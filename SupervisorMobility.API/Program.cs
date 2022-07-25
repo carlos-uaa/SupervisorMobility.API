@@ -1,4 +1,6 @@
+using Microsoft.EntityFrameworkCore;
 using Serilog;
+using SupervisorMobility.API.Context;
 
 //Configure Serilog
 Log.Logger = new LoggerConfiguration()
@@ -23,6 +25,9 @@ builder.Services.AddControllers(options =>
 builder.Services.AddEndpointsApiExplorer();
 builder.Services.AddSwaggerGen();
 
+builder.Services.AddDbContext<SupervisorMobilityContext>(
+    dbContextOptions => dbContextOptions.UseSqlServer(
+        builder.Configuration["ConnectionStrings:SupervisorMobilityDBConnectionString"]));
 var app = builder.Build();
 
 // Configure the HTTP request pipeline.
