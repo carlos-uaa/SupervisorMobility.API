@@ -1,4 +1,6 @@
-﻿namespace SupervisorMobility.API.Models
+﻿using SupervisorMobility.API.Models.ChecklistQuestionDtos;
+
+namespace SupervisorMobility.API.Models.QuestionTypeDtos
 {
     public class QuestionTypeDto
     {

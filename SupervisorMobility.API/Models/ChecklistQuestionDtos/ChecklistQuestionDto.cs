@@ -1,4 +1,7 @@
-﻿namespace SupervisorMobility.API.Models
+﻿using SupervisorMobility.API.Models.ChecklistCategoryDtos;
+using SupervisorMobility.API.Models.QuestionTypeDtos;
+
+namespace SupervisorMobility.API.Models.ChecklistQuestionDtos
 {
     public class ChecklistQuestionDto
     {
@@ -9,9 +12,9 @@
         public int CategorySequence { get; set; }
         public int AnswerSetID { get; set; }
         public bool IsActive { get; set; }
-        
+
         //Navigation properties
-        public int CategoryId { get; set; }
+        public int ChecklistCategoryId { get; set; }
         public ChecklistCategoryDto ChecklistCategoriesDto { get; set; }
             = new ChecklistCategoryDto();
 

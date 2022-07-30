@@ -1,6 +1,6 @@
-﻿namespace SupervisorMobility.API.Models
+﻿namespace SupervisorMobility.API.Models.ChecklistCategoryDtos
 {
-    public class ChecklistCategoryDto
+    public class ChecklistCategoryWithJustchecklistQuestions
     {
         public int ChecklistCategoryId { get; set; }
         public string Code { get; set; } = string.Empty;
@@ -9,7 +9,7 @@
         public bool IsActive { get; set; }
 
         //Navigation property
-        public ICollection<ChecklistQuestionDto> ChecklistQuestions { get; set; }
-            = new List<ChecklistQuestionDto>();
+        public ICollection<ChecklistCategoryWithoutChecklistQuestionsDto> ChecklistQuestions { get; set; }
+            = new List<ChecklistCategoryWithoutChecklistQuestionsDto>();
     }
 }

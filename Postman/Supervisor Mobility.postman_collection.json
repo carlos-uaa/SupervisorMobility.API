@@ -1,0 +1,404 @@
+{
+	"info": {
+		"_postman_id": "32282cfa-d537-4d3d-9577-ac452fff851f",
+		"name": "Supervisor Mobility",
+		"description": "API that will handle all requests related to supervisor mobility app, this will include:\n\n*   Job observation",
+		"schema": "https://schema.getpostman.com/json/collection/v2.1.0/collection.json",
+		"_exporter_id": "4241728"
+	},
+	"item": [
+		{
+			"name": "Checklist Categories operations",
+			"item": [
+				{
+					"name": "GET ChecklistCategories",
+					"request": {
+						"method": "GET",
+						"header": [],
+						"url": {
+							"raw": "https://localhost:{{portNumber}}/api/checklistcategories",
+							"protocol": "https",
+							"host": [
+								"localhost"
+							],
+							"port": "{{portNumber}}",
+							"path": [
+								"api",
+								"checklistcategories"
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "GET Checklist Category",
+					"request": {
+						"method": "GET",
+						"header": [],
+						"url": {
+							"raw": "https://localhost:{{portNumber}}/api/checklistcategories/1",
+							"protocol": "https",
+							"host": [
+								"localhost"
+							],
+							"port": "{{portNumber}}",
+							"path": [
+								"api",
+								"checklistcategories",
+								"1"
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "GET Checklist Category (including ChecklistQuestions)",
+					"request": {
+						"method": "GET",
+						"header": [],
+						"url": {
+							"raw": "https://localhost:{{portNumber}}/api/checklistcategories/1?includeChecklistQuestions=True",
+							"protocol": "https",
+							"host": [
+								"localhost"
+							],
+							"port": "{{portNumber}}",
+							"path": [
+								"api",
+								"checklistcategories",
+								"1"
+							],
+							"query": [
+								{
+									"key": "includeChecklistQuestions",
+									"value": "True"
+								}
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "POST Checklist Category",
+					"request": {
+						"method": "POST",
+						"header": [],
+						"body": {
+							"mode": "raw",
+							"raw": "{\r\n    \"code\": \"sdfg\",\r\n    \"description\": \"Test category that will be deleted\",\r\n    \"sequence\": 7,\r\n    \"isactive\": true\r\n}",
+							"options": {
+								"raw": {
+									"language": "json"
+								}
+							}
+						},
+						"url": {
+							"raw": "https://localhost:{{portNumber}}/api/checklistcategories",
+							"protocol": "https",
+							"host": [
+								"localhost"
+							],
+							"port": "{{portNumber}}",
+							"path": [
+								"api",
+								"checklistcategories"
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "PUT Checklist Category",
+					"request": {
+						"method": "PUT",
+						"header": [],
+						"body": {
+							"mode": "raw",
+							"raw": "{\r\n    \"code\": \"sdfg - Updated\",\r\n    \"description\": \"Test category that will be deleted - Updated\",\r\n    \"sequence\": 8,\r\n    \"isActive\": true\r\n}",
+							"options": {
+								"raw": {
+									"language": "json"
+								}
+							}
+						},
+						"url": {
+							"raw": "https://localhost:{{portNumber}}/api/checklistcategories/8",
+							"protocol": "https",
+							"host": [
+								"localhost"
+							],
+							"port": "{{portNumber}}",
+							"path": [
+								"api",
+								"checklistcategories",
+								"8"
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "PATCH Checklist Category",
+					"request": {
+						"method": "PATCH",
+						"header": [],
+						"body": {
+							"mode": "raw",
+							"raw": "[\r\n    {\r\n      \"op\": \"replace\",\r\n      \"path\": \"/sequence\",\r\n      \"value\": \"10\"\r\n    },\r\n    {\r\n      \"op\": \"replace\",\r\n      \"path\": \"/code\",\r\n      \"value\": \"asdf - test patch update 2\"\r\n    },\r\n    {\r\n      \"op\": \"replace\",\r\n      \"path\": \"/isactive\",\r\n      \"value\": \"true\"\r\n    }\r\n]",
+							"options": {
+								"raw": {
+									"language": "json"
+								}
+							}
+						},
+						"url": {
+							"raw": "https://localhost:{{portNumber}}/api/checklistcategories/10",
+							"protocol": "https",
+							"host": [
+								"localhost"
+							],
+							"port": "{{portNumber}}",
+							"path": [
+								"api",
+								"checklistcategories",
+								"10"
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "DELETE Checklist Category",
+					"request": {
+						"method": "DELETE",
+						"header": [],
+						"url": {
+							"raw": "https://localhost:{{portNumber}}/api/checklistcategories/10",
+							"protocol": "https",
+							"host": [
+								"localhost"
+							],
+							"port": "{{portNumber}}",
+							"path": [
+								"api",
+								"checklistcategories",
+								"10"
+							]
+						}
+					},
+					"response": []
+				}
+			]
+		},
+		{
+			"name": "Question types operations",
+			"item": [
+				{
+					"name": "GET Question Types",
+					"request": {
+						"method": "GET",
+						"header": [],
+						"url": {
+							"raw": "https://localhost:{{portNumber}}/api/QuestionTypes/6?includeChecklistQuestions=true",
+							"protocol": "https",
+							"host": [
+								"localhost"
+							],
+							"port": "{{portNumber}}",
+							"path": [
+								"api",
+								"QuestionTypes",
+								"6"
+							],
+							"query": [
+								{
+									"key": "includeChecklistQuestions",
+									"value": "true"
+								}
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "GET Question Type",
+					"request": {
+						"method": "GET",
+						"header": []
+					},
+					"response": []
+				}
+			]
+		},
+		{
+			"name": "Checklist Question Operations",
+			"item": [
+				{
+					"name": "Get Checklist Questions",
+					"request": {
+						"method": "GET",
+						"header": [],
+						"url": {
+							"raw": "https://localhost:{{portNumber}}/api/checklistcategories/1/checklistquestions/2",
+							"protocol": "https",
+							"host": [
+								"localhost"
+							],
+							"port": "{{portNumber}}",
+							"path": [
+								"api",
+								"checklistcategories",
+								"1",
+								"checklistquestions",
+								"2"
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "GET Checklist Question",
+					"request": {
+						"method": "GET",
+						"header": [],
+						"url": {
+							"raw": "https://localhost:{{portNumber}}/api/checklistcategories/1/checklistquestions/2",
+							"protocol": "https",
+							"host": [
+								"localhost"
+							],
+							"port": "{{portNumber}}",
+							"path": [
+								"api",
+								"checklistcategories",
+								"1",
+								"checklistquestions",
+								"2"
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "POST Checklist Question",
+					"request": {
+						"method": "POST",
+						"header": [],
+						"body": {
+							"mode": "raw",
+							"raw": "{\r\n    \"code\": \"Another Test\",\r\n    \"description\": \"Nivel ILU del operador\",\r\n    \"prompt\": \"¿Cuál es nivel de ILU del operador?  ¿Está el entrenamiento alineado con el Cuadro de requisitos de Operaicón ? (S/N)\",\r\n    \"categorySequence\": 1,\r\n    \"questionTypeId\": 6\r\n}",
+							"options": {
+								"raw": {
+									"language": "json"
+								}
+							}
+						},
+						"url": {
+							"raw": "https://localhost:{{portNumber}}/api/checklistcategories/1/checklistquestions/",
+							"protocol": "https",
+							"host": [
+								"localhost"
+							],
+							"port": "{{portNumber}}",
+							"path": [
+								"api",
+								"checklistcategories",
+								"1",
+								"checklistquestions",
+								""
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "PUT Checklist Question",
+					"request": {
+						"method": "PUT",
+						"header": [],
+						"body": {
+							"mode": "raw",
+							"raw": "{\r\n    \"code\": \"PO:NIO\",\r\n    \"description\": \"Nivel ILU del operador\",\r\n    \"prompt\": \"¿Cuál es nivel de ILU del operador?  ¿Está el entrenamiento alineado con el Cuadro de requisitos de Operaicón ? (S/N)\",\r\n    \"categorySequence\": 1,\r\n    \"isActive\": true,\r\n    \"checklistCategoryId\": 9,\r\n    \"questionTypeId\": 6\r\n}",
+							"options": {
+								"raw": {
+									"language": "json"
+								}
+							}
+						},
+						"url": {
+							"raw": "https://localhost:{{portNumber}}/api/checklistcategories/1/checklistquestions/2",
+							"protocol": "https",
+							"host": [
+								"localhost"
+							],
+							"port": "{{portNumber}}",
+							"path": [
+								"api",
+								"checklistcategories",
+								"1",
+								"checklistquestions",
+								"2"
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "Patch Checklist Question",
+					"request": {
+						"method": "PATCH",
+						"header": [],
+						"body": {
+							"mode": "raw",
+							"raw": "[\r\n    {\r\n      \"op\": \"replace\",\r\n      \"path\": \"/code\",\r\n      \"value\": \"Updated Code\"\r\n    },\r\n    {\r\n      \"op\": \"replace\",\r\n      \"path\": \"/ChecklistCategoryId\",\r\n      \"value\": \"9\"\r\n    }\r\n]",
+							"options": {
+								"raw": {
+									"language": "json"
+								}
+							}
+						},
+						"url": {
+							"raw": "https://localhost:{{portNumber}}/api/checklistcategories/1/checklistquestions/2",
+							"protocol": "https",
+							"host": [
+								"localhost"
+							],
+							"port": "{{portNumber}}",
+							"path": [
+								"api",
+								"checklistcategories",
+								"1",
+								"checklistquestions",
+								"2"
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "DELETE Checklist Question",
+					"request": {
+						"method": "GET",
+						"header": [],
+						"url": {
+							"raw": "https://localhost:7017/api/checklistcategories/1/checklistQuestions/4",
+							"protocol": "https",
+							"host": [
+								"localhost"
+							],
+							"port": "7017",
+							"path": [
+								"api",
+								"checklistcategories",
+								"1",
+								"checklistQuestions",
+								"4"
+							]
+						}
+					},
+					"response": []
+				}
+			]
+		}
+	]
+}
