@@ -1,4 +1,5 @@
 ﻿using SupervisorMobility.API.Models.ChecklistQuestionDtos;
+using SupervisorMobility.API.Models.JobObservationConfigsDtos;
 
 namespace SupervisorMobility.API.Models.ChecklistCategoryDtos
 {
@@ -13,5 +14,8 @@ namespace SupervisorMobility.API.Models.ChecklistCategoryDtos
         //Navigation property
         public ICollection<ChecklistQuestionDto> ChecklistQuestions { get; set; }
             = new List<ChecklistQuestionDto>();
+
+        public ICollection<JobObservationConfigDto> JobObservationConfigs { get; set; }
+            = new List<JobObservationConfigDto>();
     }
 }

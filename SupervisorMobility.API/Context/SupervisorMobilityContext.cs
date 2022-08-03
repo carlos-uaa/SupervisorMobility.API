@@ -5,9 +5,13 @@ namespace SupervisorMobility.API.Context
 {
     public class SupervisorMobilityContext : DbContext
     {
+        #region DbSets
         public DbSet<ChecklistCategory> ChecklistCategories { get; set; }
         public DbSet<QuestionType> QuestionTypes { get; set; }
         public DbSet<ChecklistQuestion> ChecklistQuestions { get; set; }
+        public DbSet<JobObservationConfig> JobObservationConfigs { get; set; }
+        public DbSet<JobObservationType> JobObservationTypes { get; set; }
+        #endregion
 
         public SupervisorMobilityContext(DbContextOptions<SupervisorMobilityContext> options)
             : base(options)
@@ -29,6 +33,11 @@ namespace SupervisorMobility.API.Context
             modelBuilder.Entity<ChecklistQuestion>()
                 .Property(p => p.IsActive)
                 .HasDefaultValue(true);
+
+            modelBuilder.Entity<JobObservationType>()
+                .Property(p => p.IsActive)
+                .HasDefaultValue(true);
+
 
             //seeding some data
             modelBuilder.Entity<ChecklistCategory>()
@@ -120,6 +129,50 @@ namespace SupervisorMobility.API.Context
                     ChecklistCategoryId = 1,
                     QuestionTypeId = 6
 
+                });
+            modelBuilder.Entity<JobObservationType>()
+                .HasData(
+                new JobObservationType("JC", "Observación de Operación Cíclica")
+                {
+                    JobObservationTypeId = 1,
+                    IsActive = true
+                },
+                new JobObservationType("JNC", "Observación de Operación No Cíclica")
+                {
+                    JobObservationTypeId = 2,
+                    IsActive = true
+                });
+            modelBuilder.Entity<JobObservationConfig>()
+                .HasData(
+                new JobObservationConfig()
+                {
+                    JobObservationConfigId = 1,
+                    JobObservationTypeId = 1,
+                    ChecklistCategoryId = 1
+                },
+                new JobObservationConfig()
+                {
+                    JobObservationConfigId = 2,
+                    JobObservationTypeId = 1,
+                    ChecklistCategoryId = 2
+                },
+                new JobObservationConfig()
+                {
+                    JobObservationConfigId = 3,
+                    JobObservationTypeId = 1,
+                    ChecklistCategoryId = 3
+                },
+                new JobObservationConfig()
+                {
+                    JobObservationConfigId = 4,
+                    JobObservationTypeId = 1,
+                    ChecklistCategoryId = 4
+                },
+                new JobObservationConfig()
+                {
+                    JobObservationConfigId = 5,
+                    JobObservationTypeId = 1,
+                    ChecklistCategoryId = 5
                 });
             base.OnModelCreating(modelBuilder);
         }

@@ -3,6 +3,7 @@ using System;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Infrastructure;
 using Microsoft.EntityFrameworkCore.Metadata;
+using Microsoft.EntityFrameworkCore.Migrations;
 using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 using SupervisorMobility.API.Context;
 
@@ -11,9 +12,10 @@ using SupervisorMobility.API.Context;
 namespace SupervisorMobility.API.Migrations
 {
     [DbContext(typeof(SupervisorMobilityContext))]
-    partial class SupervisorMobilityContextModelSnapshot : ModelSnapshot
+    [Migration("20220803015254_AddJobObservationConfigsEntities")]
+    partial class AddJobObservationConfigsEntities
     {
-        protected override void BuildModel(ModelBuilder modelBuilder)
+        protected override void BuildTargetModel(ModelBuilder modelBuilder)
         {
 #pragma warning disable 612, 618
             modelBuilder
@@ -197,38 +199,6 @@ namespace SupervisorMobility.API.Migrations
                     b.HasIndex("JobObservationTypeId");
 
                     b.ToTable("JobObservationConfigs");
-
-                    b.HasData(
-                        new
-                        {
-                            JobObservationConfigId = 1,
-                            ChecklistCategoryId = 1,
-                            JobObservationTypeId = 1
-                        },
-                        new
-                        {
-                            JobObservationConfigId = 2,
-                            ChecklistCategoryId = 2,
-                            JobObservationTypeId = 1
-                        },
-                        new
-                        {
-                            JobObservationConfigId = 3,
-                            ChecklistCategoryId = 3,
-                            JobObservationTypeId = 1
-                        },
-                        new
-                        {
-                            JobObservationConfigId = 4,
-                            ChecklistCategoryId = 4,
-                            JobObservationTypeId = 1
-                        },
-                        new
-                        {
-                            JobObservationConfigId = 5,
-                            ChecklistCategoryId = 5,
-                            JobObservationTypeId = 1
-                        });
                 });
 
             modelBuilder.Entity("SupervisorMobility.API.Entities.JobObservationType", b =>
@@ -257,22 +227,6 @@ namespace SupervisorMobility.API.Migrations
                     b.HasKey("JobObservationTypeId");
 
                     b.ToTable("JobObservationTypes");
-
-                    b.HasData(
-                        new
-                        {
-                            JobObservationTypeId = 1,
-                            Code = "JC",
-                            Description = "Observación de Operación Cíclica",
-                            IsActive = true
-                        },
-                        new
-                        {
-                            JobObservationTypeId = 2,
-                            Code = "JNC",
-                            Description = "Observación de Operación No Cíclica",
-                            IsActive = true
-                        });
                 });
 
             modelBuilder.Entity("SupervisorMobility.API.Entities.QuestionType", b =>
