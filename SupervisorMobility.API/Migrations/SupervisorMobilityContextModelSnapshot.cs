@@ -50,7 +50,7 @@ namespace SupervisorMobility.API.Migrations
 
                     b.HasKey("ChecklistCategoryId");
 
-                    b.ToTable("ChecklistCategories");
+                    b.ToTable("ChecklistCategories", (string)null);
 
                     b.HasData(
                         new
@@ -149,7 +149,7 @@ namespace SupervisorMobility.API.Migrations
 
                     b.HasIndex("QuestionTypeId");
 
-                    b.ToTable("ChecklistQuestions");
+                    b.ToTable("ChecklistQuestions", (string)null);
 
                     b.HasData(
                         new
@@ -196,7 +196,7 @@ namespace SupervisorMobility.API.Migrations
 
                     b.HasIndex("JobObservationTypeId");
 
-                    b.ToTable("JobObservationConfigs");
+                    b.ToTable("JobObservationConfigs", (string)null);
 
                     b.HasData(
                         new
@@ -256,7 +256,7 @@ namespace SupervisorMobility.API.Migrations
 
                     b.HasKey("JobObservationTypeId");
 
-                    b.ToTable("JobObservationTypes");
+                    b.ToTable("JobObservationTypes", (string)null);
 
                     b.HasData(
                         new
@@ -300,7 +300,7 @@ namespace SupervisorMobility.API.Migrations
 
                     b.HasKey("QuestionTypeId");
 
-                    b.ToTable("QuestionTypes");
+                    b.ToTable("QuestionTypes", (string)null);
 
                     b.HasData(
                         new

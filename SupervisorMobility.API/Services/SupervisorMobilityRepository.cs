@@ -49,6 +49,36 @@ namespace SupervisorMobility.API.Services
         }
 
         #endregion
+        #region JobObservationTypesOperations
+        public async Task<IEnumerable<JobObservationType>> GetJobObservationTypesAsync()
+        {
+            return await _context.JobObservationTypes
+                .OrderBy(c => c.JobObservationTypeId).ToListAsync();
+        }
+
+        public async Task<JobObservationType?> GetJobObservationTypeAsync(int id, bool includeConfigs = false)
+        {
+            if (includeConfigs)
+            {
+                return await _context.JobObservationTypes.Include(jot => jot.JobObservationConfigs)
+                    .Where(c => c.JobObservationTypeId == id).FirstOrDefaultAsync();
+            }
+
+            return await _context.JobObservationTypes
+                .Where(c => c.JobObservationTypeId == id).FirstOrDefaultAsync();
+        }
+
+        public void AddJobObservationType(JobObservationType jobObservationType)
+        {
+            _context.JobObservationTypes.Add(jobObservationType);
+        }
+
+        public void DeleteJobObservationType(JobObservationType jobObservationType)
+        {
+            _context.JobObservationTypes.Remove(jobObservationType);
+        }
+
+        #endregion
         #region QuestionTypeOperations
 
         public async Task<IEnumerable<QuestionType>> GetQuestionTypesAsync()

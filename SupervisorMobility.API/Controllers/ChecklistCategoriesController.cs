@@ -48,7 +48,7 @@ namespace SupervisorMobility.API.Controllers
         }
 
         [HttpPost]
-        public async Task<ActionResult<ChecklistCategoryDto>> CreateChecklistCAtegory(
+        public async Task<ActionResult<ChecklistCategoryDto>> CreateChecklistCategory(
             ChecklistCategoryForCreationDto checklistCategory)
         {
             //Map object ans save it to the DB

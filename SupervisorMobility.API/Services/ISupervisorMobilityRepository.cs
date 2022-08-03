@@ -13,6 +13,13 @@ namespace SupervisorMobility.API.Services
         void DeleteChecklistCategory(ChecklistCategory checklistCategory);
         #endregion
 
+        #region JobObservationTypesOperations
+        Task<IEnumerable<JobObservationType>> GetJobObservationTypesAsync();
+        Task<JobObservationType?> GetJobObservationTypeAsync(int id, bool includeConfigs = false);
+        void AddJobObservationType (JobObservationType jobObservationType);
+        void DeleteJobObservationType (JobObservationType jobObservationType);
+        #endregion
+
         #region QuestionTypeOperations
         Task<IEnumerable<QuestionType>> GetQuestionTypesAsync();
         Task<QuestionType?> GetQuestionTypeAsync(int id, bool includeChecklistQuestions = false);

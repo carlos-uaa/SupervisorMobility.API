@@ -15,7 +15,7 @@ namespace SupervisorMobility.API.Entities
         public string Description { get; set; }
         public bool? IsActive { get; set; }
 
-        public ICollection<JobObservationConfig> JobObservations { get; set; }
+        public ICollection<JobObservationConfig> JobObservationConfigs { get; set; }
             = new List<JobObservationConfig>();
 
         public JobObservationType(string code, string description)
