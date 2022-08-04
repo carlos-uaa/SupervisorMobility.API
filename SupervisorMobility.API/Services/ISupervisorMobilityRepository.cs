@@ -18,6 +18,7 @@ namespace SupervisorMobility.API.Services
         Task<JobObservationType?> GetJobObservationTypeAsync(int id, bool includeConfigs = false);
         void AddJobObservationType (JobObservationType jobObservationType);
         void DeleteJobObservationType (JobObservationType jobObservationType);
+        Task<bool> JobObservationTypeExistAsync(int jobObservationTypeId);
         #endregion
 
         #region QuestionTypeOperations
@@ -29,9 +30,17 @@ namespace SupervisorMobility.API.Services
 
         Task<IEnumerable<ChecklistQuestion>> GetChecklistQuestionsForCategoryAsync(int categoryId);
         Task<ChecklistQuestion?> GetChecklistQuestionForCategoryAsync(int categoryId,
-            int checklistQuestion);
+            int checklistQuestionId);
         Task AddChecklistQuestionForCategoryAsync(int categoryId, ChecklistQuestion checklistQuestion);
         void DeleteChecklistQuestions(ChecklistQuestion checklistQuestion);
+        #endregion
+
+        #region JobObservationConfigOperations
+        Task<IEnumerable<JobObservationConfig>> GetJobOperationConfigsForJobOperationTypeAsync(int jobObservationTypeId);
+        Task<JobObservationConfig?> GetJobOperationConfigForJobOperationTypeAsync(int jobObservationTypeId,
+            int jobObservationConfigId);
+        Task AddJobOperationConfigForJobOperationTypeAsync(int jobObservationTypeId, JobObservationConfig jobObservationConfig);
+        void DeleteJobOperationConfig(JobObservationConfig jobObservationConfig);
         #endregion
 
         #region CommonOperations

@@ -78,6 +78,10 @@ namespace SupervisorMobility.API.Services
             _context.JobObservationTypes.Remove(jobObservationType);
         }
 
+        public async Task<bool> JobObservationTypeExistAsync(int jobObservationTypeId)
+        {
+            return await _context.JobObservationTypes.AnyAsync(c => c.JobObservationTypeId == jobObservationTypeId);
+        }
         #endregion
         #region QuestionTypeOperations
 
@@ -125,6 +129,33 @@ namespace SupervisorMobility.API.Services
         public void DeleteChecklistQuestions(ChecklistQuestion checklistQuestion)
         {
             _context.ChecklistQuestions.Remove(checklistQuestion);
+        }
+        #endregion
+        #region JobObservationConfigOperations
+        public async Task<IEnumerable<JobObservationConfig>> GetJobOperationConfigsForJobOperationTypeAsync(int jobObservationTypeId)
+        {
+            return await _context.JobObservationConfigs
+                .Where(joc => joc.JobObservationTypeId == jobObservationTypeId).ToListAsync();
+        }
+        public async Task<JobObservationConfig?> GetJobOperationConfigForJobOperationTypeAsync(int jobObservationTypeId,
+            int jobObservationConfigId)
+        {
+            return await _context.JobObservationConfigs
+                .Where(joc => joc.JobObservationTypeId == jobObservationTypeId 
+                           && joc.JobObservationConfigId == jobObservationConfigId)
+                .FirstOrDefaultAsync();
+        }
+        public async Task AddJobOperationConfigForJobOperationTypeAsync(int jobObservationTypeId, JobObservationConfig jobObservationConfig)
+        {
+            var jobOperationType = await GetJobObservationTypeAsync(jobObservationTypeId);
+            if(jobOperationType != null)
+            {
+                jobOperationType.JobObservationConfigs.Add(jobObservationConfig);
+            }
+        }
+        public void DeleteJobOperationConfig(JobObservationConfig jobObservationConfig)
+        {
+            _context.JobObservationConfigs.Remove(jobObservationConfig);
         }
         #endregion
         #region CommonOperations
