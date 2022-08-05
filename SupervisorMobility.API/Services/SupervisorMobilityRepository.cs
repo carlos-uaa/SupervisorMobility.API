@@ -83,6 +83,29 @@ namespace SupervisorMobility.API.Services
             return await _context.JobObservationTypes.AnyAsync(c => c.JobObservationTypeId == jobObservationTypeId);
         }
         #endregion
+        #region GroupOperations
+        public async Task<IEnumerable<Group>> GetGroupsAsync()
+        {
+            return await _context.Groups
+                .OrderBy(c => c.GroupId).ToListAsync();
+        }
+
+        public async Task<Group?> GetGroupAsync(int groupId)
+        {
+            return await _context.Groups
+                .Where(c => c.GroupId == groupId).FirstOrDefaultAsync();
+        }
+
+        public void AddGroup(Group group)
+        {
+            _context.Groups.Add(group);
+        }
+
+        public void DeleteGroup(Group group)
+        {
+            _context.Groups.Remove(group);
+        }
+        #endregion
         #region QuestionTypeOperations
 
         public async Task<IEnumerable<QuestionType>> GetQuestionTypesAsync()

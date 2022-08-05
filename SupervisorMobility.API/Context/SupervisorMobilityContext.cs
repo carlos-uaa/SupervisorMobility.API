@@ -11,6 +11,7 @@ namespace SupervisorMobility.API.Context
         public DbSet<ChecklistQuestion> ChecklistQuestions { get; set; }
         public DbSet<JobObservationConfig> JobObservationConfigs { get; set; }
         public DbSet<JobObservationType> JobObservationTypes { get; set; }
+        public DbSet<Group> Groups { get; set; }
         #endregion
 
         public SupervisorMobilityContext(DbContextOptions<SupervisorMobilityContext> options)
@@ -173,6 +174,18 @@ namespace SupervisorMobility.API.Context
                     JobObservationConfigId = 5,
                     JobObservationTypeId = 1,
                     ChecklistCategoryId = 5
+                });
+            modelBuilder.Entity<Group>()
+                .HasData(
+                new Group("GA", "Grupo A")
+                {
+                    GroupId = 1,
+                    IsActive = true
+                },
+                new Group("GB", "Grupo B")
+                {
+                    GroupId = 2,
+                    IsActive = true
                 });
             base.OnModelCreating(modelBuilder);
         }

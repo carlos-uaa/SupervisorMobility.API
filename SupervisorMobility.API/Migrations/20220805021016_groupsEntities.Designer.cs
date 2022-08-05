@@ -3,6 +3,7 @@ using System;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Infrastructure;
 using Microsoft.EntityFrameworkCore.Metadata;
+using Microsoft.EntityFrameworkCore.Migrations;
 using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 using SupervisorMobility.API.Context;
 
@@ -11,9 +12,10 @@ using SupervisorMobility.API.Context;
 namespace SupervisorMobility.API.Migrations
 {
     [DbContext(typeof(SupervisorMobilityContext))]
-    partial class SupervisorMobilityContextModelSnapshot : ModelSnapshot
+    [Migration("20220805021016_groupsEntities")]
+    partial class groupsEntities
     {
-        protected override void BuildModel(ModelBuilder modelBuilder)
+        protected override void BuildTargetModel(ModelBuilder modelBuilder)
         {
 #pragma warning disable 612, 618
             modelBuilder
@@ -200,22 +202,6 @@ namespace SupervisorMobility.API.Migrations
                     b.HasKey("GroupId");
 
                     b.ToTable("Groups");
-
-                    b.HasData(
-                        new
-                        {
-                            GroupId = 1,
-                            Code = "GA",
-                            Description = "Grupo A",
-                            IsActive = true
-                        },
-                        new
-                        {
-                            GroupId = 2,
-                            Code = "GB",
-                            Description = "Grupo B",
-                            IsActive = true
-                        });
                 });
 
             modelBuilder.Entity("SupervisorMobility.API.Entities.JobObservationConfig", b =>

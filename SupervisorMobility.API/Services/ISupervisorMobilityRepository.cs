@@ -12,7 +12,6 @@ namespace SupervisorMobility.API.Services
         void AddChecklistCategory(ChecklistCategory checklistCategory);
         void DeleteChecklistCategory(ChecklistCategory checklistCategory);
         #endregion
-
         #region JobObservationTypesOperations
         Task<IEnumerable<JobObservationType>> GetJobObservationTypesAsync();
         Task<JobObservationType?> GetJobObservationTypeAsync(int id, bool includeConfigs = false);
@@ -20,12 +19,16 @@ namespace SupervisorMobility.API.Services
         void DeleteJobObservationType (JobObservationType jobObservationType);
         Task<bool> JobObservationTypeExistAsync(int jobObservationTypeId);
         #endregion
-
+        #region GroupOperations
+        Task<IEnumerable<Group>> GetGroupsAsync();
+        Task<Group?> GetGroupAsync(int GroupId);
+        void AddGroup(Group Group);
+        void DeleteGroup(Group Group);
+        #endregion
         #region QuestionTypeOperations
         Task<IEnumerable<QuestionType>> GetQuestionTypesAsync();
         Task<QuestionType?> GetQuestionTypeAsync(int id, bool includeChecklistQuestions = false);
         #endregion
-
         #region ChecklistQuestionOperations
 
         Task<IEnumerable<ChecklistQuestion>> GetChecklistQuestionsForCategoryAsync(int categoryId);
@@ -34,7 +37,6 @@ namespace SupervisorMobility.API.Services
         Task AddChecklistQuestionForCategoryAsync(int categoryId, ChecklistQuestion checklistQuestion);
         void DeleteChecklistQuestions(ChecklistQuestion checklistQuestion);
         #endregion
-
         #region JobObservationConfigOperations
         Task<IEnumerable<JobObservationConfig>> GetJobOperationConfigsForJobOperationTypeAsync(int jobObservationTypeId);
         Task<JobObservationConfig?> GetJobOperationConfigForJobOperationTypeAsync(int jobObservationTypeId,
@@ -42,7 +44,6 @@ namespace SupervisorMobility.API.Services
         Task AddJobOperationConfigForJobOperationTypeAsync(int jobObservationTypeId, JobObservationConfig jobObservationConfig);
         void DeleteJobOperationConfig(JobObservationConfig jobObservationConfig);
         #endregion
-
         #region CommonOperations
 
         Task<bool> SaveChangesAsync();
