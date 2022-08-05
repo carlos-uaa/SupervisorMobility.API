@@ -194,7 +194,28 @@
 			"name": "Question types operations",
 			"item": [
 				{
-					"name": "GET Question Types",
+					"name": "GET All Question Types",
+					"request": {
+						"method": "GET",
+						"header": [],
+						"url": {
+							"raw": "https://localhost:{{portNumber}}/api/QuestionTypes/",
+							"protocol": "https",
+							"host": [
+								"localhost"
+							],
+							"port": "{{portNumber}}",
+							"path": [
+								"api",
+								"QuestionTypes",
+								""
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "GET Question Type",
 					"request": {
 						"method": "GET",
 						"header": [],
@@ -217,14 +238,6 @@
 								}
 							]
 						}
-					},
-					"response": []
-				},
-				{
-					"name": "GET Question Type",
-					"request": {
-						"method": "GET",
-						"header": []
 					},
 					"response": []
 				}
@@ -378,15 +391,345 @@
 				{
 					"name": "DELETE Checklist Question",
 					"request": {
-						"method": "GET",
+						"method": "DELETE",
 						"header": [],
 						"url": {
-							"raw": "https://localhost:7017/api/checklistcategories/1/checklistQuestions/4",
+							"raw": "https://localhost:{{portNumber}}/api/checklistcategories/1/checklistQuestions/4",
 							"protocol": "https",
 							"host": [
 								"localhost"
 							],
-							"port": "7017",
+							"port": "{{portNumber}}",
+							"path": [
+								"api",
+								"checklistcategories",
+								"1",
+								"checklistQuestions",
+								"4"
+							]
+						}
+					},
+					"response": []
+				}
+			]
+		},
+		{
+			"name": "Job Observation  Types operations",
+			"item": [
+				{
+					"name": "GET All Job Observation Types",
+					"request": {
+						"method": "GET",
+						"header": [],
+						"url": {
+							"raw": "https://localhost:{{portNumber}}/api/jobobservationtypes",
+							"protocol": "https",
+							"host": [
+								"localhost"
+							],
+							"port": "{{portNumber}}",
+							"path": [
+								"api",
+								"jobobservationtypes"
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "GET Job Observation Type",
+					"request": {
+						"method": "GET",
+						"header": [],
+						"url": {
+							"raw": "https://localhost:{{portNumber}}/api/jobobservationtypes/2?includeConfigs=true",
+							"protocol": "https",
+							"host": [
+								"localhost"
+							],
+							"port": "{{portNumber}}",
+							"path": [
+								"api",
+								"jobobservationtypes",
+								"2"
+							],
+							"query": [
+								{
+									"key": "includeConfigs",
+									"value": "true"
+								}
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "POST Job Observation Type",
+					"request": {
+						"method": "POST",
+						"header": [],
+						"body": {
+							"mode": "raw",
+							"raw": "{\r\n    \"code\": \"JNCt2\",\r\n    \"description\": \"Observación de Operación No Cíclica test 2\",\r\n    \"isActive\": true\r\n}",
+							"options": {
+								"raw": {
+									"language": "json"
+								}
+							}
+						},
+						"url": {
+							"raw": "https://localhost:{{portNumber}}/api/jobobservationtypes",
+							"protocol": "https",
+							"host": [
+								"localhost"
+							],
+							"port": "{{portNumber}}",
+							"path": [
+								"api",
+								"jobobservationtypes"
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "PUT Job Observation Type",
+					"request": {
+						"method": "PUT",
+						"header": [],
+						"body": {
+							"mode": "raw",
+							"raw": "{\r\n    \"code\": \"JNCt2 - U\",\r\n    \"description\": \"Observación de Operación No Cíclica test 2 - U\",\r\n    \"isActive\": false\r\n}",
+							"options": {
+								"raw": {
+									"language": "json"
+								}
+							}
+						},
+						"url": {
+							"raw": "https://localhost:{{portNumber}}/api/jobobservationtypes",
+							"protocol": "https",
+							"host": [
+								"localhost"
+							],
+							"port": "{{portNumber}}",
+							"path": [
+								"api",
+								"jobobservationtypes"
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "PATCH Job Observation Type",
+					"request": {
+						"method": "PATCH",
+						"header": [],
+						"body": {
+							"mode": "raw",
+							"raw": "[\r\n    {\r\n      \"op\": \"replace\",\r\n      \"path\": \"/isactive\",\r\n      \"value\": \"true\"\r\n    }\r\n]",
+							"options": {
+								"raw": {
+									"language": "json"
+								}
+							}
+						},
+						"url": {
+							"raw": "https://localhost:{{portNumber}}/api/jobobservationtypes/3",
+							"protocol": "https",
+							"host": [
+								"localhost"
+							],
+							"port": "{{portNumber}}",
+							"path": [
+								"api",
+								"jobobservationtypes",
+								"3"
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "DELETE Job Observation Type",
+					"request": {
+						"method": "DELETE",
+						"header": [],
+						"url": {
+							"raw": "https://localhost:{{portNumber}}/api/jobobservationtypes/3",
+							"protocol": "https",
+							"host": [
+								"localhost"
+							],
+							"port": "{{portNumber}}",
+							"path": [
+								"api",
+								"jobobservationtypes",
+								"3"
+							]
+						}
+					},
+					"response": []
+				}
+			]
+		},
+		{
+			"name": "Job Observation Config Operations",
+			"item": [
+				{
+					"name": "Get Job observation Configs",
+					"request": {
+						"method": "GET",
+						"header": [],
+						"url": {
+							"raw": "https://localhost:{{portNumber}}/api/checklistcategories/1/checklistquestions/2",
+							"protocol": "https",
+							"host": [
+								"localhost"
+							],
+							"port": "{{portNumber}}",
+							"path": [
+								"api",
+								"checklistcategories",
+								"1",
+								"checklistquestions",
+								"2"
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "GET Job Observation config",
+					"request": {
+						"method": "GET",
+						"header": [],
+						"url": {
+							"raw": "https://localhost:{{portNumber}}/api/jobobservationtypes/1/jobobservationconfigs/1",
+							"protocol": "https",
+							"host": [
+								"localhost"
+							],
+							"port": "{{portNumber}}",
+							"path": [
+								"api",
+								"jobobservationtypes",
+								"1",
+								"jobobservationconfigs",
+								"1"
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "POST Job Observation Config",
+					"request": {
+						"method": "POST",
+						"header": [],
+						"body": {
+							"mode": "raw",
+							"raw": "{\r\n    \"jobObservationTypeId\": 1,\r\n    \"checklistCategoryId\": 7\r\n}",
+							"options": {
+								"raw": {
+									"language": "json"
+								}
+							}
+						},
+						"url": {
+							"raw": "https://localhost:{{portNumber}}/api/jobobservationtypes/1/jobobservationconfigs",
+							"protocol": "https",
+							"host": [
+								"localhost"
+							],
+							"port": "{{portNumber}}",
+							"path": [
+								"api",
+								"jobobservationtypes",
+								"1",
+								"jobobservationconfigs"
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "PUT Job Observation Config",
+					"request": {
+						"method": "PUT",
+						"header": [],
+						"body": {
+							"mode": "raw",
+							"raw": "{\r\n    \"jobObservationTypeId\": 1,\r\n    \"checklistCategoryId\": 8\r\n}",
+							"options": {
+								"raw": {
+									"language": "json"
+								}
+							}
+						},
+						"url": {
+							"raw": "https://localhost:{{portNumber}}/api/jobobservationtypes/1/jobobservationconfigs/7",
+							"protocol": "https",
+							"host": [
+								"localhost"
+							],
+							"port": "{{portNumber}}",
+							"path": [
+								"api",
+								"jobobservationtypes",
+								"1",
+								"jobobservationconfigs",
+								"7"
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "Patch Checklist Question",
+					"request": {
+						"method": "PATCH",
+						"header": [],
+						"body": {
+							"mode": "raw",
+							"raw": "[\r\n    {\r\n      \"op\": \"replace\",\r\n      \"path\": \"/checklistCategoryId\",\r\n      \"value\": \"6\"\r\n    },\r\n    {\r\n      \"op\": \"replace\",\r\n      \"path\": \"/ChecklistCategoryId\",\r\n      \"value\": \"9\"\r\n    }\r\n]",
+							"options": {
+								"raw": {
+									"language": "json"
+								}
+							}
+						},
+						"url": {
+							"raw": "https://localhost:{{portNumber}}/api/jobobservationtypes/1/jobobservationconfigs/7",
+							"protocol": "https",
+							"host": [
+								"localhost"
+							],
+							"port": "{{portNumber}}",
+							"path": [
+								"api",
+								"jobobservationtypes",
+								"1",
+								"jobobservationconfigs",
+								"7"
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "DELETE Checklist Question",
+					"request": {
+						"method": "DELETE",
+						"header": [],
+						"url": {
+							"raw": "https://localhost:{{portNumber}}/api/checklistcategories/1/checklistQuestions/4",
+							"protocol": "https",
+							"host": [
+								"localhost"
+							],
+							"port": "{{portNumber}}",
 							"path": [
 								"api",
 								"checklistcategories",
