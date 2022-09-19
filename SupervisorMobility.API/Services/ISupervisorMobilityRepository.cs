@@ -21,9 +21,15 @@ namespace SupervisorMobility.API.Services
         #endregion
         #region GroupOperations
         Task<IEnumerable<Group>> GetGroupsAsync();
-        Task<Group?> GetGroupAsync(int GroupId);
-        void AddGroup(Group Group);
-        void DeleteGroup(Group Group);
+        Task<Group?> GetGroupAsync(int groupId);
+        void AddGroup(Group group);
+        void DeleteGroup(Group group);
+        #endregion
+        #region PlantOperations
+        Task<IEnumerable<Plant>> GetPlantsAsync();
+        Task<Plant?> GetPlantAsync(int plantId);
+        void AddPlant(Plant plant);
+        void DeletePlant(Plant plant);
         #endregion
         #region QuestionTypeOperations
         Task<IEnumerable<QuestionType>> GetQuestionTypesAsync();

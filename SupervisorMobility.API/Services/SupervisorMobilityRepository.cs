@@ -106,6 +106,29 @@ namespace SupervisorMobility.API.Services
             _context.Groups.Remove(group);
         }
         #endregion
+        #region PlantOperations
+        public async Task<IEnumerable<Plant>> GetPlantsAsync()
+        {
+            return await _context.Plants
+                .OrderBy(c => c.PlantId).ToListAsync();
+        }
+
+        public async Task<Plant?> GetPlantAsync(int plantId)
+        {
+            return await _context.Plants
+                .Where(c => c.PlantId == plantId).FirstOrDefaultAsync();
+        }
+
+        public void AddPlant(Plant plant)
+        {
+            _context.Plants.Add(plant);
+        }
+
+        public void DeletePlant(Plant plant)
+        {
+            _context.Plants.Remove(plant);
+        }
+        #endregion
         #region QuestionTypeOperations
 
         public async Task<IEnumerable<QuestionType>> GetQuestionTypesAsync()

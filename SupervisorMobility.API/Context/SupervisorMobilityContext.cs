@@ -12,6 +12,7 @@ namespace SupervisorMobility.API.Context
         public DbSet<JobObservationConfig> JobObservationConfigs { get; set; }
         public DbSet<JobObservationType> JobObservationTypes { get; set; }
         public DbSet<Group> Groups { get; set; }
+        public DbSet<Plant> Plants { get; set; }
         #endregion
 
         public SupervisorMobilityContext(DbContextOptions<SupervisorMobilityContext> options)
@@ -185,6 +186,18 @@ namespace SupervisorMobility.API.Context
                 new Group("GB", "Grupo B")
                 {
                     GroupId = 2,
+                    IsActive = true
+                });
+            modelBuilder.Entity<Plant>()
+                .HasData(
+                new Plant("T&C", "Trim and Chassis")
+                {
+                    PlantId = 1,
+                    IsActive = true
+                },
+                new Plant("Paint", "Paint")
+                {
+                    PlantId = 2,
                     IsActive = true
                 });
             base.OnModelCreating(modelBuilder);
