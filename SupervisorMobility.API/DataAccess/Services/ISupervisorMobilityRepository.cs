@@ -1,4 +1,5 @@
-﻿using SupervisorMobility.API.Entities;
+﻿using Microsoft.EntityFrameworkCore.ChangeTracking;
+using SupervisorMobility.API.Entities;
 
 namespace SupervisorMobility.API.Services
 {
@@ -7,8 +8,12 @@ namespace SupervisorMobility.API.Services
         #region ChecklistCategoryOperations
 
         Task<IEnumerable<ChecklistCategory>> GetChecklistCategoriesAsync();
-        Task<ChecklistCategory?> GetChecklistCategoryAsync(int categoryId, bool includeChecklistQuestion = false);
-        Task<bool> ChecklistCategoryExistAsync(int cityId);
+        Task<IEnumerable<ChecklistCategory>> GetChecklistCategoriesForUpdateSequenceAsync(
+            int currentSequence, int oldSequence, int categoryId);
+        Task<ChecklistCategory?> GetChecklistCategoryAsync(
+            int categoryId, bool includeChecklistQuestion = false);
+        Task<bool> ChecklistCategoryExistAsync(int categoryId);
+        Task<int> GetChecklistCategoriesMaxSequenceAsync();
         void AddChecklistCategory(ChecklistCategory checklistCategory);
         void DeleteChecklistCategory(ChecklistCategory checklistCategory);
         #endregion

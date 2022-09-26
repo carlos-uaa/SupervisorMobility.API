@@ -9,9 +9,10 @@ namespace SupervisorMobility.API.Profiles
         {
             CreateMap<Entities.ChecklistCategory, ChecklistCategoryWithoutChecklistQuestionsDto>();
             CreateMap<Entities.ChecklistCategory, ChecklistCategoryWithJustchecklistQuestions>();
+            CreateMap<ChecklistCategorySequenceForUpdateDto, Entities.ChecklistCategory>();
             CreateMap<Entities.ChecklistCategory, ChecklistCategoryForCreationDto>().ReverseMap();
             CreateMap<ChecklistCategoryDto, Entities.ChecklistCategory>().ReverseMap();
-            CreateMap<ChecklistCategoryForUpdateDto, Entities.ChecklistCategory>().ReverseMap();
+            CreateMap<ChecklistCategoryForUpdateDto, Entities.ChecklistCategory>().ReverseMap();    
         }
     }
 }

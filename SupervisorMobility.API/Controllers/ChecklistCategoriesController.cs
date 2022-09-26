@@ -53,6 +53,7 @@ namespace SupervisorMobility.API.Controllers
         {
             //Map object ans save it to the DB
             var finalChecklistCategory = _mapper.Map<Entities.ChecklistCategory>(checklistCategory);
+            finalChecklistCategory.Sequence = await _supervisorMobilityRepository.GetChecklistCategoriesMaxSequenceAsync();
             _supervisorMobilityRepository.AddChecklistCategory(finalChecklistCategory);
             await _supervisorMobilityRepository.SaveChangesAsync();
 
@@ -133,5 +134,46 @@ namespace SupervisorMobility.API.Controllers
             return NoContent();
         }
 
+        [HttpPut("sequence/{checklistCategoryId}")]
+        public async Task<ActionResult> UpdateChecklistCategorySequence(int checklistCategoryId,
+            ChecklistCategorySequenceForUpdateDto checklistCategory)
+        {
+            var checklistCategoryEntity = await _supervisorMobilityRepository.GetChecklistCategoryAsync(checklistCategoryId);
+            if (checklistCategoryEntity == null)
+            {
+                return NotFound();
+            }
+
+            if (checklistCategory.Sequence == checklistCategoryEntity.Sequence)
+            {
+                return NoContent();
+            }
+
+            if (checklistCategory.Sequence < 1 
+                || checklistCategory.Sequence > await _supervisorMobilityRepository.GetChecklistCategoriesMaxSequenceAsync())
+            {
+                return BadRequest("Sequence must be greater than 1 and lower that the current max sequence.");
+            }
+
+            //So we need to update the checklist categories sequence between desiered and old one.
+            var currentSequence = 
+                checklistCategory.Sequence < checklistCategoryEntity.Sequence 
+                ? checklistCategory.Sequence 
+                : checklistCategoryEntity.Sequence - 1;
+            
+            var checklistCategoryEntities = await _supervisorMobilityRepository.GetChecklistCategoriesForUpdateSequenceAsync(
+                       checklistCategory.Sequence, checklistCategoryEntity.Sequence, checklistCategoryId);
+            foreach (var checklistCategoryEntityForUpdate in checklistCategoryEntities)
+            {
+                currentSequence += 1;
+                checklistCategoryEntityForUpdate.Sequence = currentSequence;
+            }
+
+            _mapper.Map(checklistCategory, checklistCategoryEntity);
+            await _supervisorMobilityRepository.SaveChangesAsync();
+
+            return NoContent();
+
+        }
     }
 }

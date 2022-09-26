@@ -10,8 +10,6 @@ namespace SupervisorMobility.API.Models.ChecklistCategoryDtos
         [Required]
         [MaxLength(200)]
         public string Description { get; set; } = string.Empty;
-        [Required]
-        public int Sequence { get; set; }
         public bool IsActive { get; set; }
     }
 }

@@ -33,7 +33,7 @@ namespace SupervisorMobility.API.Services
         public async Task<IEnumerable<ChecklistCategory>> GetChecklistCategoriesAsync()
         {
             return await _context.ChecklistCategories
-                .OrderBy(c => c.ChecklistCategoryId).ToListAsync();
+                .OrderBy(c => c.Sequence).ToListAsync();
         }
 
         public async Task<ChecklistCategory?> GetChecklistCategoryAsync(int categoryId, bool includeChecklistQuestion = false)
@@ -48,6 +48,23 @@ namespace SupervisorMobility.API.Services
                 .Where(c => c.ChecklistCategoryId == categoryId).FirstOrDefaultAsync();
         }
 
+        public async Task<int> GetChecklistCategoriesMaxSequenceAsync()
+        {
+            return await _context.ChecklistCategories.MaxAsync(cc => cc.Sequence) + 1;
+        }
+
+        public async Task<IEnumerable<ChecklistCategory>> GetChecklistCategoriesForUpdateSequenceAsync(
+            int currentSequence, int oldSequence, int categoryId)
+        {
+            int lowerValue = currentSequence < oldSequence ? currentSequence : oldSequence;
+            int upperValue = currentSequence > oldSequence ? currentSequence : oldSequence;
+
+            return await _context.ChecklistCategories
+                        .Where(c => c.Sequence >= lowerValue
+                            && c.Sequence <= upperValue
+                            && c.ChecklistCategoryId != categoryId)
+                        .OrderBy(c => c.Sequence).ToListAsync();
+        }
         #endregion
         #region JobObservationTypesOperations
         public async Task<IEnumerable<JobObservationType>> GetJobObservationTypesAsync()

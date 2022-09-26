@@ -40,6 +40,10 @@ namespace SupervisorMobility.API.Context
                 .Property(p => p.IsActive)
                 .HasDefaultValue(true);
 
+            //Constraints
+            modelBuilder.Entity<ChecklistCategory>()
+                .HasCheckConstraint("ck_cc_seq", "[Sequence] > 0");
+
 
             //seeding some data
             modelBuilder.Entity<ChecklistCategory>()

@@ -1,8 +1,11 @@
-﻿using System.ComponentModel.DataAnnotations;
+﻿using Microsoft.EntityFrameworkCore;
+using System.ComponentModel.DataAnnotations;
 using System.ComponentModel.DataAnnotations.Schema;
 
 namespace SupervisorMobility.API.Entities
 {
+    [Index(nameof(Sequence), IsUnique = true, Name = "ix_cc_seq")]
+    [Index(nameof(Code), IsUnique = true, Name = "ix_cc_cod")]
     public class ChecklistCategory
     {
         [Key]
