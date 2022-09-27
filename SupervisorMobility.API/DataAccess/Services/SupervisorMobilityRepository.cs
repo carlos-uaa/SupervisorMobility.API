@@ -189,9 +189,32 @@ namespace SupervisorMobility.API.Services
                 checklistCategory.ChecklistQuestions.Add(checklistQuestion);
             }
         }
+
+        public async Task<int> GetChecklistQuestionMaxCategorySequenceAsync(int categoryId)
+        {
+            var sequence = await _context.ChecklistQuestions
+                .Where(cq => cq.ChecklistCategoryId == categoryId)
+                .MaxAsync(cq => (int?)cq.CategorySequence) ?? 0;
+            return  sequence + 1;
+        }
+
         public void DeleteChecklistQuestions(ChecklistQuestion checklistQuestion)
         {
             _context.ChecklistQuestions.Remove(checklistQuestion);
+        }
+
+        public async Task<IEnumerable<ChecklistQuestion>> GetChecklistQuestionsForUpdateSequenceAsync(
+                int currentSequence, int oldSequence, int categoryId, int checklistQuestionId)
+        {
+            int lowerValue = currentSequence < oldSequence ? currentSequence : oldSequence;
+            int upperValue = currentSequence > oldSequence ? currentSequence : oldSequence;
+
+            return await _context.ChecklistQuestions
+                        .Where(c => c.ChecklistCategoryId == categoryId
+                            && c.CategorySequence >= lowerValue
+                            && c.CategorySequence <= upperValue
+                            && c.QuestionID != checklistQuestionId)
+                        .OrderBy(c => c.CategorySequence).ToListAsync();
         }
         #endregion
         #region JobObservationConfigOperations

@@ -13,8 +13,6 @@ namespace SupervisorMobility.API.Models.ChecklistQuestionDtos
         [Required]
         [MaxLength(200)]
         public string Prompt { get; set; } = string.Empty;
-        [Required]
-        public int CategorySequence { get; set; }
         public int? AnswerSetID { get; set; }
         public bool? IsActive { get; set; }
         //FK

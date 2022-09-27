@@ -44,6 +44,9 @@ namespace SupervisorMobility.API.Context
             modelBuilder.Entity<ChecklistCategory>()
                 .HasCheckConstraint("ck_cc_seq", "[Sequence] > 0");
 
+            modelBuilder.Entity<ChecklistQuestion>()
+                .HasCheckConstraint("ck_cq_seq", "[CategorySequence] > 0");
+
 
             //seeding some data
             modelBuilder.Entity<ChecklistCategory>()

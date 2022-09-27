@@ -1,8 +1,10 @@
-﻿using System.ComponentModel.DataAnnotations;
+﻿using Microsoft.EntityFrameworkCore;
+using System.ComponentModel.DataAnnotations;
 using System.ComponentModel.DataAnnotations.Schema;
 
 namespace SupervisorMobility.API.Entities
 {
+    [Index(nameof(Code), IsUnique = true, Name = "ix_cq_cod")]
     public class ChecklistQuestion
     {
         [Key, DatabaseGenerated(DatabaseGeneratedOption.Identity)]

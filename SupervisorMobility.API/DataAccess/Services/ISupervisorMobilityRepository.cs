@@ -46,6 +46,9 @@ namespace SupervisorMobility.API.Services
         Task<ChecklistQuestion?> GetChecklistQuestionForCategoryAsync(int categoryId,
             int checklistQuestionId);
         Task AddChecklistQuestionForCategoryAsync(int categoryId, ChecklistQuestion checklistQuestion);
+        Task<int> GetChecklistQuestionMaxCategorySequenceAsync(int categoryId);
+        Task<IEnumerable<ChecklistQuestion>> GetChecklistQuestionsForUpdateSequenceAsync(
+                int currentSequence, int oldSequence, int categoryId, int checklistQuestionId);
         void DeleteChecklistQuestions(ChecklistQuestion checklistQuestion);
         #endregion
         #region JobObservationConfigOperations
