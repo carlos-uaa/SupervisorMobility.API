@@ -2,6 +2,7 @@
 using AutoMapper;
 using Microsoft.AspNetCore.JsonPatch;
 using Microsoft.AspNetCore.Mvc;
+using Microsoft.EntityFrameworkCore.Query;
 using SupervisorMobility.API.DataAccess.Entities;
 using SupervisorMobility.API.Models.AreaDtos;
 using SupervisorMobility.API.Models.ChecklistQuestionDtos;
@@ -42,21 +43,25 @@ namespace SupervisorMobility.API.Controllers
 
         [HttpGet("{areaId}", Name = "GetArea")]
         public async Task<ActionResult<AreaWithoutNavigationPropertiesDto>> GetArea(
-           int plantId, int areaId)
+           int plantId, int areaId, bool includeOperations = false)
         {
-            if (!await _supervisorMobilityRepository.ChecklistCategoryExistAsync(plantId))
+            if (!await _supervisorMobilityRepository.PlantExistAsync(plantId))
             {
                 return NotFound();
             }
 
             var area = await _supervisorMobilityRepository
-                .GetAreaForPlantAsync(plantId, areaId);
+                .GetAreaForPlantAsync(plantId, areaId, includeOperations);
 
             if (area == null)
             {
                 return NotFound();
             }
 
+            if (includeOperations)
+            {
+                return Ok(_mapper.Map<AreaWithJustOperationsDto>(area));
+            }
             return Ok(_mapper.Map<AreaWithoutNavigationPropertiesDto>(area));
         }
 

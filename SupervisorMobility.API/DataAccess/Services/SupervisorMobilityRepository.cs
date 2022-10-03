@@ -136,11 +136,11 @@ namespace SupervisorMobility.API.Services
             if (includeAreas)
             {
                 return await _context.Plants.Include(p => p.Areas)
-                    .Where(c => c.PlantId == plantId).FirstOrDefaultAsync();
+                    .Where(p => p.PlantId == plantId).FirstOrDefaultAsync();
             }
 
             return await _context.Plants
-                .Where(c => c.PlantId == plantId).FirstOrDefaultAsync();
+                .Where(p => p.PlantId == plantId).FirstOrDefaultAsync();
         }
         public async Task<bool> PlantExistAsync(int plantId)
         {
@@ -164,10 +164,16 @@ namespace SupervisorMobility.API.Services
                 .Where(a => a.PlantId == plantId).ToListAsync();
         }
         public async Task<Area?> GetAreaForPlantAsync(int plantId,
-            int areaId)
+            int areaId, bool includeOperations = false)
         {
+            if (includeOperations)
+            {
+                return await _context.Areas.Include( a => a.Operations)
+                .Where(a => a.PlantId == plantId && a.AreaId == areaId)
+                .FirstOrDefaultAsync();
+            }
             return await _context.Areas
-                .Where(cq => cq.PlantId == plantId && cq.AreaId == areaId)
+                .Where(a => a.PlantId == plantId && a.AreaId == areaId)
                 .FirstOrDefaultAsync();
         }
         public async Task<bool> AreaExistAsync(int areaId)

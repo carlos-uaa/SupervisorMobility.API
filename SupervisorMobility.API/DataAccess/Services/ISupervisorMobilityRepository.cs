@@ -41,7 +41,7 @@ namespace SupervisorMobility.API.Services
         #region AreaOperations
         Task<IEnumerable<Area>> GetAreasForPlantAsync(int plantId);
         Task<Area?> GetAreaForPlantAsync(int plantId,
-            int areaId);
+            int areaId, bool includeOperations = false);
         Task<bool> AreaExistAsync(int areaId);
         Task AddAreaForPlantAsync(int plantId, Area area);
         void DeleteArea(Area area);
