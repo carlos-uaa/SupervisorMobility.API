@@ -1,4 +1,5 @@
 ﻿using Microsoft.EntityFrameworkCore;
+using SupervisorMobility.API.DataAccess.Entities;
 using SupervisorMobility.API.Entities;
 
 namespace SupervisorMobility.API.Context
@@ -13,6 +14,7 @@ namespace SupervisorMobility.API.Context
         public DbSet<JobObservationType> JobObservationTypes { get; set; }
         public DbSet<Group> Groups { get; set; }
         public DbSet<Plant> Plants { get; set; }
+        public DbSet<Area> Areas { get; set; }
         #endregion
 
         public SupervisorMobilityContext(DbContextOptions<SupervisorMobilityContext> options)
@@ -37,6 +39,10 @@ namespace SupervisorMobility.API.Context
                 .HasDefaultValue(true);
 
             modelBuilder.Entity<JobObservationType>()
+                .Property(p => p.IsActive)
+                .HasDefaultValue(true);
+
+            modelBuilder.Entity<Area>()
                 .Property(p => p.IsActive)
                 .HasDefaultValue(true);
 
@@ -207,6 +213,15 @@ namespace SupervisorMobility.API.Context
                     PlantId = 2,
                     IsActive = true
                 });
+            modelBuilder.Entity<Area>()
+                .HasData(
+                new Area("T1", "Trim 1")
+                {
+                    AreaId = 1,
+                    IsActive = true,
+                    PlantId = 1
+                });
+
             base.OnModelCreating(modelBuilder);
         }
     }

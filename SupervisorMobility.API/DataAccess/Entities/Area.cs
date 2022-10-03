@@ -1,13 +1,13 @@
-﻿using SupervisorMobility.API.DataAccess.Entities;
+﻿using System.ComponentModel.DataAnnotations.Schema;
 using System.ComponentModel.DataAnnotations;
-using System.ComponentModel.DataAnnotations.Schema;
+using SupervisorMobility.API.Entities;
 
-namespace SupervisorMobility.API.Entities
+namespace SupervisorMobility.API.DataAccess.Entities
 {
-    public class Plant
+    public class Area
     {
         [Key, DatabaseGenerated(DatabaseGeneratedOption.Identity)]
-        public int PlantId { get; set; }
+        public int AreaId { get; set; }
         [Required]
         [MaxLength(50)]
         public string Code { get; set; }
@@ -16,11 +16,11 @@ namespace SupervisorMobility.API.Entities
         public string Description { get; set; }
         public bool? IsActive { get; set; }
 
-        //Navigation Property
-        public ICollection<Area> Areas { get; set; }
-            = new List<Area>();
+        //Navigation properties
+        public int PlantId { get; set; }
+        public Plant? Plant { get; set; }
 
-        public Plant(string code, string description)
+        public Area(string code, string description)
         {
             Code = code;
             Description = description;

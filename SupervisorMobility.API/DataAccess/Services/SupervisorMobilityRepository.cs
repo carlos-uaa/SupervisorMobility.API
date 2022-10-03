@@ -1,5 +1,7 @@
 ﻿using Microsoft.EntityFrameworkCore;
+using Microsoft.Extensions.Diagnostics.HealthChecks;
 using SupervisorMobility.API.Context;
+using SupervisorMobility.API.DataAccess.Entities;
 using SupervisorMobility.API.Entities;
 
 namespace SupervisorMobility.API.Services
@@ -135,6 +137,10 @@ namespace SupervisorMobility.API.Services
             return await _context.Plants
                 .Where(c => c.PlantId == plantId).FirstOrDefaultAsync();
         }
+        public async Task<bool> PlantExistAsync(int plantId)
+        {
+            return await _context.Plants.AnyAsync(p => p.PlantId == plantId);
+        }
 
         public void AddPlant(Plant plant)
         {
@@ -144,6 +150,32 @@ namespace SupervisorMobility.API.Services
         public void DeletePlant(Plant plant)
         {
             _context.Plants.Remove(plant);
+        }
+        #endregion
+        #region AreaOperations
+        public async Task<IEnumerable<Area>> GetAreasForPlantAsync(int plantId)
+        {
+            return await _context.Areas
+                .Where(a => a.PlantId == plantId).ToListAsync();
+        }
+        public async Task<Area?> GetAreaForPlantAsync(int plantId,
+            int areaId)
+        {
+            return await _context.Areas
+                .Where(cq => cq.PlantId == plantId && cq.AreaId == areaId)
+                .FirstOrDefaultAsync();
+        }
+        public async Task AddAreaForPlantAsync(int plantId, Area area)
+        {
+            var plant = await GetPlantAsync(plantId);
+            if (plant != null)
+            {
+                plant.Areas.Add(area);
+            }
+        }
+        public void DeleteAreas(Area area)
+        {
+            _context.Areas.Remove(area);
         }
         #endregion
         #region QuestionTypeOperations

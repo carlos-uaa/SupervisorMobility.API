@@ -1,4 +1,5 @@
 ﻿using Microsoft.EntityFrameworkCore.ChangeTracking;
+using SupervisorMobility.API.DataAccess.Entities;
 using SupervisorMobility.API.Entities;
 
 namespace SupervisorMobility.API.Services
@@ -33,8 +34,16 @@ namespace SupervisorMobility.API.Services
         #region PlantOperations
         Task<IEnumerable<Plant>> GetPlantsAsync();
         Task<Plant?> GetPlantAsync(int plantId);
+        Task<bool> PlantExistAsync(int plantId);
         void AddPlant(Plant plant);
         void DeletePlant(Plant plant);
+        #endregion
+        #region AreaOperations
+        Task<IEnumerable<Area>> GetAreasForPlantAsync(int plantId);
+        Task<Area?> GetAreaForPlantAsync(int plantId,
+            int areaId);
+        Task AddAreaForPlantAsync(int plantId, Area area);
+        void DeleteAreas(Area area);
         #endregion
         #region QuestionTypeOperations
         Task<IEnumerable<QuestionType>> GetQuestionTypesAsync();
