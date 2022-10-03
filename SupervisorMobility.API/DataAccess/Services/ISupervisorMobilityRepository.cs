@@ -33,7 +33,7 @@ namespace SupervisorMobility.API.Services
         #endregion
         #region PlantOperations
         Task<IEnumerable<Plant>> GetPlantsAsync();
-        Task<Plant?> GetPlantAsync(int plantId);
+        Task<Plant?> GetPlantAsync(int plantId, bool includeAreas = false);
         Task<bool> PlantExistAsync(int plantId);
         void AddPlant(Plant plant);
         void DeletePlant(Plant plant);

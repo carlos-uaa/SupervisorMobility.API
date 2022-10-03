@@ -30,14 +30,19 @@ namespace SupervisorMobility.API.Controllers
         }
 
         [HttpGet("{plantId}", Name = "GetPlant")]
-        public async Task<ActionResult> GetPlant(int plantId)
+        public async Task<IActionResult> GetPlant(int plantId, bool includeAreas = false)
         {
             //Find Job Observation type
             var plant = await _supervisorMobilityRepository
-                .GetPlantAsync(plantId);
+                .GetPlantAsync(plantId, includeAreas);
             if (plant == null)
             {
                 return NotFound();
+            }
+
+            if (includeAreas)
+            {
+                return Ok(_mapper.Map<PlantWithJustAreasDto>(plant));
             }
 
             return Ok(_mapper.Map<PlantDto>(plant));

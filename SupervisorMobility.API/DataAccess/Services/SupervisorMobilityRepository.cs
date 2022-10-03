@@ -131,8 +131,14 @@ namespace SupervisorMobility.API.Services
                 .OrderBy(c => c.PlantId).ToListAsync();
         }
 
-        public async Task<Plant?> GetPlantAsync(int plantId)
+        public async Task<Plant?> GetPlantAsync(int plantId, bool includeAreas = false)
         {
+            if (includeAreas)
+            {
+                return await _context.Plants.Include(p => p.Areas)
+                    .Where(c => c.PlantId == plantId).FirstOrDefaultAsync();
+            }
+
             return await _context.Plants
                 .Where(c => c.PlantId == plantId).FirstOrDefaultAsync();
         }
