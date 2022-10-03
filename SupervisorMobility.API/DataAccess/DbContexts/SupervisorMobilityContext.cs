@@ -15,6 +15,7 @@ namespace SupervisorMobility.API.Context
         public DbSet<Group> Groups { get; set; }
         public DbSet<Plant> Plants { get; set; }
         public DbSet<Area> Areas { get; set; }
+        public DbSet<Operation> Operations { get; set; }
         #endregion
 
         public SupervisorMobilityContext(DbContextOptions<SupervisorMobilityContext> options)
@@ -42,7 +43,15 @@ namespace SupervisorMobility.API.Context
                 .Property(p => p.IsActive)
                 .HasDefaultValue(true);
 
+            modelBuilder.Entity<Plant>()
+                .Property(p => p.IsActive)
+                .HasDefaultValue(true);
+
             modelBuilder.Entity<Area>()
+                .Property(p => p.IsActive)
+                .HasDefaultValue(true);
+
+            modelBuilder.Entity<Operation>()
                 .Property(p => p.IsActive)
                 .HasDefaultValue(true);
 
@@ -220,6 +229,14 @@ namespace SupervisorMobility.API.Context
                     AreaId = 1,
                     IsActive = true,
                     PlantId = 1
+                });
+            modelBuilder.Entity<Operation>()
+                .HasData(
+                new Operation("OP1", "Operacion Trim 1")
+                {
+                    OperationId = 1,
+                    IsActive = true,
+                    AreaId = 1
                 });
 
             base.OnModelCreating(modelBuilder);

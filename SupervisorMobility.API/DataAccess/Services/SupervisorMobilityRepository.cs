@@ -1,5 +1,4 @@
 ﻿using Microsoft.EntityFrameworkCore;
-using Microsoft.Extensions.Diagnostics.HealthChecks;
 using SupervisorMobility.API.Context;
 using SupervisorMobility.API.DataAccess.Entities;
 using SupervisorMobility.API.Entities;
@@ -165,6 +164,10 @@ namespace SupervisorMobility.API.Services
                 .Where(cq => cq.PlantId == plantId && cq.AreaId == areaId)
                 .FirstOrDefaultAsync();
         }
+        public async Task<bool> AreaExistAsync(int areaId)
+        {
+            return await _context.Areas.AnyAsync(p => p.AreaId == areaId);
+        }
         public async Task AddAreaForPlantAsync(int plantId, Area area)
         {
             var plant = await GetPlantAsync(plantId);
@@ -173,9 +176,34 @@ namespace SupervisorMobility.API.Services
                 plant.Areas.Add(area);
             }
         }
-        public void DeleteAreas(Area area)
+        public void DeleteArea(Area area)
         {
             _context.Areas.Remove(area);
+        }
+        #endregion
+        #region OperationOperations
+        public async Task<IEnumerable<Operation>> GetOperationsForAreaAsync(int areaId)
+        {
+            return await _context.Operations
+                .Where(o => o.AreaId == areaId).ToListAsync();
+        }
+        public async Task<Operation?> GetOperationForAreaAsync(int areaId, int operationId)
+        {
+            return await _context.Operations
+                .Where(o => o.AreaId == areaId && o.OperationId == operationId)
+                .FirstOrDefaultAsync();
+        }
+        public async Task AddOperationForPlantAsync(int plantId, int areaId, Operation operation)
+        {
+            var area = await GetAreaForPlantAsync(plantId, areaId);
+            if (area != null)
+            {
+                area.Operations.Add(operation);
+            }
+        }
+        public void DeleteOperation(Operation operation)
+        {
+            _context.Operations.Remove(operation);
         }
         #endregion
         #region QuestionTypeOperations

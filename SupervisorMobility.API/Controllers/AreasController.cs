@@ -165,7 +165,7 @@ namespace SupervisorMobility.API.Controllers
                 return NotFound();
             }
 
-            _supervisorMobilityRepository.DeleteAreas(areaEntity);
+            _supervisorMobilityRepository.DeleteArea(areaEntity);
             await _supervisorMobilityRepository.SaveChangesAsync();
 
             return NoContent();
