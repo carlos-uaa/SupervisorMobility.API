@@ -85,7 +85,7 @@
 						"header": [],
 						"body": {
 							"mode": "raw",
-							"raw": "{\r\n    \"code\": \"sdfg\",\r\n    \"description\": \"Test category that will be deleted\",\r\n    \"sequence\": 7,\r\n    \"isactive\": true\r\n}",
+							"raw": "{\r\n    \"code\": \"sdfg\",\r\n    \"description\": \"Test category that will be deleted\",\r\n    \"isactive\": true\r\n}",
 							"options": {
 								"raw": {
 									"language": "json"
@@ -114,7 +114,7 @@
 						"header": [],
 						"body": {
 							"mode": "raw",
-							"raw": "{\r\n    \"code\": \"sdfg - Updated\",\r\n    \"description\": \"Test category that will be deleted - Updated\",\r\n    \"sequence\": 8,\r\n    \"isActive\": true\r\n}",
+							"raw": "{\r\n    \"code\": \"sdfg - Updated\",\r\n    \"description\": \"Test category that will be deleted - Updated\",\r\n    \"isActive\": true\r\n}",
 							"options": {
 								"raw": {
 									"language": "json"
@@ -144,7 +144,7 @@
 						"header": [],
 						"body": {
 							"mode": "raw",
-							"raw": "[\r\n    {\r\n      \"op\": \"replace\",\r\n      \"path\": \"/sequence\",\r\n      \"value\": \"10\"\r\n    },\r\n    {\r\n      \"op\": \"replace\",\r\n      \"path\": \"/code\",\r\n      \"value\": \"asdf - test patch update 2\"\r\n    },\r\n    {\r\n      \"op\": \"replace\",\r\n      \"path\": \"/isactive\",\r\n      \"value\": \"true\"\r\n    }\r\n]",
+							"raw": "[\r\n    {\r\n      \"op\": \"replace\",\r\n      \"path\": \"/code\",\r\n      \"value\": \"Psdfg-3\"\r\n    },\r\n    {\r\n      \"op\": \"replace\",\r\n      \"path\": \"/isactive\",\r\n      \"value\": \"true\"\r\n    }\r\n]",
 							"options": {
 								"raw": {
 									"language": "json"
@@ -152,7 +152,7 @@
 							}
 						},
 						"url": {
-							"raw": "https://localhost:{{portNumber}}/api/checklistcategories/10",
+							"raw": "https://localhost:{{portNumber}}/api/checklistcategories/14",
 							"protocol": "https",
 							"host": [
 								"localhost"
@@ -161,7 +161,7 @@
 							"path": [
 								"api",
 								"checklistcategories",
-								"10"
+								"14"
 							]
 						}
 					},
@@ -187,40 +187,23 @@
 						}
 					},
 					"response": []
-				}
-			]
-		},
-		{
-			"name": "Question types operations",
-			"item": [
-				{
-					"name": "GET All Question Types",
-					"request": {
-						"method": "GET",
-						"header": [],
-						"url": {
-							"raw": "https://localhost:{{portNumber}}/api/QuestionTypes/",
-							"protocol": "https",
-							"host": [
-								"localhost"
-							],
-							"port": "{{portNumber}}",
-							"path": [
-								"api",
-								"QuestionTypes",
-								""
-							]
-						}
-					},
-					"response": []
 				},
 				{
-					"name": "GET Question Type",
+					"name": "PUT Checklist category sequenc",
 					"request": {
-						"method": "GET",
+						"method": "PUT",
 						"header": [],
+						"body": {
+							"mode": "raw",
+							"raw": "{\r\n    \"Sequence\": 14\r\n}",
+							"options": {
+								"raw": {
+									"language": "json"
+								}
+							}
+						},
 						"url": {
-							"raw": "https://localhost:{{portNumber}}/api/QuestionTypes/6?includeChecklistQuestions=true",
+							"raw": "https://localhost:{{portNumber}}/api/checklistcategories/sequence/15",
 							"protocol": "https",
 							"host": [
 								"localhost"
@@ -228,14 +211,9 @@
 							"port": "{{portNumber}}",
 							"path": [
 								"api",
-								"QuestionTypes",
-								"6"
-							],
-							"query": [
-								{
-									"key": "includeChecklistQuestions",
-									"value": "true"
-								}
+								"checklistcategories",
+								"sequence",
+								"15"
 							]
 						}
 					},
@@ -299,7 +277,7 @@
 						"header": [],
 						"body": {
 							"mode": "raw",
-							"raw": "{\r\n    \"code\": \"Another Test\",\r\n    \"description\": \"Nivel ILU del operador\",\r\n    \"prompt\": \"¿Cuál es nivel de ILU del operador?  ¿Está el entrenamiento alineado con el Cuadro de requisitos de Operaicón ? (S/N)\",\r\n    \"categorySequence\": 1,\r\n    \"questionTypeId\": 6\r\n}",
+							"raw": "{\r\n    \"code\": \"Another Test\",\r\n    \"description\": \"Nivel ILU del operador\",\r\n    \"prompt\": \"¿Cuál es nivel de ILU del operador?  ¿Está el entrenamiento alineado con el Cuadro de requisitos de Operaicón ? (S/N)\",\r\n    \"questionTypeId\": 6\r\n}",
 							"options": {
 								"raw": {
 									"language": "json"
@@ -307,7 +285,7 @@
 							}
 						},
 						"url": {
-							"raw": "https://localhost:{{portNumber}}/api/checklistcategories/1/checklistquestions/",
+							"raw": "https://localhost:{{portNumber}}/api/checklistcategories/11/checklistquestions/",
 							"protocol": "https",
 							"host": [
 								"localhost"
@@ -316,7 +294,7 @@
 							"path": [
 								"api",
 								"checklistcategories",
-								"1",
+								"11",
 								"checklistquestions",
 								""
 							]
@@ -363,7 +341,7 @@
 						"header": [],
 						"body": {
 							"mode": "raw",
-							"raw": "[\r\n    {\r\n      \"op\": \"replace\",\r\n      \"path\": \"/code\",\r\n      \"value\": \"Updated Code\"\r\n    },\r\n    {\r\n      \"op\": \"replace\",\r\n      \"path\": \"/ChecklistCategoryId\",\r\n      \"value\": \"9\"\r\n    }\r\n]",
+							"raw": "[\r\n    {\r\n      \"op\": \"replace\",\r\n      \"path\": \"/code\",\r\n      \"value\": \"Updated Code6\"\r\n    }\r\n]",
 							"options": {
 								"raw": {
 									"language": "json"
@@ -371,7 +349,7 @@
 							}
 						},
 						"url": {
-							"raw": "https://localhost:{{portNumber}}/api/checklistcategories/1/checklistquestions/2",
+							"raw": "https://localhost:{{portNumber}}/api/checklistcategories/11/checklistquestions/8",
 							"protocol": "https",
 							"host": [
 								"localhost"
@@ -380,9 +358,9 @@
 							"path": [
 								"api",
 								"checklistcategories",
-								"1",
+								"11",
 								"checklistquestions",
-								"2"
+								"8"
 							]
 						}
 					},
@@ -394,7 +372,7 @@
 						"method": "DELETE",
 						"header": [],
 						"url": {
-							"raw": "https://localhost:{{portNumber}}/api/checklistcategories/1/checklistQuestions/4",
+							"raw": "https://localhost:{{portNumber}}/api/checklistcategories/1/checklistQuestions/3",
 							"protocol": "https",
 							"host": [
 								"localhost"
@@ -405,7 +383,93 @@
 								"checklistcategories",
 								"1",
 								"checklistQuestions",
-								"4"
+								"3"
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "PUT Checklist Question sequence",
+					"request": {
+						"method": "PUT",
+						"header": [],
+						"body": {
+							"mode": "raw",
+							"raw": "{\r\n    \"categorySequence\": 16\r\n}",
+							"options": {
+								"raw": {
+									"language": "json"
+								}
+							}
+						},
+						"url": {
+							"raw": "https://localhost:{{portNumber}}/api/checklistcategories/11/checklistquestions/sequence/8",
+							"protocol": "https",
+							"host": [
+								"localhost"
+							],
+							"port": "{{portNumber}}",
+							"path": [
+								"api",
+								"checklistcategories",
+								"11",
+								"checklistquestions",
+								"sequence",
+								"8"
+							]
+						}
+					},
+					"response": []
+				}
+			]
+		},
+		{
+			"name": "Question types operations",
+			"item": [
+				{
+					"name": "GET All Question Types",
+					"request": {
+						"method": "GET",
+						"header": [],
+						"url": {
+							"raw": "https://localhost:{{portNumber}}/api/QuestionTypes/",
+							"protocol": "https",
+							"host": [
+								"localhost"
+							],
+							"port": "{{portNumber}}",
+							"path": [
+								"api",
+								"QuestionTypes",
+								""
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "GET Question Type",
+					"request": {
+						"method": "GET",
+						"header": [],
+						"url": {
+							"raw": "https://localhost:{{portNumber}}/api/QuestionTypes/6?includeChecklistQuestions=true",
+							"protocol": "https",
+							"host": [
+								"localhost"
+							],
+							"port": "{{portNumber}}",
+							"path": [
+								"api",
+								"QuestionTypes",
+								"6"
+							],
+							"query": [
+								{
+									"key": "includeChecklistQuestions",
+									"value": "true"
+								}
 							]
 						}
 					},
@@ -583,7 +647,7 @@
 						"method": "GET",
 						"header": [],
 						"url": {
-							"raw": "https://localhost:{{portNumber}}/api/checklistcategories/1/checklistquestions/2",
+							"raw": "https://localhost:{{portNumber}}/api/jobobservationtypes/1/jobobservationconfigs/",
 							"protocol": "https",
 							"host": [
 								"localhost"
@@ -591,10 +655,10 @@
 							"port": "{{portNumber}}",
 							"path": [
 								"api",
-								"checklistcategories",
+								"jobobservationtypes",
 								"1",
-								"checklistquestions",
-								"2"
+								"jobobservationconfigs",
+								""
 							]
 						}
 					},
@@ -669,7 +733,7 @@
 							}
 						},
 						"url": {
-							"raw": "https://localhost:{{portNumber}}/api/jobobservationtypes/1/jobobservationconfigs/7",
+							"raw": "https://localhost:{{portNumber}}/api/jobobservationtypes/1/jobobservationconfigs/1001",
 							"protocol": "https",
 							"host": [
 								"localhost"
@@ -680,7 +744,7 @@
 								"jobobservationtypes",
 								"1",
 								"jobobservationconfigs",
-								"7"
+								"1001"
 							]
 						}
 					},
@@ -724,7 +788,7 @@
 						"method": "DELETE",
 						"header": [],
 						"url": {
-							"raw": "https://localhost:{{portNumber}}/api/checklistcategories/1/checklistQuestions/4",
+							"raw": "https://localhost:{{portNumber}}/api/jobobservationtypes/1/jobobservationconfigs/1001",
 							"protocol": "https",
 							"host": [
 								"localhost"
@@ -732,10 +796,10 @@
 							"port": "{{portNumber}}",
 							"path": [
 								"api",
-								"checklistcategories",
+								"jobobservationtypes",
 								"1",
-								"checklistQuestions",
-								"4"
+								"jobobservationconfigs",
+								"1001"
 							]
 						}
 					},
@@ -770,7 +834,20 @@
 					"name": "Get Group",
 					"request": {
 						"method": "GET",
-						"header": []
+						"header": [],
+						"url": {
+							"raw": "https://localhost:{{portNumber}}/api/groups/2",
+							"protocol": "https",
+							"host": [
+								"localhost"
+							],
+							"port": "{{portNumber}}",
+							"path": [
+								"api",
+								"groups",
+								"2"
+							]
+						}
 					},
 					"response": []
 				},
@@ -779,6 +856,15 @@
 					"request": {
 						"method": "POST",
 						"header": [],
+						"body": {
+							"mode": "raw",
+							"raw": "{\r\n    \"code\": \"GC\",\r\n    \"description\": \"Grupo C - Delete\",\r\n    \"isActive\": true\r\n}",
+							"options": {
+								"raw": {
+									"language": "json"
+								}
+							}
+						},
 						"url": {
 							"raw": "https://localhost:{{portNumber}}/api/groups/",
 							"protocol": "https",
@@ -810,7 +896,7 @@
 							}
 						},
 						"url": {
-							"raw": "https://localhost:{{portNumber}}/api/groups/3",
+							"raw": "https://localhost:{{portNumber}}/api/groups/5",
 							"protocol": "https",
 							"host": [
 								"localhost"
@@ -819,7 +905,7 @@
 							"path": [
 								"api",
 								"groups",
-								"3"
+								"5"
 							]
 						}
 					},
@@ -871,6 +957,567 @@
 								"api",
 								"groups",
 								"4"
+							]
+						}
+					},
+					"response": []
+				}
+			]
+		},
+		{
+			"name": "Plant Operations",
+			"item": [
+				{
+					"name": "Get All Plants",
+					"request": {
+						"method": "GET",
+						"header": [],
+						"url": {
+							"raw": "https://localhost:{{portNumber}}/api/plants",
+							"protocol": "https",
+							"host": [
+								"localhost"
+							],
+							"port": "{{portNumber}}",
+							"path": [
+								"api",
+								"plants"
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "Get Plant",
+					"request": {
+						"method": "GET",
+						"header": [],
+						"url": {
+							"raw": "https://localhost:{{portNumber}}/api/plants/3",
+							"protocol": "https",
+							"host": [
+								"localhost"
+							],
+							"port": "{{portNumber}}",
+							"path": [
+								"api",
+								"plants",
+								"3"
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "Get Plant (including Areas)",
+					"request": {
+						"method": "GET",
+						"header": [],
+						"url": {
+							"raw": "https://localhost:{{portNumber}}/api/plants/2?includeAreas=true",
+							"protocol": "https",
+							"host": [
+								"localhost"
+							],
+							"port": "{{portNumber}}",
+							"path": [
+								"api",
+								"plants",
+								"2"
+							],
+							"query": [
+								{
+									"key": "includeAreas",
+									"value": "true"
+								}
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "Post a Plant",
+					"request": {
+						"method": "POST",
+						"header": [],
+						"body": {
+							"mode": "raw",
+							"raw": "{\r\n    \"code\": \"BodBiWy\",\r\n    \"description\": \"Body\",\r\n    \"isActive\": true\r\n}",
+							"options": {
+								"raw": {
+									"language": "json"
+								}
+							}
+						},
+						"url": {
+							"raw": "https://localhost:{{portNumber}}/api/plants/",
+							"protocol": "https",
+							"host": [
+								"localhost"
+							],
+							"port": "{{portNumber}}",
+							"path": [
+								"api",
+								"plants",
+								""
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "Put Plant",
+					"request": {
+						"method": "PUT",
+						"header": [],
+						"body": {
+							"mode": "raw",
+							"raw": "{\r\n    \"code\": \"BiW\",\r\n    \"description\": \"Body\",\r\n    \"isActive\": true\r\n}",
+							"options": {
+								"raw": {
+									"language": "json"
+								}
+							}
+						},
+						"url": {
+							"raw": "https://localhost:{{portNumber}}/api/plants/3",
+							"protocol": "https",
+							"host": [
+								"localhost"
+							],
+							"port": "{{portNumber}}",
+							"path": [
+								"api",
+								"plants",
+								"3"
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "Patch Plant",
+					"request": {
+						"method": "PATCH",
+						"header": [],
+						"body": {
+							"mode": "raw",
+							"raw": "[\r\n    {\r\n      \"op\": \"replace\",\r\n      \"path\": \"/code\",\r\n      \"value\": \"testCode\"\r\n    }\r\n]",
+							"options": {
+								"raw": {
+									"language": "json"
+								}
+							}
+						},
+						"url": {
+							"raw": "https://localhost:{{portNumber}}/api/plants/4",
+							"protocol": "https",
+							"host": [
+								"localhost"
+							],
+							"port": "{{portNumber}}",
+							"path": [
+								"api",
+								"plants",
+								"4"
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "Delete Plant",
+					"request": {
+						"method": "DELETE",
+						"header": [],
+						"url": {
+							"raw": "https://localhost:{{portNumber}}/api/plants/4",
+							"protocol": "https",
+							"host": [
+								"localhost"
+							],
+							"port": "{{portNumber}}",
+							"path": [
+								"api",
+								"plants",
+								"4"
+							]
+						}
+					},
+					"response": []
+				}
+			]
+		},
+		{
+			"name": "Area Operations",
+			"item": [
+				{
+					"name": "Get All Areas",
+					"request": {
+						"method": "GET",
+						"header": [],
+						"url": {
+							"raw": "https://localhost:{{portNumber}}/api/plants/1/areas",
+							"protocol": "https",
+							"host": [
+								"localhost"
+							],
+							"port": "{{portNumber}}",
+							"path": [
+								"api",
+								"plants",
+								"1",
+								"areas"
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "Get Area",
+					"request": {
+						"method": "GET",
+						"header": [],
+						"url": {
+							"raw": "https://localhost:{{portNumber}}/api/plants/1/areas/1",
+							"protocol": "https",
+							"host": [
+								"localhost"
+							],
+							"port": "{{portNumber}}",
+							"path": [
+								"api",
+								"plants",
+								"1",
+								"areas",
+								"1"
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "Get Area (including Operations)",
+					"request": {
+						"method": "GET",
+						"header": [],
+						"url": {
+							"raw": "https://localhost:{{portNumber}}/api/plants/1/areas/1?includeOperations=true",
+							"protocol": "https",
+							"host": [
+								"localhost"
+							],
+							"port": "{{portNumber}}",
+							"path": [
+								"api",
+								"plants",
+								"1",
+								"areas",
+								"1"
+							],
+							"query": [
+								{
+									"key": "includeOperations",
+									"value": "true"
+								}
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "Post a Area",
+					"request": {
+						"method": "POST",
+						"header": [],
+						"body": {
+							"mode": "raw",
+							"raw": "{\r\n    \"code\": \"TUP\",\r\n    \"description\": \"Touch up\",\r\n    \"isActive\": true\r\n}",
+							"options": {
+								"raw": {
+									"language": "json"
+								}
+							}
+						},
+						"url": {
+							"raw": "https://localhost:{{portNumber}}/api/plants/2/areas",
+							"protocol": "https",
+							"host": [
+								"localhost"
+							],
+							"port": "{{portNumber}}",
+							"path": [
+								"api",
+								"plants",
+								"2",
+								"areas"
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "Put Area",
+					"request": {
+						"method": "PUT",
+						"header": [],
+						"body": {
+							"mode": "raw",
+							"raw": "{\r\n        \"code\": \"T2\",\r\n        \"description\": \"Trim 2\",\r\n        \"isActive\": true\r\n}",
+							"options": {
+								"raw": {
+									"language": "json"
+								}
+							}
+						},
+						"url": {
+							"raw": "https://localhost:{{portNumber}}/api/plants/1/areas/2",
+							"protocol": "https",
+							"host": [
+								"localhost"
+							],
+							"port": "{{portNumber}}",
+							"path": [
+								"api",
+								"plants",
+								"1",
+								"areas",
+								"2"
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "Patch Area",
+					"request": {
+						"method": "PATCH",
+						"header": [],
+						"body": {
+							"mode": "raw",
+							"raw": "[\r\n    {\r\n      \"op\": \"replace\",\r\n      \"path\": \"/code\",\r\n      \"value\": \"T3\"\r\n    }\r\n]",
+							"options": {
+								"raw": {
+									"language": "json"
+								}
+							}
+						},
+						"url": {
+							"raw": "https://localhost:{{portNumber}}/api/plants/1/areas/3",
+							"protocol": "https",
+							"host": [
+								"localhost"
+							],
+							"port": "{{portNumber}}",
+							"path": [
+								"api",
+								"plants",
+								"1",
+								"areas",
+								"3"
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "Delete Area",
+					"request": {
+						"method": "DELETE",
+						"header": [],
+						"url": {
+							"raw": "https://localhost:{{portNumber}}/api/plants/2/areas/4",
+							"protocol": "https",
+							"host": [
+								"localhost"
+							],
+							"port": "{{portNumber}}",
+							"path": [
+								"api",
+								"plants",
+								"2",
+								"areas",
+								"4"
+							]
+						}
+					},
+					"response": []
+				}
+			]
+		},
+		{
+			"name": "Operation Operations",
+			"item": [
+				{
+					"name": "Get All Operations",
+					"request": {
+						"method": "GET",
+						"header": [],
+						"url": {
+							"raw": "https://localhost:{{portNumber}}/api/plants/1/areas/2/Operations",
+							"protocol": "https",
+							"host": [
+								"localhost"
+							],
+							"port": "{{portNumber}}",
+							"path": [
+								"api",
+								"plants",
+								"1",
+								"areas",
+								"2",
+								"Operations"
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "Get Operation",
+					"request": {
+						"method": "GET",
+						"header": [],
+						"url": {
+							"raw": "https://localhost:{{portNumber}}/api/plants/1/areas/1/Operations/1",
+							"protocol": "https",
+							"host": [
+								"localhost"
+							],
+							"port": "{{portNumber}}",
+							"path": [
+								"api",
+								"plants",
+								"1",
+								"areas",
+								"1",
+								"Operations",
+								"1"
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "Post a Operation",
+					"request": {
+						"method": "POST",
+						"header": [],
+						"body": {
+							"mode": "raw",
+							"raw": "{\r\n    \"code\": \"OP2\",\r\n    \"description\": \"Operacion Trim 2 - Dummy\",\r\n    \"isActive\": true\r\n}",
+							"options": {
+								"raw": {
+									"language": "json"
+								}
+							}
+						},
+						"url": {
+							"raw": "https://localhost:{{portNumber}}/api/plants/1/areas/2/Operations",
+							"protocol": "https",
+							"host": [
+								"localhost"
+							],
+							"port": "{{portNumber}}",
+							"path": [
+								"api",
+								"plants",
+								"1",
+								"areas",
+								"2",
+								"Operations"
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "Put Operation",
+					"request": {
+						"method": "PUT",
+						"header": [],
+						"body": {
+							"mode": "raw",
+							"raw": "{\r\n    \"code\": \"OP7\",\r\n    \"description\": \"Operacion 3 Trim 2\",\r\n    \"isActive\": true\r\n}",
+							"options": {
+								"raw": {
+									"language": "json"
+								}
+							}
+						},
+						"url": {
+							"raw": "https://localhost:{{portNumber}}/api/plants/1/areas/2/Operations/7",
+							"protocol": "https",
+							"host": [
+								"localhost"
+							],
+							"port": "{{portNumber}}",
+							"path": [
+								"api",
+								"plants",
+								"1",
+								"areas",
+								"2",
+								"Operations",
+								"7"
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "Patch Operation",
+					"request": {
+						"method": "PATCH",
+						"header": [],
+						"body": {
+							"mode": "raw",
+							"raw": "[\r\n    {\r\n      \"op\": \"replace\",\r\n      \"path\": \"/description\",\r\n      \"value\": \"Operacion 1 Trim 1\"\r\n    }\r\n]",
+							"options": {
+								"raw": {
+									"language": "json"
+								}
+							}
+						},
+						"url": {
+							"raw": "https://localhost:{{portNumber}}/api/plants/1/areas/1/Operations/1",
+							"protocol": "https",
+							"host": [
+								"localhost"
+							],
+							"port": "{{portNumber}}",
+							"path": [
+								"api",
+								"plants",
+								"1",
+								"areas",
+								"1",
+								"Operations",
+								"1"
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "Delete Operation",
+					"request": {
+						"method": "DELETE",
+						"header": [],
+						"url": {
+							"raw": "https://localhost:{{portNumber}}/api/plants/1/areas/2/Operations/8",
+							"protocol": "https",
+							"host": [
+								"localhost"
+							],
+							"port": "{{portNumber}}",
+							"path": [
+								"api",
+								"plants",
+								"1",
+								"areas",
+								"2",
+								"Operations",
+								"8"
 							]
 						}
 					},
