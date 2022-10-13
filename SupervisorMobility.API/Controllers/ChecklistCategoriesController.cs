@@ -41,7 +41,7 @@ namespace SupervisorMobility.API.Controllers
 
             if (includeChecklistQuestions)
             {
-                return Ok(_mapper.Map<ChecklistCategoryWithJustchecklistQuestions>(checklistCategory));
+                return Ok(_mapper.Map<ChecklistCategoryWithJustchecklistQuestionsDto>(checklistCategory));
             }
 
             return Ok(_mapper.Map<ChecklistCategoryWithoutChecklistQuestionsDto>(checklistCategory));
