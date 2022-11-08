@@ -1,5 +1,6 @@
 using Microsoft.EntityFrameworkCore;
 using Serilog;
+using SupervisorMobility.API;
 using SupervisorMobility.API.Business;
 using SupervisorMobility.API.Context;
 using SupervisorMobility.API.Services;
@@ -27,13 +28,11 @@ builder.Services.AddControllers(options =>
 builder.Services.AddEndpointsApiExplorer();
 builder.Services.AddSwaggerGen();
 
-builder.Services.AddDbContext<SupervisorMobilityContext>(
-    dbContextOptions => dbContextOptions.UseSqlServer(
-        builder.Configuration["ConnectionStrings:SupervisorMobilityDBConnectionString"]));
+//Add other services
+builder.Services.RegisterBusinessServices();
+builder.Services.RegisterDataServices(builder.Configuration);
 
-builder.Services.AddScoped<ISupervisorMobilityRepository, SupervisorMobilityRepository>();
-builder.Services.AddScoped<IChecklistCategoryService, ChecklistCategoryService>();
-
+//Add automapper
 builder.Services.AddAutoMapper(AppDomain.CurrentDomain.GetAssemblies());
 
 var app = builder.Build();
