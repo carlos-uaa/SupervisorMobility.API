@@ -1,6 +1,7 @@
 ﻿using AutoMapper;
 using Microsoft.AspNetCore.JsonPatch;
 using Microsoft.AspNetCore.Mvc;
+using SupervisorMobility.API.Business;
 using SupervisorMobility.API.Models.ChecklistCategoryDtos;
 using SupervisorMobility.API.Services;
 
@@ -10,15 +11,18 @@ namespace SupervisorMobility.API.Controllers
     [Route("api/checklistcategories")]
     public class ChecklistCategoriesController : ControllerBase
     {
-        private readonly ISupervisorMobilityRepository _supervisorMobilityRepository;
+        private readonly ISupervisorMobilityRepository _supervisorMobilityRepository; //TODO: Remove from business logic
+        private readonly IChecklistCategoryService _checklistCategoryService;
         private readonly IMapper _mapper;
 
-        public ChecklistCategoriesController(ISupervisorMobilityRepository supervisorMobilityRepository, IMapper mapper)
+        public ChecklistCategoriesController(
+            ISupervisorMobilityRepository supervisorMobilityRepository, 
+            IMapper mapper, 
+            IChecklistCategoryService checklistCategoryService)
         {
-            _supervisorMobilityRepository = supervisorMobilityRepository ??
-                throw new ArgumentNullException(nameof(supervisorMobilityRepository));
-            _mapper = mapper ??
-                throw new ArgumentNullException(nameof(mapper));
+            _supervisorMobilityRepository = supervisorMobilityRepository;
+            _mapper = mapper;
+            _checklistCategoryService = checklistCategoryService;
         }
 
         [HttpGet]
@@ -122,14 +126,19 @@ namespace SupervisorMobility.API.Controllers
         [HttpDelete("{ChecklistCategoryId}")]
         public async Task<ActionResult> DeleteChecklistCategory(int checklistCategoryId)
         {
-            var checklistCategoryEntity = await _supervisorMobilityRepository.GetChecklistCategoryAsync(checklistCategoryId);
+            var checklistCategoryEntity = await _checklistCategoryService.FetchChecklistCategoryAsync(checklistCategoryId);
             if (checklistCategoryEntity == null)
             {
-                return NotFound();
+                return NotFound("Checklist category not found.");
             }
 
-            _supervisorMobilityRepository.DeleteChecklistCategory(checklistCategoryEntity);
-            await _supervisorMobilityRepository.SaveChangesAsync();
+            //Send this category to the end
+            var checklistCategorySequence = new ChecklistCategorySequenceForUpdateDto();
+            checklistCategorySequence.Sequence = await _checklistCategoryService.FetchChecklistCategoriesMaxSequenceAsync() - 1;
+            await _checklistCategoryService
+                .UpdateChecklistCategoriesSequenceAsync(checklistCategorySequence, checklistCategoryEntity);
+
+            await _checklistCategoryService.DeleteChecklistCategoryAsync(checklistCategoryEntity);
 
             return NoContent();
         }
@@ -138,10 +147,10 @@ namespace SupervisorMobility.API.Controllers
         public async Task<ActionResult> UpdateChecklistCategorySequence(int checklistCategoryId,
             ChecklistCategorySequenceForUpdateDto checklistCategory)
         {
-            var checklistCategoryEntity = await _supervisorMobilityRepository.GetChecklistCategoryAsync(checklistCategoryId);
+            var checklistCategoryEntity = await _checklistCategoryService.FetchChecklistCategoryAsync(checklistCategoryId);
             if (checklistCategoryEntity == null)
             {
-                return NotFound();
+                return NotFound("Checklist category not found.");
             }
 
             if (checklistCategory.Sequence == checklistCategoryEntity.Sequence)
@@ -150,27 +159,13 @@ namespace SupervisorMobility.API.Controllers
             }
 
             if (checklistCategory.Sequence < 1 
-                || checklistCategory.Sequence > await _supervisorMobilityRepository.GetChecklistCategoriesMaxSequenceAsync())
+                || checklistCategory.Sequence > await _checklistCategoryService.FetchChecklistCategoriesMaxSequenceAsync())
             {
                 return BadRequest("Sequence must be greater than 1 and lower that the current max sequence.");
             }
 
-            //So we need to update the checklist categories sequence between desiered and old one.
-            var currentSequence = 
-                checklistCategory.Sequence < checklistCategoryEntity.Sequence 
-                ? checklistCategory.Sequence 
-                : checklistCategoryEntity.Sequence - 1;
-            
-            var checklistCategoryEntities = await _supervisorMobilityRepository.GetChecklistCategoriesForUpdateSequenceAsync(
-                       checklistCategory.Sequence, checklistCategoryEntity.Sequence, checklistCategoryId);
-            foreach (var checklistCategoryEntityForUpdate in checklistCategoryEntities)
-            {
-                currentSequence += 1;
-                checklistCategoryEntityForUpdate.Sequence = currentSequence;
-            }
-
-            _mapper.Map(checklistCategory, checklistCategoryEntity);
-            await _supervisorMobilityRepository.SaveChangesAsync();
+            await _checklistCategoryService
+                .UpdateChecklistCategoriesSequenceAsync(checklistCategory, checklistCategoryEntity);
 
             return NoContent();
 

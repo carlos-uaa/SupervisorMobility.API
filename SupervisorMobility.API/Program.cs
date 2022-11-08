@@ -1,5 +1,6 @@
 using Microsoft.EntityFrameworkCore;
 using Serilog;
+using SupervisorMobility.API.Business;
 using SupervisorMobility.API.Context;
 using SupervisorMobility.API.Services;
 
@@ -31,6 +32,7 @@ builder.Services.AddDbContext<SupervisorMobilityContext>(
         builder.Configuration["ConnectionStrings:SupervisorMobilityDBConnectionString"]));
 
 builder.Services.AddScoped<ISupervisorMobilityRepository, SupervisorMobilityRepository>();
+builder.Services.AddScoped<IChecklistCategoryService, ChecklistCategoryService>();
 
 builder.Services.AddAutoMapper(AppDomain.CurrentDomain.GetAssemblies());
 
