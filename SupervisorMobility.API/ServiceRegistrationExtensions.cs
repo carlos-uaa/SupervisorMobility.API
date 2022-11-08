@@ -11,6 +11,7 @@ namespace SupervisorMobility.API
            this IServiceCollection services)
         {
             services.AddScoped<IChecklistCategoryService, ChecklistCategoryService>();
+            services.AddScoped<ISupportDocumentTypeService, SupportDocumentTypeService>();
             return services;
         }
 

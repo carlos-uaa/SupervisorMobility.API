@@ -16,6 +16,7 @@ namespace SupervisorMobility.API.Context
         public DbSet<Plant> Plants { get; set; }
         public DbSet<Area> Areas { get; set; }
         public DbSet<Operation> Operations { get; set; }
+        public DbSet<SupportDocumentType> SupportDocumentTypes { get; set; }
         #endregion
 
         public SupervisorMobilityContext(DbContextOptions<SupervisorMobilityContext> options)
@@ -52,6 +53,10 @@ namespace SupervisorMobility.API.Context
                 .HasDefaultValue(true);
 
             modelBuilder.Entity<Operation>()
+                .Property(p => p.IsActive)
+                .HasDefaultValue(true);
+
+            modelBuilder.Entity<SupportDocumentType>()
                 .Property(p => p.IsActive)
                 .HasDefaultValue(true);
 
@@ -237,6 +242,21 @@ namespace SupervisorMobility.API.Context
                     OperationId = 1,
                     IsActive = true,
                     AreaId = 1
+                });
+
+            modelBuilder.Entity<SupportDocumentType>()
+                .HasData(
+                new SupportDocumentType("GOS", "GOS")
+                {
+                    SupportDocumentTypeId = 1,
+                    IsActive = true
+                });
+            modelBuilder.Entity<SupportDocumentType>()
+                .HasData(
+                new SupportDocumentType("HOE", "HOE")
+                {
+                    SupportDocumentTypeId = 2,
+                    IsActive = true
                 });
 
             base.OnModelCreating(modelBuilder);

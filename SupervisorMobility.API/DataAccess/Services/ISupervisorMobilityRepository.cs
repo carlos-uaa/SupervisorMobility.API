@@ -74,6 +74,13 @@ namespace SupervisorMobility.API.Services
         Task AddJobOperationConfigForJobOperationTypeAsync(int jobObservationTypeId, JobObservationConfig jobObservationConfig);
         void DeleteJobOperationConfig(JobObservationConfig jobObservationConfig);
         #endregion
+        #region SupportDocumentTypeOperations
+        Task<IEnumerable<SupportDocumentType>> GetSupportDocumentTypesAsync();
+        Task<SupportDocumentType?> GetSupportDocumentTypeAsync(int supportDocumentTypeId);
+        Task<bool> SupportDocumentTypeExistAsync(int supportDocumentTypeId);
+        void AddSupportDocumentType(SupportDocumentType supportDocumentType);
+        void DeleteSupportDocumentType(SupportDocumentType supportDocumentType);
+        #endregion
         #region CommonOperations
 
         Task<bool> SaveChangesAsync();

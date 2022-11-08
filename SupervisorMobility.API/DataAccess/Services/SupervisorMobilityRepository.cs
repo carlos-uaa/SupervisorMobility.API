@@ -316,6 +316,33 @@ namespace SupervisorMobility.API.Services
             _context.JobObservationConfigs.Remove(jobObservationConfig);
         }
         #endregion
+        #region SupportDocumentTypeOperations
+        public async Task<IEnumerable<SupportDocumentType>> GetSupportDocumentTypesAsync()
+        {
+            return await _context.SupportDocumentTypes
+                .OrderBy(c => c.SupportDocumentTypeId).ToListAsync();
+        }
+
+        public async Task<SupportDocumentType?> GetSupportDocumentTypeAsync(int supportDocumentTypeId)
+        {
+            return await _context.SupportDocumentTypes
+                .Where(p => p.SupportDocumentTypeId == supportDocumentTypeId).FirstOrDefaultAsync();
+        }
+        public async Task<bool> SupportDocumentTypeExistAsync(int supportDocumentTypeId)
+        {
+            return await _context.SupportDocumentTypes.AnyAsync(p => p.SupportDocumentTypeId == supportDocumentTypeId);
+        }
+
+        public void AddSupportDocumentType(SupportDocumentType supportDocumentType)
+        {
+            _context.SupportDocumentTypes.Add(supportDocumentType);
+        }
+
+        public void DeleteSupportDocumentType(SupportDocumentType supportDocumentType)
+        {
+            _context.SupportDocumentTypes.Remove(supportDocumentType);
+        }
+        #endregion
         #region CommonOperations
         public async Task<bool> SaveChangesAsync()
         {
