@@ -20,8 +20,8 @@ namespace SupervisorMobility.API.DataAccess.Entities
         public int PlantId { get; set; }
         public Plant? Plant { get; set; }
 
-        public ICollection<Operation> Operations { get; set; }
-            = new List<Operation>();
+        public ICollection<Distribution> Distributions { get; set; }
+            = new List<Distribution>();
 
         public Area(string code, string description)
         {

@@ -168,7 +168,7 @@ namespace SupervisorMobility.API.Services
         {
             if (includeOperations)
             {
-                return await _context.Areas.Include( a => a.Operations)
+                return await _context.Areas.Include( a => a.Distributions)
                 .Where(a => a.PlantId == plantId && a.AreaId == areaId)
                 .FirstOrDefaultAsync();
             }
@@ -193,29 +193,29 @@ namespace SupervisorMobility.API.Services
             _context.Areas.Remove(area);
         }
         #endregion
-        #region OperationOperations
-        public async Task<IEnumerable<Operation>> GetOperationsForAreaAsync(int areaId)
+        #region DistributionOperations
+        public async Task<IEnumerable<Distribution>> GetDistributionsForAreaAsync(int areaId)
         {
-            return await _context.Operations
+            return await _context.Distributions
                 .Where(o => o.AreaId == areaId).ToListAsync();
         }
-        public async Task<Operation?> GetOperationForAreaAsync(int areaId, int operationId)
+        public async Task<Distribution?> GetDistributionForAreaAsync(int areaId, int distributionId)
         {
-            return await _context.Operations
-                .Where(o => o.AreaId == areaId && o.OperationId == operationId)
+            return await _context.Distributions
+                .Where(o => o.AreaId == areaId && o.DistributionId == distributionId)
                 .FirstOrDefaultAsync();
         }
-        public async Task AddOperationForPlantAsync(int plantId, int areaId, Operation operation)
+        public async Task AddDistributionForPlantAsync(int plantId, int areaId, Distribution distribution)
         {
             var area = await GetAreaForPlantAsync(plantId, areaId);
             if (area != null)
             {
-                area.Operations.Add(operation);
+                area.Distributions.Add(distribution);
             }
         }
-        public void DeleteOperation(Operation operation)
+        public void DeleteDistribution(Distribution distribution)
         {
-            _context.Operations.Remove(operation);
+            _context.Distributions.Remove(distribution);
         }
         #endregion
         #region QuestionTypeOperations

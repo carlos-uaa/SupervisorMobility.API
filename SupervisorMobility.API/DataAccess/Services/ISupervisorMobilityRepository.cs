@@ -46,11 +46,11 @@ namespace SupervisorMobility.API.Services
         Task AddAreaForPlantAsync(int plantId, Area area);
         void DeleteArea(Area area);
         #endregion
-        #region OperationOperations
-        Task<IEnumerable<Operation>> GetOperationsForAreaAsync(int areaId);
-        Task<Operation?> GetOperationForAreaAsync(int areaId, int operationId);
-        Task AddOperationForPlantAsync(int plantId, int areaId, Operation operation);
-        void DeleteOperation (Operation operation);
+        #region DistributionOperations
+        Task<IEnumerable<Distribution>> GetDistributionsForAreaAsync(int areaId);
+        Task<Distribution?> GetDistributionForAreaAsync(int areaId, int distributionId);
+        Task AddDistributionForPlantAsync(int plantId, int areaId, Distribution distribution);
+        void DeleteDistribution (Distribution distribution);
         #endregion
         #region QuestionTypeOperations
         Task<IEnumerable<QuestionType>> GetQuestionTypesAsync();

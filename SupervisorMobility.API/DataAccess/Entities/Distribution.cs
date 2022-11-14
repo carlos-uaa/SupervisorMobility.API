@@ -4,10 +4,10 @@ using System.ComponentModel.DataAnnotations;
 
 namespace SupervisorMobility.API.DataAccess.Entities
 {
-    public class Operation
+    public class Distribution
     {
         [Key, DatabaseGenerated(DatabaseGeneratedOption.Identity)]
-        public int OperationId { get; set; }
+        public int DistributionId { get; set; }
         [Required]
         [MaxLength(50)]
         public string Code { get; set; }
@@ -20,7 +20,7 @@ namespace SupervisorMobility.API.DataAccess.Entities
         public int AreaId { get; set; }
         public Area? Area { get; set; }
 
-        public Operation(string code, string description)
+        public Distribution(string code, string description)
         {
             Code = code;
             Description = description;

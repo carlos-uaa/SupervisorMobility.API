@@ -173,7 +173,7 @@
 						"method": "DELETE",
 						"header": [],
 						"url": {
-							"raw": "https://localhost:{{portNumber}}/api/checklistcategories/10",
+							"raw": "https://localhost:{{portNumber}}/api/checklistcategories/7",
 							"protocol": "https",
 							"host": [
 								"localhost"
@@ -182,7 +182,7 @@
 							"path": [
 								"api",
 								"checklistcategories",
-								"10"
+								"7"
 							]
 						}
 					},
@@ -195,7 +195,7 @@
 						"header": [],
 						"body": {
 							"mode": "raw",
-							"raw": "{\r\n    \"Sequence\": 14\r\n}",
+							"raw": "{\r\n    \"Sequence\": 2\r\n}",
 							"options": {
 								"raw": {
 									"language": "json"
@@ -203,7 +203,7 @@
 							}
 						},
 						"url": {
-							"raw": "https://localhost:{{portNumber}}/api/checklistcategories/sequence/15",
+							"raw": "https://localhost:{{portNumber}}/api/checklistcategories/sequence/7",
 							"protocol": "https",
 							"host": [
 								"localhost"
@@ -213,7 +213,7 @@
 								"api",
 								"checklistcategories",
 								"sequence",
-								"15"
+								"7"
 							]
 						}
 					},
@@ -1157,7 +1157,7 @@
 						"method": "GET",
 						"header": [],
 						"url": {
-							"raw": "https://localhost:{{portNumber}}/api/plants",
+							"raw": "https://localhost:{{portNumber}}/api/supportdocumenttypes/",
 							"protocol": "https",
 							"host": [
 								"localhost"
@@ -1165,7 +1165,8 @@
 							"port": "{{portNumber}}",
 							"path": [
 								"api",
-								"plants"
+								"supportdocumenttypes",
+								""
 							]
 						}
 					},
@@ -1177,7 +1178,7 @@
 						"method": "GET",
 						"header": [],
 						"url": {
-							"raw": "https://localhost:{{portNumber}}/api/plants/3",
+							"raw": "https://localhost:{{portNumber}}/api/supportdocumenttypes/4",
 							"protocol": "https",
 							"host": [
 								"localhost"
@@ -1185,8 +1186,8 @@
 							"port": "{{portNumber}}",
 							"path": [
 								"api",
-								"plants",
-								"3"
+								"supportdocumenttypes",
+								"4"
 							]
 						}
 					},
@@ -1199,7 +1200,7 @@
 						"header": [],
 						"body": {
 							"mode": "raw",
-							"raw": "{\r\n    \"code\": \"BodBiWy\",\r\n    \"description\": \"Body\",\r\n    \"isActive\": true\r\n}",
+							"raw": "{\r\n    \"code\": \"CCPDelete\",\r\n    \"description\": \"CCP\",\r\n    \"isActive\": true\r\n}",
 							"options": {
 								"raw": {
 									"language": "json"
@@ -1207,7 +1208,7 @@
 							}
 						},
 						"url": {
-							"raw": "https://localhost:{{portNumber}}/api/plants/",
+							"raw": "https://localhost:{{portNumber}}/api/supportdocumenttypes/",
 							"protocol": "https",
 							"host": [
 								"localhost"
@@ -1215,7 +1216,7 @@
 							"port": "{{portNumber}}",
 							"path": [
 								"api",
-								"plants",
+								"supportdocumenttypes",
 								""
 							]
 						}
@@ -1229,7 +1230,7 @@
 						"header": [],
 						"body": {
 							"mode": "raw",
-							"raw": "{\r\n    \"code\": \"BiW\",\r\n    \"description\": \"Body\",\r\n    \"isActive\": true\r\n}",
+							"raw": "{\r\n    \"code\": \"CCPDelete - Update2\",\r\n    \"description\": \"CCP - Update\",\r\n    \"isActive\": false\r\n}",
 							"options": {
 								"raw": {
 									"language": "json"
@@ -1237,7 +1238,7 @@
 							}
 						},
 						"url": {
-							"raw": "https://localhost:{{portNumber}}/api/plants/3",
+							"raw": "https://localhost:{{portNumber}}/api/supportdocumenttypes/4",
 							"protocol": "https",
 							"host": [
 								"localhost"
@@ -1245,8 +1246,8 @@
 							"port": "{{portNumber}}",
 							"path": [
 								"api",
-								"plants",
-								"3"
+								"supportdocumenttypes",
+								"4"
 							]
 						}
 					},
@@ -1267,7 +1268,7 @@
 							}
 						},
 						"url": {
-							"raw": "https://localhost:{{portNumber}}/api/plants/4",
+							"raw": "https://localhost:{{portNumber}}/api/supportdocumenttypes/4",
 							"protocol": "https",
 							"host": [
 								"localhost"
@@ -1275,7 +1276,7 @@
 							"port": "{{portNumber}}",
 							"path": [
 								"api",
-								"plants",
+								"supportdocumenttypes",
 								"4"
 							]
 						}
@@ -1288,7 +1289,7 @@
 						"method": "DELETE",
 						"header": [],
 						"url": {
-							"raw": "https://localhost:{{portNumber}}/api/plants/4",
+							"raw": "https://localhost:{{portNumber}}/api/supportdocumenttypes/4",
 							"protocol": "https",
 							"host": [
 								"localhost"
@@ -1296,7 +1297,7 @@
 							"port": "{{portNumber}}",
 							"path": [
 								"api",
-								"plants",
+								"supportdocumenttypes",
 								"4"
 							]
 						}
@@ -1495,6 +1496,186 @@
 								"2",
 								"areas",
 								"4"
+							]
+						}
+					},
+					"response": []
+				}
+			]
+		},
+		{
+			"name": "Distribution Operations",
+			"item": [
+				{
+					"name": "Get All Distributions",
+					"request": {
+						"method": "GET",
+						"header": [],
+						"url": {
+							"raw": "https://localhost:{{portNumber}}/api/plants/1/areas/1/Distributions",
+							"protocol": "https",
+							"host": [
+								"localhost"
+							],
+							"port": "{{portNumber}}",
+							"path": [
+								"api",
+								"plants",
+								"1",
+								"areas",
+								"1",
+								"Distributions"
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "Get Distribution",
+					"request": {
+						"method": "GET",
+						"header": [],
+						"url": {
+							"raw": "https://localhost:{{portNumber}}/api/plants/1/areas/1/Distributions/1",
+							"protocol": "https",
+							"host": [
+								"localhost"
+							],
+							"port": "{{portNumber}}",
+							"path": [
+								"api",
+								"plants",
+								"1",
+								"areas",
+								"1",
+								"Distributions",
+								"1"
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "Post a Distribution",
+					"request": {
+						"method": "POST",
+						"header": [],
+						"body": {
+							"mode": "raw",
+							"raw": "{\r\n    \"code\": \"Dist2\",\r\n    \"description\": \"Distribucion 2 - Trim 1\",\r\n    \"isActive\": true\r\n}",
+							"options": {
+								"raw": {
+									"language": "json"
+								}
+							}
+						},
+						"url": {
+							"raw": "https://localhost:{{portNumber}}/api/plants/1/areas/1/Distributions",
+							"protocol": "https",
+							"host": [
+								"localhost"
+							],
+							"port": "{{portNumber}}",
+							"path": [
+								"api",
+								"plants",
+								"1",
+								"areas",
+								"1",
+								"Distributions"
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "Put Distribution",
+					"request": {
+						"method": "PUT",
+						"header": [],
+						"body": {
+							"mode": "raw",
+							"raw": "{\r\n    \"code\": \"Dist3\",\r\n    \"description\": \"Distribucion 3 Trim 1\",\r\n    \"isActive\": true\r\n}",
+							"options": {
+								"raw": {
+									"language": "json"
+								}
+							}
+						},
+						"url": {
+							"raw": "https://localhost:{{portNumber}}/api/plants/1/areas/1/Distributions/3",
+							"protocol": "https",
+							"host": [
+								"localhost"
+							],
+							"port": "{{portNumber}}",
+							"path": [
+								"api",
+								"plants",
+								"1",
+								"areas",
+								"1",
+								"Distributions",
+								"3"
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "Patch Distribution",
+					"request": {
+						"method": "PATCH",
+						"header": [],
+						"body": {
+							"mode": "raw",
+							"raw": "[\r\n    {\r\n      \"op\": \"replace\",\r\n      \"path\": \"/description\",\r\n      \"value\": \"Distribucion 3 - Trim 1\"\r\n    },\r\n    {\r\n      \"op\": \"replace\",\r\n      \"path\": \"/isActive\",\r\n      \"value\": \"false\"\r\n    }\r\n]",
+							"options": {
+								"raw": {
+									"language": "json"
+								}
+							}
+						},
+						"url": {
+							"raw": "https://localhost:{{portNumber}}/api/plants/1/areas/1/Distributions/3",
+							"protocol": "https",
+							"host": [
+								"localhost"
+							],
+							"port": "{{portNumber}}",
+							"path": [
+								"api",
+								"plants",
+								"1",
+								"areas",
+								"1",
+								"Distributions",
+								"3"
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "Delete Distribution",
+					"request": {
+						"method": "DELETE",
+						"header": [],
+						"url": {
+							"raw": "https://localhost:{{portNumber}}/api/plants/1/areas/1/Distributions/3",
+							"protocol": "https",
+							"host": [
+								"localhost"
+							],
+							"port": "{{portNumber}}",
+							"path": [
+								"api",
+								"plants",
+								"1",
+								"areas",
+								"1",
+								"Distributions",
+								"3"
 							]
 						}
 					},

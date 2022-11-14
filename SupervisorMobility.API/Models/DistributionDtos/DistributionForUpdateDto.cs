@@ -2,7 +2,7 @@
 
 namespace SupervisorMobility.API.Models.OperationDtos
 {
-    public class OperationForCreationDto
+    public class DistributionForUpdateDto
     {
         [Required]
         [MaxLength(50)]

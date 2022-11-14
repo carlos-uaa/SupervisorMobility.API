@@ -8,14 +8,14 @@ using SupervisorMobility.API.Services;
 
 namespace SupervisorMobility.API.Controllers
 {
-    [Route("api/plants/{plantId}/areas/{areaId}/operations")]
+    [Route("api/plants/{plantId}/areas/{areaId}/distributions")]
     [ApiController]
-    public class OperationsController :  ControllerBase
+    public class DistributionsController :  ControllerBase
     {
         private readonly IMapper _mapper;
         private readonly ISupervisorMobilityRepository _supervisorMobilityRepository;
 
-        public OperationsController(ISupervisorMobilityRepository supervisorMobilityRepository,
+        public DistributionsController(ISupervisorMobilityRepository supervisorMobilityRepository,
             IMapper mapper)
         {
             _supervisorMobilityRepository = supervisorMobilityRepository ??
@@ -25,7 +25,7 @@ namespace SupervisorMobility.API.Controllers
         }
 
         [HttpGet]
-        public async Task<ActionResult<IEnumerable<OperationWithoutNavigationPropertiesDto>>> GetOperations(
+        public async Task<ActionResult<IEnumerable<DistributionWithoutNavigationPropertiesDto>>> GetDistributions(
                     int plantId, int areaId)
         {
             if (!await _supervisorMobilityRepository.PlantExistAsync(plantId))
@@ -39,14 +39,14 @@ namespace SupervisorMobility.API.Controllers
             }
 
             var areasForPlant = await _supervisorMobilityRepository
-                .GetOperationsForAreaAsync(areaId);
+                .GetDistributionsForAreaAsync(areaId);
 
-            return Ok(_mapper.Map<IEnumerable<OperationWithoutNavigationPropertiesDto>>(areasForPlant));
+            return Ok(_mapper.Map<IEnumerable<DistributionWithoutNavigationPropertiesDto>>(areasForPlant));
         }
 
-        [HttpGet("{operationId}", Name = "GetOperation")]
-        public async Task<ActionResult<OperationWithoutNavigationPropertiesDto>> GetOperation(
-           int plantId, int areaId, int operationId)
+        [HttpGet("{distributionId}", Name = "GetDistribution")]
+        public async Task<ActionResult<DistributionWithoutNavigationPropertiesDto>> GetDistribution(
+           int plantId, int areaId, int distributionId)
         {
             if (!await _supervisorMobilityRepository.PlantExistAsync(plantId))
             {
@@ -58,22 +58,22 @@ namespace SupervisorMobility.API.Controllers
                 return NotFound();
             }
 
-            var operation = await _supervisorMobilityRepository
-                .GetOperationForAreaAsync(areaId, operationId);
+            var distribution = await _supervisorMobilityRepository
+                .GetDistributionForAreaAsync(areaId, distributionId);
 
-            if (operation == null)
+            if (distribution == null)
             {
                 return NotFound();
             }
 
-            return Ok(_mapper.Map<OperationWithoutNavigationPropertiesDto>(operation));
+            return Ok(_mapper.Map<DistributionWithoutNavigationPropertiesDto>(distribution));
         }
 
         [HttpPost]
-        public async Task<ActionResult<OperationWithoutNavigationPropertiesDto>> CreateOperation(
+        public async Task<ActionResult<DistributionWithoutNavigationPropertiesDto>> CreateDistribution(
             int plantId,
             int areaId,
-            OperationForCreationDto operation)
+            DistributionForCreationDto distribution)
         {
             if (!await _supervisorMobilityRepository.PlantExistAsync(plantId))
             {
@@ -85,30 +85,30 @@ namespace SupervisorMobility.API.Controllers
                 return NotFound();
             }
 
-            var finalOperation = _mapper.Map<Operation>(operation);
+            var finalDistribution = _mapper.Map<Distribution>(distribution);
 
-            await _supervisorMobilityRepository.AddOperationForPlantAsync(plantId,
-                areaId, finalOperation);
+            await _supervisorMobilityRepository.AddDistributionForPlantAsync(plantId,
+                areaId, finalDistribution);
 
             await _supervisorMobilityRepository.SaveChangesAsync();
 
-            var createdOperationToReturn =
-                _mapper.Map<OperationWithoutNavigationPropertiesDto>(finalOperation);
+            var createdDistributionToReturn =
+                _mapper.Map<DistributionWithoutNavigationPropertiesDto>(finalDistribution);
 
-            return CreatedAtRoute("GetOperation",
+            return CreatedAtRoute("GetDistribution",
                 new
                 {
                     plantId,
                     areaId,
-                    operationId = createdOperationToReturn.OperationId
+                    distributionId = createdDistributionToReturn.DistributionId
                 },
-                createdOperationToReturn);
+                createdDistributionToReturn);
         }
 
-        [HttpPut("{operationid}")]
-        public async Task<ActionResult> UpdateOperation(int plantId, int areaId,
-            int operationId,
-            OperationForUpdateDto operation)
+        [HttpPut("{distributionid}")]
+        public async Task<ActionResult> UpdateDistribution(int plantId, int areaId,
+            int distributionId,
+            DistributionForUpdateDto distribution)
         {
             if (!await _supervisorMobilityRepository.PlantExistAsync(plantId))
             {
@@ -120,24 +120,24 @@ namespace SupervisorMobility.API.Controllers
                 return NotFound();
             }
 
-            var operationEntity = await _supervisorMobilityRepository
-                .GetOperationForAreaAsync(areaId, operationId);
-            if (operationEntity == null)
+            var distributionEntity = await _supervisorMobilityRepository
+                .GetDistributionForAreaAsync(areaId, distributionId);
+            if (distributionEntity == null)
             {
                 return NotFound();
             }
 
-            _mapper.Map(operation, operationEntity);
+            _mapper.Map(distribution, distributionEntity);
 
             await _supervisorMobilityRepository.SaveChangesAsync();
 
             return NoContent();
         }
 
-        [HttpPatch("{operationid}")]
-        public async Task<ActionResult> PartiallyUpdateOperation(
-            int plantId, int areaId, int operationId,
-            JsonPatchDocument<OperationForUpdateDto> patchDocumentOperation)
+        [HttpPatch("{distributionid}")]
+        public async Task<ActionResult> PartiallyUpdateDistribution(
+            int plantId, int areaId, int distributionId,
+            JsonPatchDocument<DistributionForUpdateDto> patchDocumentDistribution)
         {
             if (!await _supervisorMobilityRepository.PlantExistAsync(plantId))
             {
@@ -149,36 +149,36 @@ namespace SupervisorMobility.API.Controllers
                 return NotFound();
             }
 
-            var operationEntity = await _supervisorMobilityRepository
-                .GetOperationForAreaAsync(areaId, operationId);
-            if (operationEntity == null)
+            var distributionEntity = await _supervisorMobilityRepository
+                .GetDistributionForAreaAsync(areaId, distributionId);
+            if (distributionEntity == null)
             {
                 return NotFound();
             }
 
-            var operationToPatch = _mapper.Map<OperationForUpdateDto>(operationEntity);
+            var distributionToPatch = _mapper.Map<DistributionForUpdateDto>(distributionEntity);
 
-            patchDocumentOperation.ApplyTo(operationToPatch, ModelState);
+            patchDocumentDistribution.ApplyTo(distributionToPatch, ModelState);
 
             if (!ModelState.IsValid)
             {
                 return BadRequest(ModelState);
             }
 
-            if (!TryValidateModel(operationToPatch))
+            if (!TryValidateModel(distributionToPatch))
             {
                 return BadRequest(ModelState);
             }
 
-            _mapper.Map(operationToPatch, operationEntity);
+            _mapper.Map(distributionToPatch, distributionEntity);
 
             await _supervisorMobilityRepository.SaveChangesAsync();
 
             return NoContent();
         }
 
-        [HttpDelete("{operationId}")]
-        public async Task<ActionResult> DeleteOperation(int plantId, int areaId, int operationId)
+        [HttpDelete("{distributionId}")]
+        public async Task<ActionResult> DeleteDistribution(int plantId, int areaId, int distributionId)
         {
             if (!await _supervisorMobilityRepository.PlantExistAsync(plantId))
             {
@@ -190,14 +190,14 @@ namespace SupervisorMobility.API.Controllers
                 return NotFound();
             }
 
-            var operationEntity = await _supervisorMobilityRepository
-                .GetOperationForAreaAsync(areaId, operationId);
-            if (operationEntity == null)
+            var distributionEntity = await _supervisorMobilityRepository
+                .GetDistributionForAreaAsync(areaId, distributionId);
+            if (distributionEntity == null)
             {
                 return NotFound();
             }
 
-            _supervisorMobilityRepository.DeleteOperation(operationEntity);
+            _supervisorMobilityRepository.DeleteDistribution(distributionEntity);
             await _supervisorMobilityRepository.SaveChangesAsync();
 
             return NoContent();
