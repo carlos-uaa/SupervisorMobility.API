@@ -112,6 +112,7 @@ namespace SupervisorMobility.API.Controllers
                 {
                     plantId,
                     areaId,
+                    distributionId,
                     operationId = createdOperationToReturn.OperationId
                 },
                 createdOperationToReturn);
