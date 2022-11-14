@@ -1,6 +1,7 @@
 ﻿using AutoMapper;
 using SupervisorMobility.API.DataAccess.Entities;
 using SupervisorMobility.API.Models.OperationDtos;
+using SupervisorMobility.API.Models.ProductDtos;
 using SupervisorMobility.API.Models.SupportDocumentTypeDtos;
 using SupervisorMobility.API.Services;
 
@@ -36,7 +37,16 @@ namespace SupervisorMobility.API.Business
         {
             await _repository.AddOperationForDistributionAsync(areaId, distributionId, operation);
             await _repository.SaveChangesAsync();
-            return (operation);
+            return operation;
+
+        }
+
+        public async Task<Product> CreateProductAsync(ProductForCreationDto product)
+        {
+            var productEntity = _mapper.Map<Product>(product);
+            _repository.AddProduct(productEntity);
+            await _repository.SaveChangesAsync();
+            return productEntity;
 
         }
 
@@ -57,6 +67,16 @@ namespace SupervisorMobility.API.Business
             return await _repository.GetOperationsForDistributionAsync(distributionId);
         }
 
+        public async Task<Product?> FetchProductAsync(int productId)
+        {
+            return await _repository.GetProductAsync(productId);
+        }
+
+        public async Task<IEnumerable<Product>> FetchProductsAsync()
+        {
+            return await _repository.GetProductsAsync();
+        }
+
         public async Task<SupportDocumentType?> FetchSupportDocumentTypeAsync(int supportDocumentTypeId)
         {
             return await _repository
@@ -74,6 +94,12 @@ namespace SupervisorMobility.API.Business
             await _repository.SaveChangesAsync();
         }
 
+        public async Task RemoveProductAsync(Product product)
+        {
+            _repository.DeleteProduct(product);
+            await _repository.SaveChangesAsync();
+        }
+
         public async Task RemoveSupportDocumentTypeAsync(SupportDocumentType supportDocumentType)
         {
             _repository.DeleteSupportDocumentType(supportDocumentType);
@@ -85,6 +111,12 @@ namespace SupervisorMobility.API.Business
             Operation operation)
         {
             _mapper.Map(operationForUpdate, operation);
+            await _repository.SaveChangesAsync();
+        }
+
+        public async Task UpdateProductAsync(ProductForUpdateDto productForUpdate, Product product)
+        {
+            _mapper.Map(productForUpdate, product);
             await _repository.SaveChangesAsync();
         }
 

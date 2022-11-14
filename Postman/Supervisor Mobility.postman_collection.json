@@ -1692,7 +1692,7 @@
 						"method": "GET",
 						"header": [],
 						"url": {
-							"raw": "https://localhost:{{portNumber}}/api/plants/1/areas/2/Operations",
+							"raw": "https://localhost:{{portNumber}}/api/plants/1/areas/1/distributions/1/operations",
 							"protocol": "https",
 							"host": [
 								"localhost"
@@ -1703,8 +1703,10 @@
 								"plants",
 								"1",
 								"areas",
-								"2",
-								"Operations"
+								"1",
+								"distributions",
+								"1",
+								"operations"
 							]
 						}
 					},
@@ -1716,7 +1718,7 @@
 						"method": "GET",
 						"header": [],
 						"url": {
-							"raw": "https://localhost:{{portNumber}}/api/plants/1/areas/1/Operations/1",
+							"raw": "https://localhost:{{portNumber}}/api/plants/1/areas/1/distributions/1/operations/3",
 							"protocol": "https",
 							"host": [
 								"localhost"
@@ -1728,8 +1730,10 @@
 								"1",
 								"areas",
 								"1",
-								"Operations",
-								"1"
+								"distributions",
+								"1",
+								"operations",
+								"3"
 							]
 						}
 					},
@@ -1742,7 +1746,7 @@
 						"header": [],
 						"body": {
 							"mode": "raw",
-							"raw": "{\r\n    \"code\": \"OP2\",\r\n    \"description\": \"Operacion Trim 2 - Dummy\",\r\n    \"isActive\": true\r\n}",
+							"raw": "{\r\n    \"code\": \"OP3\",\r\n    \"description\": \"Operacion Trim 3 - Dummy\",\r\n    \"isActive\": true\r\n}",
 							"options": {
 								"raw": {
 									"language": "json"
@@ -1750,7 +1754,7 @@
 							}
 						},
 						"url": {
-							"raw": "https://localhost:{{portNumber}}/api/plants/1/areas/2/Operations",
+							"raw": "https://localhost:{{portNumber}}/api/plants/1/areas/1/distributions/1/operations",
 							"protocol": "https",
 							"host": [
 								"localhost"
@@ -1761,8 +1765,10 @@
 								"plants",
 								"1",
 								"areas",
-								"2",
-								"Operations"
+								"1",
+								"distributions",
+								"1",
+								"operations"
 							]
 						}
 					},
@@ -1775,7 +1781,7 @@
 						"header": [],
 						"body": {
 							"mode": "raw",
-							"raw": "{\r\n    \"code\": \"OP7\",\r\n    \"description\": \"Operacion 3 Trim 2\",\r\n    \"isActive\": true\r\n}",
+							"raw": "{\r\n    \"code\": \"OP2\",\r\n    \"description\": \"Operacion 2 Trim 1\",\r\n    \"isActive\": false\r\n}",
 							"options": {
 								"raw": {
 									"language": "json"
@@ -1783,7 +1789,7 @@
 							}
 						},
 						"url": {
-							"raw": "https://localhost:{{portNumber}}/api/plants/1/areas/2/Operations/7",
+							"raw": "https://localhost:{{portNumber}}/api/plants/1/areas/1/distributions/1/operations/2",
 							"protocol": "https",
 							"host": [
 								"localhost"
@@ -1794,9 +1800,11 @@
 								"plants",
 								"1",
 								"areas",
-								"2",
-								"Operations",
-								"7"
+								"1",
+								"distributions",
+								"1",
+								"operations",
+								"2"
 							]
 						}
 					},
@@ -1809,7 +1817,7 @@
 						"header": [],
 						"body": {
 							"mode": "raw",
-							"raw": "[\r\n    {\r\n      \"op\": \"replace\",\r\n      \"path\": \"/description\",\r\n      \"value\": \"Operacion 1 Trim 1\"\r\n    }\r\n]",
+							"raw": "[\r\n    {\r\n      \"op\": \"replace\",\r\n      \"path\": \"/description\",\r\n      \"value\": \"future delete\"\r\n    }\r\n]",
 							"options": {
 								"raw": {
 									"language": "json"
@@ -1817,7 +1825,7 @@
 							}
 						},
 						"url": {
-							"raw": "https://localhost:{{portNumber}}/api/plants/1/areas/1/Operations/1",
+							"raw": "https://localhost:{{portNumber}}/api/plants/1/areas/1/distributions/1/operations/3",
 							"protocol": "https",
 							"host": [
 								"localhost"
@@ -1829,8 +1837,10 @@
 								"1",
 								"areas",
 								"1",
-								"Operations",
-								"1"
+								"distributions",
+								"1",
+								"operations",
+								"3"
 							]
 						}
 					},
@@ -1842,7 +1852,7 @@
 						"method": "DELETE",
 						"header": [],
 						"url": {
-							"raw": "https://localhost:{{portNumber}}/api/plants/1/areas/2/Operations/8",
+							"raw": "https://localhost:{{portNumber}}/api/plants/1/areas/1/distributions/1/operations/3",
 							"protocol": "https",
 							"host": [
 								"localhost"
@@ -1853,9 +1863,168 @@
 								"plants",
 								"1",
 								"areas",
-								"2",
-								"Operations",
-								"8"
+								"1",
+								"distributions",
+								"1",
+								"operations",
+								"3"
+							]
+						}
+					},
+					"response": []
+				}
+			]
+		},
+		{
+			"name": "Product Operations",
+			"item": [
+				{
+					"name": "Get All Products",
+					"request": {
+						"method": "GET",
+						"header": [],
+						"url": {
+							"raw": "https://localhost:{{portNumber}}/api/products",
+							"protocol": "https",
+							"host": [
+								"localhost"
+							],
+							"port": "{{portNumber}}",
+							"path": [
+								"api",
+								"products"
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "Get Product",
+					"request": {
+						"method": "GET",
+						"header": [],
+						"url": {
+							"raw": "https://localhost:{{portNumber}}/api/products/4",
+							"protocol": "https",
+							"host": [
+								"localhost"
+							],
+							"port": "{{portNumber}}",
+							"path": [
+								"api",
+								"products",
+								"4"
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "Post a Product",
+					"request": {
+						"method": "POST",
+						"header": [],
+						"body": {
+							"mode": "raw",
+							"raw": "{\r\n    \"code\": \"N71A\",\r\n    \"description\": \"Infiniti QX55 - duplicated\",\r\n    \"isActive\": true\r\n}",
+							"options": {
+								"raw": {
+									"language": "json"
+								}
+							}
+						},
+						"url": {
+							"raw": "https://localhost:{{portNumber}}/api/products/",
+							"protocol": "https",
+							"host": [
+								"localhost"
+							],
+							"port": "{{portNumber}}",
+							"path": [
+								"api",
+								"products",
+								""
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "Put Product",
+					"request": {
+						"method": "PUT",
+						"header": [],
+						"body": {
+							"mode": "raw",
+							"raw": "{\r\n    \"code\": \"X247\",\r\n    \"description\": \"Mercedes GLB\",\r\n    \"isActive\": true\r\n}",
+							"options": {
+								"raw": {
+									"language": "json"
+								}
+							}
+						},
+						"url": {
+							"raw": "https://localhost:{{portNumber}}/api/products/7",
+							"protocol": "https",
+							"host": [
+								"localhost"
+							],
+							"port": "{{portNumber}}",
+							"path": [
+								"api",
+								"products",
+								"7"
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "Patch Product",
+					"request": {
+						"method": "PATCH",
+						"header": [],
+						"body": {
+							"mode": "raw",
+							"raw": "[\r\n    {\r\n      \"op\": \"replace\",\r\n      \"path\": \"/description\",\r\n      \"value\": \"Infiniti QX50\"\r\n    }\r\n]",
+							"options": {
+								"raw": {
+									"language": "json"
+								}
+							}
+						},
+						"url": {
+							"raw": "https://localhost:{{portNumber}}/api/products/1",
+							"protocol": "https",
+							"host": [
+								"localhost"
+							],
+							"port": "{{portNumber}}",
+							"path": [
+								"api",
+								"products",
+								"1"
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "Delete Product",
+					"request": {
+						"method": "DELETE",
+						"header": [],
+						"url": {
+							"raw": "https://localhost:{{portNumber}}/api/products/5",
+							"protocol": "https",
+							"host": [
+								"localhost"
+							],
+							"port": "{{portNumber}}",
+							"path": [
+								"api",
+								"products",
+								"5"
 							]
 						}
 					},

@@ -18,6 +18,7 @@ namespace SupervisorMobility.API.Context
         public DbSet<Distribution> Distributions { get; set; }
         public DbSet<Operation> Operations { get; set; }
         public DbSet<SupportDocumentType> SupportDocumentTypes { get; set; }
+        public DbSet<Product> Products { get; set; }
         #endregion
 
         public SupervisorMobilityContext(DbContextOptions<SupervisorMobilityContext> options)
@@ -62,6 +63,10 @@ namespace SupervisorMobility.API.Context
                 .HasDefaultValue(true);
 
             modelBuilder.Entity<SupportDocumentType>()
+                .Property(p => p.IsActive)
+                .HasDefaultValue(true);
+
+            modelBuilder.Entity<Product>()
                 .Property(p => p.IsActive)
                 .HasDefaultValue(true);
 
@@ -270,6 +275,22 @@ namespace SupervisorMobility.API.Context
                 new SupportDocumentType("HOE", "HOE")
                 {
                     SupportDocumentTypeId = 2,
+                    IsActive = true
+                });
+
+            modelBuilder.Entity<Product>()
+                .HasData(
+                new Product("P71A", "Infiniti P71A")
+                {
+                    ProductId = 1,
+                    IsActive = true
+                });
+
+            modelBuilder.Entity<Product>()
+                .HasData(
+                new Product("X247", "Mercedes X247")
+                {
+                    ProductId = 3,
                     IsActive = true
                 });
 

@@ -372,6 +372,33 @@ namespace SupervisorMobility.API.Services
             _context.SupportDocumentTypes.Remove(supportDocumentType);
         }
         #endregion
+        #region ProductOperations
+        public async Task<IEnumerable<Product>> GetProductsAsync()
+        {
+            return await _context.Products
+                .OrderBy(c => c.ProductId).ToListAsync();
+        }
+
+        public async Task<Product?> GetProductAsync(int productId)
+        {
+            return await _context.Products
+                .Where(p => p.ProductId == productId).FirstOrDefaultAsync();
+        }
+        public async Task<bool> ProductExistAsync(int productId)
+        {
+            return await _context.Products.AnyAsync(p => p.ProductId == productId);
+        }
+
+        public void AddProduct(Product product)
+        {
+            _context.Products.Add(product);
+        }
+
+        public void DeleteProduct(Product product)
+        {
+            _context.Products.Remove(product);
+        }
+        #endregion
         #region CommonOperations
         public async Task<bool> SaveChangesAsync()
         {

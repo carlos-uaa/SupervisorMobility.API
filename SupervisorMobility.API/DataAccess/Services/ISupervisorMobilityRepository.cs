@@ -88,6 +88,13 @@ namespace SupervisorMobility.API.Services
         void AddSupportDocumentType(SupportDocumentType supportDocumentType);
         void DeleteSupportDocumentType(SupportDocumentType supportDocumentType);
         #endregion
+        #region ProductOperations
+        Task<IEnumerable<Product>> GetProductsAsync();
+        Task<Product?> GetProductAsync(int productId);
+        Task<bool> ProductExistAsync(int productId);
+        void AddProduct(Product product);
+        void DeleteProduct(Product product);
+        #endregion
         #region CommonOperations
 
         Task<bool> SaveChangesAsync();
