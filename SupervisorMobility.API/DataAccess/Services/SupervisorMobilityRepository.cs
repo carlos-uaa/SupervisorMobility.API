@@ -213,9 +213,38 @@ namespace SupervisorMobility.API.Services
                 area.Distributions.Add(distribution);
             }
         }
+        public async Task<bool> DistributionExistsAsync(int distributionId)
+        {
+            return await _context.Distributions.AnyAsync(p => p.DistributionId == distributionId);
+        }
         public void DeleteDistribution(Distribution distribution)
         {
             _context.Distributions.Remove(distribution);
+        }
+        #endregion
+        #region OperationOperations
+        public async Task<IEnumerable<Operation>> GetOperationsForDistributionAsync(int distributionId)
+        {
+            return await _context.Operations
+                .Where(o => o.DistributionId == distributionId).ToListAsync();
+        }
+        public async Task<Operation?> GetOperationForDistributionAsync(int distributionId, int operationId)
+        {
+            return await _context.Operations
+                .Where(o => o.DistributionId == distributionId && o.OperationId == operationId)
+                .FirstOrDefaultAsync();
+        }
+        public async Task AddOperationForDistributionAsync(int areaId, int distributionId, Operation operation)
+        {
+            var distribution = await GetDistributionForAreaAsync(areaId, distributionId);
+            if (distribution != null)
+            {
+                distribution.Operations.Add(operation);
+            }
+        }
+        public void DeleteOperation(Operation operation)
+        {
+            _context.Operations.Remove(operation);
         }
         #endregion
         #region QuestionTypeOperations

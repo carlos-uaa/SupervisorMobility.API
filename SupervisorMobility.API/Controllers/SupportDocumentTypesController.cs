@@ -12,26 +12,26 @@ namespace SupervisorMobility.API.Controllers
     [ApiController]
     public class SupportDocumentTypesController : ControllerBase
     {
-        readonly ISupportDocumentTypeService _supportDocumentTypeService;
+        readonly IAssyChartService _assyChartService;
         readonly IMapper _mapper;
-        public SupportDocumentTypesController(ISupportDocumentTypeService supportDocumentTypeService,
+        public SupportDocumentTypesController(IAssyChartService assyChartService,
             IMapper mapper)
         {
-            _supportDocumentTypeService = supportDocumentTypeService;
+            _assyChartService = assyChartService;
             _mapper = mapper;
         }
 
         [HttpGet]
         public async Task<ActionResult<IEnumerable<SupportDocumentTypeDto>>> GetSupportDocumentTypes()
         {
-            var supportDocumentTypeEntities = await _supportDocumentTypeService.FetchSupportDocumentTypesAsync();
+            var supportDocumentTypeEntities = await _assyChartService.FetchSupportDocumentTypesAsync();
             return Ok(_mapper.Map<IEnumerable<SupportDocumentTypeDto>>(supportDocumentTypeEntities));
         }
 
         [HttpGet("{supportDocumentTypeId}", Name = "GetSupportDocumentType")]
         public async Task<IActionResult> GetSupportDocumentType(int supportDocumentTypeId)
         {
-            var supportDocumentType = await _supportDocumentTypeService
+            var supportDocumentType = await _assyChartService
                 .FetchSupportDocumentTypeAsync(supportDocumentTypeId);
             if (supportDocumentType == null)
             {
@@ -46,7 +46,7 @@ namespace SupervisorMobility.API.Controllers
             SupportDocumentTypeForCreationDto supportDocumentType)
         {
             //Mpa the object
-            var finalSupportDocumentType = await _supportDocumentTypeService
+            var finalSupportDocumentType = await _assyChartService
                 .CreateSupportDocumentTypeAsync(_mapper.Map<DataAccess.Entities.SupportDocumentType>(supportDocumentType));
 
             var createSupportDocumentTypeToReturn =
@@ -65,13 +65,13 @@ namespace SupervisorMobility.API.Controllers
         public async Task<ActionResult> UpdateSupportDocumentType(int supportDocumentTypeId,
             SupportDocumentTypeForUpdateDto supportDocumentType)
         {
-            var supportDocumentTypeEntity = await _supportDocumentTypeService.FetchSupportDocumentTypeAsync(supportDocumentTypeId);
+            var supportDocumentTypeEntity = await _assyChartService.FetchSupportDocumentTypeAsync(supportDocumentTypeId);
             if (supportDocumentTypeEntity == null)
             {
                 return NotFound($"No support document was found with id: {supportDocumentTypeId}");
             }
 
-            await _supportDocumentTypeService
+            await _assyChartService
                 .UpdateSupportDocumentTypeAsync(supportDocumentType, supportDocumentTypeEntity);
 
             return NoContent();
@@ -83,7 +83,7 @@ namespace SupervisorMobility.API.Controllers
             int supportDocumentTypeId,
             JsonPatchDocument<SupportDocumentTypeForUpdateDto> patchDocumentSupportDocumentType)
         {
-            var supportDocumentTypeEntity = await _supportDocumentTypeService.FetchSupportDocumentTypeAsync(supportDocumentTypeId);
+            var supportDocumentTypeEntity = await _assyChartService.FetchSupportDocumentTypeAsync(supportDocumentTypeId);
             if (supportDocumentTypeEntity == null)
             {
                 return NotFound();
@@ -103,7 +103,7 @@ namespace SupervisorMobility.API.Controllers
                 return BadRequest();
             }
 
-            await _supportDocumentTypeService
+            await _assyChartService
                 .UpdateSupportDocumentTypeAsync(supportDocumentTypeToPatch, supportDocumentTypeEntity);
 
             return NoContent();
@@ -112,13 +112,13 @@ namespace SupervisorMobility.API.Controllers
         [HttpDelete("{supportDocumentTypeId}")]
         public async Task<ActionResult> DeleteSupportDocumentType(int supportDocumentTypeId)
         {
-            var supportDocumentTypeEntity = await _supportDocumentTypeService.FetchSupportDocumentTypeAsync(supportDocumentTypeId);
+            var supportDocumentTypeEntity = await _assyChartService.FetchSupportDocumentTypeAsync(supportDocumentTypeId);
             if (supportDocumentTypeEntity == null)
             {
                 return NotFound();
             }
 
-            await _supportDocumentTypeService.RemoveSupportDocumentTypeAsync(supportDocumentTypeEntity);
+            await _assyChartService.RemoveSupportDocumentTypeAsync(supportDocumentTypeEntity);
 
             return NoContent();
         }

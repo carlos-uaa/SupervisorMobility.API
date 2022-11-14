@@ -16,6 +16,7 @@ namespace SupervisorMobility.API.Context
         public DbSet<Plant> Plants { get; set; }
         public DbSet<Area> Areas { get; set; }
         public DbSet<Distribution> Distributions { get; set; }
+        public DbSet<Operation> Operations { get; set; }
         public DbSet<SupportDocumentType> SupportDocumentTypes { get; set; }
         #endregion
 
@@ -53,6 +54,10 @@ namespace SupervisorMobility.API.Context
                 .HasDefaultValue(true);
 
             modelBuilder.Entity<Distribution>()
+                .Property(p => p.IsActive)
+                .HasDefaultValue(true);
+
+            modelBuilder.Entity<Operation>()
                 .Property(p => p.IsActive)
                 .HasDefaultValue(true);
 
@@ -242,6 +247,15 @@ namespace SupervisorMobility.API.Context
                     DistributionId = 1,
                     IsActive = true,
                     AreaId = 1
+                });
+
+            modelBuilder.Entity<Operation>()
+                .HasData(
+                new Operation("OP1", "Operacion Trim 1")
+                {
+                    OperationId = 1,
+                    IsActive = true,
+                    DistributionId = 1
                 });
 
             modelBuilder.Entity<SupportDocumentType>()

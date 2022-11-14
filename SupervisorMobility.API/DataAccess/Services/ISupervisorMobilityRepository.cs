@@ -50,7 +50,14 @@ namespace SupervisorMobility.API.Services
         Task<IEnumerable<Distribution>> GetDistributionsForAreaAsync(int areaId);
         Task<Distribution?> GetDistributionForAreaAsync(int areaId, int distributionId);
         Task AddDistributionForPlantAsync(int plantId, int areaId, Distribution distribution);
+        Task<bool> DistributionExistsAsync(int distributionId);
         void DeleteDistribution (Distribution distribution);
+        #endregion
+        #region OperationOperations
+        Task<IEnumerable<Operation>> GetOperationsForDistributionAsync(int distributionId);
+        Task<Operation?> GetOperationForDistributionAsync(int distributionId, int operationId);
+        Task AddOperationForDistributionAsync(int areaId, int distributionId, Operation operation);
+        void DeleteOperation(Operation operation);
         #endregion
         #region QuestionTypeOperations
         Task<IEnumerable<QuestionType>> GetQuestionTypesAsync();
