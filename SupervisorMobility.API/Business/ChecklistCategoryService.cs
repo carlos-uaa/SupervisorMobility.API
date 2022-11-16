@@ -1,6 +1,7 @@
 ﻿using AutoMapper;
 using SupervisorMobility.API.Entities;
 using SupervisorMobility.API.Models.ChecklistCategoryDtos;
+using SupervisorMobility.API.Models.ChecklistQuestionDtos;
 using SupervisorMobility.API.Services;
 
 namespace SupervisorMobility.API.Business
@@ -53,6 +54,50 @@ namespace SupervisorMobility.API.Business
             }
 
             _mapper.Map(newChecklistCategorySequence, checklistCategoryEntity);
+            await _repository.SaveChangesAsync();
+        }
+
+        public async Task<bool> CheckChecklistCategoryExistAsync(int categoryId)
+        {
+            return await _repository.ChecklistCategoryExistAsync(categoryId);
+        }
+        public async Task DeleteChecklistQuestionAsync(ChecklistQuestion checklistQuestion)
+        {
+            _repository.DeleteChecklistQuestions(checklistQuestion);
+            await _repository.SaveChangesAsync();
+        }
+
+        public async Task<int> FetchChecklistQuestionMaxSequenceAsync(int categoryId)
+        {
+            return await _repository.GetChecklistQuestionMaxCategorySequenceAsync(categoryId);
+        }
+
+        public async Task<ChecklistQuestion?> FetchChecklistQuestionForCategoryAsync(int categoryId, int questionId)
+        {
+            return await _repository.GetChecklistQuestionForCategoryAsync(categoryId, questionId);
+        }
+
+        public async Task UpdateChecklistQuestionsSequenceAsync(ChecklistQuestionSequenceForUpdateDto newChecklistQuestionSequence, ChecklistQuestion checklistQuestionEntity, int categoryId)
+        {
+            //Update just the checklist questions sequences between the desired and the old one.
+            var currentSequence =
+                newChecklistQuestionSequence.CategorySequence < checklistQuestionEntity.CategorySequence
+                ? newChecklistQuestionSequence.CategorySequence
+                : checklistQuestionEntity.CategorySequence - 1;
+
+            var checklistQuestionsEntities = await
+                _repository.GetChecklistQuestionsForUpdateSequenceAsync(
+                newChecklistQuestionSequence.CategorySequence,
+                checklistQuestionEntity.CategorySequence,
+                categoryId, checklistQuestionEntity.QuestionID);
+
+            foreach (var checklistQuestionsEntityForUpdate in checklistQuestionsEntities)
+            {
+                currentSequence += 1;
+                checklistQuestionsEntityForUpdate.CategorySequence = currentSequence;
+            }
+
+            _mapper.Map(newChecklistQuestionSequence, checklistQuestionEntity);
             await _repository.SaveChangesAsync();
         }
     }
