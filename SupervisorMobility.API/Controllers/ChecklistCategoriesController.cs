@@ -11,16 +11,13 @@ namespace SupervisorMobility.API.Controllers
     [Route("api/checklistcategories")]
     public class ChecklistCategoriesController : ControllerBase
     {
-        private readonly ISupervisorMobilityRepository _supervisorMobilityRepository; //TODO: Remove from business logic
-        private readonly IChecklistCategoryService _checklistCategoryService;
+        private readonly IJobObservationService _checklistCategoryService;
         private readonly IMapper _mapper;
 
-        public ChecklistCategoriesController(
-            ISupervisorMobilityRepository supervisorMobilityRepository, 
+        public ChecklistCategoriesController( 
             IMapper mapper, 
-            IChecklistCategoryService checklistCategoryService)
+            IJobObservationService checklistCategoryService)
         {
-            _supervisorMobilityRepository = supervisorMobilityRepository;
             _mapper = mapper;
             _checklistCategoryService = checklistCategoryService;
         }
@@ -28,7 +25,7 @@ namespace SupervisorMobility.API.Controllers
         [HttpGet]
         public async Task<ActionResult<IEnumerable<ChecklistCategoryWithoutChecklistQuestionsDto>>> GetChecklistCategories()
         {
-            var checklistCategoryEntities = await _supervisorMobilityRepository.GetChecklistCategoriesAsync();
+            var checklistCategoryEntities = await _checklistCategoryService.FetchChecklistCategoriesAsync();
             return Ok(_mapper.Map<IEnumerable<ChecklistCategoryWithoutChecklistQuestionsDto>>(checklistCategoryEntities));
         }
 
@@ -36,11 +33,10 @@ namespace SupervisorMobility.API.Controllers
         public async Task<IActionResult> GetChecklistCategory(int id, bool includeChecklistQuestions = false)
         {
             //Find Checklist category
-            var checklistCategory = await _supervisorMobilityRepository
-                .GetChecklistCategoryAsync(id, includeChecklistQuestions);
+            var checklistCategory = await _checklistCategoryService.FetchChecklistCategoryAsync(id, includeChecklistQuestions);
             if (checklistCategory == null)
             {
-                return NotFound();
+                return NotFound("Checklist category not found!");
             }
 
             if (includeChecklistQuestions)
@@ -55,11 +51,7 @@ namespace SupervisorMobility.API.Controllers
         public async Task<ActionResult<ChecklistCategoryDto>> CreateChecklistCategory(
             ChecklistCategoryForCreationDto checklistCategory)
         {
-            //Map object ans save it to the DB
-            var finalChecklistCategory = _mapper.Map<Entities.ChecklistCategory>(checklistCategory);
-            finalChecklistCategory.Sequence = await _supervisorMobilityRepository.GetChecklistCategoriesMaxSequenceAsync();
-            _supervisorMobilityRepository.AddChecklistCategory(finalChecklistCategory);
-            await _supervisorMobilityRepository.SaveChangesAsync();
+            var finalChecklistCategory = await _checklistCategoryService.CreateChecklistCategoryAsync(checklistCategory);
 
             var createChecklistCategoryToReturn = 
                 _mapper.Map<ChecklistCategoryDto>(finalChecklistCategory);
@@ -76,15 +68,13 @@ namespace SupervisorMobility.API.Controllers
         public async Task<ActionResult> UpdateChecklistCategory(int checklistCategoryId,
             ChecklistCategoryForUpdateDto checklistCategory)
         {
-            var checklistCategoryEntity = await _supervisorMobilityRepository.GetChecklistCategoryAsync(checklistCategoryId);
+            var checklistCategoryEntity = await _checklistCategoryService.FetchChecklistCategoryAsync(checklistCategoryId);
             if (checklistCategoryEntity == null)
             {
                 return NotFound();
             }
 
-            _mapper.Map(checklistCategory, checklistCategoryEntity);
-
-            await _supervisorMobilityRepository.SaveChangesAsync();
+            await _checklistCategoryService.UpdateChecklistCategoryAsync(checklistCategory, checklistCategoryEntity);
 
             return NoContent();
 
@@ -95,7 +85,7 @@ namespace SupervisorMobility.API.Controllers
             int checklistCategoryId,
             JsonPatchDocument<ChecklistCategoryForUpdateDto> patchDocumentChecklistCategory)
         {
-            var checklistCategoryEntity = await _supervisorMobilityRepository.GetChecklistCategoryAsync(checklistCategoryId);
+            var checklistCategoryEntity = await _checklistCategoryService.FetchChecklistCategoryAsync(checklistCategoryId);
             if (checklistCategoryEntity == null)
             {
                 return NotFound();
@@ -115,9 +105,7 @@ namespace SupervisorMobility.API.Controllers
                 return BadRequest();
             }
 
-            _mapper.Map(checklistCategoryToPatch, checklistCategoryEntity);
-
-            await _supervisorMobilityRepository.SaveChangesAsync();
+            await _checklistCategoryService.UpdateChecklistCategoryAsync(checklistCategoryToPatch, checklistCategoryEntity);
 
             return NoContent();
 

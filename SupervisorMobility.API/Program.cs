@@ -1,9 +1,5 @@
-using Microsoft.EntityFrameworkCore;
 using Serilog;
 using SupervisorMobility.API;
-using SupervisorMobility.API.Business;
-using SupervisorMobility.API.Context;
-using SupervisorMobility.API.Services;
 
 //Configure Serilog
 Log.Logger = new LoggerConfiguration()

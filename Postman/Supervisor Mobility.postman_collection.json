@@ -122,7 +122,7 @@
 							}
 						},
 						"url": {
-							"raw": "https://localhost:{{portNumber}}/api/checklistcategories/8",
+							"raw": "https://localhost:{{portNumber}}/api/checklistcategories/1007",
 							"protocol": "https",
 							"host": [
 								"localhost"
@@ -131,7 +131,7 @@
 							"path": [
 								"api",
 								"checklistcategories",
-								"8"
+								"1007"
 							]
 						}
 					},
@@ -152,7 +152,7 @@
 							}
 						},
 						"url": {
-							"raw": "https://localhost:{{portNumber}}/api/checklistcategories/14",
+							"raw": "https://localhost:{{portNumber}}/api/checklistcategories/1007",
 							"protocol": "https",
 							"host": [
 								"localhost"
@@ -161,7 +161,7 @@
 							"path": [
 								"api",
 								"checklistcategories",
-								"14"
+								"1007"
 							]
 						}
 					},
@@ -173,7 +173,7 @@
 						"method": "DELETE",
 						"header": [],
 						"url": {
-							"raw": "https://localhost:{{portNumber}}/api/checklistcategories/7",
+							"raw": "https://localhost:{{portNumber}}/api/checklistcategories/1007",
 							"protocol": "https",
 							"host": [
 								"localhost"
@@ -182,7 +182,7 @@
 							"path": [
 								"api",
 								"checklistcategories",
-								"7"
+								"1007"
 							]
 						}
 					},
@@ -195,7 +195,7 @@
 						"header": [],
 						"body": {
 							"mode": "raw",
-							"raw": "{\r\n    \"Sequence\": 2\r\n}",
+							"raw": "{\r\n    \"Sequence\": 3\r\n}",
 							"options": {
 								"raw": {
 									"language": "json"
@@ -203,7 +203,7 @@
 							}
 						},
 						"url": {
-							"raw": "https://localhost:{{portNumber}}/api/checklistcategories/sequence/7",
+							"raw": "https://localhost:{{portNumber}}/api/checklistcategories/sequence/1007",
 							"protocol": "https",
 							"host": [
 								"localhost"
@@ -213,7 +213,7 @@
 								"api",
 								"checklistcategories",
 								"sequence",
-								"7"
+								"1007"
 							]
 						}
 					},
@@ -230,7 +230,7 @@
 						"method": "GET",
 						"header": [],
 						"url": {
-							"raw": "https://localhost:{{portNumber}}/api/checklistcategories/1/checklistquestions/2",
+							"raw": "https://localhost:{{portNumber}}/api/checklistcategories/1/checklistquestions/",
 							"protocol": "https",
 							"host": [
 								"localhost"
@@ -241,7 +241,7 @@
 								"checklistcategories",
 								"1",
 								"checklistquestions",
-								"2"
+								""
 							]
 						}
 					},
@@ -277,7 +277,7 @@
 						"header": [],
 						"body": {
 							"mode": "raw",
-							"raw": "{\r\n    \"code\": \"Another Test\",\r\n    \"description\": \"Nivel ILU del operador\",\r\n    \"prompt\": \"¿Cuál es nivel de ILU del operador?  ¿Está el entrenamiento alineado con el Cuadro de requisitos de Operaicón ? (S/N)\",\r\n    \"questionTypeId\": 6\r\n}",
+							"raw": "{\r\n    \"code\": \"Another Test4\",\r\n    \"description\": \"Nivel ILU del operador432\",\r\n    \"prompt\": \"¿Cuál es nivel de ILU del operador?  ¿Está el entrenamiento alineado con el Cuadro de requisitos de Operaicón ? (S/N)432\",\r\n    \"questionTypeId\": 6\r\n}",
 							"options": {
 								"raw": {
 									"language": "json"
@@ -285,7 +285,7 @@
 							}
 						},
 						"url": {
-							"raw": "https://localhost:{{portNumber}}/api/checklistcategories/11/checklistquestions/",
+							"raw": "https://localhost:{{portNumber}}/api/checklistcategories/1/checklistquestions/",
 							"protocol": "https",
 							"host": [
 								"localhost"
@@ -294,7 +294,7 @@
 							"path": [
 								"api",
 								"checklistcategories",
-								"11",
+								"1",
 								"checklistquestions",
 								""
 							]
@@ -372,7 +372,7 @@
 						"method": "DELETE",
 						"header": [],
 						"url": {
-							"raw": "https://localhost:{{portNumber}}/api/checklistcategories/1/checklistQuestions/3",
+							"raw": "https://localhost:{{portNumber}}/api/checklistcategories/1/checklistQuestions/6",
 							"protocol": "https",
 							"host": [
 								"localhost"
@@ -383,7 +383,7 @@
 								"checklistcategories",
 								"1",
 								"checklistQuestions",
-								"3"
+								"6"
 							]
 						}
 					},
@@ -396,7 +396,7 @@
 						"header": [],
 						"body": {
 							"mode": "raw",
-							"raw": "{\r\n    \"categorySequence\": 16\r\n}",
+							"raw": "{\r\n    \"categorySequence\": 3\r\n}",
 							"options": {
 								"raw": {
 									"language": "json"
@@ -404,7 +404,7 @@
 							}
 						},
 						"url": {
-							"raw": "https://localhost:{{portNumber}}/api/checklistcategories/11/checklistquestions/sequence/8",
+							"raw": "https://localhost:{{portNumber}}/api/checklistcategories/1/checklistquestions/sequence/6",
 							"protocol": "https",
 							"host": [
 								"localhost"
@@ -413,10 +413,10 @@
 							"path": [
 								"api",
 								"checklistcategories",
-								"11",
+								"1",
 								"checklistquestions",
 								"sequence",
-								"8"
+								"6"
 							]
 						}
 					},

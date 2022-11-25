@@ -6,15 +6,37 @@ using SupervisorMobility.API.Services;
 
 namespace SupervisorMobility.API.Business
 {
-    public class ChecklistCategoryService : IChecklistCategoryService
+    public class JobObservationService : IJobObservationService
     {
         private readonly ISupervisorMobilityRepository _repository;
         private readonly IMapper _mapper;
 
-        public ChecklistCategoryService(ISupervisorMobilityRepository repository, IMapper mapper)
+        public JobObservationService(ISupervisorMobilityRepository repository, IMapper mapper)
         {
             _repository = repository;
             _mapper = mapper;
+        }
+
+        #region Category
+        public async Task<IEnumerable<ChecklistCategory>> FetchChecklistCategoriesAsync()
+        {
+            return await _repository.GetChecklistCategoriesAsync();
+        }
+
+        public async Task<ChecklistCategory> CreateChecklistCategoryAsync(ChecklistCategoryForCreationDto checklistCategory)
+        {
+            var finalChecklistCategory = _mapper.Map<ChecklistCategory>(checklistCategory);
+            finalChecklistCategory.Sequence = await _repository.GetChecklistCategoriesMaxSequenceAsync();
+            _repository.AddChecklistCategory(finalChecklistCategory);
+            await _repository.SaveChangesAsync();
+
+            return finalChecklistCategory;
+        }
+
+        public async Task UpdateChecklistCategoryAsync(ChecklistCategoryForUpdateDto checklistCategoryUpdate, ChecklistCategory checklistCategory)
+        {
+            _mapper.Map(checklistCategoryUpdate, checklistCategory);
+            await _repository.SaveChangesAsync();
         }
 
         public async Task DeleteChecklistCategoryAsync(ChecklistCategory checklistCategory)
@@ -28,9 +50,9 @@ namespace SupervisorMobility.API.Business
             return await _repository.GetChecklistCategoriesMaxSequenceAsync();
         }
 
-        public async Task<ChecklistCategory?> FetchChecklistCategoryAsync(int categoryId)
+        public async Task<ChecklistCategory?> FetchChecklistCategoryAsync(int categoryId, bool includeChecklistQuestions = false)
         {
-            return await _repository.GetChecklistCategoryAsync(categoryId);
+            return await _repository.GetChecklistCategoryAsync(categoryId, includeChecklistQuestions);
         }
 
         public async Task UpdateChecklistCategoriesSequenceAsync(ChecklistCategorySequenceForUpdateDto newChecklistCategorySequence, ChecklistCategory checklistCategoryEntity)
@@ -41,10 +63,10 @@ namespace SupervisorMobility.API.Business
                 ? newChecklistCategorySequence.Sequence
                 : checklistCategoryEntity.Sequence - 1;
 
-            var checklistCategoryEntities = 
+            var checklistCategoryEntities =
                 await _repository.GetChecklistCategoriesForUpdateSequenceAsync(
-                       newChecklistCategorySequence.Sequence, 
-                       checklistCategoryEntity.Sequence, 
+                       newChecklistCategorySequence.Sequence,
+                       checklistCategoryEntity.Sequence,
                        checklistCategoryEntity.ChecklistCategoryId);
 
             foreach (var checklistCategoryEntityForUpdate in checklistCategoryEntities)
@@ -61,6 +83,8 @@ namespace SupervisorMobility.API.Business
         {
             return await _repository.ChecklistCategoryExistAsync(categoryId);
         }
+        #endregion
+        #region Question
         public async Task DeleteChecklistQuestionAsync(ChecklistQuestion checklistQuestion)
         {
             _repository.DeleteChecklistQuestions(checklistQuestion);
@@ -99,6 +123,7 @@ namespace SupervisorMobility.API.Business
 
             _mapper.Map(newChecklistQuestionSequence, checklistQuestionEntity);
             await _repository.SaveChangesAsync();
-        }
+        } 
+        #endregion
     }
 }

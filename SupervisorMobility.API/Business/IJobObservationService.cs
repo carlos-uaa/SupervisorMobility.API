@@ -4,21 +4,28 @@ using SupervisorMobility.API.Models.ChecklistQuestionDtos;
 
 namespace SupervisorMobility.API.Business
 {
-    public interface IChecklistCategoryService
+    public interface IJobObservationService
     {
-        Task<ChecklistCategory?> FetchChecklistCategoryAsync(int categoryId);
+        #region Category
+        Task<IEnumerable<ChecklistCategory>> FetchChecklistCategoriesAsync();
+        Task<ChecklistCategory?> FetchChecklistCategoryAsync(int categoryId, bool includeChecklistQuestions = false);
+        Task<ChecklistCategory> CreateChecklistCategoryAsync(ChecklistCategoryForCreationDto checklistCategory);
         Task<int> FetchChecklistCategoriesMaxSequenceAsync();
+        Task UpdateChecklistCategoryAsync(ChecklistCategoryForUpdateDto checklistCategoryUpdate, ChecklistCategory checklistCategory);
         Task UpdateChecklistCategoriesSequenceAsync(
             ChecklistCategorySequenceForUpdateDto newChecklistCategorySequence,
-            ChecklistCategory checklistCategoryEntity);
+            ChecklistCategory checklistCategory);
         Task DeleteChecklistCategoryAsync(ChecklistCategory checklistCategory);
         Task<bool> CheckChecklistCategoryExistAsync(int categoryId);
+        #endregion
+        #region Question
         Task<ChecklistQuestion?> FetchChecklistQuestionForCategoryAsync(int categoryId, int questionId);
         Task<int> FetchChecklistQuestionMaxSequenceAsync(int cateogryId);
         Task UpdateChecklistQuestionsSequenceAsync(
             ChecklistQuestionSequenceForUpdateDto newChecklistQuestionSequence,
             ChecklistQuestion checklistQuestionEntity,
             int categoryId);
-        Task DeleteChecklistQuestionAsync(ChecklistQuestion checklistQuestion);
+        Task DeleteChecklistQuestionAsync(ChecklistQuestion checklistQuestion); 
+        #endregion
     }
 }

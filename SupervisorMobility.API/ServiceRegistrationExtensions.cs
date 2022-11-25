@@ -10,7 +10,7 @@ namespace SupervisorMobility.API
         public static IServiceCollection RegisterBusinessServices(
            this IServiceCollection services)
         {
-            services.AddScoped<IChecklistCategoryService, ChecklistCategoryService>();
+            services.AddScoped<IJobObservationService, JobObservationService>();
             services.AddScoped<IAssyChartService, AssyChartService>();
             return services;
         }

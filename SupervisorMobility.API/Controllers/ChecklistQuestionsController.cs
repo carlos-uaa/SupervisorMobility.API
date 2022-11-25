@@ -15,11 +15,11 @@ namespace SupervisorMobility.API.Controllers
     {
         private readonly IMapper _mapper;
         private readonly ISupervisorMobilityRepository _supervisorMobilityRepository;
-        private readonly IChecklistCategoryService _checklistCategoryService;
+        private readonly IJobObservationService _checklistCategoryService;
 
         public ChecklistQuestionsController(ISupervisorMobilityRepository supervisorMobilityRepository,
             IMapper mapper,
-            IChecklistCategoryService checklistCategoryService)
+            IJobObservationService checklistCategoryService)
         {
             _supervisorMobilityRepository = supervisorMobilityRepository;
             _mapper = mapper;
