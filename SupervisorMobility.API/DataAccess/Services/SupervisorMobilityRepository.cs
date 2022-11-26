@@ -273,7 +273,8 @@ namespace SupervisorMobility.API.Services
         public async Task<IEnumerable<ChecklistQuestion>> GetChecklistQuestionsForCategoryAsync(int categoryId)
         {
             return await _context.ChecklistQuestions
-                .Where(cq => cq.ChecklistCategoryId == categoryId).ToListAsync();
+                .Where(cq => cq.ChecklistCategoryId == categoryId)
+                .OrderBy(cq => cq.CategorySequence).ToListAsync();
         }
         public async Task<ChecklistQuestion?> GetChecklistQuestionForCategoryAsync(int categoryId,
             int questionId)

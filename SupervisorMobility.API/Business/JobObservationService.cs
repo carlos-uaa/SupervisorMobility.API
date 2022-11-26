@@ -85,6 +85,11 @@ namespace SupervisorMobility.API.Business
         }
         #endregion
         #region Question
+        public async Task<IEnumerable<ChecklistQuestion>> FetchChecklistQuestionsForCategoryAsync(int categoryId)
+        {
+            return await _repository.GetChecklistQuestionsForCategoryAsync(categoryId);
+        }
+
         public async Task DeleteChecklistQuestionAsync(ChecklistQuestion checklistQuestion)
         {
             _repository.DeleteChecklistQuestions(checklistQuestion);
@@ -99,6 +104,37 @@ namespace SupervisorMobility.API.Business
         public async Task<ChecklistQuestion?> FetchChecklistQuestionForCategoryAsync(int categoryId, int questionId)
         {
             return await _repository.GetChecklistQuestionForCategoryAsync(categoryId, questionId);
+        }
+
+        public async Task<ChecklistQuestion> CreateChecklistQuestionForCategoryAsync(int categoryId, 
+            ChecklistQuestionForCreationDto checklistQuestion)
+        {
+            var finalChecklistQuestion = _mapper.Map<Entities.ChecklistQuestion>(checklistQuestion);
+            finalChecklistQuestion.CategorySequence = await
+                _repository.GetChecklistQuestionMaxCategorySequenceAsync(categoryId);
+            await _repository.AddChecklistQuestionForCategoryAsync(
+                categoryId, finalChecklistQuestion);
+            await _repository.SaveChangesAsync();
+
+            return finalChecklistQuestion;
+        }
+
+        public async Task UpdateChecklistQuestionForCategoryAsync(ChecklistQuestionForUpdateDto checklistQuestionForUpdate, ChecklistQuestion checklistQuestion)
+        {
+            //Check if the category is different, if it is the checklist category will be send to the buttom.
+            if (checklistQuestionForUpdate.ChecklistCategoryId != checklistQuestion.ChecklistCategoryId)
+            {
+                //Send this question to the end
+                var checklistQuestionSequence = new ChecklistQuestionSequenceForUpdateDto();
+                checklistQuestionSequence.CategorySequence = await FetchChecklistQuestionMaxSequenceAsync(checklistQuestion.ChecklistCategoryId) - 1;
+                await UpdateChecklistQuestionsSequenceAsync(checklistQuestionSequence, checklistQuestion, checklistQuestion.ChecklistCategoryId);
+
+                checklistQuestion.CategorySequence =
+                    await FetchChecklistQuestionMaxSequenceAsync(checklistQuestionForUpdate.ChecklistCategoryId);
+            }
+
+            _mapper.Map(checklistQuestionForUpdate, checklistQuestion);
+            await _repository.SaveChangesAsync();
         }
 
         public async Task UpdateChecklistQuestionsSequenceAsync(ChecklistQuestionSequenceForUpdateDto newChecklistQuestionSequence, ChecklistQuestion checklistQuestionEntity, int categoryId)

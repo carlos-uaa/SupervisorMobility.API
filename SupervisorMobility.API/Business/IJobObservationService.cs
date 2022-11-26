@@ -19,8 +19,11 @@ namespace SupervisorMobility.API.Business
         Task<bool> CheckChecklistCategoryExistAsync(int categoryId);
         #endregion
         #region Question
+        Task<IEnumerable<ChecklistQuestion>> FetchChecklistQuestionsForCategoryAsync(int categoryId);
         Task<ChecklistQuestion?> FetchChecklistQuestionForCategoryAsync(int categoryId, int questionId);
         Task<int> FetchChecklistQuestionMaxSequenceAsync(int cateogryId);
+        Task<ChecklistQuestion> CreateChecklistQuestionForCategoryAsync(int categoryId, ChecklistQuestionForCreationDto checklistQuestion);
+        Task UpdateChecklistQuestionForCategoryAsync(ChecklistQuestionForUpdateDto checklistQuestionForUpdate, ChecklistQuestion checklistQuestion);
         Task UpdateChecklistQuestionsSequenceAsync(
             ChecklistQuestionSequenceForUpdateDto newChecklistQuestionSequence,
             ChecklistQuestion checklistQuestionEntity,
