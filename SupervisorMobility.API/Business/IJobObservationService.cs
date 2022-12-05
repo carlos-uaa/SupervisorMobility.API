@@ -1,6 +1,7 @@
 ﻿using SupervisorMobility.API.Entities;
 using SupervisorMobility.API.Models.ChecklistCategoryDtos;
 using SupervisorMobility.API.Models.ChecklistQuestionDtos;
+using SupervisorMobility.API.Models.JobObservationTypeDtos;
 
 namespace SupervisorMobility.API.Business
 {
@@ -28,7 +29,14 @@ namespace SupervisorMobility.API.Business
             ChecklistQuestionSequenceForUpdateDto newChecklistQuestionSequence,
             ChecklistQuestion checklistQuestionEntity,
             int categoryId);
-        Task DeleteChecklistQuestionAsync(ChecklistQuestion checklistQuestion); 
+        Task DeleteChecklistQuestionAsync(ChecklistQuestion checklistQuestion);
+        #endregion
+        #region JobObservation
+        Task<IEnumerable<JobObservationType>> FetchJobObservationTypesAsync();
+        Task<JobObservationType?> FetchJobObservationTypeAsync(int jobObservationTypeId, bool includeConfigs = false);
+        Task<JobObservationType> CreateJobObservationTypeAsync(JobObservationTypeForCreationDto jobObservationType);
+        Task UpdateJobObservationTypeAsync(JobObservationTypeForUpdateDto jobObservationTypeUpdate, JobObservationType jobObservationType);
+        Task DeleteJobObservationTypeAsync(JobObservationType jobObservationType);
         #endregion
     }
 }

@@ -2,6 +2,7 @@
 using SupervisorMobility.API.Entities;
 using SupervisorMobility.API.Models.ChecklistCategoryDtos;
 using SupervisorMobility.API.Models.ChecklistQuestionDtos;
+using SupervisorMobility.API.Models.JobObservationTypeDtos;
 using SupervisorMobility.API.Services;
 
 namespace SupervisorMobility.API.Business
@@ -159,7 +160,36 @@ namespace SupervisorMobility.API.Business
 
             _mapper.Map(newChecklistQuestionSequence, checklistQuestionEntity);
             await _repository.SaveChangesAsync();
-        } 
+        }
+        #endregion
+        #region JobObservationType
+        public async Task<IEnumerable<JobObservationType>> FetchJobObservationTypesAsync()
+        {
+            return await _repository.GetJobObservationTypesAsync();
+        }
+        public async Task<JobObservationType?> FetchJobObservationTypeAsync(int jobObservationTypeId, bool includeConfigs = false)
+        {
+            return await _repository
+                .GetJobObservationTypeAsync(jobObservationTypeId, includeConfigs);
+        }
+        public async Task<JobObservationType> CreateJobObservationTypeAsync(JobObservationTypeForCreationDto jobObservationType)
+        {
+            var finalJobObservationType = _mapper.Map<JobObservationType>(jobObservationType);
+            _repository.AddJobObservationType(finalJobObservationType);
+            await _repository.SaveChangesAsync();
+
+            return finalJobObservationType;
+        }
+        public async Task UpdateJobObservationTypeAsync(JobObservationTypeForUpdateDto jobObservationTypeUpdate, JobObservationType jobObservationType)
+        {
+            _mapper.Map(jobObservationTypeUpdate, jobObservationType);
+            await _repository.SaveChangesAsync();
+        }
+        public async Task DeleteJobObservationTypeAsync(JobObservationType jobObservationType)
+        {
+            _repository.DeleteJobObservationType(jobObservationType);
+            await _repository.SaveChangesAsync();
+        }
         #endregion
     }
 }
