@@ -1,6 +1,8 @@
 ﻿using AutoMapper;
 using SupervisorMobility.API.DataAccess.Entities;
+using SupervisorMobility.API.Entities;
 using SupervisorMobility.API.Models.OperationDtos;
+using SupervisorMobility.API.Models.PlantDtos;
 using SupervisorMobility.API.Models.ProductDtos;
 using SupervisorMobility.API.Models.SupportDocumentTypeDtos;
 using SupervisorMobility.API.Services;
@@ -28,11 +30,6 @@ namespace SupervisorMobility.API.Business
             return await _repository.DistributionExistsAsync(distributionId);
         }
 
-        public async Task<bool> CheckPlantExistance(int plantId)
-        {
-            return await _repository.PlantExistAsync(plantId);
-        }
-
         public async Task<Operation> CreateOperationAsync(int areaId, int distributionId, Operation operation)
         {
             await _repository.AddOperationForDistributionAsync(areaId, distributionId, operation);
@@ -48,13 +45,6 @@ namespace SupervisorMobility.API.Business
             await _repository.SaveChangesAsync();
             return productEntity;
 
-        }
-
-        public async Task<SupportDocumentType> CreateSupportDocumentTypeAsync(SupportDocumentType supportDocumentType)
-        {
-            _repository.AddSupportDocumentType(supportDocumentType);
-            await _repository.SaveChangesAsync();
-            return supportDocumentType;
         }
 
         public async Task<Operation?> FetchOperationAsync(int distributionId, int operationId)
@@ -77,17 +67,6 @@ namespace SupervisorMobility.API.Business
             return await _repository.GetProductsAsync();
         }
 
-        public async Task<SupportDocumentType?> FetchSupportDocumentTypeAsync(int supportDocumentTypeId)
-        {
-            return await _repository
-                .GetSupportDocumentTypeAsync(supportDocumentTypeId);
-        }
-
-        public async Task<IEnumerable<SupportDocumentType>> FetchSupportDocumentTypesAsync()
-        {
-            return await _repository.GetSupportDocumentTypesAsync();
-        }
-
         public async Task RemoveOperationAsync(Operation operation)
         {
             _repository.DeleteOperation(operation);
@@ -97,12 +76,6 @@ namespace SupervisorMobility.API.Business
         public async Task RemoveProductAsync(Product product)
         {
             _repository.DeleteProduct(product);
-            await _repository.SaveChangesAsync();
-        }
-
-        public async Task RemoveSupportDocumentTypeAsync(SupportDocumentType supportDocumentType)
-        {
-            _repository.DeleteSupportDocumentType(supportDocumentType);
             await _repository.SaveChangesAsync();
         }
 
@@ -120,6 +93,59 @@ namespace SupervisorMobility.API.Business
             await _repository.SaveChangesAsync();
         }
 
+        #region Plant
+        public async Task<IEnumerable<Plant>> FetchPlantsAsync()
+        {
+            return await _repository.GetPlantsAsync();
+        }
+        public async Task<Plant?> FetchPlantAsync(int plantId, bool includeAreas = false)
+        {
+            return await _repository.GetPlantAsync(plantId, includeAreas);
+        }
+        public async Task<Plant> CreatePlantAsync(PlantForCreationDto plant)
+        {
+            var finalPlant = _mapper.Map<Entities.Plant>(plant);
+            _repository.AddPlant(finalPlant);
+            await _repository.SaveChangesAsync();
+
+            return finalPlant;
+        }
+        public async Task UpdatePlantAsync(PlantForUpdateDto plantForUpdate, Plant plant)
+        {
+            _mapper.Map(plantForUpdate, plant);
+            await _repository.SaveChangesAsync();
+        }
+        public async Task RemovePlantAsync(Plant plant)
+        {
+            _repository.DeletePlant(plant);
+            await _repository.SaveChangesAsync();
+        }
+        public async Task<bool> CheckPlantExistance(int plantId)
+        {
+            return await _repository.PlantExistAsync(plantId);
+        }
+        #endregion
+        #region SupportDocumentTypes
+        public async Task<SupportDocumentType> CreateSupportDocumentTypeAsync(SupportDocumentType supportDocumentType)
+        {
+            _repository.AddSupportDocumentType(supportDocumentType);
+            await _repository.SaveChangesAsync();
+            return supportDocumentType;
+        }
+        public async Task<SupportDocumentType?> FetchSupportDocumentTypeAsync(int supportDocumentTypeId)
+        {
+            return await _repository
+                .GetSupportDocumentTypeAsync(supportDocumentTypeId);
+        }
+        public async Task<IEnumerable<SupportDocumentType>> FetchSupportDocumentTypesAsync()
+        {
+            return await _repository.GetSupportDocumentTypesAsync();
+        }
+        public async Task RemoveSupportDocumentTypeAsync(SupportDocumentType supportDocumentType)
+        {
+            _repository.DeleteSupportDocumentType(supportDocumentType);
+            await _repository.SaveChangesAsync();
+        }
         public async Task UpdateSupportDocumentTypeAsync(
             SupportDocumentTypeForUpdateDto supportDocumentTypeForUpdate,
             SupportDocumentType supportDocumentType)
@@ -127,5 +153,9 @@ namespace SupervisorMobility.API.Business
             _mapper.Map(supportDocumentTypeForUpdate, supportDocumentType);
             await _repository.SaveChangesAsync();
         }
+        #endregion
+        #region MyRegion
+
+        #endregion
     }
 }

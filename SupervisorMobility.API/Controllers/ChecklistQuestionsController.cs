@@ -14,14 +14,12 @@ namespace SupervisorMobility.API.Controllers
     public class ChecklistQuestionsController : ControllerBase
     {
         private readonly IMapper _mapper;
-        private readonly ISupervisorMobilityRepository _supervisorMobilityRepository;
         private readonly IJobObservationService _jobObservationService;
 
-        public ChecklistQuestionsController(ISupervisorMobilityRepository supervisorMobilityRepository,
+        public ChecklistQuestionsController(
             IMapper mapper,
             IJobObservationService checklistCategoryService)
         {
-            _supervisorMobilityRepository = supervisorMobilityRepository;
             _mapper = mapper;
             _jobObservationService = checklistCategoryService;
         }

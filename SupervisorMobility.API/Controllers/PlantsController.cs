@@ -1,6 +1,8 @@
 ﻿using AutoMapper;
 using Microsoft.AspNetCore.JsonPatch;
 using Microsoft.AspNetCore.Mvc;
+using SupervisorMobility.API.Business;
+using SupervisorMobility.API.Entities;
 using SupervisorMobility.API.Models.GroupDtos;
 using SupervisorMobility.API.Models.PlantDtos;
 using SupervisorMobility.API.Services;
@@ -12,20 +14,21 @@ namespace SupervisorMobility.API.Controllers
     public class PlantsController : ControllerBase
     {
         readonly ISupervisorMobilityRepository _supervisorMobilityRepository;
+        readonly IAssyChartService _assyChartService;
         readonly IMapper _mapper;
         public PlantsController(ISupervisorMobilityRepository supervisorMobilityRepository,
-            IMapper mapper)
+            IMapper mapper,
+            IAssyChartService assyChartService)
         {
-            _supervisorMobilityRepository = supervisorMobilityRepository ??
-                throw new ArgumentNullException(nameof(supervisorMobilityRepository));
-            _mapper = mapper ??
-                throw new ArgumentNullException(nameof(mapper));
+            _supervisorMobilityRepository = supervisorMobilityRepository;
+            _mapper = mapper;
+            _assyChartService = assyChartService;
         }
 
         [HttpGet]
         public async Task<ActionResult<IEnumerable<PlantDto>>> GetPlants()
         {
-            var plantEntities = await _supervisorMobilityRepository.GetPlantsAsync();
+            var plantEntities = await _assyChartService.FetchPlantsAsync();
             return Ok(_mapper.Map<IEnumerable<PlantDto>>(plantEntities));
         }
 
@@ -33,8 +36,7 @@ namespace SupervisorMobility.API.Controllers
         public async Task<IActionResult> GetPlant(int plantId, bool includeAreas = false)
         {
             //Find Job Observation type
-            var plant = await _supervisorMobilityRepository
-                .GetPlantAsync(plantId, includeAreas);
+            var plant = await _assyChartService.FetchPlantAsync(plantId, includeAreas);
             if (plant == null)
             {
                 return NotFound();
@@ -52,10 +54,8 @@ namespace SupervisorMobility.API.Controllers
         public async Task<ActionResult<PlantDto>> CreatePlant(
             PlantForCreationDto plant)
         {
-            //Mpa the pbject
-            var finalPlant = _mapper.Map<Entities.Plant>(plant);
-            _supervisorMobilityRepository.AddPlant(finalPlant);
-            await _supervisorMobilityRepository.SaveChangesAsync();
+            //Map the object
+            var finalPlant = await _assyChartService.CreatePlantAsync(plant);
 
             var createPlantToReturn =
                 _mapper.Map<PlantDto>(finalPlant);
@@ -73,14 +73,13 @@ namespace SupervisorMobility.API.Controllers
         public async Task<ActionResult> UpdatePlant(int plantId,
             PlantForUpdateDto plant)
         {
-            var plantEntity = await _supervisorMobilityRepository.GetPlantAsync(plantId);
+            var plantEntity = await _assyChartService.FetchPlantAsync(plantId);
             if (plantEntity == null)
             {
                 return NotFound();
             }
 
-            _mapper.Map(plant, plantEntity);
-            await _supervisorMobilityRepository.SaveChangesAsync();
+            await _assyChartService.UpdatePlantAsync(plant, plantEntity);
 
             return NoContent();
 
@@ -91,7 +90,7 @@ namespace SupervisorMobility.API.Controllers
             int plantId,
             JsonPatchDocument<PlantForUpdateDto> patchDocumentPlant)
         {
-            var plantEntity = await _supervisorMobilityRepository.GetPlantAsync(plantId);
+            var plantEntity = await _assyChartService.FetchPlantAsync(plantId);
             if (plantEntity == null)
             {
                 return NotFound();
@@ -111,9 +110,7 @@ namespace SupervisorMobility.API.Controllers
                 return BadRequest();
             }
 
-            _mapper.Map(plantToPatch, plantEntity);
-
-            await _supervisorMobilityRepository.SaveChangesAsync();
+            await _assyChartService.UpdatePlantAsync(plantToPatch, plantEntity);
 
             return NoContent();
         }
@@ -121,14 +118,13 @@ namespace SupervisorMobility.API.Controllers
         [HttpDelete("{plantId}")]
         public async Task<ActionResult> DeletePlant(int plantId)
         {
-            var plantEntity = await _supervisorMobilityRepository.GetPlantAsync(plantId);
+            var plantEntity = await _assyChartService.FetchPlantAsync(plantId);
             if (plantEntity == null)
             {
                 return NotFound();
             }
 
-            _supervisorMobilityRepository.DeletePlant(plantEntity);
-            await _supervisorMobilityRepository.SaveChangesAsync();
+            await _assyChartService.RemovePlantAsync(plantEntity);
 
             return NoContent();
         }
