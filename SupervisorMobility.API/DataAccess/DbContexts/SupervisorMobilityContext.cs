@@ -19,6 +19,8 @@ namespace SupervisorMobility.API.Context
         public DbSet<Operation> Operations { get; set; }
         public DbSet<SupportDocumentType> SupportDocumentTypes { get; set; }
         public DbSet<Product> Products { get; set; }
+        //Add AssyCharts db Context
+        public DbSet<AssyChart> AssyCharts { get; set; }
         #endregion
 
         public SupervisorMobilityContext(DbContextOptions<SupervisorMobilityContext> options)
@@ -27,6 +29,7 @@ namespace SupervisorMobility.API.Context
 
         }
 
+     
         protected override void OnModelCreating(ModelBuilder modelBuilder)
         {
             //Default values
@@ -69,6 +72,13 @@ namespace SupervisorMobility.API.Context
             modelBuilder.Entity<Product>()
                 .Property(p => p.IsActive)
                 .HasDefaultValue(true);
+
+            //Add AssyChartModel
+
+            modelBuilder.Entity<AssyChart>()
+                .Property(p => p.IsActive)
+                .HasDefaultValue(true);
+
 
             //Constraints
             modelBuilder.Entity<ChecklistCategory>()
@@ -293,6 +303,8 @@ namespace SupervisorMobility.API.Context
                     ProductId = 3,
                     IsActive = true
                 });
+
+            modelBuilder.Entity<AssyChart>();
 
             base.OnModelCreating(modelBuilder);
         }

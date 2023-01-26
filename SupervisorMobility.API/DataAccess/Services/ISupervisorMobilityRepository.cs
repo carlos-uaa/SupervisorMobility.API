@@ -100,5 +100,11 @@ namespace SupervisorMobility.API.Services
         Task<bool> SaveChangesAsync();
 
         #endregion
+
+        #region AssyChart
+
+        void DeleteAssyChart(AssyChart assyChart);
+
+        #endregion
     }
 }

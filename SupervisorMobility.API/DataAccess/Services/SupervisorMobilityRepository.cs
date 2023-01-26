@@ -168,7 +168,7 @@ namespace SupervisorMobility.API.Services
         {
             if (includeOperations)
             {
-                return await _context.Areas.Include( a => a.Distributions)
+                return await _context.Areas.Include(a => a.Distributions)
                 .Where(a => a.PlantId == plantId && a.AreaId == areaId)
                 .FirstOrDefaultAsync();
             }
@@ -297,7 +297,7 @@ namespace SupervisorMobility.API.Services
             var sequence = await _context.ChecklistQuestions
                 .Where(cq => cq.ChecklistCategoryId == categoryId)
                 .MaxAsync(cq => (int?)cq.CategorySequence) ?? 0;
-            return  sequence + 1;
+            return sequence + 1;
         }
 
         public void DeleteChecklistQuestions(ChecklistQuestion checklistQuestion)
@@ -329,14 +329,14 @@ namespace SupervisorMobility.API.Services
             int jobObservationConfigId)
         {
             return await _context.JobObservationConfigs
-                .Where(joc => joc.JobObservationTypeId == jobObservationTypeId 
+                .Where(joc => joc.JobObservationTypeId == jobObservationTypeId
                            && joc.JobObservationConfigId == jobObservationConfigId)
                 .FirstOrDefaultAsync();
         }
         public async Task AddJobOperationConfigForJobOperationTypeAsync(int jobObservationTypeId, JobObservationConfig jobObservationConfig)
         {
             var jobOperationType = await GetJobObservationTypeAsync(jobObservationTypeId);
-            if(jobOperationType != null)
+            if (jobOperationType != null)
             {
                 jobOperationType.JobObservationConfigs.Add(jobObservationConfig);
             }
@@ -404,7 +404,19 @@ namespace SupervisorMobility.API.Services
         public async Task<bool> SaveChangesAsync()
         {
             return (await _context.SaveChangesAsync() >= 0);
-        } 
+        }
+        #endregion
+
+        #region AssyChart
+        //Add from file, recibe enumerate, busca existencia de area, planta etc if not crea, si solo registra
+
+        public void DeleteAssyChart(AssyChart assyChart)
+        {
+           _context.AssyCharts.Remove(assyChart);
+        }
+
+
+
         #endregion
     }
 }

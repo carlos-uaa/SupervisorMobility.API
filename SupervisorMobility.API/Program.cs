@@ -1,7 +1,7 @@
+using Microsoft.AspNetCore.Hosting;
 using Serilog;
 using SupervisorMobility.API;
 
-//Experimental
 //Configure Serilog
 Log.Logger = new LoggerConfiguration()
     .MinimumLevel.Debug()
@@ -10,6 +10,9 @@ Log.Logger = new LoggerConfiguration()
     .CreateLogger();
 
 var builder = WebApplication.CreateBuilder(args);
+
+//add json file to builder configuration
+builder.Configuration.AddJsonFile("appsettings.json", optional:false, reloadOnChange: true);
 
 // Add services to the container.
 
@@ -32,7 +35,23 @@ builder.Services.RegisterDataServices(builder.Configuration);
 //Add automapper
 builder.Services.AddAutoMapper(AppDomain.CurrentDomain.GetAssemblies());
 
+//Add Cors
+builder.Services.AddCors(policy => {
+
+    policy.AddPolicy("Policy_Name", builder =>
+      builder.WithOrigins("https://*:7017/")
+        .SetIsOriginAllowedToAllowWildcardSubdomains()
+        .AllowAnyOrigin().AllowAnyMethod().AllowAnyHeader()
+ );
+});
+
+
+
 var app = builder.Build();
+
+// Configure the HTTP request pipeline.
+
+app.UseCors("Policy_Name");
 
 // Configure the HTTP request pipeline.
 if (app.Environment.IsDevelopment() || app.Environment.IsProduction())
