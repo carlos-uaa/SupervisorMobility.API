@@ -364,3 +364,5 @@ MigrationBackup/
 # Fody - auto-generated XML schema
 FodyWeavers.xsd
 SupervisorMobility.API/appsettings.Development.json
+SupervisorMobility.API/appsettings.Development.json
+SupervisorMobility.API/appsettings.json
