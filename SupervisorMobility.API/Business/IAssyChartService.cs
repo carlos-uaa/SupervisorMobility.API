@@ -1,5 +1,6 @@
 ﻿using SupervisorMobility.API.DataAccess.Entities;
 using SupervisorMobility.API.Entities;
+using SupervisorMobility.API.Models.AssyChart;
 using SupervisorMobility.API.Models.OperationDtos;
 using SupervisorMobility.API.Models.PlantDtos;
 using SupervisorMobility.API.Models.ProductDtos;
@@ -45,6 +46,11 @@ namespace SupervisorMobility.API.Business
         Task<bool> CheckDistributionExistance(int distributionId);
         #endregion
 
+        #region AssyChart
+        Task<AssyChart> CreateAssyChartAsync(AssyChart assyChart);
+        Task UpdateAssyChartAsync(AssyChartForUpdateDto assyChartForUpdate, AssyChart assyChart);
+        Task RemoveAssyChartAsync(AssyChart assyChart);
+        #endregion
 
 
 

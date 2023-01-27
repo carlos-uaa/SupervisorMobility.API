@@ -1,6 +1,7 @@
 ﻿using AutoMapper;
 using SupervisorMobility.API.DataAccess.Entities;
 using SupervisorMobility.API.Entities;
+using SupervisorMobility.API.Models.AssyChart;
 using SupervisorMobility.API.Models.OperationDtos;
 using SupervisorMobility.API.Models.PlantDtos;
 using SupervisorMobility.API.Models.ProductDtos;
@@ -154,8 +155,24 @@ namespace SupervisorMobility.API.Business
             await _repository.SaveChangesAsync();
         }
         #endregion
-        #region MyRegion
+        #region AssyChart
+        public async Task<AssyChart> CreateAssyChartAsync(AssyChart assyChart)
+        {
+            //await _repository.AddOperationForDistributionAsync(areaId, distributionId, operation);
+            await _repository.SaveChangesAsync();
+            return assyChart;
 
+        }
+
+        public Task UpdateAssyChartAsync(AssyChartForUpdateDto assyChartForUpdate, AssyChart assyChart)
+        {
+            throw new NotImplementedException();
+        }
+
+        public Task RemoveAssyChartAsync(AssyChart assyChart)
+        {
+            throw new NotImplementedException();
+        }
         #endregion
     }
 }

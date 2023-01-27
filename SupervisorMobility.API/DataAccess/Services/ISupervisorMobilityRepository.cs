@@ -95,16 +95,17 @@ namespace SupervisorMobility.API.Services
         void AddProduct(Product product);
         void DeleteProduct(Product product);
         #endregion
+        #region AssyChart
+
+        void DeleteAssyChart(AssyChart assyChart);
+
+        #endregion
         #region CommonOperations
 
         Task<bool> SaveChangesAsync();
 
         #endregion
 
-        #region AssyChart
-
-        void DeleteAssyChart(AssyChart assyChart);
-
-        #endregion
+       
     }
 }
