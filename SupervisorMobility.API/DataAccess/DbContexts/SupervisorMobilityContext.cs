@@ -16,9 +16,11 @@ namespace SupervisorMobility.API.Context
         public DbSet<Plant> Plants { get; set; }
         public DbSet<Area> Areas { get; set; }
         public DbSet<Distribution> Distributions { get; set; }
+        public DbSet<ProductDistribution> ProductDistributions { get; set; }
         public DbSet<Operation> Operations { get; set; }
         public DbSet<SupportDocumentType> SupportDocumentTypes { get; set; }
         public DbSet<Product> Products { get; set; }
+        //Add AssyCharts db Context
         public DbSet<AssyChart> AssyCharts { get; set; }
         #endregion
 
@@ -72,6 +74,17 @@ namespace SupervisorMobility.API.Context
                 .Property(p => p.IsActive)
                 .HasDefaultValue(true);
 
+            //Product Distributions
+            modelBuilder.Entity<ProductDistribution>()
+                .Property(p => p.IsActive)
+                .HasDefaultValue(true);
+
+
+            //Add AssyChartModel
+
+            modelBuilder.Entity<AssyChart>()
+                .Property(p => p.IsActive)
+                .HasDefaultValue(true);
 
 
             //Constraints
@@ -258,6 +271,15 @@ namespace SupervisorMobility.API.Context
                     AreaId = 1
                 });
 
+            modelBuilder.Entity<ProductDistribution>()
+            .HasData(
+            new ProductDistribution("Dist1", "Distribution from products")
+            {
+                ProductDistributionId = 1,
+                IsActive = true,
+                ProductId = 1
+            });
+
             modelBuilder.Entity<Operation>()
                 .HasData(
                 new Operation("OP1", "Operacion Trim 1")
@@ -298,23 +320,7 @@ namespace SupervisorMobility.API.Context
                     IsActive = true
                 });
 
-
-            modelBuilder.Entity<AssyChart>()
-                .HasData(
-                new AssyChart()
-                {
-                    AssyChardId = 1,
-                    IsActive = true,
-                    GOS = "string",
-                    CCP = "string",
-                    HOE = "string",
-                    CreationDate = new DateTime(),
-                    ModificationDate = new DateTime(),
-                    ProductId = 1,
-                    PlantId = 1,
-                    AreaId = 1,
-                    DistributionId = 1
-                });
+            modelBuilder.Entity<AssyChart>();
 
             base.OnModelCreating(modelBuilder);
         }
