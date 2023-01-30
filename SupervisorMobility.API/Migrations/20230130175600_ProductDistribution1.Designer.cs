@@ -3,6 +3,7 @@ using System;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Infrastructure;
 using Microsoft.EntityFrameworkCore.Metadata;
+using Microsoft.EntityFrameworkCore.Migrations;
 using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 using SupervisorMobility.API.Context;
 
@@ -11,9 +12,11 @@ using SupervisorMobility.API.Context;
 namespace SupervisorMobility.API.Migrations
 {
     [DbContext(typeof(SupervisorMobilityContext))]
-    partial class SupervisorMobilityContextModelSnapshot : ModelSnapshot
+    [Migration("20230130175600_ProductDistribution")]
+    partial class ProductDistribution1
     {
-        protected override void BuildModel(ModelBuilder modelBuilder)
+        /// <inheritdoc />
+        protected override void BuildTargetModel(ModelBuilder modelBuilder)
         {
 #pragma warning disable 612, 618
             modelBuilder
@@ -134,14 +137,14 @@ namespace SupervisorMobility.API.Migrations
                         .HasColumnType("bit")
                         .HasDefaultValue(true);
 
-                    b.Property<int?>("ProductDistributionId")
+                    b.Property<int?>("ProductDistributionDistributionId")
                         .HasColumnType("int");
 
                     b.HasKey("OperationId");
 
                     b.HasIndex("DistributionId");
 
-                    b.HasIndex("ProductDistributionId");
+                    b.HasIndex("ProductDistributionDistributionId");
 
                     b.ToTable("Operations");
 
@@ -202,11 +205,11 @@ namespace SupervisorMobility.API.Migrations
 
             modelBuilder.Entity("SupervisorMobility.API.DataAccess.Entities.ProductDistribution", b =>
                 {
-                    b.Property<int>("ProductDistributionId")
+                    b.Property<int>("DistributionId")
                         .ValueGeneratedOnAdd()
                         .HasColumnType("int");
 
-                    SqlServerPropertyBuilderExtensions.UseIdentityColumn(b.Property<int>("ProductDistributionId"));
+                    SqlServerPropertyBuilderExtensions.UseIdentityColumn(b.Property<int>("DistributionId"));
 
                     b.Property<string>("Code")
                         .IsRequired()
@@ -226,21 +229,11 @@ namespace SupervisorMobility.API.Migrations
                     b.Property<int>("ProductId")
                         .HasColumnType("int");
 
-                    b.HasKey("ProductDistributionId");
+                    b.HasKey("DistributionId");
 
                     b.HasIndex("ProductId");
 
                     b.ToTable("ProductDistributions");
-
-                    b.HasData(
-                        new
-                        {
-                            ProductDistributionId = 1,
-                            Code = "Dist1",
-                            Description = "Distribution from products",
-                            IsActive = true,
-                            ProductId = 1
-                        });
                 });
 
             modelBuilder.Entity("SupervisorMobility.API.DataAccess.Entities.SupportDocumentType", b =>
@@ -803,18 +796,20 @@ namespace SupervisorMobility.API.Migrations
 
                     b.HasOne("SupervisorMobility.API.DataAccess.Entities.ProductDistribution", null)
                         .WithMany("Operations")
-                        .HasForeignKey("ProductDistributionId");
+                        .HasForeignKey("ProductDistributionDistributionId");
 
                     b.Navigation("Distribution");
                 });
 
             modelBuilder.Entity("SupervisorMobility.API.DataAccess.Entities.ProductDistribution", b =>
                 {
-                    b.HasOne("SupervisorMobility.API.DataAccess.Entities.Product", null)
-                        .WithMany("ProductDistributions")
+                    b.HasOne("SupervisorMobility.API.DataAccess.Entities.Product", "Product")
+                        .WithMany()
                         .HasForeignKey("ProductId")
                         .OnDelete(DeleteBehavior.Cascade)
                         .IsRequired();
+
+                    b.Navigation("Product");
                 });
 
             modelBuilder.Entity("SupervisorMobility.API.Entities.AssyChart", b =>
@@ -896,11 +891,6 @@ namespace SupervisorMobility.API.Migrations
             modelBuilder.Entity("SupervisorMobility.API.DataAccess.Entities.Distribution", b =>
                 {
                     b.Navigation("Operations");
-                });
-
-            modelBuilder.Entity("SupervisorMobility.API.DataAccess.Entities.Product", b =>
-                {
-                    b.Navigation("ProductDistributions");
                 });
 
             modelBuilder.Entity("SupervisorMobility.API.DataAccess.Entities.ProductDistribution", b =>

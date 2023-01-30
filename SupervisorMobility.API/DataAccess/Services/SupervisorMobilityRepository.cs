@@ -194,6 +194,7 @@ namespace SupervisorMobility.API.Services
         }
         #endregion
         #region DistributionOperations
+
         public async Task<IEnumerable<Distribution>> GetDistributionsForAreaAsync(int areaId)
         {
             return await _context.Distributions
@@ -400,7 +401,7 @@ namespace SupervisorMobility.API.Services
             _context.Products.Remove(product);
         }
         #endregion
-       
+
 
         #region AssyChart
         public async Task<IEnumerable<AssyChart>> GetAssyChartsAsync()
@@ -411,8 +412,8 @@ namespace SupervisorMobility.API.Services
 
         public async Task<AssyChart?> GetAssyChartAsync(int asssychartId)
         {
-           return await _context.AssyCharts
-                .Where(p => p.AssyChardId == asssychartId).FirstOrDefaultAsync();
+            return await _context.AssyCharts
+                 .Where(p => p.AssyChardId == asssychartId).FirstOrDefaultAsync();
         }
 
         public async Task<bool> AssyChartExistAsync(int assychartID)
@@ -435,6 +436,35 @@ namespace SupervisorMobility.API.Services
         public async Task<bool> SaveChangesAsync()
         {
             return (await _context.SaveChangesAsync() >= 0);
+        }
+
+        #endregion
+
+        #region ProductDistribution
+        public async Task<IEnumerable<ProductDistribution>> GetDistributionsForProductAsync(int productId)
+        {
+            return await _context.ProductDistributions.Where(o => o.ProductId == productId).ToListAsync();
+        }
+
+        public async Task<ProductDistribution?> GetDistributionForProductAsync(int productId, int distributionId)
+        {
+            return await _context.ProductDistributions
+                .Where(o => o.ProductId == productId && o.ProductDistributionId == distributionId)
+                .FirstOrDefaultAsync();
+        }
+
+        public async Task AddDistributionForProductAsync(int productId, ProductDistribution productDistribution)
+        {
+            var product = await GetProductAsync(productId);
+            if (product != null)
+            {
+                product.ProductDistributions.Add(productDistribution);
+            }
+        }
+
+        public void DeleteProductDistribution(ProductDistribution productDistribution)
+        {
+            _context.ProductDistributions.Remove(productDistribution);
         }
 
         #endregion

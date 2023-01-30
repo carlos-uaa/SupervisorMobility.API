@@ -1,12 +1,13 @@
-﻿using System.ComponentModel.DataAnnotations.Schema;
+﻿using SupervisorMobility.API.Entities;
+using System.ComponentModel.DataAnnotations.Schema;
 using System.ComponentModel.DataAnnotations;
 
 namespace SupervisorMobility.API.DataAccess.Entities
 {
-    public class Product
+    public class ProductDistribution
     {
         [Key, DatabaseGenerated(DatabaseGeneratedOption.Identity)]
-        public int ProductId { get; set; }
+        public int ProductDistributionId { get; set; }
         [Required]
         [MaxLength(50)]
         public string Code { get; set; }
@@ -14,9 +15,14 @@ namespace SupervisorMobility.API.DataAccess.Entities
         [MaxLength(200)]
         public string Description { get; set; }
         public bool? IsActive { get; set; }
-        public ICollection<ProductDistribution> ProductDistributions { get; set; }= new List<ProductDistribution>();
 
-        public Product(string code, string description)
+        //Navigation properties
+        public int ProductId { get; set; }
+
+        public ICollection<Operation> Operations { get; set; }
+            = new List<Operation>();
+
+        public ProductDistribution(string code, string description)
         {
             Code = code;
             Description = description;

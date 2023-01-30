@@ -109,6 +109,12 @@ namespace SupervisorMobility.API.Services
 
         #endregion
 
-       
+        #region ProductDistributions
+        Task<IEnumerable<ProductDistribution>> GetDistributionsForProductAsync(int productId);
+        Task<ProductDistribution?> GetDistributionForProductAsync(int productId, int distributionId);
+        Task AddDistributionForProductAsync(int plantId, ProductDistribution distribution);
+
+        void DeleteProductDistribution(ProductDistribution productDistribution);
+        #endregion
     }
 }
