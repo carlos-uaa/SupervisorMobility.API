@@ -8,6 +8,7 @@ namespace SupervisorMobility.API.MapperProfiles
         {
             CreateMap<Entities.AssyChart, Models.AssyChart.AssyChartWithoutNavigationProperties>().ReverseMap();
             CreateMap<Entities.AssyChart, Models.AssyChart.AssyChartForCreationDto>().ReverseMap();
+            CreateMap<Entities.AssyChart, Models.AssyChart.AssyChartWhitInfo>().ReverseMap();
             CreateMap<Entities.AssyChart, Models.AssyChart.AssyChartForUpdateDto>().ReverseMap();
         }
     }

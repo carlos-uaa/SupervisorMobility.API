@@ -1,6 +1,7 @@
 ﻿using Microsoft.EntityFrameworkCore.ChangeTracking;
 using SupervisorMobility.API.DataAccess.Entities;
 using SupervisorMobility.API.Entities;
+using SupervisorMobility.API.Models.AssyChart;
 
 namespace SupervisorMobility.API.Services
 {
