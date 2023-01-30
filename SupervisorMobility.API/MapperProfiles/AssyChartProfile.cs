@@ -1,6 +1,4 @@
 ﻿using AutoMapper;
-using Microsoft.AspNetCore.Http;
-using Microsoft.AspNetCore.Mvc;
 
 namespace SupervisorMobility.API.MapperProfiles
 {
@@ -8,9 +6,9 @@ namespace SupervisorMobility.API.MapperProfiles
     {
         public AssyChartProfile()
         {
-            CreateMap<DataAccess.Entities.AssyChart, Models.AssyChart.AssyChartWithoutNavigationProperties>().ReverseMap();
-            CreateMap<DataAccess.Entities.AssyChart, Models.AssyChart.AssyChartForCreationDto>().ReverseMap();
-            CreateMap<DataAccess.Entities.AssyChart, Models.AssyChart.AssyChartForUpdateDto>().ReverseMap();
+            CreateMap<Entities.AssyChart, Models.AssyChart.AssyChartWithoutNavigationProperties>().ReverseMap();
+            CreateMap<Entities.AssyChart, Models.AssyChart.AssyChartForCreationDto>().ReverseMap();
+            CreateMap<Entities.AssyChart, Models.AssyChart.AssyChartForUpdateDto>().ReverseMap();
         }
     }
 }

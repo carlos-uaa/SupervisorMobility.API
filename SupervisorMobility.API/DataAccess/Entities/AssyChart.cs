@@ -1,8 +1,8 @@
-﻿using SupervisorMobility.API.Entities;
+﻿using System.ComponentModel.DataAnnotations.Schema;
 using System.ComponentModel.DataAnnotations;
-using System.ComponentModel.DataAnnotations.Schema;
+using SupervisorMobility.API.DataAccess.Entities;
 
-namespace SupervisorMobility.API.DataAccess.Entities
+namespace SupervisorMobility.API.Entities
 {
     public class AssyChart
     {
@@ -19,24 +19,24 @@ namespace SupervisorMobility.API.DataAccess.Entities
         public DateTime ModificationDate { get; set; }
 
         //Navigation properties
-        public int ProductId { get; set; }
+        public int? ProductId { get; set; }
         public Product? Product { get; set; }
 
         //arbol
-        public int PlantId { get; set; }
+        public int? PlantId { get; set; }
         public Plant? Plant { get; set; }
-        
-        public int AreaId { get; set; }
+
+        public int? AreaId { get; set; }
         public Area? Area { get; set; }
-     
-        public int DistributionId { get; set; }
+
+        public int? DistributionId { get; set; }
         public Distribution? Distribution { get; set; }
 
-        public int OperacionId { get; set; }
+        public int? OperationId { get; set; }
         public Operation? Operation { get; set; }
-
         
 
     }
 
 }
+

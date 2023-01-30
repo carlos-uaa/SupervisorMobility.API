@@ -36,7 +36,6 @@ builder.Services.RegisterDataServices(builder.Configuration);
 builder.Services.AddAutoMapper(AppDomain.CurrentDomain.GetAssemblies());
 
 //Add Cors
-<<<<<<< Updated upstream
 builder.Services.AddCors(policy => {
 
     policy.AddPolicy("Policy_Name", builder =>
@@ -45,14 +44,6 @@ builder.Services.AddCors(policy => {
         .AllowAnyOrigin().AllowAnyMethod().AllowAnyHeader()
  );
 });
-
-
-=======
-builder.Services.AddCors(p => p.AddPolicy("corspolicy", build =>
-{
-    build.WithOrigins("https://localhost:44398").AllowAnyMethod().AllowAnyHeader();
-}));
->>>>>>> Stashed changes
 
 var app = builder.Build();
 

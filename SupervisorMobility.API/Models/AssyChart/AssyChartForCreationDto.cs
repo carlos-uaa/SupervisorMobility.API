@@ -1,4 +1,8 @@
-﻿using System.ComponentModel.DataAnnotations;
+﻿using Microsoft.EntityFrameworkCore.Metadata.Internal;
+using SupervisorMobility.API.DataAccess.Entities;
+using SupervisorMobility.API.Entities;
+using System.ComponentModel.DataAnnotations;
+using System.ComponentModel.DataAnnotations.Schema;
 
 namespace SupervisorMobility.API.Models.AssyChart
 {
@@ -10,11 +14,15 @@ namespace SupervisorMobility.API.Models.AssyChart
         public string HOE { get; set; } = string.Empty;
         public DateTime CreationDate { get; set; }
         public DateTime ModificationDate { get; set; }
-        public int idProduct { get; set; }
-        //Linkers o Navigation Propietis
+
+        //Navigation properties
+        public int ProductId { get; set; }
+
+        //arbol
         public int PlantId { get; set; }
+
         public int AreaId { get; set; }
-        
+
         public int DistributionId { get; set; }
 
         //Data Operation to create
@@ -24,6 +32,7 @@ namespace SupervisorMobility.API.Models.AssyChart
         [Required]
         [MaxLength(200)]
         public string DescriptionOperation { get; set; } = string.Empty;
-        public bool? IsActiveOperation { get; set; }
+        public bool IsActiveOperation { get; set; }
+
     }
 }

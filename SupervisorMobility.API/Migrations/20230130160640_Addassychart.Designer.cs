@@ -12,17 +12,18 @@ using SupervisorMobility.API.Context;
 namespace SupervisorMobility.API.Migrations
 {
     [DbContext(typeof(SupervisorMobilityContext))]
-    [Migration("20221114230726_AddProductSchema")]
-    partial class AddProductSchema
+    [Migration("20230130160640_Addassychart")]
+    partial class Addassychart
     {
+        /// <inheritdoc />
         protected override void BuildTargetModel(ModelBuilder modelBuilder)
         {
 #pragma warning disable 612, 618
             modelBuilder
-                .HasAnnotation("ProductVersion", "6.0.9")
+                .HasAnnotation("ProductVersion", "7.0.1")
                 .HasAnnotation("Relational:MaxIdentifierLength", 128);
 
-            SqlServerModelBuilderExtensions.UseIdentityColumns(modelBuilder, 1L, 1);
+            SqlServerModelBuilderExtensions.UseIdentityColumns(modelBuilder);
 
             modelBuilder.Entity("SupervisorMobility.API.DataAccess.Entities.Area", b =>
                 {
@@ -30,7 +31,7 @@ namespace SupervisorMobility.API.Migrations
                         .ValueGeneratedOnAdd()
                         .HasColumnType("int");
 
-                    SqlServerPropertyBuilderExtensions.UseIdentityColumn(b.Property<int>("AreaId"), 1L, 1);
+                    SqlServerPropertyBuilderExtensions.UseIdentityColumn(b.Property<int>("AreaId"));
 
                     b.Property<string>("Code")
                         .IsRequired()
@@ -73,7 +74,7 @@ namespace SupervisorMobility.API.Migrations
                         .ValueGeneratedOnAdd()
                         .HasColumnType("int");
 
-                    SqlServerPropertyBuilderExtensions.UseIdentityColumn(b.Property<int>("DistributionId"), 1L, 1);
+                    SqlServerPropertyBuilderExtensions.UseIdentityColumn(b.Property<int>("DistributionId"));
 
                     b.Property<int>("AreaId")
                         .HasColumnType("int");
@@ -116,7 +117,7 @@ namespace SupervisorMobility.API.Migrations
                         .ValueGeneratedOnAdd()
                         .HasColumnType("int");
 
-                    SqlServerPropertyBuilderExtensions.UseIdentityColumn(b.Property<int>("OperationId"), 1L, 1);
+                    SqlServerPropertyBuilderExtensions.UseIdentityColumn(b.Property<int>("OperationId"));
 
                     b.Property<string>("Code")
                         .IsRequired()
@@ -159,7 +160,7 @@ namespace SupervisorMobility.API.Migrations
                         .ValueGeneratedOnAdd()
                         .HasColumnType("int");
 
-                    SqlServerPropertyBuilderExtensions.UseIdentityColumn(b.Property<int>("ProductId"), 1L, 1);
+                    SqlServerPropertyBuilderExtensions.UseIdentityColumn(b.Property<int>("ProductId"));
 
                     b.Property<string>("Code")
                         .IsRequired()
@@ -203,7 +204,7 @@ namespace SupervisorMobility.API.Migrations
                         .ValueGeneratedOnAdd()
                         .HasColumnType("int");
 
-                    SqlServerPropertyBuilderExtensions.UseIdentityColumn(b.Property<int>("SupportDocumentTypeId"), 1L, 1);
+                    SqlServerPropertyBuilderExtensions.UseIdentityColumn(b.Property<int>("SupportDocumentTypeId"));
 
                     b.Property<string>("Code")
                         .IsRequired()
@@ -241,13 +242,88 @@ namespace SupervisorMobility.API.Migrations
                         });
                 });
 
+            modelBuilder.Entity("SupervisorMobility.API.Entities.AssyChart", b =>
+                {
+                    b.Property<int>("AssyChardId")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("int");
+
+                    SqlServerPropertyBuilderExtensions.UseIdentityColumn(b.Property<int>("AssyChardId"));
+
+                    b.Property<int?>("AreaId")
+                        .HasColumnType("int");
+
+                    b.Property<string>("CCP")
+                        .IsRequired()
+                        .HasColumnType("nvarchar(max)");
+
+                    b.Property<DateTime>("CreationDate")
+                        .HasColumnType("Date");
+
+                    b.Property<int?>("DistributionId")
+                        .HasColumnType("int");
+
+                    b.Property<string>("GOS")
+                        .IsRequired()
+                        .HasColumnType("nvarchar(max)");
+
+                    b.Property<string>("HOE")
+                        .IsRequired()
+                        .HasColumnType("nvarchar(max)");
+
+                    b.Property<bool?>("IsActive")
+                        .HasColumnType("bit");
+
+                    b.Property<DateTime>("ModificationDate")
+                        .HasColumnType("Date");
+
+                    b.Property<int?>("OperationId")
+                        .HasColumnType("int");
+
+                    b.Property<int?>("PlantId")
+                        .HasColumnType("int");
+
+                    b.Property<int?>("ProductId")
+                        .HasColumnType("int");
+
+                    b.HasKey("AssyChardId");
+
+                    b.HasIndex("AreaId");
+
+                    b.HasIndex("DistributionId");
+
+                    b.HasIndex("OperationId");
+
+                    b.HasIndex("PlantId");
+
+                    b.HasIndex("ProductId");
+
+                    b.ToTable("AssyCharts");
+
+                    b.HasData(
+                        new
+                        {
+                            AssyChardId = 1,
+                            AreaId = 1,
+                            CCP = "string",
+                            CreationDate = new DateTime(1, 1, 1, 0, 0, 0, 0, DateTimeKind.Unspecified),
+                            DistributionId = 1,
+                            GOS = "string",
+                            HOE = "string",
+                            IsActive = true,
+                            ModificationDate = new DateTime(1, 1, 1, 0, 0, 0, 0, DateTimeKind.Unspecified),
+                            PlantId = 1,
+                            ProductId = 1
+                        });
+                });
+
             modelBuilder.Entity("SupervisorMobility.API.Entities.ChecklistCategory", b =>
                 {
                     b.Property<int>("ChecklistCategoryId")
                         .ValueGeneratedOnAdd()
                         .HasColumnType("int");
 
-                    SqlServerPropertyBuilderExtensions.UseIdentityColumn(b.Property<int>("ChecklistCategoryId"), 1L, 1);
+                    SqlServerPropertyBuilderExtensions.UseIdentityColumn(b.Property<int>("ChecklistCategoryId"));
 
                     b.Property<string>("Code")
                         .IsRequired()
@@ -272,9 +348,10 @@ namespace SupervisorMobility.API.Migrations
                     b.HasIndex(new[] { "Code" }, "ix_cc_cod")
                         .IsUnique();
 
-                    b.ToTable("ChecklistCategories");
-
-                    b.HasCheckConstraint("ck_cc_seq", "[Sequence] > 0");
+                    b.ToTable("ChecklistCategories", t =>
+                        {
+                            t.HasCheckConstraint("ck_cc_seq", "[Sequence] > 0");
+                        });
 
                     b.HasData(
                         new
@@ -333,7 +410,7 @@ namespace SupervisorMobility.API.Migrations
                         .ValueGeneratedOnAdd()
                         .HasColumnType("int");
 
-                    SqlServerPropertyBuilderExtensions.UseIdentityColumn(b.Property<int>("QuestionID"), 1L, 1);
+                    SqlServerPropertyBuilderExtensions.UseIdentityColumn(b.Property<int>("QuestionID"));
 
                     b.Property<int?>("AnswerSetID")
                         .HasColumnType("int");
@@ -376,9 +453,10 @@ namespace SupervisorMobility.API.Migrations
                     b.HasIndex(new[] { "Code" }, "ix_cq_cod")
                         .IsUnique();
 
-                    b.ToTable("ChecklistQuestions");
-
-                    b.HasCheckConstraint("ck_cq_seq", "[CategorySequence] > 0");
+                    b.ToTable("ChecklistQuestions", t =>
+                        {
+                            t.HasCheckConstraint("ck_cq_seq", "[CategorySequence] > 0");
+                        });
 
                     b.HasData(
                         new
@@ -411,7 +489,7 @@ namespace SupervisorMobility.API.Migrations
                         .ValueGeneratedOnAdd()
                         .HasColumnType("int");
 
-                    SqlServerPropertyBuilderExtensions.UseIdentityColumn(b.Property<int>("GroupId"), 1L, 1);
+                    SqlServerPropertyBuilderExtensions.UseIdentityColumn(b.Property<int>("GroupId"));
 
                     b.Property<string>("Code")
                         .IsRequired()
@@ -453,7 +531,7 @@ namespace SupervisorMobility.API.Migrations
                         .ValueGeneratedOnAdd()
                         .HasColumnType("int");
 
-                    SqlServerPropertyBuilderExtensions.UseIdentityColumn(b.Property<int>("JobObservationConfigId"), 1L, 1);
+                    SqlServerPropertyBuilderExtensions.UseIdentityColumn(b.Property<int>("JobObservationConfigId"));
 
                     b.Property<int>("ChecklistCategoryId")
                         .HasColumnType("int");
@@ -508,7 +586,7 @@ namespace SupervisorMobility.API.Migrations
                         .ValueGeneratedOnAdd()
                         .HasColumnType("int");
 
-                    SqlServerPropertyBuilderExtensions.UseIdentityColumn(b.Property<int>("JobObservationTypeId"), 1L, 1);
+                    SqlServerPropertyBuilderExtensions.UseIdentityColumn(b.Property<int>("JobObservationTypeId"));
 
                     b.Property<string>("Code")
                         .IsRequired()
@@ -552,7 +630,7 @@ namespace SupervisorMobility.API.Migrations
                         .ValueGeneratedOnAdd()
                         .HasColumnType("int");
 
-                    SqlServerPropertyBuilderExtensions.UseIdentityColumn(b.Property<int>("PlantId"), 1L, 1);
+                    SqlServerPropertyBuilderExtensions.UseIdentityColumn(b.Property<int>("PlantId"));
 
                     b.Property<string>("Code")
                         .IsRequired()
@@ -596,7 +674,7 @@ namespace SupervisorMobility.API.Migrations
                         .ValueGeneratedOnAdd()
                         .HasColumnType("int");
 
-                    SqlServerPropertyBuilderExtensions.UseIdentityColumn(b.Property<int>("QuestionTypeId"), 1L, 1);
+                    SqlServerPropertyBuilderExtensions.UseIdentityColumn(b.Property<int>("QuestionTypeId"));
 
                     b.Property<string>("Code")
                         .IsRequired()
@@ -693,6 +771,39 @@ namespace SupervisorMobility.API.Migrations
                         .IsRequired();
 
                     b.Navigation("Distribution");
+                });
+
+            modelBuilder.Entity("SupervisorMobility.API.Entities.AssyChart", b =>
+                {
+                    b.HasOne("SupervisorMobility.API.DataAccess.Entities.Area", "Area")
+                        .WithMany()
+                        .HasForeignKey("AreaId");
+
+                    b.HasOne("SupervisorMobility.API.DataAccess.Entities.Distribution", "Distribution")
+                        .WithMany()
+                        .HasForeignKey("DistributionId");
+
+                    b.HasOne("SupervisorMobility.API.DataAccess.Entities.Operation", "Operation")
+                        .WithMany()
+                        .HasForeignKey("OperationId");
+
+                    b.HasOne("SupervisorMobility.API.Entities.Plant", "Plant")
+                        .WithMany()
+                        .HasForeignKey("PlantId");
+
+                    b.HasOne("SupervisorMobility.API.DataAccess.Entities.Product", "Product")
+                        .WithMany()
+                        .HasForeignKey("ProductId");
+
+                    b.Navigation("Area");
+
+                    b.Navigation("Distribution");
+
+                    b.Navigation("Operation");
+
+                    b.Navigation("Plant");
+
+                    b.Navigation("Product");
                 });
 
             modelBuilder.Entity("SupervisorMobility.API.Entities.ChecklistQuestion", b =>

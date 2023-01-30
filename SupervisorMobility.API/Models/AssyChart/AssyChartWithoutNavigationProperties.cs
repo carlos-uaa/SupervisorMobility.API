@@ -1,4 +1,9 @@
-﻿namespace SupervisorMobility.API.Models.AssyChart
+﻿using Microsoft.EntityFrameworkCore.Metadata.Internal;
+using SupervisorMobility.API.DataAccess.Entities;
+using SupervisorMobility.API.Entities;
+using System.ComponentModel.DataAnnotations.Schema;
+
+namespace SupervisorMobility.API.Models.AssyChart
 {
     public class AssyChartWithoutNavigationProperties
     {
@@ -7,12 +12,20 @@
         public string GOS { get; set; } = string.Empty;
         public string CCP { get; set; } = string.Empty;
         public string HOE { get; set; } = string.Empty;
+
         public DateTime CreationDate { get; set; }
         public DateTime ModificationDate { get; set; }
-        public int idProduct { get; set; }
-        //Linkers o Navigation Propietis
+
+        //Navigation properties
+        public int ProductId { get; set; }
+
+        //arbol
         public int PlantId { get; set; }
+
         public int AreaId { get; set; }
+
         public int DistributionId { get; set; }
+
+        public int OperacionId { get; set; }
     }
 }

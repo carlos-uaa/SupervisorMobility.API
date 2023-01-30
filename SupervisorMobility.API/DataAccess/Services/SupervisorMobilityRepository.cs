@@ -400,23 +400,44 @@ namespace SupervisorMobility.API.Services
             _context.Products.Remove(product);
         }
         #endregion
+       
+
+        #region AssyChart
+        public async Task<IEnumerable<AssyChart>> GetAssyChartsAsync()
+        {
+            return await _context.AssyCharts
+                 .OrderBy(c => c.AssyChardId).ToListAsync();
+        }
+
+        public async Task<AssyChart?> GetAssyChartAsync(int asssychartId)
+        {
+           return await _context.AssyCharts
+                .Where(p => p.AssyChardId == asssychartId).FirstOrDefaultAsync();
+        }
+
+        public async Task<bool> AssyChartExistAsync(int assychartID)
+        {
+            return await _context.AssyCharts.AnyAsync(p => p.AssyChardId == assychartID);
+        }
+
+        public void AddAssyChart(AssyChart assychart)
+        {
+            _context.AssyCharts.Add(assychart);
+        }
+
+        public void DeleteAssyChartAsync(AssyChart assyChart)
+        {
+            _context.AssyCharts.Remove(assyChart);
+        }
+        #endregion
+
         #region CommonOperations
         public async Task<bool> SaveChangesAsync()
         {
             return (await _context.SaveChangesAsync() >= 0);
         }
-        #endregion
-
-        #region AssyChart
-        //Add from file, recibe enumerate, busca existencia de area, planta etc if not crea, si solo registra
-
-        public void DeleteAssyChart(AssyChart assyChart)
-        {
-           _context.AssyCharts.Remove(assyChart);
-        }
-
-
 
         #endregion
+
     }
 }

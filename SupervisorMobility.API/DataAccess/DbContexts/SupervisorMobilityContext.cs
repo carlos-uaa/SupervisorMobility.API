@@ -19,7 +19,6 @@ namespace SupervisorMobility.API.Context
         public DbSet<Operation> Operations { get; set; }
         public DbSet<SupportDocumentType> SupportDocumentTypes { get; set; }
         public DbSet<Product> Products { get; set; }
-        //Add AssyCharts db Context
         public DbSet<AssyChart> AssyCharts { get; set; }
         #endregion
 
@@ -73,11 +72,6 @@ namespace SupervisorMobility.API.Context
                 .Property(p => p.IsActive)
                 .HasDefaultValue(true);
 
-            //Add AssyChartModel
-
-            modelBuilder.Entity<AssyChart>()
-                .Property(p => p.IsActive)
-                .HasDefaultValue(true);
 
 
             //Constraints
@@ -304,7 +298,23 @@ namespace SupervisorMobility.API.Context
                     IsActive = true
                 });
 
-            modelBuilder.Entity<AssyChart>();
+
+            modelBuilder.Entity<AssyChart>()
+                .HasData(
+                new AssyChart()
+                {
+                    AssyChardId = 1,
+                    IsActive = true,
+                    GOS = "string",
+                    CCP = "string",
+                    HOE = "string",
+                    CreationDate = new DateTime(),
+                    ModificationDate = new DateTime(),
+                    ProductId = 1,
+                    PlantId = 1,
+                    AreaId = 1,
+                    DistributionId = 1
+                });
 
             base.OnModelCreating(modelBuilder);
         }

@@ -96,8 +96,11 @@ namespace SupervisorMobility.API.Services
         void DeleteProduct(Product product);
         #endregion
         #region AssyChart
-
-        void DeleteAssyChart(AssyChart assyChart);
+        Task<IEnumerable<AssyChart>> GetAssyChartsAsync();
+        Task<AssyChart?> GetAssyChartAsync(int asssychartId);
+        Task<bool> AssyChartExistAsync(int assychartID);
+        void AddAssyChart(AssyChart assychart);
+        void DeleteAssyChartAsync(AssyChart assyChart);
 
         #endregion
         #region CommonOperations

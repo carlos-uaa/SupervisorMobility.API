@@ -35,36 +35,45 @@ namespace SupervisorMobility.API.Controllers
         {
             if (!await _supervisorMobilityRepository.PlantExistAsync(newAssyChart.PlantId))
             {
-                return NotFound();
+                return NotFound("No Planta");
             }
 
             if (!await _supervisorMobilityRepository.AreaExistAsync(newAssyChart.AreaId))
             {
-                return NotFound();
+                return NotFound("No Area");
             }
 
             if (!await _supervisorMobilityRepository.DistributionExistsAsync(newAssyChart.DistributionId))
             {
-                return NotFound();
+                return NotFound("No Distributio");
             }
 
-            //Object new operation
-            var newOperation = _mapper.Map<Operation>(new { newAssyChart.CodeOperation, newAssyChart.DescriptionOperation, newAssyChart.IsActiveOperation });
-            //create operatin
-            await _assyChartService.CreateOperationAsync(newAssyChart.AreaId, newAssyChart.DistributionId, newOperation);
+            OperationForCreationDto newOperation = new();
+            newOperation.Code = newAssyChart.CodeOperation;
+            newOperation.Description = newAssyChart.DescriptionOperation;
+            newOperation.IsActive = newAssyChart.IsActiveOperation;
 
+            var finalOperation = _mapper.Map<Operation>(newOperation);
+
+            await _assyChartService.CreateOperationAsync(newAssyChart.AreaId, newAssyChart.DistributionId, finalOperation);
+            
             //operation to get id
-            var createdOperation = _mapper.Map<OperationWithoutNavigationPropertiesDto>(newOperation);
+            var createdOperationAndGetId = _mapper.Map<OperationWithoutNavigationPropertiesDto>(finalOperation);
 
+            
             var finalAssyChart = _mapper.Map<AssyChart>(newAssyChart);
-
+            finalAssyChart.OperationId = createdOperationAndGetId.OperationId;
             await _assyChartService.CreateAssyChartAsync(finalAssyChart);
 
-            var createdAssychart =
-                _mapper.Map<AssyChartWithoutNavigationProperties>(finalAssyChart);
+            var createdAssychartToReturn = _mapper.Map<AssyChartWithoutNavigationProperties>(finalAssyChart);
 
 
-            return NotFound();
+            return CreatedAtRoute("GetAssyChart",
+                new
+                {
+                    assychardid = createdAssychartToReturn.AssyChardId
+                },
+                createdAssychartToReturn);
 
         }
 
