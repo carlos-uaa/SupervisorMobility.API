@@ -3,6 +3,7 @@ using Microsoft.AspNetCore.Mvc;
 using SupervisorMobility.API.Business;
 using SupervisorMobility.API.DataAccess.Entities;
 using SupervisorMobility.API.Entities;
+using SupervisorMobility.API.Models.AreaDtos;
 using SupervisorMobility.API.Models.AssyChart;
 using SupervisorMobility.API.Models.OperationDtos;
 using SupervisorMobility.API.Services;
@@ -31,7 +32,7 @@ namespace SupervisorMobility.API.Controllers
         }
 
         [HttpPost]
-        public async Task<ActionResult<AssyChartWithoutNavigationProperties>> CreateAssyChart(AssyChartForCreationDto newAssyChart)
+        public async Task<ActionResult<AssyChartForCreationDto>> CreateAssyChart(AssyChartForCreationDto newAssyChart)
         {
             if (!await _supervisorMobilityRepository.PlantExistAsync(newAssyChart.PlantId))
             {
@@ -67,14 +68,22 @@ namespace SupervisorMobility.API.Controllers
 
             var createdAssychartToReturn = _mapper.Map<AssyChartWithoutNavigationProperties>(finalAssyChart);
 
+            return Ok();
+            //return CreatedAtRoute("GetAssyChart",
+            //    new
+            //    {
+            //        assychardid = createdAssychartToReturn.AssyChardId
+            //    },
+            //    createdAssychartToReturn);
+        }
 
-            return CreatedAtRoute("GetAssyChart",
-                new
-                {
-                    assychardid = createdAssychartToReturn.AssyChardId
-                },
-                createdAssychartToReturn);
+        [HttpGet]
+        public async Task<ActionResult<IEnumerable<AssyChartWithoutNavigationProperties>>> GetAssyCharts()
+        {
+            
+            var allAssyCharts = await _supervisorMobilityRepository.GetAssyChartsAsync();
 
+            return Ok(_mapper.Map<IEnumerable<AssyChartWithoutNavigationProperties>>(allAssyCharts));
         }
 
 
