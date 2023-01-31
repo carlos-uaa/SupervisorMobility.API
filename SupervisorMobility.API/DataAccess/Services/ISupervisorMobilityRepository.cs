@@ -116,5 +116,14 @@ namespace SupervisorMobility.API.Services
 
         void DeleteProductDistribution(ProductDistribution productDistribution);
         #endregion
+        #region ProductOperationsOperations
+        Task<IEnumerable<ProductOperation>> GetProductOperationsForDistributionAsync(int productDistributionId);
+        Task<ProductOperation?> GetProductOperationForDistributionAsync(int productDistributionId, int operationId);
+        Task AddProductOperationForDistributionAsync(int productId, int productDistributionId, ProductOperation productOperation);
+        void DeleteProductOperation(ProductOperation productOperation);
+        Task<bool> ProductDistributionExistsAsync(int distributionId);
+
+        #endregion
+
     }
 }

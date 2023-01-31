@@ -21,16 +21,34 @@ namespace SupervisorMobility.API.Business
             _mapper = mapper;
         }
 
+        #region Product
+        public async Task<bool> CheckProductExistance(int productId)
+        {
+            return await _repository.ProductExistAsync(productId);
+        }
+        #endregion
+        #region Area
+
         public async Task<bool> CheckAreaExistance(int areaId)
         {
             return await _repository.AreaExistAsync(areaId);
         }
-
+        #endregion
+        #region Distribution
         public async Task<bool> CheckDistributionExistance(int distributionId)
         {
             return await _repository.DistributionExistsAsync(distributionId);
         }
+        #endregion
 
+        #region ProductDistribution
+        public async Task<bool> CheckProductDistributionExistance(int productDistributionId)
+        {
+            return await _repository.ProductDistributionExistsAsync(productDistributionId);
+        }
+        #endregion
+
+        #region Operation
         public async Task<Operation> CreateOperationAsync(int areaId, int distributionId, Operation operation)
         {
             await _repository.AddOperationForDistributionAsync(areaId, distributionId, operation);
@@ -38,16 +56,6 @@ namespace SupervisorMobility.API.Business
             return operation;
 
         }
-
-        public async Task<Product> CreateProductAsync(ProductForCreationDto product)
-        {
-            var productEntity = _mapper.Map<Product>(product);
-            _repository.AddProduct(productEntity);
-            await _repository.SaveChangesAsync();
-            return productEntity;
-
-        }
-
         public async Task<Operation?> FetchOperationAsync(int distributionId, int operationId)
         {
             return await _repository.GetOperationForDistributionAsync(distributionId, operationId);
@@ -56,6 +64,53 @@ namespace SupervisorMobility.API.Business
         public async Task<IEnumerable<Operation>> FetchOperationsAsync(int distributionId)
         {
             return await _repository.GetOperationsForDistributionAsync(distributionId);
+        }
+
+        public async Task RemoveOperationAsync(Operation operation)
+        {
+            _repository.DeleteOperation(operation);
+            await _repository.SaveChangesAsync();
+        }
+        public async Task UpdateOperationAsync(
+            OperationForUpdateDto operationForUpdate,
+            Operation operation)
+        {
+            _mapper.Map(operationForUpdate, operation);
+            await _repository.SaveChangesAsync();
+        }
+
+
+        #endregion
+
+        #region ProductOperation
+
+        public async Task<ProductOperation> CreateProductOperationAsync(int productId, int productDistributionId, ProductOperation productOperation)
+        {
+            await _repository.AddProductOperationForDistributionAsync(productId, productDistributionId, productOperation);
+            await _repository.SaveChangesAsync();
+            return productOperation;
+
+        }
+
+        public async Task<IEnumerable<ProductOperation>> FetchProductOperationsAsync(int productDistributionId)
+        {
+            return await _repository.GetProductOperationsForDistributionAsync(productDistributionId);
+        }
+
+        public async Task<ProductOperation?> FetchProductOperationAsync(int productDistributionId, int productOperationId)
+        {
+            return await _repository.GetProductOperationForDistributionAsync(productDistributionId, productOperationId);
+        }
+
+        #endregion
+        #region Product
+        public async Task<Product> CreateProductAsync(ProductForCreationDto product)
+        {
+            var productEntity = _mapper.Map<Product>(product);
+            _repository.AddProduct(productEntity);
+            await _repository.SaveChangesAsync();
+            return productEntity;
+
         }
 
         public async Task<Product?> FetchProductAsync(int productId)
@@ -68,11 +123,6 @@ namespace SupervisorMobility.API.Business
             return await _repository.GetProductsAsync();
         }
 
-        public async Task RemoveOperationAsync(Operation operation)
-        {
-            _repository.DeleteOperation(operation);
-            await _repository.SaveChangesAsync();
-        }
 
         public async Task RemoveProductAsync(Product product)
         {
@@ -80,13 +130,6 @@ namespace SupervisorMobility.API.Business
             await _repository.SaveChangesAsync();
         }
 
-        public async Task UpdateOperationAsync(
-            OperationForUpdateDto operationForUpdate, 
-            Operation operation)
-        {
-            _mapper.Map(operationForUpdate, operation);
-            await _repository.SaveChangesAsync();
-        }
 
         public async Task UpdateProductAsync(ProductForUpdateDto productForUpdate, Product product)
         {
@@ -94,6 +137,8 @@ namespace SupervisorMobility.API.Business
             await _repository.SaveChangesAsync();
         }
 
+
+        #endregion
         #region Plant
         public async Task<IEnumerable<Plant>> FetchPlantsAsync()
         {
@@ -174,6 +219,8 @@ namespace SupervisorMobility.API.Business
         {
             throw new NotImplementedException();
         }
+
+
         #endregion
     }
 }

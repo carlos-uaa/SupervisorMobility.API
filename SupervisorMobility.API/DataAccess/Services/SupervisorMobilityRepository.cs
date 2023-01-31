@@ -2,6 +2,7 @@
 using SupervisorMobility.API.Context;
 using SupervisorMobility.API.DataAccess.Entities;
 using SupervisorMobility.API.Entities;
+using SupervisorMobility.API.Migrations;
 
 namespace SupervisorMobility.API.Services
 {
@@ -467,7 +468,38 @@ namespace SupervisorMobility.API.Services
             _context.ProductDistributions.Remove(productDistribution);
         }
 
+        public async Task<bool> ProductDistributionExistsAsync(int productDistributionId)
+        {
+            return await _context.ProductDistributions.AnyAsync(p => p.ProductDistributionId == productDistributionId);
+        }
         #endregion
 
+        #region ProductOperationsOperations
+        public async Task<IEnumerable<ProductOperation>> GetProductOperationsForDistributionAsync(int productDistributionId)
+        {
+            return await _context.ProductOperations.Where(o => o.ProductDistributionId == productDistributionId).ToListAsync();
+        }
+
+        public async Task<ProductOperation?> GetProductOperationForDistributionAsync(int productDistributionId, int operationId)
+        {
+            return await _context.ProductOperations
+                .Where(o => o.ProductDistributionId == productDistributionId && o.ProductOperationId == operationId)
+                .FirstOrDefaultAsync();
+        }
+
+        public async Task AddProductOperationForDistributionAsync(int productId, int productDistributionId, ProductOperation productOperation)
+        {
+            var productDistribution = await GetDistributionForProductAsync(productId, productDistributionId);
+            if (productDistribution != null)
+            {
+                productDistribution.ProductOperations.Add(productOperation);
+            }
+        }
+
+        public async void DeleteProductOperation(ProductOperation productOperation)
+        {
+            _context.ProductOperations.Remove(productOperation);
+        }
+        #endregion
     }
 }
