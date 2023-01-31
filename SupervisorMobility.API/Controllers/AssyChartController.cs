@@ -68,7 +68,7 @@ namespace SupervisorMobility.API.Controllers
 
             var createdAssychartToReturn = _mapper.Map<AssyChartWithoutNavigationProperties>(finalAssyChart);
 
-            return Ok();
+            return Ok(createdAssychartToReturn);
             //return CreatedAtRoute("GetAssyChart",
             //    new
             //    {
@@ -78,14 +78,38 @@ namespace SupervisorMobility.API.Controllers
         }
 
         [HttpGet]
-        public async Task<ActionResult<IEnumerable<AssyChartWithoutNavigationProperties>>> GetAssyCharts()
+        public async Task<ActionResult<IEnumerable<AssyChartWhitInfo>>> GetAssyCharts()
         {
             
             var allAssyCharts = await _supervisorMobilityRepository.GetAssyChartsAsync();
 
-            return Ok(_mapper.Map<IEnumerable<AssyChartWithoutNavigationProperties>>(allAssyCharts));
+            return Ok(_mapper.Map<IEnumerable<AssyChartWhitInfo>>(allAssyCharts));
         }
 
 
+        [HttpGet("{assychartid}", Name = "GetAssyChart")]
+        public async Task<ActionResult<AssyChartWithoutNavigationProperties>> GetAssyChart(int assychartId)
+        {
+           
+            var asssychart = await _supervisorMobilityRepository.GetAssyChartAsync(assychartId);
+
+            return Ok(_mapper.Map<AssyChartWithoutNavigationProperties>(asssychart));
+        }
+
+        [HttpDelete("{assychartId}")]
+        public async Task<ActionResult> DeleteAssyChart(int assychartId)
+        {
+            var assychart = await _supervisorMobilityRepository.GetAssyChartAsync(assychartId);
+
+            if (assychart == null)
+            {
+                return NotFound();
+            }
+
+            _supervisorMobilityRepository.DeleteAssyChartAsync(assychart);
+            await _supervisorMobilityRepository.SaveChangesAsync();
+
+            return Ok();
+        }
     }
 }
