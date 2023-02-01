@@ -1,6 +1,12 @@
 ﻿using Microsoft.EntityFrameworkCore.Metadata.Internal;
 using SupervisorMobility.API.DataAccess.Entities;
 using SupervisorMobility.API.Entities;
+using SupervisorMobility.API.Models.AreaDtos;
+using SupervisorMobility.API.Models.OperationDtos;
+using SupervisorMobility.API.Models.PlantDtos;
+using SupervisorMobility.API.Models.ProductDistributionsDtos;
+using SupervisorMobility.API.Models.ProductDtos;
+using System.ComponentModel.DataAnnotations;
 using System.ComponentModel.DataAnnotations.Schema;
 
 namespace SupervisorMobility.API.Models.AssyChart
@@ -16,17 +22,20 @@ namespace SupervisorMobility.API.Models.AssyChart
         public DateTime CreationDate { get; set; }
         public DateTime ModificationDate { get; set; }
 
-        //Navigation properties
+        //Product info
         public int ProductId { get; set; }
-
-        //arbol
+        public ProductDto Product { get; set; } = new ProductDto();
+        //PLANT INFO
         public int PlantId { get; set; }
-        
-
+        public PlantDto Plant { get; set; } = new PlantDto();
+        //AREA INFO
         public int AreaId { get; set; }
-
+        public AreaWithoutNavigationPropertiesDto? Area { get; set; } = new AreaWithoutNavigationPropertiesDto();   
+        //Distribution Info
         public int DistributionId { get; set; }
-
-        public int OperacionId { get; set; }
+        public  DistributionWithoutNavigationPropertiesDto Distribution { get; set; } = new DistributionWithoutNavigationPropertiesDto();
+        //Operation Info
+        public int OperationId { get; set; }
+        public OperationWithoutNavigationPropertiesDto Operation { get; set; } = new OperationWithoutNavigationPropertiesDto();
     }
 }

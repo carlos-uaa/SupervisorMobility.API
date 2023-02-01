@@ -12,12 +12,11 @@ namespace SupervisorMobility.API.Controllers
 {
     [Route("api/assycharts")]
     [ApiController]
-    public class AssyChartController: ControllerBase
+    public class AssyChartController : ControllerBase
     {
         private readonly IMapper _mapper;
         private readonly IAssyChartService _assyChartService;
         private readonly ISupervisorMobilityRepository _supervisorMobilityRepository;
-        
 
 
         public AssyChartController(IAssyChartService assyChartService, ISupervisorMobilityRepository supervisorMobilityRepository,
@@ -50,25 +49,36 @@ namespace SupervisorMobility.API.Controllers
             }
 
             OperationForCreationDto newOperation = new();
-            newOperation.Code = newAssyChart.CodeOperation;
-            newOperation.Description = newAssyChart.DescriptionOperation;
-            newOperation.IsActive = newAssyChart.IsActiveOperation;
+            newOperation.Code = newAssyChart.OperationCode;
+            newOperation.Description = newAssyChart.OperationDescription;
+            newOperation.IsActive = newAssyChart.OperationIsActive;
 
             var finalOperation = _mapper.Map<Operation>(newOperation);
 
             await _assyChartService.CreateOperationAsync(newAssyChart.AreaId, newAssyChart.DistributionId, finalOperation);
-            
+
             //operation to get id
             var createdOperationAndGetId = _mapper.Map<OperationWithoutNavigationPropertiesDto>(finalOperation);
 
-            
-            var finalAssyChart = _mapper.Map<AssyChart>(newAssyChart);
-            finalAssyChart.OperationId = createdOperationAndGetId.OperationId;
+
+            AssyChartWithoutNavigationProperties finalAssyChart = new AssyChartWithoutNavigationProperties() 
+            { 
+                GOS = newAssyChart.GOS,
+                CCP = newAssyChart.CCP,
+                HOE = newAssyChart.HOE,
+                ProductId   = newAssyChart.ProductId,
+                PlantId     = newAssyChart.PlantId,
+                AreaId = newAssyChart.AreaId,
+                DistributionId = newAssyChart.DistributionId,
+                OperationId = createdOperationAndGetId.OperationId,
+                CreationDate = newAssyChart.CreationDate,
+                ModificationDate = newAssyChart.CreationDate
+            };
+         
             await _assyChartService.CreateAssyChartAsync(finalAssyChart);
 
-            var createdAssychartToReturn = _mapper.Map<AssyChartWithoutNavigationProperties>(finalAssyChart);
 
-            return Ok(createdAssychartToReturn);
+            return Ok(finalAssyChart);
             //return CreatedAtRoute("GetAssyChart",
             //    new
             //    {
@@ -77,24 +87,26 @@ namespace SupervisorMobility.API.Controllers
             //    createdAssychartToReturn);
         }
 
+
         [HttpGet]
-        public async Task<ActionResult<IEnumerable<AssyChartWhitInfo>>> GetAssyCharts()
+        public async Task<ActionResult<IEnumerable<AssyChartWhitInfo>>> GetAllAssyCharts()
         {
-            
-            var allAssyCharts = await _supervisorMobilityRepository.GetAssyChartsAsync();
+
+            var allAssyCharts = await _supervisorMobilityRepository.GetAllAssyChartsAsync();
 
             return Ok(_mapper.Map<IEnumerable<AssyChartWhitInfo>>(allAssyCharts));
         }
 
 
-        [HttpGet("{assychartid}", Name = "GetAssyChart")]
-        public async Task<ActionResult<AssyChartWithoutNavigationProperties>> GetAssyChart(int assychartId)
+        [HttpGet("{assychartId}")]
+        public async Task<ActionResult<AssyChartForUpdateDto>> GetAssyChart(int assychartId)
         {
-           
+
             var asssychart = await _supervisorMobilityRepository.GetAssyChartAsync(assychartId);
 
-            return Ok(_mapper.Map<AssyChartWithoutNavigationProperties>(asssychart));
+            return Ok(_mapper.Map<AssyChartForUpdateDto>(asssychart));
         }
+
 
         [HttpDelete("{assychartId}")]
         public async Task<ActionResult> DeleteAssyChart(int assychartId)
@@ -111,5 +123,45 @@ namespace SupervisorMobility.API.Controllers
 
             return Ok();
         }
+
+
+        [HttpPut("{assychartId}")]
+        public async Task<ActionResult> UpdateAssyChart(int assychartId, AssyChartForUpdateDto AssyCharttoUpdate)
+        {
+            if (!await _supervisorMobilityRepository.PlantExistAsync(AssyCharttoUpdate.PlantId))
+            {
+                return NotFound("No Planta");
+            }
+
+            if (!await _supervisorMobilityRepository.AreaExistAsync(AssyCharttoUpdate.AreaId))
+            {
+                return NotFound("No Area");
+            }
+
+            if (!await _supervisorMobilityRepository.DistributionExistsAsync(AssyCharttoUpdate.DistributionId))
+            {
+                return NotFound("No Distributio");
+            } 
+            
+            if (!await _supervisorMobilityRepository.OperationExistsAsync(AssyCharttoUpdate.OperationId))
+            {
+                return NotFound("No Operation");
+            }
+
+            var assyChartEntity = await _supervisorMobilityRepository.GetAssyChartAsync(assychartId);
+            
+            if (assyChartEntity == null)
+            {
+                return NotFound("AssyChart Not Found");
+            }
+
+            _mapper.Map(AssyCharttoUpdate, assyChartEntity);
+
+            await _supervisorMobilityRepository.SaveChangesAsync();
+
+            return Ok();
+
+        }
+
     }
 }
