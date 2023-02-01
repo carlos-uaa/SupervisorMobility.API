@@ -105,6 +105,105 @@ namespace SupervisorMobility.API.Controllers
                 createdProductOperationToReturn);
         }
 
+        [HttpPut("{productOperationId}")]
+         public async Task<ActionResult> UpdateProductOperation(int productId, int productDistributionId,
+                int productOperationId,
+                ProductOperationForUpdateDto productOperation)
+                {
+                if (!await _assyChartService.CheckProductExistance(productId))
+                {
+                    return NotFound();
+                }
+
+                if (!await _assyChartService.CheckProductDistributionExistance(productDistributionId))
+                {
+                    return NotFound();
+                }
+
+                var productOperationEntity = await _assyChartService
+                    .FetchProductOperationAsync(productDistributionId, productOperationId);
+
+                if (productOperationEntity == null)
+                {
+                    return NotFound();
+                }
+
+                await _assyChartService.UpdateProductOperationAsync(productOperation, productOperationEntity);
+
+                return NoContent();
+         }
+
+        [HttpPatch("{productOperationid}")]
+        public async Task<ActionResult> PartiallyUpdateProductOperation(
+         int productId, int productDistributionId, int productOperationId,
+         JsonPatchDocument<ProductOperationForUpdateDto> patchDocumentProductOperation)
+        {
+            if (!await _assyChartService.CheckProductExistance(productId))
+            {
+                return NotFound();
+            }
+
+            if (!await _assyChartService.CheckProductDistributionExistance(productDistributionId))
+            {
+                return NotFound();
+            }
+
+            var productOperationEntity = await _assyChartService
+                .FetchProductOperationAsync(productDistributionId, productOperationId);
+
+            if (productOperationEntity == null)
+            {
+                return NotFound();
+            }
+
+            var productOperationToPatch = _mapper.Map<ProductOperationForUpdateDto>(productOperationEntity);
+
+            patchDocumentProductOperation.ApplyTo(productOperationToPatch, ModelState);
+
+            if (!ModelState.IsValid)
+            {
+                return BadRequest(ModelState);
+            }
+
+            if (!TryValidateModel(productOperationToPatch))
+            {
+                return BadRequest(ModelState);
+            }
+
+            await _assyChartService.UpdateProductOperationAsync(productOperationToPatch, productOperationEntity);
+
+            return NoContent();
+        }
+
+
+        [HttpDelete("{productOperationId}")]
+        public async Task<ActionResult> DeleteProductOperation(int productId, int productDistributionId, int productOperationId)
+        {
+            if (!await _assyChartService.CheckProductExistance(productId))
+            {
+                return NotFound();
+            }
+
+            if (!await _assyChartService.CheckProductDistributionExistance(productDistributionId))
+            {
+                return NotFound();
+            }
+
+            var productOperationEntity = await _assyChartService
+                .FetchProductOperationAsync(productDistributionId, productOperationId);
+
+            if (productOperationEntity == null)
+            {
+                return NotFound();
+            }
+
+            await _assyChartService.RemoveProductOperationAsync(productOperationEntity);
+
+            return NoContent();
+        }
+
+
+
 
     }
 }

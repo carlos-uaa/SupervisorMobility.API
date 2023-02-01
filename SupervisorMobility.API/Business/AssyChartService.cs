@@ -5,6 +5,7 @@ using SupervisorMobility.API.Models.AssyChart;
 using SupervisorMobility.API.Models.OperationDtos;
 using SupervisorMobility.API.Models.PlantDtos;
 using SupervisorMobility.API.Models.ProductDtos;
+using SupervisorMobility.API.Models.ProductOperationDtos;
 using SupervisorMobility.API.Models.SupportDocumentTypeDtos;
 using SupervisorMobility.API.Services;
 
@@ -100,6 +101,19 @@ namespace SupervisorMobility.API.Business
         public async Task<ProductOperation?> FetchProductOperationAsync(int productDistributionId, int productOperationId)
         {
             return await _repository.GetProductOperationForDistributionAsync(productDistributionId, productOperationId);
+        }
+
+        public async Task RemoveProductOperationAsync(ProductOperation productOperation)
+        {
+            _repository.DeleteProductOperation(productOperation);
+            await _repository.SaveChangesAsync();
+        }
+        public async Task UpdateProductOperationAsync(
+            ProductOperationForUpdateDto productOperationForUpdate,
+            ProductOperation productOperation)
+        {
+            _mapper.Map(productOperationForUpdate, productOperation);
+            await _repository.SaveChangesAsync();
         }
 
         #endregion

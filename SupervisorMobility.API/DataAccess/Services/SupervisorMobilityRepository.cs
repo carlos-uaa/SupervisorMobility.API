@@ -497,7 +497,7 @@ namespace SupervisorMobility.API.Services
             }
         }
 
-        public async void DeleteProductOperation(ProductOperation productOperation)
+        public void DeleteProductOperation(ProductOperation productOperation)
         {
             _context.ProductOperations.Remove(productOperation);
         }

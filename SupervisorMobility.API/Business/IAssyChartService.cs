@@ -4,6 +4,7 @@ using SupervisorMobility.API.Models.AssyChart;
 using SupervisorMobility.API.Models.OperationDtos;
 using SupervisorMobility.API.Models.PlantDtos;
 using SupervisorMobility.API.Models.ProductDtos;
+using SupervisorMobility.API.Models.ProductOperationDtos;
 using SupervisorMobility.API.Models.SupportDocumentTypeDtos;
 
 namespace SupervisorMobility.API.Business
@@ -29,7 +30,8 @@ namespace SupervisorMobility.API.Business
         Task<ProductOperation> CreateProductOperationAsync(int productId, int productDistributionId, ProductOperation productOperation);
         Task<IEnumerable<ProductOperation>> FetchProductOperationsAsync(int productDistributionId);
         Task<ProductOperation?> FetchProductOperationAsync(int productDistributionId, int productOperationId);
-
+        Task UpdateProductOperationAsync(ProductOperationForUpdateDto productOperationForUpdate, ProductOperation productOperation);
+        Task RemoveProductOperationAsync(ProductOperation productOperation);
         #endregion
 
         #region Product

@@ -40,6 +40,27 @@ namespace SupervisorMobility.API.Controllers
             return Ok(_mapper.Map<IEnumerable<ProductDistributionWithoutNavigationPropertiesDto>>(distributionsForProduct));
         }
 
+        [HttpGet("{productDistributionId}", Name = "GetProductDistribution")]
+        public async Task<ActionResult<ProductDistributionWithoutNavigationPropertiesDto>> GetProductDistribution(
+             int productId, int productDistributionId)
+        {
+            if (!await _supervisorMobilityRepository.ProductExistAsync(productId))
+            {
+                return NotFound();
+            }
+
+            var productDistribution = await _supervisorMobilityRepository
+                .GetDistributionForProductAsync(productId, productDistributionId);
+
+            if (productDistribution == null)
+            {
+                return NotFound();
+            }
+
+            return Ok(_mapper.Map<ProductDistributionWithoutNavigationPropertiesDto>(productDistribution));
+        }
+
+
         [HttpPost]
         public async Task<ActionResult<ProductDistributionWithoutNavigationPropertiesDto>> CreateProductDistribution(int productId,
             ProductDistributionForCreationDto distribution)
@@ -82,19 +103,57 @@ namespace SupervisorMobility.API.Controllers
                 return NotFound();
             }
 
-            var distributionEntity = await _supervisorMobilityRepository
+            var productDistributionEntity = await _supervisorMobilityRepository
                 .GetDistributionForProductAsync(productId, productDistributionId);
-            if (distributionEntity == null)
+            if (productDistributionEntity == null)
             {
                 return NotFound();
             }
-            _mapper.Map(productDistribution, distributionEntity);
+            _mapper.Map(productDistribution, productDistributionEntity);
 
             await _supervisorMobilityRepository.SaveChangesAsync();
 
             return NoContent();
         }
 
+        [HttpPatch("{distributionid}")]
+        public async Task<ActionResult> PartiallyUpdateProductDistribution(
+            int productId, int productDistributionId,
+            JsonPatchDocument<ProductDistributionForUpdateDto> patchDocumentProductDistribution)
+        {
+
+            if (!await _supervisorMobilityRepository.ProductExistAsync(productId))
+            {
+                return NotFound();
+            }
+
+            var productDistributionEntity = await _supervisorMobilityRepository
+                .GetDistributionForProductAsync(productId, productDistributionId);
+            if (productDistributionEntity == null)
+            {
+                return NotFound();
+            }
+
+            var productDistributionToPatch = _mapper.Map<ProductDistributionForUpdateDto>(productDistributionEntity);
+
+            patchDocumentProductDistribution.ApplyTo(productDistributionToPatch, ModelState);
+
+            if (!ModelState.IsValid)
+            {
+                return BadRequest(ModelState);
+            }
+
+            if (!TryValidateModel(productDistributionToPatch))
+            {
+                return BadRequest(ModelState);
+            }
+
+            _mapper.Map(productDistributionToPatch, productDistributionEntity);
+
+            await _supervisorMobilityRepository.SaveChangesAsync();
+
+            return NoContent();
+        }
 
         [HttpDelete("{productDistributionId}")]
         public async Task<ActionResult> DeleteProductDistribution(int productId, int productDistributionId)
