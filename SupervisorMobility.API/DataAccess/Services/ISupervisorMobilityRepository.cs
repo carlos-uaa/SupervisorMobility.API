@@ -56,6 +56,9 @@ namespace SupervisorMobility.API.Services
         #endregion
         #region OperationOperations
         Task<IEnumerable<Operation>> GetOperationsForDistributionAsync(int distributionId);
+
+        Task<bool> OperationExistsAsync(int operationId);
+
         Task<Operation?> GetOperationForDistributionAsync(int distributionId, int operationId);
         Task AddOperationForDistributionAsync(int areaId, int distributionId, Operation operation);
         void DeleteOperation(Operation operation);
@@ -97,7 +100,7 @@ namespace SupervisorMobility.API.Services
         void DeleteProduct(Product product);
         #endregion
         #region AssyChart
-        Task<IEnumerable<AssyChart>> GetAssyChartsAsync();
+        Task<IEnumerable<AssyChart>> GetAllAssyChartsAsync();
         Task<AssyChart?> GetAssyChartAsync(int asssychartId);
         Task<bool> AssyChartExistAsync(int assychartID);
         void AddAssyChart(AssyChart assychart);

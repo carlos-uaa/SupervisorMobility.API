@@ -236,6 +236,10 @@ namespace SupervisorMobility.API.Services
                 .Where(o => o.DistributionId == distributionId && o.OperationId == operationId)
                 .FirstOrDefaultAsync();
         }
+        public async Task<bool> OperationExistsAsync(int operationId)
+        {
+            return await _context.Operations.AnyAsync(p => p.OperationId == operationId);
+        }
         public async Task AddOperationForDistributionAsync(int areaId, int distributionId, Operation operation)
         {
             var distribution = await GetDistributionForAreaAsync(areaId, distributionId);
@@ -405,15 +409,23 @@ namespace SupervisorMobility.API.Services
 
 
         #region AssyChart
-        public async Task<IEnumerable<AssyChart>> GetAssyChartsAsync()
+        public async Task<IEnumerable<AssyChart>> GetAllAssyChartsAsync()
         {
             return await _context.AssyCharts
+                .Include(a => a.Area)
+                .Include(p => p.Plant)
+                .Include(d => d.Distribution)
+                .Include(o => o.Operation)
+                .Include(pr => pr.Product)
                  .OrderBy(c => c.AssyChardId).ToListAsync();
+
         }
 
         public async Task<AssyChart?> GetAssyChartAsync(int asssychartId)
         {
+            //return whit info
             return await _context.AssyCharts
+                .Include(o => o.Operation)
                  .Where(p => p.AssyChardId == asssychartId).FirstOrDefaultAsync();
         }
 
@@ -433,13 +445,7 @@ namespace SupervisorMobility.API.Services
         }
         #endregion
 
-        #region CommonOperations
-        public async Task<bool> SaveChangesAsync()
-        {
-            return (await _context.SaveChangesAsync() >= 0);
-        }
-
-        #endregion
+      
 
         #region ProductDistribution
         public async Task<IEnumerable<ProductDistribution>> GetDistributionsForProductAsync(int productId)
@@ -466,6 +472,14 @@ namespace SupervisorMobility.API.Services
         public void DeleteProductDistribution(ProductDistribution productDistribution)
         {
             _context.ProductDistributions.Remove(productDistribution);
+        }
+
+        #endregion
+
+        #region CommonOperations
+        public async Task<bool> SaveChangesAsync()
+        {
+            return (await _context.SaveChangesAsync() >= 0);
         }
 
         #endregion

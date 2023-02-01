@@ -346,6 +346,22 @@ namespace SupervisorMobility.API.Migrations
                     b.HasIndex("ProductId");
 
                     b.ToTable("AssyCharts");
+
+                    b.HasData(
+                        new
+                        {
+                            AssyChardId = 1,
+                            AreaId = 1,
+                            CCP = "string",
+                            CreationDate = new DateTime(1, 1, 1, 0, 0, 0, 0, DateTimeKind.Unspecified),
+                            DistributionId = 1,
+                            GOS = "string",
+                            HOE = "string",
+                            IsActive = true,
+                            ModificationDate = new DateTime(1, 1, 1, 0, 0, 0, 0, DateTimeKind.Unspecified),
+                            PlantId = 1,
+                            ProductId = 1
+                        });
                 });
 
             modelBuilder.Entity("SupervisorMobility.API.Entities.ChecklistCategory", b =>

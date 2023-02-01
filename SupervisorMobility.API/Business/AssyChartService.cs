@@ -156,10 +156,9 @@ namespace SupervisorMobility.API.Business
         }
         #endregion
         #region AssyChart
-        public async Task<AssyChart> CreateAssyChartAsync(AssyChart assyChart)
+        public async Task<AssyChart> CreateAssyChartAsync(AssyChartWithoutNavigationProperties assyChart)
         {
-   
-            var finalasssychart = _mapper.Map<Entities.AssyChart>(assyChart);
+            var finalasssychart = _mapper.Map<AssyChart>(assyChart);
             _repository.AddAssyChart(finalasssychart);
             await _repository.SaveChangesAsync();
             return finalasssychart;
