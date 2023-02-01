@@ -407,8 +407,6 @@ namespace SupervisorMobility.API.Services
             _context.Products.Remove(product);
         }
         #endregion
-
-
         #region AssyChart
         public async Task<IEnumerable<AssyChart>> GetAllAssyChartsAsync()
         {
@@ -445,9 +443,6 @@ namespace SupervisorMobility.API.Services
             _context.AssyCharts.Remove(assyChart);
         }
         #endregion
-
-      
-
         #region ProductDistribution
         public async Task<IEnumerable<ProductDistribution>> GetDistributionsForProductAsync(int productId)
         {
@@ -480,7 +475,6 @@ namespace SupervisorMobility.API.Services
             return await _context.ProductDistributions.AnyAsync(p => p.ProductDistributionId == productDistributionId);
         }
         #endregion
-
         #region ProductOperationsOperations
         public async Task<IEnumerable<ProductOperation>> GetProductOperationsForDistributionAsync(int productDistributionId)
         {
@@ -503,10 +497,17 @@ namespace SupervisorMobility.API.Services
             }
         }
 
-        public async void DeleteProductOperation(ProductOperation productOperation)
+        public void DeleteProductOperation(ProductOperation productOperation)
         {
             _context.ProductOperations.Remove(productOperation);
         }
+        #endregion
+        #region CommonOperations
+        public async Task<bool> SaveChangesAsync()
+        {
+            return (await _context.SaveChangesAsync() >= 0);
+        }
+
         #endregion
     }
 }
