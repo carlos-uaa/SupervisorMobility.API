@@ -18,6 +18,7 @@ namespace SupervisorMobility.API.Context
         public DbSet<Distribution> Distributions { get; set; }
         public DbSet<ProductDistribution> ProductDistributions { get; set; }
         public DbSet<Operation> Operations { get; set; }
+        public DbSet<ProductOperation> ProductOperations { get; set; }
         public DbSet<SupportDocumentType> SupportDocumentTypes { get; set; }
         public DbSet<Product> Products { get; set; }
         //Add AssyCharts db Context
@@ -63,6 +64,10 @@ namespace SupervisorMobility.API.Context
                 .HasDefaultValue(true);
 
             modelBuilder.Entity<Operation>()
+                .Property(p => p.IsActive)
+                .HasDefaultValue(true);
+
+            modelBuilder.Entity<ProductOperation>()
                 .Property(p => p.IsActive)
                 .HasDefaultValue(true);
 
@@ -287,6 +292,16 @@ namespace SupervisorMobility.API.Context
                     IsActive = true,
                     DistributionId = 1
                 });
+
+            modelBuilder.Entity<ProductOperation>()
+            .HasData(
+            new ProductOperation("OP1", "Operation from products")
+            {
+                ProductOperationId = 1,
+                IsActive = true,
+                ProductDistributionId = 1
+            });
+
 
             modelBuilder.Entity<SupportDocumentType>()
                 .HasData(

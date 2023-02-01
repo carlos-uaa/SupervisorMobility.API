@@ -24,7 +24,16 @@ namespace SupervisorMobility.API.Business
         Task UpdateOperationAsync(OperationForUpdateDto operationForUpdate, Operation operation);
         Task RemoveOperationAsync(Operation operation);
         #endregion
+
+        #region ProductOperations
+        Task<ProductOperation> CreateProductOperationAsync(int productId, int productDistributionId, ProductOperation productOperation);
+        Task<IEnumerable<ProductOperation>> FetchProductOperationsAsync(int productDistributionId);
+        Task<ProductOperation?> FetchProductOperationAsync(int productDistributionId, int productOperationId);
+
+        #endregion
+
         #region Product
+        Task<bool> CheckProductExistance(int productId);
         Task<IEnumerable<Product>> FetchProductsAsync();
         Task<Product?> FetchProductAsync(int productId);
         Task<Product> CreateProductAsync(ProductForCreationDto product);
@@ -44,6 +53,9 @@ namespace SupervisorMobility.API.Business
         #endregion
         #region Distribution
         Task<bool> CheckDistributionExistance(int distributionId);
+        #endregion
+        #region PRoductDistribution
+        Task<bool> CheckProductDistributionExistance(int productDistributionId);
         #endregion
 
         #region AssyChart

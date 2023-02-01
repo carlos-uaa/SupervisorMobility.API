@@ -3,6 +3,7 @@ using System;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Infrastructure;
 using Microsoft.EntityFrameworkCore.Metadata;
+using Microsoft.EntityFrameworkCore.Migrations;
 using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 using SupervisorMobility.API.Context;
 
@@ -11,9 +12,11 @@ using SupervisorMobility.API.Context;
 namespace SupervisorMobility.API.Migrations
 {
     [DbContext(typeof(SupervisorMobilityContext))]
-    partial class SupervisorMobilityContextModelSnapshot : ModelSnapshot
+    [Migration("20230131193554_ProductOperation")]
+    partial class ProductOperation1
     {
-        protected override void BuildModel(ModelBuilder modelBuilder)
+        /// <inheritdoc />
+        protected override void BuildTargetModel(ModelBuilder modelBuilder)
         {
 #pragma warning disable 612, 618
             modelBuilder
@@ -384,22 +387,6 @@ namespace SupervisorMobility.API.Migrations
                     b.HasIndex("ProductId");
 
                     b.ToTable("AssyCharts");
-
-                    b.HasData(
-                        new
-                        {
-                            AssyChardId = 1,
-                            AreaId = 1,
-                            CCP = "string",
-                            CreationDate = new DateTime(1, 1, 1, 0, 0, 0, 0, DateTimeKind.Unspecified),
-                            DistributionId = 1,
-                            GOS = "string",
-                            HOE = "string",
-                            IsActive = true,
-                            ModificationDate = new DateTime(1, 1, 1, 0, 0, 0, 0, DateTimeKind.Unspecified),
-                            PlantId = 1,
-                            ProductId = 1
-                        });
                 });
 
             modelBuilder.Entity("SupervisorMobility.API.Entities.ChecklistCategory", b =>
