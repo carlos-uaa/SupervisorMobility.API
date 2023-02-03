@@ -45,7 +45,15 @@ builder.Services.AddCors(policy => {
  );
 });
 
+
+builder.WebHost.ConfigureKestrel(serverOptions =>
+{
+    serverOptions.Limits.MaxRequestBodySize= 1073741824;
+});
+
 var app = builder.Build();
+
+
 
 // Configure the HTTP request pipeline.
 

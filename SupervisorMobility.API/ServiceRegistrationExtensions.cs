@@ -1,4 +1,5 @@
-﻿using Microsoft.EntityFrameworkCore;
+﻿using Microsoft.AspNetCore.Http.Features;
+using Microsoft.EntityFrameworkCore;
 using SupervisorMobility.API.Business;
 using SupervisorMobility.API.Context;
 using SupervisorMobility.API.Services;
@@ -12,6 +13,15 @@ namespace SupervisorMobility.API
         {
             services.AddScoped<IJobObservationService, JobObservationService>();
             services.AddScoped<IAssyChartService, AssyChartService>();
+
+            ////this
+            services.Configure<IISServerOptions>(options =>
+            {
+                options.MaxRequestBodySize = 1073741824;
+            });
+            ////this
+
+
             return services;
         }
 
