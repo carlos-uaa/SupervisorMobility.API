@@ -70,8 +70,6 @@ app.UseHttpsRedirection();
 
 app.UseAuthorization();
 
-app.UseCors("corspolicy");
-
 app.MapControllers();
 
 app.Run();

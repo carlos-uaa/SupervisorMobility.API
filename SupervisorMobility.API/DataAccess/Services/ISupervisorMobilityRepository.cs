@@ -35,7 +35,9 @@ namespace SupervisorMobility.API.Services
         #region PlantOperations
         Task<IEnumerable<Plant>> GetPlantsAsync();
         Task<Plant?> GetPlantAsync(int plantId, bool includeAreas = false);
+        Task<Plant?> GetPlantByCodeAndDescriptionAsync(string code, string description);
         Task<bool> PlantExistAsync(int plantId);
+        Task<bool> PlantExistByCodeAndDescriptionAsync(string code, string description);
         void AddPlant(Plant plant);
         void DeletePlant(Plant plant);
         #endregion
@@ -43,23 +45,33 @@ namespace SupervisorMobility.API.Services
         Task<IEnumerable<Area>> GetAreasForPlantAsync(int plantId);
         Task<Area?> GetAreaForPlantAsync(int plantId,
             int areaId, bool includeOperations = false);
+        Task<Area?> GetAreaForPlantByCodeAndDescriptionAsync(int plantId,
+            string code, string description);
         Task<bool> AreaExistAsync(int areaId);
+        Task<bool> AreaExistByCodeAndDescriptionInPlantAsync(string code, string description, int plantId);
         Task AddAreaForPlantAsync(int plantId, Area area);
         void DeleteArea(Area area);
         #endregion
         #region DistributionOperations
         Task<IEnumerable<Distribution>> GetDistributionsForAreaAsync(int areaId);
+        
         Task<Distribution?> GetDistributionForAreaAsync(int areaId, int distributionId);
+        Task<Distribution?> GetDistributionForAreaByCodeAndDescriptionAsync(int areaId, string code, string description);
+      
         Task AddDistributionForPlantAsync(int plantId, int areaId, Distribution distribution);
         Task<bool> DistributionExistsAsync(int distributionId);
+        Task<bool> DistributionExistsByCodeandDescriptionInAreaAsync(int areaId, string code, string description);
         void DeleteDistribution (Distribution distribution);
         #endregion
         #region OperationOperations
         Task<IEnumerable<Operation>> GetOperationsForDistributionAsync(int distributionId);
-
+        
         Task<bool> OperationExistsAsync(int operationId);
+        Task<bool> OperationExistsByCodeAndDescriptionInDistributionAsync(int distributionId, string code, string description);
 
         Task<Operation?> GetOperationForDistributionAsync(int distributionId, int operationId);
+        Task<Operation?> GetOperationForDistributionByCodeAndDescriptionAsync(int distributionId, string opcode, string opdescription);
+
         Task AddOperationForDistributionAsync(int areaId, int distributionId, Operation operation);
         void DeleteOperation(Operation operation);
         #endregion
@@ -95,13 +107,16 @@ namespace SupervisorMobility.API.Services
         #region ProductOperations
         Task<IEnumerable<Product>> GetProductsAsync();
         Task<Product?> GetProductAsync(int productId);
+        Task<Product?> GetProductByCodeAndDescriptionAsync(string code, string description);
         Task<bool> ProductExistAsync(int productId);
+        Task<bool> ProductExistByCodeAndDescriptionAsync(string code, string description);
         void AddProduct(Product product);
         void DeleteProduct(Product product);
         #endregion
         #region AssyChart
         Task<IEnumerable<AssyChart>> GetAllAssyChartsAsync();
         Task<AssyChart?> GetAssyChartAsync(int asssychartId);
+        Task<IEnumerable<AssyChart>> GetAssyChartByPlantAsync(int plantId);
         Task<bool> AssyChartExistAsync(int assychartID);
         void AddAssyChart(AssyChart assychart);
         void DeleteAssyChartAsync(AssyChart assyChart);

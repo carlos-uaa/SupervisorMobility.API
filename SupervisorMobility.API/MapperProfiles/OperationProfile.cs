@@ -6,9 +6,9 @@ namespace SupervisorMobility.API.MapperProfiles
     {
         public OperationProfile()
         {
-            CreateMap<DataAccess.Entities.Operation, Models.OperationDtos.OperationWithoutNavigationPropertiesDto>().ReverseMap();
-            CreateMap<DataAccess.Entities.Operation, Models.OperationDtos.OperationForCreationDto>().ReverseMap();
-            CreateMap<DataAccess.Entities.Operation, Models.OperationDtos.OperationForUpdateDto>().ReverseMap();
+            CreateMap<Entities.Operation, Models.OperationDtos.OperationWithoutNavigationPropertiesDto>().ReverseMap();
+            CreateMap<Entities.Operation, Models.OperationDtos.OperationForCreationDto>().ReverseMap();
+            CreateMap<Entities.Operation, Models.OperationDtos.OperationForUpdateDto>().ReverseMap();
         }
     }
 }
