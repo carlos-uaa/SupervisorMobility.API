@@ -144,5 +144,11 @@ namespace SupervisorMobility.API.Services
 
         #endregion
 
+        #region JobObservationOperations
+
+        //Task<IEnumerable<JobObservation>> GetAllJobObservationsAsync();
+
+        #endregion
+
     }
 }

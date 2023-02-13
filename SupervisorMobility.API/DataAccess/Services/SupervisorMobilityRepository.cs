@@ -2,7 +2,6 @@
 using SupervisorMobility.API.Context;
 using SupervisorMobility.API.DataAccess.Entities;
 using SupervisorMobility.API.Entities;
-using SupervisorMobility.API.Migrations;
 using SupervisorMobility.API.Models.AssyChart;
 
 namespace SupervisorMobility.API.Services
@@ -571,5 +570,20 @@ namespace SupervisorMobility.API.Services
         }
 
         #endregion
+
+        #region JobObservationOperations
+
+        //public async Task<IEnumerable<JobObservation>> GetAllJobObservationsAsync()
+        //{
+        //    //return await _context.JobObservations
+        //    //    .Include(a => a.Area)
+        //    //    .Include(p => p.Plant)
+        //    //    .Include(d => d.Distribution)
+        //    //    .Include(o => o.Operation)
+        //    //     .OrderBy(c => c.JobObservationId).ToListAsync();
+
+        //}
+        #endregion
+
     }
 }

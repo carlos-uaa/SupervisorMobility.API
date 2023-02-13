@@ -12,6 +12,7 @@ namespace SupervisorMobility.API.Context
         public DbSet<ChecklistQuestion> ChecklistQuestions { get; set; }
         public DbSet<JobObservationConfig> JobObservationConfigs { get; set; }
         public DbSet<JobObservationType> JobObservationTypes { get; set; }
+        public DbSet<JobObservation> JobObservations { get; set; }
         public DbSet<Group> Groups { get; set; }
         public DbSet<Plant> Plants { get; set; }
         public DbSet<Area> Areas { get; set; }
@@ -48,6 +49,10 @@ namespace SupervisorMobility.API.Context
                 .HasDefaultValue(true);
 
             modelBuilder.Entity<JobObservationType>()
+                .Property(p => p.IsActive)
+                .HasDefaultValue(true);
+
+            modelBuilder.Entity<JobObservation>()
                 .Property(p => p.IsActive)
                 .HasDefaultValue(true);
 
@@ -100,6 +105,38 @@ namespace SupervisorMobility.API.Context
 
 
             //seeding some data
+            modelBuilder.Entity<JobObservation>()
+                .HasData(
+                new JobObservation()
+                {
+                    JobObservationId = 1,
+                    IsActive = true,
+                    PlantId = 1,
+                    AreaId = 1,
+                    DistributionId = 1,
+                    OperationId = 1,
+                    dateStart = new DateTime(),
+                    dateEnd = new DateTime(),
+                    Observer = "Pedro",
+                    Operator = "Juan",
+                    Option = 1,
+                    Time1HOE = "10 min",
+                    Time2HOE = "20 min",
+                    Models = "P71A|X247|P71A|X247|P71A",
+                    Cicles = "1 min|2 min|3 min|4 min| 5 min",
+                    SArea = "Lorem ipsum dolor sit amet S Area",
+                    QArea = "Lorem ipsum dolor sit amet Q Area",
+                    DArea = "Lorem ipsum dolor sit amet D Area",
+                    CArea = "Lorem ipsum dolor sit amet C Area",
+                    OthersArea = "Lorem ipsum dolor sit amet Others Area",
+                    IdentifiedActivity = "Actividad identificada",
+                    SsvCommentary = "Senior Supervisor Commentary",
+                    OperatorCommentary = "Operator Commentary",
+                    SsvSignature = "Pedro",
+                    OperatorSignature = "Juan"
+
+                }); ; ;
+
             modelBuilder.Entity<ChecklistCategory>()
                 .HasData(
                 new ChecklistCategory("PO", "Preparación de la Observación")
@@ -350,6 +387,8 @@ namespace SupervisorMobility.API.Context
                     AreaId = 1,
                     DistributionId = 1
                 }); ;
+
+
 
             base.OnModelCreating(modelBuilder);
         }
