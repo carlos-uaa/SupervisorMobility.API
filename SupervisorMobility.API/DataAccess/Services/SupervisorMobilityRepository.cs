@@ -143,9 +143,18 @@ namespace SupervisorMobility.API.Services
             return await _context.Plants
                 .Where(p => p.PlantId == plantId).FirstOrDefaultAsync();
         }
+        public async Task<Plant?> GetPlantByCodeAndDescriptionAsync(string code, string description)
+        {
+            return await _context.Plants
+                .Where(p => p.Code == code && p.Description == description).FirstOrDefaultAsync();
+        }
         public async Task<bool> PlantExistAsync(int plantId)
         {
             return await _context.Plants.AnyAsync(p => p.PlantId == plantId);
+        }
+        public async Task<bool> PlantExistByCodeAndDescriptionAsync(string code, string description)
+        {
+            return await _context.Plants.AnyAsync(p => p.Code == code && p.Description == description);
         }
 
         public void AddPlant(Plant plant)
@@ -177,10 +186,24 @@ namespace SupervisorMobility.API.Services
                 .Where(a => a.PlantId == plantId && a.AreaId == areaId)
                 .FirstOrDefaultAsync();
         }
+        public async Task<Area?> GetAreaForPlantByCodeAndDescriptionAsync(int plantId,
+            string code, string description)
+        {
+            
+            return await _context.Areas
+                .Where(a => a.PlantId == plantId && a.Code == code && a.Description == description)
+                .FirstOrDefaultAsync();
+        }
         public async Task<bool> AreaExistAsync(int areaId)
         {
             return await _context.Areas.AnyAsync(p => p.AreaId == areaId);
         }
+
+        public async Task<bool> AreaExistByCodeAndDescriptionInPlantAsync(string code, string description, int plantId)
+        {
+            return await _context.Areas.AnyAsync(a => a.PlantId == plantId && a.Code == code && a.Description == description);
+        }
+
         public async Task AddAreaForPlantAsync(int plantId, Area area)
         {
             var plant = await GetPlantAsync(plantId);
@@ -207,6 +230,13 @@ namespace SupervisorMobility.API.Services
                 .Where(o => o.AreaId == areaId && o.DistributionId == distributionId)
                 .FirstOrDefaultAsync();
         }
+        public async Task<Distribution?> GetDistributionForAreaByCodeAndDescriptionAsync(int areaId, string code, string description)
+        {
+            return await _context.Distributions
+                .Where(o => o.AreaId == areaId && o.Code == code && o.Description == description)
+                .FirstOrDefaultAsync();
+        }
+       
         public async Task AddDistributionForPlantAsync(int plantId, int areaId, Distribution distribution)
         {
             var area = await GetAreaForPlantAsync(plantId, areaId);
@@ -218,6 +248,10 @@ namespace SupervisorMobility.API.Services
         public async Task<bool> DistributionExistsAsync(int distributionId)
         {
             return await _context.Distributions.AnyAsync(p => p.DistributionId == distributionId);
+        }
+        public async Task<bool> DistributionExistsByCodeandDescriptionInAreaAsync(int areaid, string code, string description )
+        {
+            return await _context.Distributions.AnyAsync(p => p.AreaId == areaid && p.Code == code && p.Description == description);
         }
         public void DeleteDistribution(Distribution distribution)
         {
@@ -236,9 +270,19 @@ namespace SupervisorMobility.API.Services
                 .Where(o => o.DistributionId == distributionId && o.OperationId == operationId)
                 .FirstOrDefaultAsync();
         }
+        public async Task<Operation?> GetOperationForDistributionByCodeAndDescriptionAsync(int distributionId, string opcode, string opdescription)
+        {
+            return await _context.Operations
+                .Where(o => o.DistributionId == distributionId && o.Code == opcode && o.Description == opdescription)
+                .FirstOrDefaultAsync();
+        }
         public async Task<bool> OperationExistsAsync(int operationId)
         {
             return await _context.Operations.AnyAsync(p => p.OperationId == operationId);
+        }
+        public async Task<bool> OperationExistsByCodeAndDescriptionInDistributionAsync(int distributionId, string code, string description)
+        {
+            return await _context.Operations.AnyAsync(p => p.DistributionId == distributionId && p.Code == code && p.Description == description);
         }
         public async Task AddOperationForDistributionAsync(int areaId, int distributionId, Operation operation)
         {
@@ -391,9 +435,18 @@ namespace SupervisorMobility.API.Services
             return await _context.Products
                 .Where(p => p.ProductId == productId).FirstOrDefaultAsync();
         }
+        public async Task<Product?> GetProductByCodeAndDescriptionAsync(string code, string description)
+        {
+            return await _context.Products
+                .Where(p => p.Code == code && p.Description == description).FirstOrDefaultAsync();
+        }
         public async Task<bool> ProductExistAsync(int productId)
         {
             return await _context.Products.AnyAsync(p => p.ProductId == productId);
+        }
+        public async Task<bool> ProductExistByCodeAndDescriptionAsync(string code, string description)
+        {
+            return await _context.Products.AnyAsync(p => p.Code == code && p.Description == description);
         }
 
         public void AddProduct(Product product)
@@ -416,7 +469,16 @@ namespace SupervisorMobility.API.Services
                 .Include(o => o.Operation)
                 .Include(pr => pr.Product)
                  .OrderBy(c => c.AssyChardId).ToListAsync();
-
+        }
+        public async Task<IEnumerable<AssyChart>> GetAssyChartByPlantAsync(int plantId)
+        {
+            return await _context.AssyCharts.Where(plant => plant.PlantId == plantId)
+                .Include(a => a.Area)
+                .Include(p => p.Plant)
+                .Include(d => d.Distribution)
+                .Include(o => o.Operation)
+                .Include(pr => pr.Product)
+                .OrderBy(c => c.AssyChardId).ToListAsync();
         }
 
         public async Task<AssyChart?> GetAssyChartAsync(int asssychartId)
