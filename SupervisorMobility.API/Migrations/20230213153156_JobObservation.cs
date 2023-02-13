@@ -8,7 +8,7 @@ using Microsoft.EntityFrameworkCore.Migrations;
 namespace SupervisorMobility.API.Migrations
 {
     /// <inheritdoc />
-    public partial class First : Migration
+    public partial class JobObservation : Migration
     {
         /// <inheritdoc />
         protected override void Up(MigrationBuilder migrationBuilder)
@@ -246,6 +246,28 @@ namespace SupervisorMobility.API.Migrations
                 });
 
             migrationBuilder.CreateTable(
+                name: "ProductOperations",
+                columns: table => new
+                {
+                    ProductOperationId = table.Column<int>(type: "int", nullable: false)
+                        .Annotation("SqlServer:Identity", "1, 1"),
+                    Code = table.Column<string>(type: "nvarchar(50)", maxLength: 50, nullable: false),
+                    Description = table.Column<string>(type: "nvarchar(200)", maxLength: 200, nullable: false),
+                    IsActive = table.Column<bool>(type: "bit", nullable: true, defaultValue: true),
+                    ProductDistributionId = table.Column<int>(type: "int", nullable: false)
+                },
+                constraints: table =>
+                {
+                    table.PrimaryKey("PK_ProductOperations", x => x.ProductOperationId);
+                    table.ForeignKey(
+                        name: "FK_ProductOperations_ProductDistributions_ProductDistributionId",
+                        column: x => x.ProductDistributionId,
+                        principalTable: "ProductDistributions",
+                        principalColumn: "ProductDistributionId",
+                        onDelete: ReferentialAction.Cascade);
+                });
+
+            migrationBuilder.CreateTable(
                 name: "Operations",
                 columns: table => new
                 {
@@ -254,8 +276,7 @@ namespace SupervisorMobility.API.Migrations
                     Code = table.Column<string>(type: "nvarchar(50)", maxLength: 50, nullable: false),
                     Description = table.Column<string>(type: "nvarchar(200)", maxLength: 200, nullable: false),
                     IsActive = table.Column<bool>(type: "bit", nullable: true, defaultValue: true),
-                    DistributionId = table.Column<int>(type: "int", nullable: false),
-                    ProductDistributionId = table.Column<int>(type: "int", nullable: true)
+                    DistributionId = table.Column<int>(type: "int", nullable: false)
                 },
                 constraints: table =>
                 {
@@ -266,11 +287,6 @@ namespace SupervisorMobility.API.Migrations
                         principalTable: "Distributions",
                         principalColumn: "DistributionId",
                         onDelete: ReferentialAction.Cascade);
-                    table.ForeignKey(
-                        name: "FK_Operations_ProductDistributions_ProductDistributionId",
-                        column: x => x.ProductDistributionId,
-                        principalTable: "ProductDistributions",
-                        principalColumn: "ProductDistributionId");
                 });
 
             migrationBuilder.CreateTable(
@@ -319,6 +335,63 @@ namespace SupervisorMobility.API.Migrations
                         column: x => x.ProductId,
                         principalTable: "Products",
                         principalColumn: "ProductId");
+                });
+
+            migrationBuilder.CreateTable(
+                name: "JobObservations",
+                columns: table => new
+                {
+                    JobObservationId = table.Column<int>(type: "int", nullable: false)
+                        .Annotation("SqlServer:Identity", "1, 1"),
+                    IsActive = table.Column<bool>(type: "bit", nullable: true, defaultValue: true),
+                    PlantId = table.Column<int>(type: "int", nullable: true),
+                    AreaId = table.Column<int>(type: "int", nullable: true),
+                    DistributionId = table.Column<int>(type: "int", nullable: true),
+                    OperationId = table.Column<int>(type: "int", nullable: true),
+                    dateStart = table.Column<DateTime>(type: "datetime2", nullable: true),
+                    dateEnd = table.Column<DateTime>(type: "datetime2", nullable: true),
+                    Observer = table.Column<string>(type: "nvarchar(max)", nullable: true),
+                    Operator = table.Column<string>(type: "nvarchar(max)", nullable: true),
+                    Option = table.Column<int>(type: "int", nullable: true),
+                    Anomaly = table.Column<string>(type: "nvarchar(max)", nullable: true),
+                    Time1HOE = table.Column<string>(type: "nvarchar(max)", nullable: true),
+                    Time2HOE = table.Column<string>(type: "nvarchar(max)", nullable: true),
+                    Models = table.Column<string>(type: "nvarchar(max)", nullable: true),
+                    Cicles = table.Column<string>(type: "nvarchar(max)", nullable: true),
+                    SArea = table.Column<string>(type: "nvarchar(max)", nullable: true),
+                    QArea = table.Column<string>(type: "nvarchar(max)", nullable: true),
+                    DArea = table.Column<string>(type: "nvarchar(max)", nullable: true),
+                    CArea = table.Column<string>(type: "nvarchar(max)", nullable: true),
+                    OthersArea = table.Column<string>(type: "nvarchar(max)", nullable: true),
+                    IdentifiedActivity = table.Column<string>(type: "nvarchar(max)", nullable: true),
+                    SsvCommentary = table.Column<string>(type: "nvarchar(max)", nullable: true),
+                    OperatorCommentary = table.Column<string>(type: "nvarchar(max)", nullable: true),
+                    SsvSignature = table.Column<string>(type: "nvarchar(max)", nullable: true),
+                    OperatorSignature = table.Column<string>(type: "nvarchar(max)", nullable: true)
+                },
+                constraints: table =>
+                {
+                    table.PrimaryKey("PK_JobObservations", x => x.JobObservationId);
+                    table.ForeignKey(
+                        name: "FK_JobObservations_Areas_AreaId",
+                        column: x => x.AreaId,
+                        principalTable: "Areas",
+                        principalColumn: "AreaId");
+                    table.ForeignKey(
+                        name: "FK_JobObservations_Distributions_DistributionId",
+                        column: x => x.DistributionId,
+                        principalTable: "Distributions",
+                        principalColumn: "DistributionId");
+                    table.ForeignKey(
+                        name: "FK_JobObservations_Operations_OperationId",
+                        column: x => x.OperationId,
+                        principalTable: "Operations",
+                        principalColumn: "OperationId");
+                    table.ForeignKey(
+                        name: "FK_JobObservations_Plants_PlantId",
+                        column: x => x.PlantId,
+                        principalTable: "Plants",
+                        principalColumn: "PlantId");
                 });
 
             migrationBuilder.InsertData(
@@ -429,14 +502,24 @@ namespace SupervisorMobility.API.Migrations
                 values: new object[] { 1, 1, "Dist1", "Distribution 1 Trim 1", true });
 
             migrationBuilder.InsertData(
+                table: "ProductOperations",
+                columns: new[] { "ProductOperationId", "Code", "Description", "IsActive", "ProductDistributionId" },
+                values: new object[] { 1, "OP1", "Operation from products", true, 1 });
+
+            migrationBuilder.InsertData(
                 table: "AssyCharts",
                 columns: new[] { "AssyChardId", "AreaId", "CCP", "CreationDate", "DistributionId", "GOS", "HOE", "IsActive", "ModificationDate", "OperationId", "PlantId", "ProductId" },
                 values: new object[] { 1, 1, "string", new DateTime(1, 1, 1, 0, 0, 0, 0, DateTimeKind.Unspecified), 1, "string", "string", true, new DateTime(1, 1, 1, 0, 0, 0, 0, DateTimeKind.Unspecified), null, 1, 1 });
 
             migrationBuilder.InsertData(
                 table: "Operations",
-                columns: new[] { "OperationId", "Code", "Description", "DistributionId", "IsActive", "ProductDistributionId" },
-                values: new object[] { 1, "OP1", "Operacion Trim 1", 1, true, null });
+                columns: new[] { "OperationId", "Code", "Description", "DistributionId", "IsActive" },
+                values: new object[] { 1, "OP1", "Operacion Trim 1", 1, true });
+
+            migrationBuilder.InsertData(
+                table: "JobObservations",
+                columns: new[] { "JobObservationId", "Anomaly", "AreaId", "CArea", "Cicles", "DArea", "DistributionId", "IdentifiedActivity", "IsActive", "Models", "Observer", "OperationId", "Operator", "OperatorCommentary", "OperatorSignature", "Option", "OthersArea", "PlantId", "QArea", "SArea", "SsvCommentary", "SsvSignature", "Time1HOE", "Time2HOE", "dateEnd", "dateStart" },
+                values: new object[] { 1, null, 1, "Lorem ipsum dolor sit amet C Area", "1 min|2 min|3 min|4 min| 5 min", "Lorem ipsum dolor sit amet D Area", 1, "Actividad identificada", true, "P71A|X247|P71A|X247|P71A", "Pedro", 1, "Juan", "Operator Commentary", "Juan", 1, "Lorem ipsum dolor sit amet Others Area", 1, "Lorem ipsum dolor sit amet Q Area", "Lorem ipsum dolor sit amet S Area", "Senior Supervisor Commentary", "Pedro", "10 min", "20 min", new DateTime(1, 1, 1, 0, 0, 0, 0, DateTimeKind.Unspecified), new DateTime(1, 1, 1, 0, 0, 0, 0, DateTimeKind.Unspecified) });
 
             migrationBuilder.CreateIndex(
                 name: "IX_Areas_PlantId",
@@ -506,19 +589,39 @@ namespace SupervisorMobility.API.Migrations
                 column: "JobObservationTypeId");
 
             migrationBuilder.CreateIndex(
+                name: "IX_JobObservations_AreaId",
+                table: "JobObservations",
+                column: "AreaId");
+
+            migrationBuilder.CreateIndex(
+                name: "IX_JobObservations_DistributionId",
+                table: "JobObservations",
+                column: "DistributionId");
+
+            migrationBuilder.CreateIndex(
+                name: "IX_JobObservations_OperationId",
+                table: "JobObservations",
+                column: "OperationId");
+
+            migrationBuilder.CreateIndex(
+                name: "IX_JobObservations_PlantId",
+                table: "JobObservations",
+                column: "PlantId");
+
+            migrationBuilder.CreateIndex(
                 name: "IX_Operations_DistributionId",
                 table: "Operations",
                 column: "DistributionId");
 
             migrationBuilder.CreateIndex(
-                name: "IX_Operations_ProductDistributionId",
-                table: "Operations",
-                column: "ProductDistributionId");
-
-            migrationBuilder.CreateIndex(
                 name: "IX_ProductDistributions_ProductId",
                 table: "ProductDistributions",
                 column: "ProductId");
+
+            migrationBuilder.CreateIndex(
+                name: "IX_ProductOperations_ProductDistributionId",
+                table: "ProductOperations",
+                column: "ProductDistributionId");
         }
 
         /// <inheritdoc />
@@ -537,10 +640,13 @@ namespace SupervisorMobility.API.Migrations
                 name: "JobObservationConfigs");
 
             migrationBuilder.DropTable(
-                name: "SupportDocumentTypes");
+                name: "JobObservations");
 
             migrationBuilder.DropTable(
-                name: "Operations");
+                name: "ProductOperations");
+
+            migrationBuilder.DropTable(
+                name: "SupportDocumentTypes");
 
             migrationBuilder.DropTable(
                 name: "QuestionTypes");
@@ -552,16 +658,19 @@ namespace SupervisorMobility.API.Migrations
                 name: "JobObservationTypes");
 
             migrationBuilder.DropTable(
-                name: "Distributions");
+                name: "Operations");
 
             migrationBuilder.DropTable(
                 name: "ProductDistributions");
 
             migrationBuilder.DropTable(
-                name: "Areas");
+                name: "Distributions");
 
             migrationBuilder.DropTable(
                 name: "Products");
+
+            migrationBuilder.DropTable(
+                name: "Areas");
 
             migrationBuilder.DropTable(
                 name: "Plants");

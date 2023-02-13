@@ -3,7 +3,6 @@ using Microsoft.AspNetCore.JsonPatch;
 using Microsoft.AspNetCore.Mvc;
 using SupervisorMobility.API.Business;
 using SupervisorMobility.API.DataAccess.Entities;
-using SupervisorMobility.API.Migrations;
 using SupervisorMobility.API.Models.OperationDtos;
 using SupervisorMobility.API.Models.ProductOperationDtos;
 using SupervisorMobility.API.Services;

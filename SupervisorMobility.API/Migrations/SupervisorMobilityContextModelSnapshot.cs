@@ -610,6 +610,134 @@ namespace SupervisorMobility.API.Migrations
                         });
                 });
 
+            modelBuilder.Entity("SupervisorMobility.API.Entities.JobObservation", b =>
+                {
+                    b.Property<int>("JobObservationId")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("int");
+
+                    SqlServerPropertyBuilderExtensions.UseIdentityColumn(b.Property<int>("JobObservationId"));
+
+                    b.Property<string>("Anomaly")
+                        .HasColumnType("nvarchar(max)");
+
+                    b.Property<int?>("AreaId")
+                        .HasColumnType("int");
+
+                    b.Property<string>("CArea")
+                        .HasColumnType("nvarchar(max)");
+
+                    b.Property<string>("Cicles")
+                        .HasColumnType("nvarchar(max)");
+
+                    b.Property<string>("DArea")
+                        .HasColumnType("nvarchar(max)");
+
+                    b.Property<int?>("DistributionId")
+                        .HasColumnType("int");
+
+                    b.Property<string>("IdentifiedActivity")
+                        .HasColumnType("nvarchar(max)");
+
+                    b.Property<bool?>("IsActive")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("bit")
+                        .HasDefaultValue(true);
+
+                    b.Property<string>("Models")
+                        .HasColumnType("nvarchar(max)");
+
+                    b.Property<string>("Observer")
+                        .HasColumnType("nvarchar(max)");
+
+                    b.Property<int?>("OperationId")
+                        .HasColumnType("int");
+
+                    b.Property<string>("Operator")
+                        .HasColumnType("nvarchar(max)");
+
+                    b.Property<string>("OperatorCommentary")
+                        .HasColumnType("nvarchar(max)");
+
+                    b.Property<string>("OperatorSignature")
+                        .HasColumnType("nvarchar(max)");
+
+                    b.Property<int?>("Option")
+                        .HasColumnType("int");
+
+                    b.Property<string>("OthersArea")
+                        .HasColumnType("nvarchar(max)");
+
+                    b.Property<int?>("PlantId")
+                        .HasColumnType("int");
+
+                    b.Property<string>("QArea")
+                        .HasColumnType("nvarchar(max)");
+
+                    b.Property<string>("SArea")
+                        .HasColumnType("nvarchar(max)");
+
+                    b.Property<string>("SsvCommentary")
+                        .HasColumnType("nvarchar(max)");
+
+                    b.Property<string>("SsvSignature")
+                        .HasColumnType("nvarchar(max)");
+
+                    b.Property<string>("Time1HOE")
+                        .HasColumnType("nvarchar(max)");
+
+                    b.Property<string>("Time2HOE")
+                        .HasColumnType("nvarchar(max)");
+
+                    b.Property<DateTime?>("dateEnd")
+                        .HasColumnType("datetime2");
+
+                    b.Property<DateTime?>("dateStart")
+                        .HasColumnType("datetime2");
+
+                    b.HasKey("JobObservationId");
+
+                    b.HasIndex("AreaId");
+
+                    b.HasIndex("DistributionId");
+
+                    b.HasIndex("OperationId");
+
+                    b.HasIndex("PlantId");
+
+                    b.ToTable("JobObservations");
+
+                    b.HasData(
+                        new
+                        {
+                            JobObservationId = 1,
+                            AreaId = 1,
+                            CArea = "Lorem ipsum dolor sit amet C Area",
+                            Cicles = "1 min|2 min|3 min|4 min| 5 min",
+                            DArea = "Lorem ipsum dolor sit amet D Area",
+                            DistributionId = 1,
+                            IdentifiedActivity = "Actividad identificada",
+                            IsActive = true,
+                            Models = "P71A|X247|P71A|X247|P71A",
+                            Observer = "Pedro",
+                            OperationId = 1,
+                            Operator = "Juan",
+                            OperatorCommentary = "Operator Commentary",
+                            OperatorSignature = "Juan",
+                            Option = 1,
+                            OthersArea = "Lorem ipsum dolor sit amet Others Area",
+                            PlantId = 1,
+                            QArea = "Lorem ipsum dolor sit amet Q Area",
+                            SArea = "Lorem ipsum dolor sit amet S Area",
+                            SsvCommentary = "Senior Supervisor Commentary",
+                            SsvSignature = "Pedro",
+                            Time1HOE = "10 min",
+                            Time2HOE = "20 min",
+                            dateEnd = new DateTime(1, 1, 1, 0, 0, 0, 0, DateTimeKind.Unspecified),
+                            dateStart = new DateTime(1, 1, 1, 0, 0, 0, 0, DateTimeKind.Unspecified)
+                        });
+                });
+
             modelBuilder.Entity("SupervisorMobility.API.Entities.JobObservationConfig", b =>
                 {
                     b.Property<int>("JobObservationConfigId")
@@ -928,6 +1056,33 @@ namespace SupervisorMobility.API.Migrations
                     b.Navigation("ChecklistCategory");
 
                     b.Navigation("QuestionType");
+                });
+
+            modelBuilder.Entity("SupervisorMobility.API.Entities.JobObservation", b =>
+                {
+                    b.HasOne("SupervisorMobility.API.DataAccess.Entities.Area", "Area")
+                        .WithMany()
+                        .HasForeignKey("AreaId");
+
+                    b.HasOne("SupervisorMobility.API.DataAccess.Entities.Distribution", "Distribution")
+                        .WithMany()
+                        .HasForeignKey("DistributionId");
+
+                    b.HasOne("SupervisorMobility.API.DataAccess.Entities.Operation", "Operation")
+                        .WithMany()
+                        .HasForeignKey("OperationId");
+
+                    b.HasOne("SupervisorMobility.API.Entities.Plant", "Plant")
+                        .WithMany()
+                        .HasForeignKey("PlantId");
+
+                    b.Navigation("Area");
+
+                    b.Navigation("Distribution");
+
+                    b.Navigation("Operation");
+
+                    b.Navigation("Plant");
                 });
 
             modelBuilder.Entity("SupervisorMobility.API.Entities.JobObservationConfig", b =>
