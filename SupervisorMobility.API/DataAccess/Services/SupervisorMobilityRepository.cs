@@ -511,16 +511,34 @@ namespace SupervisorMobility.API.Services
 
         #region JobObservationOperations
 
-        //public async Task<IEnumerable<JobObservation>> GetAllJobObservationsAsync()
-        //{
-        //    //return await _context.JobObservations
-        //    //    .Include(a => a.Area)
-        //    //    .Include(p => p.Plant)
-        //    //    .Include(d => d.Distribution)
-        //    //    .Include(o => o.Operation)
-        //    //     .OrderBy(c => c.JobObservationId).ToListAsync();
+        public async Task<IEnumerable<JobObservation>> GetAllJobObservationsAsync()
+        {
+            return await _context.JobObservations
+                .Include(a => a.Area)
+                .Include(p => p.Plant)
+                .Include(d => d.Distribution)
+                .Include(o => o.Operation)
+                 .OrderBy(c => c.JobObservationId).ToListAsync();
 
-        //}
+        }
+
+        public async Task<JobObservation?> GetJobObservationAsync(int jobObservationId)
+        {
+            //return whit info
+            return await _context.JobObservations
+                 .Where(p => p.JobObservationId == jobObservationId).FirstOrDefaultAsync();
+        }
+
+        public void AddJobObservation(JobObservation jobObservation)
+        {
+            _context.JobObservations.Add(jobObservation);
+        }
+
+        public void DeleteJobObservation(JobObservation jobObservation)
+        {
+            _context.JobObservations.Remove(jobObservation);
+        }
+
         #endregion
 
     }
