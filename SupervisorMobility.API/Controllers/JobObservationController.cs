@@ -24,32 +24,8 @@ namespace SupervisorMobility.API.Controllers
                 throw new ArgumentNullException(nameof(mapper));
         }
 
-
-        [HttpGet]
-        public async Task<ActionResult<IEnumerable<JobObservationDto>>> GetAllJobObservationsAsync()
-        {
-
-            var allJobObservations = await _supervisorMobilityRepository.GetAllJobObservationsAsync();
-
-            return Ok(_mapper.Map<IEnumerable<JobObservationDto>>(allJobObservations));
-        }
-
-        [HttpGet("{jobObservationId}", Name = "GetJobObservation")]
-        public async Task<IActionResult> GetJobObservation(int jobObservationId)
-        {
-            //Find Job Observation type
-            var jobObservation = await _supervisorMobilityRepository.GetJobObservationAsync(jobObservationId);
-            if (jobObservation == null)
-            {
-                return NotFound();
-            }
-
-            return Ok(_mapper.Map<JobObservationDto>(jobObservation));
-        }
-
-
         [HttpPost]
-        public async Task<ActionResult<JobObservationWithoutNavigationPropertiesDto>> CreateOperation(
+        public async Task<ActionResult<JobObservationWithoutNavigationPropertiesDto>> CreateJobObservation(
             JobObservationForCreationDto jobObservation)
         {
             if (!await _supervisorMobilityRepository.PlantExistAsync(jobObservation.PlantId))
@@ -74,9 +50,32 @@ namespace SupervisorMobility.API.Controllers
 
             var finalJobObservation = _mapper.Map<JobObservation>(jobObservation);
 
-             _supervisorMobilityRepository.AddJobObservation(finalJobObservation);
+            _supervisorMobilityRepository.AddJobObservation(finalJobObservation);
             await _supervisorMobilityRepository.SaveChangesAsync();
-            return Ok();
+            return Ok(finalJobObservation);
+        }
+
+
+        [HttpGet]
+        public async Task<ActionResult<IEnumerable<JobObservationDto>>> GetAllJobObservationsAsync()
+        {
+
+            var allJobObservations = await _supervisorMobilityRepository.GetAllJobObservationsAsync();
+
+            return Ok(_mapper.Map<IEnumerable<JobObservationDto>>(allJobObservations));
+        }
+
+        [HttpGet("{jobObservationId}", Name = "GetJobObservation")]
+        public async Task<IActionResult> GetJobObservation(int jobObservationId)
+        {
+            //Find Job Observation type
+            var jobObservation = await _supervisorMobilityRepository.GetJobObservationAsync(jobObservationId);
+            if (jobObservation == null)
+            {
+                return NotFound();
+            }
+
+            return Ok(_mapper.Map<JobObservationDto>(jobObservation));
         }
 
 

@@ -588,6 +588,10 @@ namespace SupervisorMobility.API.Services
         {
             //return whit info
             return await _context.JobObservations
+                .Include(a => a.Area)
+                .Include(p => p.Plant)
+                .Include(d => d.Distribution)
+                .Include(o => o.Operation)
                  .Where(p => p.JobObservationId == jobObservationId).FirstOrDefaultAsync();
         }
 
