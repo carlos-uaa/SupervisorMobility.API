@@ -1,4 +1,5 @@
 ﻿using Microsoft.AspNetCore.Http.Features;
+using Microsoft.AspNetCore.ResponseCompression;
 using Microsoft.EntityFrameworkCore;
 using SupervisorMobility.API.Business;
 using SupervisorMobility.API.Context;
@@ -14,13 +15,24 @@ namespace SupervisorMobility.API
             services.AddScoped<IJobObservationService, JobObservationService>();
             services.AddScoped<IAssyChartService, AssyChartService>();
 
-            ////this
+            
             services.Configure<IISServerOptions>(options =>
             {
                 options.MaxRequestBodySize = 1073741824;
+                options.MaxRequestBodyBufferSize = 1073741824;
             });
-            ////this
-
+            
+            services.AddMvc().AddNewtonsoftJson();
+            services.AddResponseCompression(opts =>
+            {
+                opts.MimeTypes = ResponseCompressionDefaults.MimeTypes.Concat(
+                    new[] { "application/octet-stream" });
+            });
+            services.AddResponseCompression(opts =>
+            {
+                opts.MimeTypes = ResponseCompressionDefaults.MimeTypes.Concat(
+                    new[] { "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet " });
+            });
 
             return services;
         }

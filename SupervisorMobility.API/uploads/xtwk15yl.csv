@@ -1,6 +1,6 @@
 ﻿Plantaid,4,,plantcode,Mik,,PlantDescription,Mikaros Plant,,,,,,,,,,,,,,,
 assyChardId,isActive,GOS,CCP,HOE,CreationDate,ModificationDate,productId,productCode,productDescription,productIsActive,areaId,areaCode,areaDescription,areaIsActive,operationId,operationCode,operationDescription,operationIsActive,idDistribution,distributioncode,distribudon descritoion,distributionisactive
-,true,CSV TX2300-5NA_1,TX2300-5NA_1,TX2300-5NA_1,2023-01-31T00:00:00,2023-01-31T00:00:00,1,T1,T1,true,1,A1,Area Mika 1,true,1,operation1,descriptionoperation1,true,1,CodeDistribution1,DescriptionDistribution1,true
-,true,CSV TX2400-5NA_1,TX2400-5NA_1,TX2400-5NA_1,2023-01-31T00:00:01,2023-01-31T00:00:01,2,T1,T1,true,2,A2,Area Mika 2,true,2,operation2,descriptionoperation2,true,1,CodeDistribution2,DescriptionDistribution2,true
-,true,GOS edit,CCP,HOE,2023-01-31T00:00:02,2023-01-31T00:00:02,3,Paint,Paint,true,3,P1,Paint1,true,3,operation3,descriptionoperation3,true,1,CodeDistribution3,DescriptionDistribution3,true
-,true,GOS,CCP edit,HOE,2023-01-31T00:00:03,2023-01-31T00:00:03,4,Paint,Paint,true,4,P1,Paint1,true,4,operation4,descriptionoperation4,true,1,CodeDistribution4,DescriptionDistribution4,true
+,true,CSV TX2300-5NA_1,TX2300-5NA_1,TX2300-5NA_1,2023-01-31T00:00:00,2023-01-31T00:00:00,,T1,T1,true,1,A1,Area Mika 1,true,1,operation1,descriptionoperation1,true,1,CodeDistribution1,DescriptionDistribution1,true
+,true,CSV TX2400-5NA_1,TX2400-5NA_1,TX2400-5NA_1,2023-01-31T00:00:01,2023-01-31T00:00:01,,T1,T1,true,2,A2,Area Mika 2,true,2,operation2,descriptionoperation2,true,1,CodeDistribution2,DescriptionDistribution2,true
+,true,GOS edit,CCP,HOE,2023-01-31T00:00:02,2023-01-31T00:00:02,,Paint,Paint,true,3,P1,Paint1,true,3,operation3,descriptionoperation3,true,1,CodeDistribution3,DescriptionDistribution3,true
+,true,GOS,CCP edit,HOE,2023-01-31T00:00:03,2023-01-31T00:00:03,,Paint,Paint,true,4,P1,Paint1,true,4,operation4,descriptionoperation4,true,1,CodeDistribution4,DescriptionDistribution4,true

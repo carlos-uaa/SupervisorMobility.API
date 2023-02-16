@@ -377,16 +377,16 @@ namespace SupervisorMobility.API.Context
                 {
                     AssyChardId = 1,
                     IsActive = true,
-                    GOS = "string",
-                    CCP = "string",
-                    HOE = "string",
+                    GOS = "CSV TX2300-5NA_1",
+                    CCP = "TX2300-5NA_1",
+                    HOE = "TX2300-5NA_1",
                     CreationDate = new DateTime(),
                     ModificationDate = new DateTime(),
                     ProductId = 1,
                     PlantId = 1,
                     AreaId = 1,
                     DistributionId = 1
-                }); ;
+                }); 
 
 
 

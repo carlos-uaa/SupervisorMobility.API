@@ -38,11 +38,12 @@ builder.Services.AddAutoMapper(AppDomain.CurrentDomain.GetAssemblies());
 //Add Cors
 builder.Services.AddCors(policy => {
 
-    policy.AddPolicy("Policy_Name", builder =>
+    policy.AddPolicy("Cors", builder =>
       builder.WithOrigins("https://*:7017/")
         .SetIsOriginAllowedToAllowWildcardSubdomains()
         .AllowAnyOrigin().AllowAnyMethod().AllowAnyHeader()
  );
+
 });
 
 
@@ -56,8 +57,7 @@ var app = builder.Build();
 
 
 // Configure the HTTP request pipeline.
-
-app.UseCors("Policy_Name");
+app.UseCors("Cors");
 
 // Configure the HTTP request pipeline.
 if (app.Environment.IsDevelopment() || app.Environment.IsProduction())
@@ -73,3 +73,4 @@ app.UseAuthorization();
 app.MapControllers();
 
 app.Run();
+AppContext.SetSwitch("Switch.Microsoft.AspNetCore.Mvc.EnableRangeProcessing",true);

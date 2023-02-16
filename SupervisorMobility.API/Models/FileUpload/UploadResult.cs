@@ -14,7 +14,7 @@ namespace SupervisorMobility.API.Models.FileUpload
         public int PlantCreate { get; set; }= 0;
 
         public int AreasCreated { get; set; } = 0;
-        public int    AreasUpdated { get; set; } = 0;
+        public int AreasUpdated { get; set; } = 0;
 
         public int DistributionCreated { get; set; } = 0;
         public int DistributionUpdated { get; set; } = 0;

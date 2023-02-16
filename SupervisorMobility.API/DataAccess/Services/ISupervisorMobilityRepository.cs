@@ -116,8 +116,10 @@ namespace SupervisorMobility.API.Services
         #region AssyChart
         Task<IEnumerable<AssyChart>> GetAllAssyChartsAsync();
         Task<AssyChart?> GetAssyChartAsync(int asssychartId);
+        Task<AssyChart?> GetAssyChartAdvanceAsync(string GOS, string CCP, string HOE, int PlantId, int AreaId, int DistributionId, int OperationId, int Productid);
         Task<IEnumerable<AssyChart>> GetAssyChartByPlantAsync(int plantId);
         Task<bool> AssyChartExistAsync(int assychartID);
+        Task<bool> AssyChartExistAdvanceAsync(string GOS, string CCP, string HOE, int PlantId, int AreaId, int DistributionId, int OperationId, int Productid);
         void AddAssyChart(AssyChart assychart);
         void DeleteAssyChartAsync(AssyChart assyChart);
 

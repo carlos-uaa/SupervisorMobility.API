@@ -6,7 +6,7 @@ using System.ComponentModel.DataAnnotations.Schema;
 
 namespace SupervisorMobility.API.Models.AssyChart
 {
-    public class AssyChartForCreationDto
+    public class AssyChartForCreationRecived
     {
         public string GOS { get; set; } = string.Empty;
         public string CCP { get; set; } = string.Empty;

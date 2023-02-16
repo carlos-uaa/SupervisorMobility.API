@@ -61,7 +61,7 @@ namespace SupervisorMobility.API.Business
         #endregion
 
         #region AssyChart
-        Task<AssyChart> CreateAssyChartAsync(AssyChartWithoutNavigationProperties assyChart);
+        Task<AssyChart> CreateAssyChartAsync(AssyChartForCreation assyChart);
         Task UpdateAssyChartAsync(AssyChartForUpdateDto assyChartForUpdate, AssyChart assyChart);
         Task RemoveAssyChartAsync(AssyChart assyChart);
         #endregion

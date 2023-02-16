@@ -485,13 +485,22 @@ namespace SupervisorMobility.API.Services
         {
             //return whit info
             return await _context.AssyCharts
-                .Include(o => o.Operation)
                  .Where(p => p.AssyChardId == asssychartId).FirstOrDefaultAsync();
+        }
+        public async Task<AssyChart?> GetAssyChartAdvanceAsync(string GOS, string CCP, string HOE, int PlantId, int AreaId, int DistributionId, int OperationId, int Productid)
+        {
+            //return whit info
+            return await _context.AssyCharts
+                 .Where(p => p.GOS == GOS && p.CCP == CCP && p.HOE == HOE && p.PlantId == PlantId && p.AreaId == AreaId && p.DistributionId == DistributionId && p.OperationId == OperationId && p.ProductId == Productid).FirstOrDefaultAsync();
         }
 
         public async Task<bool> AssyChartExistAsync(int assychartID)
         {
             return await _context.AssyCharts.AnyAsync(p => p.AssyChardId == assychartID);
+        }
+        public async Task<bool> AssyChartExistAdvanceAsync(string GOS, string CCP, string HOE, int PlantId, int AreaId, int DistributionId, int OperationId, int Productid)
+        {
+            return await _context.AssyCharts.AnyAsync(p => p.GOS == GOS && p.CCP == CCP && p.HOE == HOE && p.PlantId == PlantId && p.AreaId == AreaId && p.DistributionId == DistributionId && p.OperationId == OperationId && p.ProductId == Productid);
         }
 
         public void AddAssyChart(AssyChart assychart)

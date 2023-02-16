@@ -31,7 +31,7 @@ namespace SupervisorMobility.API.Controllers
         }
 
         [HttpPost]
-        public async Task<ActionResult<AssyChartForCreationDto>> CreateAssyChart(AssyChartForCreationDto newAssyChart)
+        public async Task<ActionResult<AssyChartWithoutNavigationProperties>> CreateAssyChart(AssyChartForCreationRecived newAssyChart)
         {
             if (!await _supervisorMobilityRepository.PlantExistAsync(newAssyChart.PlantId))
             {
@@ -56,12 +56,9 @@ namespace SupervisorMobility.API.Controllers
             var finalOperation = _mapper.Map<Operation>(newOperation);
 
             await _assyChartService.CreateOperationAsync(newAssyChart.AreaId, newAssyChart.DistributionId, finalOperation);
+      
 
-            //operation to get id
-            var createdOperationAndGetId = _mapper.Map<OperationWithoutNavigationPropertiesDto>(finalOperation);
-
-
-            AssyChartWithoutNavigationProperties finalAssyChart = new AssyChartWithoutNavigationProperties()
+            AssyChartForCreation finalAssyChart = new AssyChartForCreation()
             {
                 GOS = newAssyChart.GOS,
                 CCP = newAssyChart.CCP,
@@ -70,7 +67,7 @@ namespace SupervisorMobility.API.Controllers
                 PlantId = newAssyChart.PlantId,
                 AreaId = newAssyChart.AreaId,
                 DistributionId = newAssyChart.DistributionId,
-                OperationId = createdOperationAndGetId.OperationId,
+                OperationId = finalOperation.OperationId,
                 CreationDate = newAssyChart.CreationDate,
                 ModificationDate = newAssyChart.CreationDate
             };
