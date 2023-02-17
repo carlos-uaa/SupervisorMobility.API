@@ -114,7 +114,7 @@ namespace SupervisorMobility.API.Controllers
 
             await _supervisorMobilityRepository.SaveChangesAsync();
 
-            return NoContent();
+            return Ok();
         }
 
         [HttpPatch("{areaid}")]
@@ -152,7 +152,7 @@ namespace SupervisorMobility.API.Controllers
 
             await _supervisorMobilityRepository.SaveChangesAsync();
 
-            return NoContent();
+            return Ok();
         }
 
         [HttpDelete("{areaId}")]
@@ -173,7 +173,7 @@ namespace SupervisorMobility.API.Controllers
             _supervisorMobilityRepository.DeleteArea(areaEntity);
             await _supervisorMobilityRepository.SaveChangesAsync();
 
-            return NoContent();
+            return Ok();
         }
     }
 }
