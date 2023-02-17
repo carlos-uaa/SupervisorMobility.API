@@ -77,7 +77,7 @@ namespace SupervisorMobility.API.Controllers
             _mapper.Map(group, groupEntity);
             await _supervisorMobilityRepository.SaveChangesAsync();
 
-            return NoContent();
+            return Ok();
 
         }
 
@@ -110,7 +110,7 @@ namespace SupervisorMobility.API.Controllers
 
             await _supervisorMobilityRepository.SaveChangesAsync();
 
-            return NoContent();
+            return Ok();
         }
 
         [HttpDelete("{groupId}")]
@@ -125,7 +125,7 @@ namespace SupervisorMobility.API.Controllers
             _supervisorMobilityRepository.DeleteGroup(groupEntity);
             await _supervisorMobilityRepository.SaveChangesAsync();
 
-            return NoContent();
+            return Ok();
         }
     }
 }
