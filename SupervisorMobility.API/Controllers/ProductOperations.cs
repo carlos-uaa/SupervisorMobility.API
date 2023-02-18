@@ -129,7 +129,7 @@ namespace SupervisorMobility.API.Controllers
 
                 await _assyChartService.UpdateProductOperationAsync(productOperation, productOperationEntity);
 
-                return NoContent();
+                return Ok();
          }
 
         [HttpPatch("{productOperationid}")]
@@ -171,7 +171,7 @@ namespace SupervisorMobility.API.Controllers
 
             await _assyChartService.UpdateProductOperationAsync(productOperationToPatch, productOperationEntity);
 
-            return NoContent();
+            return Ok();
         }
 
 
@@ -198,7 +198,7 @@ namespace SupervisorMobility.API.Controllers
 
             await _assyChartService.RemoveProductOperationAsync(productOperationEntity);
 
-            return NoContent();
+            return Ok();
         }
 
 

@@ -790,7 +790,6 @@ namespace SupervisorMobility.API.Controllers
                         //update assy chart
 
                         var assyChartEntity = await _supervisorMobilityRepository.GetAssyChartAsync(item.AssyChardId ?? -1);
-                        Debug.WriteLine($"entity: {assyChartEntity.AssyChardId}");
 
                         if (assyChartEntity != null)
                         {

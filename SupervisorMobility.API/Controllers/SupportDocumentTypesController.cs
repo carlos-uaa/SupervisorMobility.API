@@ -74,7 +74,7 @@ namespace SupervisorMobility.API.Controllers
             await _assyChartService
                 .UpdateSupportDocumentTypeAsync(supportDocumentType, supportDocumentTypeEntity);
 
-            return NoContent();
+            return Ok();
 
         }
 
@@ -106,7 +106,7 @@ namespace SupervisorMobility.API.Controllers
             await _assyChartService
                 .UpdateSupportDocumentTypeAsync(supportDocumentTypeToPatch, supportDocumentTypeEntity);
 
-            return NoContent();
+            return Ok();
         }
 
         [HttpDelete("{supportDocumentTypeId}")]
@@ -120,7 +120,7 @@ namespace SupervisorMobility.API.Controllers
 
             await _assyChartService.RemoveSupportDocumentTypeAsync(supportDocumentTypeEntity);
 
-            return NoContent();
+            return Ok();
         }
     }
 }

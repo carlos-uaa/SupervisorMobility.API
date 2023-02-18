@@ -131,7 +131,7 @@ namespace SupervisorMobility.API.Controllers
 
             await _supervisorMobilityRepository.SaveChangesAsync();
 
-            return NoContent();
+            return Ok();
         }
 
         [HttpPatch("{distributionid}")]
@@ -174,7 +174,7 @@ namespace SupervisorMobility.API.Controllers
 
             await _supervisorMobilityRepository.SaveChangesAsync();
 
-            return NoContent();
+            return Ok();
         }
 
         [HttpDelete("{distributionId}")]
@@ -200,7 +200,7 @@ namespace SupervisorMobility.API.Controllers
             _supervisorMobilityRepository.DeleteDistribution(distributionEntity);
             await _supervisorMobilityRepository.SaveChangesAsync();
 
-            return NoContent();
+            return Ok();
         }
     }
 
