@@ -470,6 +470,11 @@ namespace SupervisorMobility.API.Services
                 .Include(pr => pr.Product)
                  .OrderBy(c => c.AssyChardId).ToListAsync();
         }
+        public async Task<AssyChart?> GetAssyChartAsync(int asssychartId)
+        {
+            return await _context.AssyCharts.Include(o => o.Operation)
+                 .Where(p => p.AssyChardId == asssychartId).FirstOrDefaultAsync();
+        }
         public async Task<IEnumerable<AssyChart>> GetAssyChartByPlantAsync(int plantId)
         {
             return await _context.AssyCharts.Where(plant => plant.PlantId == plantId)
@@ -481,12 +486,7 @@ namespace SupervisorMobility.API.Services
                 .OrderBy(c => c.AssyChardId).ToListAsync();
         }
 
-        public async Task<AssyChart?> GetAssyChartAsync(int asssychartId)
-        {
-            //return whit info
-            return await _context.AssyCharts
-                 .Where(p => p.AssyChardId == asssychartId).FirstOrDefaultAsync();
-        }
+       
         public async Task<AssyChart?> GetAssyChartAdvanceAsync(string GOS, string CCP, string HOE, int PlantId, int AreaId, int DistributionId, int OperationId, int Productid)
         {
             //return whit info
