@@ -137,8 +137,7 @@ namespace SupervisorMobility.API.Controllers
 
             patchDocumentProductDistribution.ApplyTo(productDistributionToPatch, ModelState);
 
-            if (!ModelState.IsValid)
-            {
+            if (!ModelState.IsValid)         {
                 return BadRequest(ModelState);
             }
 
