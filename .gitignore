@@ -30,6 +30,7 @@ x86/
 [Aa][Rr][Mm]64/
 bld/
 [Bb]in/
+[Uu]ploads/
 [Oo]bj/
 [Oo]ut/
 [Ll]og/
@@ -363,8 +364,5 @@ MigrationBackup/
 
 # Fody - auto-generated XML schema
 FodyWeavers.xsd
-SupervisorMobility.API/appsettings.Development.json
-SupervisorMobility.API/appsettings.Development.json
-SupervisorMobility.API/appsettings.json
-SupervisorMobility.API/appsettings.Development.json
-SupervisorMobility.API/appsettings.json
+appsettings.Development.json
+appsettings.json

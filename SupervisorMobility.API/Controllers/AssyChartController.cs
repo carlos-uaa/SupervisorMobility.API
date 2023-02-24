@@ -68,8 +68,8 @@ namespace SupervisorMobility.API.Controllers
                 AreaId = newAssyChart.AreaId,
                 DistributionId = newAssyChart.DistributionId,
                 OperationId = finalOperation.OperationId,
-                CreationDate = newAssyChart.CreationDate,
-                ModificationDate = newAssyChart.CreationDate
+                CreationDate = DateTime.Now,
+                ModificationDate = DateTime.UtcNow
             };
 
             await _assyChartService.CreateAssyChartAsync(finalAssyChart);
