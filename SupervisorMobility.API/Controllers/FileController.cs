@@ -250,35 +250,26 @@ namespace SupervisorMobility.API.Controllers
                                     ToInsertIntoList.GOS = ws.Cell(i, 3).GetString() != "" ? ws.Cell(i, 3).GetValue<string>() : "";
                                     ToInsertIntoList.CCP = ws.Cell(i, 4).GetString() != "" ? ws.Cell(i, 4).GetValue<string>() : "";
                                     ToInsertIntoList.HOE = ws.Cell(i, 5).GetString() != "" ? ws.Cell(i, 5).GetValue<string>() : "";
-
                                     try
                                     {
                                         ToInsertIntoList.CreationDate = ws.Cell(i, 6).GetString() != "" ? DateTime.Parse(ws.Cell(i, 6).GetValue<string>()) : DateTime.Now;
-
                                     }
                                     catch (Exception ex)
                                     {
                                         ToInsertIntoList.CreationDate = DateTime.Now;
-
                                     }
-
                                     try
                                     {
                                         ToInsertIntoList.ModificationDate = ws.Cell(i, 7).GetString() != "" ? DateTime.Parse(ws.Cell(i, 6).GetValue<string>()) : DateTime.Now;
-
                                     }
                                     catch (Exception ex)
                                     {
                                         ToInsertIntoList.ModificationDate = DateTime.Now;
-
                                     }
-
-
                                     ToInsertIntoList.ProductId = ws.Cell(i, 8).GetString() != "" ? ws.Cell(i, 8).GetValue<int>() : -1;
                                     ToInsertIntoList.ProductCode = ws.Cell(i, 9).GetString() != "" ? ws.Cell(i, 9).GetValue<string>() : "";
                                     ToInsertIntoList.ProductDescription = ws.Cell(i, 10).GetString() != "" ? ws.Cell(i, 10).GetValue<string>() : "";
                                     ToInsertIntoList.ProductIsActive = ws.Cell(i, 11).GetString() != "" ? ws.Cell(i, 11).GetValue<bool>() : true;
-
 
                                     ToInsertIntoList.AreaId = ws.Cell(i, 12).GetString() != "" ? ws.Cell(i, 12).GetValue<int>() : -1;
                                     ToInsertIntoList.AreaCode = ws.Cell(i, 13).GetString() != "" ? ws.Cell(i, 13).GetValue<string>() : "";

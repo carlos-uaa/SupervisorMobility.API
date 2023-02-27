@@ -503,7 +503,11 @@ namespace SupervisorMobility.API.Services
             return await _context.AssyCharts.AnyAsync(p => p.GOS == GOS && p.CCP == CCP && p.HOE == HOE && p.PlantId == PlantId && p.AreaId == AreaId && p.DistributionId == DistributionId && p.OperationId == OperationId && p.ProductId == Productid);
         }
 
-        public void AddAssyChart(AssyChart assychart)
+        public Task<bool> UserExistAdvanceAsync(string nombre, int nomina, Plant plantid, Area areaid, Group grupoid)
+        {
+            throw new NotImplementedException();
+        }
+        public void AddAssyChartAsync(AssyChart assychart)
         {
             _context.AssyCharts.Add(assychart);
         }
@@ -572,6 +576,46 @@ namespace SupervisorMobility.API.Services
             _context.ProductOperations.Remove(productOperation);
         }
         #endregion
+
+        #region Users
+        public Task<IEnumerable<User>> GetAllUsersAsync()
+        {
+            throw new NotImplementedException();
+        }
+
+        public Task<IEnumerable<User>> GetAllUsersByPlantAreaAndGroupAsync(int plantaId, int areaId, int grupId)
+        {
+            throw new NotImplementedException();
+        }
+
+        public Task<User?> GetUserAsync(int userId)
+        {
+            throw new NotImplementedException();
+        }
+
+        public Task<User?> GetUserByNominaAsync(int nomina)
+        {
+            throw new NotImplementedException();
+        }
+
+        public Task<bool> UserExistAsync(int userId)
+        {
+            throw new NotImplementedException();
+        }
+
+
+
+        public void AddUserAsync(User user)
+        {
+            throw new NotImplementedException();
+        }
+
+        public void DeleteUserAsync(User user)
+        {
+            throw new NotImplementedException();
+        }
+        #endregion
+
         #region CommonOperations
         public async Task<bool> SaveChangesAsync()
         {

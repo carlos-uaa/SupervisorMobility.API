@@ -24,6 +24,7 @@ namespace SupervisorMobility.API.Context
         public DbSet<Product> Products { get; set; }
         //Add AssyCharts db Context
         public DbSet<AssyChart> AssyCharts { get; set; }
+        public DbSet<User> Users { get; set; }
         #endregion
 
         public SupervisorMobilityContext(DbContextOptions<SupervisorMobilityContext> options)
@@ -386,7 +387,18 @@ namespace SupervisorMobility.API.Context
                     PlantId = 1,
                     AreaId = 1,
                     DistributionId = 1
-                }); 
+                });
+
+            modelBuilder.Entity<User>().HasData(
+                new User { 
+                    UserId = 1, 
+                    PlantId = 1, 
+                    AreaId = 1, 
+                    GroupId = 1, 
+                    Nombre = "Marco Aguayo", 
+                    Nomina = 239935, 
+                    IsActive = true
+                });
 
 
 
