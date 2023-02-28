@@ -616,5 +616,30 @@ namespace SupervisorMobility.API.Services
 
         #endregion
 
+        #region GlosaryOperations
+
+        public async Task<IEnumerable<Glosary>> GetGlosaryAsync()
+        {
+            return await _context.Glosary
+                .OrderBy(c => c.GlosaryWordId).ToListAsync();
+        }
+
+        public async Task<Glosary?> GetGlosaryWordAsync(int glosaryWordId)
+        {
+            return await _context.Glosary
+                .Where(c => c.GlosaryWordId == glosaryWordId).FirstOrDefaultAsync();
+        }
+
+        public void AddGlosaryWord(Glosary glosaryWord)
+        {
+            _context.Glosary.Add(glosaryWord);
+        }
+
+        public void DeleteGlosaryWord(Glosary glosaryWord)
+        {
+            _context.Glosary.Remove(glosaryWord);
+        }
+        #endregion
+
     }
 }

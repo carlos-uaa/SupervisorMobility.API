@@ -19,8 +19,14 @@ namespace SupervisorMobility.API.Entities
         public Operation? Operation { get; set; }
         public int? OperationId { get; set; }
 
-        public DateTime? dateStart { get; set; }
-        public DateTime? dateEnd { get; set; }
+        public DateTime? DateStart { get; set; }
+        public DateTime? DateEnd { get; set; }
+        public DateTime? PlannedStartDate { get; set; }
+        public DateTime? PlannedEndDate { get; set; }
+        
+        public string? Justification { get; set; }
+
+        public int? Status { get; set; }
 
         public string? Observer { get; set; }
         public string? Operator { get; set; }
