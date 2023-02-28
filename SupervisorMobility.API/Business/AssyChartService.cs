@@ -218,7 +218,7 @@ namespace SupervisorMobility.API.Business
         public async Task<AssyChart> CreateAssyChartAsync(AssyChartForCreation assyChart)
         {
             var finalasssychart = _mapper.Map<AssyChart>(assyChart);
-            _repository.AddAssyChart(finalasssychart);
+            _repository.AddAssyChartAsync(finalasssychart);
             await _repository.SaveChangesAsync();
             return finalasssychart;
         }
@@ -232,7 +232,6 @@ namespace SupervisorMobility.API.Business
         {
             throw new NotImplementedException();
         }
-
 
         #endregion
     }
