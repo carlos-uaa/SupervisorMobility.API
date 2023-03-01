@@ -174,5 +174,13 @@ namespace SupervisorMobility.API.Services
 
         #endregion
 
+        #region GlosaryOperations
+
+        Task<IEnumerable<Glosary>> GetGlosaryAsync();
+        Task<Glosary?> GetGlosaryWordAsync(int glosaryWordId);
+        void AddGlosaryWord(Glosary glosaryWord);
+        void DeleteGlosaryWord(Glosary glossaryWord);
+        #endregion
+
     }
 }

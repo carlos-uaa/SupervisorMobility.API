@@ -14,6 +14,7 @@ namespace SupervisorMobility.API.Context
         public DbSet<JobObservationType> JobObservationTypes { get; set; }
         public DbSet<JobObservation> JobObservations { get; set; }
         public DbSet<Group> Groups { get; set; }
+        public DbSet<Glosary> Glosary { get; set; }
         public DbSet<Plant> Plants { get; set; }
         public DbSet<Area> Areas { get; set; }
         public DbSet<Distribution> Distributions { get; set; }
@@ -85,6 +86,10 @@ namespace SupervisorMobility.API.Context
                 .Property(p => p.IsActive)
                 .HasDefaultValue(true);
 
+            modelBuilder.Entity<Glosary>()
+                .Property(p => p.IsActive)
+                .HasDefaultValue(true);
+
             //Product Distributions
             modelBuilder.Entity<ProductDistribution>()
                 .Property(p => p.IsActive)
@@ -116,8 +121,9 @@ namespace SupervisorMobility.API.Context
                     AreaId = 1,
                     DistributionId = 1,
                     OperationId = 1,
-                    dateStart = new DateTime(),
-                    dateEnd = new DateTime(),
+                    DateStart = new DateTime(),
+                    DateEnd = new DateTime(),
+                    Status = 0,
                     Observer = "Pedro",
                     Operator = "Juan",
                     Option = 1,
@@ -136,7 +142,7 @@ namespace SupervisorMobility.API.Context
                     SsvSignature = "Pedro",
                     OperatorSignature = "Juan"
 
-                }); ; ;
+                });; ; ;
 
             modelBuilder.Entity<ChecklistCategory>()
                 .HasData(
@@ -389,6 +395,16 @@ namespace SupervisorMobility.API.Context
                     DistributionId = 1
                 });
 
+            modelBuilder.Entity<Glosary>()
+            .HasData(
+                new Glosary()
+                {
+                    GlosaryWordId = 1,
+                    Name = "S",
+                    Description = "Safety",
+                    IsActive = true
+                });
+
             modelBuilder.Entity<User>().HasData(
                 new User { 
                     UserId = 1, 
@@ -399,8 +415,6 @@ namespace SupervisorMobility.API.Context
                     Payroll = 239935, 
                     IsActive = true
                 });
-
-
 
             base.OnModelCreating(modelBuilder);
         }

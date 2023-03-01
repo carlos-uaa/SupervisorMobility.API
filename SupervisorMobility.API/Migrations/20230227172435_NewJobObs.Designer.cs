@@ -3,6 +3,7 @@ using System;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Infrastructure;
 using Microsoft.EntityFrameworkCore.Metadata;
+using Microsoft.EntityFrameworkCore.Migrations;
 using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 using SupervisorMobility.API.Context;
 
@@ -11,9 +12,11 @@ using SupervisorMobility.API.Context;
 namespace SupervisorMobility.API.Migrations
 {
     [DbContext(typeof(SupervisorMobilityContext))]
-    partial class SupervisorMobilityContextModelSnapshot : ModelSnapshot
+    [Migration("20230227172435_NewJobObs")]
+    partial class NewJobObs
     {
-        protected override void BuildModel(ModelBuilder modelBuilder)
+        /// <inheritdoc />
+        protected override void BuildTargetModel(ModelBuilder modelBuilder)
         {
 #pragma warning disable 612, 618
             modelBuilder
@@ -282,69 +285,6 @@ namespace SupervisorMobility.API.Migrations
                         });
                 });
 
-            modelBuilder.Entity("SupervisorMobility.API.DataAccess.Entities.User", b =>
-                {
-                    b.Property<int>("UserId")
-                        .ValueGeneratedOnAdd()
-                        .HasColumnType("int");
-
-                    SqlServerPropertyBuilderExtensions.UseIdentityColumn(b.Property<int>("UserId"));
-
-                    b.Property<int?>("AreaId")
-                        .HasColumnType("int");
-
-                    b.Property<DateTime?>("CreatedDate")
-                        .HasColumnType("Date");
-
-                    b.Property<DateTime?>("DisabledDate")
-                        .HasColumnType("Date");
-
-                    b.Property<int?>("GroupId")
-                        .HasColumnType("int");
-
-                    b.Property<bool?>("IsActive")
-                        .HasColumnType("bit");
-
-                    b.Property<DateTime>("LastUpdated")
-                        .HasColumnType("Date");
-
-                    b.Property<string>("Name")
-                        .IsRequired()
-                        .HasColumnType("nvarchar(max)");
-
-                    b.Property<int>("Payroll")
-                        .HasColumnType("int");
-
-                    b.Property<string>("Permissions")
-                        .HasColumnType("nvarchar(max)");
-
-                    b.Property<int?>("PlantId")
-                        .HasColumnType("int");
-
-                    b.HasKey("UserId");
-
-                    b.HasIndex("AreaId");
-
-                    b.HasIndex("GroupId");
-
-                    b.HasIndex("PlantId");
-
-                    b.ToTable("Users");
-
-                    b.HasData(
-                        new
-                        {
-                            UserId = 1,
-                            AreaId = 1,
-                            GroupId = 1,
-                            IsActive = true,
-                            LastUpdated = new DateTime(2023, 2, 28, 21, 33, 52, 44, DateTimeKind.Local).AddTicks(9106),
-                            Name = "Marco Aguayo",
-                            Payroll = 239935,
-                            PlantId = 1
-                        });
-                });
-
             modelBuilder.Entity("SupervisorMobility.API.Entities.AssyChart", b =>
                 {
                     b.Property<int>("AssyChardId")
@@ -585,43 +525,6 @@ namespace SupervisorMobility.API.Migrations
                             IsActive = true,
                             Prompt = "¿Cuál es nivel de ILU del operador?  ¿Está el entrenamiento alineado con el Cuadro de requisitos de Operaicón ? (S/N)",
                             QuestionTypeId = 6
-                        });
-                });
-
-            modelBuilder.Entity("SupervisorMobility.API.Entities.Glosary", b =>
-                {
-                    b.Property<int>("GlosaryWordId")
-                        .ValueGeneratedOnAdd()
-                        .HasColumnType("int");
-
-                    SqlServerPropertyBuilderExtensions.UseIdentityColumn(b.Property<int>("GlosaryWordId"));
-
-                    b.Property<string>("Description")
-                        .IsRequired()
-                        .HasMaxLength(200)
-                        .HasColumnType("nvarchar(200)");
-
-                    b.Property<bool?>("IsActive")
-                        .ValueGeneratedOnAdd()
-                        .HasColumnType("bit")
-                        .HasDefaultValue(true);
-
-                    b.Property<string>("Name")
-                        .IsRequired()
-                        .HasMaxLength(50)
-                        .HasColumnType("nvarchar(50)");
-
-                    b.HasKey("GlosaryWordId");
-
-                    b.ToTable("Glosary");
-
-                    b.HasData(
-                        new
-                        {
-                            GlosaryWordId = 1,
-                            Description = "Safety",
-                            IsActive = true,
-                            Name = "S"
                         });
                 });
 
@@ -1106,27 +1009,6 @@ namespace SupervisorMobility.API.Migrations
                         .IsRequired();
 
                     b.Navigation("productDistribution");
-                });
-
-            modelBuilder.Entity("SupervisorMobility.API.DataAccess.Entities.User", b =>
-                {
-                    b.HasOne("SupervisorMobility.API.DataAccess.Entities.Area", "Area")
-                        .WithMany()
-                        .HasForeignKey("AreaId");
-
-                    b.HasOne("SupervisorMobility.API.Entities.Group", "Group")
-                        .WithMany()
-                        .HasForeignKey("GroupId");
-
-                    b.HasOne("SupervisorMobility.API.Entities.Plant", "Plant")
-                        .WithMany()
-                        .HasForeignKey("PlantId");
-
-                    b.Navigation("Area");
-
-                    b.Navigation("Group");
-
-                    b.Navigation("Plant");
                 });
 
             modelBuilder.Entity("SupervisorMobility.API.Entities.AssyChart", b =>
