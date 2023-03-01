@@ -125,8 +125,7 @@ namespace SupervisorMobility.API.Controllers
                 return NotFound();
             }
 
-            _supervisorMobilityRepository.DeleteAssyChartAsync(assychart);
-            await _supervisorMobilityRepository.SaveChangesAsync();
+            await _assyChartService.RemoveAssyChartAsync(assychart);
 
             return Ok();
         }
@@ -162,9 +161,7 @@ namespace SupervisorMobility.API.Controllers
                 return NotFound("AssyChart Not Found");
             }
 
-            _mapper.Map(AssyCharttoUpdate, assyChartEntity);
-
-            await _supervisorMobilityRepository.SaveChangesAsync();
+             await _assyChartService.UpdateAssyChartAsync(AssyCharttoUpdate, assyChartEntity);
 
             return Ok();
 

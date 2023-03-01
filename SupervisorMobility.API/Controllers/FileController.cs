@@ -25,17 +25,6 @@ using DocumentFormat.OpenXml.Spreadsheet;
 namespace SupervisorMobility.API.Controllers
 {
 
-    public class DataAreaSaved
-    {
-        public AreaWithoutNavigationPropertiesDto areaInfo { get; set; }
-        public List<DataDistributionsSaved> DistributionsInArea { get; set; } = new List<DataDistributionsSaved>();
-    }
-
-    public class DataDistributionsSaved
-    {
-        public DistributionWithoutNavigationPropertiesDto distributionInfo { get; set; }
-        public List<OperationWithoutNavigationPropertiesDto> OperationsInDistribution { get; set; } = new List<OperationWithoutNavigationPropertiesDto>();
-    }
 
     [Route("api/File")]
     [ApiController]
@@ -311,10 +300,6 @@ namespace SupervisorMobility.API.Controllers
             //created result array to return
             UploadDataResult ResumeActionsResultsToReturn = new UploadDataResult();
 
-
-            //Lists of info to evit using await's 
-            List<ProductDto> SaveProducts = new List<ProductDto>();
-            List<DataAreaSaved> SaveAreas = new List<DataAreaSaved>();
 
 
             //verify if plant is a new plant or update

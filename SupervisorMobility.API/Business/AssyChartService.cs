@@ -7,6 +7,7 @@ using SupervisorMobility.API.Models.PlantDtos;
 using SupervisorMobility.API.Models.ProductDtos;
 using SupervisorMobility.API.Models.ProductOperationDtos;
 using SupervisorMobility.API.Models.SupportDocumentTypeDtos;
+using SupervisorMobility.API.Models.Users;
 using SupervisorMobility.API.Services;
 
 namespace SupervisorMobility.API.Business
@@ -223,16 +224,48 @@ namespace SupervisorMobility.API.Business
             return finalasssychart;
         }
 
-        public Task UpdateAssyChartAsync(AssyChartForUpdateDto assyChartForUpdate, AssyChart assyChart)
+        public async Task UpdateAssyChartAsync(AssyChartForUpdateDto assyChartUpdate, AssyChart assyChart)
         {
-            throw new NotImplementedException();
+            _mapper.Map(assyChartUpdate, assyChart);
+            await _repository.SaveChangesAsync();
         }
 
-        public Task RemoveAssyChartAsync(AssyChart assyChart)
+        public async Task RemoveAssyChartAsync(AssyChart assyChart) 
         {
-            throw new NotImplementedException();
+            _repository.DeleteAssyChartAsync(assyChart);
+            await _repository.SaveChangesAsync();
         }
 
         #endregion
+
+        #region User
+
+        public async Task<User?> FetchUserAsync(int userId)
+        {
+            return await _repository.GetUserAsync(userId);
+        }
+        public async Task<User> CreateUserAsync(UsersForCreation newuser)
+        {
+            var finaluser = _mapper.Map<User>(newuser);
+            _repository.AddUserAsync(finaluser);
+            await _repository.SaveChangesAsync();
+            return finaluser;
+        }
+
+        public async Task UpdateUserAsync(UsersForUpdateDto updateuser, User user)
+        {
+            _mapper.Map(updateuser, user);
+            await _repository.SaveChangesAsync();
+        }
+
+        public async Task RemoveUserAsync(User user)
+        {
+            _repository.DeleteUserAsync(user);
+            await _repository.SaveChangesAsync();
+        }
+
+        #endregion
+
+
     }
 }
