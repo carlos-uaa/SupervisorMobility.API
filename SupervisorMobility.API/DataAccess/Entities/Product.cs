@@ -14,7 +14,9 @@ namespace SupervisorMobility.API.DataAccess.Entities
         [MaxLength(200)]
         public string Description { get; set; }
         public bool? IsActive { get; set; }
-        public ICollection<ProductDistribution> ProductDistributions { get; set; }= new List<ProductDistribution>();
+
+        public ICollection<Distribution> Distributions { get; set; }
+            = new List<Distribution>();
 
         public Product(string code, string description)
         {
