@@ -115,6 +115,12 @@ namespace SupervisorMobility.API.Services
                 .Where(c => c.GroupId == groupId).FirstOrDefaultAsync();
         }
 
+        public async Task<bool> GroupExistAsync(int groupId)
+        {
+            return await _context.Groups.AnyAsync(p => p.GroupId == groupId);
+        }
+
+
         public void AddGroup(Group group)
         {
             _context.Groups.Add(group);
@@ -198,6 +204,7 @@ namespace SupervisorMobility.API.Services
         {
             return await _context.Areas.AnyAsync(p => p.AreaId == areaId);
         }
+
 
         public async Task<bool> AreaExistByCodeAndDescriptionInPlantAsync(string code, string description, int plantId)
         {
@@ -503,10 +510,6 @@ namespace SupervisorMobility.API.Services
             return await _context.AssyCharts.AnyAsync(p => p.GOS == GOS && p.CCP == CCP && p.HOE == HOE && p.PlantId == PlantId && p.AreaId == AreaId && p.DistributionId == DistributionId && p.OperationId == OperationId && p.ProductId == Productid);
         }
 
-        public Task<bool> UserExistAdvanceAsync(string nombre, int nomina, Plant plantid, Area areaid, Group grupoid)
-        {
-            throw new NotImplementedException();
-        }
         public void AddAssyChartAsync(AssyChart assychart)
         {
             _context.AssyCharts.Add(assychart);
@@ -603,7 +606,10 @@ namespace SupervisorMobility.API.Services
             throw new NotImplementedException();
         }
 
-
+        public Task<bool> UserExistAdvanceAsync(string nombre, int nomina, Plant plantid, Area areaid, Group grupoid)
+        {
+            throw new NotImplementedException();
+        }
 
         public void AddUserAsync(User user)
         {

@@ -6,6 +6,7 @@ using SupervisorMobility.API.Models.PlantDtos;
 using SupervisorMobility.API.Models.ProductDtos;
 using SupervisorMobility.API.Models.ProductOperationDtos;
 using SupervisorMobility.API.Models.SupportDocumentTypeDtos;
+using SupervisorMobility.API.Models.Users;
 
 namespace SupervisorMobility.API.Business
 {
@@ -67,7 +68,13 @@ namespace SupervisorMobility.API.Business
         #endregion
 
 
+        #region Users
+        Task<User?> FetchUserAsync(int userId);
 
+        Task<User> CreateUserAsync(UsersForCreation user);
+        Task UpdateUserAsync(UsersForUpdateDto userForUpdate, User user);
+        Task RemoveUserAsync(User user);
+        #endregion
 
     }
 }

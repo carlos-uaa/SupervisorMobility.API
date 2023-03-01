@@ -395,8 +395,8 @@ namespace SupervisorMobility.API.Context
                     PlantId = 1, 
                     AreaId = 1, 
                     GroupId = 1, 
-                    Nombre = "Marco Aguayo", 
-                    Nomina = 239935, 
+                    Name = "Marco Aguayo", 
+                    Payroll = 239935, 
                     IsActive = true
                 });
 

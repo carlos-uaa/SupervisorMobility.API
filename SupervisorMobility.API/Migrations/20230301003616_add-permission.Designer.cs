@@ -3,6 +3,7 @@ using System;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Infrastructure;
 using Microsoft.EntityFrameworkCore.Metadata;
+using Microsoft.EntityFrameworkCore.Migrations;
 using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 using SupervisorMobility.API.Context;
 
@@ -11,9 +12,11 @@ using SupervisorMobility.API.Context;
 namespace SupervisorMobility.API.Migrations
 {
     [DbContext(typeof(SupervisorMobilityContext))]
-    partial class SupervisorMobilityContextModelSnapshot : ModelSnapshot
+    [Migration("20230301003616_add-permission")]
+    partial class addpermission
     {
-        protected override void BuildModel(ModelBuilder modelBuilder)
+        /// <inheritdoc />
+        protected override void BuildTargetModel(ModelBuilder modelBuilder)
         {
 #pragma warning disable 612, 618
             modelBuilder
@@ -293,26 +296,17 @@ namespace SupervisorMobility.API.Migrations
                     b.Property<int?>("AreaId")
                         .HasColumnType("int");
 
-                    b.Property<DateTime?>("CreatedDate")
-                        .HasColumnType("Date");
-
-                    b.Property<DateTime?>("DisabledDate")
-                        .HasColumnType("Date");
-
                     b.Property<int?>("GroupId")
                         .HasColumnType("int");
 
                     b.Property<bool?>("IsActive")
                         .HasColumnType("bit");
 
-                    b.Property<DateTime>("LastUpdated")
-                        .HasColumnType("Date");
-
-                    b.Property<string>("Name")
+                    b.Property<string>("Nombre")
                         .IsRequired()
                         .HasColumnType("nvarchar(max)");
 
-                    b.Property<int>("Payroll")
+                    b.Property<int>("Nomina")
                         .HasColumnType("int");
 
                     b.Property<string>("Permissions")
@@ -338,9 +332,8 @@ namespace SupervisorMobility.API.Migrations
                             AreaId = 1,
                             GroupId = 1,
                             IsActive = true,
-                            LastUpdated = new DateTime(2023, 2, 28, 21, 33, 52, 44, DateTimeKind.Local).AddTicks(9106),
-                            Name = "Marco Aguayo",
-                            Payroll = 239935,
+                            Nombre = "Marco Aguayo",
+                            Nomina = 239935,
                             PlantId = 1
                         });
                 });

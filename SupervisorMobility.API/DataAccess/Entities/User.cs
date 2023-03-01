@@ -1,6 +1,5 @@
 ﻿using System.ComponentModel.DataAnnotations.Schema;
 using System.ComponentModel.DataAnnotations;
-using static ClosedXML.Excel.XLPredefinedFormat;
 using SupervisorMobility.API.Entities;
 
 namespace SupervisorMobility.API.DataAccess.Entities
@@ -10,18 +9,28 @@ namespace SupervisorMobility.API.DataAccess.Entities
         [Key, DatabaseGenerated(DatabaseGeneratedOption.Identity)]
         public int UserId { get; set; }
 
-        public int Nomina { get; set; }
-        public string Nombre { get; set; } = string.Empty;
+        public int Payroll { get; set; }
+        public string Name { get; set; } = string.Empty;
+        public string? Permissions { get; set; }
+
+
+        [Column(TypeName = "Date")]
+        public DateTime? CreatedDate { get; set; }
+        [Column(TypeName = "Date")]
+        public DateTime LastUpdated { get; set; } = DateTime.Now;
+        [Column(TypeName = "Date")]
+        public DateTime? DisabledDate { get; set; }
 
         public bool? IsActive { get; set; }
 
         public int? PlantId { get; set; }
         public Plant? Plant { get; set; }
         public int? AreaId { get; set; }
-        public Area? Area { get; set; }  
+        public Area? Area { get; set; }
         public int? GroupId { get; set; }
         public Group? Group { get; set; }
 
-       
+        
+
     }
 }
