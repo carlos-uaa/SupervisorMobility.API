@@ -30,12 +30,46 @@ namespace SupervisorMobility.API.Controllers
             _assyChartService = assyChartService;
         }
 
+        [HttpGet]
+        public async Task<ActionResult<IEnumerable<UsersWhitNavigationDetails>>> GetUsers(bool collections = false)
+        {
+            if (collections)
+            {
+                var userEntity = await _supervisorMobilityRepository.GetAllUsersWhitPlantAreaAndGroupAsync();
+                return Ok(_mapper.Map<IEnumerable<UsersWhitNavigationDetails>>(userEntity));
+            }
+            else
+            {
+                var userEntity = await _supervisorMobilityRepository.GetAllUsersAsync();
+                return Ok(_mapper.Map<IEnumerable<UsersWhitoutNavigationDetails>>(userEntity));
+            }
+        }
 
         [HttpGet("{userId}")]
-        public async Task<ActionResult<IEnumerable<UserInfo>>> GetUser(int userId)
+        public async Task<ActionResult<UsersWhitNavigationDetails>> GetUser(int userId,bool collections = false)
         {
-            var userEntity = await _supervisorMobilityRepository.GetUserAsync(userId);
-            return Ok(_mapper.Map<IEnumerable<UserInfo>>(userEntity));
+            if (collections)
+            {
+                var userEntity = await _supervisorMobilityRepository.GetUserAsync(userId, collections);
+                if (userEntity != null)
+                {
+                    return Ok(_mapper.Map<UsersWhitNavigationDetails>(userEntity));
+
+                }
+
+                return NotFound();
+            }
+            else
+            {
+                var userEntity = await _supervisorMobilityRepository.GetUserAsync(userId);
+                if (userEntity != null)
+                {
+                    return Ok(_mapper.Map<UsersWhitoutNavigationDetails>(userEntity));
+
+                }
+
+                return NotFound();
+            }
         }
 
         [HttpPost]
@@ -53,7 +87,7 @@ namespace SupervisorMobility.API.Controllers
 
             if (!await _supervisorMobilityRepository.GroupExistAsync(newUser.GroupId))
             {
-                return NotFound("No Distributio");
+                return NotFound("No Group");
             }
 
             var finalUser = await _assyChartService.CreateUserAsync(newUser);
@@ -124,12 +158,13 @@ namespace SupervisorMobility.API.Controllers
         }
 
         [HttpPost("FileUpload/Data")]
-        public async Task<ActionResult<string>> ApplyUsersUpload(UploadResult FileInfo)
+        //public async Task<ActionResult<string>> ApplyUsersUpload(UploadResult FileInfo)
+        public async  Task<ActionResult> ApplyUsersUpload(UploadResult FileInfo)
         {
             string file = Directory.GetCurrentDirectory().ToString() + "\\uploads\\users\\" + FileInfo.StorageFileName;
             
             
-            return Ok("Okey");
+            return Ok();
 
         }
 

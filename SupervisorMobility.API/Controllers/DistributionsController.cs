@@ -3,6 +3,7 @@ using Microsoft.AspNetCore.JsonPatch;
 using Microsoft.AspNetCore.Mvc;
 using SupervisorMobility.API.DataAccess.Entities;
 using SupervisorMobility.API.Models.AreaDtos;
+using SupervisorMobility.API.Models.DistributionDtos;
 using SupervisorMobility.API.Models.OperationDtos;
 using SupervisorMobility.API.Services;
 
@@ -10,7 +11,7 @@ namespace SupervisorMobility.API.Controllers
 {
     [Route("api/plants/{plantId}/areas/{areaId}/distributions")]
     [ApiController]
-    public class DistributionsController :  ControllerBase
+    public class DistributionsController : ControllerBase
     {
         private readonly IMapper _mapper;
         private readonly ISupervisorMobilityRepository _supervisorMobilityRepository;
@@ -45,8 +46,8 @@ namespace SupervisorMobility.API.Controllers
         }
 
         [HttpGet("{distributionId}", Name = "GetDistribution")]
-        public async Task<ActionResult<DistributionWithoutNavigationPropertiesDto>> GetDistribution(
-           int plantId, int areaId, int distributionId)
+        public async Task<ActionResult<DistributionWithNavigationPropertiesDto>> GetDistribution(
+           int plantId, int areaId, int distributionId, bool includeCollections = false)
         {
             if (!await _supervisorMobilityRepository.PlantExistAsync(plantId))
             {
@@ -58,15 +59,30 @@ namespace SupervisorMobility.API.Controllers
                 return NotFound();
             }
 
-            var distribution = await _supervisorMobilityRepository
-                .GetDistributionForAreaAsync(areaId, distributionId);
-
-            if (distribution == null)
+            if (includeCollections)
             {
-                return NotFound();
+                var distribution = await _supervisorMobilityRepository
+                        .GetDistributionForAreaAsync(areaId, distributionId, includeCollections);
+                if (distribution == null)
+                {
+                    return NotFound();
+                }
+
+                return Ok(_mapper.Map<DistributionWithNavigationPropertiesDto>(distribution));
+            }
+            else
+            {
+                var distribution = await _supervisorMobilityRepository
+        .GetDistributionForAreaAsync(areaId, distributionId);
+                if (distribution == null)
+                {
+                    return NotFound();
+                }
+
+                return Ok(_mapper.Map<DistributionWithoutNavigationPropertiesDto>(distribution));
             }
 
-            return Ok(_mapper.Map<DistributionWithoutNavigationPropertiesDto>(distribution));
+
         }
 
         [HttpPost]
@@ -202,6 +218,42 @@ namespace SupervisorMobility.API.Controllers
 
             return Ok();
         }
+
+        [HttpDelete("{distributionId}/products/{productId}")]
+        public async Task<ActionResult> DeleteOperation(int plantId, int areaId, int distributionId, int productId)
+        {
+            if (!await _supervisorMobilityRepository.PlantExistAsync(plantId))
+            {
+                return NotFound();
+            }
+
+            if (!await _supervisorMobilityRepository.AreaExistAsync(areaId))
+            {
+                return NotFound();
+            }
+
+            if (!await _supervisorMobilityRepository.DistributionExistsAsync(distributionId))
+            {
+                return NotFound();
+            }
+
+            //Ver como hacer la baja logica para no afectar demas distrubuciones que usen el mismo producto
+
+            //Propuesta: solo sacarlo de la collection 
+
+            //var operationEntity = await _assyChartService
+            //    .FetchOperationAsync(distributionId, operationId);
+            //if (operationEntity == null)
+            //{
+            //    return NotFound();
+            //}
+
+            //await _assyChartService.RemoveOperationAsync(operationEntity);
+
+            return Ok();
+        }
+
+
     }
 
 

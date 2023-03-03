@@ -5,7 +5,6 @@ using SupervisorMobility.API.Entities;
 using SupervisorMobility.API.Models.AreaDtos;
 using SupervisorMobility.API.Models.OperationDtos;
 using SupervisorMobility.API.Models.PlantDtos;
-using SupervisorMobility.API.Models.ProductDistributionsDtos;
 using SupervisorMobility.API.Models.ProductDtos;
 using System.ComponentModel.DataAnnotations;
 using System.ComponentModel.DataAnnotations.Schema;

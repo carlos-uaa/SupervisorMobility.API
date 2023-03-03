@@ -30,7 +30,7 @@ namespace SupervisorMobility.API.Controllers
         }
 
         [HttpGet("{productId}", Name = "GetProduct")]
-        public async Task<ActionResult> GetProduct(int productId)
+        public async Task<ActionResult> GetProduct(int productId, bool collections = false)
         {
             //Find Job Observation type
             var product = await _assyChartService
@@ -38,6 +38,12 @@ namespace SupervisorMobility.API.Controllers
             if (product == null)
             {
                 return NotFound();
+            }
+
+            if (collections)
+            {
+                return Ok(_mapper.Map<ProductDto>(product));
+
             }
 
             return Ok(_mapper.Map<ProductDto>(product));
@@ -122,5 +128,25 @@ namespace SupervisorMobility.API.Controllers
 
             return Ok();
         }
+
+        [HttpDelete("{productId}/distributions/{distributionId}")]
+        public async Task<ActionResult> DeleteDistribution(int productId, int distributionId)
+        {
+            var productEntity = await _assyChartService.FetchProductAsync(productId);
+            if (productEntity == null)
+            {
+                return NotFound();
+            }
+
+
+
+            //remove distribution from collection
+
+            //await _assyChartService.RemoveProductAsync(productEntity);
+
+            return Ok();
+        }
+
+
     }
 }

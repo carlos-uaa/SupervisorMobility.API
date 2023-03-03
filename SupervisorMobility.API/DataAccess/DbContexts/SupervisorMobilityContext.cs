@@ -18,9 +18,8 @@ namespace SupervisorMobility.API.Context
         public DbSet<Plant> Plants { get; set; }
         public DbSet<Area> Areas { get; set; }
         public DbSet<Distribution> Distributions { get; set; }
-        public DbSet<ProductDistribution> ProductDistributions { get; set; }
+     
         public DbSet<Operation> Operations { get; set; }
-        public DbSet<ProductOperation> ProductOperations { get; set; }
         public DbSet<SupportDocumentType> SupportDocumentTypes { get; set; }
         public DbSet<Product> Products { get; set; }
         //Add AssyCharts db Context
@@ -74,10 +73,6 @@ namespace SupervisorMobility.API.Context
                 .Property(p => p.IsActive)
                 .HasDefaultValue(true);
 
-            modelBuilder.Entity<ProductOperation>()
-                .Property(p => p.IsActive)
-                .HasDefaultValue(true);
-
             modelBuilder.Entity<SupportDocumentType>()
                 .Property(p => p.IsActive)
                 .HasDefaultValue(true);
@@ -90,10 +85,6 @@ namespace SupervisorMobility.API.Context
                 .Property(p => p.IsActive)
                 .HasDefaultValue(true);
 
-            //Product Distributions
-            modelBuilder.Entity<ProductDistribution>()
-                .Property(p => p.IsActive)
-                .HasDefaultValue(true);
 
 
             //Add AssyChartModel
@@ -319,14 +310,7 @@ namespace SupervisorMobility.API.Context
                     AreaId = 1
                 });
 
-            modelBuilder.Entity<ProductDistribution>()
-            .HasData(
-            new ProductDistribution("Dist1", "Distribution from products")
-            {
-                ProductDistributionId = 1,
-                IsActive = true,
-                ProductId = 1
-            });
+    
 
             modelBuilder.Entity<Operation>()
                 .HasData(
@@ -336,15 +320,6 @@ namespace SupervisorMobility.API.Context
                     IsActive = true,
                     DistributionId = 1
                 });
-
-            modelBuilder.Entity<ProductOperation>()
-            .HasData(
-            new ProductOperation("OP1", "Operation from products")
-            {
-                ProductOperationId = 1,
-                IsActive = true,
-                ProductDistributionId = 1
-            });
 
 
             modelBuilder.Entity<SupportDocumentType>()
@@ -413,7 +388,10 @@ namespace SupervisorMobility.API.Context
                     GroupId = 1, 
                     Name = "Marco Aguayo", 
                     Payroll = 239935, 
-                    IsActive = true
+                    IsActive = true,
+                    IsAdmin = true,
+                    IsOperator = false,
+                    IsSupervisor = true,
                 });
 
             base.OnModelCreating(modelBuilder);

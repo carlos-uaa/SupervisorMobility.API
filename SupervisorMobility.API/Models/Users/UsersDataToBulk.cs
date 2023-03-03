@@ -11,7 +11,9 @@ namespace SupervisorMobility.API.Models.Users
 
         public int Payroll { get; set; }
         public string Name { get; set; } = string.Empty;
-        public string? Permissions { get; set; }
+        public bool IsAdmin { get; set; }
+        public bool IsSupervisor { get; set; }
+        public bool IsOperator { get; set; }
 
         public bool? IsActive { get; set; }
 

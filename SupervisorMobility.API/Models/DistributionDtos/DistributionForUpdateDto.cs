@@ -1,6 +1,6 @@
 ﻿using System.ComponentModel.DataAnnotations;
 
-namespace SupervisorMobility.API.Models.OperationDtos
+namespace SupervisorMobility.API.Models.DistributionDtos
 {
     public class DistributionForUpdateDto
     {

@@ -1,12 +1,10 @@
-﻿using SupervisorMobility.API.DataAccess.Entities;
-using SupervisorMobility.API.Entities;
-using SupervisorMobility.API.Models.AreaDtos;
+﻿using SupervisorMobility.API.Models.AreaDtos;
 using SupervisorMobility.API.Models.GroupDtos;
 using SupervisorMobility.API.Models.PlantDtos;
 
 namespace SupervisorMobility.API.Models.Users
 {
-    public class UsersWhitNavigationDetails
+    public class UsersWhitoutNavigationDetails
     {
         public int UserId { get; set; }
         public int Payroll { get; set; }
@@ -14,21 +12,10 @@ namespace SupervisorMobility.API.Models.Users
         public bool IsAdmin { get; set; }
         public bool IsSupervisor { get; set; }
         public bool IsOperator { get; set; }
-
         public bool? IsActive { get; set; }
-
         public int? PlantId { get; set; }
         public int? AreaId { get; set; }
         public int? GroupId { get; set; }
-
-        public PlantDto? Plant { get; set; } = new PlantDto();
-        public AreaWithoutNavigationPropertiesDto? Area { get; set; } = new AreaWithoutNavigationPropertiesDto();
-        public GroupDto? Group { get; set; } = new GroupDto();
-
-
-        public DateTime? CreatedDate { get; set; }
-        public DateTime LastUpdated { get; set; } = DateTime.Now;
-        public DateTime? DisabledDate { get; set; }
 
     }
 }

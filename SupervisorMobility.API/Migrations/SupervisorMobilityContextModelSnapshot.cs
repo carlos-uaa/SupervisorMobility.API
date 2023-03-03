@@ -22,6 +22,21 @@ namespace SupervisorMobility.API.Migrations
 
             SqlServerModelBuilderExtensions.UseIdentityColumns(modelBuilder);
 
+            modelBuilder.Entity("DistributionProduct", b =>
+                {
+                    b.Property<int>("DistributionsDistributionId")
+                        .HasColumnType("int");
+
+                    b.Property<int>("ProductsProductId")
+                        .HasColumnType("int");
+
+                    b.HasKey("DistributionsDistributionId", "ProductsProductId");
+
+                    b.HasIndex("ProductsProductId");
+
+                    b.ToTable("DistributionProduct");
+                });
+
             modelBuilder.Entity("SupervisorMobility.API.DataAccess.Entities.Area", b =>
                 {
                     b.Property<int>("AreaId")
@@ -152,92 +167,6 @@ namespace SupervisorMobility.API.Migrations
                         });
                 });
 
-            modelBuilder.Entity("SupervisorMobility.API.DataAccess.Entities.ProductDistribution", b =>
-                {
-                    b.Property<int>("ProductDistributionId")
-                        .ValueGeneratedOnAdd()
-                        .HasColumnType("int");
-
-                    SqlServerPropertyBuilderExtensions.UseIdentityColumn(b.Property<int>("ProductDistributionId"));
-
-                    b.Property<string>("Code")
-                        .IsRequired()
-                        .HasMaxLength(50)
-                        .HasColumnType("nvarchar(50)");
-
-                    b.Property<string>("Description")
-                        .IsRequired()
-                        .HasMaxLength(200)
-                        .HasColumnType("nvarchar(200)");
-
-                    b.Property<bool?>("IsActive")
-                        .ValueGeneratedOnAdd()
-                        .HasColumnType("bit")
-                        .HasDefaultValue(true);
-
-                    b.Property<int>("ProductId")
-                        .HasColumnType("int");
-
-                    b.HasKey("ProductDistributionId");
-
-                    b.HasIndex("ProductId");
-
-                    b.ToTable("ProductDistributions");
-
-                    b.HasData(
-                        new
-                        {
-                            ProductDistributionId = 1,
-                            Code = "Dist1",
-                            Description = "Distribution from products",
-                            IsActive = true,
-                            ProductId = 1
-                        });
-                });
-
-            modelBuilder.Entity("SupervisorMobility.API.DataAccess.Entities.ProductOperation", b =>
-                {
-                    b.Property<int>("ProductOperationId")
-                        .ValueGeneratedOnAdd()
-                        .HasColumnType("int");
-
-                    SqlServerPropertyBuilderExtensions.UseIdentityColumn(b.Property<int>("ProductOperationId"));
-
-                    b.Property<string>("Code")
-                        .IsRequired()
-                        .HasMaxLength(50)
-                        .HasColumnType("nvarchar(50)");
-
-                    b.Property<string>("Description")
-                        .IsRequired()
-                        .HasMaxLength(200)
-                        .HasColumnType("nvarchar(200)");
-
-                    b.Property<bool?>("IsActive")
-                        .ValueGeneratedOnAdd()
-                        .HasColumnType("bit")
-                        .HasDefaultValue(true);
-
-                    b.Property<int>("ProductDistributionId")
-                        .HasColumnType("int");
-
-                    b.HasKey("ProductOperationId");
-
-                    b.HasIndex("ProductDistributionId");
-
-                    b.ToTable("ProductOperations");
-
-                    b.HasData(
-                        new
-                        {
-                            ProductOperationId = 1,
-                            Code = "OP1",
-                            Description = "Operation from products",
-                            IsActive = true,
-                            ProductDistributionId = 1
-                        });
-                });
-
             modelBuilder.Entity("SupervisorMobility.API.DataAccess.Entities.SupportDocumentType", b =>
                 {
                     b.Property<int>("SupportDocumentTypeId")
@@ -305,12 +234,14 @@ namespace SupervisorMobility.API.Migrations
                     b.Property<bool?>("IsActive")
                         .HasColumnType("bit");
 
-                    b.Property<string>("Nombre")
-                        .IsRequired()
-                        .HasColumnType("nvarchar(max)");
+                    b.Property<bool>("IsAdmin")
+                        .HasColumnType("bit");
 
-                    b.Property<int>("Nomina")
-                        .HasColumnType("int");
+                    b.Property<bool>("IsOperator")
+                        .HasColumnType("bit");
+
+                    b.Property<bool>("IsSupervisor")
+                        .HasColumnType("bit");
 
                     b.Property<DateTime>("LastUpdated")
                         .HasColumnType("Date");
@@ -321,9 +252,6 @@ namespace SupervisorMobility.API.Migrations
 
                     b.Property<int>("Payroll")
                         .HasColumnType("int");
-
-                    b.Property<string>("Permissions")
-                        .HasColumnType("nvarchar(max)");
 
                     b.Property<int?>("PlantId")
                         .HasColumnType("int");
@@ -345,9 +273,10 @@ namespace SupervisorMobility.API.Migrations
                             AreaId = 1,
                             GroupId = 1,
                             IsActive = true,
-                            Nombre = "Marco Aguayo",
-                            Nomina = 239935,
-                            LastUpdated = new DateTime(2023, 2, 28, 21, 33, 52, 44, DateTimeKind.Local).AddTicks(9106),
+                            IsAdmin = true,
+                            IsOperator = false,
+                            IsSupervisor = true,
+                            LastUpdated = new DateTime(2023, 3, 2, 13, 32, 13, 940, DateTimeKind.Local).AddTicks(4891),
                             Name = "Marco Aguayo",
                             Payroll = 239935,
                             PlantId = 1
@@ -1075,6 +1004,21 @@ namespace SupervisorMobility.API.Migrations
                         });
                 });
 
+            modelBuilder.Entity("DistributionProduct", b =>
+                {
+                    b.HasOne("SupervisorMobility.API.DataAccess.Entities.Distribution", null)
+                        .WithMany()
+                        .HasForeignKey("DistributionsDistributionId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
+
+                    b.HasOne("SupervisorMobility.API.DataAccess.Entities.Product", null)
+                        .WithMany()
+                        .HasForeignKey("ProductsProductId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
+                });
+
             modelBuilder.Entity("SupervisorMobility.API.DataAccess.Entities.Area", b =>
                 {
                     b.HasOne("SupervisorMobility.API.Entities.Plant", "Plant")
@@ -1095,26 +1039,6 @@ namespace SupervisorMobility.API.Migrations
                         .IsRequired();
 
                     b.Navigation("Area");
-                });
-
-            modelBuilder.Entity("SupervisorMobility.API.DataAccess.Entities.ProductDistribution", b =>
-                {
-                    b.HasOne("SupervisorMobility.API.DataAccess.Entities.Product", null)
-                        .WithMany("ProductDistributions")
-                        .HasForeignKey("ProductId")
-                        .OnDelete(DeleteBehavior.Cascade)
-                        .IsRequired();
-                });
-
-            modelBuilder.Entity("SupervisorMobility.API.DataAccess.Entities.ProductOperation", b =>
-                {
-                    b.HasOne("SupervisorMobility.API.DataAccess.Entities.ProductDistribution", "productDistribution")
-                        .WithMany("ProductOperations")
-                        .HasForeignKey("ProductDistributionId")
-                        .OnDelete(DeleteBehavior.Cascade)
-                        .IsRequired();
-
-                    b.Navigation("productDistribution");
                 });
 
             modelBuilder.Entity("SupervisorMobility.API.DataAccess.Entities.User", b =>
@@ -1255,16 +1179,6 @@ namespace SupervisorMobility.API.Migrations
             modelBuilder.Entity("SupervisorMobility.API.DataAccess.Entities.Distribution", b =>
                 {
                     b.Navigation("Operations");
-                });
-
-            modelBuilder.Entity("SupervisorMobility.API.DataAccess.Entities.Product", b =>
-                {
-                    b.Navigation("ProductDistributions");
-                });
-
-            modelBuilder.Entity("SupervisorMobility.API.DataAccess.Entities.ProductDistribution", b =>
-                {
-                    b.Navigation("ProductOperations");
                 });
 
             modelBuilder.Entity("SupervisorMobility.API.Entities.ChecklistCategory", b =>

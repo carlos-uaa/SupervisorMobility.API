@@ -195,7 +195,7 @@ namespace SupervisorMobility.API.Services
         public async Task<Area?> GetAreaForPlantByCodeAndDescriptionAsync(int plantId,
             string code, string description)
         {
-            
+
             return await _context.Areas
                 .Where(a => a.PlantId == plantId && a.Code == code && a.Description == description)
                 .FirstOrDefaultAsync();
@@ -231,8 +231,16 @@ namespace SupervisorMobility.API.Services
             return await _context.Distributions
                 .Where(o => o.AreaId == areaId).ToListAsync();
         }
-        public async Task<Distribution?> GetDistributionForAreaAsync(int areaId, int distributionId)
+        public async Task<Distribution?> GetDistributionForAreaAsync(int areaId, int distributionId, bool includeCollections = false)
         {
+            if (includeCollections)
+            {
+                return await _context.Distributions.Include(o => o.Operations).Include(p => p.Products)
+                     .Where(o => o.AreaId == areaId && o.DistributionId == distributionId)
+                    .FirstOrDefaultAsync();
+            }
+
+
             return await _context.Distributions
                 .Where(o => o.AreaId == areaId && o.DistributionId == distributionId)
                 .FirstOrDefaultAsync();
@@ -243,7 +251,7 @@ namespace SupervisorMobility.API.Services
                 .Where(o => o.AreaId == areaId && o.Code == code && o.Description == description)
                 .FirstOrDefaultAsync();
         }
-       
+
         public async Task AddDistributionForPlantAsync(int plantId, int areaId, Distribution distribution)
         {
             var area = await GetAreaForPlantAsync(plantId, areaId);
@@ -256,7 +264,7 @@ namespace SupervisorMobility.API.Services
         {
             return await _context.Distributions.AnyAsync(p => p.DistributionId == distributionId);
         }
-        public async Task<bool> DistributionExistsByCodeandDescriptionInAreaAsync(int areaid, string code, string description )
+        public async Task<bool> DistributionExistsByCodeandDescriptionInAreaAsync(int areaid, string code, string description)
         {
             return await _context.Distributions.AnyAsync(p => p.AreaId == areaid && p.Code == code && p.Description == description);
         }
@@ -437,8 +445,13 @@ namespace SupervisorMobility.API.Services
                 .OrderBy(c => c.ProductId).ToListAsync();
         }
 
-        public async Task<Product?> GetProductAsync(int productId)
+        public async Task<Product?> GetProductAsync(int productId, bool collection = false)
         {
+            if(collection)
+            {
+                return await _context.Products.Include(d => d.Distributions).Where(p => p.ProductId == productId).FirstOrDefaultAsync();
+            }
+
             return await _context.Products
                 .Where(p => p.ProductId == productId).FirstOrDefaultAsync();
         }
@@ -493,7 +506,7 @@ namespace SupervisorMobility.API.Services
                 .OrderBy(c => c.AssyChardId).ToListAsync();
         }
 
-       
+
         public async Task<AssyChart?> GetAssyChartAdvanceAsync(string GOS, string CCP, string HOE, int PlantId, int AreaId, int DistributionId, int OperationId, int Productid)
         {
             //return whit info
@@ -520,105 +533,63 @@ namespace SupervisorMobility.API.Services
             _context.AssyCharts.Remove(assyChart);
         }
         #endregion
-        #region ProductDistribution
-        public async Task<IEnumerable<ProductDistribution>> GetDistributionsForProductAsync(int productId)
-        {
-            return await _context.ProductDistributions.Where(o => o.ProductId == productId).ToListAsync();
-        }
 
-        public async Task<ProductDistribution?> GetDistributionForProductAsync(int productId, int distributionId)
-        {
-            return await _context.ProductDistributions
-                .Where(o => o.ProductId == productId && o.ProductDistributionId == distributionId)
-                .FirstOrDefaultAsync();
-        }
-
-        public async Task AddDistributionForProductAsync(int productId, ProductDistribution productDistribution)
-        {
-            var product = await GetProductAsync(productId);
-            if (product != null)
-            {
-                product.ProductDistributions.Add(productDistribution);
-            }
-        }
-
-        public void DeleteProductDistribution(ProductDistribution productDistribution)
-        {
-            _context.ProductDistributions.Remove(productDistribution);
-        }
-
-        public async Task<bool> ProductDistributionExistsAsync(int productDistributionId)
-        {
-            return await _context.ProductDistributions.AnyAsync(p => p.ProductDistributionId == productDistributionId);
-        }
-        #endregion
-        #region ProductOperationsOperations
-        public async Task<IEnumerable<ProductOperation>> GetProductOperationsForDistributionAsync(int productDistributionId)
-        {
-            return await _context.ProductOperations.Where(o => o.ProductDistributionId == productDistributionId).ToListAsync();
-        }
-
-        public async Task<ProductOperation?> GetProductOperationForDistributionAsync(int productDistributionId, int operationId)
-        {
-            return await _context.ProductOperations
-                .Where(o => o.ProductDistributionId == productDistributionId && o.ProductOperationId == operationId)
-                .FirstOrDefaultAsync();
-        }
-
-        public async Task AddProductOperationForDistributionAsync(int productId, int productDistributionId, ProductOperation productOperation)
-        {
-            var productDistribution = await GetDistributionForProductAsync(productId, productDistributionId);
-            if (productDistribution != null)
-            {
-                productDistribution.ProductOperations.Add(productOperation);
-            }
-        }
-
-        public void DeleteProductOperation(ProductOperation productOperation)
-        {
-            _context.ProductOperations.Remove(productOperation);
-        }
-        #endregion
 
         #region Users
-        public Task<IEnumerable<User>> GetAllUsersAsync()
+        public async Task<IEnumerable<User>> GetAllUsersAsync()
         {
-            throw new NotImplementedException();
+            return await _context.Users
+                 .OrderBy(c => c.UserId).ToListAsync();
         }
 
-        public Task<IEnumerable<User>> GetAllUsersByPlantAreaAndGroupAsync(int plantaId, int areaId, int grupId)
+        public async Task<IEnumerable<User>> GetAllUsersWhitPlantAreaAndGroupAsync()
         {
-            throw new NotImplementedException();
+            return await _context.Users
+                .Include(a => a.Area)
+                .Include(p => p.Plant)
+                .Include(g => g.Group)
+                 .OrderBy(c => c.UserId).ToListAsync();
         }
 
-        public Task<User?> GetUserAsync(int userId)
+        public async Task<User?> GetUserAsync(int userId, bool collection = false)
         {
-            throw new NotImplementedException();
+            if (collection)
+            {
+                return await _context.Users.Include(a => a.Area)
+                .Include(p => p.Plant)
+                .Include(g => g.Group)
+                .Where(p => p.UserId == userId).FirstOrDefaultAsync();
+            }
+            return await _context.Users.Where(p => p.UserId == userId).FirstOrDefaultAsync();
         }
 
-        public Task<User?> GetUserByNominaAsync(int nomina)
+        public async Task<User?> GetUserByNominaAsync(int nomina)
         {
-            throw new NotImplementedException();
+            return await _context.Users.Where(p => p.Payroll == nomina).FirstOrDefaultAsync();
+
         }
 
-        public Task<bool> UserExistAsync(int userId)
+        public async Task<bool> UserExistAsync(int userId)
         {
-            throw new NotImplementedException();
+            return await _context.Users.AnyAsync(p => p.UserId == userId);
         }
 
-        public Task<bool> UserExistAdvanceAsync(string nombre, int nomina, Plant plantid, Area areaid, Group grupoid)
+        public async Task<bool> UserExistAdvanceAsync(string nombre, int nomina, int plantid, int areaid, int grupoid)
         {
-            throw new NotImplementedException();
+            return await _context.Users.AnyAsync(p => p.Name == nombre && p.Payroll == nomina && p.PlantId == plantid && p.AreaId == areaid && p.GroupId == grupoid) ;
+
         }
 
         public void AddUserAsync(User user)
         {
-            throw new NotImplementedException();
+            _context.Users.Add(user);
+
         }
 
         public void DeleteUserAsync(User user)
         {
-            throw new NotImplementedException();
+            _context.Users.Remove(user);
+
         }
         #endregion
 

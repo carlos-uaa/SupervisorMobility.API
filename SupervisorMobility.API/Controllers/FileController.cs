@@ -13,6 +13,7 @@ using SupervisorMobility.API.Services;
 using SupervisorMobility.API.Models.PlantDtos;
 using SupervisorMobility.API.Business;
 using SupervisorMobility.API.Models.OperationDtos;
+using SupervisorMobility.API.Models.DistributionDtos;
 using SupervisorMobility.API.Models.ProductDtos;
 using Azure;
 using SupervisorMobility.API.DataAccess.Entities;
