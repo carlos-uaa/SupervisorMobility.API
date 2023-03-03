@@ -12,8 +12,8 @@ using SupervisorMobility.API.Context;
 namespace SupervisorMobility.API.Migrations
 {
     [DbContext(typeof(SupervisorMobilityContext))]
-    [Migration("20230301003616_add-permission")]
-    partial class addpermission
+    [Migration("20230301152547_UsersMigration")]
+    partial class UsersMigration
     {
         /// <inheritdoc />
         protected override void BuildTargetModel(ModelBuilder modelBuilder)
@@ -296,17 +296,26 @@ namespace SupervisorMobility.API.Migrations
                     b.Property<int?>("AreaId")
                         .HasColumnType("int");
 
+                    b.Property<DateTime?>("CreatedDate")
+                        .HasColumnType("Date");
+
+                    b.Property<DateTime?>("DisabledDate")
+                        .HasColumnType("Date");
+
                     b.Property<int?>("GroupId")
                         .HasColumnType("int");
 
                     b.Property<bool?>("IsActive")
                         .HasColumnType("bit");
 
-                    b.Property<string>("Nombre")
+                    b.Property<DateTime>("LastUpdated")
+                        .HasColumnType("Date");
+
+                    b.Property<string>("Name")
                         .IsRequired()
                         .HasColumnType("nvarchar(max)");
 
-                    b.Property<int>("Nomina")
+                    b.Property<int>("Payroll")
                         .HasColumnType("int");
 
                     b.Property<string>("Permissions")
@@ -332,8 +341,9 @@ namespace SupervisorMobility.API.Migrations
                             AreaId = 1,
                             GroupId = 1,
                             IsActive = true,
-                            Nombre = "Marco Aguayo",
-                            Nomina = 239935,
+                            LastUpdated = new DateTime(2023, 3, 1, 9, 25, 46, 879, DateTimeKind.Local).AddTicks(5128),
+                            Name = "Marco Aguayo",
+                            Payroll = 239935,
                             PlantId = 1
                         });
                 });
@@ -581,6 +591,43 @@ namespace SupervisorMobility.API.Migrations
                         });
                 });
 
+            modelBuilder.Entity("SupervisorMobility.API.Entities.Glosary", b =>
+                {
+                    b.Property<int>("GlosaryWordId")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("int");
+
+                    SqlServerPropertyBuilderExtensions.UseIdentityColumn(b.Property<int>("GlosaryWordId"));
+
+                    b.Property<string>("Description")
+                        .IsRequired()
+                        .HasMaxLength(200)
+                        .HasColumnType("nvarchar(200)");
+
+                    b.Property<bool?>("IsActive")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("bit")
+                        .HasDefaultValue(true);
+
+                    b.Property<string>("Name")
+                        .IsRequired()
+                        .HasMaxLength(50)
+                        .HasColumnType("nvarchar(50)");
+
+                    b.HasKey("GlosaryWordId");
+
+                    b.ToTable("Glosary");
+
+                    b.HasData(
+                        new
+                        {
+                            GlosaryWordId = 1,
+                            Description = "Safety",
+                            IsActive = true,
+                            Name = "S"
+                        });
+                });
+
             modelBuilder.Entity("SupervisorMobility.API.Entities.Group", b =>
                 {
                     b.Property<int>("GroupId")
@@ -646,6 +693,12 @@ namespace SupervisorMobility.API.Migrations
                     b.Property<string>("DArea")
                         .HasColumnType("nvarchar(max)");
 
+                    b.Property<DateTime?>("DateEnd")
+                        .HasColumnType("datetime2");
+
+                    b.Property<DateTime?>("DateStart")
+                        .HasColumnType("datetime2");
+
                     b.Property<int?>("DistributionId")
                         .HasColumnType("int");
 
@@ -656,6 +709,9 @@ namespace SupervisorMobility.API.Migrations
                         .ValueGeneratedOnAdd()
                         .HasColumnType("bit")
                         .HasDefaultValue(true);
+
+                    b.Property<string>("Justification")
+                        .HasColumnType("nvarchar(max)");
 
                     b.Property<string>("Models")
                         .HasColumnType("nvarchar(max)");
@@ -681,6 +737,12 @@ namespace SupervisorMobility.API.Migrations
                     b.Property<string>("OthersArea")
                         .HasColumnType("nvarchar(max)");
 
+                    b.Property<DateTime?>("PlannedEndDate")
+                        .HasColumnType("datetime2");
+
+                    b.Property<DateTime?>("PlannedStartDate")
+                        .HasColumnType("datetime2");
+
                     b.Property<int?>("PlantId")
                         .HasColumnType("int");
 
@@ -696,17 +758,14 @@ namespace SupervisorMobility.API.Migrations
                     b.Property<string>("SsvSignature")
                         .HasColumnType("nvarchar(max)");
 
+                    b.Property<int?>("Status")
+                        .HasColumnType("int");
+
                     b.Property<string>("Time1HOE")
                         .HasColumnType("nvarchar(max)");
 
                     b.Property<string>("Time2HOE")
                         .HasColumnType("nvarchar(max)");
-
-                    b.Property<DateTime?>("dateEnd")
-                        .HasColumnType("datetime2");
-
-                    b.Property<DateTime?>("dateStart")
-                        .HasColumnType("datetime2");
 
                     b.HasKey("JobObservationId");
 
@@ -728,6 +787,8 @@ namespace SupervisorMobility.API.Migrations
                             CArea = "Lorem ipsum dolor sit amet C Area",
                             Cicles = "1 min|2 min|3 min|4 min| 5 min",
                             DArea = "Lorem ipsum dolor sit amet D Area",
+                            DateEnd = new DateTime(1, 1, 1, 0, 0, 0, 0, DateTimeKind.Unspecified),
+                            DateStart = new DateTime(1, 1, 1, 0, 0, 0, 0, DateTimeKind.Unspecified),
                             DistributionId = 1,
                             IdentifiedActivity = "Actividad identificada",
                             IsActive = true,
@@ -744,10 +805,9 @@ namespace SupervisorMobility.API.Migrations
                             SArea = "Lorem ipsum dolor sit amet S Area",
                             SsvCommentary = "Senior Supervisor Commentary",
                             SsvSignature = "Pedro",
+                            Status = 0,
                             Time1HOE = "10 min",
-                            Time2HOE = "20 min",
-                            dateEnd = new DateTime(1, 1, 1, 0, 0, 0, 0, DateTimeKind.Unspecified),
-                            dateStart = new DateTime(1, 1, 1, 0, 0, 0, 0, DateTimeKind.Unspecified)
+                            Time2HOE = "20 min"
                         });
                 });
 

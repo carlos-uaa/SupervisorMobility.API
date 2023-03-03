@@ -305,13 +305,6 @@ namespace SupervisorMobility.API.Migrations
                     b.Property<bool?>("IsActive")
                         .HasColumnType("bit");
 
-                    b.Property<string>("Nombre")
-                        .IsRequired()
-                        .HasColumnType("nvarchar(max)");
-
-                    b.Property<int>("Nomina")
-                        .HasColumnType("int");
-
                     b.Property<DateTime>("LastUpdated")
                         .HasColumnType("Date");
 
@@ -345,9 +338,7 @@ namespace SupervisorMobility.API.Migrations
                             AreaId = 1,
                             GroupId = 1,
                             IsActive = true,
-                            Nombre = "Marco Aguayo",
-                            Nomina = 239935,
-                            LastUpdated = new DateTime(2023, 2, 28, 21, 33, 52, 44, DateTimeKind.Local).AddTicks(9106),
+                            LastUpdated = new DateTime(2023, 3, 1, 9, 25, 46, 879, DateTimeKind.Local).AddTicks(5128),
                             Name = "Marco Aguayo",
                             Payroll = 239935,
                             PlantId = 1

@@ -6,7 +6,7 @@ using Microsoft.EntityFrameworkCore.Migrations;
 namespace SupervisorMobility.API.Migrations
 {
     /// <inheritdoc />
-    public partial class renameFieldsaddDate : Migration
+    public partial class UsersMigration : Migration
     {
         /// <inheritdoc />
         protected override void Up(MigrationBuilder migrationBuilder)
@@ -40,12 +40,18 @@ namespace SupervisorMobility.API.Migrations
                 nullable: false,
                 defaultValue: new DateTime(1, 1, 1, 0, 0, 0, 0, DateTimeKind.Unspecified));
 
+            migrationBuilder.AddColumn<string>(
+                name: "Permissions",
+                table: "Users",
+                type: "nvarchar(max)",
+                nullable: true);
+
             migrationBuilder.UpdateData(
                 table: "Users",
                 keyColumn: "UserId",
                 keyValue: 1,
-                columns: new[] { "CreatedDate", "DisabledDate", "LastUpdated" },
-                values: new object[] { null, null, new DateTime(2023, 2, 28, 21, 33, 52, 44, DateTimeKind.Local).AddTicks(9106) });
+                columns: new[] { "CreatedDate", "DisabledDate", "LastUpdated", "Permissions" },
+                values: new object[] { null, null, new DateTime(2023, 3, 1, 9, 25, 46, 879, DateTimeKind.Local).AddTicks(5128), null });
         }
 
         /// <inheritdoc />
@@ -61,6 +67,10 @@ namespace SupervisorMobility.API.Migrations
 
             migrationBuilder.DropColumn(
                 name: "LastUpdated",
+                table: "Users");
+
+            migrationBuilder.DropColumn(
+                name: "Permissions",
                 table: "Users");
 
             migrationBuilder.RenameColumn(
