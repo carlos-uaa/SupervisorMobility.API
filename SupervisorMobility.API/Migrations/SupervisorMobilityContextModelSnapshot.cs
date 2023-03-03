@@ -273,6 +273,7 @@ namespace SupervisorMobility.API.Migrations
                             AreaId = 1,
                             GroupId = 1,
                             IsActive = true,
+                            LastUpdated = new DateTime(2023, 3, 1, 9, 25, 46, 879, DateTimeKind.Local).AddTicks(5128),
                             IsAdmin = true,
                             IsOperator = false,
                             IsSupervisor = true,
