@@ -4,7 +4,6 @@ using SupervisorMobility.API.Models.AssyChart;
 using SupervisorMobility.API.Models.OperationDtos;
 using SupervisorMobility.API.Models.PlantDtos;
 using SupervisorMobility.API.Models.ProductDtos;
-using SupervisorMobility.API.Models.ProductOperationDtos;
 using SupervisorMobility.API.Models.SupportDocumentTypeDtos;
 using SupervisorMobility.API.Models.Users;
 
@@ -27,18 +26,11 @@ namespace SupervisorMobility.API.Business
         Task RemoveOperationAsync(Operation operation);
         #endregion
 
-        #region ProductOperations
-        Task<ProductOperation> CreateProductOperationAsync(int productId, int productDistributionId, ProductOperation productOperation);
-        Task<IEnumerable<ProductOperation>> FetchProductOperationsAsync(int productDistributionId);
-        Task<ProductOperation?> FetchProductOperationAsync(int productDistributionId, int productOperationId);
-        Task UpdateProductOperationAsync(ProductOperationForUpdateDto productOperationForUpdate, ProductOperation productOperation);
-        Task RemoveProductOperationAsync(ProductOperation productOperation);
-        #endregion
 
         #region Product
         Task<bool> CheckProductExistance(int productId);
         Task<IEnumerable<Product>> FetchProductsAsync();
-        Task<Product?> FetchProductAsync(int productId);
+        Task<Product?> FetchProductAsync(int productId, bool collections = false);
         Task<Product> CreateProductAsync(ProductForCreationDto product);
         Task UpdateProductAsync(ProductForUpdateDto productForUpdate, Product product);
         Task RemoveProductAsync(Product product);
@@ -57,9 +49,7 @@ namespace SupervisorMobility.API.Business
         #region Distribution
         Task<bool> CheckDistributionExistance(int distributionId);
         #endregion
-        #region PRoductDistribution
-        Task<bool> CheckProductDistributionExistance(int productDistributionId);
-        #endregion
+        
 
         #region AssyChart
         Task<AssyChart> CreateAssyChartAsync(AssyChartForCreation assyChart);

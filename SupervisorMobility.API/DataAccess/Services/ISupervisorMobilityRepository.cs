@@ -57,7 +57,7 @@ namespace SupervisorMobility.API.Services
         #region DistributionOperations
         Task<IEnumerable<Distribution>> GetDistributionsForAreaAsync(int areaId);
         
-        Task<Distribution?> GetDistributionForAreaAsync(int areaId, int distributionId);
+        Task<Distribution?> GetDistributionForAreaAsync(int areaId, int distributionId, bool includeCollections = false);
         Task<Distribution?> GetDistributionForAreaByCodeAndDescriptionAsync(int areaId, string code, string description);
       
         Task AddDistributionForPlantAsync(int plantId, int areaId, Distribution distribution);
@@ -108,7 +108,7 @@ namespace SupervisorMobility.API.Services
         #endregion
         #region ProductOperations
         Task<IEnumerable<Product>> GetProductsAsync();
-        Task<Product?> GetProductAsync(int productId);
+        Task<Product?> GetProductAsync(int productId, bool collection = false);
         Task<Product?> GetProductByCodeAndDescriptionAsync(string code, string description);
         Task<bool> ProductExistAsync(int productId);
         Task<bool> ProductExistByCodeAndDescriptionAsync(string code, string description);
@@ -129,11 +129,11 @@ namespace SupervisorMobility.API.Services
 
         #region Users
         Task<IEnumerable<User>> GetAllUsersAsync();
-        Task<IEnumerable<User>> GetAllUsersByPlantAreaAndGroupAsync(int plantaId, int areaId, int grupId);
-        Task<User?> GetUserAsync(int userId);
+        Task<IEnumerable<User>> GetAllUsersWhitPlantAreaAndGroupAsync();
+        Task<User?> GetUserAsync(int userId, bool collection = false);
         Task<User?> GetUserByNominaAsync(int nomina);
         Task<bool> UserExistAsync(int userId);
-        Task<bool> UserExistAdvanceAsync(string nombre, int nomina, Plant plantid, Area areaid, Group grupoid);
+        Task<bool> UserExistAdvanceAsync(string nombre, int nomina, int plantid, int areaid, int grupoid);
         void AddUserAsync(User user);
         void DeleteUserAsync(User user);
 
@@ -145,21 +145,7 @@ namespace SupervisorMobility.API.Services
 
         #endregion
 
-        #region ProductDistributions
-        Task<IEnumerable<ProductDistribution>> GetDistributionsForProductAsync(int productId);
-        Task<ProductDistribution?> GetDistributionForProductAsync(int productId, int distributionId);
-        Task AddDistributionForProductAsync(int plantId, ProductDistribution distribution);
-
-        void DeleteProductDistribution(ProductDistribution productDistribution);
-        #endregion
-        #region ProductOperationsOperations
-        Task<IEnumerable<ProductOperation>> GetProductOperationsForDistributionAsync(int productDistributionId);
-        Task<ProductOperation?> GetProductOperationForDistributionAsync(int productDistributionId, int operationId);
-        Task AddProductOperationForDistributionAsync(int productId, int productDistributionId, ProductOperation productOperation);
-        void DeleteProductOperation(ProductOperation productOperation);
-        Task<bool> ProductDistributionExistsAsync(int distributionId);
-
-        #endregion
+      
 
         #region JobObservationOperations
 

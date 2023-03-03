@@ -7,10 +7,11 @@ namespace SupervisorMobility.API.MapperProfiles
     public class UserProfile : Profile
     {
         public UserProfile() { 
-            CreateMap<User, UsersDataToBulk>();
-            CreateMap<User, UsersWhitNavigationDetails>();
-            CreateMap<User, UsersForCreation>();
-            CreateMap<User, UsersForUpdateDto>();
+            CreateMap<User, UsersDataToBulk>().ReverseMap();
+            CreateMap<User, UsersWhitNavigationDetails>().ReverseMap();
+            CreateMap<User, UsersWhitoutNavigationDetails>().ReverseMap();
+            CreateMap<User, UsersForCreation>().ReverseMap();
+            CreateMap<User, UsersForUpdateDto>().ReverseMap();
         }
     }
 }

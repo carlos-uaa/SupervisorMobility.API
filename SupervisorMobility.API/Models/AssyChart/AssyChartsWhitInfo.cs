@@ -2,9 +2,9 @@
 using SupervisorMobility.API.DataAccess.Entities;
 using SupervisorMobility.API.Entities;
 using SupervisorMobility.API.Models.AreaDtos;
+using SupervisorMobility.API.Models.DistributionDtos;
 using SupervisorMobility.API.Models.OperationDtos;
 using SupervisorMobility.API.Models.PlantDtos;
-using SupervisorMobility.API.Models.ProductDistributionsDtos;
 using SupervisorMobility.API.Models.ProductDtos;
 using System.ComponentModel.DataAnnotations;
 using System.ComponentModel.DataAnnotations.Schema;
@@ -33,7 +33,7 @@ namespace SupervisorMobility.API.Models.AssyChart
         public AreaWithoutNavigationPropertiesDto? Area { get; set; } = new AreaWithoutNavigationPropertiesDto();   
         //Distribution Info
         public int DistributionId { get; set; }
-        public  DistributionWithoutNavigationPropertiesDto Distribution { get; set; } = new DistributionWithoutNavigationPropertiesDto();
+        public  DistributionWithNavigationPropertiesDto Distribution { get; set; } = new DistributionWithNavigationPropertiesDto();
         //Operation Info
         public int OperationId { get; set; }
         public OperationWithoutNavigationPropertiesDto Operation { get; set; } = new OperationWithoutNavigationPropertiesDto();
