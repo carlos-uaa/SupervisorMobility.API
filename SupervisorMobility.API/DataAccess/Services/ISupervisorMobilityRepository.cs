@@ -55,7 +55,7 @@ namespace SupervisorMobility.API.Services
         void DeleteArea(Area area);
         #endregion
         #region DistributionOperations
-        Task<IEnumerable<Distribution>> GetDistributionsForAreaAsync(int areaId);
+        Task<IEnumerable<Distribution>> GetDistributionsForAreaAsync(int areaId, bool includecollections = false);;
         
         Task<Distribution?> GetDistributionForAreaAsync(int areaId, int distributionId, bool includeCollections = false);
         Task<Distribution?> GetDistributionForAreaByCodeAndDescriptionAsync(int areaId, string code, string description);

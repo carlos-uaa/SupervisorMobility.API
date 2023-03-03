@@ -226,8 +226,16 @@ namespace SupervisorMobility.API.Services
         #endregion
         #region DistributionOperations
 
-        public async Task<IEnumerable<Distribution>> GetDistributionsForAreaAsync(int areaId)
+        public async Task<IEnumerable<Distribution>> GetDistributionsForAreaAsync(int areaId, bool includecollections = false)
         {
+
+            if (includecollections)
+            {
+                return await _context.Distributions.Include(o => o.Operations).Include(p => p.Products)
+                     .Where(o => o.AreaId == areaId)
+                    .ToListAsync();
+            }
+
             return await _context.Distributions
                 .Where(o => o.AreaId == areaId).ToListAsync();
         }
