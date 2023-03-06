@@ -21,8 +21,7 @@ namespace SupervisorMobility.API.Entities
 
         public DateTime? DateStart { get; set; }
         public DateTime? DateEnd { get; set; }
-        public DateTime? PlannedStartDate { get; set; }
-        public DateTime? PlannedEndDate { get; set; }
+        public DateTime? DateFinalized { get; set; }
         
         public string? Justification { get; set; }
 

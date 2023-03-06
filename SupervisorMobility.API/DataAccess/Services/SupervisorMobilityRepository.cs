@@ -418,6 +418,8 @@ namespace SupervisorMobility.API.Services
         {
             _context.JobObservationConfigs.Remove(jobObservationConfig);
         }
+
+
         #endregion
         #region SupportDocumentTypeOperations
         public async Task<IEnumerable<SupportDocumentType>> GetSupportDocumentTypesAsync()
@@ -642,6 +644,10 @@ namespace SupervisorMobility.API.Services
         {
             _context.JobObservations.Remove(jobObservation);
         }
+        public async Task<bool> JobObservationExistAsync(int jobObservationId)
+        {
+            return await _context.JobObservations.AnyAsync(j => j.JobObservationId == jobObservationId);
+        }
 
         #endregion
 
@@ -667,6 +673,34 @@ namespace SupervisorMobility.API.Services
         public void DeleteGlosaryWord(Glosary glosaryWord)
         {
             _context.Glosary.Remove(glosaryWord);
+        }
+        #endregion
+
+        #region LupOperations
+        public async Task<IEnumerable<Lup>> GetAllLupAsync()
+        {
+            return await _context.Lup
+                .Include(l => l.JobObservation)
+                 .OrderBy(c => c.LupId).ToListAsync();
+
+        }
+
+        public async Task<Lup?> GetLupAsync(int lupId)
+        {
+            //return whit info
+            return await _context.Lup
+                .Include(l => l.JobObservation)
+                 .Where(x => x.LupId == lupId).FirstOrDefaultAsync();
+        }
+
+        public void AddLup(Lup lup)
+        {
+            _context.Lup.Add(lup);
+        }
+
+        public void DeleteLup(Lup lup)
+        {
+            _context.Lup.Remove(lup);
         }
         #endregion
 

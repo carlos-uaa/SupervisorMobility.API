@@ -43,17 +43,18 @@ namespace SupervisorMobility.API.Controllers
             {
                 var areasForPlant = await _supervisorMobilityRepository
                 .GetDistributionsForAreaAsync(areaId, includecollections);
+                return Ok(_mapper.Map<IEnumerable<DistributionWithNavigationPropertiesDto>>(areasForPlant));
             }
             else
             {
                 var areasForPlant = await _supervisorMobilityRepository
                 .GetDistributionsForAreaAsync(areaId);
+                return Ok(_mapper.Map<IEnumerable<DistributionWithoutNavigationPropertiesDto>>(areasForPlant));
 
             }
 
 
 
-            return Ok(_mapper.Map<IEnumerable<DistributionWithNavigationPropertiesDto>>(areasForPlant));
         }
 
         [HttpGet("{distributionId}", Name = "GetDistribution")]

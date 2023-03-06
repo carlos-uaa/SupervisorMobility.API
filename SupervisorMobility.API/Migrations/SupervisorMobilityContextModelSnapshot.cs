@@ -273,11 +273,10 @@ namespace SupervisorMobility.API.Migrations
                             AreaId = 1,
                             GroupId = 1,
                             IsActive = true,
-                            LastUpdated = new DateTime(2023, 3, 1, 9, 25, 46, 879, DateTimeKind.Local).AddTicks(5128),
                             IsAdmin = true,
                             IsOperator = false,
                             IsSupervisor = true,
-                            LastUpdated = new DateTime(2023, 3, 2, 13, 32, 13, 940, DateTimeKind.Local).AddTicks(4891),
+                            LastUpdated = new DateTime(2023, 3, 6, 14, 48, 37, 773, DateTimeKind.Local).AddTicks(4340),
                             Name = "Marco Aguayo",
                             Payroll = 239935,
                             PlantId = 1
@@ -632,6 +631,9 @@ namespace SupervisorMobility.API.Migrations
                     b.Property<DateTime?>("DateEnd")
                         .HasColumnType("datetime2");
 
+                    b.Property<DateTime?>("DateFinalized")
+                        .HasColumnType("datetime2");
+
                     b.Property<DateTime?>("DateStart")
                         .HasColumnType("datetime2");
 
@@ -672,12 +674,6 @@ namespace SupervisorMobility.API.Migrations
 
                     b.Property<string>("OthersArea")
                         .HasColumnType("nvarchar(max)");
-
-                    b.Property<DateTime?>("PlannedEndDate")
-                        .HasColumnType("datetime2");
-
-                    b.Property<DateTime?>("PlannedStartDate")
-                        .HasColumnType("datetime2");
 
                     b.Property<int?>("PlantId")
                         .HasColumnType("int");
@@ -723,8 +719,9 @@ namespace SupervisorMobility.API.Migrations
                             CArea = "Lorem ipsum dolor sit amet C Area",
                             Cicles = "1 min|2 min|3 min|4 min| 5 min",
                             DArea = "Lorem ipsum dolor sit amet D Area",
-                            DateEnd = new DateTime(1, 1, 1, 0, 0, 0, 0, DateTimeKind.Unspecified),
-                            DateStart = new DateTime(1, 1, 1, 0, 0, 0, 0, DateTimeKind.Unspecified),
+                            DateEnd = new DateTime(2023, 3, 6, 14, 48, 37, 773, DateTimeKind.Local).AddTicks(4018),
+                            DateFinalized = new DateTime(2023, 3, 6, 14, 48, 37, 773, DateTimeKind.Local).AddTicks(4020),
+                            DateStart = new DateTime(2023, 3, 6, 14, 48, 37, 773, DateTimeKind.Local).AddTicks(3981),
                             DistributionId = 1,
                             IdentifiedActivity = "Actividad identificada",
                             IsActive = true,
@@ -843,6 +840,69 @@ namespace SupervisorMobility.API.Migrations
                             Code = "JNC",
                             Description = "Observación de Operación No Cíclica",
                             IsActive = true
+                        });
+                });
+
+            modelBuilder.Entity("SupervisorMobility.API.Entities.Lup", b =>
+                {
+                    b.Property<int>("LupId")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("int");
+
+                    SqlServerPropertyBuilderExtensions.UseIdentityColumn(b.Property<int>("LupId"));
+
+                    b.Property<DateTime?>("CreatedDate")
+                        .HasColumnType("datetime2");
+
+                    b.Property<DateTime?>("EndDate")
+                        .HasColumnType("datetime2");
+
+                    b.Property<bool?>("IsActive")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("bit")
+                        .HasDefaultValue(true);
+
+                    b.Property<int>("JobObservationId")
+                        .HasColumnType("int");
+
+                    b.Property<string>("Observer")
+                        .HasColumnType("nvarchar(max)");
+
+                    b.Property<int?>("Pillar")
+                        .HasColumnType("int");
+
+                    b.Property<string>("Q3")
+                        .HasColumnType("nvarchar(max)");
+
+                    b.Property<string>("Q4")
+                        .HasColumnType("nvarchar(max)");
+
+                    b.Property<string>("evidence")
+                        .HasColumnType("nvarchar(max)");
+
+                    b.Property<int?>("status")
+                        .HasColumnType("int");
+
+                    b.HasKey("LupId");
+
+                    b.HasIndex("JobObservationId");
+
+                    b.ToTable("Lup");
+
+                    b.HasData(
+                        new
+                        {
+                            LupId = 1,
+                            CreatedDate = new DateTime(2023, 3, 6, 14, 48, 37, 773, DateTimeKind.Local).AddTicks(4353),
+                            EndDate = new DateTime(2023, 3, 6, 14, 48, 37, 773, DateTimeKind.Local).AddTicks(4354),
+                            IsActive = true,
+                            JobObservationId = 1,
+                            Observer = "Pedro",
+                            Pillar = 1,
+                            Q3 = "contramedida inmediata",
+                            Q4 = "contramedida definitiva",
+                            evidence = "/uploads/lup/img1.jpg",
+                            status = 1
                         });
                 });
 
@@ -1159,6 +1219,17 @@ namespace SupervisorMobility.API.Migrations
                     b.Navigation("ChecklistCategoryDto");
 
                     b.Navigation("JobObservationTypeDto");
+                });
+
+            modelBuilder.Entity("SupervisorMobility.API.Entities.Lup", b =>
+                {
+                    b.HasOne("SupervisorMobility.API.Entities.JobObservation", "JobObservation")
+                        .WithMany()
+                        .HasForeignKey("JobObservationId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
+
+                    b.Navigation("JobObservation");
                 });
 
             modelBuilder.Entity("SupervisorMobility.API.Entities.Operation", b =>

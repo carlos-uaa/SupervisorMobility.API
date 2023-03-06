@@ -13,6 +13,7 @@ namespace SupervisorMobility.API.Context
         public DbSet<JobObservationConfig> JobObservationConfigs { get; set; }
         public DbSet<JobObservationType> JobObservationTypes { get; set; }
         public DbSet<JobObservation> JobObservations { get; set; }
+        public DbSet<Lup> Lup { get; set; }
         public DbSet<Group> Groups { get; set; }
         public DbSet<Glosary> Glosary { get; set; }
         public DbSet<Plant> Plants { get; set; }
@@ -85,6 +86,9 @@ namespace SupervisorMobility.API.Context
                 .Property(p => p.IsActive)
                 .HasDefaultValue(true);
 
+            modelBuilder.Entity<Lup>()
+                .Property(p => p.IsActive)
+                .HasDefaultValue(true);
 
 
             //Add AssyChartModel
@@ -112,8 +116,9 @@ namespace SupervisorMobility.API.Context
                     AreaId = 1,
                     DistributionId = 1,
                     OperationId = 1,
-                    DateStart = new DateTime(),
-                    DateEnd = new DateTime(),
+                    DateStart = DateTime.Now,
+                    DateEnd = DateTime.Now,
+                    DateFinalized = DateTime.Now,
                     Status = 0,
                     Observer = "Pedro",
                     Operator = "Juan",
@@ -393,6 +398,23 @@ namespace SupervisorMobility.API.Context
                     IsOperator = false,
                     IsSupervisor = true,
                 });
+
+            modelBuilder.Entity<Lup>()
+                 .HasData(
+                     new Lup()
+                     {
+                         LupId = 1,
+                         JobObservationId = 1,
+                         IsActive = true,
+                         Observer = "Pedro",
+                         Pillar = 1,
+                         Q3 = "contramedida inmediata",
+                         Q4 = "contramedida definitiva",
+                         Evidence = "/uploads/lup/img1.jpg",
+                         Status = 1,
+                         CreatedDate = DateTime.Now,
+                         EndDate = DateTime.Now
+                     });
 
             base.OnModelCreating(modelBuilder);
         }

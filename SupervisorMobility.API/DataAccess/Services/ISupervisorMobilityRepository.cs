@@ -55,7 +55,7 @@ namespace SupervisorMobility.API.Services
         void DeleteArea(Area area);
         #endregion
         #region DistributionOperations
-        Task<IEnumerable<Distribution>> GetDistributionsForAreaAsync(int areaId, bool includecollections = false);;
+        Task<IEnumerable<Distribution>> GetDistributionsForAreaAsync(int areaId, bool includecollections = false);
         
         Task<Distribution?> GetDistributionForAreaAsync(int areaId, int distributionId, bool includeCollections = false);
         Task<Distribution?> GetDistributionForAreaByCodeAndDescriptionAsync(int areaId, string code, string description);
@@ -145,18 +145,13 @@ namespace SupervisorMobility.API.Services
 
         #endregion
 
-      
-
         #region JobObservationOperations
 
         Task<IEnumerable<JobObservation>> GetAllJobObservationsAsync();
-
         Task<JobObservation?> GetJobObservationAsync(int jobObservationId);
-
         void AddJobObservation(JobObservation jobObservation);
-
         void DeleteJobObservation(JobObservation jobObservation);
-
+        Task<bool> JobObservationExistAsync(int jobObservationId);
 
         #endregion
 
@@ -166,6 +161,15 @@ namespace SupervisorMobility.API.Services
         Task<Glosary?> GetGlosaryWordAsync(int glosaryWordId);
         void AddGlosaryWord(Glosary glosaryWord);
         void DeleteGlosaryWord(Glosary glossaryWord);
+        #endregion
+
+        #region LupOperations
+        Task<IEnumerable<Lup>> GetAllLupAsync();
+        Task<Lup?> GetLupAsync(int lupId);
+        void AddLup(Lup lup);
+        void DeleteLup(Lup lup);
+
+
         #endregion
 
     }
