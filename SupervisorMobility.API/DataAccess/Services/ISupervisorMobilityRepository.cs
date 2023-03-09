@@ -160,13 +160,10 @@ namespace SupervisorMobility.API.Services
         #region JobObservationOperations
 
         Task<IEnumerable<JobObservation>> GetAllJobObservationsAsync();
-
         Task<JobObservation?> GetJobObservationAsync(int jobObservationId);
-
         void AddJobObservation(JobObservation jobObservation);
-
         void DeleteJobObservation(JobObservation jobObservation);
-
+        Task<bool> JobObservationExistAsync(int jobObservationId);
 
         #endregion
 
@@ -185,6 +182,12 @@ namespace SupervisorMobility.API.Services
         #region CommonOperations
 
         Task<bool> SaveChangesAsync();
+
+        #region LupOperations
+        Task<IEnumerable<Lup>> GetAllLupAsync();
+        Task<Lup?> GetLupAsync(int lupId);
+        void AddLup(Lup lup);
+        void DeleteLup(Lup lup);
 
         #endregion
 
