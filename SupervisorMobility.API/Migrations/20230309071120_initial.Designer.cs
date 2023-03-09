@@ -12,8 +12,8 @@ using SupervisorMobility.API.Context;
 namespace SupervisorMobility.API.Migrations
 {
     [DbContext(typeof(SupervisorMobilityContext))]
-    [Migration("20230227172435_NewJobObs")]
-    partial class NewJobObs
+    [Migration("20230309071120_initial")]
+    partial class initial
     {
         /// <inheritdoc />
         protected override void BuildTargetModel(ModelBuilder modelBuilder)
@@ -24,6 +24,21 @@ namespace SupervisorMobility.API.Migrations
                 .HasAnnotation("Relational:MaxIdentifierLength", 128);
 
             SqlServerModelBuilderExtensions.UseIdentityColumns(modelBuilder);
+
+            modelBuilder.Entity("DistributionProduct", b =>
+                {
+                    b.Property<int>("DistributionsDistributionId")
+                        .HasColumnType("int");
+
+                    b.Property<int>("ProductsProductId")
+                        .HasColumnType("int");
+
+                    b.HasKey("DistributionsDistributionId", "ProductsProductId");
+
+                    b.HasIndex("ProductsProductId");
+
+                    b.ToTable("DistributionProduct");
+                });
 
             modelBuilder.Entity("SupervisorMobility.API.DataAccess.Entities.Area", b =>
                 {
@@ -111,6 +126,66 @@ namespace SupervisorMobility.API.Migrations
                         });
                 });
 
+            modelBuilder.Entity("SupervisorMobility.API.DataAccess.Entities.FileUpload", b =>
+                {
+                    b.Property<int>("FileUploadId")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("int");
+
+                    SqlServerPropertyBuilderExtensions.UseIdentityColumn(b.Property<int>("FileUploadId"));
+
+                    b.Property<string>("ContentType")
+                        .HasColumnType("nvarchar(max)");
+
+                    b.Property<string>("FileName")
+                        .HasColumnType("nvarchar(max)");
+
+                    b.Property<string>("StorageFileName")
+                        .HasColumnType("nvarchar(max)");
+
+                    b.Property<DateTime>("UploadDate")
+                        .HasColumnType("Date");
+
+                    b.HasKey("FileUploadId");
+
+                    b.ToTable("Files");
+                });
+
+            modelBuilder.Entity("SupervisorMobility.API.DataAccess.Entities.Guides", b =>
+                {
+                    b.Property<int>("GuideId")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("int");
+
+                    SqlServerPropertyBuilderExtensions.UseIdentityColumn(b.Property<int>("GuideId"));
+
+                    b.Property<string>("Code")
+                        .IsRequired()
+                        .HasColumnType("nvarchar(max)");
+
+                    b.Property<string>("Description")
+                        .IsRequired()
+                        .HasColumnType("nvarchar(max)");
+
+                    b.Property<int>("FileUploadId")
+                        .HasColumnType("int");
+
+                    b.Property<bool?>("IsActive")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("bit")
+                        .HasDefaultValue(true);
+
+                    b.Property<string>("Name")
+                        .IsRequired()
+                        .HasColumnType("nvarchar(max)");
+
+                    b.HasKey("GuideId");
+
+                    b.HasIndex("FileUploadId");
+
+                    b.ToTable("Guides");
+                });
+
             modelBuilder.Entity("SupervisorMobility.API.DataAccess.Entities.Product", b =>
                 {
                     b.Property<int>("ProductId")
@@ -155,92 +230,6 @@ namespace SupervisorMobility.API.Migrations
                         });
                 });
 
-            modelBuilder.Entity("SupervisorMobility.API.DataAccess.Entities.ProductDistribution", b =>
-                {
-                    b.Property<int>("ProductDistributionId")
-                        .ValueGeneratedOnAdd()
-                        .HasColumnType("int");
-
-                    SqlServerPropertyBuilderExtensions.UseIdentityColumn(b.Property<int>("ProductDistributionId"));
-
-                    b.Property<string>("Code")
-                        .IsRequired()
-                        .HasMaxLength(50)
-                        .HasColumnType("nvarchar(50)");
-
-                    b.Property<string>("Description")
-                        .IsRequired()
-                        .HasMaxLength(200)
-                        .HasColumnType("nvarchar(200)");
-
-                    b.Property<bool?>("IsActive")
-                        .ValueGeneratedOnAdd()
-                        .HasColumnType("bit")
-                        .HasDefaultValue(true);
-
-                    b.Property<int>("ProductId")
-                        .HasColumnType("int");
-
-                    b.HasKey("ProductDistributionId");
-
-                    b.HasIndex("ProductId");
-
-                    b.ToTable("ProductDistributions");
-
-                    b.HasData(
-                        new
-                        {
-                            ProductDistributionId = 1,
-                            Code = "Dist1",
-                            Description = "Distribution from products",
-                            IsActive = true,
-                            ProductId = 1
-                        });
-                });
-
-            modelBuilder.Entity("SupervisorMobility.API.DataAccess.Entities.ProductOperation", b =>
-                {
-                    b.Property<int>("ProductOperationId")
-                        .ValueGeneratedOnAdd()
-                        .HasColumnType("int");
-
-                    SqlServerPropertyBuilderExtensions.UseIdentityColumn(b.Property<int>("ProductOperationId"));
-
-                    b.Property<string>("Code")
-                        .IsRequired()
-                        .HasMaxLength(50)
-                        .HasColumnType("nvarchar(50)");
-
-                    b.Property<string>("Description")
-                        .IsRequired()
-                        .HasMaxLength(200)
-                        .HasColumnType("nvarchar(200)");
-
-                    b.Property<bool?>("IsActive")
-                        .ValueGeneratedOnAdd()
-                        .HasColumnType("bit")
-                        .HasDefaultValue(true);
-
-                    b.Property<int>("ProductDistributionId")
-                        .HasColumnType("int");
-
-                    b.HasKey("ProductOperationId");
-
-                    b.HasIndex("ProductDistributionId");
-
-                    b.ToTable("ProductOperations");
-
-                    b.HasData(
-                        new
-                        {
-                            ProductOperationId = 1,
-                            Code = "OP1",
-                            Description = "Operation from products",
-                            IsActive = true,
-                            ProductDistributionId = 1
-                        });
-                });
-
             modelBuilder.Entity("SupervisorMobility.API.DataAccess.Entities.SupportDocumentType", b =>
                 {
                     b.Property<int>("SupportDocumentTypeId")
@@ -282,6 +271,78 @@ namespace SupervisorMobility.API.Migrations
                             Code = "HOE",
                             Description = "HOE",
                             IsActive = true
+                        });
+                });
+
+            modelBuilder.Entity("SupervisorMobility.API.DataAccess.Entities.User", b =>
+                {
+                    b.Property<int>("UserId")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("int");
+
+                    SqlServerPropertyBuilderExtensions.UseIdentityColumn(b.Property<int>("UserId"));
+
+                    b.Property<int?>("AreaId")
+                        .HasColumnType("int");
+
+                    b.Property<DateTime?>("CreatedDate")
+                        .HasColumnType("Date");
+
+                    b.Property<DateTime?>("DisabledDate")
+                        .HasColumnType("Date");
+
+                    b.Property<int?>("GroupId")
+                        .HasColumnType("int");
+
+                    b.Property<bool?>("IsActive")
+                        .HasColumnType("bit");
+
+                    b.Property<bool>("IsAdmin")
+                        .HasColumnType("bit");
+
+                    b.Property<bool>("IsOperator")
+                        .HasColumnType("bit");
+
+                    b.Property<bool>("IsSupervisor")
+                        .HasColumnType("bit");
+
+                    b.Property<DateTime>("LastUpdated")
+                        .HasColumnType("Date");
+
+                    b.Property<string>("Name")
+                        .IsRequired()
+                        .HasColumnType("nvarchar(max)");
+
+                    b.Property<int>("Payroll")
+                        .HasColumnType("int");
+
+                    b.Property<int?>("PlantId")
+                        .HasColumnType("int");
+
+                    b.HasKey("UserId");
+
+                    b.HasIndex("AreaId");
+
+                    b.HasIndex("GroupId");
+
+                    b.HasIndex("PlantId");
+
+                    b.ToTable("Users");
+
+                    b.HasData(
+                        new
+                        {
+                            UserId = 1,
+                            AreaId = 1,
+                            GroupId = 1,
+                            IsActive = true,
+                            IsAdmin = true,
+                            IsOperator = false,
+                            IsSupervisor = true,
+                            LastUpdated = new DateTime(2023, 3, 9, 1, 11, 20, 155, DateTimeKind.Local).AddTicks(5844),
+                            Name = "Marco Aguayo",
+                            Payroll = 239935,
+                            PlantId = 1
                         });
                 });
 
@@ -525,6 +586,43 @@ namespace SupervisorMobility.API.Migrations
                             IsActive = true,
                             Prompt = "¿Cuál es nivel de ILU del operador?  ¿Está el entrenamiento alineado con el Cuadro de requisitos de Operaicón ? (S/N)",
                             QuestionTypeId = 6
+                        });
+                });
+
+            modelBuilder.Entity("SupervisorMobility.API.Entities.Glosary", b =>
+                {
+                    b.Property<int>("GlosaryWordId")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("int");
+
+                    SqlServerPropertyBuilderExtensions.UseIdentityColumn(b.Property<int>("GlosaryWordId"));
+
+                    b.Property<string>("Description")
+                        .IsRequired()
+                        .HasMaxLength(200)
+                        .HasColumnType("nvarchar(200)");
+
+                    b.Property<bool?>("IsActive")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("bit")
+                        .HasDefaultValue(true);
+
+                    b.Property<string>("Name")
+                        .IsRequired()
+                        .HasMaxLength(50)
+                        .HasColumnType("nvarchar(50)");
+
+                    b.HasKey("GlosaryWordId");
+
+                    b.ToTable("Glosary");
+
+                    b.HasData(
+                        new
+                        {
+                            GlosaryWordId = 1,
+                            Description = "Safety",
+                            IsActive = true,
+                            Name = "S"
                         });
                 });
 
@@ -969,6 +1067,21 @@ namespace SupervisorMobility.API.Migrations
                         });
                 });
 
+            modelBuilder.Entity("DistributionProduct", b =>
+                {
+                    b.HasOne("SupervisorMobility.API.DataAccess.Entities.Distribution", null)
+                        .WithMany()
+                        .HasForeignKey("DistributionsDistributionId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
+
+                    b.HasOne("SupervisorMobility.API.DataAccess.Entities.Product", null)
+                        .WithMany()
+                        .HasForeignKey("ProductsProductId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
+                });
+
             modelBuilder.Entity("SupervisorMobility.API.DataAccess.Entities.Area", b =>
                 {
                     b.HasOne("SupervisorMobility.API.Entities.Plant", "Plant")
@@ -991,24 +1104,36 @@ namespace SupervisorMobility.API.Migrations
                     b.Navigation("Area");
                 });
 
-            modelBuilder.Entity("SupervisorMobility.API.DataAccess.Entities.ProductDistribution", b =>
+            modelBuilder.Entity("SupervisorMobility.API.DataAccess.Entities.Guides", b =>
                 {
-                    b.HasOne("SupervisorMobility.API.DataAccess.Entities.Product", null)
-                        .WithMany("ProductDistributions")
-                        .HasForeignKey("ProductId")
+                    b.HasOne("SupervisorMobility.API.DataAccess.Entities.FileUpload", "FileUpload")
+                        .WithMany()
+                        .HasForeignKey("FileUploadId")
                         .OnDelete(DeleteBehavior.Cascade)
                         .IsRequired();
+
+                    b.Navigation("FileUpload");
                 });
 
-            modelBuilder.Entity("SupervisorMobility.API.DataAccess.Entities.ProductOperation", b =>
+            modelBuilder.Entity("SupervisorMobility.API.DataAccess.Entities.User", b =>
                 {
-                    b.HasOne("SupervisorMobility.API.DataAccess.Entities.ProductDistribution", "productDistribution")
-                        .WithMany("ProductOperations")
-                        .HasForeignKey("ProductDistributionId")
-                        .OnDelete(DeleteBehavior.Cascade)
-                        .IsRequired();
+                    b.HasOne("SupervisorMobility.API.DataAccess.Entities.Area", "Area")
+                        .WithMany()
+                        .HasForeignKey("AreaId");
 
-                    b.Navigation("productDistribution");
+                    b.HasOne("SupervisorMobility.API.Entities.Group", "Group")
+                        .WithMany()
+                        .HasForeignKey("GroupId");
+
+                    b.HasOne("SupervisorMobility.API.Entities.Plant", "Plant")
+                        .WithMany()
+                        .HasForeignKey("PlantId");
+
+                    b.Navigation("Area");
+
+                    b.Navigation("Group");
+
+                    b.Navigation("Plant");
                 });
 
             modelBuilder.Entity("SupervisorMobility.API.Entities.AssyChart", b =>
@@ -1128,16 +1253,6 @@ namespace SupervisorMobility.API.Migrations
             modelBuilder.Entity("SupervisorMobility.API.DataAccess.Entities.Distribution", b =>
                 {
                     b.Navigation("Operations");
-                });
-
-            modelBuilder.Entity("SupervisorMobility.API.DataAccess.Entities.Product", b =>
-                {
-                    b.Navigation("ProductDistributions");
-                });
-
-            modelBuilder.Entity("SupervisorMobility.API.DataAccess.Entities.ProductDistribution", b =>
-                {
-                    b.Navigation("ProductOperations");
                 });
 
             modelBuilder.Entity("SupervisorMobility.API.Entities.ChecklistCategory", b =>

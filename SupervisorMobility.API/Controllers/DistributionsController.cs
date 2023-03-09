@@ -5,7 +5,9 @@ using SupervisorMobility.API.DataAccess.Entities;
 using SupervisorMobility.API.Models.AreaDtos;
 using SupervisorMobility.API.Models.DistributionDtos;
 using SupervisorMobility.API.Models.OperationDtos;
+using SupervisorMobility.API.Models.ProductDtos;
 using SupervisorMobility.API.Services;
+using System.Diagnostics;
 
 namespace SupervisorMobility.API.Controllers
 {
@@ -43,17 +45,20 @@ namespace SupervisorMobility.API.Controllers
             {
                 var areasForPlant = await _supervisorMobilityRepository
                 .GetDistributionsForAreaAsync(areaId, includecollections);
+                return Ok(_mapper.Map<IEnumerable<DistributionWithNavigationPropertiesDto>>(areasForPlant));
+
             }
             else
             {
                 var areasForPlant = await _supervisorMobilityRepository
                 .GetDistributionsForAreaAsync(areaId);
+                return Ok(_mapper.Map<IEnumerable<DistributionWithoutNavigationPropertiesDto>>(areasForPlant));
+
 
             }
 
 
 
-            return Ok(_mapper.Map<IEnumerable<DistributionWithNavigationPropertiesDto>>(areasForPlant));
         }
 
         [HttpGet("{distributionId}", Name = "GetDistribution")]
@@ -229,6 +234,99 @@ namespace SupervisorMobility.API.Controllers
 
             return Ok();
         }
+
+
+        [HttpPost("{distributionId}/products")]
+        public async Task<ActionResult<DistributionWithoutNavigationPropertiesDto>> CreateProduct(int plantId, int areaId, int distributionId, 
+      ProductForCreationDto product)
+        {
+            if (!await _supervisorMobilityRepository.PlantExistAsync(plantId))
+            {
+                return NotFound("No Plant Exist");
+            }
+
+            if (!await _supervisorMobilityRepository.AreaExistAsync(areaId))
+            {
+                return NotFound("No Area Exist");
+            }  
+            
+            if (!await _supervisorMobilityRepository.DistributionExistsAsync(distributionId))
+            {
+                return NotFound("No Distribution Exist");
+            }
+
+            //var finalDistribution = _mapper.Map<Distribution>(distribution);
+
+            //await _supervisorMobilityRepository.AddDistributionForPlantAsync(plantId,
+            //    areaId, finalDistribution);
+
+            ////add distribution to product
+
+            //await _supervisorMobilityRepository.AddDistributionForProductAsync(productId, finalDistribution);
+
+
+            //await _supervisorMobilityRepository.SaveChangesAsync();
+
+            //var createdDistributionToReturn =
+            //    _mapper.Map<DistributionWithoutNavigationPropertiesDto>(finalDistribution);
+
+            //return CreatedAtRoute("GetDistribution",
+            //    new
+            //    {
+            //        plantId,
+            //        areaId,
+            //        distributionId = createdDistributionToReturn.DistributionId
+            //    },
+            //    createdDistributionToReturn);
+
+            return Ok();
+        }
+
+        [HttpPost("{distributionId}/products/add")]
+        public async Task<ActionResult<DistributionWithoutNavigationPropertiesDto>> AddProduct(int plantId, int areaId, int distributionId,
+            ProductDto product)
+        {
+            if (!await _supervisorMobilityRepository.PlantExistAsync(plantId))
+            {
+                return NotFound("No Plant Exist");
+            }
+
+            if (!await _supervisorMobilityRepository.AreaExistAsync(areaId))
+            {
+                return NotFound("No Area Exist");
+            }
+
+            if (!await _supervisorMobilityRepository.DistributionExistsAsync(distributionId))
+            {
+                return NotFound("No Distribution Exist");
+            }
+        
+
+
+            //var finalDistribution = _mapper.Map<Distribution>(distribution);
+            //finalDistribution.AreaId = areaId;
+            //Debug.WriteLine("Pree add");
+            //await _supervisorMobilityRepository.AddDistributionForProductAsync(productId, finalDistribution);
+            //Debug.WriteLine("despues add");
+
+            //await _supervisorMobilityRepository.SaveChangesAsync();
+
+
+            //var createdDistributionToReturn =
+            //   _mapper.Map<DistributionWithoutNavigationPropertiesDto>(finalDistribution);
+
+            //return CreatedAtRoute("GetDistribution",
+            //    new
+            //    {
+            //        plantId,
+            //        areaId,
+            //        distributionId = createdDistributionToReturn.DistributionId
+            //    },
+            //    createdDistributionToReturn);
+
+            return Ok();
+        }
+
 
         [HttpDelete("{distributionId}/products/{productId}")]
         public async Task<ActionResult> DeleteOperation(int plantId, int areaId, int distributionId, int productId)

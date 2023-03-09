@@ -22,6 +22,7 @@ using Microsoft.AspNetCore.Cors;
 using Microsoft.AspNetCore.Mvc.Infrastructure;
 using ClosedXML.Excel;
 using DocumentFormat.OpenXml.Spreadsheet;
+using SupervisorMobility.API.Models.FileUploadDto;
 
 namespace SupervisorMobility.API.Controllers
 {
@@ -48,9 +49,9 @@ namespace SupervisorMobility.API.Controllers
         }
 
         [HttpPost]
-        public async Task<ActionResult<UploadResult>> UploadFile(IFormFile file)
+        public async Task<ActionResult<FileUploadGeneralDto>> UploadFile(IFormFile file)
         {
-            UploadResult uploadResult = new UploadResult();
+            FileUploadForCreationDto uploadResult = new FileUploadForCreationDto();
             string trustedFileNameForFileStorage;
             var untrustedFileName = file.FileName;
             uploadResult.FileName = untrustedFileName;
@@ -69,18 +70,101 @@ namespace SupervisorMobility.API.Controllers
                 trustedFileNameForFileStorage = Path.GetRandomFileName();
 
             //trustedFileNameForFileStorage = Path.GetRandomFileName();
-            var path = Path.Combine(_env.ContentRootPath, "uploads", trustedFileNameForFileStorage);
+            var path = Path.Combine(_env.ContentRootPath, "uploads\\assycharts", trustedFileNameForFileStorage);
 
             await using FileStream fs = new(path, FileMode.Create);
             await file.CopyToAsync(fs);
 
-            uploadResult.StorageFileName = trustedFileNameForFileStorage;
 
-            return Ok(uploadResult);
+            uploadResult.FileName = untrustedFileName;
+            uploadResult.StorageFileName = trustedFileNameForFileStorage;
+            uploadResult.ContentType = file.ContentType;
+            uploadResult.UploadDate = DateTime.Now;
+
+            var fileToReturn = await _assyChartService.CreateFileAsync(uploadResult);
+
+            return Ok(fileToReturn);
+        }
+
+        [HttpPost("UploadUsers")]
+        public async Task<ActionResult<FileUploadGeneralDto>> UploadUsers(IFormFile file)
+        {
+            var uploadResult = new FileUploadForCreationDto();
+            string trustedFileNameForStorage = string.Empty;
+            var unstrustedFileName = file.FileName;
+
+            trustedFileNameForStorage = Path.GetRandomFileName();
+            var path = Path.Combine(_env.ContentRootPath, "uploads\\users", trustedFileNameForStorage);
+
+            await using FileStream fs = new(path, FileMode.Create);
+            await file.CopyToAsync(fs);
+
+            uploadResult.FileName = unstrustedFileName;
+            uploadResult.StorageFileName = trustedFileNameForStorage;
+            uploadResult.ContentType = file.ContentType;
+            uploadResult.UploadDate = DateTime.Now;
+
+            var fileToReturn = await _assyChartService.CreateFileAsync(uploadResult);
+
+            return Ok(fileToReturn);
+
+        }
+
+        [HttpPost("UploadGuide")]
+        public async Task<ActionResult<FileUpload>> UploadGuide(IFormFile file)
+        {
+            var uploadResult = new FileUploadForCreationDto();
+            string trustedFileNameForStorage = string.Empty;
+            var unstrustedFileName = file.FileName;
+
+            trustedFileNameForStorage = Path.GetRandomFileName();
+            var path = Path.Combine(_env.ContentRootPath, "uploads\\guides", trustedFileNameForStorage);
+
+            await using FileStream fs = new(path, FileMode.Create);
+            await file.CopyToAsync(fs);
+
+            uploadResult.FileName = unstrustedFileName;
+            uploadResult.StorageFileName = trustedFileNameForStorage;
+            uploadResult.ContentType = file.ContentType;
+            uploadResult.UploadDate = DateTime.Now;
+
+            var fileToReturn = await _assyChartService.CreateFileAsync(uploadResult);
+
+            return Ok(fileToReturn);
+        }
+
+        [HttpPost("UploadEvidences")]
+        public async Task<ActionResult<List<FileUpload>>> UploadEvidences(List<IFormFile> files)
+        {
+            List<FileUpload> uploadData = new List<FileUpload>();
+
+            foreach (var file in files)
+            {
+                var uploadResult = new FileUploadForCreationDto();
+                string trustedFileNameForStorage = string.Empty;
+                var unstrustedFileName = file.FileName;
+
+                trustedFileNameForStorage = Path.GetRandomFileName();
+                var path = Path.Combine(_env.ContentRootPath, "uploads\\evidences", trustedFileNameForStorage);
+
+                await using FileStream fs = new(path, FileMode.Create);
+                await file.CopyToAsync(fs);
+
+                uploadResult.FileName = unstrustedFileName;
+                uploadResult.StorageFileName = trustedFileNameForStorage;
+                uploadResult.ContentType = file.ContentType;
+                uploadResult.UploadDate = DateTime.Now;
+
+                var fileToReturn = await _assyChartService.CreateFileAsync(uploadResult);
+
+                uploadData.Add(fileToReturn);
+            }
+
+            return Ok(uploadData);
         }
 
         [HttpPost("Data")]
-        public async Task<ActionResult<UploadDataResult>> UpdateDataInServer(UploadResult FileInfo)
+        public async Task<ActionResult<FileUploadGeneralDto>> UpdateDataInServer(FileUploadGeneralDto FileInfo)
         {
 
 
@@ -284,10 +368,10 @@ namespace SupervisorMobility.API.Controllers
                         }//end foreach
 
                     }//end using
-                   
+
                     Debug.WriteLine($"plant id {PlantInfo.PlantId} code {PlantInfo.Code} description: {PlantInfo.Description}");
 
-                  
+
                 }//end try
                 catch (Exception ex)
                 {
@@ -299,7 +383,7 @@ namespace SupervisorMobility.API.Controllers
             //*****************************************************//
 
             //created result array to return
-            UploadDataResult ResumeActionsResultsToReturn = new UploadDataResult();
+            UploadAssyChartResult ResumeActionsResultsToReturn = new UploadAssyChartResult();
 
 
 
@@ -820,7 +904,7 @@ namespace SupervisorMobility.API.Controllers
                         }
                         else
                         {
-                                ResumeActionsResultsToReturn.AssyChartUpdated++;
+                            ResumeActionsResultsToReturn.AssyChartUpdated++;
                         }
                     }
                     else
@@ -843,7 +927,7 @@ namespace SupervisorMobility.API.Controllers
                         }
                         else
                         {
-                            
+
                             if (!await _supervisorMobilityRepository.AssyChartExistAdvanceAsync(finalAssyChart.GOS, finalAssyChart.CCP, finalAssyChart.HOE, finalAssyChart.PlantId, finalAssyChart.AreaId, finalAssyChart.DistributionId, finalAssyChart.OperationId, finalAssyChart.ProductId))
                             {
                                 finalAssyChart.CreationDate = DateTime.Now;
@@ -891,7 +975,7 @@ namespace SupervisorMobility.API.Controllers
             }
 
             return Ok(ResumeActionsResultsToReturn);
-            
+
         }
 
         [EnableCors("Cors")]
@@ -1111,7 +1195,30 @@ namespace SupervisorMobility.API.Controllers
 
         }//end download file function 
 
+
+        [EnableCors("Cors")]
+        [HttpGet("Guide/{fileid}")]
+        public async Task<IActionResult> DownloadGuide(int fileid)
+        {
+            var FileInfo = await _assyChartService.FetchFileAsync(fileid);
+
+            if (FileInfo is not null)
+            {
+                var path = Path.Combine(_env.ContentRootPath, "uploads\\guides", FileInfo.StorageFileName);
+
+                var memory = new MemoryStream();
+                using (var stream = new FileStream(path, FileMode.Open))
+                {
+                    await stream.CopyToAsync(memory);
+                }
+                memory.Position = 0;
+                return File(memory, FileInfo.ContentType, Path.GetFileName(path));
+
+
+            }
+            return NotFound("Error File download");
+
+        }
+
     }
-
-
 }

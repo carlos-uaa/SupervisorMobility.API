@@ -8,6 +8,7 @@ namespace SupervisorMobility.API.MapperProfiles
         {
             CreateMap<DataAccess.Entities.Product, Models.ProductDtos.ProductDto>();
             CreateMap<DataAccess.Entities.Product, Models.ProductDtos.ProductForCreationDto>().ReverseMap();
+            CreateMap<DataAccess.Entities.Product, Models.ProductDtos.ProductWhitNavigationPropietiesDto>().ReverseMap();
             CreateMap<DataAccess.Entities.Product, Models.ProductDtos.ProductForUpdateDto>().ReverseMap();
         }
     }

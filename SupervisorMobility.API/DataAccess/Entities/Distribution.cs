@@ -24,7 +24,7 @@ namespace SupervisorMobility.API.DataAccess.Entities
             = new List<Operation>();
 
         //Navigation Property
-        public ICollection<Product> Products { get; set; }
+        public virtual ICollection<Product> Products { get; set; }
             = new List<Product>();
 
         public Distribution(string code, string description)

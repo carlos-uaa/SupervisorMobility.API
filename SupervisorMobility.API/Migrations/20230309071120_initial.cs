@@ -8,7 +8,7 @@ using Microsoft.EntityFrameworkCore.Migrations;
 namespace SupervisorMobility.API.Migrations
 {
     /// <inheritdoc />
-    public partial class JobObservation : Migration
+    public partial class initial : Migration
     {
         /// <inheritdoc />
         protected override void Up(MigrationBuilder migrationBuilder)
@@ -28,6 +28,37 @@ namespace SupervisorMobility.API.Migrations
                 {
                     table.PrimaryKey("PK_ChecklistCategories", x => x.ChecklistCategoryId);
                     table.CheckConstraint("ck_cc_seq", "[Sequence] > 0");
+                });
+
+            migrationBuilder.CreateTable(
+                name: "Files",
+                columns: table => new
+                {
+                    FileUploadId = table.Column<int>(type: "int", nullable: false)
+                        .Annotation("SqlServer:Identity", "1, 1"),
+                    FileName = table.Column<string>(type: "nvarchar(max)", nullable: true),
+                    StorageFileName = table.Column<string>(type: "nvarchar(max)", nullable: true),
+                    ContentType = table.Column<string>(type: "nvarchar(max)", nullable: true),
+                    UploadDate = table.Column<DateTime>(type: "Date", nullable: false)
+                },
+                constraints: table =>
+                {
+                    table.PrimaryKey("PK_Files", x => x.FileUploadId);
+                });
+
+            migrationBuilder.CreateTable(
+                name: "Glosary",
+                columns: table => new
+                {
+                    GlosaryWordId = table.Column<int>(type: "int", nullable: false)
+                        .Annotation("SqlServer:Identity", "1, 1"),
+                    Name = table.Column<string>(type: "nvarchar(50)", maxLength: 50, nullable: false),
+                    Description = table.Column<string>(type: "nvarchar(200)", maxLength: 200, nullable: false),
+                    IsActive = table.Column<bool>(type: "bit", nullable: true, defaultValue: true)
+                },
+                constraints: table =>
+                {
+                    table.PrimaryKey("PK_Glosary", x => x.GlosaryWordId);
                 });
 
             migrationBuilder.CreateTable(
@@ -121,6 +152,29 @@ namespace SupervisorMobility.API.Migrations
                 });
 
             migrationBuilder.CreateTable(
+                name: "Guides",
+                columns: table => new
+                {
+                    GuideId = table.Column<int>(type: "int", nullable: false)
+                        .Annotation("SqlServer:Identity", "1, 1"),
+                    Code = table.Column<string>(type: "nvarchar(max)", nullable: false),
+                    Name = table.Column<string>(type: "nvarchar(max)", nullable: false),
+                    Description = table.Column<string>(type: "nvarchar(max)", nullable: false),
+                    IsActive = table.Column<bool>(type: "bit", nullable: true, defaultValue: true),
+                    FileUploadId = table.Column<int>(type: "int", nullable: false)
+                },
+                constraints: table =>
+                {
+                    table.PrimaryKey("PK_Guides", x => x.GuideId);
+                    table.ForeignKey(
+                        name: "FK_Guides_Files_FileUploadId",
+                        column: x => x.FileUploadId,
+                        principalTable: "Files",
+                        principalColumn: "FileUploadId",
+                        onDelete: ReferentialAction.Cascade);
+                });
+
+            migrationBuilder.CreateTable(
                 name: "JobObservationConfigs",
                 columns: table => new
                 {
@@ -165,28 +219,6 @@ namespace SupervisorMobility.API.Migrations
                         column: x => x.PlantId,
                         principalTable: "Plants",
                         principalColumn: "PlantId",
-                        onDelete: ReferentialAction.Cascade);
-                });
-
-            migrationBuilder.CreateTable(
-                name: "ProductDistributions",
-                columns: table => new
-                {
-                    ProductDistributionId = table.Column<int>(type: "int", nullable: false)
-                        .Annotation("SqlServer:Identity", "1, 1"),
-                    Code = table.Column<string>(type: "nvarchar(50)", maxLength: 50, nullable: false),
-                    Description = table.Column<string>(type: "nvarchar(200)", maxLength: 200, nullable: false),
-                    IsActive = table.Column<bool>(type: "bit", nullable: true, defaultValue: true),
-                    ProductId = table.Column<int>(type: "int", nullable: false)
-                },
-                constraints: table =>
-                {
-                    table.PrimaryKey("PK_ProductDistributions", x => x.ProductDistributionId);
-                    table.ForeignKey(
-                        name: "FK_ProductDistributions_Products_ProductId",
-                        column: x => x.ProductId,
-                        principalTable: "Products",
-                        principalColumn: "ProductId",
                         onDelete: ReferentialAction.Cascade);
                 });
 
@@ -246,24 +278,65 @@ namespace SupervisorMobility.API.Migrations
                 });
 
             migrationBuilder.CreateTable(
-                name: "ProductOperations",
+                name: "Users",
                 columns: table => new
                 {
-                    ProductOperationId = table.Column<int>(type: "int", nullable: false)
+                    UserId = table.Column<int>(type: "int", nullable: false)
                         .Annotation("SqlServer:Identity", "1, 1"),
-                    Code = table.Column<string>(type: "nvarchar(50)", maxLength: 50, nullable: false),
-                    Description = table.Column<string>(type: "nvarchar(200)", maxLength: 200, nullable: false),
-                    IsActive = table.Column<bool>(type: "bit", nullable: true, defaultValue: true),
-                    ProductDistributionId = table.Column<int>(type: "int", nullable: false)
+                    Payroll = table.Column<int>(type: "int", nullable: false),
+                    Name = table.Column<string>(type: "nvarchar(max)", nullable: false),
+                    IsAdmin = table.Column<bool>(type: "bit", nullable: false),
+                    IsSupervisor = table.Column<bool>(type: "bit", nullable: false),
+                    IsOperator = table.Column<bool>(type: "bit", nullable: false),
+                    CreatedDate = table.Column<DateTime>(type: "Date", nullable: true),
+                    LastUpdated = table.Column<DateTime>(type: "Date", nullable: false),
+                    DisabledDate = table.Column<DateTime>(type: "Date", nullable: true),
+                    IsActive = table.Column<bool>(type: "bit", nullable: true),
+                    PlantId = table.Column<int>(type: "int", nullable: true),
+                    AreaId = table.Column<int>(type: "int", nullable: true),
+                    GroupId = table.Column<int>(type: "int", nullable: true)
                 },
                 constraints: table =>
                 {
-                    table.PrimaryKey("PK_ProductOperations", x => x.ProductOperationId);
+                    table.PrimaryKey("PK_Users", x => x.UserId);
                     table.ForeignKey(
-                        name: "FK_ProductOperations_ProductDistributions_ProductDistributionId",
-                        column: x => x.ProductDistributionId,
-                        principalTable: "ProductDistributions",
-                        principalColumn: "ProductDistributionId",
+                        name: "FK_Users_Areas_AreaId",
+                        column: x => x.AreaId,
+                        principalTable: "Areas",
+                        principalColumn: "AreaId");
+                    table.ForeignKey(
+                        name: "FK_Users_Groups_GroupId",
+                        column: x => x.GroupId,
+                        principalTable: "Groups",
+                        principalColumn: "GroupId");
+                    table.ForeignKey(
+                        name: "FK_Users_Plants_PlantId",
+                        column: x => x.PlantId,
+                        principalTable: "Plants",
+                        principalColumn: "PlantId");
+                });
+
+            migrationBuilder.CreateTable(
+                name: "DistributionProduct",
+                columns: table => new
+                {
+                    DistributionsDistributionId = table.Column<int>(type: "int", nullable: false),
+                    ProductsProductId = table.Column<int>(type: "int", nullable: false)
+                },
+                constraints: table =>
+                {
+                    table.PrimaryKey("PK_DistributionProduct", x => new { x.DistributionsDistributionId, x.ProductsProductId });
+                    table.ForeignKey(
+                        name: "FK_DistributionProduct_Distributions_DistributionsDistributionId",
+                        column: x => x.DistributionsDistributionId,
+                        principalTable: "Distributions",
+                        principalColumn: "DistributionId",
+                        onDelete: ReferentialAction.Cascade);
+                    table.ForeignKey(
+                        name: "FK_DistributionProduct_Products_ProductsProductId",
+                        column: x => x.ProductsProductId,
+                        principalTable: "Products",
+                        principalColumn: "ProductId",
                         onDelete: ReferentialAction.Cascade);
                 });
 
@@ -348,8 +421,12 @@ namespace SupervisorMobility.API.Migrations
                     AreaId = table.Column<int>(type: "int", nullable: true),
                     DistributionId = table.Column<int>(type: "int", nullable: true),
                     OperationId = table.Column<int>(type: "int", nullable: true),
-                    dateStart = table.Column<DateTime>(type: "datetime2", nullable: true),
-                    dateEnd = table.Column<DateTime>(type: "datetime2", nullable: true),
+                    DateStart = table.Column<DateTime>(type: "datetime2", nullable: true),
+                    DateEnd = table.Column<DateTime>(type: "datetime2", nullable: true),
+                    PlannedStartDate = table.Column<DateTime>(type: "datetime2", nullable: true),
+                    PlannedEndDate = table.Column<DateTime>(type: "datetime2", nullable: true),
+                    Justification = table.Column<string>(type: "nvarchar(max)", nullable: true),
+                    Status = table.Column<int>(type: "int", nullable: true),
                     Observer = table.Column<string>(type: "nvarchar(max)", nullable: true),
                     Operator = table.Column<string>(type: "nvarchar(max)", nullable: true),
                     Option = table.Column<int>(type: "int", nullable: true),
@@ -406,6 +483,11 @@ namespace SupervisorMobility.API.Migrations
                     { 5, "OMEFE", "Observación para mejora del estándar de acuerdo al filtro elegido", true, 5 },
                     { 6, "TOSF", "Trabajo de Observación  - Sumario / Finalización", true, 6 }
                 });
+
+            migrationBuilder.InsertData(
+                table: "Glosary",
+                columns: new[] { "GlosaryWordId", "Description", "IsActive", "Name" },
+                values: new object[] { 1, "Safety", true, "S" });
 
             migrationBuilder.InsertData(
                 table: "Groups",
@@ -492,24 +574,19 @@ namespace SupervisorMobility.API.Migrations
                 });
 
             migrationBuilder.InsertData(
-                table: "ProductDistributions",
-                columns: new[] { "ProductDistributionId", "Code", "Description", "IsActive", "ProductId" },
-                values: new object[] { 1, "Dist1", "Distribution from products", true, 1 });
-
-            migrationBuilder.InsertData(
                 table: "Distributions",
                 columns: new[] { "DistributionId", "AreaId", "Code", "Description", "IsActive" },
                 values: new object[] { 1, 1, "Dist1", "Distribution 1 Trim 1", true });
 
             migrationBuilder.InsertData(
-                table: "ProductOperations",
-                columns: new[] { "ProductOperationId", "Code", "Description", "IsActive", "ProductDistributionId" },
-                values: new object[] { 1, "OP1", "Operation from products", true, 1 });
+                table: "Users",
+                columns: new[] { "UserId", "AreaId", "CreatedDate", "DisabledDate", "GroupId", "IsActive", "IsAdmin", "IsOperator", "IsSupervisor", "LastUpdated", "Name", "Payroll", "PlantId" },
+                values: new object[] { 1, 1, null, null, 1, true, true, false, true, new DateTime(2023, 3, 9, 1, 11, 20, 155, DateTimeKind.Local).AddTicks(5844), "Marco Aguayo", 239935, 1 });
 
             migrationBuilder.InsertData(
                 table: "AssyCharts",
                 columns: new[] { "AssyChardId", "AreaId", "CCP", "CreationDate", "DistributionId", "GOS", "HOE", "IsActive", "ModificationDate", "OperationId", "PlantId", "ProductId" },
-                values: new object[] { 1, 1, "string", new DateTime(1, 1, 1, 0, 0, 0, 0, DateTimeKind.Unspecified), 1, "string", "string", true, new DateTime(1, 1, 1, 0, 0, 0, 0, DateTimeKind.Unspecified), null, 1, 1 });
+                values: new object[] { 1, 1, "TX2300-5NA_1", new DateTime(1, 1, 1, 0, 0, 0, 0, DateTimeKind.Unspecified), 1, "CSV TX2300-5NA_1", "TX2300-5NA_1", true, new DateTime(1, 1, 1, 0, 0, 0, 0, DateTimeKind.Unspecified), null, 1, 1 });
 
             migrationBuilder.InsertData(
                 table: "Operations",
@@ -518,8 +595,8 @@ namespace SupervisorMobility.API.Migrations
 
             migrationBuilder.InsertData(
                 table: "JobObservations",
-                columns: new[] { "JobObservationId", "Anomaly", "AreaId", "CArea", "Cicles", "DArea", "DistributionId", "IdentifiedActivity", "IsActive", "Models", "Observer", "OperationId", "Operator", "OperatorCommentary", "OperatorSignature", "Option", "OthersArea", "PlantId", "QArea", "SArea", "SsvCommentary", "SsvSignature", "Time1HOE", "Time2HOE", "dateEnd", "dateStart" },
-                values: new object[] { 1, null, 1, "Lorem ipsum dolor sit amet C Area", "1 min|2 min|3 min|4 min| 5 min", "Lorem ipsum dolor sit amet D Area", 1, "Actividad identificada", true, "P71A|X247|P71A|X247|P71A", "Pedro", 1, "Juan", "Operator Commentary", "Juan", 1, "Lorem ipsum dolor sit amet Others Area", 1, "Lorem ipsum dolor sit amet Q Area", "Lorem ipsum dolor sit amet S Area", "Senior Supervisor Commentary", "Pedro", "10 min", "20 min", new DateTime(1, 1, 1, 0, 0, 0, 0, DateTimeKind.Unspecified), new DateTime(1, 1, 1, 0, 0, 0, 0, DateTimeKind.Unspecified) });
+                columns: new[] { "JobObservationId", "Anomaly", "AreaId", "CArea", "Cicles", "DArea", "DateEnd", "DateStart", "DistributionId", "IdentifiedActivity", "IsActive", "Justification", "Models", "Observer", "OperationId", "Operator", "OperatorCommentary", "OperatorSignature", "Option", "OthersArea", "PlannedEndDate", "PlannedStartDate", "PlantId", "QArea", "SArea", "SsvCommentary", "SsvSignature", "Status", "Time1HOE", "Time2HOE" },
+                values: new object[] { 1, null, 1, "Lorem ipsum dolor sit amet C Area", "1 min|2 min|3 min|4 min| 5 min", "Lorem ipsum dolor sit amet D Area", new DateTime(1, 1, 1, 0, 0, 0, 0, DateTimeKind.Unspecified), new DateTime(1, 1, 1, 0, 0, 0, 0, DateTimeKind.Unspecified), 1, "Actividad identificada", true, null, "P71A|X247|P71A|X247|P71A", "Pedro", 1, "Juan", "Operator Commentary", "Juan", 1, "Lorem ipsum dolor sit amet Others Area", null, null, 1, "Lorem ipsum dolor sit amet Q Area", "Lorem ipsum dolor sit amet S Area", "Senior Supervisor Commentary", "Pedro", 0, "10 min", "20 min" });
 
             migrationBuilder.CreateIndex(
                 name: "IX_Areas_PlantId",
@@ -574,9 +651,19 @@ namespace SupervisorMobility.API.Migrations
                 unique: true);
 
             migrationBuilder.CreateIndex(
+                name: "IX_DistributionProduct_ProductsProductId",
+                table: "DistributionProduct",
+                column: "ProductsProductId");
+
+            migrationBuilder.CreateIndex(
                 name: "IX_Distributions_AreaId",
                 table: "Distributions",
                 column: "AreaId");
+
+            migrationBuilder.CreateIndex(
+                name: "IX_Guides_FileUploadId",
+                table: "Guides",
+                column: "FileUploadId");
 
             migrationBuilder.CreateIndex(
                 name: "IX_JobObservationConfigs_ChecklistCategoryId",
@@ -614,14 +701,19 @@ namespace SupervisorMobility.API.Migrations
                 column: "DistributionId");
 
             migrationBuilder.CreateIndex(
-                name: "IX_ProductDistributions_ProductId",
-                table: "ProductDistributions",
-                column: "ProductId");
+                name: "IX_Users_AreaId",
+                table: "Users",
+                column: "AreaId");
 
             migrationBuilder.CreateIndex(
-                name: "IX_ProductOperations_ProductDistributionId",
-                table: "ProductOperations",
-                column: "ProductDistributionId");
+                name: "IX_Users_GroupId",
+                table: "Users",
+                column: "GroupId");
+
+            migrationBuilder.CreateIndex(
+                name: "IX_Users_PlantId",
+                table: "Users",
+                column: "PlantId");
         }
 
         /// <inheritdoc />
@@ -634,7 +726,13 @@ namespace SupervisorMobility.API.Migrations
                 name: "ChecklistQuestions");
 
             migrationBuilder.DropTable(
-                name: "Groups");
+                name: "DistributionProduct");
+
+            migrationBuilder.DropTable(
+                name: "Glosary");
+
+            migrationBuilder.DropTable(
+                name: "Guides");
 
             migrationBuilder.DropTable(
                 name: "JobObservationConfigs");
@@ -643,13 +741,19 @@ namespace SupervisorMobility.API.Migrations
                 name: "JobObservations");
 
             migrationBuilder.DropTable(
-                name: "ProductOperations");
-
-            migrationBuilder.DropTable(
                 name: "SupportDocumentTypes");
 
             migrationBuilder.DropTable(
+                name: "Users");
+
+            migrationBuilder.DropTable(
                 name: "QuestionTypes");
+
+            migrationBuilder.DropTable(
+                name: "Products");
+
+            migrationBuilder.DropTable(
+                name: "Files");
 
             migrationBuilder.DropTable(
                 name: "ChecklistCategories");
@@ -661,13 +765,10 @@ namespace SupervisorMobility.API.Migrations
                 name: "Operations");
 
             migrationBuilder.DropTable(
-                name: "ProductDistributions");
+                name: "Groups");
 
             migrationBuilder.DropTable(
                 name: "Distributions");
-
-            migrationBuilder.DropTable(
-                name: "Products");
 
             migrationBuilder.DropTable(
                 name: "Areas");
