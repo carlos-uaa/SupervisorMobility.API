@@ -132,7 +132,6 @@ namespace SupervisorMobility.API.Context
                     DArea = "Lorem ipsum dolor sit amet D Area",
                     CArea = "Lorem ipsum dolor sit amet C Area",
                     OthersArea = "Lorem ipsum dolor sit amet Others Area",
-                    IdentifiedActivity = "Actividad identificada",
                     SsvCommentary = "Senior Supervisor Commentary",
                     OperatorCommentary = "Operator Commentary",
                     SsvSignature = "Pedro",
@@ -405,12 +404,12 @@ namespace SupervisorMobility.API.Context
                      {
                          LupId = 1,
                          JobObservationId = 1,
+                         Oportunity = "Operator need a safety helmet",
                          IsActive = true,
                          Observer = "Pedro",
                          Pillar = 1,
                          Q3 = "contramedida inmediata",
                          Q4 = "contramedida definitiva",
-                         Evidence = "/uploads/lup/img1.jpg",
                          Status = 1,
                          CreatedDate = DateTime.Now,
                          EndDate = DateTime.Now

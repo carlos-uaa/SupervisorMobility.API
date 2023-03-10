@@ -65,14 +65,19 @@ namespace SupervisorMobility.API.Controllers
             return Ok(_mapper.Map<IEnumerable<JobObservationDto>>(allJobObservations));
         }
 
+
         [HttpGet("{jobObservationId}", Name = "GetJobObservation")]
-        public async Task<IActionResult> GetJobObservation(int jobObservationId)
+        public async Task<IActionResult> GetJobObservation(int jobObservationId, bool includeLup = false)
         {
             //Find Job Observation type
-            var jobObservation = await _supervisorMobilityRepository.GetJobObservationAsync(jobObservationId);
+            var jobObservation = await _supervisorMobilityRepository.GetJobObservationAsync(jobObservationId, includeLup);
             if (jobObservation == null)
             {
                 return NotFound();
+            }
+            if (includeLup)
+            {
+                return Ok(_mapper.Map<JobObservationWithJustLupDto>(jobObservation));
             }
 
             return Ok(_mapper.Map<JobObservationDto>(jobObservation));
@@ -104,7 +109,7 @@ namespace SupervisorMobility.API.Controllers
             }
 
 
-            var jobObservationEntity = await _supervisorMobilityRepository.GetJobObservationAsync(jobObservationId);
+            var jobObservationEntity = await _supervisorMobilityRepository.GetJobObservationAsync(jobObservationId, false);
 
             if (jobObservationEntity == null)
             {
@@ -122,7 +127,7 @@ namespace SupervisorMobility.API.Controllers
         [HttpDelete("{jobObservationId}")]
         public async Task<ActionResult> DeleteJobObservation(int jobObservationId)
         {
-            var jobObservation = await _supervisorMobilityRepository.GetJobObservationAsync(jobObservationId);
+            var jobObservation = await _supervisorMobilityRepository.GetJobObservationAsync(jobObservationId, false);
 
             if (jobObservation == null)
             {

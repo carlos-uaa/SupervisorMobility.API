@@ -624,8 +624,14 @@ namespace SupervisorMobility.API.Services
 
         }
 
-        public async Task<JobObservation?> GetJobObservationAsync(int jobObservationId)
+        public async Task<JobObservation?> GetJobObservationAsync(int jobObservationId, bool includeLup)
         {
+            if (includeLup)
+            {
+                return await _context.JobObservations
+                    .Include(l => l.Lup)
+                     .Where(p => p.JobObservationId == jobObservationId).FirstOrDefaultAsync();
+            }
             //return whit info
             return await _context.JobObservations
                 .Include(a => a.Area)
@@ -680,7 +686,6 @@ namespace SupervisorMobility.API.Services
         public async Task<IEnumerable<Lup>> GetAllLupAsync()
         {
             return await _context.Lup
-                .Include(l => l.JobObservation)
                  .OrderBy(c => c.LupId).ToListAsync();
 
         }
@@ -689,7 +694,6 @@ namespace SupervisorMobility.API.Services
         {
             //return whit info
             return await _context.Lup
-                .Include(l => l.JobObservation)
                  .Where(x => x.LupId == lupId).FirstOrDefaultAsync();
         }
 

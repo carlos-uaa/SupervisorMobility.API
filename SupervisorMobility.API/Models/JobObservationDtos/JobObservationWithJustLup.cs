@@ -1,28 +1,31 @@
-﻿using System.ComponentModel.DataAnnotations;
-using System.ComponentModel.DataAnnotations.Schema;
-using SupervisorMobility.API.DataAccess.Entities;
+﻿using SupervisorMobility.API.Entities;
+using SupervisorMobility.API.Models.AreaDtos;
+using SupervisorMobility.API.Models.ChecklistCategoryDtos;
+using SupervisorMobility.API.Models.JobObservationTypeDtos;
+using SupervisorMobility.API.Models.DistributionDtos;
+using SupervisorMobility.API.Models.OperationDtos;
+using SupervisorMobility.API.Models.PlantDtos;
+using SupervisorMobility.API.Models.LupDtos;
 
-namespace SupervisorMobility.API.Entities
+namespace SupervisorMobility.API.Models.JobObservationDtos
 {
-    public class JobObservation
+    public class JobObservationWithJustLupDto
     {
-        [Key, DatabaseGenerated(DatabaseGeneratedOption.Identity)]
+
+        public ICollection<LupDto> Lup { get; set; } = new List<LupDto>();
+
         public int JobObservationId { get; set; }
         public bool? IsActive { get; set; }
 
-        public Plant? Plant { get; set; }
         public int? PlantId { get; set; }
-        public Area? Area { get; set; }
         public int? AreaId { get; set; }
-        public Distribution? Distribution { get; set; }
         public int? DistributionId { get; set; }
-        public Operation? Operation { get; set; }
         public int? OperationId { get; set; }
 
-        public DateTime? DateStart { get; set; }
-        public DateTime? DateEnd { get; set; }
+        public DateTime? dateStart { get; set; }
+        public DateTime? dateEnd { get; set; }
         public DateTime? DateFinalized { get; set; }
-        
+
         public string? Justification { get; set; }
 
         public int? Status { get; set; }
@@ -44,13 +47,11 @@ namespace SupervisorMobility.API.Entities
         public string? DArea { get; set; }
         public string? CArea { get; set; }
         public string? OthersArea { get; set; }
+
         public string? SsvCommentary { get; set; }
         public string? OperatorCommentary { get; set; }
         public string? SsvSignature { get; set; }
         public string? OperatorSignature { get; set; }
-
-        public ICollection<Lup> Lup { get; set; } = new List<Lup>();
-
 
     }
 }

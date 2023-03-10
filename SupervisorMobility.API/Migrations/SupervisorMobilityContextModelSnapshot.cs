@@ -276,7 +276,7 @@ namespace SupervisorMobility.API.Migrations
                             IsAdmin = true,
                             IsOperator = false,
                             IsSupervisor = true,
-                            LastUpdated = new DateTime(2023, 3, 6, 14, 48, 37, 773, DateTimeKind.Local).AddTicks(4340),
+                            LastUpdated = new DateTime(2023, 3, 7, 16, 52, 58, 695, DateTimeKind.Local).AddTicks(2835),
                             Name = "Marco Aguayo",
                             Payroll = 239935,
                             PlantId = 1
@@ -640,9 +640,6 @@ namespace SupervisorMobility.API.Migrations
                     b.Property<int?>("DistributionId")
                         .HasColumnType("int");
 
-                    b.Property<string>("IdentifiedActivity")
-                        .HasColumnType("nvarchar(max)");
-
                     b.Property<bool?>("IsActive")
                         .ValueGeneratedOnAdd()
                         .HasColumnType("bit")
@@ -719,11 +716,10 @@ namespace SupervisorMobility.API.Migrations
                             CArea = "Lorem ipsum dolor sit amet C Area",
                             Cicles = "1 min|2 min|3 min|4 min| 5 min",
                             DArea = "Lorem ipsum dolor sit amet D Area",
-                            DateEnd = new DateTime(2023, 3, 6, 14, 48, 37, 773, DateTimeKind.Local).AddTicks(4018),
-                            DateFinalized = new DateTime(2023, 3, 6, 14, 48, 37, 773, DateTimeKind.Local).AddTicks(4020),
-                            DateStart = new DateTime(2023, 3, 6, 14, 48, 37, 773, DateTimeKind.Local).AddTicks(3981),
+                            DateEnd = new DateTime(2023, 3, 7, 16, 52, 58, 695, DateTimeKind.Local).AddTicks(2491),
+                            DateFinalized = new DateTime(2023, 3, 7, 16, 52, 58, 695, DateTimeKind.Local).AddTicks(2492),
+                            DateStart = new DateTime(2023, 3, 7, 16, 52, 58, 695, DateTimeKind.Local).AddTicks(2454),
                             DistributionId = 1,
-                            IdentifiedActivity = "Actividad identificada",
                             IsActive = true,
                             Models = "P71A|X247|P71A|X247|P71A",
                             Observer = "Pedro",
@@ -868,7 +864,10 @@ namespace SupervisorMobility.API.Migrations
                     b.Property<string>("Observer")
                         .HasColumnType("nvarchar(max)");
 
-                    b.Property<int?>("Pillar")
+                    b.Property<string>("Oportunity")
+                        .HasColumnType("nvarchar(max)");
+
+                    b.Property<int>("Pillar")
                         .HasColumnType("int");
 
                     b.Property<string>("Q3")
@@ -877,10 +876,7 @@ namespace SupervisorMobility.API.Migrations
                     b.Property<string>("Q4")
                         .HasColumnType("nvarchar(max)");
 
-                    b.Property<string>("evidence")
-                        .HasColumnType("nvarchar(max)");
-
-                    b.Property<int?>("status")
+                    b.Property<int?>("Status")
                         .HasColumnType("int");
 
                     b.HasKey("LupId");
@@ -893,16 +889,16 @@ namespace SupervisorMobility.API.Migrations
                         new
                         {
                             LupId = 1,
-                            CreatedDate = new DateTime(2023, 3, 6, 14, 48, 37, 773, DateTimeKind.Local).AddTicks(4353),
-                            EndDate = new DateTime(2023, 3, 6, 14, 48, 37, 773, DateTimeKind.Local).AddTicks(4354),
+                            CreatedDate = new DateTime(2023, 3, 7, 16, 52, 58, 695, DateTimeKind.Local).AddTicks(2847),
+                            EndDate = new DateTime(2023, 3, 7, 16, 52, 58, 695, DateTimeKind.Local).AddTicks(2849),
                             IsActive = true,
                             JobObservationId = 1,
                             Observer = "Pedro",
+                            Oportunity = "Operator need a safety helmet",
                             Pillar = 1,
                             Q3 = "contramedida inmediata",
                             Q4 = "contramedida definitiva",
-                            evidence = "/uploads/lup/img1.jpg",
-                            status = 1
+                            Status = 1
                         });
                 });
 
@@ -1223,13 +1219,11 @@ namespace SupervisorMobility.API.Migrations
 
             modelBuilder.Entity("SupervisorMobility.API.Entities.Lup", b =>
                 {
-                    b.HasOne("SupervisorMobility.API.Entities.JobObservation", "JobObservation")
-                        .WithMany()
+                    b.HasOne("SupervisorMobility.API.Entities.JobObservation", null)
+                        .WithMany("Lup")
                         .HasForeignKey("JobObservationId")
                         .OnDelete(DeleteBehavior.Cascade)
                         .IsRequired();
-
-                    b.Navigation("JobObservation");
                 });
 
             modelBuilder.Entity("SupervisorMobility.API.Entities.Operation", b =>
@@ -1256,6 +1250,11 @@ namespace SupervisorMobility.API.Migrations
             modelBuilder.Entity("SupervisorMobility.API.Entities.ChecklistCategory", b =>
                 {
                     b.Navigation("ChecklistQuestions");
+                });
+
+            modelBuilder.Entity("SupervisorMobility.API.Entities.JobObservation", b =>
+                {
+                    b.Navigation("Lup");
                 });
 
             modelBuilder.Entity("SupervisorMobility.API.Entities.JobObservationType", b =>
