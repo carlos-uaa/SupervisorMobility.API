@@ -6,7 +6,7 @@ namespace SupervisorMobility.API.Profiles
     {
         public LupProfile()
         {
-            CreateMap<Entities.Lup, Models.LupDtos.LupDto>().ReverseMap();
+            CreateMap<Entities.Lup, Models.LupDtos.LupDto>();
             CreateMap<Entities.Lup, Models.LupDtos.LupForCreationDto>().ReverseMap();
             CreateMap<Entities.Lup, Models.LupDtos.LupForUpdateDto>().ReverseMap();
             CreateMap<Entities.Lup, Models.LupDtos.LupWithoutNavigationPropertiesDto>().ReverseMap();

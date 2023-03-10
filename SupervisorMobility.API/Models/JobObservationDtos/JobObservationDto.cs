@@ -49,8 +49,6 @@ namespace SupervisorMobility.API.Models.JobObservationDtos
         public string? DArea { get; set; }
         public string? CArea { get; set; }
         public string? OthersArea { get; set; }
-
-        public string? IdentifiedActivity { get; set; }
         public string? SsvCommentary { get; set; }
         public string? OperatorCommentary { get; set; }
         public string? SsvSignature { get; set; }
