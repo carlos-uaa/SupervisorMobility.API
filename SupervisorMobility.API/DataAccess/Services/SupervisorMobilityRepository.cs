@@ -1,8 +1,12 @@
-﻿using Microsoft.EntityFrameworkCore;
+﻿using DocumentFormat.OpenXml.Presentation;
+using DocumentFormat.OpenXml.Spreadsheet;
+using Microsoft.EntityFrameworkCore;
 using SupervisorMobility.API.Context;
 using SupervisorMobility.API.DataAccess.Entities;
 using SupervisorMobility.API.Entities;
 using SupervisorMobility.API.Models.AssyChart;
+using System.Diagnostics;
+using System.Xml;
 
 namespace SupervisorMobility.API.Services
 {
@@ -103,13 +107,13 @@ namespace SupervisorMobility.API.Services
         }
         #endregion
         #region GroupOperations
-        public async Task<IEnumerable<Group>> GetGroupsAsync()
+        public async Task<IEnumerable<Entities.Group>> GetGroupsAsync()
         {
             return await _context.Groups
                 .OrderBy(c => c.GroupId).ToListAsync();
         }
 
-        public async Task<Group?> GetGroupAsync(int groupId)
+        public async Task<Entities.Group?> GetGroupAsync(int groupId)
         {
             return await _context.Groups
                 .Where(c => c.GroupId == groupId).FirstOrDefaultAsync();
@@ -121,12 +125,12 @@ namespace SupervisorMobility.API.Services
         }
 
 
-        public void AddGroup(Group group)
+        public void AddGroup(Entities.Group group)
         {
             _context.Groups.Add(group);
         }
 
-        public void DeleteGroup(Group group)
+        public void DeleteGroup(Entities.Group group)
         {
             _context.Groups.Remove(group);
         }
@@ -258,6 +262,23 @@ namespace SupervisorMobility.API.Services
             return await _context.Distributions
                 .Where(o => o.AreaId == areaId && o.Code == code && o.Description == description)
                 .FirstOrDefaultAsync();
+        }
+        public async Task AddProductForDistributionAsync(int areaId, int distributionId, Product product)
+        {
+            var distribution = await GetDistributionForAreaAsync(areaId, distributionId, true);
+            if (distribution != null)
+            {
+                if (distribution.Products != null)
+                {
+                    distribution.Products.Add(product);
+                }
+                else{
+                    distribution.Products = new List<Product>();
+                    distribution.Products.Add(product);
+
+                }
+
+            }
         }
 
         public async Task AddDistributionForPlantAsync(int plantId, int areaId, Distribution distribution)
@@ -483,6 +504,36 @@ namespace SupervisorMobility.API.Services
         {
             _context.Products.Add(product);
         }
+        public async Task AddDistributionForProductAsync(int productId, Distribution distribution)
+        {
+            var product = await GetProductAsync(productId, true);
+            Debug.WriteLine("GET product");
+
+            if (product != null)
+            {
+
+
+                if (product.Distributions != null)
+                {
+                    Debug.WriteLine("no null");
+
+                    product.Distributions.Add(distribution);
+                    Debug.WriteLine("despues add in no null");
+
+                }
+                else
+                {
+                    Debug.WriteLine("Es null");
+
+                    product.Distributions = new List<Distribution>();
+                    product.Distributions.Add(distribution);
+                    Debug.WriteLine("despues add is null");
+
+                }
+
+
+            }
+        }
 
         public void DeleteProduct(Product product)
         {
@@ -603,12 +654,63 @@ namespace SupervisorMobility.API.Services
         }
         #endregion
 
-        #region CommonOperations
-        public async Task<bool> SaveChangesAsync()
+        #region File
+        public void AddUploadFile(FileUpload fileUplaod)
         {
-            return (await _context.SaveChangesAsync() >= 0);
+            _context.Files.Add(fileUplaod);
         }
 
+
+        public async Task<FileUpload?> GetFileUploadAsync(int fileid)
+        {
+           
+            return await _context.Files
+                .Where(p => p.FileUploadId == fileid).FirstOrDefaultAsync();
+        }
+
+        public void DeleteUploadFile(FileUpload fileUplaod)
+        {
+            _context.Files.Remove(fileUplaod);
+        }
+        #endregion
+
+        #region Guide
+
+        //, 
+
+        public async Task<Guides?> GetGuideAsync(int guideId, bool includeFile = false)
+        {
+            if (includeFile)
+            {
+                return await _context.Guides.Include(p => p.FileUpload)
+                    .Where(p => p.GuideId == guideId).FirstOrDefaultAsync();
+            }
+
+            return await _context.Guides
+                .Where(p => p.GuideId == guideId).FirstOrDefaultAsync();
+        }
+
+        public async  Task<IEnumerable<Guides>> GetAllGuides(bool includeFile = false)
+        {
+            if (includeFile)
+            {
+                return await _context.Guides.Include(p => p.FileUpload).OrderBy(g => g.GuideId).ToListAsync();
+            }
+
+            return await _context.Guides.OrderBy(g => g.GuideId).ToListAsync();
+        }
+
+        public void AddGuide(Guides guide)
+        {
+            _context.Guides.Add(guide);
+        }
+
+
+
+        public void DeleteGuide(Guides guide)
+        {
+            _context.Guides.Remove(guide);
+        }
         #endregion
 
         #region JobObservationOperations
@@ -682,6 +784,13 @@ namespace SupervisorMobility.API.Services
         }
         #endregion
 
+#region CommonOperations
+        public async Task<bool> SaveChangesAsync()
+        {
+            return (await _context.SaveChangesAsync() >= 0);
+        }
+
+        #endregion
         #region LupOperations
         public async Task<IEnumerable<Lup>> GetAllLupAsync()
         {

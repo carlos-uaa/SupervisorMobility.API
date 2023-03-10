@@ -15,7 +15,7 @@ namespace SupervisorMobility.API.DataAccess.Entities
         public string Description { get; set; }
         public bool? IsActive { get; set; }
 
-        public ICollection<Distribution> Distributions { get; set; }
+        public virtual ICollection<Distribution> Distributions { get; set; }
             = new List<Distribution>();
 
         public Product(string code, string description)

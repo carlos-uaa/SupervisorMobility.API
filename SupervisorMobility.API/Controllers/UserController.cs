@@ -2,7 +2,9 @@
 using DocumentFormat.OpenXml.Spreadsheet;
 using Microsoft.AspNetCore.Mvc;
 using SupervisorMobility.API.Business;
+using SupervisorMobility.API.DataAccess.Entities;
 using SupervisorMobility.API.Models.FileUpload;
+using SupervisorMobility.API.Models.FileUploadDto;
 using SupervisorMobility.API.Models.Users;
 using SupervisorMobility.API.Services;
 using System.Net;
@@ -126,9 +128,9 @@ namespace SupervisorMobility.API.Controllers
 
         //******* File users    **********//
         [HttpPost("FileUpload")]
-        public async Task<ActionResult<UploadResult>> UploadUsersFile(IFormFile file)
+        public async Task<ActionResult<FileUploadGeneralDto>> UploadUsersFile(IFormFile file)
         {
-            UploadResult uploadResult = new UploadResult();
+            FileUploadGeneralDto uploadResult = new FileUploadGeneralDto();
             string trustedFileNameForFileStorage;
             var untrustedFileName = file.FileName;
             uploadResult.FileName = untrustedFileName;
@@ -159,7 +161,7 @@ namespace SupervisorMobility.API.Controllers
 
         [HttpPost("FileUpload/Data")]
         //public async Task<ActionResult<string>> ApplyUsersUpload(UploadResult FileInfo)
-        public async  Task<ActionResult> ApplyUsersUpload(UploadResult FileInfo)
+        public async  Task<ActionResult> ApplyUsersUpload(FileUploadGeneralDto FileInfo)
         {
             string file = Directory.GetCurrentDirectory().ToString() + "\\uploads\\users\\" + FileInfo.StorageFileName;
             

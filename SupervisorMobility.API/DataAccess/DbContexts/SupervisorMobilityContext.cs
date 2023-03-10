@@ -26,6 +26,11 @@ namespace SupervisorMobility.API.Context
         //Add AssyCharts db Context
         public DbSet<AssyChart> AssyCharts { get; set; }
         public DbSet<User> Users { get; set; }
+
+        public DbSet<FileUpload> Files {  get; set; }
+        public DbSet<Guides> Guides { get; set; }
+
+
         #endregion
 
         public SupervisorMobilityContext(DbContextOptions<SupervisorMobilityContext> options)
@@ -90,11 +95,16 @@ namespace SupervisorMobility.API.Context
                 .Property(p => p.IsActive)
                 .HasDefaultValue(true);
 
-
-            //Add AssyChartModel
             modelBuilder.Entity<AssyChart>()
                 .Property(p => p.IsActive)
+                .HasDefaultValue(true); 
+            
+            modelBuilder.Entity<Guides>()
+                .Property(p => p.IsActive)
                 .HasDefaultValue(true);
+
+            //Add AssyChartModel
+
 
 
             //Constraints

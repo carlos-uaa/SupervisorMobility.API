@@ -2,6 +2,8 @@
 using SupervisorMobility.API.DataAccess.Entities;
 using SupervisorMobility.API.Entities;
 using SupervisorMobility.API.Models.AssyChart;
+using SupervisorMobility.API.Models.FileUploadDto;
+using SupervisorMobility.API.Models.GuidesDtos;
 using SupervisorMobility.API.Models.OperationDtos;
 using SupervisorMobility.API.Models.PlantDtos;
 using SupervisorMobility.API.Models.ProductDtos;
@@ -41,9 +43,6 @@ namespace SupervisorMobility.API.Business
             return await _repository.DistributionExistsAsync(distributionId);
         }
         #endregion
-
-        
-
         #region Operation
         public async Task<Operation> CreateOperationAsync(int areaId, int distributionId, Operation operation)
         {
@@ -77,8 +76,6 @@ namespace SupervisorMobility.API.Business
 
 
         #endregion
-
-     
         #region Product
         public async Task<Product> CreateProductAsync(ProductForCreationDto product)
         {
@@ -96,12 +93,16 @@ namespace SupervisorMobility.API.Business
        
         
         }
+        
+        
 
 
         public async Task<IEnumerable<Product>> FetchProductsAsync()
         {
             return await _repository.GetProductsAsync();
         }
+
+
 
 
         public async Task RemoveProductAsync(Product product)
@@ -231,6 +232,53 @@ namespace SupervisorMobility.API.Business
 
         #endregion
 
+        #region File
+        public async Task<FileUpload> CreateFileAsync(FileUploadForCreationDto newFile)
+        {
+            var finalNewFile = _mapper.Map<FileUpload>(newFile);
+            _repository.AddUploadFile(finalNewFile);
+            await _repository.SaveChangesAsync();
+            return finalNewFile;
+        }
+        public async Task<FileUpload?> FetchFileAsync(int fileid)
+        {
+            return await _repository.GetFileUploadAsync(fileid);
+        }
+        public async Task RemoveFileAsync(FileUpload fileUpload)
+        {
+            _repository.DeleteUploadFile(fileUpload);
+            await _repository.SaveChangesAsync();
+        }
+        #endregion
+
+        #region Guide
+        public async Task<Guides?> FetchGuideAsync(int guideId, bool includeFile = false)
+        {
+            return await _repository.GetGuideAsync(guideId, includeFile);
+        }
+        public async Task<Guides> CreateGuideAsync(GuideForCreationDto newguide)
+        {
+            var finalNewGuide = _mapper.Map<Guides>(newguide);
+            _repository.AddGuide(finalNewGuide);
+
+
+            //var FileGuide
+
+
+            await _repository.SaveChangesAsync();
+            return finalNewGuide;
+        }
+        public async Task UpdateGuideAsync(GuideForUpdateDto GuideToUpdate, Guides guide)
+        {
+            _mapper.Map(GuideToUpdate, guide);
+            await _repository.SaveChangesAsync();
+        }
+        public async Task RemoveGuideAsync(Guides guide)
+        {
+            _repository.DeleteGuide(guide);
+            await _repository.SaveChangesAsync();
+        }
+        #endregion
 
     }
 }

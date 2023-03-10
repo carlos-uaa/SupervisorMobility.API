@@ -9,6 +9,6 @@ namespace SupervisorMobility.API.Models.ProductDtos
         public string Description { get; set; } = string.Empty;
         public bool? IsActive { get; set; }
 
-        public ICollection<DistributionWithoutNavigationPropertiesDto> Distributions { get; set; } = new List<DistributionWithoutNavigationPropertiesDto>();
+        public ICollection<DistributionWithoutNavigationPropertiesDto>? Distributions { get; set; } = new List<DistributionWithoutNavigationPropertiesDto>();
     }
 }

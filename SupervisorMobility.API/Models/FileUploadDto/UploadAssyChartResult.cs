@@ -2,13 +2,7 @@
 
 namespace SupervisorMobility.API.Models.FileUpload
 {
-    public class UploadResult
-    {
-        public string? FileName { get; set; }  
-        public string? StorageFileName { get; set; }
-    }
-
-    public class UploadDataResult
+     public class UploadAssyChartResult
     {
         public int PlantUpdate { get; set; } = 0;
         public int PlantCreate { get; set; }= 0;

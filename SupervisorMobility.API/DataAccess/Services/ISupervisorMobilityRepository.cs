@@ -61,6 +61,7 @@ namespace SupervisorMobility.API.Services
         Task<Distribution?> GetDistributionForAreaByCodeAndDescriptionAsync(int areaId, string code, string description);
       
         Task AddDistributionForPlantAsync(int plantId, int areaId, Distribution distribution);
+        Task AddProductForDistributionAsync(int areaId, int distributionId, Product product);
         Task<bool> DistributionExistsAsync(int distributionId);
         Task<bool> DistributionExistsByCodeandDescriptionInAreaAsync(int areaId, string code, string description);
         void DeleteDistribution (Distribution distribution);
@@ -113,6 +114,7 @@ namespace SupervisorMobility.API.Services
         Task<bool> ProductExistAsync(int productId);
         Task<bool> ProductExistByCodeAndDescriptionAsync(string code, string description);
         void AddProduct(Product product);
+        Task AddDistributionForProductAsync(int productId, Distribution distribution);
         void DeleteProduct(Product product);
         #endregion
         #region AssyChart
@@ -139,10 +141,20 @@ namespace SupervisorMobility.API.Services
 
         #endregion
 
-        #region CommonOperations
+        #region File
+        void AddUploadFile(FileUpload fileUpload);
 
-        Task<bool> SaveChangesAsync();
+        Task<FileUpload?> GetFileUploadAsync(int fileid);
+        void DeleteUploadFile(FileUpload fileUpload);
+        #endregion
 
+        #region Guide
+
+        Task<Guides?> GetGuideAsync(int guideId, bool includeFile = false);
+
+        Task<IEnumerable<Guides>> GetAllGuides(bool includeFile = false);
+        void AddGuide(Guides guide);
+        void DeleteGuide(Guides guide);
         #endregion
 
         #region JobObservationOperations
@@ -163,12 +175,19 @@ namespace SupervisorMobility.API.Services
         void DeleteGlosaryWord(Glosary glossaryWord);
         #endregion
 
+
+
+
+
+        #region CommonOperations
+
+        Task<bool> SaveChangesAsync();
+
         #region LupOperations
         Task<IEnumerable<Lup>> GetAllLupAsync();
         Task<Lup?> GetLupAsync(int lupId);
         void AddLup(Lup lup);
         void DeleteLup(Lup lup);
-
 
         #endregion
 

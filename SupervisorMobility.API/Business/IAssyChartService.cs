@@ -1,6 +1,8 @@
 ﻿using SupervisorMobility.API.DataAccess.Entities;
 using SupervisorMobility.API.Entities;
 using SupervisorMobility.API.Models.AssyChart;
+using SupervisorMobility.API.Models.FileUploadDto;
+using SupervisorMobility.API.Models.GuidesDtos;
 using SupervisorMobility.API.Models.OperationDtos;
 using SupervisorMobility.API.Models.PlantDtos;
 using SupervisorMobility.API.Models.ProductDtos;
@@ -64,6 +66,22 @@ namespace SupervisorMobility.API.Business
         Task<User> CreateUserAsync(UsersForCreation user);
         Task UpdateUserAsync(UsersForUpdateDto userForUpdate, User user);
         Task RemoveUserAsync(User user);
+        #endregion
+
+
+        #region Files
+        Task<FileUpload> CreateFileAsync(FileUploadForCreationDto newFile);
+        Task<FileUpload?> FetchFileAsync(int fileId);
+
+        Task RemoveFileAsync(FileUpload fileUpload);
+        #endregion
+
+        #region guides
+        Task<Guides?> FetchGuideAsync(int guideId, bool includeFile = false);
+
+        Task<Guides> CreateGuideAsync(GuideForCreationDto guide);
+        Task UpdateGuideAsync(GuideForUpdateDto guideForUpdate, Guides guide);
+        Task RemoveGuideAsync(Guides guide);
         #endregion
 
     }
