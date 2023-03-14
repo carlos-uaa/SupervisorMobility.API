@@ -176,13 +176,6 @@ namespace SupervisorMobility.API.Services
         #endregion
 
 
-
-
-
-        #region CommonOperations
-
-        Task<bool> SaveChangesAsync();
-
         #region LupOperations
         Task<IEnumerable<Lup>> GetAllLupAsync();
         Task<Lup?> GetLupAsync(int lupId);
@@ -190,6 +183,14 @@ namespace SupervisorMobility.API.Services
         void DeleteLup(Lup lup);
 
         #endregion
+
+
+        #region CommonOperations
+
+        Task<bool> SaveChangesAsync();
+
+        #endregion
+
 
     }
 }
