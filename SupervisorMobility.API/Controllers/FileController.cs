@@ -23,6 +23,7 @@ using Microsoft.AspNetCore.Mvc.Infrastructure;
 using ClosedXML.Excel;
 using DocumentFormat.OpenXml.Spreadsheet;
 using SupervisorMobility.API.Models.FileUploadDto;
+using SupervisorMobility.API.Models.Users;
 
 namespace SupervisorMobility.API.Controllers
 {
@@ -145,7 +146,7 @@ namespace SupervisorMobility.API.Controllers
                 var unstrustedFileName = file.FileName;
 
                 trustedFileNameForStorage = Path.GetRandomFileName();
-                var path = Path.Combine(_env.ContentRootPath, "uploads\\evidences", trustedFileNameForStorage);
+                var path = Path.Combine(_env.ContentRootPath, "uploads\\evidence", trustedFileNameForStorage);
 
                 await using FileStream fs = new(path, FileMode.Create);
                 await file.CopyToAsync(fs);
@@ -894,10 +895,10 @@ namespace SupervisorMobility.API.Controllers
                                 ModificationDate = finalAssyChart.CreationDate
                             };
 
-                            var element = await _assyChartService.CreateAssyChartAsync(assychartForCreate);
-                            if (element != null)
+                            var itemUser = await _assyChartService.CreateAssyChartAsync(assychartForCreate);
+                            if (itemUser != null)
                             {
-                                Debug.WriteLine($"update assy id {element.AssyChardId} plantid {finalAssyChart.PlantId} areaid {finalAssyChart.AreaId} distributionid {finalAssyChart.DistributionId} operation {finalAssyChart.OperationId} product {finalAssyChart.ProductId}");
+                                Debug.WriteLine($"update assy id {itemUser.AssyChardId} plantid {finalAssyChart.PlantId} areaid {finalAssyChart.AreaId} distributionid {finalAssyChart.DistributionId} operation {finalAssyChart.OperationId} product {finalAssyChart.ProductId}");
 
                                 ResumeActionsResultsToReturn.AssyChartCreated++;
                             }
@@ -947,10 +948,10 @@ namespace SupervisorMobility.API.Controllers
                                     ModificationDate = finalAssyChart.CreationDate
                                 };
 
-                                var element = await _assyChartService.CreateAssyChartAsync(assychartForCreate);
-                                if (element != null)
+                                var itemUser = await _assyChartService.CreateAssyChartAsync(assychartForCreate);
+                                if (itemUser != null)
                                 {
-                                    Debug.WriteLine($"update assy id {element.AssyChardId} plantid {finalAssyChart.PlantId} areaid {finalAssyChart.AreaId} distributionid {finalAssyChart.DistributionId} operation {finalAssyChart.OperationId} product {finalAssyChart.ProductId}");
+                                    Debug.WriteLine($"update assy id {itemUser.AssyChardId} plantid {finalAssyChart.PlantId} areaid {finalAssyChart.AreaId} distributionid {finalAssyChart.DistributionId} operation {finalAssyChart.OperationId} product {finalAssyChart.ProductId}");
 
                                     ResumeActionsResultsToReturn.AssyChartCreated++;
                                 }
@@ -1029,32 +1030,32 @@ namespace SupervisorMobility.API.Controllers
                 ws.SetCellValue("W2", "DistributionIsActive");
 
                 int row = 3;
-                foreach (var element in assyChartsForPlant)
+                foreach (var itemUser in assyChartsForPlant)
                 {
 
-                    ws.SetCellValue($"A{row}", element.AssyChardId.ToString() ?? "");
-                    ws.SetCellValue($"B{row}", element.IsActive.ToString() ?? "");
-                    ws.SetCellValue($"C{row}", element.GOS ?? "");
-                    ws.SetCellValue($"D{row}", element.CCP ?? "");
-                    ws.SetCellValue($"E{row}", element.HOE);
-                    ws.SetCellValue($"F{row}", element.CreationDate.ToString() ?? "");
-                    ws.SetCellValue($"G{row}", element.ModificationDate.ToString() ?? "");
-                    ws.SetCellValue($"H{row}", element.Product?.ProductId.ToString() ?? "");
-                    ws.SetCellValue($"I{row}", element.Product?.Code ?? "");
-                    ws.SetCellValue($"J{row}", element.Product?.Description ?? "");
-                    ws.SetCellValue($"K{row}", element.Product?.IsActive?.ToString() ?? "");
-                    ws.SetCellValue($"L{row}", element.Area?.AreaId.ToString() ?? "");
-                    ws.SetCellValue($"M{row}", element.Area?.Code ?? "");
-                    ws.SetCellValue($"N{row}", element.Area?.Description ?? "");
-                    ws.SetCellValue($"O{row}", element.Area?.IsActive?.ToString() ?? "");
-                    ws.SetCellValue($"P{row}", element.Operation?.OperationId.ToString() ?? "");
-                    ws.SetCellValue($"Q{row}", element.Operation?.Code ?? "");
-                    ws.SetCellValue($"R{row}", element.Operation?.Description ?? "");
-                    ws.SetCellValue($"S{row}", element.Operation?.IsActive.ToString() ?? "");
-                    ws.SetCellValue($"T{row}", element.Distribution?.DistributionId.ToString() ?? "");
-                    ws.SetCellValue($"U{row}", element.Distribution?.Code ?? "");
-                    ws.SetCellValue($"V{row}", element.Distribution?.Description ?? "");
-                    ws.SetCellValue($"W{row}", element.Distribution?.IsActive?.ToString() ?? "");
+                    ws.SetCellValue($"A{row}", itemUser.AssyChardId.ToString() ?? "");
+                    ws.SetCellValue($"B{row}", itemUser.IsActive.ToString() ?? "");
+                    ws.SetCellValue($"C{row}", itemUser.GOS ?? "");
+                    ws.SetCellValue($"D{row}", itemUser.CCP ?? "");
+                    ws.SetCellValue($"E{row}", itemUser.HOE);
+                    ws.SetCellValue($"F{row}", itemUser.CreationDate.ToString() ?? "");
+                    ws.SetCellValue($"G{row}", itemUser.ModificationDate.ToString() ?? "");
+                    ws.SetCellValue($"H{row}", itemUser.Product?.ProductId.ToString() ?? "");
+                    ws.SetCellValue($"I{row}", itemUser.Product?.Code ?? "");
+                    ws.SetCellValue($"J{row}", itemUser.Product?.Description ?? "");
+                    ws.SetCellValue($"K{row}", itemUser.Product?.IsActive?.ToString() ?? "");
+                    ws.SetCellValue($"L{row}", itemUser.Area?.AreaId.ToString() ?? "");
+                    ws.SetCellValue($"M{row}", itemUser.Area?.Code ?? "");
+                    ws.SetCellValue($"N{row}", itemUser.Area?.Description ?? "");
+                    ws.SetCellValue($"O{row}", itemUser.Area?.IsActive?.ToString() ?? "");
+                    ws.SetCellValue($"P{row}", itemUser.Operation?.OperationId.ToString() ?? "");
+                    ws.SetCellValue($"Q{row}", itemUser.Operation?.Code ?? "");
+                    ws.SetCellValue($"R{row}", itemUser.Operation?.Description ?? "");
+                    ws.SetCellValue($"S{row}", itemUser.Operation?.IsActive.ToString() ?? "");
+                    ws.SetCellValue($"T{row}", itemUser.Distribution?.DistributionId.ToString() ?? "");
+                    ws.SetCellValue($"U{row}", itemUser.Distribution?.Code ?? "");
+                    ws.SetCellValue($"V{row}", itemUser.Distribution?.Description ?? "");
+                    ws.SetCellValue($"W{row}", itemUser.Distribution?.IsActive?.ToString() ?? "");
                     row++;
                 }
 
@@ -1149,31 +1150,31 @@ namespace SupervisorMobility.API.Controllers
                 {
 
                     int row = 3;
-                    foreach (var element in assyChartsForPlant)
+                    foreach (var itemUser in assyChartsForPlant)
                     {
-                        ws.SetCellValue($"A{row}", element.AssyChardId.ToString() ?? "");
-                        ws.SetCellValue($"B{row}", element.IsActive.ToString() ?? "");
-                        ws.SetCellValue($"C{row}", element.GOS ?? "");
-                        ws.SetCellValue($"D{row}", element.CCP ?? "");
-                        ws.SetCellValue($"E{row}", element.HOE);
-                        ws.SetCellValue($"F{row}", element.CreationDate.ToString() ?? "");
-                        ws.SetCellValue($"G{row}", element.ModificationDate.ToString() ?? "");
-                        ws.SetCellValue($"H{row}", element.Product?.ProductId.ToString() ?? "");
-                        ws.SetCellValue($"I{row}", element.Product?.Code ?? "");
-                        ws.SetCellValue($"J{row}", element.Product?.Description ?? "");
-                        ws.SetCellValue($"K{row}", element.Product?.IsActive?.ToString() ?? "");
-                        ws.SetCellValue($"L{row}", element.Area?.AreaId.ToString() ?? "");
-                        ws.SetCellValue($"M{row}", element.Area?.Code ?? "");
-                        ws.SetCellValue($"N{row}", element.Area?.Description ?? "");
-                        ws.SetCellValue($"O{row}", element.Area?.IsActive?.ToString() ?? "");
-                        ws.SetCellValue($"P{row}", element.Operation?.OperationId.ToString() ?? "");
-                        ws.SetCellValue($"Q{row}", element.Operation?.Code ?? "");
-                        ws.SetCellValue($"R{row}", element.Operation?.Description ?? "");
-                        ws.SetCellValue($"S{row}", element.Operation?.IsActive.ToString() ?? "");
-                        ws.SetCellValue($"T{row}", element.Distribution?.DistributionId.ToString() ?? "");
-                        ws.SetCellValue($"U{row}", element.Distribution?.Code ?? "");
-                        ws.SetCellValue($"V{row}", element.Distribution?.Description ?? "");
-                        ws.SetCellValue($"W{row}", element.Distribution?.IsActive?.ToString() ?? "");
+                        ws.SetCellValue($"A{row}", itemUser.AssyChardId.ToString() ?? "");
+                        ws.SetCellValue($"B{row}", itemUser.IsActive.ToString() ?? "");
+                        ws.SetCellValue($"C{row}", itemUser.GOS ?? "");
+                        ws.SetCellValue($"D{row}", itemUser.CCP ?? "");
+                        ws.SetCellValue($"E{row}", itemUser.HOE);
+                        ws.SetCellValue($"F{row}", itemUser.CreationDate.ToString() ?? "");
+                        ws.SetCellValue($"G{row}", itemUser.ModificationDate.ToString() ?? "");
+                        ws.SetCellValue($"H{row}", itemUser.Product?.ProductId.ToString() ?? "");
+                        ws.SetCellValue($"I{row}", itemUser.Product?.Code ?? "");
+                        ws.SetCellValue($"J{row}", itemUser.Product?.Description ?? "");
+                        ws.SetCellValue($"K{row}", itemUser.Product?.IsActive?.ToString() ?? "");
+                        ws.SetCellValue($"L{row}", itemUser.Area?.AreaId.ToString() ?? "");
+                        ws.SetCellValue($"M{row}", itemUser.Area?.Code ?? "");
+                        ws.SetCellValue($"N{row}", itemUser.Area?.Description ?? "");
+                        ws.SetCellValue($"O{row}", itemUser.Area?.IsActive?.ToString() ?? "");
+                        ws.SetCellValue($"P{row}", itemUser.Operation?.OperationId.ToString() ?? "");
+                        ws.SetCellValue($"Q{row}", itemUser.Operation?.Code ?? "");
+                        ws.SetCellValue($"R{row}", itemUser.Operation?.Description ?? "");
+                        ws.SetCellValue($"S{row}", itemUser.Operation?.IsActive.ToString() ?? "");
+                        ws.SetCellValue($"T{row}", itemUser.Distribution?.DistributionId.ToString() ?? "");
+                        ws.SetCellValue($"U{row}", itemUser.Distribution?.Code ?? "");
+                        ws.SetCellValue($"V{row}", itemUser.Distribution?.Description ?? "");
+                        ws.SetCellValue($"W{row}", itemUser.Distribution?.IsActive?.ToString() ?? "");
                         row++;
                     }
                 }
@@ -1219,6 +1220,77 @@ namespace SupervisorMobility.API.Controllers
             return NotFound("Error File download");
 
         }
+
+
+        [EnableCors("Cors")]
+        [HttpGet("Bulk/DownloadUsers")]
+        public async Task<IActionResult> DownloadAllUsers()
+        {
+            List<UsersWhitNavigationDetails> allUsersList = _mapper.Map<List<UsersWhitNavigationDetails>>(await _supervisorMobilityRepository.GetAllUsersWhitPlantAreaAndGroupAsync());
+
+
+            if (allUsersList.Count == 0)
+            {
+                return BadRequest("No Users");
+            }
+
+            MemoryStream ms = new MemoryStream(6000 * 65536);
+            SLDocument ws = new SLDocument();
+
+
+            ws.RenameWorksheet(SLDocument.DefaultFirstSheetName, $"Users Bulk: {allUsersList.Count}" ?? "Users Bulk");
+
+            //ROW Data identificators
+
+            ws.SetCellValue("A1", "UserId");
+            ws.SetCellValue("B1", "Payroll");
+            ws.SetCellValue("C1", "Name");
+            ws.SetCellValue("D1", "Plant");
+            ws.SetCellValue("E1", "Area");
+            ws.SetCellValue("F1", "Group");
+            ws.SetCellValue("G1", "Admin permission");
+            ws.SetCellValue("H1", "Supervisor permission");
+            ws.SetCellValue("I1", "Operator permission");
+            ws.SetCellValue("J1", "Date Create User");
+            ws.SetCellValue("K1", "Date Update User");
+            ws.SetCellValue("L1", "Date Disable User");
+            ws.SetCellValue("M1", "User Is Active");
+
+           
+
+                int row = 2;
+                foreach (var itemUser in allUsersList)
+                {
+                    ws.SetCellValue($"A{row}", itemUser.UserId.ToString() ?? "");
+                    ws.SetCellValue($"B{row}", itemUser.Payroll.ToString() ?? "");
+                    ws.SetCellValue($"C{row}", itemUser.Name.ToString() ?? "");;
+                    ws.SetCellValue($"D{row}", itemUser.PlantId.ToString() ?? "");;
+                    ws.SetCellValue($"E{row}", itemUser.AreaId.ToString() ?? "");
+                    ws.SetCellValue($"F{row}", itemUser.GroupId.ToString() ?? "");
+                    ws.SetCellValue($"G{row}", itemUser.IsAdmin.ToString() ?? "");
+                    ws.SetCellValue($"H{row}", itemUser.IsSupervisor.ToString() ?? "");
+                    ws.SetCellValue($"I{row}", itemUser.IsOperator.ToString() ?? "");
+                    ws.SetCellValue($"K{row}", itemUser.CreatedDate.ToString() ?? "");
+                    ws.SetCellValue($"K{row}", itemUser.LastUpdated.ToString() ?? "");
+                    ws.SetCellValue($"L{row}", itemUser.DisabledDate.ToString() ?? "");
+                    ws.SetCellValue($"M{row}", itemUser.IsActive.ToString() ?? "");
+                    row++;
+                }
+
+
+            string path = Directory.GetCurrentDirectory().ToString() + "\\report.xlsx";
+
+            ws.SaveAs(ms);
+
+            ms.Position = 0;
+
+            var res = File(ms, "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet", "ReportAllPlants.xlsx");
+            res.EnableRangeProcessing = true;
+            return res;
+
+
+
+        }//end download file function 
 
     }
 }

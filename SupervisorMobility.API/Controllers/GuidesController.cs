@@ -92,8 +92,6 @@ namespace SupervisorMobility.API.Controllers
 
             }
 
-
-
         }
 
     }
