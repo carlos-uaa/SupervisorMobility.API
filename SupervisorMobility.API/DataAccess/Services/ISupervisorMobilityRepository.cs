@@ -184,13 +184,10 @@ namespace SupervisorMobility.API.Services
 
         #endregion
 
-
         #region CommonOperations
 
         Task<bool> SaveChangesAsync();
-
         #endregion
-
 
     }
 }
