@@ -336,7 +336,7 @@ namespace SupervisorMobility.API.Migrations
                             IsAdmin = true,
                             IsOperator = false,
                             IsSupervisor = true,
-                            LastUpdated = new DateTime(2023, 3, 10, 12, 47, 30, 100, DateTimeKind.Local).AddTicks(8274),
+                            LastUpdated = new DateTime(2023, 3, 14, 13, 12, 36, 127, DateTimeKind.Local).AddTicks(6968),
                             Name = "Marco Aguayo",
                             Payroll = 239935,
                             PlantId = 1
@@ -679,13 +679,7 @@ namespace SupervisorMobility.API.Migrations
                     b.Property<int?>("AreaId")
                         .HasColumnType("int");
 
-                    b.Property<string>("CArea")
-                        .HasColumnType("nvarchar(max)");
-
                     b.Property<string>("Cicles")
-                        .HasColumnType("nvarchar(max)");
-
-                    b.Property<string>("DArea")
                         .HasColumnType("nvarchar(max)");
 
                     b.Property<DateTime?>("DateEnd")
@@ -729,17 +723,8 @@ namespace SupervisorMobility.API.Migrations
                     b.Property<int?>("Option")
                         .HasColumnType("int");
 
-                    b.Property<string>("OthersArea")
-                        .HasColumnType("nvarchar(max)");
-
                     b.Property<int?>("PlantId")
                         .HasColumnType("int");
-
-                    b.Property<string>("QArea")
-                        .HasColumnType("nvarchar(max)");
-
-                    b.Property<string>("SArea")
-                        .HasColumnType("nvarchar(max)");
 
                     b.Property<string>("SsvCommentary")
                         .HasColumnType("nvarchar(max)");
@@ -773,12 +758,10 @@ namespace SupervisorMobility.API.Migrations
                         {
                             JobObservationId = 1,
                             AreaId = 1,
-                            CArea = "Lorem ipsum dolor sit amet C Area",
                             Cicles = "1 min|2 min|3 min|4 min| 5 min",
-                            DArea = "Lorem ipsum dolor sit amet D Area",
-                            DateEnd = new DateTime(2023, 3, 10, 12, 47, 30, 100, DateTimeKind.Local).AddTicks(7981),
-                            DateFinalized = new DateTime(2023, 3, 10, 12, 47, 30, 100, DateTimeKind.Local).AddTicks(7983),
-                            DateStart = new DateTime(2023, 3, 10, 12, 47, 30, 100, DateTimeKind.Local).AddTicks(7935),
+                            DateEnd = new DateTime(2023, 3, 14, 13, 12, 36, 127, DateTimeKind.Local).AddTicks(6689),
+                            DateFinalized = new DateTime(2023, 3, 14, 13, 12, 36, 127, DateTimeKind.Local).AddTicks(6691),
+                            DateStart = new DateTime(2023, 3, 14, 13, 12, 36, 127, DateTimeKind.Local).AddTicks(6655),
                             DistributionId = 1,
                             IsActive = true,
                             Models = "P71A|X247|P71A|X247|P71A",
@@ -788,10 +771,7 @@ namespace SupervisorMobility.API.Migrations
                             OperatorCommentary = "Operator Commentary",
                             OperatorSignature = "Juan",
                             Option = 1,
-                            OthersArea = "Lorem ipsum dolor sit amet Others Area",
                             PlantId = 1,
-                            QArea = "Lorem ipsum dolor sit amet Q Area",
-                            SArea = "Lorem ipsum dolor sit amet S Area",
                             SsvCommentary = "Senior Supervisor Commentary",
                             SsvSignature = "Pedro",
                             Status = 0,
@@ -949,8 +929,8 @@ namespace SupervisorMobility.API.Migrations
                         new
                         {
                             LupId = 1,
-                            CreatedDate = new DateTime(2023, 3, 10, 12, 47, 30, 100, DateTimeKind.Local).AddTicks(8287),
-                            EndDate = new DateTime(2023, 3, 10, 12, 47, 30, 100, DateTimeKind.Local).AddTicks(8289),
+                            CreatedDate = new DateTime(2023, 3, 14, 13, 12, 36, 127, DateTimeKind.Local).AddTicks(6985),
+                            EndDate = new DateTime(2023, 3, 14, 13, 12, 36, 127, DateTimeKind.Local).AddTicks(6986),
                             IsActive = true,
                             JobObservationId = 1,
                             Observer = "Pedro",
