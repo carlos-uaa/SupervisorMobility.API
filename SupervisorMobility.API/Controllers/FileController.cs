@@ -125,6 +125,7 @@ namespace SupervisorMobility.API.Controllers
             await file.CopyToAsync(fs);
 
             uploadResult.FileName = unstrustedFileName;
+            uploadResult.FileName = unstrustedFileName;
             uploadResult.StorageFileName = trustedFileNameForStorage;
             uploadResult.ContentType = file.ContentType;
             uploadResult.UploadDate = DateTime.Now;
@@ -1182,8 +1183,6 @@ namespace SupervisorMobility.API.Controllers
 
 
 
-            string path = Directory.GetCurrentDirectory().ToString() + "\\report.xlsx";
-
             ws.SaveAs(ms);
 
             ms.Position = 0;
@@ -1238,7 +1237,7 @@ namespace SupervisorMobility.API.Controllers
             SLDocument ws = new SLDocument();
 
 
-            ws.RenameWorksheet(SLDocument.DefaultFirstSheetName, $"Users Bulk: {allUsersList.Count}" ?? "Users Bulk");
+            ws.RenameWorksheet(SLDocument.DefaultFirstSheetName, "Users Bulk");
 
             //ROW Data identificators
 
@@ -1256,35 +1255,34 @@ namespace SupervisorMobility.API.Controllers
             ws.SetCellValue("L1", "Date Disable User");
             ws.SetCellValue("M1", "User Is Active");
 
-           
-
-                int row = 2;
-                foreach (var itemUser in allUsersList)
-                {
-                    ws.SetCellValue($"A{row}", itemUser.UserId.ToString() ?? "");
-                    ws.SetCellValue($"B{row}", itemUser.Payroll.ToString() ?? "");
-                    ws.SetCellValue($"C{row}", itemUser.Name.ToString() ?? "");;
-                    ws.SetCellValue($"D{row}", itemUser.PlantId.ToString() ?? "");;
-                    ws.SetCellValue($"E{row}", itemUser.AreaId.ToString() ?? "");
-                    ws.SetCellValue($"F{row}", itemUser.GroupId.ToString() ?? "");
-                    ws.SetCellValue($"G{row}", itemUser.IsAdmin.ToString() ?? "");
-                    ws.SetCellValue($"H{row}", itemUser.IsSupervisor.ToString() ?? "");
-                    ws.SetCellValue($"I{row}", itemUser.IsOperator.ToString() ?? "");
-                    ws.SetCellValue($"K{row}", itemUser.CreatedDate.ToString() ?? "");
-                    ws.SetCellValue($"K{row}", itemUser.LastUpdated.ToString() ?? "");
-                    ws.SetCellValue($"L{row}", itemUser.DisabledDate.ToString() ?? "");
-                    ws.SetCellValue($"M{row}", itemUser.IsActive.ToString() ?? "");
-                    row++;
-                }
 
 
-            string path = Directory.GetCurrentDirectory().ToString() + "\\report.xlsx";
+            int row = 2;
+            foreach (var itemUser in allUsersList)
+            {
+                ws.SetCellValue($"A{row}", itemUser.UserId.ToString() ?? "");
+                ws.SetCellValue($"B{row}", itemUser.Payroll.ToString() ?? "");
+                ws.SetCellValue($"C{row}", itemUser.Name.ToString() ?? ""); ;
+                ws.SetCellValue($"D{row}", itemUser.PlantId.ToString() ?? ""); ;
+                ws.SetCellValue($"E{row}", itemUser.AreaId.ToString() ?? "");
+                ws.SetCellValue($"F{row}", itemUser.GroupId.ToString() ?? "");
+                ws.SetCellValue($"G{row}", itemUser.IsAdmin.ToString() ?? "");
+                ws.SetCellValue($"H{row}", itemUser.IsSupervisor.ToString() ?? "");
+                ws.SetCellValue($"I{row}", itemUser.IsOperator.ToString() ?? "");
+                ws.SetCellValue($"K{row}", itemUser.CreatedDate.ToString() ?? "");
+                ws.SetCellValue($"K{row}", itemUser.LastUpdated.ToString() ?? "");
+                ws.SetCellValue($"L{row}", itemUser.DisabledDate.ToString() ?? "");
+                ws.SetCellValue($"M{row}", itemUser.IsActive.ToString() ?? "");
+                row++;
+            }
+
+
 
             ws.SaveAs(ms);
 
             ms.Position = 0;
 
-            var res = File(ms, "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet", "ReportAllPlants.xlsx");
+            var res = File(ms, "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet", "UsersBulk.xlsx");
             res.EnableRangeProcessing = true;
             return res;
 
