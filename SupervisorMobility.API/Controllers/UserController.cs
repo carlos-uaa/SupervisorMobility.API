@@ -224,10 +224,10 @@ namespace SupervisorMobility.API.Controllers
                                     //Navigation Porpieties
                                     userToInsert.PlantId = ws.Cell(i, 4).GetString() != "" ? ws.Cell(i, 4).GetValue<int>() : -1;
                                     userToInsert.AreaId = ws.Cell(i, 5).GetString() != "" ? ws.Cell(i, 5).GetValue<int>() : -1;
-                                    userToInsert.GroupId = ws.Cell(i,6).GetString() != "" ? ws.Cell(i, 6).GetValue<int>() : -1;
+                                    userToInsert.GroupId = ws.Cell(i, 6).GetString() != "" ? ws.Cell(i, 6).GetValue<int>() : -1;
                                     //Permission
                                     userToInsert.IsAdmin = ws.Cell(i, 7).GetString() != "" ? ws.Cell(i, 7).GetValue<bool>() : false;
-                                    userToInsert.IsSupervisor = ws.Cell(i,8).GetString() != "" ? ws.Cell(i, 8).GetValue<bool>() : false;
+                                    userToInsert.IsSupervisor = ws.Cell(i, 8).GetString() != "" ? ws.Cell(i, 8).GetValue<bool>() : false;
                                     userToInsert.IsOperator = ws.Cell(i, 9).GetString() != "" ? ws.Cell(i, 9).GetValue<bool>() : false;
                                     //Date Controlls
                                     try
@@ -281,24 +281,27 @@ namespace SupervisorMobility.API.Controllers
                 }//end trycatch to add excel to list
             }
 
-            foreach(User userItem in UsersListToSave)
+            foreach (User userItem in UsersListToSave)
             {
                 //new validations 
 
-                if(userItem.UserId == -1)
+                if (userItem.UserId == -1)
                 {
-                    //nuevo usuario
-
-                    //busqueda avanzada (Nomina ?? Nombre)
-
-                    if(userItem.Payroll.ToString() != "" && userItem.Name != ""){
- var advanceUser = await _supervisorMobilityRepository.UserExistAdvanceAsync(userItem.Name, userItem.Payroll, (int)userItem.PlantId, (int)userItem.AreaId, (int)userItem.GroupId);
-
-                    }else if (userItem.Payroll.ToString() != "")
+                    //busqueda solo por nomina
+                    if (userItem.Payroll.ToString() != "" && userItem.Name == "")
                     {
-                        //busqueda avanzada
-                        var advanceUser = await _supervisorMobilityRepository.UserExistAdvanceAsync(userItem.Name, userItem.Payroll, (int)userItem.PlantId, (int)userItem.AreaId, (int)userItem.GroupId);
+                        var userByPayroll = await _supervisorMobilityRepository.UserExistAsync(userItem.Payroll);
 
+
+                    }
+                    else if (userItem.Payroll.ToString() != "")
+                    {
+                        //busqueda avanzada planta area grupo
+                        var advanceUser = await _supervisorMobilityRepository.UserExistAdvanceAsync(userItem.Name, userItem.Payroll, (int)userItem.PlantId, (int)userItem.AreaId, (int)userItem.GroupId);
+                    }
+                    else
+                    {
+                        //se crea
                     }
 
 
@@ -312,7 +315,7 @@ namespace SupervisorMobility.API.Controllers
                     //get entity from db
                     var entityUser = await _assyChartService.FetchUserAsync(userItem.UserId);
 
-                    if(entityUser != null)
+                    if (entityUser != null)
                     {
                         //user exist
 
@@ -320,9 +323,9 @@ namespace SupervisorMobility.API.Controllers
                     else
                     {
                         //user not exist
-                        
+
                         //busqueda avanzada
-                       
+
                     }
 
                 }
