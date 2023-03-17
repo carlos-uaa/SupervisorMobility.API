@@ -146,7 +146,7 @@ namespace SupervisorMobility.API.Controllers
             var unstrustedFileName = file.FileName;
 
             trustedFileNameForStorage = Path.GetRandomFileName();
-            var path = Path.Combine(_env.ContentRootPath, "uploads\\evidence", trustedFileNameForStorage);
+            var path = Path.Combine(_env.ContentRootPath, "uploads\\users", trustedFileNameForStorage);
 
             await using FileStream fs = new(path, FileMode.Create);
             await file.CopyToAsync(fs);
@@ -169,7 +169,7 @@ namespace SupervisorMobility.API.Controllers
         {
 
 
-            string file = Directory.GetCurrentDirectory().ToString() + "\\uploads\\" + FileInfo.StorageFileName;
+            string file = Directory.GetCurrentDirectory().ToString() + "\\uploads\\users" + FileInfo.StorageFileName;
             List<AssyChartDataToBulk> DataList = new List<AssyChartDataToBulk>();
 
             Regex regexcsv = new Regex(".+\\.csv", RegexOptions.Compiled);

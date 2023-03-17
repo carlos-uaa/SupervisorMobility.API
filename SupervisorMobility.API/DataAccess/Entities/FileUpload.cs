@@ -14,7 +14,6 @@ namespace SupervisorMobility.API.DataAccess.Entities
 
         [Column(TypeName = "Date")]
         public DateTime UploadDate { get; set; }
-        public int? LupId { get; set; }
 
 
     }

@@ -115,6 +115,7 @@ namespace SupervisorMobility.API.Services
         Task<bool> ProductExistAsync(int productId);
         Task<bool> ProductExistByCodeAndDescriptionAsync(string code, string description);
         void AddProduct(Product product);
+        Task RemoveDistributionForProductAsync(int productId, int distributionID);
         Task AddDistributionForProductAsync(int productId, Distribution distribution);
         void DeleteProduct(Product product);
         #endregion
