@@ -336,12 +336,13 @@ namespace SupervisorMobility.API.Migrations
                         {
                             UserId = 1,
                             AreaId = 1,
+                            CreatedDate = new DateTime(2023, 3, 17, 16, 16, 28, 686, DateTimeKind.Local).AddTicks(1592),
                             GroupId = 1,
                             IsActive = true,
                             IsAdmin = true,
                             IsOperator = false,
                             IsSupervisor = true,
-                            LastUpdated = new DateTime(2023, 3, 17, 16, 11, 3, 282, DateTimeKind.Local).AddTicks(4482),
+                            LastUpdated = new DateTime(1, 1, 1, 0, 0, 0, 0, DateTimeKind.Unspecified),
                             Name = "Marco Aguayo",
                             Payroll = 239935,
                             PlantId = 1
@@ -764,9 +765,9 @@ namespace SupervisorMobility.API.Migrations
                             JobObservationId = 1,
                             AreaId = 1,
                             Cicles = "1 min|2 min|3 min|4 min| 5 min",
-                            DateEnd = new DateTime(2023, 3, 17, 16, 11, 3, 282, DateTimeKind.Local).AddTicks(4228),
-                            DateFinalized = new DateTime(2023, 3, 17, 16, 11, 3, 282, DateTimeKind.Local).AddTicks(4228),
-                            DateStart = new DateTime(2023, 3, 17, 16, 11, 3, 282, DateTimeKind.Local).AddTicks(4217),
+                            DateEnd = new DateTime(2023, 3, 17, 16, 16, 28, 686, DateTimeKind.Local).AddTicks(1211),
+                            DateFinalized = new DateTime(2023, 3, 17, 16, 16, 28, 686, DateTimeKind.Local).AddTicks(1212),
+                            DateStart = new DateTime(2023, 3, 17, 16, 16, 28, 686, DateTimeKind.Local).AddTicks(1177),
                             DistributionId = 1,
                             IsActive = true,
                             Models = "P71A|X247|P71A|X247|P71A",
@@ -934,8 +935,8 @@ namespace SupervisorMobility.API.Migrations
                         new
                         {
                             LupId = 1,
-                            CreatedDate = new DateTime(2023, 3, 17, 16, 11, 3, 282, DateTimeKind.Local).AddTicks(4513),
-                            EndDate = new DateTime(2023, 3, 17, 16, 11, 3, 282, DateTimeKind.Local).AddTicks(4513),
+                            CreatedDate = new DateTime(2023, 3, 17, 16, 16, 28, 686, DateTimeKind.Local).AddTicks(1619),
+                            EndDate = new DateTime(2023, 3, 17, 16, 16, 28, 686, DateTimeKind.Local).AddTicks(1621),
                             IsActive = true,
                             JobObservationId = 1,
                             Observer = "Pedro",
