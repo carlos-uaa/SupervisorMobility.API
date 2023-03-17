@@ -17,9 +17,9 @@ namespace SupervisorMobility.API.DataAccess.Entities
 
 
         [Column(TypeName = "Date")]
-        public DateTime? CreatedDate { get; set; }
+        public DateTime? CreatedDate { get; set; } = DateTime.Now;
         [Column(TypeName = "Date")]
-        public DateTime LastUpdated { get; set; } = DateTime.Now;
+        public DateTime LastUpdated { get; set; } 
         [Column(TypeName = "Date")]
         public DateTime? DisabledDate { get; set; }
 

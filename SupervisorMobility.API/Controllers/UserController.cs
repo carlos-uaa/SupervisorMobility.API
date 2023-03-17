@@ -146,11 +146,18 @@ namespace SupervisorMobility.API.Controllers
         }
 
 
+        [HttpPost("/massderegistration")]
+        public async Task<ActionResult> Masderegistration()
+        {
+
+
+            return Ok();
+        }
+
         //******* Upload users    **********//
 
 
         [HttpPost("FileUpload/Data")]
-        //public async Task<ActionResult<string>> ApplyUsersUpload(UploadResult FileInfo)
         public async Task<ActionResult<UploadUsersResult>> ApplyUsersUpload(FileUploadGeneralDto FileToInsert)
         {
             string file = Directory.GetCurrentDirectory().ToString() + "\\uploads\\users\\" + FileToInsert.StorageFileName;

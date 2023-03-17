@@ -274,7 +274,7 @@ namespace SupervisorMobility.API.Services
                 {
                     distribution.Products.Add(product);
                 }
-                else{
+                else {
                     distribution.Products = new List<Product>();
                     distribution.Products.Add(product);
 
@@ -480,7 +480,7 @@ namespace SupervisorMobility.API.Services
 
         public async Task<Product?> GetProductAsync(int productId, bool collection = false)
         {
-            if(collection)
+            if (collection)
             {
                 return await _context.Products.Include(d => d.Distributions).Where(p => p.ProductId == productId).FirstOrDefaultAsync();
             }
@@ -506,6 +506,19 @@ namespace SupervisorMobility.API.Services
         {
             _context.Products.Add(product);
         }
+
+        public async Task RemoveDistributionForProductAsync(int productId, int distributionID)
+        {
+            var product = await GetProductAsync(productId, true);
+            if(product != null)
+            {
+                if (product.Distributions != null)
+                {
+                    //Remove product
+                    product.Distributions.Remove(item: product.Distributions.ToList().Find(d => d.DistributionId == distributionID));
+                }
+            }
+        }
         public async Task AddDistributionForProductAsync(int productId, Distribution distribution)
         {
             var product = await GetProductAsync(productId, true);
@@ -513,23 +526,15 @@ namespace SupervisorMobility.API.Services
 
             if (product != null)
             {
-
-
                 if (product.Distributions != null)
                 {
-                    Debug.WriteLine("no null");
-
                     product.Distributions.Add(distribution);
-                    Debug.WriteLine("despues add in no null");
 
                 }
                 else
                 {
-                    Debug.WriteLine("Es null");
-
                     product.Distributions = new List<Distribution>();
                     product.Distributions.Add(distribution);
-                    Debug.WriteLine("despues add is null");
 
                 }
 

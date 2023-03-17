@@ -166,6 +166,31 @@ namespace SupervisorMobility.API.Controllers
                 createdDistributionToReturn);
         }
 
+        [HttpPost("{productId}/distributions/remove")]
+        public async Task<ActionResult<DistributionWithoutNavigationPropertiesDto>> RemoveDistribution(int productId,
+            int distributionId)
+        {
+           
+            if (!await _supervisorMobilityRepository.ProductExistAsync(productId))
+            {
+                return NotFound("No product Exist");
+            }
+
+
+            await _supervisorMobilityRepository.RemoveDistributionForProductAsync(productId, distributionId);
+
+            await _supervisorMobilityRepository.SaveChangesAsync();
+
+            var product = await _assyChartService
+                 .FetchProductAsync(productId, true);
+            if (product == null)
+            {
+                return NotFound();
+            }
+
+            return Ok(_mapper.Map<ProductWhitNavigationPropietiesDto>(product));
+        }
+
         [HttpPut("{productId}")]
         public async Task<ActionResult> UpdateProduct(int productId,
             ProductForUpdateDto product)

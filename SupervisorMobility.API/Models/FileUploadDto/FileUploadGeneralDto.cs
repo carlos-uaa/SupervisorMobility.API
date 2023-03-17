@@ -7,6 +7,7 @@
         public string? StorageFileName { get; set; }
         public string? ContentType { get; set; }
         public DateTime UploadDate { get; set; }
+        public int? LupId { get; set; }
 
     }
 }
