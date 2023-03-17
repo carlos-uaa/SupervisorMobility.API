@@ -844,7 +844,18 @@ namespace SupervisorMobility.API.Services
 
             }
         }
-
+        public async Task RemoveEvidenceForLupAsync(int lupId, int fileUploadId)
+        {
+            var lup = await GetLupAsync(lupId, true);
+            if (lup != null)
+            {
+                if (lup.Evidences != null)
+                {
+                    //Remove evidence
+                    lup.Evidences.Remove(item: lup.Evidences.ToList().Find(e => e.FileUploadId == fileUploadId));
+                }
+            }
+        }
         #endregion
 
         #region CommonOperations

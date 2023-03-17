@@ -160,6 +160,7 @@ namespace SupervisorMobility.API.Controllers
 
             var fileToReturn = await _assyChartService.CreateFileAsync(uploadResult);
             await _supervisorMobilityRepository.AddEvidenceForLupAsync(lupId, fileToReturn);
+            await _supervisorMobilityRepository.SaveChangesAsync();
 
 
             return Ok(fileToReturn);

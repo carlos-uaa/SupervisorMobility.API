@@ -187,6 +187,8 @@ namespace SupervisorMobility.API.Services
         void DeleteLup(Lup lup);
         Task<bool> LupExistAsync(int lupId);
         Task AddEvidenceForLupAsync(int lupId, FileUpload evidence);
+        Task RemoveEvidenceForLupAsync(int lupId, int fileUploadId);
+
 
         #endregion
 
