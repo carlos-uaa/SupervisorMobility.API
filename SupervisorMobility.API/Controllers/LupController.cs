@@ -1,7 +1,11 @@
 ﻿using AutoMapper;
 using Microsoft.AspNetCore.Mvc;
+using SupervisorMobility.API.DataAccess.Entities;
 using SupervisorMobility.API.Entities;
 using SupervisorMobility.API.Models.AssyChart;
+using SupervisorMobility.API.Models.DistributionDtos;
+using SupervisorMobility.API.Models.FileUploadDto;
+using SupervisorMobility.API.Models.GuidesDtos;
 using SupervisorMobility.API.Models.JobObservationDtos;
 using SupervisorMobility.API.Models.LupDtos;
 using SupervisorMobility.API.Models.OperationDtos;
@@ -26,9 +30,44 @@ namespace SupervisorMobility.API.Controllers
                 throw new ArgumentNullException(nameof(mapper));
         }
 
+        [HttpGet]
+        public async Task<ActionResult<IEnumerable<LupDto>>> GetAllLupAsync()
+        {
+
+            var allLup = await _supervisorMobilityRepository.GetAllLupAsync();
+
+            return Ok(_mapper.Map<IEnumerable<LupDto>>(allLup));
+        }
+
+        [HttpGet("{lupId}", Name = "GetLup")]
+        public async Task<IActionResult> GetLup(int lupId, bool includeFile = false)
+        {
+            if (includeFile)
+            {
+                var lup = await _supervisorMobilityRepository.GetLupAsync(lupId, includeFile);
+                if (lup == null)
+                {
+                    return NotFound();
+                }
+                return Ok(_mapper.Map<LupWithFilesDto>(lup));
+            }
+            else
+            {
+                var lup = await _supervisorMobilityRepository.GetLupAsync(lupId);
+                if (lup == null)
+                {
+                    return NotFound();
+                }
+
+                return Ok(_mapper.Map<LupDto>(lup));
+            }
+
+        }
+
+
         [HttpPost]
         public async Task<ActionResult<LupWithoutNavigationPropertiesDto>> CreateLup(
-        LupForCreationDto lup)
+            LupForCreationDto lup)
         {
 
             if (!await _supervisorMobilityRepository.JobObservationExistAsync(lup.JobObservationId))
@@ -42,31 +81,6 @@ namespace SupervisorMobility.API.Controllers
             await _supervisorMobilityRepository.SaveChangesAsync();
             return Ok(finalLup);
         }
-
-
-        [HttpGet]
-        public async Task<ActionResult<IEnumerable<LupDto>>> GetAllLupAsync()
-        {
-
-            var allLup = await _supervisorMobilityRepository.GetAllLupAsync();
-
-            return Ok(_mapper.Map<IEnumerable<LupDto>>(allLup));
-        }
-
-        [HttpGet("{lupId}", Name = "GetLup")]
-        public async Task<IActionResult> GetLup(int lupId)
-        {
-            //Find Job Observation type
-            var lup = await _supervisorMobilityRepository.GetLupAsync(lupId);
-            if (lup == null)
-            {
-                return NotFound();
-            }
-
-            return Ok(_mapper.Map<LupDto>(lup));
-        }
-
-
 
         [HttpPut("{lupId}")]
         public async Task<ActionResult> UpdateLup(int lupId, LupForUpdateDto lupForUpdate)
