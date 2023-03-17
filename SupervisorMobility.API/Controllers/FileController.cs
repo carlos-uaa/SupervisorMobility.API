@@ -49,6 +49,7 @@ namespace SupervisorMobility.API.Controllers
                 throw new ArgumentNullException(nameof(mapper));
         }
 
+
         [HttpPost]
         public async Task<ActionResult<FileUploadGeneralDto>> UploadFile(IFormFile file)
         {
@@ -135,35 +136,33 @@ namespace SupervisorMobility.API.Controllers
             return Ok(fileToReturn);
         }
 
+
         [HttpPost("UploadEvidences")]
-        public async Task<ActionResult<List<FileUpload>>> UploadEvidences(List<IFormFile> files)
+        public async Task<ActionResult<FileUpload>> UploadEvidences(int lupId, IFormFile file)
         {
-            List<FileUpload> uploadData = new List<FileUpload>();
 
-            foreach (var file in files)
-            {
-                var uploadResult = new FileUploadForCreationDto();
-                string trustedFileNameForStorage = string.Empty;
-                var unstrustedFileName = file.FileName;
+            var uploadResult = new FileUploadForCreationDto();
+            string trustedFileNameForStorage = string.Empty;
+            var unstrustedFileName = file.FileName;
 
-                trustedFileNameForStorage = Path.GetRandomFileName();
-                var path = Path.Combine(_env.ContentRootPath, "uploads\\evidence", trustedFileNameForStorage);
+            trustedFileNameForStorage = Path.GetRandomFileName();
+            var path = Path.Combine(_env.ContentRootPath, "uploads\\evidence", trustedFileNameForStorage);
 
-                await using FileStream fs = new(path, FileMode.Create);
-                await file.CopyToAsync(fs);
+            await using FileStream fs = new(path, FileMode.Create);
+            await file.CopyToAsync(fs);
 
-                uploadResult.FileName = unstrustedFileName;
-                uploadResult.StorageFileName = trustedFileNameForStorage;
-                uploadResult.ContentType = file.ContentType;
-                uploadResult.UploadDate = DateTime.Now;
+            uploadResult.FileName = unstrustedFileName;
+            uploadResult.StorageFileName = trustedFileNameForStorage;
+            uploadResult.ContentType = file.ContentType;
+            uploadResult.UploadDate = DateTime.Now;
+            uploadResult.LupId = lupId;
 
-                var fileToReturn = await _assyChartService.CreateFileAsync(uploadResult);
+            var fileToReturn = await _assyChartService.CreateFileAsync(uploadResult);
 
-                uploadData.Add(fileToReturn);
-            }
+            return Ok(fileToReturn);
 
-            return Ok(uploadData);
         }
+
 
         [HttpPost("Data")]
         public async Task<ActionResult<FileUploadGeneralDto>> UpdateDataInServer(FileUploadGeneralDto FileInfo)
@@ -1205,6 +1204,30 @@ namespace SupervisorMobility.API.Controllers
             if (FileInfo is not null)
             {
                 var path = Path.Combine(_env.ContentRootPath, "uploads\\guides", FileInfo.StorageFileName);
+
+                var memory = new MemoryStream();
+                using (var stream = new FileStream(path, FileMode.Open))
+                {
+                    await stream.CopyToAsync(memory);
+                }
+                memory.Position = 0;
+                return File(memory, FileInfo.ContentType, Path.GetFileName(path));
+
+
+            }
+            return NotFound("Error File download");
+
+        }
+
+        [EnableCors("Cors")]
+        [HttpGet("Evidence/{fileid}")]
+        public async Task<IActionResult> DownloadEvidence(int fileid)
+        {
+            var FileInfo = await _assyChartService.FetchFileAsync(fileid);
+
+            if (FileInfo is not null)
+            {
+                var path = Path.Combine(_env.ContentRootPath, "uploads\\evidence", FileInfo.StorageFileName);
 
                 var memory = new MemoryStream();
                 using (var stream = new FileStream(path, FileMode.Open))

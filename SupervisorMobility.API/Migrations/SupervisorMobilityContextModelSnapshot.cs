@@ -137,6 +137,9 @@ namespace SupervisorMobility.API.Migrations
                     b.Property<string>("FileName")
                         .HasColumnType("nvarchar(max)");
 
+                    b.Property<int?>("LupId")
+                        .HasColumnType("int");
+
                     b.Property<string>("StorageFileName")
                         .HasColumnType("nvarchar(max)");
 
@@ -144,6 +147,8 @@ namespace SupervisorMobility.API.Migrations
                         .HasColumnType("Date");
 
                     b.HasKey("FileUploadId");
+
+                    b.HasIndex("LupId");
 
                     b.ToTable("Files");
                 });
@@ -1138,6 +1143,13 @@ namespace SupervisorMobility.API.Migrations
                     b.Navigation("Area");
                 });
 
+            modelBuilder.Entity("SupervisorMobility.API.DataAccess.Entities.FileUpload", b =>
+                {
+                    b.HasOne("SupervisorMobility.API.Entities.Lup", null)
+                        .WithMany("Evidences")
+                        .HasForeignKey("LupId");
+                });
+
             modelBuilder.Entity("SupervisorMobility.API.DataAccess.Entities.Guides", b =>
                 {
                     b.HasOne("SupervisorMobility.API.DataAccess.Entities.FileUpload", "FileUpload")
@@ -1311,6 +1323,11 @@ namespace SupervisorMobility.API.Migrations
             modelBuilder.Entity("SupervisorMobility.API.Entities.JobObservationType", b =>
                 {
                     b.Navigation("JobObservationConfigs");
+                });
+
+            modelBuilder.Entity("SupervisorMobility.API.Entities.Lup", b =>
+                {
+                    b.Navigation("Evidences");
                 });
 
             modelBuilder.Entity("SupervisorMobility.API.Entities.Plant", b =>

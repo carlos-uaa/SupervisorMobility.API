@@ -21,9 +21,7 @@ namespace SupervisorMobility.API.Entities
         public int? Status { get; set; }
         public DateTime? CreatedDate { get; set; }
         public DateTime? EndDate { get; set;}
-
-        //Evidence
-        //public ICollection<FileUpload> Evidences { get; set; }
-        //    = new List<FileUpload>();
+        public ICollection<FileUpload>? Evidences { get; set; }
+            = new List<FileUpload>();
     }
 }

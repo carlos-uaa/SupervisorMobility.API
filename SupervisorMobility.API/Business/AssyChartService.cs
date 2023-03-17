@@ -240,6 +240,14 @@ namespace SupervisorMobility.API.Business
             await _repository.SaveChangesAsync();
             return finalNewFile;
         }
+        public async Task<FileUpload> CreateLupFileAsync(FileUploadForCreationDto newFile, int lupId)
+        {
+            var finalNewFile = _mapper.Map<FileUpload>(newFile);
+            _repository.AddUploadFile(finalNewFile);
+            await _repository.SaveChangesAsync();
+            return finalNewFile;
+        }
+
         public async Task<FileUpload?> FetchFileAsync(int fileid)
         {
             return await _repository.GetFileUploadAsync(fileid);

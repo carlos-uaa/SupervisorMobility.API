@@ -2,6 +2,7 @@
 using SupervisorMobility.API.DataAccess.Entities;
 using SupervisorMobility.API.Entities;
 using SupervisorMobility.API.Models.AssyChart;
+using SupervisorMobility.API.Models.FileUploadDto;
 
 namespace SupervisorMobility.API.Services
 {
@@ -178,7 +179,7 @@ namespace SupervisorMobility.API.Services
 
         #region LupOperations
         Task<IEnumerable<Lup>> GetAllLupAsync();
-        Task<Lup?> GetLupAsync(int lupId);
+        Task<Lup?> GetLupAsync(int guideId, bool includeFile = false);
         void AddLup(Lup lup);
         void DeleteLup(Lup lup);
 

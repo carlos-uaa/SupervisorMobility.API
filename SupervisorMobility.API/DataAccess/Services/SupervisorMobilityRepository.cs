@@ -5,6 +5,7 @@ using SupervisorMobility.API.Context;
 using SupervisorMobility.API.DataAccess.Entities;
 using SupervisorMobility.API.Entities;
 using SupervisorMobility.API.Models.AssyChart;
+using SupervisorMobility.API.Models.FileUploadDto;
 using System.Diagnostics;
 using System.Xml;
 
@@ -660,7 +661,6 @@ namespace SupervisorMobility.API.Services
             _context.Files.Add(fileUplaod);
         }
 
-
         public async Task<FileUpload?> GetFileUploadAsync(int fileid)
         {
            
@@ -675,8 +675,6 @@ namespace SupervisorMobility.API.Services
         #endregion
 
         #region Guide
-
-        //, 
 
         public async Task<Guides?> GetGuideAsync(int guideId, bool includeFile = false)
         {
@@ -704,8 +702,6 @@ namespace SupervisorMobility.API.Services
         {
             _context.Guides.Add(guide);
         }
-
-
 
         public void DeleteGuide(Guides guide)
         {
@@ -784,14 +780,18 @@ namespace SupervisorMobility.API.Services
         }
         #endregion
 
-#region CommonOperations
-        public async Task<bool> SaveChangesAsync()
+        #region LupOperations
+        public async Task<Lup?> GetLupAsync(int lupId, bool includeFile = false)
         {
-            return (await _context.SaveChangesAsync() >= 0);
+            if (includeFile)
+            {
+                return await _context.Lup.Include(l => l.Evidences)
+                    .Where(e => e.LupId == lupId).FirstOrDefaultAsync();
+            }
+            return await _context.Lup
+                 .Where(x => x.LupId == lupId).FirstOrDefaultAsync();
         }
 
-        #endregion
-        #region LupOperations
         public async Task<IEnumerable<Lup>> GetAllLupAsync()
         {
             return await _context.Lup
@@ -799,12 +799,6 @@ namespace SupervisorMobility.API.Services
 
         }
 
-        public async Task<Lup?> GetLupAsync(int lupId)
-        {
-            //return whit info
-            return await _context.Lup
-                 .Where(x => x.LupId == lupId).FirstOrDefaultAsync();
-        }
 
         public void AddLup(Lup lup)
         {
@@ -817,5 +811,11 @@ namespace SupervisorMobility.API.Services
         }
         #endregion
 
+#region CommonOperations
+        public async Task<bool> SaveChangesAsync()
+        {
+            return (await _context.SaveChangesAsync() >= 0);
+        }
+        #endregion
     }
 }

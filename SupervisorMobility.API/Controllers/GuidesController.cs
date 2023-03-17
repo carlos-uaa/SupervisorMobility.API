@@ -51,9 +51,6 @@ namespace SupervisorMobility.API.Controllers
         [HttpGet("{guideId}", Name = "GetGuide")]
         public async Task<IActionResult> GetGuide(int guideId, bool includeFile = false)
         {
-            //Find Job Observation type
-
-
             if (includeFile)
             {
                 var guide = await _assyChartService.FetchGuideAsync(guideId, includeFile);
@@ -72,9 +69,8 @@ namespace SupervisorMobility.API.Controllers
                 }
                 return Ok(_mapper.Map<GuideWithoutFileDto>(guide));
             }
-
-
         }
+
         [HttpGet]
         public async Task<ActionResult<IEnumerable<GuideWithFileInfoDto>>> GetAllGuides(bool includeFiles = false)
         {
@@ -93,6 +89,24 @@ namespace SupervisorMobility.API.Controllers
             }
 
         }
+
+        
+        [HttpDelete("{lupId}")]
+        public async Task<ActionResult> DeleteLup(int lupId)
+        {
+            var lup = await _supervisorMobilityRepository.GetLupAsync(lupId);
+
+            if (lup == null)
+            {
+                return NotFound();
+            }
+
+            _supervisorMobilityRepository.DeleteLup(lup);
+            await _supervisorMobilityRepository.SaveChangesAsync();
+
+            return Ok();
+        }
+
 
     }
 }
