@@ -7,6 +7,7 @@ using SupervisorMobility.API.Entities;
 using SupervisorMobility.API.Models.AssyChart;
 using SupervisorMobility.API.Models.FileUploadDto;
 using System.Diagnostics;
+using System.Security.Policy;
 using System.Xml;
 
 namespace SupervisorMobility.API.Services
@@ -809,9 +810,39 @@ namespace SupervisorMobility.API.Services
         {
             _context.Lup.Remove(lup);
         }
+
+        public async Task<bool> LupExistAsync(int lupId)
+        {
+            return await _context.Lup.AnyAsync(l => l.LupId == lupId);
+        }
+
+        public async Task AddEvidenceForLupAsync(int lupId, FileUpload evidence)
+        {
+            var lup = await GetLupAsync(lupId, true);
+
+            if (lup != null)
+            {
+
+                if (lup.Evidences != null)
+                {
+                    lup.Evidences.Add(evidence);
+                }
+                else
+                {
+                    lup.Evidences = new List<FileUpload>
+                    {
+                        evidence
+                    };
+
+                }
+
+
+            }
+        }
+
         #endregion
 
-#region CommonOperations
+        #region CommonOperations
         public async Task<bool> SaveChangesAsync()
         {
             return (await _context.SaveChangesAsync() >= 0);

@@ -147,6 +147,8 @@ namespace SupervisorMobility.API.Services
 
         Task<FileUpload?> GetFileUploadAsync(int fileid);
         void DeleteUploadFile(FileUpload fileUpload);
+
+
         #endregion
 
         #region Guide
@@ -182,6 +184,8 @@ namespace SupervisorMobility.API.Services
         Task<Lup?> GetLupAsync(int guideId, bool includeFile = false);
         void AddLup(Lup lup);
         void DeleteLup(Lup lup);
+        Task<bool> LupExistAsync(int lupId);
+        Task AddEvidenceForLupAsync(int lupId, FileUpload evidence);
 
         #endregion
 

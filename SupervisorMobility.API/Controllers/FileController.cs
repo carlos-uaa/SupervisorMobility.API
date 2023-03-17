@@ -24,6 +24,7 @@ using ClosedXML.Excel;
 using DocumentFormat.OpenXml.Spreadsheet;
 using SupervisorMobility.API.Models.FileUploadDto;
 using SupervisorMobility.API.Models.Users;
+using System.Security.Policy;
 
 namespace SupervisorMobility.API.Controllers
 {
@@ -154,9 +155,11 @@ namespace SupervisorMobility.API.Controllers
             uploadResult.StorageFileName = trustedFileNameForStorage;
             uploadResult.ContentType = file.ContentType;
             uploadResult.UploadDate = DateTime.Now;
-            uploadResult.LupId = lupId;
+
 
             var fileToReturn = await _assyChartService.CreateFileAsync(uploadResult);
+            await _supervisorMobilityRepository.AddEvidenceForLupAsync(lupId, fileToReturn);
+
 
             return Ok(fileToReturn);
 

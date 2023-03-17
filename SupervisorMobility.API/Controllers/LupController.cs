@@ -64,7 +64,6 @@ namespace SupervisorMobility.API.Controllers
 
         }
 
-
         [HttpPost]
         public async Task<ActionResult<LupWithoutNavigationPropertiesDto>> CreateLup(
             LupForCreationDto lup)
