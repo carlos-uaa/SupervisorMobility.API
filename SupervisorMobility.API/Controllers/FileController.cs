@@ -162,7 +162,6 @@ namespace SupervisorMobility.API.Controllers
             await _supervisorMobilityRepository.AddEvidenceForLupAsync(lupId, fileToReturn);
             await _supervisorMobilityRepository.SaveChangesAsync();
 
-
             return Ok(fileToReturn);
 
         }
