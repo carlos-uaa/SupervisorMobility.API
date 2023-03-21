@@ -65,25 +65,6 @@ namespace SupervisorMobility.API.Controllers
 
         }
 
-        [HttpPost("{lupId}/evidence/add")]
-        public async Task<ActionResult<DistributionWithoutNavigationPropertiesDto>> AddEvidence(int lupId,
-          FileUploadGeneralDto evidence)
-        {
-            if (!await _supervisorMobilityRepository.LupExistAsync(lupId))
-            {
-                return NotFound("No lup exists");
-            }
-
-            var finalEvidence = _mapper.Map<FileUpload>(evidence);
-
-            await _supervisorMobilityRepository.AddEvidenceForLupAsync(lupId, finalEvidence);
-
-            await _supervisorMobilityRepository.SaveChangesAsync();
-
-            return Ok();
-        }
-
-
         [HttpPost]
         public async Task<ActionResult<LupWithoutNavigationPropertiesDto>> CreateLup(
             LupForCreationDto lup)
@@ -143,8 +124,7 @@ namespace SupervisorMobility.API.Controllers
         }
 
         [HttpPost("{lupId}/evidence/remove")]
-        public async Task<ActionResult<LupWithFilesDto>> RemoveEvidence(int lupId,
-        int fileUploadId)
+        public async Task<ActionResult<int>> RemoveEvidence(int lupId, [FromBody] int fileUploadId)
         {
 
             if (!await _supervisorMobilityRepository.LupExistAsync(lupId))
@@ -154,7 +134,6 @@ namespace SupervisorMobility.API.Controllers
 
 
             await _supervisorMobilityRepository.RemoveEvidenceForLupAsync(lupId, fileUploadId);
-
             await _supervisorMobilityRepository.SaveChangesAsync();
 
             return Ok();

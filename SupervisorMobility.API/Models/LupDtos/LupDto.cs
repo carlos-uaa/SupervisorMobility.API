@@ -16,6 +16,7 @@ namespace SupervisorMobility.API.Models.LupDtos
         public int Pillar { get; set; }
         public string? Q3 { get; set; }
         public string? Q4 { get; set; }
+        public string? Justification { get; set; }
         public int? Status { get; set; }
         public DateTime? CreatedDate { get; set; }
         public DateTime? EndDate { get; set; }

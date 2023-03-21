@@ -10,7 +10,7 @@ namespace SupervisorMobility.API.Profiles
             CreateMap<Entities.Lup, Models.LupDtos.LupForCreationDto>().ReverseMap();
             CreateMap<Entities.Lup, Models.LupDtos.LupForUpdateDto>().ReverseMap();
             CreateMap<Entities.Lup, Models.LupDtos.LupWithoutNavigationPropertiesDto>().ReverseMap();
-            CreateMap<Entities.Lup, Models.LupDtos.LupWithFilesDto>();
+            CreateMap<Entities.Lup, Models.LupDtos.LupWithFilesDto>().ReverseMap();
         }
     }
 }
