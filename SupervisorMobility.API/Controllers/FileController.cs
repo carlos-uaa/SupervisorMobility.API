@@ -142,7 +142,7 @@ namespace SupervisorMobility.API.Controllers
             var unstrustedFileName = file.FileName;
 
             trustedFileNameForStorage = Path.GetRandomFileName();
-            var path = Path.Combine(_env.ContentRootPath, "uploads\\users", trustedFileNameForStorage);
+            var path = Path.Combine(_env.ContentRootPath, "uploads\\evidence", trustedFileNameForStorage);
 
             await using FileStream fs = new(path, FileMode.Create);
             await file.CopyToAsync(fs);

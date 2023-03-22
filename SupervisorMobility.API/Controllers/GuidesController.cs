@@ -90,23 +90,6 @@ namespace SupervisorMobility.API.Controllers
 
         }
 
-        
-        [HttpDelete("{lupId}")]
-        public async Task<ActionResult> DeleteLup(int lupId)
-        {
-            var lup = await _supervisorMobilityRepository.GetLupAsync(lupId);
-
-            if (lup == null)
-            {
-                return NotFound();
-            }
-
-            _supervisorMobilityRepository.DeleteLup(lup);
-            await _supervisorMobilityRepository.SaveChangesAsync();
-
-            return Ok();
-        }
-
 
     }
 }
