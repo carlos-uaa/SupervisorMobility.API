@@ -336,7 +336,7 @@ namespace SupervisorMobility.API.Migrations
                         {
                             UserId = 1,
                             AreaId = 1,
-                            CreatedDate = new DateTime(2023, 3, 17, 16, 16, 28, 686, DateTimeKind.Local).AddTicks(1592),
+                            CreatedDate = new DateTime(2023, 3, 21, 13, 50, 34, 882, DateTimeKind.Local).AddTicks(2587),
                             GroupId = 1,
                             IsActive = true,
                             IsAdmin = true,
@@ -765,9 +765,9 @@ namespace SupervisorMobility.API.Migrations
                             JobObservationId = 1,
                             AreaId = 1,
                             Cicles = "1 min|2 min|3 min|4 min| 5 min",
-                            DateEnd = new DateTime(2023, 3, 17, 16, 16, 28, 686, DateTimeKind.Local).AddTicks(1211),
-                            DateFinalized = new DateTime(2023, 3, 17, 16, 16, 28, 686, DateTimeKind.Local).AddTicks(1212),
-                            DateStart = new DateTime(2023, 3, 17, 16, 16, 28, 686, DateTimeKind.Local).AddTicks(1177),
+                            DateEnd = new DateTime(2023, 3, 21, 13, 50, 34, 882, DateTimeKind.Local).AddTicks(1987),
+                            DateFinalized = new DateTime(2023, 3, 21, 13, 50, 34, 882, DateTimeKind.Local).AddTicks(1996),
+                            DateStart = new DateTime(2023, 3, 21, 13, 50, 34, 882, DateTimeKind.Local).AddTicks(1925),
                             DistributionId = 1,
                             IsActive = true,
                             Models = "P71A|X247|P71A|X247|P71A",
@@ -935,8 +935,8 @@ namespace SupervisorMobility.API.Migrations
                         new
                         {
                             LupId = 1,
-                            CreatedDate = new DateTime(2023, 3, 17, 16, 16, 28, 686, DateTimeKind.Local).AddTicks(1619),
-                            EndDate = new DateTime(2023, 3, 17, 16, 16, 28, 686, DateTimeKind.Local).AddTicks(1621),
+                            CreatedDate = new DateTime(2023, 3, 21, 13, 50, 34, 882, DateTimeKind.Local).AddTicks(2614),
+                            EndDate = new DateTime(2023, 3, 21, 13, 50, 34, 882, DateTimeKind.Local).AddTicks(2617),
                             IsActive = true,
                             JobObservationId = 1,
                             Observer = "Pedro",

@@ -5,7 +5,6 @@ using SpreadsheetLight;
 using SupervisorMobility.API.Entities;
 using SupervisorMobility.API.Models.AreaDtos;
 using SupervisorMobility.API.Models.AssyChart;
-using SupervisorMobility.API.Models.FileUpload;
 using System.Diagnostics;
 using System.Net;
 using System.Text.RegularExpressions;
@@ -15,16 +14,12 @@ using SupervisorMobility.API.Business;
 using SupervisorMobility.API.Models.OperationDtos;
 using SupervisorMobility.API.Models.DistributionDtos;
 using SupervisorMobility.API.Models.ProductDtos;
-using Azure;
 using SupervisorMobility.API.DataAccess.Entities;
-using System.Collections.Generic;
 using Microsoft.AspNetCore.Cors;
-using Microsoft.AspNetCore.Mvc.Infrastructure;
 using ClosedXML.Excel;
-using DocumentFormat.OpenXml.Spreadsheet;
 using SupervisorMobility.API.Models.FileUploadDto;
 using SupervisorMobility.API.Models.Users;
-using System.Security.Policy;
+using SupervisorMobility.API.Models.ReturnResults;
 
 namespace SupervisorMobility.API.Controllers
 {
@@ -1295,7 +1290,7 @@ namespace SupervisorMobility.API.Controllers
                 ws.SetCellValue($"G{row}", itemUser.IsAdmin.ToString() ?? "");
                 ws.SetCellValue($"H{row}", itemUser.IsSupervisor.ToString() ?? "");
                 ws.SetCellValue($"I{row}", itemUser.IsOperator.ToString() ?? "");
-                ws.SetCellValue($"K{row}", itemUser.CreatedDate.ToString() ?? "");
+                ws.SetCellValue($"J{row}", itemUser.CreatedDate.ToString() ?? "");
                 ws.SetCellValue($"K{row}", itemUser.LastUpdated.ToString() ?? "");
                 ws.SetCellValue($"L{row}", itemUser.DisabledDate.ToString() ?? "");
                 ws.SetCellValue($"M{row}", itemUser.IsActive.ToString() ?? "");

@@ -26,8 +26,8 @@ namespace SupervisorMobility.API.Models.Users
         public GroupDto? Group { get; set; } = new GroupDto();
 
 
-        public DateTime? CreatedDate { get; set; }
-        public DateTime LastUpdated { get; set; } = DateTime.Now;
+        public DateTime? CreatedDate { get; set; } = DateTime.Now;
+        public DateTime LastUpdated { get; set; } 
         public DateTime? DisabledDate { get; set; }
 
     }
