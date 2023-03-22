@@ -1,11 +1,11 @@
 ﻿using System.Reflection;
 
-namespace SupervisorMobility.API.Models.FileUpload
+namespace SupervisorMobility.API.Models.ReturnResults
 {
-     public class UploadAssyChartResult
+    public class UploadAssyChartResult
     {
         public int PlantUpdate { get; set; } = 0;
-        public int PlantCreate { get; set; }= 0;
+        public int PlantCreate { get; set; } = 0;
 
         public int AreasCreated { get; set; } = 0;
         public int AreasUpdated { get; set; } = 0;

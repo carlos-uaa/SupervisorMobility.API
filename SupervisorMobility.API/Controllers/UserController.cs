@@ -1,33 +1,23 @@
 ﻿using AutoMapper;
-using System.IO;
-using ClosedXML.Excel;
-using DocumentFormat.OpenXml.Drawing;
-using DocumentFormat.OpenXml.Spreadsheet;
 using Microsoft.AspNetCore.Mvc;
-using SupervisorMobility.API.Business;
-using SupervisorMobility.API.DataAccess.Entities;
-using SupervisorMobility.API.Entities;
-using SupervisorMobility.API.Models.AssyChart;
-using SupervisorMobility.API.Models.FileUpload;
-using SupervisorMobility.API.Models.FileUploadDto;
-using SupervisorMobility.API.Models.Users;
-using SupervisorMobility.API.Services;
-using System.Diagnostics;
-using System.Net;
-
 using Microsoft.VisualBasic.FileIO;
 using SpreadsheetLight;
+using SupervisorMobility.API.Entities;
 using SupervisorMobility.API.Models.AreaDtos;
+using SupervisorMobility.API.Models.AssyChart;
+using System.Diagnostics;
+using System.Net;
 using System.Text.RegularExpressions;
+using SupervisorMobility.API.Services;
 using SupervisorMobility.API.Models.PlantDtos;
-using SupervisorMobility.API.Models.OperationDtos;
-using SupervisorMobility.API.Models.DistributionDtos;
-using SupervisorMobility.API.Models.ProductDtos;
-using Azure;
-using System.Collections.Generic;
+using SupervisorMobility.API.Business;
+using SupervisorMobility.API.DataAccess.Entities;
 using Microsoft.AspNetCore.Cors;
-using Microsoft.AspNetCore.Mvc.Infrastructure;
-using DocumentFormat.OpenXml.Presentation;
+using SupervisorMobility.API.Models.FileUploadDto;
+using SupervisorMobility.API.Models.Users;
+using SupervisorMobility.API.Models.ReturnResults;
+using ClosedXML.Excel;
+using DocumentFormat.OpenXml.Spreadsheet;
 
 namespace SupervisorMobility.API.Controllers
 {
@@ -161,9 +151,10 @@ namespace SupervisorMobility.API.Controllers
         public async Task<ActionResult<UploadUsersResult>> ApplyUsersUpload(FileUploadGeneralDto FileToInsert)
         {
             string file = Directory.GetCurrentDirectory().ToString() + "\\uploads\\users\\" + FileToInsert.StorageFileName;
+            string originalPath = System.IO.Path.Combine(System.IO.Path.GetDirectoryName(file), System.IO.Path.GetFileNameWithoutExtension(file) + System.IO.Path.GetExtension(file));
 
             UploadUsersResult result = new UploadUsersResult();
-            List<User> UsersListToSave = new List<User>();
+            List<UsersWhitoutNavigationDetails> UsersListToSave = new List<UsersWhitoutNavigationDetails>();
 
             if (FileToInsert.ContentType == "text/csv")
             {
@@ -172,7 +163,6 @@ namespace SupervisorMobility.API.Controllers
             else
             {
                 // Obtiene la ruta del archivo con la extensión original
-                string originalPath = System.IO.Path.Combine(System.IO.Path.GetDirectoryName(file), System.IO.Path.GetFileNameWithoutExtension(file) + System.IO.Path.GetExtension(file));
 
                 if (FileToInsert.ContentType == "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet")
                 {
@@ -205,13 +195,16 @@ namespace SupervisorMobility.API.Controllers
                     using (var workBook = new XLWorkbook(file))
                     {
                         IXLWorksheet ws = workBook.Worksheet(1);
-                        Debug.WriteLine($"Si abrio el excel");
+
+                        ws.Column("A").Style.Font.Underline = XLFontUnderlineValues.Single;
+                        ws.Column("J").Style.Font.Underline = XLFontUnderlineValues.Single;
+                        ws.Column("K").Style.Font.Underline = XLFontUnderlineValues.Single;
+                        ws.Column("L").Style.Font.Underline = XLFontUnderlineValues.Single;
 
                         //Loop through the Worksheet rows.
                         bool firstRow = true;
-                        int i = 1;
+                        int i = 2;
                         foreach (IXLRow row in ws.Rows())
-
                         {
                             //Use the first row to add columns to DataTable.
                             if (firstRow)
@@ -222,25 +215,25 @@ namespace SupervisorMobility.API.Controllers
                             {
                                 if (!row.IsEmpty())
                                 {
-                                    User userToInsert = new User();
+                                    var userToInsert = new UsersWhitoutNavigationDetails();
                                     //1UserId	2Payroll	3Name	4Plant	5Area	6Grupo	7Admin	8Supervisor	9Operator	10Create	11Update	12Disable	13Active
                                     //UserPorp
-                                    userToInsert.UserId = ws.Cell(i, 1).GetString() != "" ? ws.Cell(i, 1).GetValue<int>() : -1;
-                                    userToInsert.Payroll = ws.Cell(i, 2).GetString() != "" ? ws.Cell(i, 2).GetValue<int>() : -1;
-                                    userToInsert.Name = ws.Cell(i, 3).GetString() != "" ? ws.Cell(i, 3).GetValue<string>() : "";
+                                    userToInsert.UserId = ws.Cell(i,1).Value.ToString() != "" ? int.Parse(ws.Cell(i, 1).Value.ToString()) : -1;
+                                    userToInsert.Payroll = ws.Cell(i, 2).Value.ToString() != "" ? int.Parse(ws.Cell(i, 2).Value.ToString()) : 0;
+                                    userToInsert.Name = ws.Cell(i, 3).Value.ToString() != "" ? ws.Cell(i, 3).Value.ToString() : "";
                                     //Navigation Porpieties
-                                    userToInsert.PlantId = ws.Cell(i, 4).GetString() != "" ? ws.Cell(i, 4).GetValue<int>() : -1;
-                                    userToInsert.AreaId = ws.Cell(i, 5).GetString() != "" ? ws.Cell(i, 5).GetValue<int>() : -1;
-                                    userToInsert.GroupId = ws.Cell(i, 6).GetString() != "" ? ws.Cell(i, 6).GetValue<int>() : -1;
+                                    userToInsert.PlantId = ws.Cell(i, 4).Value.ToString() != "" ? int.Parse(ws.Cell(i, 4).Value.ToString()) : -1;
+                                    userToInsert.AreaId = ws.Cell(i, 5).Value.ToString() != "" ? int.Parse(ws.Cell(i, 5).Value.ToString()) : -1;
+                                    userToInsert.GroupId = ws.Cell(i, 6).Value.ToString() != "" ? int.Parse(ws.Cell(i, 6).Value.ToString()) : -1;
                                     //Permission
-                                    userToInsert.IsAdmin = ws.Cell(i, 7).GetString() != "" ? ws.Cell(i, 7).GetValue<bool>() : false;
-                                    userToInsert.IsSupervisor = ws.Cell(i, 8).GetString() != "" ? ws.Cell(i, 8).GetValue<bool>() : false;
-                                    userToInsert.IsOperator = ws.Cell(i, 9).GetString() != "" ? ws.Cell(i, 9).GetValue<bool>() : false;
+                                    userToInsert.IsAdmin = ws.Cell(i, 7).Value.ToString() != "" ? bool.Parse(ws.Cell(i, 7).Value.ToString()) : false;
+                                    userToInsert.IsSupervisor = ws.Cell(i, 8).Value.ToString() != "" ? bool.Parse(ws.Cell(i, 8).Value.ToString()) : false;
+                                    userToInsert.IsOperator = ws.Cell(i, 9).Value.ToString() != "" ? bool.Parse(ws.Cell(i, 9).Value.ToString()) : false;
                                     //Date Controlls
                                     try
                                     {
                                         //create date
-                                        userToInsert.CreatedDate = ws.Cell(i, 10).GetString() != "" ? DateTime.Parse(ws.Cell(i, 10).GetValue<string>()) : DateTime.Now;
+                                        userToInsert.CreatedDate = ws.Cell(i, 10).Value.ToString() != "" ? DateTime.Parse(ws.Cell(i, 10).GetValue<string>()) : DateTime.Now;
                                     }
                                     catch (Exception ex)
                                     {
@@ -249,7 +242,7 @@ namespace SupervisorMobility.API.Controllers
                                     try
                                     {
                                         //update
-                                        userToInsert.LastUpdated = ws.Cell(i, 11).GetString() != "" ? DateTime.Parse(ws.Cell(i, 11).GetValue<string>()) : DateTime.Now;
+                                        userToInsert.LastUpdated = ws.Cell(i, 11).Value.ToString() != "" ? DateTime.Parse(ws.Cell(i, 11).GetValue<string>()) : DateTime.Now;
                                     }
                                     catch (Exception ex)
                                     {
@@ -259,26 +252,26 @@ namespace SupervisorMobility.API.Controllers
                                     try
                                     {
                                         //disabel
-                                        userToInsert.DisabledDate = ws.Cell(i, 12).GetString() != "" ? DateTime.Parse(ws.Cell(i, 12).GetValue<string>()) : DateTime.Now;
+                                        userToInsert.DisabledDate = ws.Cell(i, 12).GetString() != "" ? DateTime.Parse(ws.Cell(i, 12).GetValue<string>()) : null;
                                     }
                                     catch (Exception ex)
                                     {
-                                        userToInsert.DisabledDate = DateTime.Now;
+                                        userToInsert.DisabledDate = null;
                                     }
                                     //Is acctive
-                                    userToInsert.IsActive = ws.Cell(i, 13).GetString() != "" ? ws.Cell(i, 13).GetValue<bool>() : false;
+                                    userToInsert.IsActive = ws.Cell(i, 13).GetString() != "" ? bool.Parse(ws.Cell(i, 13).Value.ToString()) : false;
 
                                     //1UserId	2Payroll	3Name	4Plant	5Area	6Grupo	7Admin	8Supervisor	9Operator	10Create	11Update	12Disable	13Active
-                                    i++;
                                     UsersListToSave.Add(userToInsert);
-                                }
-                            }
+
+                                    i++;
+                                }//end is not empety row
+                            }//end else first roe
 
                         }//end foreach
-
+                        
                     }//end using
 
-                    Debug.WriteLine($"");
 
 
                 }//end try
@@ -288,59 +281,91 @@ namespace SupervisorMobility.API.Controllers
                 }//end trycatch to add excel to list
             }
 
-            foreach (User userItem in UsersListToSave)
-            {
-                //new validations 
+            UploadUsersResult ResultToReturn = new UploadUsersResult();
 
+            foreach (var userItem in UsersListToSave)
+            {
                 if (userItem.UserId == -1)
                 {
-                    //busqueda solo por nomina
-                    if (userItem.Payroll.ToString() != "" && userItem.Name == "")
-                    {
-                        var userByPayroll = await _supervisorMobilityRepository.UserExistAsync(userItem.Payroll);
 
+                    //Otros campos
+                    var entityUserPayAndExtras = await _supervisorMobilityRepository.GetUserByPayrollAndMoreAsync(userItem.Payroll, (int)userItem.PlantId, (int)userItem.AreaId, (int)userItem.GroupId);
 
-                    }
-                    else if (userItem.Payroll.ToString() != "")
+                    if (entityUserPayAndExtras == null)
                     {
-                        //busqueda avanzada planta area grupo
-                        var advanceUser = await _supervisorMobilityRepository.UserExistAdvanceAsync(userItem.Name, userItem.Payroll, (int)userItem.PlantId, (int)userItem.AreaId, (int)userItem.GroupId);
+
+                        //new user
+                        UsersForCreation newuser = new UsersForCreation()
+                        {
+                            Name = userItem.Name,
+                            Payroll = userItem.Payroll,
+                            PlantId = (int)userItem.PlantId,
+                            AreaId = (int)userItem.AreaId,
+                            GroupId = (int)userItem.GroupId,
+                            IsActive = userItem.IsActive,
+                            IsAdmin = userItem.IsAdmin,
+                            IsSupervisor = userItem.IsSupervisor,
+                            IsOperator = userItem.IsOperator,
+                            CreatedDate = (DateTime)userItem.CreatedDate,
+                            LastUpdated = userItem.LastUpdated,
+                            DisabledDate = userItem.DisabledDate
+                        };
+
+                        var finalUser = await _assyChartService.CreateUserAsync(newuser);
+                        if (finalUser != null)
+                            ResultToReturn.UsersCreated++;
                     }
                     else
                     {
-                        //se crea
+                        ResultToReturn.UsersExist++;
                     }
-
-
-
 
                 }
                 else
                 {
-                    //usuario existe
 
-                    //get entity from db
-                    var entityUser = await _assyChartService.FetchUserAsync(userItem.UserId);
+                    var entityUser = await _assyChartService.FetchUserAsync((int)userItem.UserId);
 
-                    if (entityUser != null)
+                    if (entityUser == null)
                     {
-                        //user exist
 
-                    }
-                    else
-                    {
-                        //user not exist
+                        var entityUserPayAndExtras = await _supervisorMobilityRepository.GetUserByPayrollAndMoreAsync(userItem.Payroll, (int)userItem.PlantId, (int)userItem.AreaId, (int)userItem.GroupId);
+                        if (entityUserPayAndExtras == null)
+                        {
+                            //new user
+                            UsersForCreation newuser = new UsersForCreation()
+                            {
+                                Name = userItem.Name,
+                                Payroll = userItem.Payroll,
+                                PlantId = (int)userItem.PlantId,
+                                AreaId = (int)userItem.AreaId,
+                                GroupId = (int)userItem.GroupId,
+                                IsActive = userItem.IsActive,
+                                IsAdmin = userItem.IsAdmin,
+                                IsSupervisor = userItem.IsSupervisor,
+                                IsOperator = userItem.IsOperator,
+                                CreatedDate = (DateTime)userItem.CreatedDate,
+                                LastUpdated = userItem.LastUpdated,
+                                DisabledDate = userItem.DisabledDate
+                            };
 
-                        //busqueda avanzada
-
+                            var finalUser = await _assyChartService.CreateUserAsync(newuser);
+                            if (finalUser != null)
+                                ResultToReturn.UsersCreated++;
+                        }
+                        else
+                        {
+                            ResultToReturn.UsersExist++;
+                        }
                     }
 
                 }
 
             }
+            //restore extencion of file
+            System.IO.File.Move(file, originalPath);
 
-            result.UsersCreated = 3;
-            return Ok(result);
+            return Ok(ResultToReturn);
 
         }
 

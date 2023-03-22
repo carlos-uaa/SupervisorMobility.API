@@ -631,10 +631,9 @@ namespace SupervisorMobility.API.Services
             return await _context.Users.Where(p => p.UserId == userId).FirstOrDefaultAsync();
         }
 
-        public async Task<User?> GetUserByNominaAsync(int nomina)
+        public async Task<User?> GetUserByPayrollAndMoreAsync(int payroll, int plantid, int areaid, int groupid)
         {
-            return await _context.Users.Where(p => p.Payroll == nomina).FirstOrDefaultAsync();
-
+            return await _context.Users.Where(p => p.Payroll == payroll && p.PlantId == plantid && p.AreaId == areaid && p.GroupId == groupid).FirstOrDefaultAsync();
         }
 
         public async Task<bool> UserExistAsync(int userId)

@@ -13,9 +13,11 @@ namespace SupervisorMobility.API.Models.Users
         public bool IsSupervisor { get; set; }
         public bool IsOperator { get; set; }
         public bool? IsActive { get; set; }
-        public int? PlantId { get; set; }
-        public int? AreaId { get; set; }
-        public int? GroupId { get; set; }
-
+        public int PlantId { get; set; }
+        public int AreaId { get; set; }
+        public int GroupId { get; set; }
+        public DateTime? CreatedDate { get; set; } = DateTime.Now;
+        public DateTime LastUpdated { get; set; }
+        public DateTime? DisabledDate { get; set; }
     }
 }
