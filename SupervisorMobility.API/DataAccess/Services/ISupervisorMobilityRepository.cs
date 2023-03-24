@@ -124,6 +124,8 @@ namespace SupervisorMobility.API.Services
         Task<AssyChart?> GetAssyChartAsync(int asssychartId);
         Task<AssyChart?> GetAssyChartAdvanceAsync(string GOS, string CCP, string HOE, int PlantId, int AreaId, int DistributionId, int OperationId, int Productid);
         Task<IEnumerable<AssyChart>> GetAssyChartByPlantAsync(int plantId);
+        Task<IEnumerable<AssyChart>> GetAssyChartByAreaAsync(int plantId, int areaId);
+        Task<IEnumerable<AssyChart>> GetAssyChartByDistributionAsync(int plantId, int areaId, int distributionId);
         Task<bool> AssyChartExistAsync(int assychartID);
         Task<bool> AssyChartExistAdvanceAsync(string GOS, string CCP, string HOE, int PlantId, int AreaId, int DistributionId, int OperationId, int Productid);
         void AddAssyChartAsync(AssyChart assychart);

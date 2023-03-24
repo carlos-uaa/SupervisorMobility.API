@@ -358,6 +358,10 @@ namespace SupervisorMobility.API.Controllers
                             ResultToReturn.UsersExist++;
                         }
                     }
+                    else
+                    {
+                        ResultToReturn.UsersExist++;
+                    }
 
                 }
 

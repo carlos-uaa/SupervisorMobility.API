@@ -267,20 +267,21 @@ namespace SupervisorMobility.API.Services
         }
         public async Task AddProductForDistributionAsync(int areaId, int distributionId, Product product)
         {
-            var distribution = await GetDistributionForAreaAsync(areaId, distributionId, true);
-            if (distribution != null)
-            {
-                if (distribution.Products != null)
-                {
-                    distribution.Products.Add(product);
-                }
-                else {
-                    distribution.Products = new List<Product>();
-                    distribution.Products.Add(product);
+            //usar metodo de include distribution un producs
 
-                }
+            //var distribution = await GetDistributionForAreaAsync(areaId, distributionId, true);
+            //if (distribution != null)
+            //{
+            //    if (distribution.Products != null)
+            //    {
+            //        distribution.Products.Add(product);
+            //    }
+            //    else {
+            //        distribution.Products = new List<Product>();
+            //        distribution.Products.Add(product);
+            //    }
 
-            }
+            //}
         }
 
         public async Task AddDistributionForPlantAsync(int plantId, int areaId, Distribution distribution)
@@ -566,6 +567,28 @@ namespace SupervisorMobility.API.Services
         public async Task<IEnumerable<AssyChart>> GetAssyChartByPlantAsync(int plantId)
         {
             return await _context.AssyCharts.Where(plant => plant.PlantId == plantId)
+                .Include(a => a.Area)
+                .Include(p => p.Plant)
+                .Include(d => d.Distribution)
+                .Include(o => o.Operation)
+                .Include(pr => pr.Product)
+                .OrderBy(c => c.AssyChardId).ToListAsync();
+        }
+
+        public async Task<IEnumerable<AssyChart>> GetAssyChartByAreaAsync(int plantId, int areaId)
+        {
+            return await _context.AssyCharts.Where(a => a.PlantId == plantId && a.AreaId == areaId)
+                .Include(a => a.Area)
+                .Include(p => p.Plant)
+                .Include(d => d.Distribution)
+                .Include(o => o.Operation)
+                .Include(pr => pr.Product)
+                .OrderBy(c => c.AssyChardId).ToListAsync();
+        }
+
+        public async Task<IEnumerable<AssyChart>> GetAssyChartByDistributionAsync(int plantId, int areaId, int distributionId)
+        {
+            return await _context.AssyCharts.Where(a => a.PlantId == plantId &&  a.AreaId == areaId && a.DistributionId == distributionId)
                 .Include(a => a.Area)
                 .Include(p => p.Plant)
                 .Include(d => d.Distribution)

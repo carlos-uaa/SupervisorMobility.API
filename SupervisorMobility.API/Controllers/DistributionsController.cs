@@ -300,31 +300,22 @@ namespace SupervisorMobility.API.Controllers
             {
                 return NotFound("No Distribution Exist");
             }
-        
 
 
-            //var finalDistribution = _mapper.Map<Distribution>(distribution);
-            //finalDistribution.AreaId = areaId;
-            //Debug.WriteLine("Pree add");
-            //await _supervisorMobilityRepository.AddDistributionForProductAsync(productId, finalDistribution);
-            //Debug.WriteLine("despues add");
+            var finalProduct = _mapper.Map<Product>(product);
+            await _supervisorMobilityRepository.AddProductForDistributionAsync(areaId, distributionId, finalProduct);
 
-            //await _supervisorMobilityRepository.SaveChangesAsync();
+            await _supervisorMobilityRepository.SaveChangesAsync();
 
 
-            //var createdDistributionToReturn =
-            //   _mapper.Map<DistributionWithoutNavigationPropertiesDto>(finalDistribution);
-
-            //return CreatedAtRoute("GetDistribution",
-            //    new
-            //    {
-            //        plantId,
-            //        areaId,
-            //        distributionId = createdDistributionToReturn.DistributionId
-            //    },
-            //    createdDistributionToReturn);
-
-            return Ok();
+            return CreatedAtRoute("GetDistribution",
+                new
+                {
+                    plantId,
+                    areaId,
+                    distributionId
+                }, finalProduct
+                );
         }
 
 

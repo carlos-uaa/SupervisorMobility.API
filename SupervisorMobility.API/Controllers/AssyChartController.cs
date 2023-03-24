@@ -94,10 +94,24 @@ namespace SupervisorMobility.API.Controllers
             return Ok(_mapper.Map<IEnumerable<AssyChartWhitInfo>>(allAssyCharts));
         }
 
-        [HttpGet("byplantid/{plantId}")]
+        [HttpGet("plant/{plantId}")]
         public async Task<ActionResult<IEnumerable<AssyChartWhitInfo>>> GetAssyChartsOfPlant(int plantId)
         {
             var assyChartsForPlant = await _supervisorMobilityRepository.GetAssyChartByPlantAsync(plantId);
+            return Ok(_mapper.Map<IEnumerable<AssyChartWhitInfo>>(assyChartsForPlant));
+        }
+
+        [HttpGet("plant/{plantId}/area/{areaId}")]
+        public async Task<ActionResult<IEnumerable<AssyChartWhitInfo>>> GetAssyChartsOfArea(int plantId, int areaId)
+        {
+            var assyChartsForPlant = await _supervisorMobilityRepository.GetAssyChartByAreaAsync(plantId, areaId) ;
+            return Ok(_mapper.Map<IEnumerable<AssyChartWhitInfo>>(assyChartsForPlant));
+        }
+
+        [HttpGet("plant/{plantId}/area/{areaId}/distribution/{distributionId}")]
+        public async Task<ActionResult<IEnumerable<AssyChartWhitInfo>>> GetAssyChartsOfDistribution(int plantId, int areaId, int distributionId)
+        {
+            var assyChartsForPlant = await _supervisorMobilityRepository.GetAssyChartByDistributionAsync(plantId, areaId, distributionId);
             return Ok(_mapper.Map<IEnumerable<AssyChartWhitInfo>>(assyChartsForPlant));
         }
 
