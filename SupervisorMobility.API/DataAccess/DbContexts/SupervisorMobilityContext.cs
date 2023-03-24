@@ -385,9 +385,101 @@ namespace SupervisorMobility.API.Context
                 {
                     GlosaryWordId = 1,
                     Name = "S",
-                    Description = "Safety",
+                    Description = "Safety Pillar",
                     IsActive = true
-                });
+                },
+                new Glosary()
+                {
+                    GlosaryWordId = 2,
+                    Name = "Q",
+                    Description = "Quality Pillar",
+                    IsActive = true
+                },
+                new Glosary()
+                {
+                    GlosaryWordId = 3,
+                    Name = "D",
+                    Description = "Delivery Pillar",
+                    IsActive = true
+                },
+                new Glosary()
+                {
+                    GlosaryWordId = 4,
+                    Name = "C",
+                    Description = "Cost Pillar",
+                    IsActive = true
+                },
+                new Glosary()
+                {
+                    GlosaryWordId = 5,
+                    Name = "Other",
+                    Description = "Other",
+                    IsActive = true
+                },
+                new Glosary()
+                {
+                    GlosaryWordId = 6,
+                    Name = "SSV",
+                    Description = "Senior Supervisor",
+                    IsActive = true
+                },
+                new Glosary()
+                {
+                    GlosaryWordId = 7,
+                    Name = "SV",
+                    Description = "Supervisor",
+                    IsActive = true
+                },
+                new Glosary()
+                {
+                    GlosaryWordId = 8,
+                    Name = "Lup",
+                    Description = "Listado único de problemas",
+                    IsActive = true
+                },
+                new Glosary()
+                {
+                    GlosaryWordId = 9,
+                    Name = "Tiempo ciclo",
+                    Description = "Tiempo ciclo de la operación por modelo",
+                    IsActive = true
+                },
+                new Glosary()
+                {
+                    GlosaryWordId = 10,
+                    Name = "Tiempo de la HOE",
+                    Description = "Tiempo ciclo de la operación por modelo",
+                    IsActive = true
+                },
+                new Glosary()
+                {
+                    GlosaryWordId = 11,
+                    Name = "Manejo de la anomalía",
+                    Description = "Seguimiento de anomalías",
+                    IsActive = true
+                },
+                new Glosary()
+                {
+                    GlosaryWordId = 12,
+                    Name = "Eventual",
+                    Description = "Observación de la operación eventual",
+                    IsActive = true
+                },
+                new Glosary()
+                {
+                    GlosaryWordId = 13,
+                    Name = "Planeada",
+                    Description = "Observación de la operación planeada",
+                    IsActive = true
+                },
+                new Glosary()
+                {
+                    GlosaryWordId = 14,
+                    Name = "Assy Chart",
+                    Description = "Listado de distribución-Operación por etapa y planta",
+                    IsActive = true
+                }
+            );
 
             modelBuilder.Entity<User>().HasData(
                 new User { 
