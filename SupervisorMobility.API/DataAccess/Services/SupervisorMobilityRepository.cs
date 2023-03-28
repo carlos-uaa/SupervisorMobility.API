@@ -520,6 +520,19 @@ namespace SupervisorMobility.API.Services
                 }
             }
         }
+
+        public async Task RemoveProductForDistributionAsync(int productId, int distributionID)
+        {
+            var product = await GetProductAsync(productId, true);
+            if (product != null)
+            {
+                if (product.Distributions != null)
+                {
+                    //Remove product
+                    product.Distributions.Remove(item: product.Distributions.ToList().Find(d => d.DistributionId == distributionID));
+                }
+            }
+        }
         public async Task AddDistributionForProductAsync(int productId, Distribution distribution)
         {
             var product = await GetProductAsync(productId, true);

@@ -1,6 +1,9 @@
 ﻿using AutoMapper;
+using DocumentFormat.OpenXml.Bibliography;
+using Irony.Parsing;
 using Microsoft.AspNetCore.JsonPatch;
 using Microsoft.AspNetCore.Mvc;
+using SupervisorMobility.API.Business;
 using SupervisorMobility.API.DataAccess.Entities;
 using SupervisorMobility.API.Models.AreaDtos;
 using SupervisorMobility.API.Models.DistributionDtos;
@@ -17,10 +20,14 @@ namespace SupervisorMobility.API.Controllers
     {
         private readonly IMapper _mapper;
         private readonly ISupervisorMobilityRepository _supervisorMobilityRepository;
+        readonly IAssyChartService _assyChartService;
+
 
         public DistributionsController(ISupervisorMobilityRepository supervisorMobilityRepository,
-            IMapper mapper)
+            IMapper mapper, IAssyChartService assyChartService)
         {
+            _assyChartService = assyChartService;
+
             _supervisorMobilityRepository = supervisorMobilityRepository ??
                 throw new ArgumentNullException(nameof(supervisorMobilityRepository));
             _mapper = mapper ??
@@ -302,20 +309,25 @@ namespace SupervisorMobility.API.Controllers
             }
 
 
-            var finalProduct = _mapper.Map<Product>(product);
-            await _supervisorMobilityRepository.AddProductForDistributionAsync(areaId, distributionId, finalProduct);
+
+            Distribution? finalDistribution = await _supervisorMobilityRepository.GetDistributionForAreaAsync(areaId, distributionId);
+          
+            await _supervisorMobilityRepository.AddDistributionForProductAsync(product.ProductId, finalDistribution);
 
             await _supervisorMobilityRepository.SaveChangesAsync();
 
+
+            var createdDistributionToReturn =
+               _mapper.Map<DistributionWithoutNavigationPropertiesDto>(finalDistribution);
 
             return CreatedAtRoute("GetDistribution",
                 new
                 {
                     plantId,
                     areaId,
-                    distributionId
-                }, finalProduct
-                );
+                    distributionId = createdDistributionToReturn.DistributionId
+                },
+                createdDistributionToReturn);
         }
 
 
@@ -337,20 +349,21 @@ namespace SupervisorMobility.API.Controllers
                 return NotFound();
             }
 
-            //Ver como hacer la baja logica para no afectar demas distrubuciones que usen el mismo producto
 
-            //Propuesta: solo sacarlo de la collection 
+            await _supervisorMobilityRepository.RemoveDistributionForProductAsync(productId, distributionId);
 
-            //var operationEntity = await _assyChartService
-            //    .FetchOperationAsync(distributionId, operationId);
-            //if (operationEntity == null)
-            //{
-            //    return NotFound();
-            //}
+            await _supervisorMobilityRepository.SaveChangesAsync();
 
-            //await _assyChartService.RemoveOperationAsync(operationEntity);
+            var product = await _assyChartService
+                 .FetchProductAsync(productId, true);
+            if (product == null)
+            {
+                return NotFound();
+            }
 
-            return Ok();
+            return Ok(_mapper.Map<ProductWhitNavigationPropietiesDto>(product));
+
+
         }
 
 
