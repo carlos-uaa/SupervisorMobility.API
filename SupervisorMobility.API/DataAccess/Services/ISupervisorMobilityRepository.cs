@@ -166,7 +166,7 @@ namespace SupervisorMobility.API.Services
 
         #region JobObservationOperations
 
-        Task<IEnumerable<JobObservation>> GetAllJobObservationsAsync();
+        Task<IEnumerable<JobObservation>> GetAllJobObservationsAsync(bool includeLup);
         Task<JobObservation?> GetJobObservationAsync(int jobObservationId, bool includeLup);
         void AddJobObservation(JobObservation jobObservation);
         void DeleteJobObservation(JobObservation jobObservation);
