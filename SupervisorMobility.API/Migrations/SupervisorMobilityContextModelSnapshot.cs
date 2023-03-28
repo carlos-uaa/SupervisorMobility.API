@@ -336,14 +336,29 @@ namespace SupervisorMobility.API.Migrations
                         {
                             UserId = 1,
                             AreaId = 1,
-                            CreatedDate = new DateTime(2023, 3, 21, 13, 50, 34, 882, DateTimeKind.Local).AddTicks(2587),
+                            CreatedDate = new DateTime(2023, 3, 27, 17, 19, 41, 845, DateTimeKind.Local).AddTicks(1460),
                             GroupId = 1,
                             IsActive = true,
-                            IsAdmin = true,
+                            IsAdmin = false,
                             IsOperator = false,
                             IsSupervisor = true,
                             LastUpdated = new DateTime(1, 1, 1, 0, 0, 0, 0, DateTimeKind.Unspecified),
-                            Name = "Marco Aguayo",
+                            Name = "Pedro",
+                            Payroll = 12345,
+                            PlantId = 1
+                        },
+                        new
+                        {
+                            UserId = 2,
+                            AreaId = 1,
+                            CreatedDate = new DateTime(2023, 3, 27, 17, 19, 41, 845, DateTimeKind.Local).AddTicks(1463),
+                            GroupId = 1,
+                            IsActive = true,
+                            IsAdmin = false,
+                            IsOperator = true,
+                            IsSupervisor = false,
+                            LastUpdated = new DateTime(1, 1, 1, 0, 0, 0, 0, DateTimeKind.Unspecified),
+                            Name = "Marco",
                             Payroll = 239935,
                             PlantId = 1
                         });
@@ -802,17 +817,14 @@ namespace SupervisorMobility.API.Migrations
                     b.Property<string>("Models")
                         .HasColumnType("nvarchar(max)");
 
-                    b.Property<string>("Observer")
-                        .HasColumnType("nvarchar(max)");
-
                     b.Property<int?>("OperationId")
                         .HasColumnType("int");
 
-                    b.Property<string>("Operator")
-                        .HasColumnType("nvarchar(max)");
-
                     b.Property<string>("OperatorCommentary")
                         .HasColumnType("nvarchar(max)");
+
+                    b.Property<int?>("OperatorId")
+                        .HasColumnType("int");
 
                     b.Property<string>("OperatorSignature")
                         .HasColumnType("nvarchar(max)");
@@ -832,6 +844,9 @@ namespace SupervisorMobility.API.Migrations
                     b.Property<int?>("Status")
                         .HasColumnType("int");
 
+                    b.Property<int?>("SupervisorId")
+                        .HasColumnType("int");
+
                     b.Property<string>("Time1HOE")
                         .HasColumnType("nvarchar(max)");
 
@@ -846,7 +861,11 @@ namespace SupervisorMobility.API.Migrations
 
                     b.HasIndex("OperationId");
 
+                    b.HasIndex("OperatorId");
+
                     b.HasIndex("PlantId");
+
+                    b.HasIndex("SupervisorId");
 
                     b.ToTable("JobObservations");
 
@@ -856,22 +875,22 @@ namespace SupervisorMobility.API.Migrations
                             JobObservationId = 1,
                             AreaId = 1,
                             Cicles = "1 min|2 min|3 min|4 min| 5 min",
-                            DateEnd = new DateTime(2023, 3, 21, 13, 50, 34, 882, DateTimeKind.Local).AddTicks(1987),
-                            DateFinalized = new DateTime(2023, 3, 21, 13, 50, 34, 882, DateTimeKind.Local).AddTicks(1996),
-                            DateStart = new DateTime(2023, 3, 21, 13, 50, 34, 882, DateTimeKind.Local).AddTicks(1925),
+                            DateEnd = new DateTime(2023, 3, 27, 17, 19, 41, 845, DateTimeKind.Local).AddTicks(1160),
+                            DateFinalized = new DateTime(2023, 3, 27, 17, 19, 41, 845, DateTimeKind.Local).AddTicks(1160),
+                            DateStart = new DateTime(2023, 3, 27, 17, 19, 41, 845, DateTimeKind.Local).AddTicks(1149),
                             DistributionId = 1,
                             IsActive = true,
                             Models = "P71A|X247|P71A|X247|P71A",
-                            Observer = "Pedro",
                             OperationId = 1,
-                            Operator = "Juan",
                             OperatorCommentary = "Operator Commentary",
+                            OperatorId = 2,
                             OperatorSignature = "Juan",
                             Option = 1,
                             PlantId = 1,
                             SsvCommentary = "Senior Supervisor Commentary",
                             SsvSignature = "Pedro",
-                            Status = 0,
+                            Status = 1,
+                            SupervisorId = 1,
                             Time1HOE = "10 min",
                             Time2HOE = "20 min"
                         });
@@ -1029,8 +1048,8 @@ namespace SupervisorMobility.API.Migrations
                         new
                         {
                             LupId = 1,
-                            CreatedDate = new DateTime(2023, 3, 21, 13, 50, 34, 882, DateTimeKind.Local).AddTicks(2614),
-                            EndDate = new DateTime(2023, 3, 21, 13, 50, 34, 882, DateTimeKind.Local).AddTicks(2617),
+                            CreatedDate = new DateTime(2023, 3, 27, 17, 19, 41, 845, DateTimeKind.Local).AddTicks(1473),
+                            EndDate = new DateTime(2023, 3, 27, 17, 19, 41, 845, DateTimeKind.Local).AddTicks(1473),
                             IsActive = true,
                             JobObservationId = 1,
                             Observer = "Pedro",
@@ -1343,9 +1362,17 @@ namespace SupervisorMobility.API.Migrations
                         .WithMany()
                         .HasForeignKey("OperationId");
 
+                    b.HasOne("SupervisorMobility.API.DataAccess.Entities.User", "Operator")
+                        .WithMany()
+                        .HasForeignKey("OperatorId");
+
                     b.HasOne("SupervisorMobility.API.Entities.Plant", "Plant")
                         .WithMany()
                         .HasForeignKey("PlantId");
+
+                    b.HasOne("SupervisorMobility.API.DataAccess.Entities.User", "Supervisor")
+                        .WithMany()
+                        .HasForeignKey("SupervisorId");
 
                     b.Navigation("Area");
 
@@ -1353,7 +1380,11 @@ namespace SupervisorMobility.API.Migrations
 
                     b.Navigation("Operation");
 
+                    b.Navigation("Operator");
+
                     b.Navigation("Plant");
+
+                    b.Navigation("Supervisor");
                 });
 
             modelBuilder.Entity("SupervisorMobility.API.Entities.JobObservationConfig", b =>

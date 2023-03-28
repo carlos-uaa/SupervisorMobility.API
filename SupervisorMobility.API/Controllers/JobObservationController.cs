@@ -57,11 +57,14 @@ namespace SupervisorMobility.API.Controllers
 
 
         [HttpGet]
-        public async Task<ActionResult<IEnumerable<JobObservationDto>>> GetAllJobObservationsAsync()
+        public async Task<ActionResult<IEnumerable<JobObservationDto>>> GetAllJobObservationsAsync(bool includeLup = false)
         {
 
-            var allJobObservations = await _supervisorMobilityRepository.GetAllJobObservationsAsync();
-
+            var allJobObservations = await _supervisorMobilityRepository.GetAllJobObservationsAsync(includeLup);
+            if (includeLup)
+            {
+                return Ok(_mapper.Map<IEnumerable<JobObservationWithJustLupDto>>(allJobObservations));
+            }
             return Ok(_mapper.Map<IEnumerable<JobObservationDto>>(allJobObservations));
         }
 

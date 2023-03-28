@@ -739,13 +739,29 @@ namespace SupervisorMobility.API.Services
 
         #region JobObservationOperations
 
-        public async Task<IEnumerable<JobObservation>> GetAllJobObservationsAsync()
+        public async Task<IEnumerable<JobObservation>> GetAllJobObservationsAsync(bool includeLup)
         {
+
+            if (includeLup)
+            {
+                return await _context.JobObservations
+                    .Include(a => a.Area)
+                    .Include(p => p.Plant)
+                    .Include(d => d.Distribution)
+                    .Include(o => o.Operation)
+                    .Include(l => l.Lup)
+                    .Include(s => s.Supervisor)
+                    .Include(o => o.Operator)
+                     .OrderBy(c => c.JobObservationId).ToListAsync();
+            }
+
             return await _context.JobObservations
                 .Include(a => a.Area)
                 .Include(p => p.Plant)
                 .Include(d => d.Distribution)
                 .Include(o => o.Operation)
+                .Include(s => s.Supervisor)
+                .Include(o => o.Operator)
                  .OrderBy(c => c.JobObservationId).ToListAsync();
 
         }
@@ -756,6 +772,8 @@ namespace SupervisorMobility.API.Services
             {
                 return await _context.JobObservations
                     .Include(l => l.Lup)
+                    .Include(s => s.Supervisor)
+                    .Include(o => o.Operator)
                      .Where(p => p.JobObservationId == jobObservationId).FirstOrDefaultAsync();
             }
             //return whit info
@@ -764,6 +782,8 @@ namespace SupervisorMobility.API.Services
                 .Include(p => p.Plant)
                 .Include(d => d.Distribution)
                 .Include(o => o.Operation)
+                .Include(s => s.Supervisor)
+                .Include(o => o.Operator)
                  .Where(p => p.JobObservationId == jobObservationId).FirstOrDefaultAsync();
         }
 

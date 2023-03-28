@@ -22,7 +22,7 @@ else
     builder.Configuration.AddJsonFile("appsettings.json", optional: false, reloadOnChange: true);
 }
 // Add services to the container.
-
+ 
 builder.Host.UseSerilog();
 
 builder.Services.AddControllers(options =>

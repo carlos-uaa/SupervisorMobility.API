@@ -5,6 +5,7 @@ using SupervisorMobility.API.Models.JobObservationTypeDtos;
 using SupervisorMobility.API.Models.DistributionDtos;
 using SupervisorMobility.API.Models.OperationDtos;
 using SupervisorMobility.API.Models.PlantDtos;
+using SupervisorMobility.API.Models.Users;
 
 namespace SupervisorMobility.API.Models.JobObservationDtos
 {
@@ -16,6 +17,10 @@ namespace SupervisorMobility.API.Models.JobObservationDtos
         public DistributionWithoutNavigationPropertiesDto Distribution { get; set; } = new DistributionWithoutNavigationPropertiesDto();
         public OperationWithoutNavigationPropertiesDto Operation { get; set; } = new OperationWithoutNavigationPropertiesDto();
 
+        public UsersWhitoutNavigationDetails Supervisor { get; set; } = new UsersWhitoutNavigationDetails();
+        public UsersWhitoutNavigationDetails Operator { get; set; } = new UsersWhitoutNavigationDetails();
+
+
         public int JobObservationId { get; set; }
         public bool? IsActive { get; set; }
 
@@ -23,6 +28,8 @@ namespace SupervisorMobility.API.Models.JobObservationDtos
         public int? AreaId { get; set; }
         public int? DistributionId { get; set; }
         public int? OperationId { get; set; }
+        public int? SupervisorId { get; set; }
+        public int? OperatorId { get; set; }
 
         public DateTime? dateStart { get; set; }
         public DateTime? dateEnd { get; set; }
@@ -31,10 +38,6 @@ namespace SupervisorMobility.API.Models.JobObservationDtos
         public string? Justification { get; set; }
 
         public int? Status { get; set; }
-
-        public string? Observer { get; set; }
-        public string? Operator { get; set; }
-
         public int? Option { get; set; }
         public string? Anomaly { get; set; }
 
