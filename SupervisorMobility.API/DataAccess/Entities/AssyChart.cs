@@ -9,9 +9,9 @@ namespace SupervisorMobility.API.Entities
         [Key, DatabaseGenerated(DatabaseGeneratedOption.Identity)]
         public int AssyChardId { get; set; }
         public bool? IsActive { get; set; }
-        public string GOS { get; set; } = string.Empty;
-        public string CCP { get; set; } = string.Empty;
-        public string HOE { get; set; } = string.Empty;
+        public string? GOS { get; set; } = string.Empty;
+        public string? CCP { get; set; } = string.Empty;
+        public string? HOE { get; set; } = string.Empty;
 
         [Column(TypeName = "Date")]
         public DateTime CreationDate { get; set; }
