@@ -167,7 +167,7 @@ namespace SupervisorMobility.API.Controllers
         {
 
 
-            string file = Directory.GetCurrentDirectory().ToString() + "\\uploads\\users" + FileInfo.StorageFileName;
+            string file = Directory.GetCurrentDirectory().ToString() + "\\uploads\\assycharts" + FileInfo.StorageFileName;
             List<AssyChartDataToBulk> DataList = new List<AssyChartDataToBulk>();
 
             Regex regexcsv = new Regex(".+\\.csv", RegexOptions.Compiled);

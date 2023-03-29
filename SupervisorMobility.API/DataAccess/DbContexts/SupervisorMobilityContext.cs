@@ -368,15 +368,16 @@ namespace SupervisorMobility.API.Context
                 {
                     AssyChardId = 1,
                     IsActive = true,
-                    GOS = "CSV TX2300-5NA_1",
-                    CCP = "TX2300-5NA_1",
-                    HOE = "TX2300-5NA_1",
-                    CreationDate = new DateTime(),
+                    GOS = "01. PRESS/01. MANUFACTURA/01. X247",
+                    CCP = "01. PRESS/01. CCP",
+                    HOE = "1§01. PRESS/5§01. CALIDAD",
+                    CreationDate = DateTime.Parse("2023-02-25T12:55:58.303-06:00"),
                     ModificationDate = new DateTime(),
                     ProductId = 1,
                     PlantId = 1,
                     AreaId = 1,
-                    DistributionId = 1
+                    DistributionId = 1,
+                    OperationId = 1
                 });
 
             modelBuilder.Entity<Glosary>()

@@ -45,7 +45,7 @@ namespace SupervisorMobility.API.Services
         void DeletePlant(Plant plant);
         #endregion
         #region AreaOperations
-        Task<IEnumerable<Area>> GetAreasForPlantAsync(int plantId);
+        Task<IEnumerable<Area>> GetAreasForPlantAsync(int plantId, bool includeCollections = false);
         Task<Area?> GetAreaForPlantAsync(int plantId,
             int areaId, bool includeOperations = false);
         Task<Area?> GetAreaForPlantByCodeAndDescriptionAsync(int plantId,
@@ -123,6 +123,7 @@ namespace SupervisorMobility.API.Services
         #region AssyChart
         Task<IEnumerable<AssyChart>> GetAllAssyChartsAsync();
         Task<AssyChart?> GetAssyChartAsync(int asssychartId);
+        Task<AssyChart?> GetAssyChartForJobObservationAsync(int PlantId, int AreaId, int DistributionId, int OperationId);
         Task<AssyChart?> GetAssyChartAdvanceAsync(string GOS, string CCP, string HOE, int PlantId, int AreaId, int DistributionId, int OperationId, int Productid);
         Task<IEnumerable<AssyChart>> GetAssyChartByPlantAsync(int plantId);
         Task<IEnumerable<AssyChart>> GetAssyChartByAreaAsync(int plantId, int areaId);

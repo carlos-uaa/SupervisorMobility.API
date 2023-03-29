@@ -1,5 +1,7 @@
-﻿using DocumentFormat.OpenXml.Presentation;
+﻿using DocumentFormat.OpenXml.Drawing;
+using DocumentFormat.OpenXml.Presentation;
 using DocumentFormat.OpenXml.Spreadsheet;
+using Irony.Parsing;
 using Microsoft.EntityFrameworkCore;
 using SupervisorMobility.API.Context;
 using SupervisorMobility.API.DataAccess.Entities;
@@ -180,8 +182,15 @@ namespace SupervisorMobility.API.Services
         }
         #endregion
         #region AreaOperations
-        public async Task<IEnumerable<Area>> GetAreasForPlantAsync(int plantId)
+        public async Task<IEnumerable<Area>> GetAreasForPlantAsync(int plantId, bool includeCollections = false)
         {
+
+            if (includeCollections)
+            {
+                return await _context.Areas.Include(a => a.Distributions)
+              .Where(a => a.PlantId == plantId).ToListAsync();
+            }
+
             return await _context.Areas
                 .Where(a => a.PlantId == plantId).ToListAsync();
         }
@@ -576,6 +585,12 @@ namespace SupervisorMobility.API.Services
         {
             return await _context.AssyCharts.Include(o => o.Operation)
                  .Where(p => p.AssyChardId == asssychartId).FirstOrDefaultAsync();
+        }
+        public async Task<AssyChart?> GetAssyChartForJobObservationAsync(int PlantId, int AreaId, int DistributionId, int OperationId)
+        {
+            return await _context.AssyCharts
+            .Where(p => p.PlantId == PlantId && p.AreaId == AreaId && p.DistributionId == DistributionId && p.OperationId == OperationId).FirstOrDefaultAsync();
+
         }
         public async Task<IEnumerable<AssyChart>> GetAssyChartByPlantAsync(int plantId)
         {

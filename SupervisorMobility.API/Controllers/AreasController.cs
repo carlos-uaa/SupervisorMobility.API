@@ -27,18 +27,29 @@ namespace SupervisorMobility.API.Controllers
         }
 
         [HttpGet]
-        public async Task<ActionResult<IEnumerable<AreaWithoutNavigationPropertiesDto>>> GetAreas(
-                    int plantId)
+        public async Task<ActionResult<IEnumerable<AreaWithJustOperationsDto>>> GetAreas(
+                    int plantId, bool includeCollections = false)
         {
             if (!await _supervisorMobilityRepository.PlantExistAsync(plantId))
             {
                 return NotFound();
             }
 
-            var areasForPlant = await _supervisorMobilityRepository
-                .GetAreasForPlantAsync(plantId);
+            if (includeCollections)
+            {
+                var areasForPlantWhitDistributions = await _supervisorMobilityRepository.GetAreasForPlantAsync(plantId, includeCollections);
+                return Ok(_mapper.Map<IEnumerable<AreaWithJustOperationsDto>>(areasForPlantWhitDistributions));
 
-            return Ok(_mapper.Map<IEnumerable<AreaWithoutNavigationPropertiesDto>>(areasForPlant));
+            }
+            else
+            {
+                var areasForPlant = await _supervisorMobilityRepository
+                                .GetAreasForPlantAsync(plantId);
+                return Ok(_mapper.Map<IEnumerable<AreaWithoutNavigationPropertiesDto>>(areasForPlant));
+
+            }
+
+
         }
 
         [HttpGet("{areaId}", Name = "GetArea")]
