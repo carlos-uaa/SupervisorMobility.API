@@ -135,12 +135,12 @@ namespace SupervisorMobility.API.Context
                     OperatorId = 2,
                     Time1HOE = "10 min",
                     Time2HOE = "20 min",
-                    Models = "P71A|X247|P71A|X247|P71A",
-                    Cicles = "1 min|2 min|3 min|4 min| 5 min",
+                    Models = "1|1|1|1|1",
+                    Cicles = "3000|2500|3000|4000|1500",
                     SsvCommentary = "Senior Supervisor Commentary",
                     OperatorCommentary = "Operator Commentary",
-                    SsvSignature = "Pedro",
-                    OperatorSignature = "Juan"
+                    SsvSignature = "",
+                    OperatorSignature = ""
 
                 });; ; ;
 
