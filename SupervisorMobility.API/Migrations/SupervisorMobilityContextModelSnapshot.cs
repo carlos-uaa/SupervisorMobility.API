@@ -336,7 +336,7 @@ namespace SupervisorMobility.API.Migrations
                         {
                             UserId = 1,
                             AreaId = 1,
-                            CreatedDate = new DateTime(2023, 3, 28, 17, 16, 27, 823, DateTimeKind.Local).AddTicks(4125),
+                            CreatedDate = new DateTime(2023, 3, 31, 9, 14, 42, 478, DateTimeKind.Local).AddTicks(8882),
                             GroupId = 1,
                             IsActive = true,
                             IsAdmin = false,
@@ -351,7 +351,7 @@ namespace SupervisorMobility.API.Migrations
                         {
                             UserId = 2,
                             AreaId = 1,
-                            CreatedDate = new DateTime(2023, 3, 28, 17, 16, 27, 823, DateTimeKind.Local).AddTicks(4128),
+                            CreatedDate = new DateTime(2023, 3, 31, 9, 14, 42, 478, DateTimeKind.Local).AddTicks(8887),
                             GroupId = 1,
                             IsActive = true,
                             IsAdmin = false,
@@ -376,7 +376,6 @@ namespace SupervisorMobility.API.Migrations
                         .HasColumnType("int");
 
                     b.Property<string>("CCP")
-                        .IsRequired()
                         .HasColumnType("nvarchar(max)");
 
                     b.Property<DateTime>("CreationDate")
@@ -386,11 +385,9 @@ namespace SupervisorMobility.API.Migrations
                         .HasColumnType("int");
 
                     b.Property<string>("GOS")
-                        .IsRequired()
                         .HasColumnType("nvarchar(max)");
 
                     b.Property<string>("HOE")
-                        .IsRequired()
                         .HasColumnType("nvarchar(max)");
 
                     b.Property<bool?>("IsActive")
@@ -429,13 +426,14 @@ namespace SupervisorMobility.API.Migrations
                         {
                             AssyChardId = 1,
                             AreaId = 1,
-                            CCP = "TX2300-5NA_1",
-                            CreationDate = new DateTime(1, 1, 1, 0, 0, 0, 0, DateTimeKind.Unspecified),
+                            CCP = "01. PRESS/01. CCP",
+                            CreationDate = new DateTime(2023, 2, 25, 12, 55, 58, 303, DateTimeKind.Local),
                             DistributionId = 1,
-                            GOS = "CSV TX2300-5NA_1",
-                            HOE = "TX2300-5NA_1",
+                            GOS = "01. PRESS/01. MANUFACTURA/01. X247",
+                            HOE = "1§01. PRESS/5§01. CALIDAD",
                             IsActive = true,
                             ModificationDate = new DateTime(1, 1, 1, 0, 0, 0, 0, DateTimeKind.Unspecified),
+                            OperationId = 1,
                             PlantId = 1,
                             ProductId = 1
                         });
@@ -874,21 +872,21 @@ namespace SupervisorMobility.API.Migrations
                         {
                             JobObservationId = 1,
                             AreaId = 1,
-                            Cicles = "1 min|2 min|3 min|4 min| 5 min",
-                            DateEnd = new DateTime(2023, 3, 28, 17, 16, 27, 823, DateTimeKind.Local).AddTicks(3789),
-                            DateFinalized = new DateTime(2023, 3, 28, 17, 16, 27, 823, DateTimeKind.Local).AddTicks(3789),
-                            DateStart = new DateTime(2023, 3, 28, 17, 16, 27, 823, DateTimeKind.Local).AddTicks(3776),
+                            Cicles = "3000|2500|3000|4000|1500",
+                            DateEnd = new DateTime(2023, 3, 31, 9, 14, 42, 478, DateTimeKind.Local).AddTicks(8146),
+                            DateFinalized = new DateTime(2023, 3, 31, 9, 14, 42, 478, DateTimeKind.Local).AddTicks(8147),
+                            DateStart = new DateTime(2023, 3, 31, 9, 14, 42, 478, DateTimeKind.Local).AddTicks(8126),
                             DistributionId = 1,
                             IsActive = true,
-                            Models = "P71A|X247|P71A|X247|P71A",
+                            Models = "1|1|1|1|1",
                             OperationId = 1,
                             OperatorCommentary = "Operator Commentary",
                             OperatorId = 2,
-                            OperatorSignature = "Juan",
+                            OperatorSignature = "",
                             Option = 1,
                             PlantId = 1,
                             SsvCommentary = "Senior Supervisor Commentary",
-                            SsvSignature = "Pedro",
+                            SsvSignature = "",
                             Status = 1,
                             SupervisorId = 1,
                             Time1HOE = "10 min",
@@ -1048,8 +1046,8 @@ namespace SupervisorMobility.API.Migrations
                         new
                         {
                             LupId = 1,
-                            CreatedDate = new DateTime(2023, 3, 28, 17, 16, 27, 823, DateTimeKind.Local).AddTicks(4140),
-                            EndDate = new DateTime(2023, 3, 28, 17, 16, 27, 823, DateTimeKind.Local).AddTicks(4141),
+                            CreatedDate = new DateTime(2023, 3, 31, 9, 14, 42, 478, DateTimeKind.Local).AddTicks(8907),
+                            EndDate = new DateTime(2023, 3, 31, 9, 14, 42, 478, DateTimeKind.Local).AddTicks(8908),
                             IsActive = true,
                             JobObservationId = 1,
                             Observer = "Pedro",
