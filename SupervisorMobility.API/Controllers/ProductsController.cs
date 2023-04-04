@@ -84,45 +84,21 @@ namespace SupervisorMobility.API.Controllers
                 createProductToReturn);
         }
 
-        [HttpPost("{productId}/distributions")]
-        public async Task<ActionResult<DistributionWithoutNavigationPropertiesDto>> CreateDistribution(int productId,
-            int plantId,
-            int areaId,
-            DistributionForCreationDto distribution)
+       
+
+        [HttpGet("{productId}/distributions/{distributionId}")]
+        public async Task<ActionResult<DistributionWithNavigationPropertiesDto>> GetOneDistributionOnlyById(
+          int distributionId, bool includeCollections = false)
         {
-            if (!await _supervisorMobilityRepository.PlantExistAsync(plantId))
+
+            var distribution = await _supervisorMobilityRepository.GetDistributionOnlyIdAsync(distributionId);
+            if (distribution == null)
             {
-                return NotFound("No Plant Exist");
+                return NotFound();
             }
 
-            if (!await _supervisorMobilityRepository.AreaExistAsync(areaId))
-            {
-                return NotFound("No Area Exist");
-            }
+            return Ok(_mapper.Map<DistributionWithoutNavigationPropertiesDto>(distribution));
 
-            var finalDistribution = _mapper.Map<Distribution>(distribution);
-
-            await _supervisorMobilityRepository.AddDistributionForPlantAsync(plantId,
-                areaId, finalDistribution);
-
-            //add distribution to product
-
-            await _supervisorMobilityRepository.AddDistributionForProductAsync(productId, finalDistribution);
-
-
-            await _supervisorMobilityRepository.SaveChangesAsync();
-
-            var createdDistributionToReturn =
-                _mapper.Map<DistributionWithoutNavigationPropertiesDto>(finalDistribution);
-
-            return CreatedAtRoute("GetDistribution",
-                new
-                {
-                    plantId,
-                    areaId,
-                    distributionId = createdDistributionToReturn.DistributionId
-                },
-                createdDistributionToReturn);
         }
 
         [HttpPost("{productId}/distributions/add")]
@@ -166,11 +142,71 @@ namespace SupervisorMobility.API.Controllers
                 createdDistributionToReturn);
         }
 
-        [HttpPost("{productId}/distributions/remove")]
-        public async Task<ActionResult<DistributionWithoutNavigationPropertiesDto>> RemoveDistribution(int productId,
-            int distributionId)
+        [HttpPost("{productId}/distributions/create")]
+        public async Task<ActionResult<DistributionWithoutNavigationPropertiesDto>> CreateDistribution(int productId,
+           int plantId,
+           int areaId,
+           DistributionForCreationDto distribution)
         {
-           
+            if (!await _supervisorMobilityRepository.PlantExistAsync(plantId))
+            {
+                return NotFound("No Plant Exist");
+            }
+
+            if (!await _supervisorMobilityRepository.AreaExistAsync(areaId))
+            {
+                return NotFound("No Area Exist");
+            }
+
+            var finalDistribution = _mapper.Map<Distribution>(distribution);
+
+            await _supervisorMobilityRepository.AddDistributionForPlantAsync(plantId,
+                areaId, finalDistribution);
+
+            //add distribution to product
+
+            await _supervisorMobilityRepository.AddDistributionForProductAsync(productId, finalDistribution);
+
+
+            await _supervisorMobilityRepository.SaveChangesAsync();
+
+            var createdDistributionToReturn =
+                _mapper.Map<DistributionWithoutNavigationPropertiesDto>(finalDistribution);
+
+            return CreatedAtRoute("GetDistribution",
+                new
+                {
+                    plantId,
+                    areaId,
+                    distributionId = createdDistributionToReturn.DistributionId
+                },
+                createdDistributionToReturn);
+        }
+
+        [HttpPut("{productId}/distributions/{distributionId}/update")]
+        public async Task<ActionResult> UpdateDistributionOnlyOne(
+           int distributionId,
+           DistributionForUpdateDto distribution)
+        {
+
+
+            var distributionEntity = await _supervisorMobilityRepository
+                .GetDistributionOnlyIdAsync(distributionId);
+            if (distributionEntity == null)
+            {
+                return NotFound();
+            }
+
+            _mapper.Map(distribution, distributionEntity);
+
+            await _supervisorMobilityRepository.SaveChangesAsync();
+
+            return Ok();
+        }
+
+        [HttpDelete("{productId}/distributions/{distributionId}/remove")]
+        public async Task<ActionResult> DeleteDistribution(int productId, int distributionId)
+        {
             if (!await _supervisorMobilityRepository.ProductExistAsync(productId))
             {
                 return NotFound("No product Exist");
@@ -190,6 +226,7 @@ namespace SupervisorMobility.API.Controllers
 
             return Ok(_mapper.Map<ProductWhitNavigationPropietiesDto>(product));
         }
+
 
         [HttpPut("{productId}")]
         public async Task<ActionResult> UpdateProduct(int productId,
@@ -251,24 +288,7 @@ namespace SupervisorMobility.API.Controllers
             return Ok();
         }
 
-        [HttpDelete("{productId}/distributions/{distributionId}")]
-        public async Task<ActionResult> DeleteDistribution(int productId, int distributionId)
-        {
-            var productEntity = await _assyChartService.FetchProductAsync(productId);
-            if (productEntity == null)
-            {
-                return NotFound();
-            }
-
-
-
-            //remove distribution from collection
-
-            //await _assyChartService.RemoveProductAsync(productEntity);
-
-            return Ok();
-        }
-
+       
 
     }
 }
