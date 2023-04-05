@@ -126,6 +126,7 @@ namespace SupervisorMobility.API.Context
                     AreaId = 1,
                     DistributionId = 1,
                     OperationId = 1,
+                    Type= 2,
                     DateStart = DateTime.Now,
                     DateEnd = DateTime.Now,
                     DateFinalized = DateTime.Now,
