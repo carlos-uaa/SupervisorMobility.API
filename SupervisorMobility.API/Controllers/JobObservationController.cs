@@ -1,11 +1,13 @@
 ﻿using AutoMapper;
 using Microsoft.AspNetCore.Mvc;
+using SupervisorMobility.API.DataAccess.Entities;
 using SupervisorMobility.API.Entities;
 using SupervisorMobility.API.Models.AssyChart;
 using SupervisorMobility.API.Models.JobObservationDtos;
 using SupervisorMobility.API.Models.OperationDtos;
 using SupervisorMobility.API.Models.PlantDtos;
 using SupervisorMobility.API.Services;
+using System.Diagnostics;
 
 namespace SupervisorMobility.API.Controllers
 {
@@ -117,6 +119,26 @@ namespace SupervisorMobility.API.Controllers
             if (jobObservationEntity == null)
             {
                 return NotFound("Job Observation Not Found");
+            }
+
+            if(jobObservationEntity.Status == 4)
+            {
+                //crear notificacion
+            }
+
+            //Crear copia de la version actual en base de datos
+            
+           var HistoryToAdd = _mapper.Map<JobObservationVersion>(jobObservationEntity);
+
+           if(HistoryToAdd != null)
+            {
+                Debug.WriteLine("Id DB Version");
+                Debug.WriteLine(HistoryToAdd.JobObservationVersionId.ToString());
+                Debug.WriteLine("Id JobObservation: ");
+                Debug.WriteLine(HistoryToAdd.JobObservationVersionId.ToString());
+                //add to 
+                //si funciona esto va abajo y primero se actualiza,
+                //agrego la version sobreel ya actualizado
             }
 
             _mapper.Map(jobObservationForUpdate, jobObservationEntity);

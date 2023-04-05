@@ -29,7 +29,7 @@ namespace SupervisorMobility.API.Context
 
         public DbSet<FileUpload> Files {  get; set; }
         public DbSet<Guides> Guides { get; set; }
-
+        public DbSet<JobObservationVersion> JobObservationHistory { get; set; }
 
         #endregion
 
@@ -100,6 +100,10 @@ namespace SupervisorMobility.API.Context
                 .HasDefaultValue(true); 
             
             modelBuilder.Entity<Guides>()
+                .Property(p => p.IsActive)
+                .HasDefaultValue(true);
+
+            modelBuilder.Entity<JobObservationVersion>()
                 .Property(p => p.IsActive)
                 .HasDefaultValue(true);
 

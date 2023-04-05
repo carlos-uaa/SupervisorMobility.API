@@ -188,6 +188,95 @@ namespace SupervisorMobility.API.Migrations
                     b.ToTable("Guides");
                 });
 
+            modelBuilder.Entity("SupervisorMobility.API.DataAccess.Entities.JobObservationVersion", b =>
+                {
+                    b.Property<int>("JobObservationVersionId")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("int");
+
+                    SqlServerPropertyBuilderExtensions.UseIdentityColumn(b.Property<int>("JobObservationVersionId"));
+
+                    b.Property<string>("Anomaly")
+                        .HasColumnType("nvarchar(max)");
+
+                    b.Property<int?>("AreaId")
+                        .HasColumnType("int");
+
+                    b.Property<string>("Cicles")
+                        .HasColumnType("nvarchar(max)");
+
+                    b.Property<DateTime?>("DateEnd")
+                        .HasColumnType("datetime2");
+
+                    b.Property<DateTime?>("DateFinalized")
+                        .HasColumnType("datetime2");
+
+                    b.Property<DateTime?>("DateModification")
+                        .HasColumnType("datetime2");
+
+                    b.Property<DateTime?>("DateStart")
+                        .HasColumnType("datetime2");
+
+                    b.Property<int?>("DistributionId")
+                        .HasColumnType("int");
+
+                    b.Property<bool?>("IsActive")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("bit")
+                        .HasDefaultValue(true);
+
+                    b.Property<int>("JobObservationId")
+                        .HasColumnType("int");
+
+                    b.Property<string>("Justification")
+                        .HasColumnType("nvarchar(max)");
+
+                    b.Property<string>("Models")
+                        .HasColumnType("nvarchar(max)");
+
+                    b.Property<int?>("OperationId")
+                        .HasColumnType("int");
+
+                    b.Property<string>("OperatorCommentary")
+                        .HasColumnType("nvarchar(max)");
+
+                    b.Property<int?>("OperatorId")
+                        .HasColumnType("int");
+
+                    b.Property<string>("OperatorSignature")
+                        .HasColumnType("nvarchar(max)");
+
+                    b.Property<int?>("Option")
+                        .HasColumnType("int");
+
+                    b.Property<int?>("PlantId")
+                        .HasColumnType("int");
+
+                    b.Property<string>("SsvCommentary")
+                        .HasColumnType("nvarchar(max)");
+
+                    b.Property<string>("SsvSignature")
+                        .HasColumnType("nvarchar(max)");
+
+                    b.Property<int?>("Status")
+                        .HasColumnType("int");
+
+                    b.Property<int?>("SupervisorId")
+                        .HasColumnType("int");
+
+                    b.Property<string>("Time1HOE")
+                        .HasColumnType("nvarchar(max)");
+
+                    b.Property<string>("Time2HOE")
+                        .HasColumnType("nvarchar(max)");
+
+                    b.HasKey("JobObservationVersionId");
+
+                    b.HasIndex("JobObservationId");
+
+                    b.ToTable("JobObservationHistory");
+                });
+
             modelBuilder.Entity("SupervisorMobility.API.DataAccess.Entities.Product", b =>
                 {
                     b.Property<int>("ProductId")
@@ -336,7 +425,7 @@ namespace SupervisorMobility.API.Migrations
                         {
                             UserId = 1,
                             AreaId = 1,
-                            CreatedDate = new DateTime(2023, 3, 31, 9, 14, 42, 478, DateTimeKind.Local).AddTicks(8882),
+                            CreatedDate = new DateTime(2023, 4, 5, 10, 14, 59, 986, DateTimeKind.Local).AddTicks(9962),
                             GroupId = 1,
                             IsActive = true,
                             IsAdmin = false,
@@ -351,7 +440,7 @@ namespace SupervisorMobility.API.Migrations
                         {
                             UserId = 2,
                             AreaId = 1,
-                            CreatedDate = new DateTime(2023, 3, 31, 9, 14, 42, 478, DateTimeKind.Local).AddTicks(8887),
+                            CreatedDate = new DateTime(2023, 4, 5, 10, 14, 59, 986, DateTimeKind.Local).AddTicks(9969),
                             GroupId = 1,
                             IsActive = true,
                             IsAdmin = false,
@@ -873,9 +962,9 @@ namespace SupervisorMobility.API.Migrations
                             JobObservationId = 1,
                             AreaId = 1,
                             Cicles = "3000|2500|3000|4000|1500",
-                            DateEnd = new DateTime(2023, 3, 31, 9, 14, 42, 478, DateTimeKind.Local).AddTicks(8146),
-                            DateFinalized = new DateTime(2023, 3, 31, 9, 14, 42, 478, DateTimeKind.Local).AddTicks(8147),
-                            DateStart = new DateTime(2023, 3, 31, 9, 14, 42, 478, DateTimeKind.Local).AddTicks(8126),
+                            DateEnd = new DateTime(2023, 4, 5, 10, 14, 59, 986, DateTimeKind.Local).AddTicks(9257),
+                            DateFinalized = new DateTime(2023, 4, 5, 10, 14, 59, 986, DateTimeKind.Local).AddTicks(9257),
+                            DateStart = new DateTime(2023, 4, 5, 10, 14, 59, 986, DateTimeKind.Local).AddTicks(9238),
                             DistributionId = 1,
                             IsActive = true,
                             Models = "1|1|1|1|1",
@@ -1015,6 +1104,9 @@ namespace SupervisorMobility.API.Migrations
                     b.Property<int>("JobObservationId")
                         .HasColumnType("int");
 
+                    b.Property<int?>("JobObservationVersionId")
+                        .HasColumnType("int");
+
                     b.Property<string>("Justification")
                         .HasColumnType("nvarchar(max)");
 
@@ -1040,14 +1132,16 @@ namespace SupervisorMobility.API.Migrations
 
                     b.HasIndex("JobObservationId");
 
+                    b.HasIndex("JobObservationVersionId");
+
                     b.ToTable("Lup");
 
                     b.HasData(
                         new
                         {
                             LupId = 1,
-                            CreatedDate = new DateTime(2023, 3, 31, 9, 14, 42, 478, DateTimeKind.Local).AddTicks(8907),
-                            EndDate = new DateTime(2023, 3, 31, 9, 14, 42, 478, DateTimeKind.Local).AddTicks(8908),
+                            CreatedDate = new DateTime(2023, 4, 5, 10, 14, 59, 986, DateTimeKind.Local).AddTicks(9985),
+                            EndDate = new DateTime(2023, 4, 5, 10, 14, 59, 986, DateTimeKind.Local).AddTicks(9986),
                             IsActive = true,
                             JobObservationId = 1,
                             Observer = "Pedro",
@@ -1273,6 +1367,15 @@ namespace SupervisorMobility.API.Migrations
                     b.Navigation("FileUpload");
                 });
 
+            modelBuilder.Entity("SupervisorMobility.API.DataAccess.Entities.JobObservationVersion", b =>
+                {
+                    b.HasOne("SupervisorMobility.API.Entities.JobObservation", null)
+                        .WithMany("History")
+                        .HasForeignKey("JobObservationId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
+                });
+
             modelBuilder.Entity("SupervisorMobility.API.DataAccess.Entities.User", b =>
                 {
                     b.HasOne("SupervisorMobility.API.DataAccess.Entities.Area", "Area")
@@ -1411,6 +1514,10 @@ namespace SupervisorMobility.API.Migrations
                         .HasForeignKey("JobObservationId")
                         .OnDelete(DeleteBehavior.Cascade)
                         .IsRequired();
+
+                    b.HasOne("SupervisorMobility.API.DataAccess.Entities.JobObservationVersion", null)
+                        .WithMany("Lup")
+                        .HasForeignKey("JobObservationVersionId");
                 });
 
             modelBuilder.Entity("SupervisorMobility.API.Entities.Operation", b =>
@@ -1434,6 +1541,11 @@ namespace SupervisorMobility.API.Migrations
                     b.Navigation("Operations");
                 });
 
+            modelBuilder.Entity("SupervisorMobility.API.DataAccess.Entities.JobObservationVersion", b =>
+                {
+                    b.Navigation("Lup");
+                });
+
             modelBuilder.Entity("SupervisorMobility.API.Entities.ChecklistCategory", b =>
                 {
                     b.Navigation("ChecklistQuestions");
@@ -1441,6 +1553,8 @@ namespace SupervisorMobility.API.Migrations
 
             modelBuilder.Entity("SupervisorMobility.API.Entities.JobObservation", b =>
                 {
+                    b.Navigation("History");
+
                     b.Navigation("Lup");
                 });
 

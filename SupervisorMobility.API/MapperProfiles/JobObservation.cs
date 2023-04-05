@@ -1,4 +1,5 @@
 ﻿using AutoMapper;
+using SupervisorMobility.API.DataAccess.Entities;
 
 namespace SupervisorMobility.API.Profiles
 {
@@ -11,6 +12,7 @@ namespace SupervisorMobility.API.Profiles
             CreateMap<Entities.JobObservation, Models.JobObservationDtos.JobObservationForUpdateDto>().ReverseMap();
             CreateMap<Entities.JobObservation, Models.JobObservationDtos.JobObservationWithoutNavigationPropertiesDto>().ReverseMap();
             CreateMap<Entities.JobObservation, Models.JobObservationDtos.JobObservationWithJustLupDto>().ReverseMap();
+            CreateMap<Entities.JobObservation, JobObservationVersion>().ReverseMap();
         }
     }
 }
