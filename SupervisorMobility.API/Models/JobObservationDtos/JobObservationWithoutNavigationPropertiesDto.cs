@@ -11,6 +11,7 @@
         public int? OperationId { get; set; }
         public int? SupervisorId { get; set; }
         public int? OperatorId { get; set; }
+        public int? Type { get; set; }
         public DateTime? dateStart { get; set; }
         public DateTime? dateEnd { get; set; }
         public DateTime? DateFinalized { get; set; }

@@ -30,6 +30,7 @@ namespace SupervisorMobility.API.Models.JobObservationDtos
         public int? OperationId { get; set; }
         public int? SupervisorId { get; set; }
         public int? OperatorId { get; set; }
+        public int? Type { get; set; }
 
         public DateTime? dateStart { get; set; }
         public DateTime? dateEnd { get; set; }
