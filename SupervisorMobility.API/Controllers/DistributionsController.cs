@@ -108,6 +108,8 @@ namespace SupervisorMobility.API.Controllers
 
         }
 
+       
+
         [HttpPost]
         public async Task<ActionResult<DistributionWithoutNavigationPropertiesDto>> CreateDistribution(
             int plantId,
@@ -172,6 +174,8 @@ namespace SupervisorMobility.API.Controllers
 
             return Ok();
         }
+
+       
 
         [HttpPatch("{distributionid}")]
         public async Task<ActionResult> PartiallyUpdateDistribution(

@@ -59,6 +59,7 @@ namespace SupervisorMobility.API.Services
         Task<IEnumerable<Distribution>> GetDistributionsForAreaAsync(int areaId, bool includecollections = false);
         
         Task<Distribution?> GetDistributionForAreaAsync(int areaId, int distributionId, bool includeCollections = false);
+        Task<Distribution?> GetDistributionOnlyIdAsync(int distributionId, bool includeCollections = false);
         Task<Distribution?> GetDistributionForAreaByCodeAndDescriptionAsync(int areaId, string code, string description);
       
         Task AddDistributionForPlantAsync(int plantId, int areaId, Distribution distribution);
