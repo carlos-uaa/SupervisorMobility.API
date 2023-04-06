@@ -1,4 +1,5 @@
-﻿using DocumentFormat.OpenXml.Drawing;
+﻿using DocumentFormat.OpenXml.Bibliography;
+using DocumentFormat.OpenXml.Drawing;
 using DocumentFormat.OpenXml.Presentation;
 using DocumentFormat.OpenXml.Spreadsheet;
 using Irony.Parsing;
@@ -267,7 +268,7 @@ namespace SupervisorMobility.API.Services
             return await _context.Distributions
                 .Where(o => o.AreaId == areaId && o.DistributionId == distributionId)
                 .FirstOrDefaultAsync();
-        }   
+        }
         public async Task<Distribution?> GetDistributionOnlyIdAsync(int distributionId, bool includeCollections = false)
         {
             if (includeCollections)
@@ -288,24 +289,24 @@ namespace SupervisorMobility.API.Services
                 .Where(o => o.AreaId == areaId && o.Code == code && o.Description == description)
                 .FirstOrDefaultAsync();
         }
-        public async Task AddProductForDistributionAsync(int areaId, int distributionId, Product product)
-        {
-            //usar metodo de include distribution un producs
+        // public async Task AddProductForDistributionAsync(int areaId, int distributionId, Product product)
+        //{
+        //usar metodo de include distribution un producs
 
-            //var distribution = await GetDistributionForAreaAsync(areaId, distributionId, true);
-            //if (distribution != null)
-            //{
-            //    if (distribution.Products != null)
-            //    {
-            //        distribution.Products.Add(product);
-            //    }
-            //    else {
-            //        distribution.Products = new List<Product>();
-            //        distribution.Products.Add(product);
-            //    }
+        //var distribution = await GetDistributionForAreaAsync(areaId, distributionId, true);
+        //if (distribution != null)
+        //{
+        //    if (distribution.Products != null)
+        //    {
+        //        distribution.Products.Add(product);
+        //    }
+        //    else {
+        //        distribution.Products = new List<Product>();
+        //        distribution.Products.Add(product);
+        //    }
 
-            //}
-        }
+        //}
+        // }
 
         public async Task AddDistributionForPlantAsync(int plantId, int areaId, Distribution distribution)
         {
@@ -534,7 +535,7 @@ namespace SupervisorMobility.API.Services
         public async Task RemoveDistributionForProductAsync(int productId, int distributionID)
         {
             var product = await GetProductAsync(productId, true);
-            if(product != null)
+            if (product != null)
             {
                 if (product.Distributions != null)
                 {
@@ -630,7 +631,7 @@ namespace SupervisorMobility.API.Services
 
         public async Task<IEnumerable<AssyChart>> GetAssyChartByDistributionAsync(int plantId, int areaId, int distributionId)
         {
-            return await _context.AssyCharts.Where(a => a.PlantId == plantId &&  a.AreaId == areaId && a.DistributionId == distributionId)
+            return await _context.AssyCharts.Where(a => a.PlantId == plantId && a.AreaId == areaId && a.DistributionId == distributionId)
                 .Include(a => a.Area)
                 .Include(p => p.Plant)
                 .Include(d => d.Distribution)
@@ -666,15 +667,83 @@ namespace SupervisorMobility.API.Services
             _context.AssyCharts.Remove(assyChart);
         }
         #endregion
+        #region HistoryJobObservation
+        public async Task<JobObservationVersion?> GetHistoryJobObservationAsync(int HistoryJobObservationId)
+        {
+            return await _context.JobObservationHistory.Where(H => H.JobObservationVersionId == HistoryJobObservationId).FirstOrDefaultAsync();
+        }
 
 
+        public async Task<IEnumerable<JobObservationVersion>> GetAllHistoryJobObservationAsync(int jobObservationId)
+        {
+            return await _context.JobObservationHistory
+                 .Include(a => a.Area)
+                    .Include(p => p.Plant)
+                    .Include(d => d.Distribution)
+                    .Include(o => o.Operation)
+                    .Include(l => l.Lup)
+                    .Include(s => s.Supervisor)
+                    .Include(o => o.Operator)
+                    .Where(h => h.JobObservationId == jobObservationId)
+                 .OrderBy(c => c.JobObservationVersionId).ToListAsync();
+        }
+
+
+        public void AddHistoyJobObservationAsync(JobObservationVersion jobObservationHistory)
+        {
+            _context.JobObservationHistory.Add(jobObservationHistory);
+        }
+
+        public void DeleteHistoyJobObservationAsync(JobObservationVersion jobObservationHistory)
+        {
+            _context.JobObservationHistory.Remove(jobObservationHistory);
+        }
+
+        public async Task<bool> DeleteHistoyFromJobObservationAsync(JobObservationVersion HistoryVersion, JobObservation jobObservation)
+        {
+
+            if (jobObservation != null)
+            {
+                if (jobObservation.History != null)
+                {
+                    jobObservation.History.Remove(HistoryVersion);
+
+                    return !(jobObservation.History.Contains(HistoryVersion));
+                }
+            }
+
+            return false;
+        }
+        public async Task<bool> AddHistoyToJobObservationAsync(JobObservationVersion HistoryVersion, JobObservation jobObservation)
+        {
+
+            if (jobObservation != null)
+            {
+                if (jobObservation.History != null)
+                {
+                    jobObservation.History.Add(HistoryVersion);
+
+                }
+                else
+                {
+                    jobObservation.History = new List<JobObservationVersion>();
+                    jobObservation.History.Add(HistoryVersion);
+                }
+
+                return jobObservation.History.Contains(HistoryVersion);
+            }
+            else
+            {
+                return false;
+            }
+        }
+        #endregion
         #region Users
         public async Task<IEnumerable<User>> GetAllUsersAsync()
         {
             return await _context.Users
                  .OrderBy(c => c.UserId).ToListAsync();
         }
-
         public async Task<IEnumerable<User>> GetAllUsersWhitPlantAreaAndGroupAsync()
         {
             return await _context.Users
@@ -708,23 +777,20 @@ namespace SupervisorMobility.API.Services
 
         public async Task<bool> UserExistAdvanceAsync(string nombre, int nomina, int plantid, int areaid, int grupoid)
         {
-            return await _context.Users.AnyAsync(p => p.Name == nombre && p.Payroll == nomina && p.PlantId == plantid && p.AreaId == areaid && p.GroupId == grupoid) ;
+            return await _context.Users.AnyAsync(p => p.Name == nombre && p.Payroll == nomina && p.PlantId == plantid && p.AreaId == areaid && p.GroupId == grupoid);
 
         }
 
         public void AddUserAsync(User user)
         {
             _context.Users.Add(user);
-
         }
 
         public void DeleteUserAsync(User user)
         {
             _context.Users.Remove(user);
-
         }
         #endregion
-
         #region File
         public void AddUploadFile(FileUpload fileUplaod)
         {
@@ -733,7 +799,7 @@ namespace SupervisorMobility.API.Services
 
         public async Task<FileUpload?> GetFileUploadAsync(int fileid)
         {
-           
+
             return await _context.Files
                 .Where(p => p.FileUploadId == fileid).FirstOrDefaultAsync();
         }
@@ -743,7 +809,6 @@ namespace SupervisorMobility.API.Services
             _context.Files.Remove(fileUplaod);
         }
         #endregion
-
         #region Guide
 
         public async Task<Guides?> GetGuideAsync(int guideId, bool includeFile = false)
@@ -758,7 +823,7 @@ namespace SupervisorMobility.API.Services
                 .Where(p => p.GuideId == guideId).FirstOrDefaultAsync();
         }
 
-        public async  Task<IEnumerable<Guides>> GetAllGuides(bool includeFile = false)
+        public async Task<IEnumerable<Guides>> GetAllGuides(bool includeFile = false)
         {
             if (includeFile)
             {
@@ -778,7 +843,6 @@ namespace SupervisorMobility.API.Services
             _context.Guides.Remove(guide);
         }
         #endregion
-
         #region JobObservationOperations
 
         public async Task<IEnumerable<JobObservation>> GetAllJobObservationsAsync(bool includeLup)
@@ -808,6 +872,8 @@ namespace SupervisorMobility.API.Services
 
         }
 
+
+
         public async Task<JobObservation?> GetJobObservationAsync(int jobObservationId, bool includeLup)
         {
             if (includeLup)
@@ -816,6 +882,7 @@ namespace SupervisorMobility.API.Services
                     .Include(l => l.Lup)
                     .Include(s => s.Supervisor)
                     .Include(o => o.Operator)
+                    .Include(h => h.History)
                      .Where(p => p.JobObservationId == jobObservationId).FirstOrDefaultAsync();
             }
             //return whit info
@@ -844,7 +911,6 @@ namespace SupervisorMobility.API.Services
         }
 
         #endregion
-
         #region GlosaryOperations
 
         public async Task<IEnumerable<Glosary>> GetGlosaryAsync()
@@ -869,7 +935,6 @@ namespace SupervisorMobility.API.Services
             _context.Glosary.Remove(glosaryWord);
         }
         #endregion
-
         #region LupOperations
         public async Task<Lup?> GetLupAsync(int lupId, bool includeFile = false)
         {
@@ -927,7 +992,7 @@ namespace SupervisorMobility.API.Services
 
 
             }
-           
+
         }
         public async Task RemoveEvidenceForLupAsync(int lupId, int fileUploadId)
         {
@@ -942,7 +1007,6 @@ namespace SupervisorMobility.API.Services
             }
         }
         #endregion
-
         #region CommonOperations
         public async Task<bool> SaveChangesAsync()
         {

@@ -1,5 +1,4 @@
-﻿using Microsoft.EntityFrameworkCore.ChangeTracking;
-using SupervisorMobility.API.DataAccess.Entities;
+﻿using SupervisorMobility.API.DataAccess.Entities;
 using SupervisorMobility.API.Entities;
 using SupervisorMobility.API.Models.AssyChart;
 using SupervisorMobility.API.Models.FileUploadDto;
@@ -63,7 +62,7 @@ namespace SupervisorMobility.API.Services
         Task<Distribution?> GetDistributionForAreaByCodeAndDescriptionAsync(int areaId, string code, string description);
       
         Task AddDistributionForPlantAsync(int plantId, int areaId, Distribution distribution);
-        Task AddProductForDistributionAsync(int areaId, int distributionId, Product product);
+        //Task AddProductForDistributionAsync(int areaId, int distributionId, Product product);
         Task<bool> DistributionExistsAsync(int distributionId);
         Task<bool> DistributionExistsByCodeandDescriptionInAreaAsync(int areaId, string code, string description);
         void DeleteDistribution (Distribution distribution);
@@ -145,6 +144,18 @@ namespace SupervisorMobility.API.Services
         Task<bool> UserExistAdvanceAsync(string nombre, int nomina, int plantid, int areaid, int grupoid);
         void AddUserAsync(User user);
         void DeleteUserAsync(User user);
+        #endregion
+
+        #region HistoyJobObservation
+        Task<JobObservationVersion?> GetHistoryJobObservationAsync(int HistoryJobObservationId);
+        Task<IEnumerable<JobObservationVersion>> GetAllHistoryJobObservationAsync(int jobObservationId);
+        void AddHistoyJobObservationAsync(JobObservationVersion jobObservationHistory);
+        void DeleteHistoyJobObservationAsync(JobObservationVersion HistoryVersion);
+        Task<bool> DeleteHistoyFromJobObservationAsync(JobObservationVersion HistoryVersion, JobObservation jobObservation);
+        Task<bool> AddHistoyToJobObservationAsync(JobObservationVersion HistoryVersion, JobObservation jobObservation);
+
+
+
 
         #endregion
 

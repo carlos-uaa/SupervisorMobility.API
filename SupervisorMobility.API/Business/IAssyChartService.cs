@@ -58,8 +58,6 @@ namespace SupervisorMobility.API.Business
         Task UpdateAssyChartAsync(AssyChartForUpdateDto assyChartForUpdate, AssyChart assyChart);
         Task RemoveAssyChartAsync(AssyChart assyChart);
         #endregion
-
-
         #region Users
         Task<User?> FetchUserAsync(int userId);
 
@@ -67,15 +65,12 @@ namespace SupervisorMobility.API.Business
         Task UpdateUserAsync(UsersForUpdateDto userForUpdate, User user);
         Task RemoveUserAsync(User user);
         #endregion
-
-
         #region Files
         Task<FileUpload> CreateFileAsync(FileUploadForCreationDto newFile);
         Task<FileUpload?> FetchFileAsync(int fileId);
 
         Task RemoveFileAsync(FileUpload fileUpload);
         #endregion
-
         #region guides
         Task<Guides?> FetchGuideAsync(int guideId, bool includeFile = false);
 
@@ -83,6 +78,12 @@ namespace SupervisorMobility.API.Business
         Task UpdateGuideAsync(GuideForUpdateDto guideForUpdate, Guides guide);
         Task RemoveGuideAsync(Guides guide);
         #endregion
+        #region HistoryJobObservation
+        Task<JobObservationVersion?> FetchHistoryJobObservationAsync(int JobObservationHistoryId);
 
+        Task<JobObservationVersion> CreateHistoryJobObservationAsync(JobObservation jobObservation);
+        Task UpdateHistoryJobObservationAsync(JobObservationVersion userForUpdate, JobObservationVersion user);
+        Task RemoveHistoryJobObservationAsync(JobObservationVersion HistoryVersion, JobObservation jobObservation);
+        #endregion
     }
 }

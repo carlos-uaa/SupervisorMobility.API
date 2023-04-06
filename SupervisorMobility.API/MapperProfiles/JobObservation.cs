@@ -12,7 +12,8 @@ namespace SupervisorMobility.API.Profiles
             CreateMap<Entities.JobObservation, Models.JobObservationDtos.JobObservationForUpdateDto>().ReverseMap();
             CreateMap<Entities.JobObservation, Models.JobObservationDtos.JobObservationWithoutNavigationPropertiesDto>().ReverseMap();
             CreateMap<Entities.JobObservation, Models.JobObservationDtos.JobObservationWithJustLupDto>().ReverseMap();
-            CreateMap<Entities.JobObservation, JobObservationVersion>().ReverseMap();
+            CreateMap<JobObservationVersion, Entities.JobObservation>().ReverseMap();
+            CreateMap<JobObservationVersion, Models.JobObservationDtos.JobObservationHistoryDto>().ReverseMap();
         }
     }
 }

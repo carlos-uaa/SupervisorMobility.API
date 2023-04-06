@@ -1,19 +1,18 @@
-﻿using SupervisorMobility.API.Entities;
-using SupervisorMobility.API.Models.AreaDtos;
-using SupervisorMobility.API.Models.ChecklistCategoryDtos;
-using SupervisorMobility.API.Models.JobObservationTypeDtos;
+﻿using SupervisorMobility.API.Models.AreaDtos;
 using SupervisorMobility.API.Models.DistributionDtos;
+using SupervisorMobility.API.Models.LupDtos;
 using SupervisorMobility.API.Models.OperationDtos;
 using SupervisorMobility.API.Models.PlantDtos;
-using SupervisorMobility.API.Models.LupDtos;
+using SupervisorMobility.API.Models.Users;
 
 namespace SupervisorMobility.API.Models.JobObservationDtos
 {
-    public class JobObservationWithJustLupDto
+    public class JobObservationHistoryDto
     {
+        public int JobObservationVersionId { get; set; }
+        public DateTime? DateModification { get; set; }
+        public string? resumeVersion { get; set; }
 
-        public ICollection<LupDto> Lup { get; set; } = new List<LupDto>();
-        public ICollection<JobObservationHistoryDto> History { get; set; } = new List<JobObservationHistoryDto>();
 
         public int JobObservationId { get; set; }
         public bool? IsActive { get; set; }
@@ -22,17 +21,28 @@ namespace SupervisorMobility.API.Models.JobObservationDtos
         public int? AreaId { get; set; }
         public int? DistributionId { get; set; }
         public int? OperationId { get; set; }
+
         public int? SupervisorId { get; set; }
         public int? OperatorId { get; set; }
+
+        public PlantDto Plant { get; set; } = new PlantDto();
+        public AreaWithoutNavigationPropertiesDto? Area { get; set; } = new AreaWithoutNavigationPropertiesDto();
+        public DistributionWithoutNavigationPropertiesDto Distribution { get; set; } = new DistributionWithoutNavigationPropertiesDto();
+        public OperationWithoutNavigationPropertiesDto Operation { get; set; } = new OperationWithoutNavigationPropertiesDto();
+
+        public UsersWhitoutNavigationDetails Supervisor { get; set; } = new UsersWhitoutNavigationDetails();
+        public UsersWhitoutNavigationDetails Operator { get; set; } = new UsersWhitoutNavigationDetails();
+
+
+
         public int? Type { get; set; }
+
         public DateTime? dateStart { get; set; }
         public DateTime? dateEnd { get; set; }
         public DateTime? DateFinalized { get; set; }
 
         public string? Justification { get; set; }
-
         public int? Status { get; set; }
-
         public int? Option { get; set; }
         public string? Anomaly { get; set; }
 
@@ -46,6 +56,8 @@ namespace SupervisorMobility.API.Models.JobObservationDtos
         public string? OperatorCommentary { get; set; }
         public string? SsvSignature { get; set; }
         public string? OperatorSignature { get; set; }
+
+        public ICollection<LupDto> Lup { get; set; } = new List<LupDto>();
 
     }
 }

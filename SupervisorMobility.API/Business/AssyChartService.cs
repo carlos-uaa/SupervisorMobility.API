@@ -288,5 +288,33 @@ namespace SupervisorMobility.API.Business
         }
         #endregion
 
+        #region HistoyJobObservation
+        public async Task<JobObservationVersion?> FetchHistoryJobObservationAsync(int HistoyJobObservationId)
+        {
+            return await _repository.GetHistoryJobObservationAsync(HistoyJobObservationId);
+        }
+        public async Task<JobObservationVersion> CreateHistoryJobObservationAsync(JobObservation jobObservationEntity)
+        {
+            var HistoryToAdd = _mapper.Map<JobObservationVersion>(jobObservationEntity);
+
+            _repository.AddHistoyJobObservationAsync(HistoryToAdd);
+            await _repository.SaveChangesAsync();
+            return HistoryToAdd;
+        }
+
+
+        public Task UpdateHistoryJobObservationAsync(JobObservationVersion ForUpdate, JobObservationVersion JobObservation)
+        {
+            throw new NotImplementedException();
+        }
+
+        public Task RemoveHistoryJobObservationAsync(JobObservationVersion HistoryVersion, JobObservation jobObservation)
+        {
+            throw new NotImplementedException();
+        }
+
+
+        #endregion
+
     }
 }

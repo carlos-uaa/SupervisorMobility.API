@@ -12,16 +12,15 @@ namespace SupervisorMobility.API.Models.JobObservationDtos
         public int OperationId { get; set; }
         public int SupervisorId { get; set; }
         public int OperatorId { get; set; }
+
         public int? Type { get; set; }
+
         public DateTime? dateStart { get; set; }
         public DateTime? dateEnd { get; set; }
         public DateTime? DateFinalized { get; set; }
 
         public string? Justification { get; set; }
-
         public int? Status { get; set; }
-
-
         public int? Option { get; set; }
         public string? Anomaly { get; set; }
 
@@ -31,7 +30,6 @@ namespace SupervisorMobility.API.Models.JobObservationDtos
         public string? Models { get; set; }
         public string? Cicles { get; set; }
 
-        public string? IdentifiedActivity { get; set; }
         public string? SsvCommentary { get; set; }
         public string? OperatorCommentary { get; set; }
         public string? SsvSignature { get; set; }
