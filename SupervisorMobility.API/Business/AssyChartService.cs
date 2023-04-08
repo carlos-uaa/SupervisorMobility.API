@@ -4,11 +4,13 @@ using SupervisorMobility.API.Entities;
 using SupervisorMobility.API.Models.AssyChart;
 using SupervisorMobility.API.Models.FileUploadDto;
 using SupervisorMobility.API.Models.GuidesDtos;
+using SupervisorMobility.API.Models.NotificationDtos;
 using SupervisorMobility.API.Models.OperationDtos;
 using SupervisorMobility.API.Models.PlantDtos;
 using SupervisorMobility.API.Models.ProductDtos;
 using SupervisorMobility.API.Models.SupportDocumentTypeDtos;
 using SupervisorMobility.API.Models.Users;
+using SupervisorMobility.API.Profiles;
 using SupervisorMobility.API.Services;
 
 namespace SupervisorMobility.API.Business
@@ -125,6 +127,12 @@ namespace SupervisorMobility.API.Business
         {
             return await _repository.GetPlantsAsync();
         }
+
+        public async Task<IEnumerable<Notification>> GetNotifications()
+        {
+            return await _repository.GetAllNotificationsAsync();
+        }
+
         public async Task<Plant?> FetchPlantAsync(int plantId, bool includeAreas = false)
         {
             return await _repository.GetPlantAsync(plantId, includeAreas);
@@ -203,7 +211,6 @@ namespace SupervisorMobility.API.Business
         }
 
         #endregion
-
         #region User
 
         public async Task<User?> FetchUserAsync(int userId)
@@ -231,7 +238,6 @@ namespace SupervisorMobility.API.Business
         }
 
         #endregion
-
         #region File
         public async Task<FileUpload> CreateFileAsync(FileUploadForCreationDto newFile)
         {
@@ -258,7 +264,6 @@ namespace SupervisorMobility.API.Business
             await _repository.SaveChangesAsync();
         }
         #endregion
-
         #region Guide
         public async Task<Guides?> FetchGuideAsync(int guideId, bool includeFile = false)
         {
@@ -287,13 +292,12 @@ namespace SupervisorMobility.API.Business
             await _repository.SaveChangesAsync();
         }
         #endregion
-
         #region HistoyJobObservation
         public async Task<JobObservationVersion?> FetchHistoryJobObservationAsync(int HistoyJobObservationId)
         {
             return await _repository.GetHistoryJobObservationAsync(HistoyJobObservationId);
         }
-        public async Task<JobObservationVersion> CreateHistoryJobObservationAsync(JobObservation jobObservationEntity)
+        public async Task<JobObservationVersion> CreateHistoryJobObservationAsync(Entities.JobObservation jobObservationEntity)
         {
             var HistoryToAdd = _mapper.Map<JobObservationVersion>(jobObservationEntity);
 
@@ -308,13 +312,40 @@ namespace SupervisorMobility.API.Business
             throw new NotImplementedException();
         }
 
-        public Task RemoveHistoryJobObservationAsync(JobObservationVersion HistoryVersion, JobObservation jobObservation)
+        public async Task<bool> RemoveHistoryJobObservationAsync(JobObservationVersion HistoryVersion, Entities.JobObservation jobObservation)
+        {
+            bool state = await _repository.DeleteHistoyFromJobObservationAsync(HistoryVersion, jobObservation);
+
+            return state;
+        }
+        #endregion
+        #region Notification
+        public async Task<Notification?> FetchNotificationAsync(int notifyId)
+        {
+            return await _repository.GetNotificationAsync(notifyId);
+
+        }
+        public async Task<Notification> CreateNotificationAsync(NotificationToCreateDto Notification)
+        {
+            var NotifyToAdd = _mapper.Map<Notification>(Notification);
+
+            _repository.AddNotificationAsync(NotifyToAdd);
+            await _repository.SaveChangesAsync();
+           return NotifyToAdd;
+        }
+
+
+        public Task UpdateNotificationAsync(Notification ForUpdate, Notification JobObservation)
         {
             throw new NotImplementedException();
         }
 
+        public async Task<bool> RemoveNotificationAsync(Notification notificationEntity)
+        {
+            _repository.DeleteNotificationAsync(notificationEntity);
 
+            return true;
+        }
         #endregion
-
     }
 }

@@ -158,7 +158,12 @@ namespace SupervisorMobility.API.Services
 
 
         #endregion
-
+        #region Notification
+        Task<Notification?> GetNotificationAsync(int notificationID);
+        Task<IEnumerable<Notification>> GetAllNotificationsAsync();
+        void AddNotificationAsync(Notification notify);
+        void DeleteNotificationAsync(Notification notify);
+        #endregion
         #region File
         void AddUploadFile(FileUpload fileUpload);
 

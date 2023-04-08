@@ -231,6 +231,9 @@ namespace SupervisorMobility.API.Migrations
                     b.Property<string>("Justification")
                         .HasColumnType("nvarchar(max)");
 
+                    b.Property<string>("MadeBy")
+                        .HasColumnType("nvarchar(max)");
+
                     b.Property<string>("Models")
                         .HasColumnType("nvarchar(max)");
 
@@ -293,6 +296,59 @@ namespace SupervisorMobility.API.Migrations
                     b.HasIndex("SupervisorId");
 
                     b.ToTable("JobObservationHistory");
+                });
+
+            modelBuilder.Entity("SupervisorMobility.API.DataAccess.Entities.Notification", b =>
+                {
+                    b.Property<int>("NotificationID")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("int");
+
+                    SqlServerPropertyBuilderExtensions.UseIdentityColumn(b.Property<int>("NotificationID"));
+
+                    b.Property<DateTime>("EntryDate")
+                        .HasColumnType("datetime2");
+
+                    b.Property<bool>("IsAccepted")
+                        .HasColumnType("bit");
+
+                    b.Property<bool>("IsActive")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("bit")
+                        .HasDefaultValue(true);
+
+                    b.Property<string>("MadeBy")
+                        .HasColumnType("nvarchar(max)");
+
+                    b.Property<string>("NotificationText")
+                        .IsRequired()
+                        .HasColumnType("nvarchar(max)");
+
+                    b.Property<string>("NotificationType")
+                        .IsRequired()
+                        .HasColumnType("nvarchar(max)");
+
+                    b.Property<int>("UserId")
+                        .HasColumnType("int");
+
+                    b.HasKey("NotificationID");
+
+                    b.HasIndex("UserId");
+
+                    b.ToTable("Notifications");
+
+                    b.HasData(
+                        new
+                        {
+                            NotificationID = 1,
+                            EntryDate = new DateTime(2023, 4, 7, 17, 34, 57, 821, DateTimeKind.Local).AddTicks(371),
+                            IsAccepted = true,
+                            IsActive = true,
+                            MadeBy = "Marco Aguayo",
+                            NotificationText = "Example of notify",
+                            NotificationType = "info",
+                            UserId = 3
+                        });
                 });
 
             modelBuilder.Entity("SupervisorMobility.API.DataAccess.Entities.Product", b =>
@@ -443,7 +499,7 @@ namespace SupervisorMobility.API.Migrations
                         {
                             UserId = 1,
                             AreaId = 1,
-                            CreatedDate = new DateTime(2023, 4, 5, 19, 46, 11, 124, DateTimeKind.Local).AddTicks(300),
+                            CreatedDate = new DateTime(2023, 4, 7, 17, 34, 57, 821, DateTimeKind.Local).AddTicks(306),
                             GroupId = 1,
                             IsActive = true,
                             IsAdmin = false,
@@ -458,7 +514,7 @@ namespace SupervisorMobility.API.Migrations
                         {
                             UserId = 2,
                             AreaId = 1,
-                            CreatedDate = new DateTime(2023, 4, 5, 19, 46, 11, 124, DateTimeKind.Local).AddTicks(303),
+                            CreatedDate = new DateTime(2023, 4, 7, 17, 34, 57, 821, DateTimeKind.Local).AddTicks(310),
                             GroupId = 1,
                             IsActive = true,
                             IsAdmin = false,
@@ -467,6 +523,21 @@ namespace SupervisorMobility.API.Migrations
                             LastUpdated = new DateTime(1, 1, 1, 0, 0, 0, 0, DateTimeKind.Unspecified),
                             Name = "Marco",
                             Payroll = 239935,
+                            PlantId = 1
+                        },
+                        new
+                        {
+                            UserId = 3,
+                            AreaId = 1,
+                            CreatedDate = new DateTime(2023, 4, 7, 17, 34, 57, 821, DateTimeKind.Local).AddTicks(315),
+                            GroupId = 1,
+                            IsActive = true,
+                            IsAdmin = true,
+                            IsOperator = true,
+                            IsSupervisor = true,
+                            LastUpdated = new DateTime(1, 1, 1, 0, 0, 0, 0, DateTimeKind.Unspecified),
+                            Name = "Marco Aguayo",
+                            Payroll = 906,
                             PlantId = 1
                         });
                 });
@@ -983,9 +1054,9 @@ namespace SupervisorMobility.API.Migrations
                             JobObservationId = 1,
                             AreaId = 1,
                             Cicles = "3000|2500|3000|4000|1500",
-                            DateEnd = new DateTime(2023, 4, 5, 19, 46, 11, 123, DateTimeKind.Local).AddTicks(9736),
-                            DateFinalized = new DateTime(2023, 4, 5, 19, 46, 11, 123, DateTimeKind.Local).AddTicks(9736),
-                            DateStart = new DateTime(2023, 4, 5, 19, 46, 11, 123, DateTimeKind.Local).AddTicks(9720),
+                            DateEnd = new DateTime(2023, 4, 7, 17, 34, 57, 820, DateTimeKind.Local).AddTicks(9757),
+                            DateFinalized = new DateTime(2023, 4, 7, 17, 34, 57, 820, DateTimeKind.Local).AddTicks(9758),
+                            DateStart = new DateTime(2023, 4, 7, 17, 34, 57, 820, DateTimeKind.Local).AddTicks(9745),
                             DistributionId = 1,
                             IsActive = true,
                             Models = "1|1|1|1|1",
@@ -1162,8 +1233,8 @@ namespace SupervisorMobility.API.Migrations
                         new
                         {
                             LupId = 1,
-                            CreatedDate = new DateTime(2023, 4, 5, 19, 46, 11, 124, DateTimeKind.Local).AddTicks(315),
-                            EndDate = new DateTime(2023, 4, 5, 19, 46, 11, 124, DateTimeKind.Local).AddTicks(316),
+                            CreatedDate = new DateTime(2023, 4, 7, 17, 34, 57, 821, DateTimeKind.Local).AddTicks(335),
+                            EndDate = new DateTime(2023, 4, 7, 17, 34, 57, 821, DateTimeKind.Local).AddTicks(335),
                             IsActive = true,
                             JobObservationId = 1,
                             Observer = "Pedro",
@@ -1432,6 +1503,17 @@ namespace SupervisorMobility.API.Migrations
                     b.Navigation("Plant");
 
                     b.Navigation("Supervisor");
+                });
+
+            modelBuilder.Entity("SupervisorMobility.API.DataAccess.Entities.Notification", b =>
+                {
+                    b.HasOne("SupervisorMobility.API.DataAccess.Entities.User", "User")
+                        .WithMany()
+                        .HasForeignKey("UserId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
+
+                    b.Navigation("User");
                 });
 
             modelBuilder.Entity("SupervisorMobility.API.DataAccess.Entities.User", b =>

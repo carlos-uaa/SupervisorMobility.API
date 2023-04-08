@@ -707,9 +707,8 @@ namespace SupervisorMobility.API.Services
                 if (jobObservation.History != null)
                 {
                     jobObservation.History.Remove(HistoryVersion);
-
-                    return !(jobObservation.History.Contains(HistoryVersion));
                 }
+                return !(jobObservation.History.Contains(HistoryVersion));
             }
 
             return false;
@@ -1005,6 +1004,32 @@ namespace SupervisorMobility.API.Services
                     lup.Evidences.Remove(item: lup.Evidences.ToList().Find(e => e.FileUploadId == fileUploadId));
                 }
             }
+        }
+        #endregion
+        #region Notification
+        public async Task<Notification?> GetNotificationAsync(int notifyID)
+        {
+            return await _context.Notifications.Where(n => n.NotificationID == notifyID && n.IsActive == true).FirstOrDefaultAsync();
+        }
+
+
+        public async Task<IEnumerable<Notification>> GetAllNotificationsAsync()
+        {
+            return await _context.Notifications
+                .Where(n => n.IsActive == true)
+                 .OrderBy(c => c.NotificationID).ToListAsync();
+        }
+
+
+        public void AddNotificationAsync(Notification notify)
+        {
+            _context.Notifications.Add(notify);
+        }
+
+        public void DeleteNotificationAsync(Notification notify)
+        {
+            notify.IsActive = false;
+            //_context.Notifications.Remove(notify);
         }
         #endregion
         #region CommonOperations

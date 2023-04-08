@@ -10,6 +10,8 @@ namespace SupervisorMobility.API.DataAccess.Entities
         public int JobObservationVersionId { get; set; }
         public DateTime? DateModification { get; set; }
         public string? resumeVersion { get; set; }
+        public string? MadeBy { get; set; }
+
 
         public int JobObservationId { get; set; }
         public bool? IsActive { get; set; }

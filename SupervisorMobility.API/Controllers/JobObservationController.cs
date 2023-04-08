@@ -1,12 +1,15 @@
 ﻿using AutoMapper;
+using DocumentFormat.OpenXml.Wordprocessing;
 using Microsoft.AspNetCore.Mvc;
 using SupervisorMobility.API.Business;
 using SupervisorMobility.API.DataAccess.Entities;
 using SupervisorMobility.API.Entities;
 using SupervisorMobility.API.Models.AssyChart;
 using SupervisorMobility.API.Models.JobObservationDtos;
+using SupervisorMobility.API.Models.NotificationDtos;
 using SupervisorMobility.API.Models.OperationDtos;
 using SupervisorMobility.API.Models.PlantDtos;
+using SupervisorMobility.API.Models.Users;
 using SupervisorMobility.API.Services;
 using System.Diagnostics;
 
@@ -103,7 +106,7 @@ namespace SupervisorMobility.API.Controllers
 
 
         [HttpPut("{jobObservationId}")]
-        public async Task<ActionResult> UpdateJobObservation(int jobObservationId, JobObservationForUpdateDto jobObservationForUpdate)
+        public async Task<ActionResult> UpdateJobObservation(int jobObservationId, JobObservationForUpdateDto jobObservationForUpdate, string MadeBy = "")
         {
             if (!await _supervisorMobilityRepository.PlantExistAsync(jobObservationForUpdate.PlantId))
             {
@@ -133,10 +136,22 @@ namespace SupervisorMobility.API.Controllers
                 return NotFound("Job Observation Not Found");
             }
 
-            if(jobObservationEntity.Status == 4)
+            if(jobObservationForUpdate.Status == 4 && jobObservationEntity.Status != jobObservationForUpdate.Status)
             {
                 //crear notificacion
-            }
+                NotificationToCreateDto newnotify = new NotificationToCreateDto();
+                newnotify.MadeBy = MadeBy;
+                newnotify.UserId = jobObservationForUpdate.SupervisorId;
+                newnotify.IsAccepted = true;
+                newnotify.IsActive = true;
+                newnotify.NotificationText = $"The JobObservation with id: {jobObservationEntity.OperationId} was terminated by the user {MadeBy}";
+                newnotify.NotificationType = "FinishJobObservation";
+                var notadd = await _assyChartService.CreateNotificationAsync(newnotify);
+                if(notadd != null)
+                {
+                    Debug.WriteLine("Complete");
+                }
+            } 
 
 
             //Crear copia de la version actual en base de datos
@@ -144,7 +159,7 @@ namespace SupervisorMobility.API.Controllers
 
             //Creo mensaje de cambios
             //Creamos mensaje de cambios
-            string resumeChanges = "The following properties were changed: ";
+            string resumeChanges = "";
 
             if (jobObservationEntity.IsActive != jobObservationForUpdate.IsActive)
             {
@@ -180,7 +195,7 @@ namespace SupervisorMobility.API.Controllers
             }
             if (jobObservationEntity.DateStart != jobObservationForUpdate.dateStart)
             {
-                resumeChanges += "dat eStart, ";
+                resumeChanges += "date Start, ";
             }
             if (jobObservationEntity.DateEnd != jobObservationForUpdate.dateEnd)
             {
@@ -255,6 +270,7 @@ namespace SupervisorMobility.API.Controllers
                 var jobtoaddversion = await _supervisorMobilityRepository.GetJobObservationAsync(jobObservationId, true);
                 HistoryToAdd.DateModification = DateTime.Now;
                 HistoryToAdd.resumeVersion = resumeChanges;
+                HistoryToAdd.MadeBy = MadeBy;
                 //añadimos
                 bool added = await _supervisorMobilityRepository.AddHistoyToJobObservationAsync(HistoryToAdd, jobtoaddversion);
                 //add to 

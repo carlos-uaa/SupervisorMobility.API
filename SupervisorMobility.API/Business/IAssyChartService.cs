@@ -3,6 +3,7 @@ using SupervisorMobility.API.Entities;
 using SupervisorMobility.API.Models.AssyChart;
 using SupervisorMobility.API.Models.FileUploadDto;
 using SupervisorMobility.API.Models.GuidesDtos;
+using SupervisorMobility.API.Models.NotificationDtos;
 using SupervisorMobility.API.Models.OperationDtos;
 using SupervisorMobility.API.Models.PlantDtos;
 using SupervisorMobility.API.Models.ProductDtos;
@@ -80,10 +81,18 @@ namespace SupervisorMobility.API.Business
         #endregion
         #region HistoryJobObservation
         Task<JobObservationVersion?> FetchHistoryJobObservationAsync(int JobObservationHistoryId);
-
         Task<JobObservationVersion> CreateHistoryJobObservationAsync(JobObservation jobObservation);
         Task UpdateHistoryJobObservationAsync(JobObservationVersion userForUpdate, JobObservationVersion user);
-        Task RemoveHistoryJobObservationAsync(JobObservationVersion HistoryVersion, JobObservation jobObservation);
+        Task<bool> RemoveHistoryJobObservationAsync(JobObservationVersion HistoryVersion, JobObservation jobObservation);
+        #endregion
+
+        #region Notification
+        Task<Notification?> FetchNotificationAsync(int NotificationId);
+        Task<Notification> CreateNotificationAsync(NotificationToCreateDto notify);
+        Task<IEnumerable<Notification>> GetNotifications();
+
+        Task UpdateNotificationAsync(Notification ForUpdate, Notification notify);
+        Task<bool> RemoveNotificationAsync(Notification NotificationId);
         #endregion
     }
 }

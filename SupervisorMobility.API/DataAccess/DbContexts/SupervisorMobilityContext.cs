@@ -19,7 +19,7 @@ namespace SupervisorMobility.API.Context
         public DbSet<Plant> Plants { get; set; }
         public DbSet<Area> Areas { get; set; }
         public DbSet<Distribution> Distributions { get; set; }
-     
+
         public DbSet<Operation> Operations { get; set; }
         public DbSet<SupportDocumentType> SupportDocumentTypes { get; set; }
         public DbSet<Product> Products { get; set; }
@@ -27,9 +27,10 @@ namespace SupervisorMobility.API.Context
         public DbSet<AssyChart> AssyCharts { get; set; }
         public DbSet<User> Users { get; set; }
 
-        public DbSet<FileUpload> Files {  get; set; }
+        public DbSet<FileUpload> Files { get; set; }
         public DbSet<Guides> Guides { get; set; }
         public DbSet<JobObservationVersion> JobObservationHistory { get; set; }
+        public DbSet<Notification> Notifications { get; set; }
 
         #endregion
 
@@ -39,7 +40,7 @@ namespace SupervisorMobility.API.Context
 
         }
 
-     
+
         protected override void OnModelCreating(ModelBuilder modelBuilder)
         {
             //Default values
@@ -97,9 +98,13 @@ namespace SupervisorMobility.API.Context
 
             modelBuilder.Entity<AssyChart>()
                 .Property(p => p.IsActive)
-                .HasDefaultValue(true); 
-            
+                .HasDefaultValue(true);
+
             modelBuilder.Entity<Guides>()
+                .Property(p => p.IsActive)
+                .HasDefaultValue(true);
+
+            modelBuilder.Entity<Notification>()
                 .Property(p => p.IsActive)
                 .HasDefaultValue(true);
 
@@ -130,7 +135,7 @@ namespace SupervisorMobility.API.Context
                     AreaId = 1,
                     DistributionId = 1,
                     OperationId = 1,
-                    Type= 2,
+                    Type = 2,
                     DateStart = DateTime.Now,
                     DateEnd = DateTime.Now,
                     DateFinalized = DateTime.Now,
@@ -147,7 +152,7 @@ namespace SupervisorMobility.API.Context
                     SsvSignature = "",
                     OperatorSignature = ""
 
-                });; ; ;
+                }); ; ; ;
 
             modelBuilder.Entity<ChecklistCategory>()
                 .HasData(
@@ -324,7 +329,7 @@ namespace SupervisorMobility.API.Context
                     AreaId = 1
                 });
 
-    
+
 
             modelBuilder.Entity<Operation>()
                 .HasData(
@@ -488,13 +493,14 @@ namespace SupervisorMobility.API.Context
             );
 
             modelBuilder.Entity<User>().HasData(
-                new User { 
-                    UserId = 1, 
-                    PlantId = 1, 
-                    AreaId = 1, 
-                    GroupId = 1, 
-                    Name = "Pedro", 
-                    Payroll = 12345, 
+                new User
+                {
+                    UserId = 1,
+                    PlantId = 1,
+                    AreaId = 1,
+                    GroupId = 1,
+                    Name = "Pedro",
+                    Payroll = 12345,
                     IsActive = true,
                     IsAdmin = false,
                     IsOperator = false,
@@ -512,7 +518,21 @@ namespace SupervisorMobility.API.Context
                     IsAdmin = false,
                     IsOperator = true,
                     IsSupervisor = false,
-                });
+                },
+                new User
+                {
+                    UserId = 3,
+                    PlantId = 1,
+                    AreaId = 1,
+                    GroupId = 1,
+                    Name = "Marco Aguayo",
+                    Payroll = 0906,
+                    IsActive = true,
+                    IsAdmin = true,
+                    IsOperator = true,
+                    IsSupervisor = true,
+                }
+                );
 
             modelBuilder.Entity<Lup>()
                  .HasData(
@@ -530,6 +550,21 @@ namespace SupervisorMobility.API.Context
                          CreatedDate = DateTime.Now,
                          EndDate = DateTime.Now
                      });
+
+            modelBuilder.Entity<Notification>()
+                .HasData(
+                    new Notification()
+                    {
+                       NotificationID = 1,
+                       EntryDate = DateTime.Now,
+                       IsAccepted = true,
+                      IsActive = true,
+                      MadeBy = "Marco Aguayo",
+                      UserId = 3,
+                      NotificationType = "info",
+                      NotificationText = "Example of notify"
+                    });
+
 
             base.OnModelCreating(modelBuilder);
         }

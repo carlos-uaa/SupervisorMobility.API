@@ -1,21 +1,18 @@
-﻿using System.ComponentModel.DataAnnotations.Schema;
+﻿using SupervisorMobility.API.Models.Users;
 using System.ComponentModel.DataAnnotations;
 
-namespace SupervisorMobility.API.DataAccess.Entities
+namespace SupervisorMobility.API.Models.NotificationDtos
 {
-    public class Notification
+    public class NotificationToCreateDto
     {
-        [Key, DatabaseGenerated(DatabaseGeneratedOption.Identity)]
-        public int NotificationID { get; set; }
-
         public string? MadeBy { get; set; }
 
         //public int TargetRelation { get; set; }
         public string NotificationType { get; set; }
-        public string NotificationText { get; set; }
-
+        public string? NotificationText { get; set; }
         public int UserId { get; set; }
-        public User? User { get; set; }
+
+        public UsersWhitoutNavigationDetails? User { get; set; }
 
         public bool IsAccepted { get; set; } = false;
         public bool IsActive { get; set; } = false;
