@@ -670,7 +670,9 @@ namespace SupervisorMobility.API.Services
         #region HistoryJobObservation
         public async Task<JobObservationVersion?> GetHistoryJobObservationAsync(int HistoryJobObservationId)
         {
-            return await _context.JobObservationHistory.Where(H => H.JobObservationVersionId == HistoryJobObservationId).FirstOrDefaultAsync();
+            return await _context.JobObservationHistory
+                .Include(l => l.Lup)
+                .Where(H => H.JobObservationVersionId == HistoryJobObservationId).FirstOrDefaultAsync();
         }
 
 

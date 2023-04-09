@@ -86,6 +86,39 @@ namespace SupervisorMobility.API.Controllers
             return Ok(_mapper.Map<IEnumerable<JobObservationHistoryDto>>(allHistory));
         }
 
+        [HttpGet("{jobObservationId}/history/{historyId}/detail")]
+        public async Task<ActionResult<JobObservationHistoryDto>> GetHistoryDetails(int jobObservationId, int historyId)
+        {
+            var history = await _supervisorMobilityRepository.GetHistoryJobObservationAsync(historyId);
+
+            return Ok(_mapper.Map<JobObservationHistoryDto>(history));
+        }
+
+        [HttpDelete("{jobObservationId}/history/{HistoryId}/remove")]
+        public async Task<ActionResult> DeleteHistoryJobObservation(int jobObservationId, int HistoryId)
+        {
+            var jobObservation = await _supervisorMobilityRepository.GetJobObservationAsync(jobObservationId, true);
+
+            if (jobObservation == null)
+            {
+                return NotFound();
+            }
+
+
+            var HistoryToRemove = await _supervisorMobilityRepository.GetHistoryJobObservationAsync(HistoryId);
+
+            var result = await _supervisorMobilityRepository.DeleteHistoyFromJobObservationAsync(HistoryToRemove, jobObservation);
+            await _supervisorMobilityRepository.SaveChangesAsync();
+
+            if (result)
+            {
+                return Ok();
+            }
+
+
+            return NotFound("Job Observation Version not remove");
+        }
+
         [HttpGet("{jobObservationId}", Name = "GetJobObservation")]
         public async Task<IActionResult> GetJobObservation(int jobObservationId, bool includeLup = false)
         {
