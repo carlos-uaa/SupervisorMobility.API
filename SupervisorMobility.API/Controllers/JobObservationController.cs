@@ -169,7 +169,7 @@ namespace SupervisorMobility.API.Controllers
                 return NotFound("Job Observation Not Found");
             }
 
-            if(jobObservationForUpdate.Status == 4 && jobObservationEntity.Status != jobObservationForUpdate.Status)
+            if(jobObservationForUpdate.Status == 6 && jobObservationEntity.Status != jobObservationForUpdate.Status)
             {
                 //crear notificacion
                 NotificationToCreateDto newnotify = new NotificationToCreateDto();
