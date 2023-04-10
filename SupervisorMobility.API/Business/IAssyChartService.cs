@@ -90,7 +90,7 @@ namespace SupervisorMobility.API.Business
         Task<Notification?> FetchNotificationAsync(int NotificationId);
         Task<Notification> CreateNotificationAsync(NotificationToCreateDto notify);
         Task<IEnumerable<Notification>> GetNotifications();
-
+        Task<IEnumerable<Notification>> GetNotificationsFromUser(int iduser);
         Task UpdateNotificationAsync(Notification ForUpdate, Notification notify);
         Task<bool> RemoveNotificationAsync(Notification NotificationId);
         #endregion

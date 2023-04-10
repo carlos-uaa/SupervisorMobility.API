@@ -91,12 +91,12 @@ namespace SupervisorMobility.API.Business
         public async Task<Product?> FetchProductAsync(int productId, bool collection = false)
         {
 
-                return await _repository.GetProductAsync(productId, collection);
-       
-        
+            return await _repository.GetProductAsync(productId, collection);
+
+
         }
-        
-        
+
+
 
 
         public async Task<IEnumerable<Product>> FetchProductsAsync()
@@ -128,10 +128,7 @@ namespace SupervisorMobility.API.Business
             return await _repository.GetPlantsAsync();
         }
 
-        public async Task<IEnumerable<Notification>> GetNotifications()
-        {
-            return await _repository.GetAllNotificationsAsync();
-        }
+
 
         public async Task<Plant?> FetchPlantAsync(int plantId, bool includeAreas = false)
         {
@@ -204,7 +201,7 @@ namespace SupervisorMobility.API.Business
             await _repository.SaveChangesAsync();
         }
 
-        public async Task RemoveAssyChartAsync(AssyChart assyChart) 
+        public async Task RemoveAssyChartAsync(AssyChart assyChart)
         {
             _repository.DeleteAssyChartAsync(assyChart);
             await _repository.SaveChangesAsync();
@@ -331,10 +328,17 @@ namespace SupervisorMobility.API.Business
 
             _repository.AddNotificationAsync(NotifyToAdd);
             await _repository.SaveChangesAsync();
-           return NotifyToAdd;
+            return NotifyToAdd;
         }
 
-
+        public async Task<IEnumerable<Notification>> GetNotifications()
+        {
+            return await _repository.GetAllNotificationsAsync();
+        }
+        public async Task<IEnumerable<Notification>> GetNotificationsFromUser(int iduser)
+        {
+            return await _repository.GetAllNotificationsFromUserAsync(iduser);
+        }
         public Task UpdateNotificationAsync(Notification ForUpdate, Notification JobObservation)
         {
             throw new NotImplementedException();
