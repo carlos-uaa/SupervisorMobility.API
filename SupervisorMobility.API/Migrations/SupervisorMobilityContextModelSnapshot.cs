@@ -341,7 +341,7 @@ namespace SupervisorMobility.API.Migrations
                         new
                         {
                             NotificationID = 1,
-                            EntryDate = new DateTime(2023, 4, 7, 17, 34, 57, 821, DateTimeKind.Local).AddTicks(371),
+                            EntryDate = new DateTime(2023, 4, 10, 11, 1, 51, 74, DateTimeKind.Local).AddTicks(4352),
                             IsAccepted = true,
                             IsActive = true,
                             MadeBy = "Marco Aguayo",
@@ -499,7 +499,7 @@ namespace SupervisorMobility.API.Migrations
                         {
                             UserId = 1,
                             AreaId = 1,
-                            CreatedDate = new DateTime(2023, 4, 7, 17, 34, 57, 821, DateTimeKind.Local).AddTicks(306),
+                            CreatedDate = new DateTime(2023, 4, 10, 11, 1, 51, 74, DateTimeKind.Local).AddTicks(4327),
                             GroupId = 1,
                             IsActive = true,
                             IsAdmin = false,
@@ -514,7 +514,7 @@ namespace SupervisorMobility.API.Migrations
                         {
                             UserId = 2,
                             AreaId = 1,
-                            CreatedDate = new DateTime(2023, 4, 7, 17, 34, 57, 821, DateTimeKind.Local).AddTicks(310),
+                            CreatedDate = new DateTime(2023, 4, 10, 11, 1, 51, 74, DateTimeKind.Local).AddTicks(4330),
                             GroupId = 1,
                             IsActive = true,
                             IsAdmin = false,
@@ -529,7 +529,7 @@ namespace SupervisorMobility.API.Migrations
                         {
                             UserId = 3,
                             AreaId = 1,
-                            CreatedDate = new DateTime(2023, 4, 7, 17, 34, 57, 821, DateTimeKind.Local).AddTicks(315),
+                            CreatedDate = new DateTime(2023, 4, 10, 11, 1, 51, 74, DateTimeKind.Local).AddTicks(4332),
                             GroupId = 1,
                             IsActive = true,
                             IsAdmin = true,
@@ -1054,9 +1054,9 @@ namespace SupervisorMobility.API.Migrations
                             JobObservationId = 1,
                             AreaId = 1,
                             Cicles = "3000|2500|3000|4000|1500",
-                            DateEnd = new DateTime(2023, 4, 7, 17, 34, 57, 820, DateTimeKind.Local).AddTicks(9757),
-                            DateFinalized = new DateTime(2023, 4, 7, 17, 34, 57, 820, DateTimeKind.Local).AddTicks(9758),
-                            DateStart = new DateTime(2023, 4, 7, 17, 34, 57, 820, DateTimeKind.Local).AddTicks(9745),
+                            DateEnd = new DateTime(2023, 4, 10, 11, 1, 51, 74, DateTimeKind.Local).AddTicks(3870),
+                            DateFinalized = new DateTime(2023, 4, 10, 11, 1, 51, 74, DateTimeKind.Local).AddTicks(3871),
+                            DateStart = new DateTime(2023, 4, 10, 11, 1, 51, 74, DateTimeKind.Local).AddTicks(3859),
                             DistributionId = 1,
                             IsActive = true,
                             Models = "1|1|1|1|1",
@@ -1233,8 +1233,8 @@ namespace SupervisorMobility.API.Migrations
                         new
                         {
                             LupId = 1,
-                            CreatedDate = new DateTime(2023, 4, 7, 17, 34, 57, 821, DateTimeKind.Local).AddTicks(335),
-                            EndDate = new DateTime(2023, 4, 7, 17, 34, 57, 821, DateTimeKind.Local).AddTicks(335),
+                            CreatedDate = new DateTime(2023, 4, 10, 11, 1, 51, 74, DateTimeKind.Local).AddTicks(4344),
+                            EndDate = new DateTime(2023, 4, 10, 11, 1, 51, 74, DateTimeKind.Local).AddTicks(4345),
                             IsActive = true,
                             JobObservationId = 1,
                             Observer = "Pedro",
