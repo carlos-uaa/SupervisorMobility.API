@@ -1020,6 +1020,13 @@ namespace SupervisorMobility.API.Services
             return await _context.Notifications
                 .Where(n => n.IsActive == true)
                  .OrderBy(c => c.NotificationID).ToListAsync();
+        } 
+        
+        public async Task<IEnumerable<Notification>> GetAllNotificationsFromUserAsync(int id)
+        {
+            return await _context.Notifications
+                .Where(n => n.UserId == id && n.IsActive &&  EF.Functions.DateDiffDay(DateTime.Now,n.EntryDate) <= 3 && EF.Functions.DateDiffMonth(DateTime.Now, n.EntryDate) == 0)
+                 .OrderBy(c => c.NotificationID).ToListAsync();
         }
 
 

@@ -1,8 +1,11 @@
 ﻿using AutoMapper;
+using DocumentFormat.OpenXml.Spreadsheet;
+using DocumentFormat.OpenXml.Vml;
 using DocumentFormat.OpenXml.Wordprocessing;
 using Microsoft.AspNetCore.Mvc;
 using SupervisorMobility.API.Business;
 using SupervisorMobility.API.DataAccess.Entities;
+using SupervisorMobility.API.DataAccess.Services;
 using SupervisorMobility.API.Entities;
 using SupervisorMobility.API.Models.AssyChart;
 using SupervisorMobility.API.Models.JobObservationDtos;
@@ -13,6 +16,7 @@ using SupervisorMobility.API.Models.Users;
 using SupervisorMobility.API.Services;
 using System.Diagnostics;
 
+
 namespace SupervisorMobility.API.Controllers
 {
     [Route("api/jobobservations")]
@@ -22,10 +26,12 @@ namespace SupervisorMobility.API.Controllers
         private readonly ISupervisorMobilityRepository _supervisorMobilityRepository;
         readonly IAssyChartService _assyChartService;
         private readonly IMapper _mapper;
+        private readonly IEmailService _email;
 
         public JobObservationController(ISupervisorMobilityRepository supervisorMobilityRepository, IMapper mapper,
-            IAssyChartService assyChartService)
+            IAssyChartService assyChartService, IEmailService emailService)
         {
+            _email = emailService;
             _supervisorMobilityRepository = supervisorMobilityRepository ??
                 throw new ArgumentNullException(nameof(supervisorMobilityRepository));
             _mapper = mapper ??
@@ -175,22 +181,27 @@ namespace SupervisorMobility.API.Controllers
                 NotificationToCreateDto newnotify = new NotificationToCreateDto();
                 newnotify.MadeBy = MadeBy;
                 newnotify.UserId = jobObservationForUpdate.SupervisorId;
+                newnotify.User = _mapper.Map<UsersWhitoutNavigationDetails>(newnotify);
                 newnotify.IsAccepted = true;
                 newnotify.IsActive = true;
                 newnotify.NotificationText = $"The JobObservation with id: {jobObservationEntity.OperationId} was terminated by the user {MadeBy}";
                 newnotify.NotificationType = "FinishJobObservation";
+
                 var notadd = await _assyChartService.CreateNotificationAsync(newnotify);
                 if(notadd != null)
                 {
                     Debug.WriteLine("Complete");
+                    //aqui mandamos correo 
+                    // create email message
+
+                    //var emailMessage = _email.CreateEmailMessage("maguayo@gruposinco.com.mx", "Este es un mensaje de prueba enviado desde job observation");
+                    //_email.Send(emailMessage);
                 }
             } 
 
-
-            //Crear copia de la version actual en base de datos
+            //Crear copia de la version anterior
             JobObservationVersion HistoryToAdd = await _assyChartService.CreateHistoryJobObservationAsync(jobObservationEntity);
 
-            //Creo mensaje de cambios
             //Creamos mensaje de cambios
             string resumeChanges = "";
 

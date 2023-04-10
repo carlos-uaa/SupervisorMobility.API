@@ -1,6 +1,7 @@
 using Microsoft.AspNetCore.Hosting;
 using Serilog;
 using SupervisorMobility.API;
+using SupervisorMobility.API.DataAccess.Entities;
 
 //Configure Serilog
 Log.Logger = new LoggerConfiguration()
@@ -59,9 +60,15 @@ builder.WebHost.ConfigureKestrel(serverOptions =>
     serverOptions.Limits.MaxRequestBodySize= 1073741824;
 });
 
+//mail
+var emailConfig = builder.Configuration
+        .GetSection("EmailConfiguration")
+        .Get<EmailConfiguration>();
+builder.Services.AddSingleton(emailConfig);
+
+
+
 var app = builder.Build();
-
-
 
 // Configure the HTTP request pipeline.
 app.UseCors("Cors");

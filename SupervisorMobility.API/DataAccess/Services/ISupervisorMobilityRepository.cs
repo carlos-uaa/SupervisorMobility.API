@@ -161,6 +161,7 @@ namespace SupervisorMobility.API.Services
         #region Notification
         Task<Notification?> GetNotificationAsync(int notificationID);
         Task<IEnumerable<Notification>> GetAllNotificationsAsync();
+        Task<IEnumerable<Notification>> GetAllNotificationsFromUserAsync(int id);
         void AddNotificationAsync(Notification notify);
         void DeleteNotificationAsync(Notification notify);
         #endregion

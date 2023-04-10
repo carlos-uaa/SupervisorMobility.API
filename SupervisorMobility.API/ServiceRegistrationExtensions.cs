@@ -3,6 +3,7 @@ using Microsoft.AspNetCore.ResponseCompression;
 using Microsoft.EntityFrameworkCore;
 using SupervisorMobility.API.Business;
 using SupervisorMobility.API.Context;
+using SupervisorMobility.API.DataAccess.Services;
 using SupervisorMobility.API.Services;
 
 namespace SupervisorMobility.API
@@ -14,6 +15,7 @@ namespace SupervisorMobility.API
         {
             services.AddScoped<IJobObservationService, JobObservationService>();
             services.AddScoped<IAssyChartService, AssyChartService>();
+            services.AddScoped<IEmailService, EmailService>();
 
             
             services.Configure<IISServerOptions>(options =>
