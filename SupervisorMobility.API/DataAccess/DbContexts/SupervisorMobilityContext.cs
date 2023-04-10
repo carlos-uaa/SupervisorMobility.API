@@ -500,6 +500,7 @@ namespace SupervisorMobility.API.Context
                     AreaId = 1,
                     GroupId = 1,
                     Name = "Pedro",
+                    ObjectId = ""
                     Payroll = 12345,
                     IsActive = true,
                     IsAdmin = false,
@@ -513,6 +514,7 @@ namespace SupervisorMobility.API.Context
                     AreaId = 1,
                     GroupId = 1,
                     Name = "Marco",
+                    ObjectId = "",
                     Payroll = 239935,
                     IsActive = true,
                     IsAdmin = false,
@@ -525,6 +527,7 @@ namespace SupervisorMobility.API.Context
                     PlantId = 1,
                     AreaId = 1,
                     GroupId = 1,
+                    ObjectId = "",
                     Name = "Marco Aguayo",
                     Payroll = 0906,
                     IsActive = true,
