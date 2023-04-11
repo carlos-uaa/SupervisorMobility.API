@@ -12,9 +12,11 @@
         public int? SupervisorId { get; set; }
         public int? OperatorId { get; set; }
         public int? Type { get; set; }
-        public DateTime? dateStart { get; set; }
-        public DateTime? dateEnd { get; set; }
-        public DateTime? DateFinalized { get; set; }
+        public DateTime? StartDate { get; set; }
+        public DateTime? EndDate { get; set; }
+        public DateTime? EditStartDate { get; set; }
+        public DateTime? EditEndDate { get; set; }
+        public DateTime? FinishedDate { get; set; }
 
         public string? Justification { get; set; }
 

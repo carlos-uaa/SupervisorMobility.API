@@ -341,7 +341,7 @@ namespace SupervisorMobility.API.Migrations
                         new
                         {
                             NotificationID = 1,
-                            EntryDate = new DateTime(2023, 4, 10, 11, 1, 51, 74, DateTimeKind.Local).AddTicks(4352),
+                            EntryDate = new DateTime(2023, 4, 11, 12, 34, 24, 750, DateTimeKind.Local).AddTicks(9793),
                             IsAccepted = true,
                             IsActive = true,
                             MadeBy = "Marco Aguayo",
@@ -478,6 +478,9 @@ namespace SupervisorMobility.API.Migrations
                         .IsRequired()
                         .HasColumnType("nvarchar(max)");
 
+                    b.Property<int>("ObjectId")
+                        .HasColumnType("int");
+
                     b.Property<int>("Payroll")
                         .HasColumnType("int");
 
@@ -499,7 +502,7 @@ namespace SupervisorMobility.API.Migrations
                         {
                             UserId = 1,
                             AreaId = 1,
-                            CreatedDate = new DateTime(2023, 4, 10, 11, 1, 51, 74, DateTimeKind.Local).AddTicks(4327),
+                            CreatedDate = new DateTime(2023, 4, 11, 12, 34, 24, 750, DateTimeKind.Local).AddTicks(9767),
                             GroupId = 1,
                             IsActive = true,
                             IsAdmin = false,
@@ -507,6 +510,7 @@ namespace SupervisorMobility.API.Migrations
                             IsSupervisor = true,
                             LastUpdated = new DateTime(1, 1, 1, 0, 0, 0, 0, DateTimeKind.Unspecified),
                             Name = "Pedro",
+                            ObjectId = 0,
                             Payroll = 12345,
                             PlantId = 1
                         },
@@ -514,7 +518,7 @@ namespace SupervisorMobility.API.Migrations
                         {
                             UserId = 2,
                             AreaId = 1,
-                            CreatedDate = new DateTime(2023, 4, 10, 11, 1, 51, 74, DateTimeKind.Local).AddTicks(4330),
+                            CreatedDate = new DateTime(2023, 4, 11, 12, 34, 24, 750, DateTimeKind.Local).AddTicks(9770),
                             GroupId = 1,
                             IsActive = true,
                             IsAdmin = false,
@@ -522,6 +526,7 @@ namespace SupervisorMobility.API.Migrations
                             IsSupervisor = false,
                             LastUpdated = new DateTime(1, 1, 1, 0, 0, 0, 0, DateTimeKind.Unspecified),
                             Name = "Marco",
+                            ObjectId = 0,
                             Payroll = 239935,
                             PlantId = 1
                         },
@@ -529,7 +534,7 @@ namespace SupervisorMobility.API.Migrations
                         {
                             UserId = 3,
                             AreaId = 1,
-                            CreatedDate = new DateTime(2023, 4, 10, 11, 1, 51, 74, DateTimeKind.Local).AddTicks(4332),
+                            CreatedDate = new DateTime(2023, 4, 11, 12, 34, 24, 750, DateTimeKind.Local).AddTicks(9771),
                             GroupId = 1,
                             IsActive = true,
                             IsAdmin = true,
@@ -537,6 +542,7 @@ namespace SupervisorMobility.API.Migrations
                             IsSupervisor = true,
                             LastUpdated = new DateTime(1, 1, 1, 0, 0, 0, 0, DateTimeKind.Unspecified),
                             Name = "Marco Aguayo",
+                            ObjectId = 0,
                             Payroll = 906,
                             PlantId = 1
                         });
@@ -970,17 +976,20 @@ namespace SupervisorMobility.API.Migrations
                     b.Property<string>("Cicles")
                         .HasColumnType("nvarchar(max)");
 
-                    b.Property<DateTime?>("DateEnd")
-                        .HasColumnType("datetime2");
-
-                    b.Property<DateTime?>("DateFinalized")
-                        .HasColumnType("datetime2");
-
-                    b.Property<DateTime?>("DateStart")
-                        .HasColumnType("datetime2");
-
                     b.Property<int?>("DistributionId")
                         .HasColumnType("int");
+
+                    b.Property<DateTime?>("EditEndDate")
+                        .HasColumnType("datetime2");
+
+                    b.Property<DateTime?>("EditStartDate")
+                        .HasColumnType("datetime2");
+
+                    b.Property<DateTime?>("EndDate")
+                        .HasColumnType("datetime2");
+
+                    b.Property<DateTime?>("FinishedDate")
+                        .HasColumnType("datetime2");
 
                     b.Property<bool?>("IsActive")
                         .ValueGeneratedOnAdd()
@@ -1016,6 +1025,9 @@ namespace SupervisorMobility.API.Migrations
 
                     b.Property<string>("SsvSignature")
                         .HasColumnType("nvarchar(max)");
+
+                    b.Property<DateTime?>("StartDate")
+                        .HasColumnType("datetime2");
 
                     b.Property<int?>("Status")
                         .HasColumnType("int");
@@ -1054,10 +1066,9 @@ namespace SupervisorMobility.API.Migrations
                             JobObservationId = 1,
                             AreaId = 1,
                             Cicles = "3000|2500|3000|4000|1500",
-                            DateEnd = new DateTime(2023, 4, 10, 11, 1, 51, 74, DateTimeKind.Local).AddTicks(3870),
-                            DateFinalized = new DateTime(2023, 4, 10, 11, 1, 51, 74, DateTimeKind.Local).AddTicks(3871),
-                            DateStart = new DateTime(2023, 4, 10, 11, 1, 51, 74, DateTimeKind.Local).AddTicks(3859),
                             DistributionId = 1,
+                            EndDate = new DateTime(2023, 4, 11, 12, 34, 24, 750, DateTimeKind.Local).AddTicks(9226),
+                            FinishedDate = new DateTime(2023, 4, 11, 12, 34, 24, 750, DateTimeKind.Local).AddTicks(9226),
                             IsActive = true,
                             Models = "1|1|1|1|1",
                             OperationId = 1,
@@ -1068,6 +1079,7 @@ namespace SupervisorMobility.API.Migrations
                             PlantId = 1,
                             SsvCommentary = "Senior Supervisor Commentary",
                             SsvSignature = "",
+                            StartDate = new DateTime(2023, 4, 11, 12, 34, 24, 750, DateTimeKind.Local).AddTicks(9211),
                             Status = 1,
                             SupervisorId = 1,
                             Time1HOE = "10 min",
@@ -1233,8 +1245,8 @@ namespace SupervisorMobility.API.Migrations
                         new
                         {
                             LupId = 1,
-                            CreatedDate = new DateTime(2023, 4, 10, 11, 1, 51, 74, DateTimeKind.Local).AddTicks(4344),
-                            EndDate = new DateTime(2023, 4, 10, 11, 1, 51, 74, DateTimeKind.Local).AddTicks(4345),
+                            CreatedDate = new DateTime(2023, 4, 11, 12, 34, 24, 750, DateTimeKind.Local).AddTicks(9784),
+                            EndDate = new DateTime(2023, 4, 11, 12, 34, 24, 750, DateTimeKind.Local).AddTicks(9785),
                             IsActive = true,
                             JobObservationId = 1,
                             Observer = "Pedro",

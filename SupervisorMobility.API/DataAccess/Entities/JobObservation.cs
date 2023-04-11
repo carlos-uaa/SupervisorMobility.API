@@ -25,10 +25,12 @@ namespace SupervisorMobility.API.Entities
 
         public int? Type { get; set; }
 
-        public DateTime? DateStart { get; set; }
-        public DateTime? DateEnd { get; set; }
-        public DateTime? DateFinalized { get; set; }
-        
+        public DateTime? StartDate { get; set; }
+        public DateTime? EndDate { get; set; }
+        public DateTime? EditStartDate { get; set; }
+        public DateTime? EditEndDate { get; set; }
+        public DateTime? FinishedDate { get; set; }
+
         public string? Justification { get; set; }
         public int? Status { get; set; }
         public int? Option { get; set; }
