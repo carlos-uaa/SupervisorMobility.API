@@ -1,4 +1,5 @@
 ﻿using AutoMapper;
+using DocumentFormat.OpenXml.Spreadsheet;
 using SupervisorMobility.API.DataAccess.Entities;
 using SupervisorMobility.API.Entities;
 using SupervisorMobility.API.Models.AssyChart;
@@ -339,15 +340,18 @@ namespace SupervisorMobility.API.Business
         {
             return await _repository.GetAllNotificationsFromUserAsync(iduser);
         }
-        public Task UpdateNotificationAsync(Notification ForUpdate, Notification JobObservation)
+        public async Task<bool> UpdateNotificationAsync(NotificationForUpdateDto ForUpdate, Notification notifyEntity)
         {
-            throw new NotImplementedException();
+            _mapper.Map(ForUpdate, notifyEntity);
+            await _repository.SaveChangesAsync();
+
+            return true;
         }
 
         public async Task<bool> RemoveNotificationAsync(Notification notificationEntity)
         {
             _repository.DeleteNotificationAsync(notificationEntity);
-
+            await _repository.SaveChangesAsync();
             return true;
         }
         #endregion
