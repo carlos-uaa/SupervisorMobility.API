@@ -500,6 +500,7 @@ namespace SupervisorMobility.API.Context
                     AreaId = 1,
                     GroupId = 1,
                     Name = "Pedro",
+                    ObjectId = "4f54e317-1ab9-45ec-9b72-7d1910a0cc88",
                     Payroll = 12345,
                     IsActive = true,
                     IsAdmin = false,
@@ -513,6 +514,7 @@ namespace SupervisorMobility.API.Context
                     AreaId = 1,
                     GroupId = 1,
                     Name = "Marco",
+                    ObjectId = "4f54e317",
                     Payroll = 239935,
                     IsActive = true,
                     IsAdmin = false,
@@ -525,6 +527,7 @@ namespace SupervisorMobility.API.Context
                     PlantId = 1,
                     AreaId = 1,
                     GroupId = 1,
+                    ObjectId = "7a184926-2f58-4f9c-872c-97d54d825912",
                     Name = "Marco Aguayo",
                     Payroll = 0906,
                     IsActive = true,
@@ -555,14 +558,58 @@ namespace SupervisorMobility.API.Context
                 .HasData(
                     new Notification()
                     {
-                       NotificationID = 1,
-                       EntryDate = DateTime.Now,
-                       IsAccepted = true,
-                      IsActive = true,
-                      MadeBy = "Marco Aguayo",
-                      UserId = 3,
-                      NotificationType = "info",
-                      NotificationText = "Example of notify"
+                        NotificationID = 1,
+                        EntryDate = DateTime.Parse("2023-02-25T12:55:58.303-06:00"),
+                        IsAccepted = true,
+                        IsActive = true,
+                        MadeBy = "Marco Aguayo",
+                        UserId = 3,
+                        NotificationType = "info",
+                        NotificationText = "Example of notify"
+                    },
+                    new Notification()
+                    {
+                        NotificationID = 2,
+                        EntryDate = DateTime.Now,
+                        IsAccepted = true,
+                        IsActive = true,
+                        MadeBy = "Marco Aguayo",
+                        UserId = 3,
+                        NotificationType = "Supervisor",
+                        NotificationText = "Example of notify Active and not read"
+                    },
+                    new Notification()
+                    {
+                        NotificationID = 3,
+                        EntryDate = DateTime.Now,
+                        IsAccepted = false,
+                        IsActive = true,
+                        MadeBy = "Marco Aguayo",
+                        UserId = 3,
+                        NotificationType = "Supervisor",
+                        NotificationText = "Example of notify Active and Read"
+                    },
+                    new Notification()
+                    {
+                        NotificationID = 4,
+                        EntryDate = DateTime.Now,
+                        IsAccepted = true,
+                        IsActive = false,
+                        MadeBy = "Marco Aguayo",
+                        UserId = 3,
+                        NotificationType = "Supervisor",
+                        NotificationText = "Example of notify Read and delete"
+                    },
+                    new Notification()
+                    {
+                        NotificationID = 5,
+                        EntryDate = DateTime.Now,
+                        IsAccepted = false,
+                        IsActive = false,
+                        MadeBy = "Marco Aguayo",
+                        UserId = 3,
+                        NotificationType = "Supervisor",
+                        NotificationText = "Example of notify Read and delete"
                     });
 
 

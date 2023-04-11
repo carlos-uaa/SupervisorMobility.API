@@ -289,7 +289,7 @@ namespace SupervisorMobility.API.Controllers
                 {
 
                     //Otros campos
-                    var entityUserPayAndExtras = await _supervisorMobilityRepository.GetUserByPayrollAndMoreAsync(userItem.Payroll, (int)userItem.PlantId, (int)userItem.AreaId, (int)userItem.GroupId);
+                    var entityUserPayAndExtras = await _supervisorMobilityRepository.GetUserByPayrollAndMoreAsync((int)userItem.Payroll, (int)userItem.PlantId, (int)userItem.AreaId, (int)userItem.GroupId);
 
                     if (entityUserPayAndExtras == null)
                     {
@@ -329,7 +329,7 @@ namespace SupervisorMobility.API.Controllers
                     if (entityUser == null)
                     {
 
-                        var entityUserPayAndExtras = await _supervisorMobilityRepository.GetUserByPayrollAndMoreAsync(userItem.Payroll, (int)userItem.PlantId, (int)userItem.AreaId, (int)userItem.GroupId);
+                        var entityUserPayAndExtras = await _supervisorMobilityRepository.GetUserByPayrollAndMoreAsync((int)userItem.Payroll, (int)userItem.PlantId, (int)userItem.AreaId, (int)userItem.GroupId);
                         if (entityUserPayAndExtras == null)
                         {
                             //new user

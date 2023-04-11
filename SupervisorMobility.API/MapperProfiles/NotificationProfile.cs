@@ -8,6 +8,7 @@ namespace SupervisorMobility.API.MapperProfiles
         public NotificationProfile() {
             CreateMap<Notification, Models.NotificationDtos.NotificationDto>();
             CreateMap<Notification, Models.NotificationDtos.NotificationToCreateDto>().ReverseMap();
+            CreateMap<Notification, Models.NotificationDtos.NotificationForUpdateDto>().ReverseMap();
         }
     }
 }
