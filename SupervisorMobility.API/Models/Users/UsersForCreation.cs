@@ -2,7 +2,7 @@
 {
     public class UsersForCreation
     {
-        public string ObjectId { get; set; }
+        public string? ObjectId { get; set; }
         public int? Payroll { get; set; }
         public string Name { get; set; } = string.Empty;
         public bool? IsAdmin { get; set; }
