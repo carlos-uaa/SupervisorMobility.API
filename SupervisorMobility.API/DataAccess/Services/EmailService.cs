@@ -30,8 +30,7 @@ namespace SupervisorMobility.API.DataAccess.Services
             {
                 try
                 {
-                    client.Connect(_emailConfig.SmtpServer, _emailConfig.Port, SecureSocketOptions.StartTls, default);
-                    //client.AuthenticationMechanisms.Remove("XOAUTH2");
+                    client.Connect(_emailConfig.SmtpServer, _emailConfig.Port);
                     client.Authenticate(_emailConfig.UserName, _emailConfig.Password);
                     client.Send(mailMessage);
                 }
