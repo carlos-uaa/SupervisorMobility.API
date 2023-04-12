@@ -237,15 +237,15 @@ namespace SupervisorMobility.API.Controllers
             {
                 resumeChanges += "Type, ";
             }
-            if (jobObservationEntity.DateStart != jobObservationForUpdate.dateStart)
+            if (jobObservationEntity.StartDate != jobObservationForUpdate.StartDate)
             {
                 resumeChanges += "date Start, ";
             }
-            if (jobObservationEntity.DateEnd != jobObservationForUpdate.dateEnd)
+            if (jobObservationEntity.EndDate != jobObservationForUpdate.EndDate)
             {
                 resumeChanges += "date End, ";
             }
-            if (jobObservationEntity.DateFinalized != jobObservationForUpdate.DateFinalized)
+            if (jobObservationEntity.FinishedDate != jobObservationForUpdate.FinishedDate)
             {
                 resumeChanges += "Date Finalized, ";
             }
