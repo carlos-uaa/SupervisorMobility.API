@@ -187,7 +187,7 @@ namespace SupervisorMobility.API.Controllers
                 newnotify.UserId = jobObservationForUpdate.SupervisorId;
                 newnotify.IsAccepted = true;
                 newnotify.IsActive = true;
-                newnotify.NotificationText = $"The JobObservation with id: {jobObservationEntity.OperationId} was terminated by the user {MadeBy}";
+                newnotify.NotificationText = $"The JobObservation with id: {jobObservationEntity.OperationId} was terminated by the user {auser.name}";
                 newnotify.NotificationType = "FinishJobObservation";
 
                 var notadd = await _assyChartService.CreateNotificationAsync(newnotify);
@@ -313,7 +313,7 @@ namespace SupervisorMobility.API.Controllers
                 var jobtoaddversion = await _supervisorMobilityRepository.GetJobObservationAsync(jobObservationId, true);
                 HistoryToAdd.DateModification = DateTime.Now;
                 HistoryToAdd.resumeVersion = resumeChanges;
-                HistoryToAdd.MadeBy = MadeBy;
+                HistoryToAdd.MadeBy = auser.name;
                 //añadimos
                 bool added = await _supervisorMobilityRepository.AddHistoyToJobObservationAsync(HistoryToAdd, jobtoaddversion);
                 //add to 
