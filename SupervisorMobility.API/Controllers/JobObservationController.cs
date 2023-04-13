@@ -7,6 +7,7 @@ using SupervisorMobility.API.Business;
 using SupervisorMobility.API.DataAccess.Entities;
 using SupervisorMobility.API.DataAccess.Services;
 using SupervisorMobility.API.Entities;
+using SupervisorMobility.API.Models.ADUser;
 using SupervisorMobility.API.Models.AssyChart;
 using SupervisorMobility.API.Models.JobObservationDtos;
 using SupervisorMobility.API.Models.NotificationDtos;
@@ -148,7 +149,7 @@ namespace SupervisorMobility.API.Controllers
         public async Task<ActionResult> UpdateJobObservation(int jobObservationId, RequestJobObservationADuser request)
         {
 
-            JobObservationForUpdateDto jobObservationForUpdate = _mapper.Map<JobObservationForUpdateDto>(request.JobObservation);
+            JobObservationForUpdateDto jobObservationForUpdate = request.JobObservation;
             ADuser auser = request.ADuser;
 
             if (!await _supervisorMobilityRepository.PlantExistAsync(jobObservationForUpdate.PlantId))
@@ -187,7 +188,7 @@ namespace SupervisorMobility.API.Controllers
                 newnotify.UserId = jobObservationForUpdate.SupervisorId;
                 newnotify.IsAccepted = true;
                 newnotify.IsActive = true;
-                newnotify.NotificationText = $"The JobObservation with id: {jobObservationEntity.OperationId} was terminated by the user {MadeBy}";
+                newnotify.NotificationText = $"The JobObservation with id: {jobObservationEntity.OperationId} was terminated by the user {auser.name}";
                 newnotify.NotificationType = "FinishJobObservation";
 
                 var notadd = await _assyChartService.CreateNotificationAsync(newnotify);
@@ -313,7 +314,7 @@ namespace SupervisorMobility.API.Controllers
                 var jobtoaddversion = await _supervisorMobilityRepository.GetJobObservationAsync(jobObservationId, true);
                 HistoryToAdd.DateModification = DateTime.Now;
                 HistoryToAdd.resumeVersion = resumeChanges;
-                HistoryToAdd.MadeBy = MadeBy;
+                HistoryToAdd.MadeBy = auser.name;
                 //añadimos
                 bool added = await _supervisorMobilityRepository.AddHistoyToJobObservationAsync(HistoryToAdd, jobtoaddversion);
                 //add to 
