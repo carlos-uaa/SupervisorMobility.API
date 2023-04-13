@@ -99,6 +99,7 @@ namespace SupervisorMobility.API.Business
         Task<Attendance> FetchAttendanceByIdAsync(int AttendanceId);
         Task<Attendance> FetchAttendancePayrollAsync(int payroll);
         Task<Attendance> CreateAttendanceAsync(AttendanceForCreationDto Attendance);
+        Task<bool> UpdateAttendanceAsync(AttendanceForUpdateDto ForUpdate, Attendance Attendance);
         Task<IEnumerable<Attendance>> GetAllAttendanceAsync();
         #endregion
     }

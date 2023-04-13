@@ -373,6 +373,14 @@ namespace SupervisorMobility.API.Business
             await _repository.SaveChangesAsync();
             return AttendanceToAdd;
         }
+
+        public async Task<bool> UpdateAttendanceAsync(AttendanceForUpdateDto ForUpdate, Attendance attendance)
+        {
+            _mapper.Map(ForUpdate, attendance);
+            await _repository.SaveChangesAsync();
+
+            return true;
+        }
         public async Task<IEnumerable<Attendance>> GetAllAttendanceAsync()
         {
             return await _repository.GetAllAttendance();

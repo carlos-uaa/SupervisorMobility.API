@@ -198,134 +198,134 @@ namespace SupervisorMobility.API.Controllers
                 }
             }
 
-           
-                //Crear copia de la version anterior
-                JobObservationVersion HistoryToAdd = await _assyChartService.CreateHistoryJobObservationAsync(jobObservationEntity);
 
-                //Creamos mensaje de cambios
-                string resumeChanges = "";
+            //Crear copia de la version anterior
+            JobObservationVersion HistoryToAdd = await _assyChartService.CreateHistoryJobObservationAsync(jobObservationEntity);
 
-                if (jobObservationEntity.IsActive != jobObservationForUpdate.IsActive)
+            //Creamos mensaje de cambios
+            string resumeChanges = "";
+
+            if (jobObservationEntity.IsActive != jobObservationForUpdate.IsActive)
+            {
+                resumeChanges += "IsActive, ";
+            }
+            if (jobObservationEntity.PlantId != jobObservationForUpdate.PlantId)
+            {
+                resumeChanges += "plant, ";
+            }
+            if (jobObservationEntity.AreaId != jobObservationForUpdate.AreaId)
+            {
+                resumeChanges += "area, ";
+            }
+            if (jobObservationEntity.DistributionId != jobObservationForUpdate.DistributionId)
+            {
+                resumeChanges += "distribution, ";
+            }
+            if (jobObservationEntity.OperationId != jobObservationForUpdate.OperationId)
+            {
+                resumeChanges += "operation, ";
+            }
+            if (jobObservationEntity.SupervisorId != jobObservationForUpdate.SupervisorId)
+            {
+                resumeChanges += "supervisor, ";
+            }
+            if (jobObservationEntity.OperatorId != jobObservationForUpdate.OperatorId)
+            {
+                resumeChanges += "operator, ";
+            }
+            if (jobObservationEntity.Type != jobObservationForUpdate.Type)
+            {
+                resumeChanges += "Type, ";
+            }
+            if (jobObservationEntity.StartDate != jobObservationForUpdate.StartDate)
+            {
+                resumeChanges += "date Start, ";
+            }
+            if (jobObservationEntity.EndDate != jobObservationForUpdate.EndDate)
+            {
+                resumeChanges += "date End, ";
+            }
+            if (jobObservationEntity.FinishedDate != jobObservationForUpdate.FinishedDate)
+            {
+                resumeChanges += "Date Finalized, ";
+            }
+            if (jobObservationEntity.Justification != jobObservationForUpdate.Justification)
+            {
+                resumeChanges += "Justification , ";
+            }
+            if (jobObservationEntity.Status != jobObservationForUpdate.Status)
+            {
+                resumeChanges += "Status, ";
+            }
+            if (jobObservationEntity.Option != jobObservationForUpdate.Option)
+            {
+                resumeChanges += "Option, ";
+            }
+            if (jobObservationEntity.Anomaly != jobObservationForUpdate.Anomaly)
+            {
+                resumeChanges += "Anomaly, ";
+            }
+            if (jobObservationEntity.Time1HOE != jobObservationForUpdate.Time1HOE)
+            {
+                resumeChanges += "Timers 1, ";
+            }
+            if (jobObservationEntity.Time2HOE != jobObservationForUpdate.Time2HOE)
+            {
+                resumeChanges += "Timers 2, ";
+            }
+            if (jobObservationEntity.Models != jobObservationForUpdate.Models)
+            {
+                resumeChanges += "Models, ";
+            }
+            if (jobObservationEntity.Cicles != jobObservationForUpdate.Cicles)
+            {
+                resumeChanges += "Cicles, ";
+            }
+            if (jobObservationEntity.SsvCommentary != jobObservationForUpdate.SsvCommentary)
+            {
+                resumeChanges += "SsvCommentary, ";
+            }
+            if (jobObservationEntity.OperatorCommentary != jobObservationForUpdate.OperatorCommentary)
+            {
+                resumeChanges += "OperatorCommentary, ";
+            }
+            if (jobObservationEntity.SsvSignature != jobObservationForUpdate.SsvSignature)
+            {
+                resumeChanges += "SsvSignature, ";
+            }
+            if (jobObservationEntity.OperatorSignature != jobObservationForUpdate.OperatorSignature)
+            {
+                resumeChanges += "OperatorSignature, ";
+            }
+
+            // Remove the trailing comma and space
+            if (resumeChanges.EndsWith(", "))
+            {
+                resumeChanges = resumeChanges.Substring(0, resumeChanges.Length - 2);
+            }
+
+            //Actualiza la jobobsevation
+            _mapper.Map(jobObservationForUpdate, jobObservationEntity);
+
+            //añadimos la version anterior a la jobOb actualizada
+            if (HistoryToAdd != null)
+            {
+                //optenemos la nueva version
+                var jobtoaddversion = await _supervisorMobilityRepository.GetJobObservationAsync(jobObservationId, true);
+                HistoryToAdd.DateModification = DateTime.Now;
+                HistoryToAdd.resumeVersion = resumeChanges;
+                HistoryToAdd.MadeBy = auser.name;
+                //añadimos
+                bool added = await _supervisorMobilityRepository.AddHistoyToJobObservationAsync(HistoryToAdd, jobtoaddversion);
+                //add to 
+
+                if (!added)
                 {
-                    resumeChanges += "IsActive, ";
-                }
-                if (jobObservationEntity.PlantId != jobObservationForUpdate.PlantId)
-                {
-                    resumeChanges += "plant, ";
-                }
-                if (jobObservationEntity.AreaId != jobObservationForUpdate.AreaId)
-                {
-                    resumeChanges += "area, ";
-                }
-                if (jobObservationEntity.DistributionId != jobObservationForUpdate.DistributionId)
-                {
-                    resumeChanges += "distribution, ";
-                }
-                if (jobObservationEntity.OperationId != jobObservationForUpdate.OperationId)
-                {
-                    resumeChanges += "operation, ";
-                }
-                if (jobObservationEntity.SupervisorId != jobObservationForUpdate.SupervisorId)
-                {
-                    resumeChanges += "supervisor, ";
-                }
-                if (jobObservationEntity.OperatorId != jobObservationForUpdate.OperatorId)
-                {
-                    resumeChanges += "operator, ";
-                }
-                if (jobObservationEntity.Type != jobObservationForUpdate.Type)
-                {
-                    resumeChanges += "Type, ";
-                }
-                if (jobObservationEntity.StartDate != jobObservationForUpdate.StartDate)
-                {
-                    resumeChanges += "date Start, ";
-                }
-                if (jobObservationEntity.EndDate != jobObservationForUpdate.EndDate)
-                {
-                    resumeChanges += "date End, ";
-                }
-                if (jobObservationEntity.FinishedDate != jobObservationForUpdate.FinishedDate)
-                {
-                    resumeChanges += "Date Finalized, ";
-                }
-                if (jobObservationEntity.Justification != jobObservationForUpdate.Justification)
-                {
-                    resumeChanges += "Justification , ";
-                }
-                if (jobObservationEntity.Status != jobObservationForUpdate.Status)
-                {
-                    resumeChanges += "Status, ";
-                }
-                if (jobObservationEntity.Option != jobObservationForUpdate.Option)
-                {
-                    resumeChanges += "Option, ";
-                }
-                if (jobObservationEntity.Anomaly != jobObservationForUpdate.Anomaly)
-                {
-                    resumeChanges += "Anomaly, ";
-                }
-                if (jobObservationEntity.Time1HOE != jobObservationForUpdate.Time1HOE)
-                {
-                    resumeChanges += "Timers 1, ";
-                }
-                if (jobObservationEntity.Time2HOE != jobObservationForUpdate.Time2HOE)
-                {
-                    resumeChanges += "Timers 2, ";
-                }
-                if (jobObservationEntity.Models != jobObservationForUpdate.Models)
-                {
-                    resumeChanges += "Models, ";
-                }
-                if (jobObservationEntity.Cicles != jobObservationForUpdate.Cicles)
-                {
-                    resumeChanges += "Cicles, ";
-                }
-                if (jobObservationEntity.SsvCommentary != jobObservationForUpdate.SsvCommentary)
-                {
-                    resumeChanges += "SsvCommentary, ";
-                }
-                if (jobObservationEntity.OperatorCommentary != jobObservationForUpdate.OperatorCommentary)
-                {
-                    resumeChanges += "OperatorCommentary, ";
-                }
-                if (jobObservationEntity.SsvSignature != jobObservationForUpdate.SsvSignature)
-                {
-                    resumeChanges += "SsvSignature, ";
-                }
-                if (jobObservationEntity.OperatorSignature != jobObservationForUpdate.OperatorSignature)
-                {
-                    resumeChanges += "OperatorSignature, ";
+                    return NotFound("Fail updating history");
                 }
 
-                // Remove the trailing comma and space
-                if (resumeChanges.EndsWith(", "))
-                {
-                    resumeChanges = resumeChanges.Substring(0, resumeChanges.Length - 2);
-                }
+            }
 
-                //Actualiza la jobobsevation
-                _mapper.Map(jobObservationForUpdate, jobObservationEntity);
-
-                //añadimos la version anterior a la jobOb actualizada
-                if (HistoryToAdd != null)
-                {
-                    //optenemos la nueva version
-                    var jobtoaddversion = await _supervisorMobilityRepository.GetJobObservationAsync(jobObservationId, true);
-                    HistoryToAdd.DateModification = DateTime.Now;
-                    HistoryToAdd.resumeVersion = resumeChanges;
-                    HistoryToAdd.MadeBy = auser.name;
-                    //añadimos
-                    bool added = await _supervisorMobilityRepository.AddHistoyToJobObservationAsync(HistoryToAdd, jobtoaddversion);
-                    //add to 
-
-                    if (!added)
-                    {
-                        return NotFound("Fail updating history");
-                    }
-
-                }
-            
 
 
             await _supervisorMobilityRepository.SaveChangesAsync();

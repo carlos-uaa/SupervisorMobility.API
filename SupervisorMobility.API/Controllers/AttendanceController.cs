@@ -79,6 +79,7 @@ namespace SupervisorMobility.API.Controllers
             List<User> alluser = _mapper.Map<List<User>>(await _supervisorMobilityRepository.GetAllUsersAsync());
             var fecha2 = DateTime.Now;
 
+            List<Attendance> allattendanceadded = new List<Attendance>();
 
             foreach (var record in records)
             {
@@ -86,12 +87,7 @@ namespace SupervisorMobility.API.Controllers
                 string concepto = (string)record.Concepto;
                 DateTime fecha = DateTime.Parse((string)record.Fecha);
 
-                var existingRecord = allattendance.Find(a => a.Payroll == id);
-
-                if (existingRecord != null)
-                {
-                    continue;
-                }
+                
 
                 var user = alluser.Find(u => u.Payroll == id);
                 if (user == null && concepto != "CP_CHECADA")
@@ -99,13 +95,45 @@ namespace SupervisorMobility.API.Controllers
                     continue;
                 }
 
+                var existingRecord = allattendance.Find(a => a.Payroll == id);
                 bool mismoDia = fecha.Day == fecha2.Day && fecha.Month == fecha2.Month && fecha.Year == fecha2.Year;
 
                 if (!mismoDia)
                 {
+                    if (existingRecord != null)
+                    {
+                        DateTime inico = DateTime.Parse((string)record.Inicio);
+                        DateTime fin = DateTime.Parse((string)record.Fin);
+                        bool diapasado = inico.Day == fin.Day && inico.Month == fin.Month && inico.Year == fin.Year;
+
+                        if (diapasado)
+                        {
+                            var updateRecord = new AttendanceForUpdateDto
+                            {
+                                Payroll = user.Payroll,
+                                Name = user.Name,
+                                AreaId = user.AreaId,
+                                GroupId = user.GroupId,
+                                Compas = false,
+                                Station = false
+                            };
+
+                            bool update = await _assyChartService.UpdateAttendanceAsync(updateRecord, existingRecord);
+                        }
+
+                    }
                     continue;
                 }
+                else
+                {
+                    if (existingRecord != null)
+                    {
+                        continue;
+                    }
+                }
 
+
+               
 
                 var newRecord = new AttendanceForCreationDto
                 {
@@ -119,18 +147,32 @@ namespace SupervisorMobility.API.Controllers
                 
 
                 var processAttendance = await _assyChartService.CreateAttendanceAsync(newRecord);
-                
+                allattendanceadded.Add(processAttendance);
             }
 
-            return Ok(_mapper.Map<List<Attendance>>(await _assyChartService.GetAllAttendanceAsync()));
+            return Ok(allattendanceadded);
         }
 
         [HttpPost("updatelist")]
         public async Task<ActionResult> updatelist(List<AttendanceWithoutDetailsDto> lista)
         {
             //update lista
+            List<Attendance> allattendance = _mapper.Map<List<Attendance>>(await _assyChartService.GetAllAttendanceAsync());
 
-            return Ok();
+            foreach (var item in lista)
+            {
+                var AttendaceforUpdate = allattendance.Find(e => e.AttendanceId == item.AttendanceId);
+
+                if(AttendaceforUpdate != null)
+                {
+                    bool update = await _assyChartService.UpdateAttendanceAsync(_mapper.Map<AttendanceForUpdateDto>(item), AttendaceforUpdate);
+                }
+
+            }
+
+            allattendance = _mapper.Map<List<Attendance>>(await _assyChartService.GetAllAttendanceAsync());
+
+            return Ok(allattendance);
         }
 
     }
