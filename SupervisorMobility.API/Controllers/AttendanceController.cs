@@ -116,7 +116,8 @@ namespace SupervisorMobility.API.Controllers
                     Compas = true, 
                     Station = false 
                 };
-                //Falta crear el MAPERPROFILE
+                
+
                 var processAttendance = await _assyChartService.CreateAttendanceAsync(newRecord);
                 
             }
