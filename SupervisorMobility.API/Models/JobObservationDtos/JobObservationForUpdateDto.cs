@@ -16,8 +16,8 @@ namespace SupervisorMobility.API.Models.JobObservationDtos
         public int? Type { get; set; }
         public DateTime? StartDate { get; set; }
         public DateTime? EndDate { get; set; }
-        public DateTime? EditStartDate { get; set; }
-        public DateTime? EditEndDate { get; set; }
+        public DateTime? PlannedStartDate { get; set; }
+        public DateTime? PlannedEndDate { get; set; }
         public DateTime? FinishedDate { get; set; }
 
         public string? Justification { get; set; }
