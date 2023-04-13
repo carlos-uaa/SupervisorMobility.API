@@ -13,7 +13,7 @@ namespace SupervisorMobility.API.Models.NotificationDtos
 
         public int UserId { get; set; }
 
-        public UsersWhitoutNavigationDetails? User { get; set; }
+        public UsersWithoutNavigationDetails? User { get; set; }
 
         public bool IsAccepted { get; set; } = false;
         public bool IsActive { get; set; } = false;

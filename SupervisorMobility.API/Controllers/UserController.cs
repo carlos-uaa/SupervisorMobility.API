@@ -42,29 +42,29 @@ namespace SupervisorMobility.API.Controllers
         }
 
         [HttpGet]
-        public async Task<ActionResult<IEnumerable<UsersWhitNavigationDetails>>> GetUsers(bool collections = false)
+        public async Task<ActionResult<IEnumerable<UsersWithNavigationDetails>>> GetUsers(bool collections = false)
         {
             if (collections)
             {
                 var userEntity = await _supervisorMobilityRepository.GetAllUsersWhitPlantAreaAndGroupAsync();
-                return Ok(_mapper.Map<IEnumerable<UsersWhitNavigationDetails>>(userEntity));
+                return Ok(_mapper.Map<IEnumerable<UsersWithNavigationDetails>>(userEntity));
             }
             else
             {
                 var userEntity = await _supervisorMobilityRepository.GetAllUsersAsync();
-                return Ok(_mapper.Map<IEnumerable<UsersWhitoutNavigationDetails>>(userEntity));
+                return Ok(_mapper.Map<IEnumerable<UsersWithoutNavigationDetails>>(userEntity));
             }
         }
 
         [HttpGet("{userId}")]
-        public async Task<ActionResult<UsersWhitNavigationDetails>> GetUser(int userId, bool collections = false)
+        public async Task<ActionResult<UsersWithNavigationDetails>> GetUser(int userId, bool collections = false)
         {
             if (collections)
             {
                 var userEntity = await _supervisorMobilityRepository.GetUserAsync(userId, collections);
                 if (userEntity != null)
                 {
-                    return Ok(_mapper.Map<UsersWhitNavigationDetails>(userEntity));
+                    return Ok(_mapper.Map<UsersWithNavigationDetails>(userEntity));
 
                 }
 
@@ -75,7 +75,7 @@ namespace SupervisorMobility.API.Controllers
                 var userEntity = await _supervisorMobilityRepository.GetUserAsync(userId);
                 if (userEntity != null)
                 {
-                    return Ok(_mapper.Map<UsersWhitoutNavigationDetails>(userEntity));
+                    return Ok(_mapper.Map<UsersWithoutNavigationDetails>(userEntity));
 
                 }
 
@@ -84,7 +84,7 @@ namespace SupervisorMobility.API.Controllers
         }
 
         [HttpPost]
-        public async Task<ActionResult<UsersWhitNavigationDetails>> CreateUser(UsersForCreation newUser)
+        public async Task<ActionResult<UsersWithNavigationDetails>> CreateUser(UsersForCreation newUser)
         {
             if (!await _supervisorMobilityRepository.PlantExistAsync(newUser.PlantId))
             {
@@ -154,7 +154,7 @@ namespace SupervisorMobility.API.Controllers
             string originalPath = System.IO.Path.Combine(System.IO.Path.GetDirectoryName(file), System.IO.Path.GetFileNameWithoutExtension(file) + System.IO.Path.GetExtension(file));
 
             UploadUsersResult result = new UploadUsersResult();
-            List<UsersWhitoutNavigationDetails> UsersListToSave = new List<UsersWhitoutNavigationDetails>();
+            List<UsersWithoutNavigationDetails> UsersListToSave = new List<UsersWithoutNavigationDetails>();
 
             if (FileToInsert.ContentType == "text/csv")
             {
@@ -215,7 +215,7 @@ namespace SupervisorMobility.API.Controllers
                             {
                                 if (!row.IsEmpty())
                                 {
-                                    var userToInsert = new UsersWhitoutNavigationDetails();
+                                    var userToInsert = new UsersWithoutNavigationDetails();
                                     //1UserId	2Payroll	3Name	4Plant	5Area	6Grupo	7Admin	8Supervisor	9Operator	10Create	11Update	12Disable	13Active
                                     //UserPorp
                                     userToInsert.UserId = ws.Cell(i,1).Value.ToString() != "" ? int.Parse(ws.Cell(i, 1).Value.ToString()) : -1;

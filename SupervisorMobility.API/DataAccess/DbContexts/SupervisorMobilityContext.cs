@@ -19,19 +19,16 @@ namespace SupervisorMobility.API.Context
         public DbSet<Plant> Plants { get; set; }
         public DbSet<Area> Areas { get; set; }
         public DbSet<Distribution> Distributions { get; set; }
-
         public DbSet<Operation> Operations { get; set; }
         public DbSet<SupportDocumentType> SupportDocumentTypes { get; set; }
         public DbSet<Product> Products { get; set; }
-        //Add AssyCharts db Context
         public DbSet<AssyChart> AssyCharts { get; set; }
         public DbSet<User> Users { get; set; }
-
         public DbSet<FileUpload> Files { get; set; }
         public DbSet<Guides> Guides { get; set; }
         public DbSet<JobObservationVersion> JobObservationHistory { get; set; }
         public DbSet<Notification> Notifications { get; set; }
-
+        public DbSet<Attendance> Attendances { get; set; }
         #endregion
 
         public SupervisorMobilityContext(DbContextOptions<SupervisorMobilityContext> options)

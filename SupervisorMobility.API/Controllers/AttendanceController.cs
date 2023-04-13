@@ -1,9 +1,15 @@
 ﻿using AutoMapper;
-using Microsoft.AspNetCore.Http;
+using CsvHelper;
+using DocumentFormat.OpenXml.InkML;
 using Microsoft.AspNetCore.Mvc;
+using Microsoft.Kiota.Abstractions;
 using SupervisorMobility.API.Business;
+using SupervisorMobility.API.DataAccess.Entities;
+using SupervisorMobility.API.Models.AreaDtos;
+using SupervisorMobility.API.Models.AttendanceDtos;
 using SupervisorMobility.API.Models.FileUploadDto;
 using SupervisorMobility.API.Services;
+using System.Globalization;
 
 namespace SupervisorMobility.API.Controllers
 {
@@ -51,6 +57,80 @@ namespace SupervisorMobility.API.Controllers
 
         }
 
+        [HttpGet] 
+        public async Task<ActionResult> GetAllAttendance()
+        {
+            List<Attendance> allattendance = _mapper.Map<List<Attendance>>(await _assyChartService.GetAllAttendanceAsync());
+            
+            return Ok(allattendance);
+        }
+
+
+        [HttpGet("Assign")]
+        public async Task<ActionResult> AssignEmployees()
+        {
+            string filePath = Directory.GetCurrentDirectory().ToString() + "\\uploads\\attendance\\attendance.csv";
+            using var reader = new StreamReader(filePath);
+            using var csv = new CsvReader(reader, CultureInfo.InvariantCulture);
+
+            var records = csv.GetRecords<dynamic>();
+
+            List<Attendance> allattendance = _mapper.Map<List<Attendance>>(await _assyChartService.GetAllAttendanceAsync());
+            List<User> alluser = _mapper.Map<List<User>>(await _supervisorMobilityRepository.GetAllUsersAsync());
+            var fecha2 = DateTime.Now;
+
+
+            foreach (var record in records)
+            {
+                int id = int.Parse(record.Id_Empleado);
+                string concepto = (string)record.Concepto;
+                DateTime fecha = DateTime.Parse((string)record.Fecha);
+
+                var existingRecord = allattendance.Find(a => a.Payroll == id);
+
+                if (existingRecord != null)
+                {
+                    continue;
+                }
+
+                var user = alluser.Find(u => u.Payroll == id);
+                if (user == null && concepto != "CP_CHECADA")
+                {
+                    continue;
+                }
+
+                bool mismoDia = fecha.Day == fecha2.Day && fecha.Month == fecha2.Month && fecha.Year == fecha2.Year;
+
+                if (!mismoDia)
+                {
+                    continue;
+                }
+
+
+                var newRecord = new AttendanceForCreationDto
+                {
+                    Payroll = user.Payroll,
+                    Name = user.Name,
+                    AreaId = user.AreaId,
+                    GroupId = user.GroupId,
+                    Compas = true, 
+                    Station = false 
+                };
+                //Falta crear el MAPERPROFILE
+                var processAttendance = await _assyChartService.CreateAttendanceAsync(newRecord);
+                
+            }
+
+            return Ok(_mapper.Map<List<Attendance>>(await _assyChartService.GetAllAttendanceAsync()));
+        }
+
+        [HttpPost("updatelist")]
+        public async Task<ActionResult> updatelist(List<AttendanceWithoutDetailsDto> lista)
+        {
+            //update lista
+
+            return Ok();
+        }
 
     }
 }

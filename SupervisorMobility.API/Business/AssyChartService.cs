@@ -3,6 +3,7 @@ using DocumentFormat.OpenXml.Spreadsheet;
 using SupervisorMobility.API.DataAccess.Entities;
 using SupervisorMobility.API.Entities;
 using SupervisorMobility.API.Models.AssyChart;
+using SupervisorMobility.API.Models.AttendanceDtos;
 using SupervisorMobility.API.Models.FileUploadDto;
 using SupervisorMobility.API.Models.GuidesDtos;
 using SupervisorMobility.API.Models.NotificationDtos;
@@ -353,6 +354,28 @@ namespace SupervisorMobility.API.Business
             _repository.DeleteNotificationAsync(notificationEntity);
             await _repository.SaveChangesAsync();
             return true;
+        }
+        #endregion
+        #region Attendance
+        public async Task<Attendance> FetchAttendanceByIdAsync(int AttendanceId)
+        {
+            return await _repository.GetAttendanceById(AttendanceId);
+        }
+        public async Task<Attendance> FetchAttendancePayrollAsync(int payroll)
+        {
+            return await _repository.GetAttendancePayroll(payroll);
+        }
+        public async Task<Attendance> CreateAttendanceAsync(AttendanceForCreationDto AttendanceForCreate)
+        {
+            var AttendanceToAdd = _mapper.Map<Attendance>(AttendanceForCreate);
+
+            _repository.AddAttendance(AttendanceToAdd);
+            await _repository.SaveChangesAsync();
+            return AttendanceToAdd;
+        }
+        public async Task<IEnumerable<Attendance>> GetAllAttendanceAsync()
+        {
+            return await _repository.GetAllAttendance();
         }
         #endregion
     }

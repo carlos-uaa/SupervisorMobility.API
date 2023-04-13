@@ -9,6 +9,7 @@ using SupervisorMobility.API.Models.PlantDtos;
 using SupervisorMobility.API.Models.ProductDtos;
 using SupervisorMobility.API.Models.SupportDocumentTypeDtos;
 using SupervisorMobility.API.Models.Users;
+using SupervisorMobility.API.Models.AttendanceDtos;
 
 namespace SupervisorMobility.API.Business
 {
@@ -93,6 +94,12 @@ namespace SupervisorMobility.API.Business
         Task<IEnumerable<Notification>> GetNotificationsFromUser(int iduser);
         Task<bool> UpdateNotificationAsync(NotificationForUpdateDto ForUpdate, Notification notify);
         Task<bool> RemoveNotificationAsync(Notification NotificationId);
+        #endregion
+        #region attendance
+        Task<Attendance> FetchAttendanceByIdAsync(int AttendanceId);
+        Task<Attendance> FetchAttendancePayrollAsync(int payroll);
+        Task<Attendance> CreateAttendanceAsync(AttendanceForCreationDto Attendance);
+        Task<IEnumerable<Attendance>> GetAllAttendanceAsync();
         #endregion
     }
 }

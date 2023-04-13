@@ -12,8 +12,6 @@ namespace SupervisorMobility.API.Models.NotificationDtos
         public string? NotificationText { get; set; }
         public int UserId { get; set; }
 
-        public UsersWhitoutNavigationDetails? User { get; set; }
-
         public bool IsAccepted { get; set; } = false;
         public bool IsActive { get; set; } = false;
         public DateTime EntryDate { get; set; } = DateTime.Now;

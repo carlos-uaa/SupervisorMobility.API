@@ -6,7 +6,7 @@ using SupervisorMobility.API.Models.PlantDtos;
 
 namespace SupervisorMobility.API.Models.Users
 {
-    public class UsersWhitNavigationDetails
+    public class UsersWithNavigationDetails
     {
         public int UserId { get; set; }
         public string? ObjectId { get; set; }

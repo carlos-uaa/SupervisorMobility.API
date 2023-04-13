@@ -145,8 +145,12 @@ namespace SupervisorMobility.API.Controllers
 
 
         [HttpPut("{jobObservationId}")]
-        public async Task<ActionResult> UpdateJobObservation(int jobObservationId, JobObservationForUpdateDto jobObservationForUpdate, string MadeBy = "")
+        public async Task<ActionResult> UpdateJobObservation(int jobObservationId, RequestJobObservationADuser request)
         {
+
+            JobObservationForUpdateDto jobObservationForUpdate = _mapper.Map<JobObservationForUpdateDto>(request.JobObservation);
+            ADuser auser = request.ADuser;
+
             if (!await _supervisorMobilityRepository.PlantExistAsync(jobObservationForUpdate.PlantId))
             {
                 return NotFound();
@@ -179,9 +183,8 @@ namespace SupervisorMobility.API.Controllers
             {
                 //crear notificacion
                 NotificationToCreateDto newnotify = new NotificationToCreateDto();
-                newnotify.MadeBy = MadeBy;
+                newnotify.MadeBy = auser.name;
                 newnotify.UserId = jobObservationForUpdate.SupervisorId;
-                newnotify.User = _mapper.Map<UsersWhitoutNavigationDetails>(newnotify);
                 newnotify.IsAccepted = true;
                 newnotify.IsActive = true;
                 newnotify.NotificationText = $"The JobObservation with id: {jobObservationEntity.OperationId} was terminated by the user {MadeBy}";
@@ -190,12 +193,8 @@ namespace SupervisorMobility.API.Controllers
                 var notadd = await _assyChartService.CreateNotificationAsync(newnotify);
                 if(notadd != null)
                 {
-                    Debug.WriteLine("Complete");
-                    //aqui mandamos correo 
-                    // create email message
-
-                    //var emailMessage = _email.CreateEmailMessage("maguayo@gruposinco.com.mx", "Este es un mensaje de prueba enviado desde job observation");
-                    //_email.Send(emailMessage);
+                    var emailMessage = _email.CreateEmailMessage(auser.email, "Este es un mensaje de prueba enviado desde job observation");
+                    _email.Send(emailMessage);
                 }
             } 
 

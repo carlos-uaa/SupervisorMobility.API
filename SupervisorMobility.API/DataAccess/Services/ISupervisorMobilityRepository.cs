@@ -1,6 +1,7 @@
 ﻿using SupervisorMobility.API.DataAccess.Entities;
 using SupervisorMobility.API.Entities;
 using SupervisorMobility.API.Models.AssyChart;
+using SupervisorMobility.API.Models.AttendanceDtos;
 using SupervisorMobility.API.Models.FileUploadDto;
 
 namespace SupervisorMobility.API.Services
@@ -22,8 +23,8 @@ namespace SupervisorMobility.API.Services
         #region JobObservationTypesOperations
         Task<IEnumerable<JobObservationType>> GetJobObservationTypesAsync();
         Task<JobObservationType?> GetJobObservationTypeAsync(int id, bool includeConfigs = false);
-        void AddJobObservationType (JobObservationType jobObservationType);
-        void DeleteJobObservationType (JobObservationType jobObservationType);
+        void AddJobObservationType(JobObservationType jobObservationType);
+        void DeleteJobObservationType(JobObservationType jobObservationType);
         Task<bool> JobObservationTypeExistAsync(int jobObservationTypeId);
         #endregion
         #region GroupOperations
@@ -56,20 +57,20 @@ namespace SupervisorMobility.API.Services
         #endregion
         #region DistributionOperations
         Task<IEnumerable<Distribution>> GetDistributionsForAreaAsync(int areaId, bool includecollections = false);
-        
+
         Task<Distribution?> GetDistributionForAreaAsync(int areaId, int distributionId, bool includeCollections = false);
         Task<Distribution?> GetDistributionOnlyIdAsync(int distributionId, bool includeCollections = false);
         Task<Distribution?> GetDistributionForAreaByCodeAndDescriptionAsync(int areaId, string code, string description);
-      
+
         Task AddDistributionForPlantAsync(int plantId, int areaId, Distribution distribution);
         //Task AddProductForDistributionAsync(int areaId, int distributionId, Product product);
         Task<bool> DistributionExistsAsync(int distributionId);
         Task<bool> DistributionExistsByCodeandDescriptionInAreaAsync(int areaId, string code, string description);
-        void DeleteDistribution (Distribution distribution);
+        void DeleteDistribution(Distribution distribution);
         #endregion
         #region OperationOperations
         Task<IEnumerable<Operation>> GetOperationsForDistributionAsync(int distributionId);
-        
+
         Task<bool> OperationExistsAsync(int operationId);
         Task<bool> OperationExistsByCodeAndDescriptionInDistributionAsync(int distributionId, string code, string description);
 
@@ -134,7 +135,6 @@ namespace SupervisorMobility.API.Services
         void DeleteAssyChartAsync(AssyChart assyChart);
 
         #endregion
-
         #region Users
         Task<IEnumerable<User>> GetAllUsersAsync();
         Task<IEnumerable<User>> GetAllUsersWhitPlantAreaAndGroupAsync();
@@ -145,7 +145,6 @@ namespace SupervisorMobility.API.Services
         void AddUserAsync(User user);
         void DeleteUserAsync(User user);
         #endregion
-
         #region HistoyJobObservation
         Task<JobObservationVersion?> GetHistoryJobObservationAsync(int HistoryJobObservationId);
         Task<IEnumerable<JobObservationVersion>> GetAllHistoryJobObservationAsync(int jobObservationId);
@@ -173,7 +172,6 @@ namespace SupervisorMobility.API.Services
 
 
         #endregion
-
         #region Guide
 
         Task<Guides?> GetGuideAsync(int guideId, bool includeFile = false);
@@ -182,7 +180,6 @@ namespace SupervisorMobility.API.Services
         void AddGuide(Guides guide);
         void DeleteGuide(Guides guide);
         #endregion
-
         #region JobObservationOperations
 
         Task<IEnumerable<JobObservation>> GetAllJobObservationsAsync(bool includeLup);
@@ -192,7 +189,6 @@ namespace SupervisorMobility.API.Services
         Task<bool> JobObservationExistAsync(int jobObservationId);
 
         #endregion
-
         #region GlosaryOperations
 
         Task<IEnumerable<Glosary>> GetGlosaryAsync();
@@ -200,8 +196,6 @@ namespace SupervisorMobility.API.Services
         void AddGlosaryWord(Glosary glosaryWord);
         void DeleteGlosaryWord(Glosary glossaryWord);
         #endregion
-
-
         #region LupOperations
         Task<IEnumerable<Lup>> GetAllLupAsync();
         Task<Lup?> GetLupAsync(int guideId, bool includeFile = false);
@@ -213,7 +207,12 @@ namespace SupervisorMobility.API.Services
 
 
         #endregion
-
+        #region Attendance
+        Task<Attendance> GetAttendanceById(int AttendanceId);
+        Task<Attendance> GetAttendancePayroll(int payroll);
+        void AddAttendance(Attendance Attendance);
+        Task<IEnumerable<Attendance>> GetAllAttendance();
+        #endregion
         #region CommonOperations
 
         Task<bool> SaveChangesAsync();

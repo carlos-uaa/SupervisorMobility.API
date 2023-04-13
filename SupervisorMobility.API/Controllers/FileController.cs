@@ -1246,7 +1246,7 @@ namespace SupervisorMobility.API.Controllers
         [HttpGet("Bulk/DownloadUsers")]
         public async Task<IActionResult> DownloadAllUsers()
         {
-            List<UsersWhitNavigationDetails> allUsersList = _mapper.Map<List<UsersWhitNavigationDetails>>(await _supervisorMobilityRepository.GetAllUsersWhitPlantAreaAndGroupAsync());
+            List<UsersWithNavigationDetails> allUsersList = _mapper.Map<List<UsersWithNavigationDetails>>(await _supervisorMobilityRepository.GetAllUsersWhitPlantAreaAndGroupAsync());
 
 
             if (allUsersList.Count == 0)

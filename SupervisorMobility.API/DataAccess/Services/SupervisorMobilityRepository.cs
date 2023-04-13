@@ -1020,16 +1020,16 @@ namespace SupervisorMobility.API.Services
             return await _context.Notifications.Include(n => n.User)
                 .Where(n => n.IsActive == true)
                  .OrderBy(c => c.NotificationID).ToListAsync();
-        } 
-        
+        }
+
         public async Task<IEnumerable<Notification>> GetAllNotificationsFromUserAsync(int id)
         {
             return await _context.Notifications.Include(n => n.User)
-                .Where(n => n.UserId == id && EF.Functions.DateDiffDay(DateTime.Now,n.EntryDate) <= 3 && EF.Functions.DateDiffMonth(DateTime.Now, n.EntryDate) == 0)
+                .Where(n => n.UserId == id && EF.Functions.DateDiffDay(DateTime.Now, n.EntryDate) <= 3 && EF.Functions.DateDiffMonth(DateTime.Now, n.EntryDate) == 0)
                  .OrderBy(c => c.NotificationID).ToListAsync();
         }
 
-    
+
 
         public void AddNotificationAsync(Notification notify)
         {
@@ -1042,11 +1042,38 @@ namespace SupervisorMobility.API.Services
             //_context.Notifications.Remove(notify);
         }
         #endregion
+        #region Attendance
+        public async Task<Attendance> GetAttendanceById(int AttendanceId)
+        {
+            return await _context.Attendances
+                .Include(a => a.Area)
+                .Include(g => g.Group)
+                  .Where(p => p.AttendanceId == AttendanceId).FirstOrDefaultAsync();
+        }
+        public async Task<Attendance> GetAttendancePayroll(int payroll)
+        {
+            return await _context.Attendances
+               .Include(a => a.Area)
+               .Include(g => g.Group)
+                 .Where(p => p.Payroll == payroll).FirstOrDefaultAsync();
+        }
+        public void AddAttendance(Attendance Attendance){
+            _context.Attendances.Add(Attendance);
+        }
+        public async Task<IEnumerable<Attendance>> GetAllAttendance()
+        {
+            return await _context.Attendances
+               .Include(a => a.Area)
+               .Include(p => p.Group)
+                .OrderBy(c => c.AttendanceId).ToListAsync();
+        }
+
+        #endregion
         #region CommonOperations
         public async Task<bool> SaveChangesAsync()
         {
             return (await _context.SaveChangesAsync() >= 0);
         }
-        #endregion
+        #endregion 
     }
 }
