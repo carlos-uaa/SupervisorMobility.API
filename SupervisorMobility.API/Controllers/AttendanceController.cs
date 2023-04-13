@@ -120,9 +120,8 @@ namespace SupervisorMobility.API.Controllers
 
                             bool update = await _assyChartService.UpdateAttendanceAsync(updateRecord, existingRecord);
                         }
-
+                        continue;
                     }
-                    continue;
                 }
                 else
                 {
@@ -132,16 +131,14 @@ namespace SupervisorMobility.API.Controllers
                     }
                 }
 
-
                
-
                 var newRecord = new AttendanceForCreationDto
                 {
                     Payroll = user.Payroll,
                     Name = user.Name,
                     AreaId = user.AreaId,
                     GroupId = user.GroupId,
-                    Compas = true, 
+                    Compas = mismoDia, 
                     Station = false 
                 };
                 
