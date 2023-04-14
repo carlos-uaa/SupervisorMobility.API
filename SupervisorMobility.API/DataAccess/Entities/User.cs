@@ -11,10 +11,7 @@ namespace SupervisorMobility.API.DataAccess.Entities
         public string? ObjectId { get; set; }
         public int? Payroll { get; set; }
         public string Name { get; set; } = string.Empty;
-        public bool? IsAdmin { get; set; }
-        public bool? IsSupervisor { get; set; }
-        public bool? IsOperator { get; set; }
-
+        public int UserType { get; set; }
 
         [Column(TypeName = "Date")]
         public DateTime? CreatedDate { get; set; } = DateTime.Now;
