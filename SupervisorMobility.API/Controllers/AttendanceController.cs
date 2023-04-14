@@ -57,11 +57,11 @@ namespace SupervisorMobility.API.Controllers
 
         }
 
-        [HttpGet] 
+        [HttpGet]
         public async Task<ActionResult> GetAllAttendance()
         {
             List<Attendance> allattendance = _mapper.Map<List<Attendance>>(await _assyChartService.GetAllAttendanceAsync());
-            
+
             return Ok(allattendance);
         }
 
@@ -81,16 +81,37 @@ namespace SupervisorMobility.API.Controllers
 
             List<Attendance> allattendanceadded = new List<Attendance>();
 
+
+
             foreach (var record in records)
             {
-                int id = int.Parse(record.Id_Empleado);
-                string concepto = (string)record.Concepto;
-                DateTime fecha = DateTime.Parse((string)record.Fecha);
-
+                int id = 0;
                 
+                if ((string)record.Id_Empleado != "")
+                    id = int.Parse(record.Id_Empleado);
+                else
+                    continue;
+
+
+
+                string concepto = "";
+                if ((string)record.Concepto != "")
+                    concepto = (string)record.Concepto;
+                else
+                    continue;
+
+
+
+                DateTime fecha = DateTime.Now;
+
+                if ((string)record.Fecha != "")
+                    fecha = DateTime.Parse((string)record.Fecha);
+                else
+                    continue;
+
 
                 var user = alluser.Find(u => u.Payroll == id);
-                if (user == null && concepto != "CP_CHECADA")
+                if (user == null)
                 {
                     continue;
                 }
@@ -102,26 +123,59 @@ namespace SupervisorMobility.API.Controllers
                 {
                     if (existingRecord != null)
                     {
-                        DateTime inico = DateTime.Parse((string)record.Inicio);
-                        DateTime fin = DateTime.Parse((string)record.Fin);
+
+                        DateTime inico = DateTime.Now;
+
+                        if ((string)record.Inicio != "")
+                            inico = DateTime.Parse((string)record.Inicio);
+                        else
+                            continue;
+
+                        DateTime fin = DateTime.Now;
+
+                        if ((string)record.Fin != "")
+                            inico = DateTime.Parse((string)record.Fin);
+                        else
+                            continue;
+
+
+
                         bool diapasado = inico.Day == fin.Day && inico.Month == fin.Month && inico.Year == fin.Year;
 
                         if (diapasado)
                         {
                             var updateRecord = new AttendanceForUpdateDto
                             {
-                                Payroll = user.Payroll,
-                                Name = user.Name,
-                                AreaId = user.AreaId,
-                                GroupId = user.GroupId,
+                                Payroll = user?.Payroll,
+                                Name = user?.Name,
+                                AreaId = user?.AreaId,
+                                GroupId = user?.GroupId,
                                 Compas = false,
                                 Station = false
                             };
 
                             bool update = await _assyChartService.UpdateAttendanceAsync(updateRecord, existingRecord);
                         }
-                        continue;
                     }
+                    else
+                    {
+                        var newRecord = new AttendanceForCreationDto
+                        {
+                            Payroll = user.Payroll,
+                            Name = user.Name,
+                            AreaId = user.AreaId,
+                            GroupId = user.GroupId,
+                            Compas = mismoDia,
+                            Station = false
+                        };
+
+
+                        var processAttendance = await _assyChartService.CreateAttendanceAsync(newRecord);
+                        allattendanceadded.Add(processAttendance);
+                    }
+
+                    continue;
+
                 }
                 else
                 {
@@ -131,20 +185,25 @@ namespace SupervisorMobility.API.Controllers
                     }
                 }
 
-               
-                var newRecord = new AttendanceForCreationDto
+                if (concepto == "CP_CHECADA")
                 {
-                    Payroll = user.Payroll,
-                    Name = user.Name,
-                    AreaId = user.AreaId,
-                    GroupId = user.GroupId,
-                    Compas = mismoDia, 
-                    Station = false 
-                };
-                
+                    var newRecord = new AttendanceForCreationDto
+                    {
+                        Payroll = user.Payroll,
+                        Name = user.Name,
+                        AreaId = user.AreaId,
+                        GroupId = user.GroupId,
+                        Compas = mismoDia,
+                        Station = false
+                    };
 
-                var processAttendance = await _assyChartService.CreateAttendanceAsync(newRecord);
-                allattendanceadded.Add(processAttendance);
+
+                    var processAttendance = await _assyChartService.CreateAttendanceAsync(newRecord);
+                    allattendanceadded.Add(processAttendance);
+                }
+
+
+
             }
 
             return Ok(allattendanceadded);
@@ -160,7 +219,7 @@ namespace SupervisorMobility.API.Controllers
             {
                 var AttendaceforUpdate = allattendance.Find(e => e.AttendanceId == item.AttendanceId);
 
-                if(AttendaceforUpdate != null)
+                if (AttendaceforUpdate != null)
                 {
                     bool update = await _assyChartService.UpdateAttendanceAsync(_mapper.Map<AttendanceForUpdateDto>(item), AttendaceforUpdate);
                 }
