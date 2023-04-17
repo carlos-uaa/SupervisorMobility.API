@@ -11,7 +11,6 @@ namespace SupervisorMobility.API.Models.Users
         public int? Payroll { get; set; }
         public string Name { get; set; } = string.Empty;
         public int UserType { get; set; }
-
         public bool? IsActive { get; set; }
         public int PlantId { get; set; }
         public int AreaId { get; set; }

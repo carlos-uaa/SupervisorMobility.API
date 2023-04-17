@@ -500,9 +500,7 @@ namespace SupervisorMobility.API.Context
                     ObjectId = "4f54e317-1ab9-45ec-9b72-7d1910a0cc88",
                     Payroll = 12345,
                     IsActive = true,
-                    IsAdmin = false,
-                    IsOperator = false,
-                    IsSupervisor = true,
+                    UserType = 1
                 },
                 new User
                 {
@@ -514,9 +512,8 @@ namespace SupervisorMobility.API.Context
                     ObjectId = "4f54e317",
                     Payroll = 239935,
                     IsActive = true,
-                    IsAdmin = false,
-                    IsOperator = true,
-                    IsSupervisor = false,
+                    UserType = 3
+
                 },
                 new User
                 {
@@ -528,9 +525,7 @@ namespace SupervisorMobility.API.Context
                     Name = "Marco Aguayo",
                     Payroll = 0906,
                     IsActive = true,
-                    IsAdmin = true,
-                    IsOperator = true,
-                    IsSupervisor = true,
+                    UserType = 1
                 }
                 );
 

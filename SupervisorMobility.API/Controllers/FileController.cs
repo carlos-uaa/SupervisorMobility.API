@@ -1263,18 +1263,17 @@ namespace SupervisorMobility.API.Controllers
             //ROW Data identificators
 
             ws.SetCellValue("A1", "UserId");
-            ws.SetCellValue("B1", "Payroll");
-            ws.SetCellValue("C1", "Name");
-            ws.SetCellValue("D1", "Plant");
-            ws.SetCellValue("E1", "Area");
-            ws.SetCellValue("F1", "Group");
-            ws.SetCellValue("G1", "Admin permission");
-            ws.SetCellValue("H1", "Supervisor permission");
-            ws.SetCellValue("I1", "Operator permission");
-            ws.SetCellValue("J1", "Date Create User");
-            ws.SetCellValue("K1", "Date Update User");
-            ws.SetCellValue("L1", "Date Disable User");
-            ws.SetCellValue("M1", "User Is Active");
+            ws.SetCellValue("B1", "ObjectId");
+            ws.SetCellValue("C1", "Payroll");
+            ws.SetCellValue("D1", "Name");
+            ws.SetCellValue("E1", "Plant");
+            ws.SetCellValue("F1", "Area");
+            ws.SetCellValue("G1", "Group");
+            ws.SetCellValue("H1", "Permission");
+            ws.SetCellValue("I1", "User creation date");
+            ws.SetCellValue("J1", "User update date");
+            ws.SetCellValue("K1", "User disable date");
+            ws.SetCellValue("L1", "Is Active");
 
 
 
@@ -1282,18 +1281,17 @@ namespace SupervisorMobility.API.Controllers
             foreach (var itemUser in allUsersList)
             {
                 ws.SetCellValue($"A{row}", itemUser.UserId.ToString() ?? "");
-                ws.SetCellValue($"B{row}", itemUser.Payroll.ToString() ?? "");
-                ws.SetCellValue($"C{row}", itemUser.Name.ToString() ?? ""); ;
-                ws.SetCellValue($"D{row}", itemUser.PlantId.ToString() ?? ""); ;
-                ws.SetCellValue($"E{row}", itemUser.AreaId.ToString() ?? "");
-                ws.SetCellValue($"F{row}", itemUser.GroupId.ToString() ?? "");
-                ws.SetCellValue($"G{row}", itemUser.IsAdmin.ToString() ?? "");
-                ws.SetCellValue($"H{row}", itemUser.IsSupervisor.ToString() ?? "");
-                ws.SetCellValue($"I{row}", itemUser.IsOperator.ToString() ?? "");
-                ws.SetCellValue($"J{row}", itemUser.CreatedDate.ToString() ?? "");
-                ws.SetCellValue($"K{row}", itemUser.LastUpdated.ToString() ?? "");
-                ws.SetCellValue($"L{row}", itemUser.DisabledDate.ToString() ?? "");
-                ws.SetCellValue($"M{row}", itemUser.IsActive.ToString() ?? "");
+                ws.SetCellValue($"B{row}", itemUser.ObjectId.ToString() ?? "");
+                ws.SetCellValue($"C{row}", itemUser.Payroll.ToString() ?? "");
+                ws.SetCellValue($"D{row}", itemUser.Name.ToString() ?? ""); ;
+                ws.SetCellValue($"E{row}", itemUser.PlantId.ToString() ?? ""); ;
+                ws.SetCellValue($"F{row}", itemUser.AreaId.ToString() ?? "");
+                ws.SetCellValue($"G{row}", itemUser.GroupId.ToString() ?? "");
+                ws.SetCellValue($"H{row}", itemUser.UserType.ToString() ?? "");
+                ws.SetCellValue($"I{row}", itemUser.CreatedDate.ToString() ?? "");
+                ws.SetCellValue($"J{row}", itemUser.LastUpdated.ToString() ?? "");
+                ws.SetCellValue($"K{row}", itemUser.DisabledDate.ToString() ?? "");
+                ws.SetCellValue($"L{row}", itemUser.IsActive.ToString() ?? "");
                 row++;
             }
 

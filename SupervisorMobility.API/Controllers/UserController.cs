@@ -196,10 +196,23 @@ namespace SupervisorMobility.API.Controllers
                     {
                         IXLWorksheet ws = workBook.Worksheet(1);
 
+                        //Forcar a que la columna contenga estilo, si es vacia, sea detectada 
+                        //userid
                         ws.Column("A").Style.Font.Underline = XLFontUnderlineValues.Single;
+                        //nomian
+                        ws.Column("B").Style.Font.Underline = XLFontUnderlineValues.Single;
+                        //planta area grupo
+                        ws.Column("D").Style.Font.Underline = XLFontUnderlineValues.Single;
+                        ws.Column("E").Style.Font.Underline = XLFontUnderlineValues.Single;
+                        ws.Column("F").Style.Font.Underline = XLFontUnderlineValues.Single;
+                        //permissions 
+                        ws.Column("G").Style.Font.Underline = XLFontUnderlineValues.Single;
+                        //date
+                        ws.Column("H").Style.Font.Underline = XLFontUnderlineValues.Single;
+                        ws.Column("I").Style.Font.Underline = XLFontUnderlineValues.Single;
                         ws.Column("J").Style.Font.Underline = XLFontUnderlineValues.Single;
+                        //is active
                         ws.Column("K").Style.Font.Underline = XLFontUnderlineValues.Single;
-                        ws.Column("L").Style.Font.Underline = XLFontUnderlineValues.Single;
 
                         //Loop through the Worksheet rows.
                         bool firstRow = true;
@@ -216,24 +229,27 @@ namespace SupervisorMobility.API.Controllers
                                 if (!row.IsEmpty())
                                 {
                                     var userToInsert = new UsersWithoutNavigationDetails();
-                                    //1UserId	2Payroll	3Name	4Plant	5Area	6Grupo	7Admin	8Supervisor	9Operator	10Create	11Update	12Disable	13Active
+                                    //UserId	ObjectId	Payroll	Name	Plant	Area	Grupo	Permission	CreateDate	UpdateDate	DisableDate	IsActive
+                                    //1         2           3       4       5       6       7       8           9           10          11          12          
                                     //UserPorp
                                     userToInsert.UserId = ws.Cell(i,1).Value.ToString() != "" ? int.Parse(ws.Cell(i, 1).Value.ToString()) : -1;
-                                    userToInsert.Payroll = ws.Cell(i, 2).Value.ToString() != "" ? int.Parse(ws.Cell(i, 2).Value.ToString()) : 0;
-                                    userToInsert.Name = ws.Cell(i, 3).Value.ToString() != "" ? ws.Cell(i, 3).Value.ToString() : "";
+                                    //
+                                    userToInsert.ObjectId = ws.Cell(i, 2).Value.ToString() != "" ? ws.Cell(i, 2).Value.ToString() : "";
+                                    userToInsert.Payroll = ws.Cell(i, 3).Value.ToString() != "" ? int.Parse(ws.Cell(i, 3).Value.ToString()) : 0;
+                                    userToInsert.Name = ws.Cell(i, 4).Value.ToString() != "" ? ws.Cell(i, 4).Value.ToString() : "";
                                     //Navigation Porpieties
-                                    userToInsert.PlantId = ws.Cell(i, 4).Value.ToString() != "" ? int.Parse(ws.Cell(i, 4).Value.ToString()) : -1;
-                                    userToInsert.AreaId = ws.Cell(i, 5).Value.ToString() != "" ? int.Parse(ws.Cell(i, 5).Value.ToString()) : -1;
-                                    userToInsert.GroupId = ws.Cell(i, 6).Value.ToString() != "" ? int.Parse(ws.Cell(i, 6).Value.ToString()) : -1;
+                                    userToInsert.PlantId = ws.Cell(i, 5).Value.ToString() != "" ? int.Parse(ws.Cell(i, 5).Value.ToString()) : -1;
+                                    userToInsert.AreaId = ws.Cell(i, 6).Value.ToString() != "" ? int.Parse(ws.Cell(i, 6).Value.ToString()) : -1;
+                                    userToInsert.GroupId = ws.Cell(i, 7).Value.ToString() != "" ? int.Parse(ws.Cell(i, 7).Value.ToString()) : -1;
                                     //Permission
-                                    userToInsert.IsAdmin = ws.Cell(i, 7).Value.ToString() != "" ? bool.Parse(ws.Cell(i, 7).Value.ToString()) : false;
-                                    userToInsert.IsSupervisor = ws.Cell(i, 8).Value.ToString() != "" ? bool.Parse(ws.Cell(i, 8).Value.ToString()) : false;
-                                    userToInsert.IsOperator = ws.Cell(i, 9).Value.ToString() != "" ? bool.Parse(ws.Cell(i, 9).Value.ToString()) : false;
+                                    userToInsert.UserType = ws.Cell(i, 8).Value.ToString() != "" ? int.Parse(ws.Cell(i, 8).Value.ToString()) : 0;
+                                  
+                                    
                                     //Date Controlls
                                     try
                                     {
                                         //create date
-                                        userToInsert.CreatedDate = ws.Cell(i, 10).Value.ToString() != "" ? DateTime.Parse(ws.Cell(i, 10).GetValue<string>()) : DateTime.Now;
+                                        userToInsert.CreatedDate = ws.Cell(i, 9).Value.ToString() != "" ? DateTime.Parse(ws.Cell(i, 9).GetValue<string>()) : DateTime.Now;
                                     }
                                     catch (Exception ex)
                                     {
@@ -242,7 +258,7 @@ namespace SupervisorMobility.API.Controllers
                                     try
                                     {
                                         //update
-                                        userToInsert.LastUpdated = ws.Cell(i, 11).Value.ToString() != "" ? DateTime.Parse(ws.Cell(i, 11).GetValue<string>()) : DateTime.Now;
+                                        userToInsert.LastUpdated = ws.Cell(i, 10).Value.ToString() != "" ? DateTime.Parse(ws.Cell(i, 10).GetValue<string>()) : DateTime.Now;
                                     }
                                     catch (Exception ex)
                                     {
@@ -252,16 +268,18 @@ namespace SupervisorMobility.API.Controllers
                                     try
                                     {
                                         //disabel
-                                        userToInsert.DisabledDate = ws.Cell(i, 12).GetString() != "" ? DateTime.Parse(ws.Cell(i, 12).GetValue<string>()) : null;
+                                        userToInsert.DisabledDate = ws.Cell(i, 11).GetString() != "" ? DateTime.Parse(ws.Cell(i, 11).GetValue<string>()) : null;
                                     }
                                     catch (Exception ex)
                                     {
                                         userToInsert.DisabledDate = null;
                                     }
                                     //Is acctive
-                                    userToInsert.IsActive = ws.Cell(i, 13).GetString() != "" ? bool.Parse(ws.Cell(i, 13).Value.ToString()) : false;
+                                    userToInsert.IsActive = ws.Cell(i, 12).GetString() != "" ? bool.Parse(ws.Cell(i, 12).Value.ToString()) : false;
+                                    //UserId	ObjectId	Payroll	Name	Plant	Area	Grupo	Permission	CreateDate	UpdateDate	DisableDate	IsActive
+                                    //1         2           3       4       5       6       7       8           9           10          11          12   
 
-                                    //1UserId	2Payroll	3Name	4Plant	5Area	6Grupo	7Admin	8Supervisor	9Operator	10Create	11Update	12Disable	13Active
+
                                     UsersListToSave.Add(userToInsert);
 
                                     i++;
@@ -287,28 +305,25 @@ namespace SupervisorMobility.API.Controllers
             {
                 if (userItem.UserId == -1)
                 {
-
-                    //Otros campos
+                    //Usuario sin id
+                    //Busqueda avanzada
                     var entityUserPayAndExtras = await _supervisorMobilityRepository.GetUserByPayrollAndMoreAsync((int)userItem.Payroll, (int)userItem.PlantId, (int)userItem.AreaId, (int)userItem.GroupId);
 
                     if (entityUserPayAndExtras == null)
                     {
-
                         //new user
                         UsersForCreation newuser = new UsersForCreation()
                         {
                             Name = userItem.Name,
+                            ObjectId =  userItem.ObjectId,
                             Payroll = userItem.Payroll,
                             PlantId = (int)userItem.PlantId,
                             AreaId = (int)userItem.AreaId,
                             GroupId = (int)userItem.GroupId,
-                            IsActive = userItem.IsActive,
-                            IsAdmin = userItem.IsAdmin,
-                            IsSupervisor = userItem.IsSupervisor,
-                            IsOperator = userItem.IsOperator,
-                            CreatedDate = (DateTime)userItem.CreatedDate,
+                            UserType= (int)userItem.UserType,
                             LastUpdated = userItem.LastUpdated,
-                            DisabledDate = userItem.DisabledDate
+                            DisabledDate = userItem.DisabledDate,
+                            IsActive = userItem.IsActive
                         };
 
                         var finalUser = await _assyChartService.CreateUserAsync(newuser);
@@ -317,36 +332,35 @@ namespace SupervisorMobility.API.Controllers
                     }
                     else
                     {
+                        //User ya existe
                         ResultToReturn.UsersExist++;
                     }
 
                 }
                 else
                 {
-
+                    //User con id
                     var entityUser = await _assyChartService.FetchUserAsync((int)userItem.UserId);
 
                     if (entityUser == null)
                     {
-
+                        //Si tiene un id erroneo, entra aqui
                         var entityUserPayAndExtras = await _supervisorMobilityRepository.GetUserByPayrollAndMoreAsync((int)userItem.Payroll, (int)userItem.PlantId, (int)userItem.AreaId, (int)userItem.GroupId);
                         if (entityUserPayAndExtras == null)
                         {
-                            //new user
+                            //new user porque no existe
                             UsersForCreation newuser = new UsersForCreation()
                             {
                                 Name = userItem.Name,
+                                ObjectId = userItem.ObjectId,
                                 Payroll = userItem.Payroll,
                                 PlantId = (int)userItem.PlantId,
                                 AreaId = (int)userItem.AreaId,
                                 GroupId = (int)userItem.GroupId,
-                                IsActive = userItem.IsActive,
-                                IsAdmin = userItem.IsAdmin,
-                                IsSupervisor = userItem.IsSupervisor,
-                                IsOperator = userItem.IsOperator,
-                                CreatedDate = (DateTime)userItem.CreatedDate,
+                                UserType = (int)userItem.UserType,
                                 LastUpdated = userItem.LastUpdated,
-                                DisabledDate = userItem.DisabledDate
+                                DisabledDate = userItem.DisabledDate,
+                                IsActive = userItem.IsActive
                             };
 
                             var finalUser = await _assyChartService.CreateUserAsync(newuser);
@@ -360,6 +374,7 @@ namespace SupervisorMobility.API.Controllers
                     }
                     else
                     {
+                        //Si el usuario existe entra aqui
                         ResultToReturn.UsersExist++;
                     }
 
