@@ -146,8 +146,6 @@ namespace SupervisorMobility.API.Context
                     Cicles = "3000|2500|3000|4000|1500",
                     SsvCommentary = "Senior Supervisor Commentary",
                     OperatorCommentary = "Operator Commentary",
-                    SsvSignature = "",
-                    OperatorSignature = ""
 
                 }); ; ; ;
 
