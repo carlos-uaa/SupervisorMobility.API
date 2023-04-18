@@ -216,6 +216,16 @@ namespace SupervisorMobility.API.Business
         {
             return await _repository.GetUserAsync(userId);
         }
+
+        public async Task<IEnumerable<User>> GetAllUsersAsync()
+        {
+            return await _repository.GetAllUsersAsync();
+        }
+
+        public async Task<IEnumerable<User>> GetAllUsersWhitPlantAreaAndGroupAsync()
+        {
+            return await _repository.GetAllUsersWhitPlantAreaAndGroupAsync();
+        }
         public async Task<User> CreateUserAsync(UsersForCreation newuser)
         {
             var finaluser = _mapper.Map<User>(newuser);
@@ -385,6 +395,8 @@ namespace SupervisorMobility.API.Business
         {
             return await _repository.GetAllAttendance();
         }
+
+      
         #endregion
     }
 }

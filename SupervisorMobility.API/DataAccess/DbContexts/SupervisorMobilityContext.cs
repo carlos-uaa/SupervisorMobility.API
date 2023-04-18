@@ -19,7 +19,7 @@ namespace SupervisorMobility.API.Context
         public DbSet<Plant> Plants { get; set; }
         public DbSet<Area> Areas { get; set; }
         public DbSet<Distribution> Distributions { get; set; }
-        public DbSet<Operation> Operations { get; set; }
+        public DbSet<Entities.Operation> Operations { get; set; }
         public DbSet<SupportDocumentType> SupportDocumentTypes { get; set; }
         public DbSet<Product> Products { get; set; }
         public DbSet<AssyChart> AssyCharts { get; set; }
@@ -73,7 +73,7 @@ namespace SupervisorMobility.API.Context
                 .Property(p => p.IsActive)
                 .HasDefaultValue(true);
 
-            modelBuilder.Entity<Operation>()
+            modelBuilder.Entity<Entities.Operation>()
                 .Property(p => p.IsActive)
                 .HasDefaultValue(true);
 
@@ -326,9 +326,9 @@ namespace SupervisorMobility.API.Context
 
 
 
-            modelBuilder.Entity<Operation>()
+            modelBuilder.Entity<Entities.Operation>()
                 .HasData(
-                new Operation("OP1", "Operacion Trim 1")
+                new Entities.Operation("OP1", "Operacion Trim 1")
                 {
                     OperationId = 1,
                     IsActive = true,
@@ -521,9 +521,9 @@ namespace SupervisorMobility.API.Context
                     GroupId = 1,
                     ObjectId = "7a184926-2f58-4f9c-872c-97d54d825912",
                     Name = "Marco Aguayo",
-                    Payroll = 0906,
+                    Payroll = 90633,
                     IsActive = true,
-                    UserType = 4
+                    UserType = 1
                 }
                 );
 

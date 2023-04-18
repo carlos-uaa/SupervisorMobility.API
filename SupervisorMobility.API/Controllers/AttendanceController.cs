@@ -20,14 +20,11 @@ namespace SupervisorMobility.API.Controllers
         private readonly IWebHostEnvironment _env;
         private readonly IMapper _mapper;
         private readonly IAssyChartService _assyChartService;
-        private readonly ISupervisorMobilityRepository _supervisorMobilityRepository;
 
         public AttendanceController(IWebHostEnvironment env, IMapper mapper, ISupervisorMobilityRepository supervisorMobilityRepository,
             IAssyChartService assyChartService)
         {
             _assyChartService = assyChartService;
-            _supervisorMobilityRepository = supervisorMobilityRepository ??
-                throw new ArgumentNullException(nameof(supervisorMobilityRepository));
             _env = env;
             _mapper = mapper ??
                 throw new ArgumentNullException(nameof(mapper));
@@ -76,135 +73,134 @@ namespace SupervisorMobility.API.Controllers
             var records = csv.GetRecords<dynamic>();
 
             List<Attendance> allattendance = _mapper.Map<List<Attendance>>(await _assyChartService.GetAllAttendanceAsync());
-            List<User> alluser = _mapper.Map<List<User>>(await _supervisorMobilityRepository.GetAllUsersAsync());
+            List<User> alluser = _mapper.Map<List<User>>(await _assyChartService.GetAllUsersAsync());
             var fecha2 = DateTime.Now;
 
             List<Attendance> allattendanceadded = new List<Attendance>();
 
 
-
-            foreach (var record in records)
-            {
-                int id = 0;
+            //foreach (var record in records)
+            //{
+            //    int id = 0;
                 
-                if ((string)record.Id_Empleado != "")
-                    id = int.Parse(record.Id_Empleado);
-                else
-                    continue;
+            //    if ((string)record.Id_Empleado != "")
+            //        id = int.Parse(record.Id_Empleado);
+            //    else
+            //        continue;
 
 
 
-                string concepto = "";
-                if ((string)record.Concepto != "")
-                    concepto = (string)record.Concepto;
-                else
-                    continue;
+            //    string concepto = "";
+            //    if ((string)record.Concepto != "")
+            //        concepto = (string)record.Concepto;
+            //    else
+            //        continue;
 
 
 
-                DateTime fecha = DateTime.Now;
+            //    DateTime fecha = DateTime.Now;
 
-                if ((string)record.Fecha != "")
-                    fecha = DateTime.Parse((string)record.Fecha);
-                else
-                    continue;
-
-
-                var user = alluser.Find(u => u.Payroll == id);
-                if (user == null)
-                {
-                    continue;
-                }
-
-                var existingRecord = allattendance.Find(a => a.Payroll == id);
-                bool mismoDia = fecha.Day == fecha2.Day && fecha.Month == fecha2.Month && fecha.Year == fecha2.Year;
-
-                if (!mismoDia)
-                {
-                    if (existingRecord != null)
-                    {
-
-                        DateTime inico = DateTime.Now;
-
-                        if ((string)record.Inicio != "")
-                            inico = DateTime.Parse((string)record.Inicio);
-                        else
-                            continue;
-
-                        DateTime fin = DateTime.Now;
-
-                        if ((string)record.Fin != "")
-                            inico = DateTime.Parse((string)record.Fin);
-                        else
-                            continue;
+            //    if ((string)record.Fecha != "")
+            //        fecha = DateTime.Parse((string)record.Fecha);
+            //    else
+            //        continue;
 
 
+            //    var user = alluser.Find(u => u.Payroll == id);
+            //    if (user == null)
+            //    {
+            //        continue;
+            //    }
 
-                        bool diapasado = inico.Day == fin.Day && inico.Month == fin.Month && inico.Year == fin.Year;
+            //    var existingRecord = allattendance.Find(a => a.User.Payroll == id);
+            //    bool mismoDia = fecha.Day == fecha2.Day && fecha.Month == fecha2.Month && fecha.Year == fecha2.Year;
 
-                        if (diapasado)
-                        {
-                            var updateRecord = new AttendanceForUpdateDto
-                            {
-                                Payroll = user?.Payroll,
-                                Name = user?.Name,
-                                AreaId = user?.AreaId,
-                                GroupId = user?.GroupId,
-                                Compas = false,
-                                Station = false
-                            };
+            //    if (!mismoDia)
+            //    {
+            //        if (existingRecord != null)
+            //        {
 
-                            bool update = await _assyChartService.UpdateAttendanceAsync(updateRecord, existingRecord);
-                        }
-                    }
-                    else
-                    {
-                        var newRecord = new AttendanceForCreationDto
-                        {
-                            Payroll = user.Payroll,
-                            Name = user.Name,
-                            AreaId = user.AreaId,
-                            GroupId = user.GroupId,
-                            Compas = mismoDia,
-                            Station = false
-                        };
+            //            DateTime inico = DateTime.Now;
 
+            //            if ((string)record.Inicio != "")
+            //                inico = DateTime.Parse((string)record.Inicio);
+            //            else
+            //                continue;
 
-                        var processAttendance = await _assyChartService.CreateAttendanceAsync(newRecord);
-                        allattendanceadded.Add(processAttendance);
-                    }
+            //            DateTime fin = DateTime.Now;
 
-                    continue;
-
-                }
-                else
-                {
-                    if (existingRecord != null)
-                    {
-                        continue;
-                    }
-                }
-
-                if (concepto == "CP_CHECADA")
-                {
-                    var newRecord = new AttendanceForCreationDto
-                    {
-                        Payroll = user.Payroll,
-                        Name = user.Name,
-                        AreaId = user.AreaId,
-                        GroupId = user.GroupId,
-                        Compas = mismoDia,
-                        Station = false
-                    };
-
-
-                    var processAttendance = await _assyChartService.CreateAttendanceAsync(newRecord);
-                    allattendanceadded.Add(processAttendance);
-                }
+            //            if ((string)record.Fin != "")
+            //                inico = DateTime.Parse((string)record.Fin);
+            //            else
+            //                continue;
 
 
 
-            }
+            //            bool diapasado = inico.Day == fin.Day && inico.Month == fin.Month && inico.Year == fin.Year;
+
+            //            if (diapasado)
+            //            {
+            //                var updateRecord = new AttendanceForUpdateDto
+            //                {
+            //                    Payroll = user?.Payroll,
+            //                    Name = user?.Name,
+            //                    AreaId = user?.AreaId,
+            //                    GroupId = user?.GroupId,
+            //                    Compas = false,
+            //                    Station = false
+            //                };
+
+            //                bool update = await _assyChartService.UpdateAttendanceAsync(updateRecord, existingRecord);
+            //            }
+            //        }
+            //        else
+            //        {
+            //            var newRecord = new AttendanceForCreationDto
+            //            {
+            //                Payroll = user.Payroll,
+            //                Name = user.Name,
+            //                AreaId = user.AreaId,
+            //                GroupId = user.GroupId,
+            //                Compas = mismoDia,
+            //                Station = false
+            //            };
+
+
+            //            var processAttendance = await _assyChartService.CreateAttendanceAsync(newRecord);
+            //            allattendanceadded.Add(processAttendance);
+            //        }
+
+            //        continue;
+
+            //    }
+            //    else
+            //    {
+            //        if (existingRecord != null)
+            //        {
+            //            continue;
+            //        }
+            //    }
+
+            //    if (concepto == "CP_CHECADA")
+            //    {
+            //        var newRecord = new AttendanceForCreationDto
+            //        {
+            //            Payroll = user.Payroll,
+            //            Name = user.Name,
+            //            AreaId = user.AreaId,
+            //            GroupId = user.GroupId,
+            //            Compas = mismoDia,
+            //            Station = false
+            //        };
+
+
+            //        var processAttendance = await _assyChartService.CreateAttendanceAsync(newRecord);
+            //        allattendanceadded.Add(processAttendance);
+            //    }
+
+
+
+            //}
 
             return Ok(allattendanceadded);
         }

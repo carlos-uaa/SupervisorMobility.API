@@ -2,7 +2,6 @@
 using System.ComponentModel.DataAnnotations;
 using SupervisorMobility.API.DataAccess.Entities;
 
-
 namespace SupervisorMobility.API.Entities
 {
     public class Operation

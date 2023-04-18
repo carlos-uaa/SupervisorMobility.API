@@ -16,7 +16,7 @@ namespace SupervisorMobility.API.Entities
         public int? AreaId { get; set; }
         public Distribution? Distribution { get; set; }
         public int? DistributionId { get; set; }
-        public Operation? Operation { get; set; }
+        public Entities.Operation? Operation { get; set; }
         public int? OperationId { get; set; }
         public User? Supervisor { get; set; }
         public User? Operator { get; set; }

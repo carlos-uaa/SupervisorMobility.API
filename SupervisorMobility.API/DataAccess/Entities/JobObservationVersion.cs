@@ -1,13 +1,14 @@
-﻿using SupervisorMobility.API.Entities;
+﻿using System.ComponentModel.DataAnnotations;
 using System.ComponentModel.DataAnnotations.Schema;
-using System.ComponentModel.DataAnnotations;
+using SupervisorMobility.API.DataAccess.Entities;
 
-namespace SupervisorMobility.API.DataAccess.Entities
+namespace SupervisorMobility.API.Entities
 {
     public class JobObservationVersion
     {
         [Key, DatabaseGenerated(DatabaseGeneratedOption.Identity)]
         public int JobObservationVersionId { get; set; }
+
         public DateTime? DateModification { get; set; }
         public string? resumeVersion { get; set; }
         public string? MadeBy { get; set; }
@@ -22,7 +23,7 @@ namespace SupervisorMobility.API.DataAccess.Entities
         public int? AreaId { get; set; }
         public Distribution? Distribution { get; set; }
         public int? DistributionId { get; set; }
-        public Operation? Operation { get; set; }
+        public Entities.Operation? Operation { get; set; }
         public int? OperationId { get; set; }
         public User? Supervisor { get; set; }
         public User? Operator { get; set; }

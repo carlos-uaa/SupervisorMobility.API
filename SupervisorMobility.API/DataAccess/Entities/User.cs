@@ -11,7 +11,13 @@ namespace SupervisorMobility.API.DataAccess.Entities
         public string? ObjectId { get; set; }
         public int? Payroll { get; set; }
         public string Name { get; set; } = string.Empty;
+        public string? Email { get; set; } = string.Empty;
         public int UserType { get; set; }
+
+        public int? SuperiorId { get; set; }
+        public User? Superior { get; set; }
+
+        public ICollection<User>? Subordinates { get; set; }
 
         [Column(TypeName = "Date")]
         public DateTime? CreatedDate { get; set; } = DateTime.Now;
@@ -29,7 +35,10 @@ namespace SupervisorMobility.API.DataAccess.Entities
         public int? GroupId { get; set; }
         public Group? Group { get; set; }
 
-        
+        //Distirbucion de usuario
+        public int? DistributionId { get; set; }
+        public Distribution? Distribution { get; set; }
+
 
     }
 }

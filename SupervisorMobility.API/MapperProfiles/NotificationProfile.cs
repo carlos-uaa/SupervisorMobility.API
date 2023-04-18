@@ -1,14 +1,15 @@
 ﻿using AutoMapper;
 using SupervisorMobility.API.DataAccess.Entities;
+using SupervisorMobility.API.Models.NotificationDtos;
 
 namespace SupervisorMobility.API.MapperProfiles
 {
     public class NotificationProfile : Profile
     {
         public NotificationProfile() {
-            CreateMap<Notification, Models.NotificationDtos.NotificationDto>();
-            CreateMap<Notification, Models.NotificationDtos.NotificationToCreateDto>().ReverseMap();
-            CreateMap<Notification, Models.NotificationDtos.NotificationForUpdateDto>().ReverseMap();
+            CreateMap<Notification, NotificationDto>();
+            CreateMap<Notification, NotificationToCreateDto>().ReverseMap();
+            CreateMap<Notification, NotificationForUpdateDto>().ReverseMap();
         }
     }
 }

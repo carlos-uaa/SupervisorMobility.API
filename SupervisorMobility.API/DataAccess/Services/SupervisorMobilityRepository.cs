@@ -1,17 +1,8 @@
-﻿using DocumentFormat.OpenXml.Bibliography;
-using DocumentFormat.OpenXml.Drawing;
-using DocumentFormat.OpenXml.Presentation;
-using DocumentFormat.OpenXml.Spreadsheet;
-using Irony.Parsing;
-using Microsoft.EntityFrameworkCore;
+﻿using Microsoft.EntityFrameworkCore;
 using SupervisorMobility.API.Context;
 using SupervisorMobility.API.DataAccess.Entities;
 using SupervisorMobility.API.Entities;
-using SupervisorMobility.API.Models.AssyChart;
-using SupervisorMobility.API.Models.FileUploadDto;
 using System.Diagnostics;
-using System.Security.Policy;
-using System.Xml;
 
 namespace SupervisorMobility.API.Services
 {
@@ -1045,27 +1036,30 @@ namespace SupervisorMobility.API.Services
         #region Attendance
         public async Task<Attendance> GetAttendanceById(int AttendanceId)
         {
-            return await _context.Attendances
-                .Include(a => a.Area)
-                .Include(g => g.Group)
-                  .Where(p => p.AttendanceId == AttendanceId).FirstOrDefaultAsync();
+            return null;
+            //return await _context.Attendances
+            //    .Include(a => a.Area)
+            //    .Include(g => g.Group)
+            //      .Where(p => p.AttendanceId == AttendanceId).FirstOrDefaultAsync();
         }
         public async Task<Attendance> GetAttendancePayroll(int payroll)
         {
-            return await _context.Attendances
-               .Include(a => a.Area)
-               .Include(g => g.Group)
-                 .Where(p => p.Payroll == payroll).FirstOrDefaultAsync();
+            return null;
+            //return await _context.Attendances
+            //   .Include(a => a.Area)
+            //   .Include(g => g.Group)
+            //     .Where(p => p.Payroll == payroll).FirstOrDefaultAsync();
         }
         public void AddAttendance(Attendance Attendance){
             _context.Attendances.Add(Attendance);
         }
         public async Task<IEnumerable<Attendance>> GetAllAttendance()
         {
-            return await _context.Attendances
-               .Include(a => a.Area)
-               .Include(p => p.Group)
-                .OrderBy(c => c.AttendanceId).ToListAsync();
+            return null;
+            //return await _context.Attendances
+            //   .Include(a => a.Area)
+            //   .Include(p => p.Group)
+            //    .OrderBy(c => c.AttendanceId).ToListAsync();
         }
 
         #endregion
