@@ -523,7 +523,7 @@ namespace SupervisorMobility.API.Context
                     Name = "Marco Aguayo",
                     Payroll = 0906,
                     IsActive = true,
-                    UserType = 4
+                    UserType = 1
                 }
                 );
 
