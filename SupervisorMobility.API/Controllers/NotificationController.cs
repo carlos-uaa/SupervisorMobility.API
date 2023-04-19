@@ -1,10 +1,8 @@
 ﻿using AutoMapper;
-using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
 using SupervisorMobility.API.Business;
-using SupervisorMobility.API.DataAccess.Entities;
+using SupervisorMobility.API.Entities;
 using SupervisorMobility.API.Models.NotificationDtos;
-using SupervisorMobility.API.Models.OperationDtos;
 
 namespace SupervisorMobility.API.Controllers
 {

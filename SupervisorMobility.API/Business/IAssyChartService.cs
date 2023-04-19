@@ -62,7 +62,7 @@ namespace SupervisorMobility.API.Business
         #endregion
         #region Users
         Task<User?> FetchUserAsync(int userId);
-        Task<IEnumerable<User>> GetAllUsersAsync();
+        Task<IEnumerable<User>> GetAllUsers();
         Task<IEnumerable<User>> GetAllUsersWhitPlantAreaAndGroupAsync();
         Task<User> CreateUserAsync(UsersForCreation user);
         Task UpdateUserAsync(UsersForUpdateDto userForUpdate, User user);
@@ -98,10 +98,11 @@ namespace SupervisorMobility.API.Business
         #endregion
         #region attendance
         Task<Attendance> FetchAttendanceByIdAsync(int AttendanceId);
-        Task<Attendance> FetchAttendancePayrollAsync(int payroll);
+  
         Task<Attendance> CreateAttendanceAsync(AttendanceForCreationDto Attendance);
         Task<bool> UpdateAttendanceAsync(AttendanceForUpdateDto ForUpdate, Attendance Attendance);
         Task<IEnumerable<Attendance>> GetAllAttendanceAsync();
+        Task<IEnumerable<Attendance>> GetAllAttendanceOfSupervisorAsync(int idsupervisor);
         #endregion
     }
 }

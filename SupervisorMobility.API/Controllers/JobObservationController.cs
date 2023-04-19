@@ -1,12 +1,21 @@
 ﻿using AutoMapper;
+using DocumentFormat.OpenXml.Spreadsheet;
+using DocumentFormat.OpenXml.Vml;
+using DocumentFormat.OpenXml.Wordprocessing;
 using Microsoft.AspNetCore.Mvc;
 using SupervisorMobility.API.Business;
+using SupervisorMobility.API.DataAccess.Entities;
 using SupervisorMobility.API.DataAccess.Services;
 using SupervisorMobility.API.Entities;
 using SupervisorMobility.API.Models.ADUser;
+using SupervisorMobility.API.Models.AssyChart;
 using SupervisorMobility.API.Models.JobObservationDtos;
 using SupervisorMobility.API.Models.NotificationDtos;
+using SupervisorMobility.API.Models.OperationDtos;
+using SupervisorMobility.API.Models.PlantDtos;
+using SupervisorMobility.API.Models.Users;
 using SupervisorMobility.API.Services;
+using System.Diagnostics;
 
 
 namespace SupervisorMobility.API.Controllers
@@ -60,8 +69,7 @@ namespace SupervisorMobility.API.Controllers
 
             _supervisorMobilityRepository.AddJobObservation(finalJobObservation);
             await _supervisorMobilityRepository.SaveChangesAsync();
-            return Ok();
-            //return Ok(finalJobObservation);
+            return Ok(finalJobObservation);
         }
 
 

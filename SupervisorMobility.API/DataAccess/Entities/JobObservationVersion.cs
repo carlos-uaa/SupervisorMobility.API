@@ -1,5 +1,5 @@
-﻿using System.ComponentModel.DataAnnotations;
-using System.ComponentModel.DataAnnotations.Schema;
+﻿using System.ComponentModel.DataAnnotations.Schema;
+using System.ComponentModel.DataAnnotations;
 using SupervisorMobility.API.DataAccess.Entities;
 
 namespace SupervisorMobility.API.Entities
@@ -17,7 +17,7 @@ namespace SupervisorMobility.API.Entities
         public int JobObservationId { get; set; }
         public bool? IsActive { get; set; }
 
-        public Plant? Plant { get; set; }
+          public Plant? Plant { get; set; }
         public int? PlantId { get; set; }
         public Area? Area { get; set; }
         public int? AreaId { get; set; }
@@ -30,11 +30,13 @@ namespace SupervisorMobility.API.Entities
         public int? SupervisorId { get; set; }
         public int? OperatorId { get; set; }
 
-        public int? Type { get; set; }
 
-        public DateTime? DateStart { get; set; }
-        public DateTime? DateEnd { get; set; }
-        public DateTime? DateFinalized { get; set; }
+        public int? Type { get; set; }
+        public DateTime? StartDate { get; set; }
+        public DateTime? EndDate { get; set; }
+        public DateTime? PlannedStartDate { get; set; }
+        public DateTime? PlannedEndDate { get; set; }
+        public DateTime? FinishedDate { get; set; }
 
         public string? Justification { get; set; }
         public int? Status { get; set; }
@@ -51,6 +53,7 @@ namespace SupervisorMobility.API.Entities
         public string? OperatorCommentary { get; set; }
         public string? SsvSignature { get; set; }
         public string? OperatorSignature { get; set; }
+
 
         public ICollection<Lup> Lup { get; set; } = new List<Lup>();
     }

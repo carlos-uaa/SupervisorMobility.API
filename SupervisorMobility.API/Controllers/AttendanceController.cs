@@ -55,9 +55,9 @@ namespace SupervisorMobility.API.Controllers
         }
 
         [HttpGet]
-        public async Task<ActionResult> GetAllAttendance()
+        public async Task<ActionResult> GetAllAttendance(int idsuperior)
         {
-            List<Attendance> allattendance = _mapper.Map<List<Attendance>>(await _assyChartService.GetAllAttendanceAsync());
+            List<Attendance> allattendance = _mapper.Map<List<Attendance>>(await _assyChartService.GetAllAttendanceOfSupervisorAsync(idsuperior));
 
             return Ok(allattendance);
         }
@@ -73,7 +73,7 @@ namespace SupervisorMobility.API.Controllers
             var records = csv.GetRecords<dynamic>();
 
             List<Attendance> allattendance = _mapper.Map<List<Attendance>>(await _assyChartService.GetAllAttendanceAsync());
-            List<User> alluser = _mapper.Map<List<User>>(await _assyChartService.GetAllUsersAsync());
+            List<User> alluser = _mapper.Map<List<User>>(await _assyChartService.GetAllUsers());
             var fecha2 = DateTime.Now;
 
             List<Attendance> allattendanceadded = new List<Attendance>();

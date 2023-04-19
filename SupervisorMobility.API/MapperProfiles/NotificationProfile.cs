@@ -1,5 +1,5 @@
 ﻿using AutoMapper;
-using SupervisorMobility.API.DataAccess.Entities;
+using SupervisorMobility.API.Entities;
 using SupervisorMobility.API.Models.NotificationDtos;
 
 namespace SupervisorMobility.API.MapperProfiles

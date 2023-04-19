@@ -217,7 +217,7 @@ namespace SupervisorMobility.API.Business
             return await _repository.GetUserAsync(userId);
         }
 
-        public async Task<IEnumerable<User>> GetAllUsersAsync()
+        public async Task<IEnumerable<User>> GetAllUsers()
         {
             return await _repository.GetAllUsersAsync();
         }
@@ -371,10 +371,7 @@ namespace SupervisorMobility.API.Business
         {
             return await _repository.GetAttendanceById(AttendanceId);
         }
-        public async Task<Attendance> FetchAttendancePayrollAsync(int payroll)
-        {
-            return await _repository.GetAttendancePayroll(payroll);
-        }
+    
         public async Task<Attendance> CreateAttendanceAsync(AttendanceForCreationDto AttendanceForCreate)
         {
             var AttendanceToAdd = _mapper.Map<Attendance>(AttendanceForCreate);
@@ -394,6 +391,10 @@ namespace SupervisorMobility.API.Business
         public async Task<IEnumerable<Attendance>> GetAllAttendanceAsync()
         {
             return await _repository.GetAllAttendance();
+        }
+        public async Task<IEnumerable<Attendance>> GetAllAttendanceOfSupervisorAsync(int idsupervisor)
+        {
+            return await _repository.GetAllAttendanceOfSupervisor(idsupervisor);
         }
 
       

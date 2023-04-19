@@ -32,12 +32,14 @@ namespace SupervisorMobility.API.DataAccess.Entities
         public Plant? Plant { get; set; }
         public int? AreaId { get; set; }
         public Area? Area { get; set; }
+
+        public int? DistributionId { get; set; }
+        public Distribution? Distribution { get; set; }
+
         public int? GroupId { get; set; }
         public Group? Group { get; set; }
 
-        //Distirbucion de usuario
-        public int? DistributionId { get; set; }
-        public Distribution? Distribution { get; set; }
+      
 
 
     }
