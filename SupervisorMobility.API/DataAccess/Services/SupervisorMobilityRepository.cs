@@ -1046,26 +1046,31 @@ namespace SupervisorMobility.API.Services
         public async Task<Attendance> GetAttendanceById(int AttendanceId)
         {
             return await _context.Attendances
-                .Include(a => a.Area)
-                .Include(g => g.Group)
+                .Include(a => a.User)
+                .Include(g => g.Superior)
+                .Include(c => c.currentdistribution)
                   .Where(p => p.AttendanceId == AttendanceId).FirstOrDefaultAsync();
-        }
-        public async Task<Attendance> GetAttendancePayroll(int payroll)
-        {
-            return await _context.Attendances
-               .Include(a => a.Area)
-               .Include(g => g.Group)
-                 .Where(p => p.Payroll == payroll).FirstOrDefaultAsync();
         }
         public void AddAttendance(Attendance Attendance){
             _context.Attendances.Add(Attendance);
         }
         public async Task<IEnumerable<Attendance>> GetAllAttendance()
-        {
+        { 
             return await _context.Attendances
-               .Include(a => a.Area)
-               .Include(p => p.Group)
-                .OrderBy(c => c.AttendanceId).ToListAsync();
+                .Include(a => a.User)
+                .Include(g => g.Superior)
+                .Include(c => c.currentdistribution)
+               .OrderBy(c => c.AttendanceId).ToListAsync();
+        }
+        
+        public async Task<IEnumerable<Attendance>> GetAllAttendanceOfSupervisor(int idsuperior)
+        { 
+            return await _context.Attendances
+                .Include(a => a.User)
+                .Include(g => g.Superior)
+                .Include(c => c.currentdistribution)
+                .Where(o => o.SuperiorId == idsuperior)
+               .OrderBy(c => c.AttendanceId).ToListAsync();
         }
 
         #endregion

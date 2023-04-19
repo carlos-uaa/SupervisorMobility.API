@@ -526,6 +526,43 @@ namespace SupervisorMobility.API.Context
                     Payroll = 0906,
                     IsActive = true,
                     UserType = 1
+                }, new User
+                {
+                    UserId = 4,
+                    PlantId = 1,
+                    AreaId = 1,
+                    GroupId = 1,
+                    Name = "SeniorSupervisor",
+                    ObjectId = "4fe317",
+                    Payroll = 4,
+                    IsActive = true,
+                    UserType = 2,
+                    SuperiorId = 3
+                }, new User
+                {
+                    UserId = 5,
+                    PlantId = 1,
+                    AreaId = 1,
+                    GroupId = 1,
+                    Name = "Supervisor",
+                    ObjectId = "4f5317",
+                    Payroll = 5,
+                    IsActive = true,
+                    UserType = 3,
+                    SuperiorId = 4,
+
+                }, new User
+                {
+                    UserId = 6,
+                    PlantId = 1,
+                    AreaId = 1,
+                    GroupId = 1,
+                    Name = "Operador1",
+                    ObjectId = "4f54e7",
+                    Payroll = 6,
+                    IsActive = true,
+                    UserType = 4,
+                    SuperiorId = 5,
                 }
                 );
 

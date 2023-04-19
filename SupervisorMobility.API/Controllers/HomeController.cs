@@ -1,9 +1,6 @@
 ﻿using Microsoft.AspNetCore.Mvc;
-using Microsoft.Graph;
-using Microsoft.Identity.Client;
-using Microsoft.AspNetCore.Authentication;
-using Microsoft.Graph.Models;
-using Azure.Identity;
+using Microsoft.Data.SqlClient;
+
 
 namespace SupervisorMobility.API.Controllers
 {
@@ -11,51 +8,39 @@ namespace SupervisorMobility.API.Controllers
     [ApiController]
     public class HomeController : ControllerBase
     {
+        private readonly IConfiguration _configuration;
 
-        [HttpGet]
-        public ActionResult Hello()
+        public HomeController(IConfiguration configuration)
         {
-            return Ok("Hello");
+            _configuration = configuration;
         }
 
-        [HttpGet("{objectId}")]
-        public async Task<IActionResult> GetUser(string objectId)
+        [HttpGet("Bdd")]
+        public ActionResult Hello()
         {
-           
-            string clientId = "7a184926-2f58-4f9c-872c-97d54d825912";
-            string tenantId = "84539953-c856-42b8-a26c-a60e5362d3e4";
-            string[] scopes = new[] { "https://graph.microsoft.com/.default" };
-            IConfidentialClientApplication app = ConfidentialClientApplicationBuilder
-                .Create(clientId)
-                .WithTenantId(tenantId)
-                .WithClientSecret("TuSecretKey")
-                .Build();
-
-            var credential = new ChainedTokenCredential(new ManagedIdentityCredential(), new EnvironmentCredential());
 
             try
             {
-
-                var graphServiceClient = new GraphServiceClient(credential, scopes);
-               
-                DirectoryObject? userRequest = await graphServiceClient.DirectoryObjects[objectId].GetAsync();
-
-                if (userRequest != null)
+                using (var connection = new SqlConnection(_configuration.GetConnectionString("SupervisorMobilityDBConnectionString")))
                 {
-                    return Ok(new
-                    {
-                        Name = userRequest.AdditionalData["displayName"],
-                        Email = userRequest.AdditionalData["mail"],
-                        UserPrincipalName = userRequest.AdditionalData["userPrincipalName"]
-                    });
+                    connection.Open();
+                    return Ok("Connection successful to BDD!");
                 }
-                return StatusCode(401, $"Error: Unknow");
             }
             catch (Exception ex)
             {
-                return StatusCode(500, $"Error: {ex.Message}");
+                return StatusCode(500, $"Connection failed: {ex.Message}");
             }
+
+
         }
+
+        [HttpGet("API")]
+        public ActionResult ApiHello()
+        {
+            return Ok("Im Works, Hello World!");
+        }
+
 
 
     }

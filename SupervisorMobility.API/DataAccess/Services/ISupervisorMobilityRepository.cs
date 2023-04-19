@@ -153,9 +153,6 @@ namespace SupervisorMobility.API.Services
         Task<bool> DeleteHistoyFromJobObservationAsync(JobObservationVersion HistoryVersion, JobObservation jobObservation);
         Task<bool> AddHistoyToJobObservationAsync(JobObservationVersion HistoryVersion, JobObservation jobObservation);
 
-
-
-
         #endregion
         #region Notification
         Task<Notification?> GetNotificationAsync(int notificationID);
@@ -209,9 +206,10 @@ namespace SupervisorMobility.API.Services
         #endregion
         #region Attendance
         Task<Attendance> GetAttendanceById(int AttendanceId);
-        Task<Attendance> GetAttendancePayroll(int payroll);
+      
         void AddAttendance(Attendance Attendance);
         Task<IEnumerable<Attendance>> GetAllAttendance();
+        Task<IEnumerable<Attendance>> GetAllAttendanceOfSupervisor(int idsupervisor);
         #endregion
         #region CommonOperations
 

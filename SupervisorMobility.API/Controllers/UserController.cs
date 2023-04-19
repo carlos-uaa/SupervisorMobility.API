@@ -139,7 +139,7 @@ namespace SupervisorMobility.API.Controllers
         [HttpPost("/massderegistration")]
         public async Task<ActionResult> Masderegistration()
         {
-
+            //
 
             return Ok();
         }
