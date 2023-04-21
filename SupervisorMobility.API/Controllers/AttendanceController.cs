@@ -95,7 +95,6 @@ namespace SupervisorMobility.API.Controllers
                     continue;
 
 
-
                 DateTime fecha = DateTime.Now;
 
                 if ((string)record.Fecha != "")
@@ -110,62 +109,43 @@ namespace SupervisorMobility.API.Controllers
                     continue;
                 }
 
-                var existingRecord = allattendance.Find(a => a.User.Payroll == id);
+                var existingRecordInAttendance = allattendance.Find(a => a.User.Payroll == id);
                 bool mismoDia = fecha.Day == fecha2.Day && fecha.Month == fecha2.Month && fecha.Year == fecha2.Year;
 
                 if (!mismoDia)
                 {
-                    if (existingRecord != null)
+                    //es un dia diferente
+                    if(existingRecordInAttendance != null)
                     {
-
-                        DateTime inico = DateTime.Now;
-
-                        if ((string)record.Inicio != "")
-                            inico = DateTime.Parse((string)record.Inicio);
-                        else
-                            continue;
-
-                        DateTime fin = DateTime.Now;
-
-                        if ((string)record.Fin != "")
-                            inico = DateTime.Parse((string)record.Fin);
-                        else
-                            continue;
-
-
-
-                        bool diapasado = inico.Day == fin.Day && inico.Month == fin.Month && inico.Year == fin.Year;
-
-                        if (diapasado)
-                        {
+                        //ya se encuentra en la lista
                             var updateRecord = new AttendanceForUpdateDto
                             {
-                                Payroll = user?.Payroll,
-                                Name = user?.Name,
-                                AreaId = user?.AreaId,
-                                GroupId = user?.GroupId,
+                                UserId = user.UserId,
+                                SuperiorId = user.SuperiorId,
+                                CurrentdistributionId = user.DistributionId,
                                 Compas = false,
                                 Station = false
                             };
 
-                            bool update = await _assyChartService.UpdateAttendanceAsync(updateRecord, existingRecord);
-                        }
+                            bool update = await _assyChartService.UpdateAttendanceAsync(updateRecord, existingRecordInAttendance);
+                       //se actualiza dado que es de un dia pasado y no estara en la planta 
                     }
                     else
                     {
-                        var newRecord = new AttendanceForCreationDto
+                        //El registro no existe y es un dia diferente
+
+                        var newRecorddifday = new AttendanceForCreationDto
                         {
-                            Payroll = user.Payroll,
-                            Name = user.Name,
-                            AreaId = user.AreaId,
-                            GroupId = user.GroupId,
+                            UserId = user.UserId,
+                            SuperiorId = user.SuperiorId,
+                            CurrentdistributionId = user.DistributionId,
                             Compas = mismoDia,
                             Station = false
                         };
 
 
-                        var processAttendance = await _assyChartService.CreateAttendanceAsync(newRecord);
-                        allattendanceadded.Add(processAttendance);
+                        var processAttendanceYesterday = await _assyChartService.CreateAttendanceAsync(newRecorddifday);
+                        allattendanceadded.Add(processAttendanceYesterday);
                     }
 
                     continue;
@@ -173,30 +153,43 @@ namespace SupervisorMobility.API.Controllers
                 }
                 else
                 {
-                    if (existingRecord != null)
+                    //Es el mismo dia
+                    DateTime inico = DateTime.Now;
+                    DateTime fin = DateTime.Now;
+
+                    if ((string)record.Inicio != "")
+                        inico = DateTime.Parse((string)record.Inicio);
+                    else
+                        continue;
+                      
+                    //el inicio puede estar vacio por que es turno vespertino u horas extras
+                    if((string)record.Inicio == "")
+                    {
+                        if (existingRecordInAttendance != null)
+                        {
+                            continue;
+                        }
+                    }
+
+                    if (existingRecordInAttendance != null)
                     {
                         continue;
                     }
                 }
 
-                if (concepto == "CP_CHECADA")
+
+                var newRecord = new AttendanceForCreationDto
                 {
-                    var newRecord = new AttendanceForCreationDto
-                    {
-                        Payroll = user.Payroll,
-                        Name = user.Name,
-                        AreaId = user.AreaId,
-                        GroupId = user.GroupId,
-                        Compas = mismoDia,
-                        Station = false
-                    };
+                    UserId = user.UserId,
+                    SuperiorId = user.SuperiorId,
+                    CurrentdistributionId = user.DistributionId,
+                    Compas = mismoDia,
+                    Station = false
+                };
 
 
-                    var processAttendance = await _assyChartService.CreateAttendanceAsync(newRecord);
-                    allattendanceadded.Add(processAttendance);
-                }
-
-
+                var processAttendance = await _assyChartService.CreateAttendanceAsync(newRecord);
+                allattendanceadded.Add(processAttendance);
 
             }
 
