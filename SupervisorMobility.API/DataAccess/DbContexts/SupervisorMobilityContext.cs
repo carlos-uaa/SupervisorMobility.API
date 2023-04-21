@@ -557,12 +557,51 @@ namespace SupervisorMobility.API.Context
                     PlantId = 1,
                     AreaId = 1,
                     GroupId = 1,
-                    Name = "Operador1",
+                    Name = "Operador 1",
                     ObjectId = "4f54e7",
                     Payroll = 6,
                     IsActive = true,
                     UserType = 4,
                     SuperiorId = 5,
+                },
+                new User
+                {
+                    UserId = 7,
+                    PlantId = 1,
+                    AreaId = 1,
+                    GroupId = 1,
+                    Name = "Operador 2",
+                    ObjectId = "4f54e7",
+                    Payroll = 7,
+                    IsActive = true,
+                    UserType = 4,
+                    SuperiorId = 1,
+                },
+                new User
+                {
+                    UserId = 8,
+                    PlantId = 1,
+                    AreaId = 1,
+                    GroupId = 1,
+                    Name = "Operador 3",
+                    ObjectId = "4f54e7",
+                    Payroll = 8,
+                    IsActive = true,
+                    UserType = 4,
+                    SuperiorId = 1,
+                },
+                new User
+                {
+                    UserId = 9,
+                    PlantId = 1,
+                    AreaId = 1,
+                    GroupId = 1,
+                    Name = "Operador 4",
+                    ObjectId = "4f54e7",
+                    Payroll = 9,
+                    IsActive = true,
+                    UserType = 4,
+                    SuperiorId = 1,
                 }
                 );
 
