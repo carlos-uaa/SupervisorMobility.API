@@ -1079,6 +1079,14 @@ namespace SupervisorMobility.API.Services
                 .Include(a => a.User)
                 .Include(g => g.Superior)
                 .Include(c => c.currentdistribution)
+                .Include(s => s.Superior.Plant)
+                .Include(s => s.Superior.Area)
+                .Include(s => s.Superior.Distribution)
+                .Include(s => s.Superior.Group)
+                .Include(s => s.User.Plant)
+                .Include(s => s.User.Area)
+                .Include(s => s.User.Distribution)
+                .Include(s => s.User.Group)
                 .Where(o => o.SuperiorId == idsuperior)
                .OrderBy(c => c.AttendanceId).ToListAsync();
         }

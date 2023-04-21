@@ -12,8 +12,8 @@ namespace SupervisorMobility.API.Models.AttendanceDtos
         public int? UserId { get; set; }
         public int? CurrentdistributionId { get; set; }
 
-        public UsersWithoutNavigationDetails? User { get; set; } = new UsersWithoutNavigationDetails();
-        public UsersWithoutNavigationDetails? Superior { get; set; } = new UsersWithoutNavigationDetails();
+        public UsersWhitoutPeopleNavigation? User { get; set; } = new UsersWhitoutPeopleNavigation();
+        public UsersWhitoutPeopleNavigation? Superior { get; set; } = new UsersWhitoutPeopleNavigation();
         public DistributionWithoutNavigationPropertiesDto? Currentdistribution { get; set; } = new DistributionWithoutNavigationPropertiesDto();
 
         
