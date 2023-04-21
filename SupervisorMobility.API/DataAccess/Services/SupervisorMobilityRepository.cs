@@ -671,13 +671,13 @@ namespace SupervisorMobility.API.Services
         public async Task<JobObservationVersion?> GetHistoryJobObservationAsync(int HistoryJobObservationId)
         {
             return await _context.JobObservationHistory
+                .Include(l => l.Lup)
                 .Include(a => a.Area)
-                    .Include(p => p.Plant)
-                    .Include(d => d.Distribution)
-                    .Include(o => o.Operation)
-                    .Include(l => l.Lup)
-                    .Include(s => s.Supervisor)
-                    .Include(o => o.Operator)
+                .Include(p => p.Plant)
+                .Include(d => d.Distribution)
+                .Include(o => o.Operation)
+                .Include(s => s.Supervisor)
+                .Include(o => o.Operator)
                 .Where(H => H.JobObservationVersionId == HistoryJobObservationId).FirstOrDefaultAsync();
         }
 
