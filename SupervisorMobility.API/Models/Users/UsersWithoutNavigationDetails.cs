@@ -31,8 +31,6 @@ namespace SupervisorMobility.API.Models.Users
         public int? PlantId { get; set; }
         public int? AreaId { get; set; }
         public int? GroupId { get; set; }
-
-        //Distirbucion de usuario
         public int? DistributionId { get; set; }
     }
 }

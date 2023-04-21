@@ -671,7 +671,13 @@ namespace SupervisorMobility.API.Services
         public async Task<JobObservationVersion?> GetHistoryJobObservationAsync(int HistoryJobObservationId)
         {
             return await _context.JobObservationHistory
-                .Include(l => l.Lup)
+                .Include(a => a.Area)
+                    .Include(p => p.Plant)
+                    .Include(d => d.Distribution)
+                    .Include(o => o.Operation)
+                    .Include(l => l.Lup)
+                    .Include(s => s.Supervisor)
+                    .Include(o => o.Operator)
                 .Where(H => H.JobObservationVersionId == HistoryJobObservationId).FirstOrDefaultAsync();
         }
 
@@ -761,6 +767,9 @@ namespace SupervisorMobility.API.Services
                 return await _context.Users.Include(a => a.Area)
                 .Include(p => p.Plant)
                 .Include(g => g.Group)
+                .Include(d => d.Distribution)
+                .Include(s => s.Superior)
+                .Include(s => s.Subordinates)
                 .Where(p => p.UserId == userId).FirstOrDefaultAsync();
             }
             return await _context.Users.Where(p => p.UserId == userId).FirstOrDefaultAsync();

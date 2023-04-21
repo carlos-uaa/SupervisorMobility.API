@@ -15,14 +15,12 @@
         public DateTime LastUpdated { get; set; } = DateTime.Now;
         public DateTime? DisabledDate { get; set; } 
 
-
         public bool? IsActive { get; set; }
 
         public int PlantId { get; set; }
         public int AreaId { get; set; }
         public int GroupId { get; set; }
         public int? DistributionId { get; set; }
-
-
+        public ICollection<UsersWithoutNavigationDetails>? Subordinates { get; set; }
     }
 }
