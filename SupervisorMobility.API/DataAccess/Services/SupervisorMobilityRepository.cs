@@ -757,6 +757,7 @@ namespace SupervisorMobility.API.Services
                 .Include(a => a.Area)
                 .Include(p => p.Plant)
                 .Include(g => g.Group)
+                .Include(o => o.Distribution)
                  .OrderBy(c => c.UserId).ToListAsync();
         }
 

@@ -8,6 +8,7 @@ using SupervisorMobility.API.DataAccess.Entities;
 using SupervisorMobility.API.Models.AreaDtos;
 using SupervisorMobility.API.Models.AttendanceDtos;
 using SupervisorMobility.API.Models.FileUploadDto;
+using SupervisorMobility.API.Models.Users;
 using SupervisorMobility.API.Services;
 using System.Globalization;
 
@@ -57,7 +58,7 @@ namespace SupervisorMobility.API.Controllers
         [HttpGet]
         public async Task<ActionResult> GetAllAttendance(int idsuperior)
         {
-            List<Attendance> allattendance = _mapper.Map<List<Attendance>>(await _assyChartService.GetAllAttendanceOfSupervisorAsync(idsuperior));
+            List<AttendanceWithNavigationDetailsDto> allattendance = _mapper.Map<List<AttendanceWithNavigationDetailsDto>>(await _assyChartService.GetAllAttendanceOfSupervisorAsync(idsuperior));
 
             return Ok(allattendance);
         }
@@ -73,7 +74,7 @@ namespace SupervisorMobility.API.Controllers
             var records = csv.GetRecords<dynamic>();
 
             List<Attendance> allattendance = _mapper.Map<List<Attendance>>(await _assyChartService.GetAllAttendanceAsync());
-            List<User> alluser = _mapper.Map<List<User>>(await _assyChartService.GetAllUsers());
+            List<UsersWithoutNavigationDetails> alluser = _mapper.Map<List<UsersWithoutNavigationDetails>>(await _assyChartService.GetAllUsers());
             var fecha2 = DateTime.Now;
 
             List<Attendance> allattendanceadded = new List<Attendance>();
