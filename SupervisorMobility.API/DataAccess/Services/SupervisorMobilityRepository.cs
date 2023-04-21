@@ -767,6 +767,9 @@ namespace SupervisorMobility.API.Services
                 return await _context.Users.Include(a => a.Area)
                 .Include(p => p.Plant)
                 .Include(g => g.Group)
+                .Include(d => d.Distribution)
+                .Include(s => s.Superior)
+                .Include(s => s.Subordinates)
                 .Where(p => p.UserId == userId).FirstOrDefaultAsync();
             }
             return await _context.Users.Where(p => p.UserId == userId).FirstOrDefaultAsync();

@@ -2,7 +2,6 @@
 {
     public class AttendanceForUpdateDto
     {
-        public string? Name { get; set; }
         public int? SuperiorId { get; set; }
         public int? UserId { get; set; }
         public int? CurrentdistributionId { get; set; }

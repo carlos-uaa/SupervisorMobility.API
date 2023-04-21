@@ -21,5 +21,7 @@
         public DateTime LastUpdated { get; set; } = DateTime.Now;
         public DateTime? DisabledDate { get; set; }
 
+        public ICollection<UsersWithoutNavigationDetails>? Subordinates { get; set; }
+
     }
 }
