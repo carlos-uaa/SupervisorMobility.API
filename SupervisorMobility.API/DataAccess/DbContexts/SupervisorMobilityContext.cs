@@ -442,49 +442,49 @@ namespace SupervisorMobility.API.Context
                 {
                     GlosaryWordId = 8,
                     Name = "Lup",
-                    Description = "Listado único de problemas",
+                    Description = "Unique list of problems",
                     IsActive = true
                 },
                 new Glosary()
                 {
                     GlosaryWordId = 9,
-                    Name = "Tiempo ciclo",
-                    Description = "Tiempo ciclo de la operación por modelo",
+                    Name = "Cycle time",
+                    Description = "Operation cycle time by model",
                     IsActive = true
                 },
                 new Glosary()
                 {
                     GlosaryWordId = 10,
-                    Name = "Tiempo de la HOE",
-                    Description = "Tiempo ciclo de la operación por modelo",
+                    Name = "HOE Time",
+                    Description = "Operation cycle time by model",
                     IsActive = true
                 },
                 new Glosary()
                 {
                     GlosaryWordId = 11,
-                    Name = "Manejo de la anomalía",
-                    Description = "Seguimiento de anomalías",
+                    Name = "Management of the anomaly",
+                    Description = "Anomaly tracking",
                     IsActive = true
                 },
                 new Glosary()
                 {
                     GlosaryWordId = 12,
                     Name = "Eventual",
-                    Description = "Observación de la operación eventual",
+                    Description = "Observation of the eventual operation",
                     IsActive = true
                 },
                 new Glosary()
                 {
                     GlosaryWordId = 13,
                     Name = "Planeada",
-                    Description = "Observación de la operación planeada",
+                    Description = "Observation of the planned operation",
                     IsActive = true
                 },
                 new Glosary()
                 {
                     GlosaryWordId = 14,
                     Name = "Assy Chart",
-                    Description = "Listado de distribución-Operación por etapa y planta",
+                    Description = "Distribution listing-Operation by stage and plant",
                     IsActive = true
                 }
             );
