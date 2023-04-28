@@ -83,22 +83,86 @@ namespace SupervisorMobility.API.Controllers
             }
         }
 
+        [HttpGet("ByObjectId")]
+        public async Task<ActionResult<UsersWithNavigationDetails>> GetUserByObject(string ObjectId, bool collections = false)
+        {
+
+            var userEntity = await _assyChartService.FetchUserWhitObjectIdAsync(ObjectId);
+
+            if (collections)
+            {
+                if (userEntity != null)
+                {
+                    return Ok(_mapper.Map<UsersWithNavigationDetails>(userEntity));
+
+                }
+
+                return NotFound();
+            }
+            else
+            {
+                if (userEntity != null)
+                {
+                    return Ok(_mapper.Map<UsersWithoutNavigationDetails>(userEntity));
+                }
+                return NotFound();
+            }
+        }
+
         [HttpPost]
         public async Task<ActionResult<UsersWithNavigationDetails>> CreateUser(UsersForCreation newUser)
         {
-            if (!await _supervisorMobilityRepository.PlantExistAsync(newUser.PlantId))
+            if (newUser.PlantId == 0)
             {
-                return NotFound("No Planta");
+                newUser.PlantId = null;
+            }
+            else
+            {
+                if (!await _supervisorMobilityRepository.PlantExistAsync((int)newUser.PlantId))
+                {
+                    return NotFound("No Planta");
+                }
             }
 
-            if (!await _supervisorMobilityRepository.AreaExistAsync(newUser.AreaId))
+            if (newUser.AreaId == 0)
             {
-                return NotFound("No Area");
+                newUser.AreaId = null;
+            }
+            else
+            {
+                if (!await _supervisorMobilityRepository.AreaExistAsync((int)newUser.AreaId))
+                {
+                    return NotFound("No Area");
+                }
             }
 
-            if (!await _supervisorMobilityRepository.GroupExistAsync(newUser.GroupId))
+            if (newUser.GroupId == 0)
             {
-                return NotFound("No Group");
+                newUser.GroupId = null;
+            }
+            else
+            {
+                if (!await _supervisorMobilityRepository.AreaExistAsync((int)newUser.GroupId))
+                {
+                    return NotFound("No Area");
+                }
+            }
+
+            if (newUser.DistributionId == 0)
+            {
+                newUser.DistributionId = null;
+            }
+            else
+            {
+                if (!await _supervisorMobilityRepository.DistributionExistsAsync((int)newUser.DistributionId))
+                {
+                    return NotFound("No Distribution");
+                }
+            }
+
+            if (newUser.Payroll == 0)
+            {
+                newUser.Payroll = null;
             }
 
             var finalUser = await _assyChartService.CreateUserAsync(newUser);
