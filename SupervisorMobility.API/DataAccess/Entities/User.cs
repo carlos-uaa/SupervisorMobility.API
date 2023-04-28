@@ -32,6 +32,7 @@ namespace SupervisorMobility.API.DataAccess.Entities
         public Plant? Plant { get; set; }
         public int? AreaId { get; set; }
         public Area? Area { get; set; }
+        public ICollection<Area>? Areas { get; set; }
 
         public int? DistributionId { get; set; }
         public Distribution? Distribution { get; set; }

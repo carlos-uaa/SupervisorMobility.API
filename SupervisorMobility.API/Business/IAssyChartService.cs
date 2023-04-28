@@ -62,6 +62,7 @@ namespace SupervisorMobility.API.Business
         #endregion
         #region Users
         Task<User?> FetchUserAsync(int userId);
+        Task<User?> FetchUserWhitObjectIdAsync(string objectId);
         Task<IEnumerable<User>> GetAllUsers();
         Task<IEnumerable<User>> GetAllUsersWhitPlantAreaAndGroupAsync();
         Task<User> CreateUserAsync(UsersForCreation user);
