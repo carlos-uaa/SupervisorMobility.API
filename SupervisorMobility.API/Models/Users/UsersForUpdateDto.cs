@@ -1,4 +1,4 @@
-﻿namespace SupervisorMobility.API.Models.Users
+﻿ namespace SupervisorMobility.API.Models.Users
 {
     public class UsersForUpdateDto
     {
@@ -21,7 +21,9 @@
         public DateTime LastUpdated { get; set; } = DateTime.Now;
         public DateTime? DisabledDate { get; set; }
 
+        public ICollection<AreaDtos.AreaWithoutNavigationPropertiesDto>? Areas { get; set; }
         public ICollection<UsersWithoutNavigationDetails>? Subordinates { get; set; }
+
 
     }
 }

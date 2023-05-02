@@ -503,6 +503,128 @@ namespace SupervisorMobility.API.Controllers
 
         }
 
+        [EnableCors("Cors")]
+        [HttpGet("Bulk/DownloadAllUsersFormat")]
+        public async Task<IActionResult> DownloadAllUsersFormat()
+        {
+       
+            MemoryStream ms = new MemoryStream(6000 * 65536);
+            SLDocument ws = new SLDocument();
+
+            ws.RenameWorksheet(SLDocument.DefaultFirstSheetName, "Users Bulk");
+
+            //ROW Data identificators
+
+            ws.SetCellValue("A1", "UserId");
+            ws.SetCellValue("B1", "ObjectId");
+            ws.SetCellValue("C1", "Payroll");
+            ws.SetCellValue("D1", "Name");
+            ws.SetCellValue("E1", "Plant");
+            ws.SetCellValue("F1", "Area");
+            ws.SetCellValue("G1", "Group");
+            ws.SetCellValue("H1", "Permission");
+            ws.SetCellValue("I1", "User creation date");
+            ws.SetCellValue("J1", "User update date");
+            ws.SetCellValue("K1", "User disable date");
+            ws.SetCellValue("L1", "Is Active");
+
+
+            ws.SaveAs(ms);
+
+            ms.Position = 0;
+
+            var res = File(ms, "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet", "AllUsersFormat.xlsx");
+            res.EnableRangeProcessing = true;
+            return res;
+
+        }//end download file function 
+
+        [EnableCors("Cors")]
+        [HttpGet("Bulk/DownloadSSVFormat")]
+        public async Task<IActionResult> DownloadSSVFormat()
+        {
+
+            MemoryStream ms = new MemoryStream(6000 * 65536);
+            SLDocument ws = new SLDocument();
+
+            ws.RenameWorksheet(SLDocument.DefaultFirstSheetName, "Users Bulk");
+
+            //ROW Data identificators
+
+            ws.SetCellValue("A1", "UserId SSV");
+            ws.SetCellValue("B1", "ObjectId");
+            ws.SetCellValue("C1", "Name");
+            ws.SetCellValue("D1", "Email");
+            ws.SetCellValue("E1", "Plant");
+            ws.SetCellValue("F1", "Group");
+            ws.SetCellValue("G1", "AreasManage");
+
+            ws.SaveAs(ms);
+
+            ms.Position = 0;
+
+            var res = File(ms, "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet", "SSVFormat.xlsx");
+            res.EnableRangeProcessing = true;
+            return res;
+
+        }//end download file function 
+
+        [EnableCors("Cors")]
+        [HttpGet("Bulk/DownloadSupervisorFormat")]
+        public async Task<IActionResult> DownloadSupervisorFormat()
+        {
+
+            MemoryStream ms = new MemoryStream(6000 * 65536);
+            SLDocument ws = new SLDocument();
+
+            ws.RenameWorksheet(SLDocument.DefaultFirstSheetName, "Users Bulk");
+
+            //ROW Data identificators
+
+            ws.SetCellValue("A1", "UserId Supervisor");
+            ws.SetCellValue("B1", "ObjectId");
+            ws.SetCellValue("C1", "Name");
+            ws.SetCellValue("D1", "Email");
+            ws.SetCellValue("E1", "SSV_Id Superior");
+            ws.SetCellValue("F1", "Assign Area_ID");
+
+            ws.SaveAs(ms);
+
+            ms.Position = 0;
+
+            var res = File(ms, "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet", "SupervisorsFormat.xlsx");
+            res.EnableRangeProcessing = true;
+            return res;
+
+        }//end download file function 
+
+        [EnableCors("Cors")]
+        [HttpGet("Bulk/DownloadOperatorsFormat")]
+        public async Task<IActionResult> DownloadOperatorsFormat()
+        {
+
+            MemoryStream ms = new MemoryStream(6000 * 65536);
+            SLDocument ws = new SLDocument();
+
+            ws.RenameWorksheet(SLDocument.DefaultFirstSheetName, "Users Bulk");
+
+            //ROW Data identificators
+
+            ws.SetCellValue("A1", "UserId Operator");
+            ws.SetCellValue("B1", "Payroll");
+            ws.SetCellValue("C1", "Name");
+            ws.SetCellValue("D1", "Distribution Id");
+            ws.SetCellValue("E1", "Supervisor_Id Superior");
+
+            ws.SaveAs(ms);
+
+            ms.Position = 0;
+
+            var res = File(ms, "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet", "OperatorsFormat.xlsx");
+            res.EnableRangeProcessing = true;
+            return res;
+
+        }//end download file function 
 
     }
 }

@@ -38,7 +38,8 @@ namespace SupervisorMobility.API.Models.Users
 
 
         public UsersWithoutNavigationDetails? Superior { get; set; }
-        public ICollection<UsersWithoutNavigationDetails> Subordinates { get; set; }
+        public ICollection<UsersWithoutNavigationDetails>? Subordinates { get; set; }
+        public ICollection<AreaDtos.AreaWithoutNavigationPropertiesDto>? Areas { get; set; }
 
     }
 }
