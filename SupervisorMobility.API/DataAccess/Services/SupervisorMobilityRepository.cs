@@ -800,12 +800,41 @@ namespace SupervisorMobility.API.Services
         public async Task<bool> UserExistAdvanceAsync(string nombre, int nomina, int plantid, int areaid, int grupoid)
         {
             return await _context.Users.AnyAsync(p => p.Name == nombre && p.Payroll == nomina && p.PlantId == plantid && p.AreaId == areaid && p.GroupId == grupoid);
-
         }
+        public Task<int> UserAddSubordinated(User Master, User Slave)
+        {
+            if (Master.Subordinates != null)
+            {
+                Master.Subordinates.Add(Slave);
+            }
+            else
+            {
+                Master.Subordinates = new List<User>();
+                Master.Subordinates.Add(Slave);
+            }
+
+            return _context.SaveChangesAsync();
+        } 
+        public Task<int> UserAddArea(User Master, Area Slave)
+        {
+            if (Master.Areas != null)
+            {
+                Master.Areas.Add(Slave);
+            }
+            else
+            {
+                Master.Areas = new List<Area>();
+                Master.Areas.Add(Slave);
+            }
+
+            return _context.SaveChangesAsync();
+        }
+
 
         public void AddUserAsync(User user)
         {
             _context.Users.Add(user);
+            _context.SaveChangesAsync();
         }
 
         public void DeleteUserAsync(User user)

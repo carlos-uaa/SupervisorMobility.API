@@ -18,6 +18,7 @@ using SupervisorMobility.API.Models.Users;
 using SupervisorMobility.API.Models.ReturnResults;
 using ClosedXML.Excel;
 using DocumentFormat.OpenXml.Spreadsheet;
+using System.Drawing.Text;
 
 namespace SupervisorMobility.API.Controllers
 {
@@ -112,11 +113,16 @@ namespace SupervisorMobility.API.Controllers
         [HttpPost]
         public async Task<ActionResult<UsersWithNavigationDetails>> CreateUser(UsersForCreation newUser)
         {
+            List<Area> Areas = new List<Area>();
+            List<User> Users = new List<User>();
+            bool haveAreas = false;
+            bool haveUsers = false;
+
             if (newUser.PlantId == 0)
             {
                 newUser.PlantId = null;
             }
-            else
+            else if (newUser.PlantId != null)
             {
                 if (!await _supervisorMobilityRepository.PlantExistAsync((int)newUser.PlantId))
                 {
@@ -128,7 +134,7 @@ namespace SupervisorMobility.API.Controllers
             {
                 newUser.AreaId = null;
             }
-            else
+            else if(newUser.AreaId != null) 
             {
                 if (!await _supervisorMobilityRepository.AreaExistAsync((int)newUser.AreaId))
                 {
@@ -140,7 +146,7 @@ namespace SupervisorMobility.API.Controllers
             {
                 newUser.GroupId = null;
             }
-            else
+            else if( newUser.GroupId != null)
             {
                 if (!await _supervisorMobilityRepository.AreaExistAsync((int)newUser.GroupId))
                 {
@@ -165,7 +171,52 @@ namespace SupervisorMobility.API.Controllers
                 newUser.Payroll = null;
             }
 
+            if(newUser.SuperiorId == 0)
+            {
+                newUser.SuperiorId = null;
+            }
+
+
+            if(newUser.Subordinates != null)
+            {
+                haveUsers = true;
+                foreach(var Sub in newUser.Subordinates)
+                {
+                    Users.Add(await _assyChartService.FetchUserAsync(Sub.UserId));
+                }
+
+                newUser.Subordinates = null;
+            }
+
+            if(newUser.Areas != null)
+            {
+                haveAreas = true;
+                foreach (var AreainList in newUser.Areas)
+                {
+                    Areas.Add(await _supervisorMobilityRepository.GetAreaForPlantAsync((int)newUser.PlantId, AreainList.AreaId));
+                }
+            newUser.Areas = null;
+            }
+
             var finalUser = await _assyChartService.CreateUserAsync(newUser);
+
+            if (haveUsers)
+            {
+                foreach (var item in Users)
+                {
+                    var OpNumber = _supervisorMobilityRepository.UserAddSubordinated(finalUser, item);
+                }
+            }
+
+            if (haveAreas)
+            {
+                foreach (var item in Areas)
+                {
+                    var OpNumber = _supervisorMobilityRepository.UserAddArea(finalUser, item);
+                }
+            }
+
+           
 
             return Ok(finalUser);
 

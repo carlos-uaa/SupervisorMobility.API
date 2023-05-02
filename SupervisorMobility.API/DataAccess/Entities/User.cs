@@ -15,6 +15,7 @@ namespace SupervisorMobility.API.DataAccess.Entities
         public int UserType { get; set; }
 
         public int? SuperiorId { get; set; }
+        [ForeignKey("SuperiorId")]
         public User? Superior { get; set; }
 
         public ICollection<User>? Subordinates { get; set; }
@@ -31,6 +32,7 @@ namespace SupervisorMobility.API.DataAccess.Entities
         public int? PlantId { get; set; }
         public Plant? Plant { get; set; }
         public int? AreaId { get; set; }
+        [ForeignKey("AreaId")]
         public Area? Area { get; set; }
         public ICollection<Area>? Areas { get; set; }
 

@@ -22,5 +22,6 @@
         public int? GroupId { get; set; }
         public int? DistributionId { get; set; }
         public ICollection<UsersWithoutNavigationDetails>? Subordinates { get; set; }
+        public ICollection<AreaDtos.AreaWithoutNavigationPropertiesDto>? Areas { get; set; }
     }
 }

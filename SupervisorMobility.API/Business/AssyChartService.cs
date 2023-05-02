@@ -234,7 +234,6 @@ namespace SupervisorMobility.API.Business
         {
             var finaluser = _mapper.Map<User>(newuser);
             _repository.AddUserAsync(finaluser);
-            await _repository.SaveChangesAsync();
             return finaluser;
         }
 

@@ -316,7 +316,23 @@ namespace SupervisorMobility.API.Context
                     AreaId = 1,
                     IsActive = true,
                     PlantId = 1
-                });
+                },
+                 new Area("T2", "Trim 2")
+                 {
+                     AreaId = 2,
+                     IsActive = true,
+                     PlantId = 1
+                 }, new Area("P1", "Paint 1")
+                 {
+                     AreaId = 3,
+                     IsActive = true,
+                     PlantId = 2
+                 }, new Area("P1", "Paint 2")
+                 {
+                     AreaId = 4,
+                     IsActive = true,
+                     PlantId = 2
+                 });
             modelBuilder.Entity<Distribution>()
                 .HasData(
                 new Distribution("Dist1", "Distribution 1 Trim 1")
@@ -324,7 +340,25 @@ namespace SupervisorMobility.API.Context
                     DistributionId = 1,
                     IsActive = true,
                     AreaId = 1
-                });
+                }, new Distribution("Dist2", "Distribution 2 Trim 2")
+                {
+                    DistributionId = 2,
+                    IsActive = true,
+                    AreaId = 2
+                },
+                new Distribution("P1 Dist 3", "Distribution 1 Paint 1")
+                {
+                    DistributionId = 3,
+                    IsActive = true,
+                    AreaId = 3
+                },
+                new Distribution("P2 Dist 4", "Distribution 2 Pint 2")
+                {
+                    DistributionId = 4,
+                    IsActive = true,
+                    AreaId = 4
+                }
+                );
 
 
 

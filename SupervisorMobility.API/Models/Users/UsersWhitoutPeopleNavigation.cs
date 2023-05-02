@@ -28,10 +28,6 @@ namespace SupervisorMobility.API.Models.Users
         public int? DistributionId { get; set; }
 
 
-        public DistributionWithoutNavigationPropertiesDto? Distribution { get; set; }
-        public PlantDto? Plant { get; set; } = new PlantDto();
-        public AreaWithoutNavigationPropertiesDto? Area { get; set; } = new AreaWithoutNavigationPropertiesDto();
-        public GroupDto? Group { get; set; } = new GroupDto();
 
 
     }
