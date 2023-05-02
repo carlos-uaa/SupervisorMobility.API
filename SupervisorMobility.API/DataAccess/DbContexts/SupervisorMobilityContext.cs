@@ -721,6 +721,50 @@ namespace SupervisorMobility.API.Context
                         UserId = 3,
                         NotificationType = "Supervisor",
                         NotificationText = "Example of notify Read and delete"
+                    },
+                    new Notification()
+                    {
+                        NotificationID = 6,
+                        EntryDate = DateTime.Now,
+                        IsAccepted = true,
+                        IsActive = true,
+                        MadeBy = "Marco Aguayo",
+                        UserId = 1,
+                        NotificationType = "Supervisor",
+                        NotificationText = "Example of notify Active and not read"
+                    },
+                    new Notification()
+                    {
+                        NotificationID = 7,
+                        EntryDate = DateTime.Now,
+                        IsAccepted = false,
+                        IsActive = true,
+                        MadeBy = "Marco Aguayo",
+                        UserId = 1,
+                        NotificationType = "Supervisor",
+                        NotificationText = "Example of notify Active and Read"
+                    },
+                    new Notification()
+                    {
+                        NotificationID = 8,
+                        EntryDate = DateTime.Now,
+                        IsAccepted = true,
+                        IsActive = false,
+                        MadeBy = "Marco Aguayo",
+                        UserId = 1,
+                        NotificationType = "Supervisor",
+                        NotificationText = "Example of notify Read and delete"
+                    },
+                    new Notification()
+                    {
+                        NotificationID = 9,
+                        EntryDate = DateTime.Now,
+                        IsAccepted = false,
+                        IsActive = false,
+                        MadeBy = "Marco Aguayo",
+                        UserId = 1,
+                        NotificationType = "Supervisor",
+                        NotificationText = "Example of notify Read and delete"
                     });
 
 
