@@ -802,7 +802,7 @@ namespace SupervisorMobility.API.Services
         {
             return await _context.Users.AnyAsync(p => p.Name == nombre && p.Payroll == nomina && p.PlantId == plantid && p.AreaId == areaid && p.GroupId == grupoid);
         }
-        public Task<int> UserAddSubordinated(User Master, User Slave)
+        public void UserAddSubordinated(User Master, User Slave)
         {
             if (Master.Subordinates != null)
             {
@@ -813,10 +813,9 @@ namespace SupervisorMobility.API.Services
                 Master.Subordinates = new List<User>();
                 Master.Subordinates.Add(Slave);
             }
-
-            return _context.SaveChangesAsync();
+            _context.SaveChanges();
         } 
-        public Task<int> UserAddArea(User Master, Area Slave)
+        public void UserAddArea(User Master, Area Slave)
         {
             if (Master.Areas != null)
             {
@@ -827,8 +826,7 @@ namespace SupervisorMobility.API.Services
                 Master.Areas = new List<Area>();
                 Master.Areas.Add(Slave);
             }
-
-            return _context.SaveChangesAsync();
+            _context.SaveChanges();
         }
 
 

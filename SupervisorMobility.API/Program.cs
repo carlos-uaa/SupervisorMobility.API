@@ -1,4 +1,6 @@
+using DocumentFormat.OpenXml.Office2016.Drawing.ChartDrawing;
 using Microsoft.AspNetCore.Hosting;
+using Newtonsoft.Json;
 using Serilog;
 using SupervisorMobility.API;
 using SupervisorMobility.API.DataAccess.Entities;
@@ -53,6 +55,13 @@ builder.Services.AddCors(policy => {
  );
 
 });
+
+//Odmitir Referencias ciruclares
+builder.Services.AddControllers()
+    .AddNewtonsoftJson(options =>
+    {
+        options.SerializerSettings.ReferenceLoopHandling = ReferenceLoopHandling.Ignore;
+    });
 
 
 builder.WebHost.ConfigureKestrel(serverOptions =>

@@ -1,6 +1,7 @@
 ﻿using System.ComponentModel.DataAnnotations.Schema;
 using System.ComponentModel.DataAnnotations;
 using SupervisorMobility.API.Entities;
+using System.Text.Json.Serialization;
 
 namespace SupervisorMobility.API.DataAccess.Entities
 {
@@ -16,6 +17,7 @@ namespace SupervisorMobility.API.DataAccess.Entities
 
         public int? SuperiorId { get; set; }
         [ForeignKey("SuperiorId")]
+        [JsonIgnore]
         public User? Superior { get; set; }
 
         public ICollection<User>? Subordinates { get; set; }
@@ -41,8 +43,6 @@ namespace SupervisorMobility.API.DataAccess.Entities
 
         public int? GroupId { get; set; }
         public Group? Group { get; set; }
-
-      
 
 
     }

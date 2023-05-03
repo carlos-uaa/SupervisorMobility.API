@@ -177,16 +177,16 @@ namespace SupervisorMobility.API.Controllers
             }
 
 
-            if(newUser.Subordinates != null)
-            {
-                haveUsers = true;
-                foreach(var Sub in newUser.Subordinates)
-                {
-                    Users.Add(await _assyChartService.FetchUserAsync(Sub.UserId));
-                }
+            //if(newUser.Subordinates != null)
+            //{
+            //    haveUsers = true;
+            //    foreach(var Sub in newUser.Subordinates)
+            //    {
+            //        Users.Add(await _assyChartService.FetchUserAsync(Sub.UserId));
+            //    }
 
-                newUser.Subordinates = null;
-            }
+            //    newUser.Subordinates = null;
+            //}
 
             if(newUser.Areas != null)
             {
@@ -200,19 +200,19 @@ namespace SupervisorMobility.API.Controllers
 
             var finalUser = await _assyChartService.CreateUserAsync(newUser);
 
-            if (haveUsers)
-            {
-                foreach (var item in Users)
-                {
-                    var OpNumber = _supervisorMobilityRepository.UserAddSubordinated(finalUser, item);
-                }
-            }
-
+            //if (haveUsers)
+            //{
+            //    foreach (var item in Users)
+            //    {
+            //        _supervisorMobilityRepository.UserAddSubordinated(finalUser, item);
+            //    }
+            //}
+             
             if (haveAreas)
             {
                 foreach (var item in Areas)
                 {
-                    var OpNumber = _supervisorMobilityRepository.UserAddArea(finalUser, item);
+                    _supervisorMobilityRepository.UserAddArea(finalUser, item);
                 }
             }
 
