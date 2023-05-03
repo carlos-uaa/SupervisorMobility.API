@@ -200,23 +200,18 @@ namespace SupervisorMobility.API.Controllers
 
             var finalUser = await _assyChartService.CreateUserAsync(newUser);
 
-            //if (haveUsers)
-            //{
-            //    foreach (var item in Users)
-            //    {
-            //        _supervisorMobilityRepository.UserAddSubordinated(finalUser, item);
-            //    }
-            //}
-             
-            if (haveAreas)
+            if (haveUsers)
             {
-                foreach (var item in Areas)
-                {
-                    _supervisorMobilityRepository.UserAddArea(finalUser, item);
-                }
+                  await  _supervisorMobilityRepository.UserAddSubordinated(finalUser, Users);
             }
 
-           
+            if (haveAreas)
+            {
+                await _supervisorMobilityRepository.UserAddArea(finalUser, Areas);
+                
+            }
+
+            await _supervisorMobilityRepository.SaveChangesAsync();
 
             return Ok(finalUser);
 

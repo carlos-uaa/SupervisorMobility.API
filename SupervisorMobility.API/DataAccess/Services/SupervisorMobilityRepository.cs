@@ -10,6 +10,7 @@ using SupervisorMobility.API.Entities;
 using SupervisorMobility.API.Models.AssyChart;
 using SupervisorMobility.API.Models.FileUploadDto;
 using System.Diagnostics;
+using System.Runtime.CompilerServices;
 using System.Security.Policy;
 using System.Xml;
 
@@ -802,31 +803,32 @@ namespace SupervisorMobility.API.Services
         {
             return await _context.Users.AnyAsync(p => p.Name == nombre && p.Payroll == nomina && p.PlantId == plantid && p.AreaId == areaid && p.GroupId == grupoid);
         }
-        public void UserAddSubordinated(User Master, User Slave)
+        public async Task UserAddSubordinated(User Master, List<User> Slaves)
         {
-            if (Master.Subordinates != null)
-            {
-                Master.Subordinates.Add(Slave);
-            }
-            else
+            if (Master.Subordinates is null || Master.Subordinates == null)
             {
                 Master.Subordinates = new List<User>();
-                Master.Subordinates.Add(Slave);
             }
             _context.SaveChanges();
-        } 
-        public void UserAddArea(User Master, Area Slave)
-        {
-            if (Master.Areas != null)
+            foreach(var item in Slaves)
             {
-                Master.Areas.Add(Slave);
+                Master.Subordinates.Add(item);
             }
-            else
+
+             await _context.SaveChangesAsync();
+        } 
+        public async Task UserAddArea(User Master, List<Area> Slaves)
+        {
+            if (Master.Areas is null || Master.Areas == null)
             {
                 Master.Areas = new List<Area>();
-                Master.Areas.Add(Slave);
             }
             _context.SaveChanges();
+            foreach (var item in Slaves)
+            {
+                Master.Areas.Add(item);
+            }
+            await _context.SaveChangesAsync();           
         }
 
 
