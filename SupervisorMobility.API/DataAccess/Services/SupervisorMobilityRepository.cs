@@ -1,17 +1,10 @@
-﻿using DocumentFormat.OpenXml.Bibliography;
-using DocumentFormat.OpenXml.Drawing;
-using DocumentFormat.OpenXml.Presentation;
-using DocumentFormat.OpenXml.Spreadsheet;
-using Irony.Parsing;
+﻿
 using Microsoft.EntityFrameworkCore;
 using SupervisorMobility.API.Context;
 using SupervisorMobility.API.DataAccess.Entities;
 using SupervisorMobility.API.Entities;
-using SupervisorMobility.API.Models.AssyChart;
-using SupervisorMobility.API.Models.FileUploadDto;
 using System.Diagnostics;
-using System.Security.Policy;
-using System.Xml;
+
 
 namespace SupervisorMobility.API.Services
 {
@@ -749,6 +742,13 @@ namespace SupervisorMobility.API.Services
         public async Task<IEnumerable<User>> GetAllUsersAsync()
         {
             return await _context.Users
+                .Include(p => p.Plant)
+                .Include(a => a.Area)
+                .Include(d => d.Distribution)
+                .Include(g => g.Group)
+                .Include(s => s.Superior)
+                .Include(ss => ss.Subordinates)
+                .Include(aa => aa.Areas)
                  .OrderBy(c => c.UserId).ToListAsync();
         }
         public async Task<IEnumerable<User>> GetAllUsersWhitPlantAreaAndGroupAsync()
@@ -767,11 +767,12 @@ namespace SupervisorMobility.API.Services
             {
                 return await _context.Users.Include(a => a.Area)
                 .Include(p => p.Plant)
-                .Include(g => g.Group)
+                .Include(a => a.Area)
                 .Include(d => d.Distribution)
+                .Include(g => g.Group)
                 .Include(s => s.Superior)
-                .Include(s => s.Subordinates)
-                .Include(a => a.Areas)
+                .Include(ss => ss.Subordinates)
+                .Include(aa => aa.Areas)
                 .Where(p => p.UserId == userId).FirstOrDefaultAsync();
             }
             return await _context.Users.Where(p => p.UserId == userId).FirstOrDefaultAsync();
@@ -779,12 +780,13 @@ namespace SupervisorMobility.API.Services
         public async Task<User?> GetUserByObjectIdAsync(string objectId)
         {
             return await _context.Users.Include(a => a.Area)
-            .Include(p => p.Plant)
-            .Include(g => g.Group)
-            .Include(d => d.Distribution)
-            .Include(s => s.Superior)
-            .Include(s => s.Subordinates)
-            .Include(a => a.Areas)
+           .Include(p => p.Plant)
+                .Include(a => a.Area)
+                .Include(d => d.Distribution)
+                .Include(g => g.Group)
+                .Include(s => s.Superior)
+                .Include(ss => ss.Subordinates)
+                .Include(aa => aa.Areas)
             .Where(p => p.ObjectId == objectId).FirstOrDefaultAsync();
         } 
 
@@ -802,21 +804,21 @@ namespace SupervisorMobility.API.Services
         {
             return await _context.Users.AnyAsync(p => p.Name == nombre && p.Payroll == nomina && p.PlantId == plantid && p.AreaId == areaid && p.GroupId == grupoid);
         }
-        public Task<int> UserAddSubordinated(User Master, User Slave)
+        public void UserAddSubordinated(User Master, User Slave)
         {
             if (Master.Subordinates != null)
             {
+                Slave.SuperiorId = Master.UserId;
                 Master.Subordinates.Add(Slave);
             }
             else
             {
                 Master.Subordinates = new List<User>();
+                Slave.SuperiorId = Master.UserId;
                 Master.Subordinates.Add(Slave);
             }
-
-            return _context.SaveChangesAsync();
-        } 
-        public Task<int> UserAddArea(User Master, Area Slave)
+        }
+        public void UserAddArea(User Master, Area Slave)
         {
             if (Master.Areas != null)
             {
@@ -827,8 +829,6 @@ namespace SupervisorMobility.API.Services
                 Master.Areas = new List<Area>();
                 Master.Areas.Add(Slave);
             }
-
-            return _context.SaveChangesAsync();
         }
 
 

@@ -1,4 +1,6 @@
-﻿using Microsoft.EntityFrameworkCore;
+﻿using DocumentFormat.OpenXml.EMMA;
+using DocumentFormat.OpenXml.Wordprocessing;
+using Microsoft.EntityFrameworkCore;
 using SupervisorMobility.API.DataAccess.Entities;
 using SupervisorMobility.API.Entities;
 using System.Globalization;
@@ -15,7 +17,7 @@ namespace SupervisorMobility.API.Context
         public DbSet<JobObservationType> JobObservationTypes { get; set; }
         public DbSet<JobObservation> JobObservations { get; set; }
         public DbSet<Lup> Lup { get; set; }
-        public DbSet<Group> Groups { get; set; }
+        public DbSet<Entities.Group> Groups { get; set; }
         public DbSet<Glosary> Glosary { get; set; }
         public DbSet<Plant> Plants { get; set; }
         public DbSet<Area> Areas { get; set; }
@@ -66,9 +68,7 @@ namespace SupervisorMobility.API.Context
                 .Property(p => p.IsActive)
                 .HasDefaultValue(true);
 
-            modelBuilder.Entity<Area>()
-                .Property(p => p.IsActive)
-                .HasDefaultValue(true);
+
 
             modelBuilder.Entity<Distribution>()
                 .Property(p => p.IsActive)
@@ -102,6 +102,49 @@ namespace SupervisorMobility.API.Context
                 .Property(p => p.IsActive)
                 .HasDefaultValue(true);
 
+            //Users
+
+            modelBuilder.Entity<User>()
+                .Property(u => u.UserId)
+                .UseIdentityColumn();
+
+          
+
+            modelBuilder.Entity<User>()
+                .HasOne(u => u.Area)
+                .WithMany()
+                .HasForeignKey(u => u.AreaId)
+                .IsRequired(false);
+
+            modelBuilder.Entity<User>()
+                .HasMany(u => u.Areas)
+                .WithMany(a => a.Users)
+                .UsingEntity<Dictionary<string, object>>(
+                    "UserArea",
+                    r => r.HasOne<Area>().WithMany().HasForeignKey("AreaId"),
+                    l => l.HasOne<User>().WithMany().HasForeignKey("UserId"),
+                    e =>
+                    {
+                        e.ToTable("UserAreas");
+                        e.HasKey("UserId", "AreaId");
+                    }
+                );
+
+            modelBuilder.Entity<User>()
+                .HasCheckConstraint("CK_Role", "UserType >= 1");
+
+            modelBuilder.Entity<User>()
+                .Property(p => p.IsActive)
+                .HasDefaultValue(true);
+            //area
+
+
+            modelBuilder.Entity<Area>()
+                .Property(p => p.IsActive)
+                .HasDefaultValue(true);
+
+
+
             modelBuilder.Entity<Notification>()
                 .Property(p => p.IsActive)
                 .HasDefaultValue(true);
@@ -109,10 +152,6 @@ namespace SupervisorMobility.API.Context
             modelBuilder.Entity<JobObservationVersion>()
                 .Property(p => p.IsActive)
                 .HasDefaultValue(true);
-
-            //Add AssyChartModel
-
-
 
             //Constraints
             modelBuilder.Entity<ChecklistCategory>()
@@ -307,14 +346,14 @@ namespace SupervisorMobility.API.Context
                     JobObservationTypeId = 1,
                     ChecklistCategoryId = 5
                 });
-            modelBuilder.Entity<Group>()
+            modelBuilder.Entity<Entities.Group>()
                 .HasData(
-                new Group("GA", "Grupo A")
+                new Entities.Group("GA", "Grupo A")
                 {
                     GroupId = 1,
                     IsActive = true
                 },
-                new Group("GB", "Grupo B")
+                new Entities.Group("GB", "Grupo B")
                 {
                     GroupId = 2,
                     IsActive = true
@@ -339,22 +378,22 @@ namespace SupervisorMobility.API.Context
                     IsActive = true,
                     PlantId = 1
                 },
-                 new Area("T2", "Trim 2")
-                 {
-                     AreaId = 2,
-                     IsActive = true,
-                     PlantId = 1
-                 }, new Area("P1", "Paint 1")
-                 {
-                     AreaId = 3,
-                     IsActive = true,
-                     PlantId = 2
-                 }, new Area("P1", "Paint 2")
-                 {
-                     AreaId = 4,
-                     IsActive = true,
-                     PlantId = 2
-                 });
+                new Area("T2", "Trim 2")
+                {
+                    AreaId = 2,
+                    IsActive = true,
+                    PlantId = 1
+                }, new Area("P1", "Paint 1")
+                {
+                    AreaId = 3,
+                    IsActive = true,
+                    PlantId = 2
+                }, new Area("P1", "Paint 2")
+                {
+                    AreaId = 4,
+                    IsActive = true,
+                    PlantId = 2
+                });
             modelBuilder.Entity<Distribution>()
                 .HasData(
                 new Distribution("Dist1", "Distribution 1 Trim 1")
@@ -584,8 +623,9 @@ namespace SupervisorMobility.API.Context
                     Name = "Marco Aguayo",
                     Payroll = 0906,
                     IsActive = true,
-                    UserType = 1
-                }, new User
+                    UserType = 1,
+                }
+                , new User
                 {
                     UserId = 4,
                     PlantId = 1,
