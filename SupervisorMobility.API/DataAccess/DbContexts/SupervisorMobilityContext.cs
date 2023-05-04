@@ -107,8 +107,7 @@ namespace SupervisorMobility.API.Context
                 .Property(u => u.UserId)
                 .UseIdentityColumn();
 
-          
-
+         
             modelBuilder.Entity<User>()
                 .HasOne(u => u.Area)
                 .WithMany()

@@ -209,7 +209,7 @@ namespace SupervisorMobility.API.Controllers
                 {
                     _supervisorMobilityRepository.UserAddSubordinated(UserToReturn, item);
                 }
-                    await _supervisorMobilityRepository.SaveChangesAsync();
+                   
             }
 
             if (haveAreas)
@@ -218,9 +218,10 @@ namespace SupervisorMobility.API.Controllers
                 {
                     _supervisorMobilityRepository.UserAddArea(UserToReturn, item);
                 }
-                    await _supervisorMobilityRepository.SaveChangesAsync();
+                    
             }
 
+            await _supervisorMobilityRepository.SaveChangesAsync();
 
             return Ok(UserToReturn);
 

@@ -233,7 +233,7 @@ namespace SupervisorMobility.API.Business
         public async Task<User> CreateUserAsync(UsersForCreation newuser)
         {
             var finaluser = _mapper.Map<User>(newuser);
-            _repository.AddUserAsync(finaluser);
+            await _repository.AddUserAsync(finaluser);
             return finaluser;
         }
 

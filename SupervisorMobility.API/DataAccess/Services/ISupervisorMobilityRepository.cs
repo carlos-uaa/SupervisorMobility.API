@@ -148,7 +148,7 @@ namespace SupervisorMobility.API.Services
         void UserAddArea(User Master, Area Slave);
 
 
-        void AddUserAsync(User user);
+        Task AddUserAsync(User user);
         void DeleteUserAsync(User user);
         #endregion
         #region HistoyJobObservation

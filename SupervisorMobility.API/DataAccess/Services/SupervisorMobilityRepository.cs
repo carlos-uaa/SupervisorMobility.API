@@ -808,13 +808,13 @@ namespace SupervisorMobility.API.Services
         {
             if (Master.Subordinates != null)
             {
-                Slave.SuperiorId = Master.UserId;
+               
                 Master.Subordinates.Add(Slave);
             }
             else
-            {
+            { 
                 Master.Subordinates = new List<User>();
-                Slave.SuperiorId = Master.UserId;
+               
                 Master.Subordinates.Add(Slave);
             }
         }
@@ -832,10 +832,10 @@ namespace SupervisorMobility.API.Services
         }
 
 
-        public void AddUserAsync(User user)
+        public async Task AddUserAsync(User user)
         {
             _context.Users.Add(user);
-            _context.SaveChangesAsync();
+            await _context.SaveChangesAsync();
         }
 
         public void DeleteUserAsync(User user)
