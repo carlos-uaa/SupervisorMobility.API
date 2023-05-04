@@ -3,6 +3,7 @@ using DocumentFormat.OpenXml.Wordprocessing;
 using Microsoft.EntityFrameworkCore;
 using SupervisorMobility.API.DataAccess.Entities;
 using SupervisorMobility.API.Entities;
+using System.Globalization;
 
 namespace SupervisorMobility.API.Context
 {
@@ -159,6 +160,26 @@ namespace SupervisorMobility.API.Context
                 .HasCheckConstraint("ck_cq_seq", "[CategorySequence] > 0");
 
 
+            DateTime startDateFormat;
+            DateTime endDateFormat;
+
+            var startDate = DateTime.Now.ToShortDateString() + " 12:00:00";
+            var endDate = DateTime.Now.ToShortDateString() + " 13:00:00";
+
+            if (DateTime.TryParseExact(startDate, $"d/M/yyyy HH:mm:ss", null, DateTimeStyles.None, out startDateFormat))
+            {
+                Console.WriteLine(startDateFormat);
+            }
+            else
+                Console.WriteLine("Unable to parse '{0}'", startDate);
+
+
+            if (DateTime.TryParseExact(endDate, $"d/M/yyyy HH:mm:ss", null, DateTimeStyles.None, out endDateFormat))
+            {
+                Console.WriteLine(endDateFormat);
+            }
+            else
+                Console.WriteLine("Unable to parse '{0}'", endDate);
 
             //seeding some data
             modelBuilder.Entity<JobObservation>()
@@ -172,10 +193,10 @@ namespace SupervisorMobility.API.Context
                     DistributionId = 1,
                     OperationId = 1,
                     Type = 2,
-                    StartDate = DateTime.Parse("27/4/2023 12:00:00"),
-                    EndDate = DateTime.Parse("27/4/2023 13:00:00"),
-                    PlannedStartDate = DateTime.Parse("27/4/2023 00:00:00"),
-                    PlannedEndDate = DateTime.Parse("27/4/2023 00:00:00"),
+                    StartDate = startDateFormat,
+                    EndDate = endDateFormat,
+                    PlannedStartDate = startDateFormat,
+                    PlannedEndDate = endDateFormat,
                     FinishedDate = null,
                     Status = 1,
                     Option = 1,
@@ -684,6 +705,20 @@ namespace SupervisorMobility.API.Context
                     Payroll = 9,
                     IsActive = true,
                     UserType = 4,
+                    SuperiorId = 1,
+                },
+                new User
+                {
+                    UserId = 10,
+                    PlantId = 1,
+                    AreaId = 1,
+                    DistributionId = null,
+                    GroupId = 1,
+                    Name = "pmunoz@gruposinco.com.mx",
+                    ObjectId = "7f223478-bd34-445b-b662-0f64caa9998c",
+                    Payroll = 10,
+                    IsActive = true,
+                    UserType = 1,
                     SuperiorId = 1,
                 }
                 );
