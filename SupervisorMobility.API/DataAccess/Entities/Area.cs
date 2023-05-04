@@ -22,8 +22,7 @@ namespace SupervisorMobility.API.DataAccess.Entities
 
         public ICollection<Distribution> Distributions { get; set; }
             = new List<Distribution>();
-
-        public ICollection<User> Users { get; set; }  = new List<User>();
+        public ICollection<User>? Users { get; set; }
 
         public Area(string code, string description)
         {

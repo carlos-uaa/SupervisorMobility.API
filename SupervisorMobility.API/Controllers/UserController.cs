@@ -45,14 +45,15 @@ namespace SupervisorMobility.API.Controllers
         [HttpGet]
         public async Task<ActionResult<IEnumerable<UsersWithNavigationDetails>>> GetUsers(bool collections = false)
         {
+            var userEntity = await _supervisorMobilityRepository.GetAllUsersAsync();
             if (collections)
             {
-                var userEntity = await _supervisorMobilityRepository.GetAllUsersWhitPlantAreaAndGroupAsync();
+
                 return Ok(_mapper.Map<IEnumerable<UsersWithNavigationDetails>>(userEntity));
             }
             else
             {
-                var userEntity = await _supervisorMobilityRepository.GetAllUsersAsync();
+
                 return Ok(_mapper.Map<IEnumerable<UsersWithoutNavigationDetails>>(userEntity));
             }
         }
@@ -134,7 +135,7 @@ namespace SupervisorMobility.API.Controllers
             {
                 newUser.AreaId = null;
             }
-            else if(newUser.AreaId != null) 
+            else if (newUser.AreaId != null)
             {
                 if (!await _supervisorMobilityRepository.AreaExistAsync((int)newUser.AreaId))
                 {
@@ -146,7 +147,7 @@ namespace SupervisorMobility.API.Controllers
             {
                 newUser.GroupId = null;
             }
-            else if( newUser.GroupId != null)
+            else if (newUser.GroupId != null)
             {
                 if (!await _supervisorMobilityRepository.AreaExistAsync((int)newUser.GroupId))
                 {
@@ -171,49 +172,57 @@ namespace SupervisorMobility.API.Controllers
                 newUser.Payroll = null;
             }
 
-            if(newUser.SuperiorId == 0)
+            if (newUser.SuperiorId == 0)
             {
                 newUser.SuperiorId = null;
             }
 
 
-            //if(newUser.Subordinates != null)
-            //{
-            //    haveUsers = true;
-            //    foreach(var Sub in newUser.Subordinates)
-            //    {
-            //        Users.Add(await _assyChartService.FetchUserAsync(Sub.UserId));
-            //    }
+            if (newUser.Subordinates != null)
+            {
+                haveUsers = true;
+                foreach (var Sub in newUser.Subordinates)
+                {
+                    Users.Add(await _assyChartService.FetchUserAsync(Sub.UserId));
+                }
 
-            //    newUser.Subordinates = null;
-            //}
+                newUser.Subordinates = null;
+            }
 
-            if(newUser.Areas != null)
+            if (newUser.Areas != null)
             {
                 haveAreas = true;
                 foreach (var AreainList in newUser.Areas)
                 {
                     Areas.Add(await _supervisorMobilityRepository.GetAreaForPlantAsync((int)newUser.PlantId, AreainList.AreaId));
                 }
-            newUser.Areas = null;
+                newUser.Areas = null;
             }
 
             var finalUser = await _assyChartService.CreateUserAsync(newUser);
 
+            var UserToReturn = _mapper.Map<User>(finalUser);
+
             if (haveUsers)
             {
-                  await  _supervisorMobilityRepository.UserAddSubordinated(finalUser, Users);
+                foreach (var item in Users)
+                {
+                    _supervisorMobilityRepository.UserAddSubordinated(UserToReturn, item);
+                }
+                    await _supervisorMobilityRepository.SaveChangesAsync();
             }
 
             if (haveAreas)
             {
-                await _supervisorMobilityRepository.UserAddArea(finalUser, Areas);
-                
+                foreach (var item in Areas)
+                {
+                    _supervisorMobilityRepository.UserAddArea(UserToReturn, item);
+                }
+                    await _supervisorMobilityRepository.SaveChangesAsync();
             }
 
-            await _supervisorMobilityRepository.SaveChangesAsync();
 
-            return Ok(finalUser);
+            return Ok(UserToReturn);
 
         }
 
@@ -342,7 +351,7 @@ namespace SupervisorMobility.API.Controllers
                                     //UserId	ObjectId	Payroll	Name	Plant	Area	Grupo	Permission	CreateDate	UpdateDate	DisableDate	IsActive
                                     //1         2           3       4       5       6       7       8           9           10          11          12          
                                     //UserPorp
-                                    userToInsert.UserId = ws.Cell(i,1).Value.ToString() != "" ? int.Parse(ws.Cell(i, 1).Value.ToString()) : -1;
+                                    userToInsert.UserId = ws.Cell(i, 1).Value.ToString() != "" ? int.Parse(ws.Cell(i, 1).Value.ToString()) : -1;
                                     //
                                     userToInsert.ObjectId = ws.Cell(i, 2).Value.ToString() != "" ? ws.Cell(i, 2).Value.ToString() : "";
                                     userToInsert.Payroll = ws.Cell(i, 3).Value.ToString() != "" ? int.Parse(ws.Cell(i, 3).Value.ToString()) : 0;
@@ -353,8 +362,8 @@ namespace SupervisorMobility.API.Controllers
                                     userToInsert.GroupId = ws.Cell(i, 7).Value.ToString() != "" ? int.Parse(ws.Cell(i, 7).Value.ToString()) : -1;
                                     //Permission
                                     userToInsert.UserType = ws.Cell(i, 8).Value.ToString() != "" ? int.Parse(ws.Cell(i, 8).Value.ToString()) : 0;
-                                  
-                                    
+
+
                                     //Date Controlls
                                     try
                                     {
@@ -397,7 +406,7 @@ namespace SupervisorMobility.API.Controllers
                             }//end else first roe
 
                         }//end foreach
-                        
+
                     }//end using
 
 
@@ -425,12 +434,12 @@ namespace SupervisorMobility.API.Controllers
                         UsersForCreation newuser = new UsersForCreation()
                         {
                             Name = userItem.Name,
-                            ObjectId =  userItem.ObjectId,
+                            ObjectId = userItem.ObjectId,
                             Payroll = userItem.Payroll,
                             PlantId = (int)userItem.PlantId,
                             AreaId = (int)userItem.AreaId,
                             GroupId = (int)userItem.GroupId,
-                            UserType= (int)userItem.UserType,
+                            UserType = (int)userItem.UserType,
                             LastUpdated = userItem.LastUpdated,
                             DisabledDate = userItem.DisabledDate,
                             IsActive = userItem.IsActive
@@ -502,7 +511,7 @@ namespace SupervisorMobility.API.Controllers
         [HttpGet("Bulk/DownloadAllUsersFormat")]
         public async Task<IActionResult> DownloadAllUsersFormat()
         {
-       
+
             MemoryStream ms = new MemoryStream(6000 * 65536);
             SLDocument ws = new SLDocument();
 

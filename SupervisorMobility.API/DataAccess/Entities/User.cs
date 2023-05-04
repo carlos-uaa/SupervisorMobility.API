@@ -19,7 +19,7 @@ namespace SupervisorMobility.API.DataAccess.Entities
         [ForeignKey("SuperiorId")]
         [JsonIgnore]
         public User? Superior { get; set; }
-
+        [InverseProperty("Superior")]
         public ICollection<User>? Subordinates { get; set; }
 
         [Column(TypeName = "Date")]
@@ -36,6 +36,8 @@ namespace SupervisorMobility.API.DataAccess.Entities
         public int? AreaId { get; set; }
         [ForeignKey("AreaId")]
         public Area? Area { get; set; }
+
+        [NotMapped]
         public ICollection<Area>? Areas { get; set; }
 
         public int? DistributionId { get; set; }

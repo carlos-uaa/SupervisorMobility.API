@@ -67,9 +67,7 @@ namespace SupervisorMobility.API.Context
                 .Property(p => p.IsActive)
                 .HasDefaultValue(true);
 
-            modelBuilder.Entity<Area>()
-                .Property(p => p.IsActive)
-                .HasDefaultValue(true);
+
 
             modelBuilder.Entity<Distribution>()
                 .Property(p => p.IsActive)
@@ -103,17 +101,48 @@ namespace SupervisorMobility.API.Context
                 .Property(p => p.IsActive)
                 .HasDefaultValue(true);
 
+            //Users
+
             modelBuilder.Entity<User>()
-                .HasOne(x => x.Area)
-                .WithMany();
-            
+                .Property(u => u.UserId)
+                .UseIdentityColumn();
+
+          
+
             modelBuilder.Entity<User>()
-                .HasOne(x => x.Superior)
-                .WithMany();
+                .HasOne(u => u.Area)
+                .WithMany()
+                .HasForeignKey(u => u.AreaId)
+                .IsRequired(false);
+
+            modelBuilder.Entity<User>()
+                .HasMany(u => u.Areas)
+                .WithMany(a => a.Users)
+                .UsingEntity<Dictionary<string, object>>(
+                    "UserArea",
+                    r => r.HasOne<Area>().WithMany().HasForeignKey("AreaId"),
+                    l => l.HasOne<User>().WithMany().HasForeignKey("UserId"),
+                    e =>
+                    {
+                        e.ToTable("UserAreas");
+                        e.HasKey("UserId", "AreaId");
+                    }
+                );
+
+            modelBuilder.Entity<User>()
+                .HasCheckConstraint("CK_Role", "UserType >= 1");
 
             modelBuilder.Entity<User>()
                 .Property(p => p.IsActive)
                 .HasDefaultValue(true);
+            //area
+
+
+            modelBuilder.Entity<Area>()
+                .Property(p => p.IsActive)
+                .HasDefaultValue(true);
+
+
 
             modelBuilder.Entity<Notification>()
                 .Property(p => p.IsActive)
@@ -123,13 +152,13 @@ namespace SupervisorMobility.API.Context
                 .Property(p => p.IsActive)
                 .HasDefaultValue(true);
 
-
             //Constraints
             modelBuilder.Entity<ChecklistCategory>()
                 .HasCheckConstraint("ck_cc_seq", "[Sequence] > 0");
 
             modelBuilder.Entity<ChecklistQuestion>()
                 .HasCheckConstraint("ck_cq_seq", "[CategorySequence] > 0");
+
 
 
             //seeding some data
