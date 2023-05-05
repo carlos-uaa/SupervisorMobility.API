@@ -235,17 +235,6 @@ namespace SupervisorMobility.API.Controllers
             bool haveAreas = false;
             bool haveUsers = false;
 
-            if (user.Subordinates != null)
-            {
-                haveUsers = true;
-                foreach (var Sub in user.Subordinates)
-                {
-                    Users.Add(await _assyChartService.FetchUserAsync(Sub.UserId));
-                }
-
-                user.Subordinates = null;
-            }
-
             if (user.Areas != null)
             {
                 haveAreas = true;
@@ -256,19 +245,10 @@ namespace SupervisorMobility.API.Controllers
                 user.Areas = null;
             }
 
-            
+          
             await _assyChartService.UpdateUserAsync(user, userId);
 
             var UserToReturn = _mapper.Map<User>(user);
-
-            if (haveUsers)
-            {
-                foreach (var item in Users)
-                {
-                    _supervisorMobilityRepository.UserAddSubordinated(UserToReturn, item);
-                }
-
-            }
 
             if (haveAreas)
             {
@@ -279,10 +259,9 @@ namespace SupervisorMobility.API.Controllers
 
             }
 
-            await _supervisorMobilityRepository.SaveChangesAsync();
+           
 
-
-            return Ok(UserToReturn);
+            return Ok();
         }
 
         [HttpDelete("{userId}")]

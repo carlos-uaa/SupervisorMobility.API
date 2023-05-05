@@ -818,8 +818,9 @@ namespace SupervisorMobility.API.Services
             
             _context.SaveChanges();
         }
-        public void UserAddSubordinated(User Master, User Slave)
+        public async void UserAddSubordinated(User Master, User Slave)
         {
+       
             if (Master.Subordinates != null)
             {
                
