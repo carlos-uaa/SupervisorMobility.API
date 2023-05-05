@@ -32,6 +32,8 @@ namespace SupervisorMobility.API.DataAccess.Entities
         public bool? IsActive { get; set; }
 
         public int? PlantId { get; set; }
+        [ForeignKey("PlantId")]
+
         public Plant? Plant { get; set; }
         public int? AreaId { get; set; }
         [ForeignKey("AreaId")]

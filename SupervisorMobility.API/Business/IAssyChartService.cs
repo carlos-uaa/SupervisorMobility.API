@@ -66,7 +66,7 @@ namespace SupervisorMobility.API.Business
         Task<IEnumerable<User>> GetAllUsers();
         Task<IEnumerable<User>> GetAllUsersWhitPlantAreaAndGroupAsync();
         Task<User> CreateUserAsync(UsersForCreation user);
-        Task UpdateUserAsync(UsersForUpdateDto userForUpdate, User user);
+        Task UpdateUserAsync(UsersForUpdateDto userForUpdate, int UserId);
         Task RemoveUserAsync(User user);
         #endregion
         #region Files

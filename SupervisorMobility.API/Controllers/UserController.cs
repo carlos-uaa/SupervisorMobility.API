@@ -230,15 +230,59 @@ namespace SupervisorMobility.API.Controllers
         [HttpPut("{userId}")]
         public async Task<ActionResult> UpdateUser(int userId, UsersForUpdateDto user)
         {
-            var userEntity = await _assyChartService.FetchUserAsync(userId);
-            if (userEntity == null)
+            List<Area> Areas = new List<Area>();
+            List<User> Users = new List<User>();
+            bool haveAreas = false;
+            bool haveUsers = false;
+
+            if (user.Subordinates != null)
             {
-                return NotFound();
+                haveUsers = true;
+                foreach (var Sub in user.Subordinates)
+                {
+                    Users.Add(await _assyChartService.FetchUserAsync(Sub.UserId));
+                }
+
+                user.Subordinates = null;
             }
 
-            await _assyChartService.UpdateUserAsync(user, userEntity);
+            if (user.Areas != null)
+            {
+                haveAreas = true;
+                foreach (var AreainList in user.Areas)
+                {
+                    Areas.Add(await _supervisorMobilityRepository.GetAreaForPlantAsync((int)user.PlantId, AreainList.AreaId));
+                }
+                user.Areas = null;
+            }
 
-            return Ok();
+            
+            await _assyChartService.UpdateUserAsync(user, userId);
+
+            var UserToReturn = _mapper.Map<User>(user);
+
+            if (haveUsers)
+            {
+                foreach (var item in Users)
+                {
+                    _supervisorMobilityRepository.UserAddSubordinated(UserToReturn, item);
+                }
+
+            }
+
+            if (haveAreas)
+            {
+                foreach (var item in Areas)
+                {
+                    _supervisorMobilityRepository.UserAddArea(UserToReturn, item);
+                }
+
+            }
+
+            await _supervisorMobilityRepository.SaveChangesAsync();
+
+
+            return Ok(UserToReturn);
         }
 
         [HttpDelete("{userId}")]
@@ -249,6 +293,8 @@ namespace SupervisorMobility.API.Controllers
             {
                 return NotFound();
             }
+
+
 
             await _assyChartService.RemoveUserAsync(userEntity);
 

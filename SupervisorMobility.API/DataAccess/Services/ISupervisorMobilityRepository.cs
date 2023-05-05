@@ -3,6 +3,7 @@ using SupervisorMobility.API.Entities;
 using SupervisorMobility.API.Models.AssyChart;
 using SupervisorMobility.API.Models.AttendanceDtos;
 using SupervisorMobility.API.Models.FileUploadDto;
+using SupervisorMobility.API.Models.Users;
 using System;
 
 namespace SupervisorMobility.API.Services
@@ -147,6 +148,7 @@ namespace SupervisorMobility.API.Services
         void UserAddSubordinated(User Master, User Slave);
         void UserAddArea(User Master, Area Slave);
 
+        Task UpdateUser(UsersForUpdateDto user, int userId);
 
         Task AddUserAsync(User user);
         void DeleteUserAsync(User user);

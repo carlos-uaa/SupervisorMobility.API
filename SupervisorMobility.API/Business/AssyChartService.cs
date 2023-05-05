@@ -237,10 +237,9 @@ namespace SupervisorMobility.API.Business
             return finaluser;
         }
 
-        public async Task UpdateUserAsync(UsersForUpdateDto updateuser, User user)
+        public async Task UpdateUserAsync(UsersForUpdateDto userForUpdate, int UserId)
         {
-            _mapper.Map(updateuser, user);
-            await _repository.SaveChangesAsync();
+            await _repository.UpdateUser(userForUpdate, UserId);
         }
 
         public async Task RemoveUserAsync(User user)

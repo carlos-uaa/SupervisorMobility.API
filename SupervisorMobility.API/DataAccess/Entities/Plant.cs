@@ -17,6 +17,7 @@ namespace SupervisorMobility.API.Entities
         public bool? IsActive { get; set; }
 
         //Navigation Property
+        [NotMapped]
         public ICollection<Area> Areas { get; set; }
             = new List<Area>();
 

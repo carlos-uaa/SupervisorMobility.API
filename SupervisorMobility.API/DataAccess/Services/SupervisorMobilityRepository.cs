@@ -1,8 +1,10 @@
 ﻿
+using AutoMapper;
 using Microsoft.EntityFrameworkCore;
 using SupervisorMobility.API.Context;
 using SupervisorMobility.API.DataAccess.Entities;
 using SupervisorMobility.API.Entities;
+using SupervisorMobility.API.Models.Users;
 using System.Diagnostics;
 
 
@@ -11,9 +13,12 @@ namespace SupervisorMobility.API.Services
     public class SupervisorMobilityRepository : ISupervisorMobilityRepository
     {
         private readonly SupervisorMobilityContext _context;
+        private readonly IMapper _mapper;
 
-        public SupervisorMobilityRepository(SupervisorMobilityContext context)
+
+        public SupervisorMobilityRepository(SupervisorMobilityContext context, IMapper mapper)
         {
+            _mapper = mapper;
             _context = context ?? throw new ArgumentNullException(nameof(context));
         }
 
@@ -803,6 +808,15 @@ namespace SupervisorMobility.API.Services
         public async Task<bool> UserExistAdvanceAsync(string nombre, int nomina, int plantid, int areaid, int grupoid)
         {
             return await _context.Users.AnyAsync(p => p.Name == nombre && p.Payroll == nomina && p.PlantId == plantid && p.AreaId == areaid && p.GroupId == grupoid);
+        }
+
+        public async Task UpdateUser(UsersForUpdateDto user, int userId)
+        {
+            var entityUser = await _context.Users.FirstOrDefaultAsync(u => u.UserId == userId);
+
+            _mapper.Map(user, entityUser);
+            
+            _context.SaveChanges();
         }
         public void UserAddSubordinated(User Master, User Slave)
         {
