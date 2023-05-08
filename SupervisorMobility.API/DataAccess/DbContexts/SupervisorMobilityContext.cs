@@ -137,7 +137,7 @@ namespace SupervisorMobility.API.Context
                 .HasDefaultValue(true);
             //area
 
-
+            
             modelBuilder.Entity<Area>()
                 .Property(p => p.IsActive)
                 .HasDefaultValue(true);
@@ -583,17 +583,19 @@ namespace SupervisorMobility.API.Context
                 }
             );
 
+            
+
             modelBuilder.Entity<User>().HasData(
                 new User
                 {
                     UserId = 1,
-                    PlantId = 1,
-                    AreaId = 1,
+                    PlantId = null,
+                    AreaId = null,
                     DistributionId = null,
-                    GroupId = 1,
-                    Name = "Pedro",
+                    GroupId = null,
+                    Name = "SupervisorAdmin",
                     ObjectId = "4f54e317-1ab9-45ec-9b72-7d1910a0cc88",
-                    Payroll = 12345,
+                    Payroll = null,
                     IsActive = true,
                     UserType = 1
                 },
@@ -721,7 +723,7 @@ namespace SupervisorMobility.API.Context
                     UserType = 1,
                     SuperiorId = 1,
                 }
-                );
+                );;
 
             modelBuilder.Entity<Lup>()
                  .HasData(
