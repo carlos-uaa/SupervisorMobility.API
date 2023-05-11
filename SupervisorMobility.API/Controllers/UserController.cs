@@ -577,17 +577,15 @@ namespace SupervisorMobility.API.Controllers
             MemoryStream ms = new MemoryStream(6000 * 65536);
             SLDocument ws = new SLDocument();
 
-            ws.RenameWorksheet(SLDocument.DefaultFirstSheetName, "Users Bulk");
+            ws.RenameWorksheet(SLDocument.DefaultFirstSheetName, "SSV Format");
 
             //ROW Data identificators
-
             ws.SetCellValue("A1", "UserId SSV");
-            ws.SetCellValue("B1", "ObjectId");
-            ws.SetCellValue("C1", "Name");
-            ws.SetCellValue("D1", "Email");
-            ws.SetCellValue("E1", "Plant");
-            ws.SetCellValue("F1", "Group");
-            ws.SetCellValue("G1", "AreasManage");
+            ws.SetCellValue("B1", "Name");
+            ws.SetCellValue("C1", "Email");
+            ws.SetCellValue("D1", "Plant");
+            ws.SetCellValue("E1", "Group");
+            ws.SetCellValue("F1", "AreasManage");
 
             ws.SaveAs(ms);
 
@@ -612,11 +610,10 @@ namespace SupervisorMobility.API.Controllers
             //ROW Data identificators
 
             ws.SetCellValue("A1", "UserId Supervisor");
-            ws.SetCellValue("B1", "ObjectId");
-            ws.SetCellValue("C1", "Name");
-            ws.SetCellValue("D1", "Email");
-            ws.SetCellValue("E1", "SSV_Id Superior");
-            ws.SetCellValue("F1", "Assign Area_ID");
+            ws.SetCellValue("B1", "Name");
+            ws.SetCellValue("C1", "Email");
+            ws.SetCellValue("D1", "SSV_Id Superior");
+            ws.SetCellValue("E1", "Assign Area_ID");
 
             ws.SaveAs(ms);
 
