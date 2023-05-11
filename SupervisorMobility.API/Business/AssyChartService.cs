@@ -221,6 +221,11 @@ namespace SupervisorMobility.API.Business
             return await _repository.GetUserByObjectIdAsync(objectId);
         }
 
+        public async Task<User?> FetchUserByEmailAsync(string email)
+        {
+            return await _repository.GetUserByEmailAsync(email);
+        }
+
         public async Task<IEnumerable<User>> GetAllUsers()
         {
             return await _repository.GetAllUsersAsync();

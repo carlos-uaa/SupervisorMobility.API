@@ -149,7 +149,7 @@ namespace SupervisorMobility.API.Controllers
         {
 
             JobObservationForUpdateDto jobObservationForUpdate = request.JobObservation;
-            ADuser auser = request.ADuser;
+            string auser = request.LoggedUser;
 
             if (!await _supervisorMobilityRepository.PlantExistAsync(jobObservationForUpdate.PlantId))
             {
@@ -179,21 +179,21 @@ namespace SupervisorMobility.API.Controllers
                 return NotFound("Job Observation Not Found");
             }
 
-            if (jobObservationForUpdate.Status == 6 && jobObservationEntity.Status != jobObservationForUpdate.Status && auser.name != "S.M. System")
+            if (jobObservationForUpdate.Status == 6 && jobObservationEntity.Status != jobObservationForUpdate.Status && auser != "S.M. System")
             {
                 //crear notificacion
                 NotificationToCreateDto newnotify = new NotificationToCreateDto();
-                newnotify.MadeBy = auser.name;
+                newnotify.MadeBy = auser;
                 newnotify.UserId = jobObservationForUpdate.SupervisorId;
                 newnotify.IsAccepted = true;
                 newnotify.IsActive = true;
-                newnotify.NotificationText = $"The JobObservation with id: {jobObservationEntity.OperationId} was terminated by the user {auser.name}";
+                newnotify.NotificationText = $"The JobObservation with id: {jobObservationEntity.OperationId} was terminated by the user {auser}";
                 newnotify.NotificationType = "FinishJobObservation";
 
                 var notadd = await _assyChartService.CreateNotificationAsync(newnotify);
                 if (notadd != null)
                 {
-                    var emailMessage = _email.CreateEmailMessage(auser.email, "Este es un mensaje de prueba enviado desde job observation");
+                    var emailMessage = _email.CreateEmailMessage(auser, "Este es un mensaje de prueba enviado desde job observation");
                     _email.Send(emailMessage);
                 }
             }
@@ -314,7 +314,7 @@ namespace SupervisorMobility.API.Controllers
                 var jobtoaddversion = await _supervisorMobilityRepository.GetJobObservationAsync(jobObservationId, true);
                 HistoryToAdd.DateModification = DateTime.Now;
                 HistoryToAdd.resumeVersion = resumeChanges;
-                HistoryToAdd.MadeBy = auser.name;
+                HistoryToAdd.MadeBy = auser;
                 //añadimos
                 bool added = await _supervisorMobilityRepository.AddHistoyToJobObservationAsync(HistoryToAdd, jobtoaddversion);
                 //add to 

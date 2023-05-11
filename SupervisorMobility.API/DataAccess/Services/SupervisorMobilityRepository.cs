@@ -793,7 +793,21 @@ namespace SupervisorMobility.API.Services
                 .Include(ss => ss.Subordinates)
                 .Include(aa => aa.Areas)
             .Where(p => p.ObjectId == objectId).FirstOrDefaultAsync();
-        } 
+        }
+
+        public async Task<User?> GetUserByEmailAsync(string email)
+        {
+            return await _context.Users.Include(a => a.Area)
+           .Include(p => p.Plant)
+                .Include(a => a.Area)
+                .Include(d => d.Distribution)
+                .Include(g => g.Group)
+                .Include(s => s.Superior)
+                .Include(ss => ss.Subordinates)
+                .Include(aa => aa.Areas)
+            .Where(p => p.Email == email).FirstOrDefaultAsync();
+        }
+
 
         public async Task<User?> GetUserByPayrollAndMoreAsync(int payroll, int plantid, int areaid, int groupid)
         {

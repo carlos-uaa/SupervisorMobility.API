@@ -111,6 +111,34 @@ namespace SupervisorMobility.API.Controllers
             }
         }
 
+
+        [HttpGet("ByEmail")]
+        public async Task<ActionResult<UsersWithNavigationDetails>> GetUserByEmail(string email, bool collections = false)
+        {
+
+            var userEntity = await _assyChartService.FetchUserByEmailAsync(email);
+
+            if (collections)
+            {
+                if (userEntity != null)
+                {
+                    return Ok(_mapper.Map<UsersWithNavigationDetails>(userEntity));
+
+                }
+
+                return NotFound();
+            }
+            else
+            {
+                if (userEntity != null)
+                {
+                    return Ok(_mapper.Map<UsersWithoutNavigationDetails>(userEntity));
+                }
+                return NotFound();
+            }
+        }
+
+
         [HttpPost]
         public async Task<ActionResult<UsersWithNavigationDetails>> CreateUser(UsersForCreation newUser)
         {
