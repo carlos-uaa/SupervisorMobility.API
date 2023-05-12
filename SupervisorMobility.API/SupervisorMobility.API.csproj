@@ -35,7 +35,9 @@
     <Folder Include="uploads\evidence\" />
     <Folder Include="uploads\evidence\" />
     <Folder Include="uploads\guides\" />
+    <Folder Include="uploads\massive\" />
     <Folder Include="uploads\users\" />
+    <Folder Include="uploads\massive\" />
   </ItemGroup>
 
 </Project>

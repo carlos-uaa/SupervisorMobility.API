@@ -585,8 +585,7 @@ namespace SupervisorMobility.API.Context
                     AreaId = 1,
                     DistributionId = null,
                     GroupId = 1,
-                    Name = "Pedro",
-                    ObjectId = "pmunozsinco@compasdcpcs.local",
+                    Name = "SuperAdmin",
                     Payroll = null,
                     IsActive = true,
                     UserType = 1

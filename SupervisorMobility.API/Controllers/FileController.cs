@@ -20,6 +20,8 @@ using ClosedXML.Excel;
 using SupervisorMobility.API.Models.FileUploadDto;
 using SupervisorMobility.API.Models.Users;
 using SupervisorMobility.API.Models.ReturnResults;
+using System.Collections.Generic;
+using System.Formats.Asn1;
 
 namespace SupervisorMobility.API.Controllers
 {
@@ -1308,6 +1310,154 @@ namespace SupervisorMobility.API.Controllers
 
 
         }//end download file function 
+
+        [HttpPost("MassiveUploadAreasDistributionOperations")]
+        public async Task<ActionResult<FileUpload>> UploadAreasDistributionsOperations(int plantid, IFormFile file)
+        {
+
+            var uploadResult = new FileUploadForCreationDto();
+            string trustedFileNameForStorage = string.Empty;
+            var unstrustedFileName = file.FileName;
+
+            trustedFileNameForStorage = Path.GetRandomFileName();
+            trustedFileNameForStorage = System.IO.Path.ChangeExtension(trustedFileNameForStorage, ".xlsx");
+            var path = Path.Combine(_env.ContentRootPath, "uploads\\massive", trustedFileNameForStorage);
+
+            await using FileStream fs = new(path, FileMode.Create);
+            await file.CopyToAsync(fs);
+
+            uploadResult.FileName = unstrustedFileName;
+            uploadResult.StorageFileName = trustedFileNameForStorage;
+            uploadResult.ContentType = file.ContentType;
+            uploadResult.UploadDate = DateTime.Now;
+
+            var fileToReturn = await _assyChartService.CreateFileAsync(uploadResult);
+
+            await _supervisorMobilityRepository.SaveChangesAsync();
+
+            //// hacer el desmadre aqui
+            //string filetoOpen = "";
+
+            //if (uploadResult.ContentType == "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet")
+            //{
+            //    // Obtiene la nueva ruta del archivo con la nueva extensión
+            //    string newPath = System.IO.Path.ChangeExtension(trustedFileNameForStorage, ".xlsx");
+            //    // Mueve el archivo a la nueva ruta
+            //    System.IO.File.Move(trustedFileNameForStorage, newPath);
+            //    filetoOpen = newPath;
+            //}
+            //else if (uploadResult.ContentType == "application/vnd.ms-excel")
+            //{
+            //    // Obtiene la nueva ruta del archivo con la nueva extensión
+            //    string newPath = System.IO.Path.ChangeExtension(trustedFileNameForStorage, ".xls");
+            //    // Mueve el archivo a la nueva ruta
+            //    System.IO.File.Move(trustedFileNameForStorage, newPath);
+            //    filetoOpen = newPath;
+            //}
+
+
+
+            var plant = _assyChartService.FetchPlantAsync(plantid);
+
+
+            try
+            {
+                using (var workBook = new XLWorkbook(path))
+                {
+                    IXLWorksheet ws = workBook.Worksheet(1);
+
+                    bool firstRow = true;
+                    int i = 2;
+                    foreach (IXLRow row in ws.Rows())
+                    {
+                        //Use the first row to add columns to DataTable.
+                        if (firstRow)
+                        {
+                            firstRow = false;
+                        }
+                        else
+                        {
+                            if (!row.IsEmpty())
+                            {
+                                var CodeArea = ws.Cell(i, 1).Value.ToString() != "" ? ws.Cell(i, 1).Value.ToString() : "";
+                                var DescriptionArea = ws.Cell(i, 2).Value.ToString() != "" ? ws.Cell(i, 2).Value.ToString() : "";
+                                
+                                var CodeDistribution = ws.Cell(i, 3).Value.ToString() != "" ? ws.Cell(i, 3).Value.ToString() : "";
+                                var DescriptionDistribution = ws.Cell(i, 4).Value.ToString() != "" ? ws.Cell(i, 4).Value.ToString() : "";
+                                
+                                var CodeOperation = ws.Cell(i, 5).Value.ToString() != "" ? ws.Cell(i, 5).Value.ToString() : "";
+                                var DescriptionOperation = ws.Cell(i, 6).Value.ToString() != "" ? ws.Cell(i, 6).Value.ToString() : "";
+
+                                var area = await _supervisorMobilityRepository.GetAreaForPlantByCodeAndDescriptionAsync(plantid, CodeArea, DescriptionArea);
+
+                                if (area is null)
+                                {
+                                    AreaForCreationDto newarea = new AreaForCreationDto()
+                                    {
+                                        Code = CodeArea,
+                                        Description = DescriptionArea,
+                                        IsActive = true
+                                    };
+                                    var finalArea = _mapper.Map<Area>(area);
+                                    finalArea.PlantId = plantid;
+
+                                    await _supervisorMobilityRepository.AddArea(finalArea);
+
+                                    area = finalArea;
+                                }
+
+                                var distribution = await _supervisorMobilityRepository.GetDistributionForAreaByCodeAndDescriptionAsync(area.AreaId, CodeDistribution, DescriptionDistribution);
+;
+                                if (distribution is null)
+                                {
+                                    DistributionForCreationDto newdistribution = new DistributionForCreationDto()
+                                    {
+                                        Code = CodeDistribution,
+                                        Description = DescriptionDistribution,
+                                        IsActive = true
+                                    };
+
+                                    var finalDistribution = _mapper.Map<Distribution>(distribution);
+
+                                    await _supervisorMobilityRepository.AddDistributionForPlantAsync(plantid,
+                                        area.AreaId, finalDistribution);
+                                }
+
+                                var operation = await _supervisorMobilityRepository.GetOperationForDistributionByCodeAndDescriptionAsync(area.AreaId, CodeOperation, DescriptionOperation);
+
+                                if(operation is null)
+                                {
+                                    OperationForCreationDto newoperation = new OperationForCreationDto()
+                                    {
+                                        Code = CodeOperation,
+                                        Description = DescriptionOperation,
+                                        IsActive = true
+                                    };
+                                    var finalOperation = _mapper.Map<Operation>(operation);
+
+                                    await _assyChartService.CreateOperationAsync(area.AreaId, distribution.DistributionId, finalOperation);
+                                }
+                            i++;
+                        }//end is not empety row
+                    }//end else first roe
+
+                }//end foreach
+                  await  _supervisorMobilityRepository.SaveChangesAsync();
+            }//end using
+
+
+
+            }//end try
+            catch (Exception ex)
+            {
+                Debug.WriteLine(ex.ToString());
+            }//end trycatch to add excel to list
+
+
+
+            return Ok(fileToReturn);
+
+}
 
     }
 }
