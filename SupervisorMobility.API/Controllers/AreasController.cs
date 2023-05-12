@@ -87,6 +87,10 @@ namespace SupervisorMobility.API.Controllers
             }
 
             var finalArea = _mapper.Map<Area>(area);
+            finalArea.PlantId = plantId;
+
+            await _supervisorMobilityRepository.AddArea(finalArea);
+
 
             await _supervisorMobilityRepository.AddAreaForPlantAsync(
                 plantId, finalArea);

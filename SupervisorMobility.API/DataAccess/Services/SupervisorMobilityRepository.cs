@@ -6,7 +6,7 @@ using SupervisorMobility.API.DataAccess.Entities;
 using SupervisorMobility.API.Entities;
 using SupervisorMobility.API.Models.Users;
 using System.Diagnostics;
-
+using System.Runtime.CompilerServices;
 
 namespace SupervisorMobility.API.Services
 {
@@ -217,6 +217,13 @@ namespace SupervisorMobility.API.Services
         public async Task<bool> AreaExistAsync(int areaId)
         {
             return await _context.Areas.AnyAsync(p => p.AreaId == areaId);
+        } 
+        public async Task<AsyncVoidMethodBuilder> AddArea(Area area)
+        {
+            var resp = new AsyncVoidMethodBuilder();
+            await _context.Areas.AddAsync(area);
+            await _context.SaveChangesAsync();
+            return resp;  
         }
 
 
@@ -227,6 +234,7 @@ namespace SupervisorMobility.API.Services
 
         public async Task AddAreaForPlantAsync(int plantId, Area area)
         {
+     
             var plant = await GetPlantAsync(plantId);
             if (plant != null)
             {

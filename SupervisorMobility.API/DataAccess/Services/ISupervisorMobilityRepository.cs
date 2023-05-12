@@ -5,6 +5,7 @@ using SupervisorMobility.API.Models.AttendanceDtos;
 using SupervisorMobility.API.Models.FileUploadDto;
 using SupervisorMobility.API.Models.Users;
 using System;
+using System.Runtime.CompilerServices;
 
 namespace SupervisorMobility.API.Services
 {
@@ -55,6 +56,7 @@ namespace SupervisorMobility.API.Services
         Task<bool> AreaExistAsync(int areaId);
         Task<bool> AreaExistByCodeAndDescriptionInPlantAsync(string code, string description, int plantId);
         Task AddAreaForPlantAsync(int plantId, Area area);
+        Task<AsyncVoidMethodBuilder> AddArea(Area area);
         void DeleteArea(Area area);
         #endregion
         #region DistributionOperations

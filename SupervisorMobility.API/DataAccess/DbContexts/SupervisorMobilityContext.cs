@@ -108,12 +108,6 @@ namespace SupervisorMobility.API.Context
                 .Property(u => u.UserId)
                 .UseIdentityColumn();
 
-         
-            modelBuilder.Entity<User>()
-                .HasOne(u => u.Area)
-                .WithMany()
-                .HasForeignKey(u => u.AreaId)
-                .IsRequired(false);
 
             modelBuilder.Entity<User>()
                 .HasMany(u => u.Areas)
@@ -129,8 +123,6 @@ namespace SupervisorMobility.API.Context
                     }
                 );
 
-            modelBuilder.Entity<User>()
-                .HasCheckConstraint("CK_Role", "UserType >= 1");
 
             modelBuilder.Entity<User>()
                 .Property(p => p.IsActive)
@@ -209,7 +201,7 @@ namespace SupervisorMobility.API.Context
                     SsvCommentary = "Senior Supervisor Commentary",
                     OperatorCommentary = "Operator Commentary",
 
-                }); ; ; ;
+                });
 
             modelBuilder.Entity<ChecklistCategory>()
                 .HasData(
