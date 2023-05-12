@@ -589,12 +589,12 @@ namespace SupervisorMobility.API.Context
                 new User
                 {
                     UserId = 1,
-                    PlantId = null,
-                    AreaId = null,
+                    PlantId = 1,
+                    AreaId = 1,
                     DistributionId = null,
-                    GroupId = null,
-                    Name = "SupervisorAdmin",
-                    ObjectId = "4f54e317-1ab9-45ec-9b72-7d1910a0cc88",
+                    GroupId = 1,
+                    Name = "Pedro",
+                    ObjectId = "pmunozsinco@compasdcpcs.local",
                     Payroll = null,
                     IsActive = true,
                     UserType = 1
