@@ -1,4 +1,5 @@
 ﻿using MailKit.Net.Smtp;
+using MailKit.Security;
 using MimeKit;
 using SupervisorMobility.API.DataAccess.Entities;
 
@@ -29,8 +30,8 @@ namespace SupervisorMobility.API.DataAccess.Services
             {
                 try
                 {
-                    client.Connect(_emailConfig.SmtpServer, _emailConfig.Port);
-                    client.Authenticate(_emailConfig.UserName, _emailConfig.Password);
+                    client.Connect(_emailConfig.SmtpServer, _emailConfig.Port, SecureSocketOptions.None);
+                    //client.Authenticate(_emailConfig.UserName, _emailConfig.Password);
                     client.Send(mailMessage);
                 }
                 catch
