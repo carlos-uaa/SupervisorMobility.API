@@ -2,6 +2,7 @@
 using DocumentFormat.OpenXml.Spreadsheet;
 using DocumentFormat.OpenXml.Vml;
 using DocumentFormat.OpenXml.Wordprocessing;
+using Microsoft.AspNetCore.Cors;
 using Microsoft.AspNetCore.Mvc;
 using SupervisorMobility.API.Business;
 using SupervisorMobility.API.DataAccess.Entities;
@@ -20,6 +21,7 @@ using System.Diagnostics;
 
 namespace SupervisorMobility.API.Controllers
 {
+    [EnableCors("Cors")]
     [Route("api/jobobservations")]
     [ApiController]
     public class JobObservationController : ControllerBase
@@ -125,7 +127,7 @@ namespace SupervisorMobility.API.Controllers
 
             return NotFound("Job Observation Version not remove");
         }
-
+        [EnableCors("Cors")]
         [HttpGet("{jobObservationId}", Name = "GetJobObservation")]
         public async Task<IActionResult> GetJobObservation(int jobObservationId, bool includeLup = false)
         {
@@ -143,7 +145,7 @@ namespace SupervisorMobility.API.Controllers
             return Ok(_mapper.Map<JobObservationDto>(jobObservation));
         }
 
-
+        [EnableCors("Cors")]
         [HttpPut("{jobObservationId}")]
         public async Task<ActionResult> UpdateJobObservation(int jobObservationId, RequestJobObservationADuser request)
         {
@@ -191,11 +193,11 @@ namespace SupervisorMobility.API.Controllers
                 newnotify.NotificationType = "FinishJobObservation";
 
                 var notadd = await _assyChartService.CreateNotificationAsync(newnotify);
-                if (notadd != null)
-                {
-                    var emailMessage = _email.CreateEmailMessage(auser, "Este es un mensaje de prueba enviado desde job observation");
-                    _email.Send(emailMessage);
-                }
+                //if (notadd != null)
+                //{
+                //    var emailMessage = _email.CreateEmailMessage(auser, "Este es un mensaje de prueba enviado desde job observation");
+                //    _email.Send(emailMessage);
+                //}
             }
 
 

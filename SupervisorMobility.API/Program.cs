@@ -49,7 +49,7 @@ builder.Services.AddAutoMapper(AppDomain.CurrentDomain.GetAssemblies());
 builder.Services.AddCors(policy => {
 
     policy.AddPolicy("Cors", builder =>
-      builder.WithOrigins("https://*:10202/")
+      builder.WithOrigins("*://*:10202/")
         .SetIsOriginAllowedToAllowWildcardSubdomains()
         .AllowAnyOrigin().AllowAnyMethod().AllowAnyHeader()
  );
