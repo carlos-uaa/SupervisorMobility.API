@@ -14,6 +14,17 @@ Log.Logger = new LoggerConfiguration()
 
 var builder = WebApplication.CreateBuilder(args);
 
+//Add Cors
+builder.Services.AddCors(policy => {
+
+    policy.AddPolicy("Cors", builder =>
+      builder.WithOrigins("*")
+        .AllowAnyMethod().AllowAnyHeader()
+        .SetIsOriginAllowedToAllowWildcardSubdomains()
+ );
+});
+
+
 //add json file to builder configuration
 var env = builder.Environment;
 if (env.IsDevelopment())
@@ -45,15 +56,6 @@ builder.Services.RegisterDataServices(builder.Configuration);
 //Add automapper
 builder.Services.AddAutoMapper(AppDomain.CurrentDomain.GetAssemblies());
 
-//Add Cors
-builder.Services.AddCors(policy => {
-
-    policy.AddPolicy("Cors", builder =>
-      builder.WithOrigins("*://*:10202/")
-        .SetIsOriginAllowedToAllowWildcardSubdomains()
-        .AllowAnyOrigin().AllowAnyMethod().AllowAnyHeader()
- );
-});
 
 //Odmitir Referencias ciruclares
 builder.Services.AddControllers()
@@ -88,7 +90,7 @@ if (app.Environment.IsDevelopment() || app.Environment.IsProduction())
     app.UseSwaggerUI();
 }
 
-app.UseHttpsRedirection();
+//app.UseHttpsRedirection();
 
 app.UseAuthorization();
 
