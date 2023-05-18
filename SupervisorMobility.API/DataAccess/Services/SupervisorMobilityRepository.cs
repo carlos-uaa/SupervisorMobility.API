@@ -814,17 +814,38 @@ namespace SupervisorMobility.API.Services
                 .Include(ss => ss.Subordinates)
                 .Include(aa => aa.Areas)
             .Where(p => p.Email == email).FirstOrDefaultAsync();
+        } 
+        public async Task<User?> GetUserByPayrollAsync(int payroll)
+        {
+            return await _context.Users.Include(a => a.Area)
+           .Include(p => p.Plant)
+                .Include(a => a.Area)
+                .Include(d => d.Distribution)
+                .Include(g => g.Group)
+                .Include(s => s.Superior)
+                .Include(ss => ss.Subordinates)
+                .Include(aa => aa.Areas)
+            .Where(p => p.Payroll == payroll).FirstOrDefaultAsync();
         }
 
 
         public async Task<User?> GetUserByPayrollAndMoreAsync(int payroll, int plantid, int areaid, int groupid)
         {
             return await _context.Users.Where(p => p.Payroll == payroll && p.PlantId == plantid && p.AreaId == areaid && p.GroupId == groupid).FirstOrDefaultAsync();
-        }
+        } 
+       
 
         public async Task<bool> UserExistAsync(int userId)
         {
             return await _context.Users.AnyAsync(p => p.UserId == userId);
+        } 
+        public async Task<bool> UserExistByPayrollAsync(int payroll)
+        {
+            return await _context.Users.AnyAsync(p => p.Payroll == payroll);
+        }  
+        public async Task<bool> UserExistByEmailAsync(string email)
+        {
+            return await _context.Users.AnyAsync(p => p.Email == email);
         }
 
         public async Task<bool> UserExistAdvanceAsync(string nombre, int nomina, int plantid, int areaid, int grupoid)
@@ -838,7 +859,7 @@ namespace SupervisorMobility.API.Services
 
             _mapper.Map(user, entityUser);
             
-            _context.SaveChanges();
+            await _context.SaveChangesAsync();
         }
         public async void UserAddSubordinated(User Master, User Slave)
         {
@@ -855,6 +876,16 @@ namespace SupervisorMobility.API.Services
                 Master.Subordinates.Add(Slave);
             }
         }
+
+        public async void UserRemoveSubordinated(User Master, User Slave)
+        {
+            Master.Subordinates?.Remove(Slave);
+        } 
+        public async void UserRemoveAllSubordinated(User Master)
+        {
+            Master.Subordinates?.Clear();
+        }
+
         public void UserAddArea(User Master, Area Slave)
         {
             if (Master.Areas != null)
