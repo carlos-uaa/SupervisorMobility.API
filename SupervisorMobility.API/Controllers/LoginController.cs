@@ -14,6 +14,7 @@ namespace SupervisorMobility.API.Controllers
 
         public LoginController()
         {
+
             _httpClient = new HttpClient { BaseAddress = new Uri("http://10.91.116.212:4251/") };
         }
 

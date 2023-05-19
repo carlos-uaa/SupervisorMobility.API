@@ -18,7 +18,7 @@ var builder = WebApplication.CreateBuilder(args);
 builder.Services.AddCors(policy => {
 
     policy.AddPolicy("Cors", builder =>
-      builder.WithOrigins("*")
+        builder.WithOrigins("*")
         .AllowAnyMethod().AllowAnyHeader()
         .SetIsOriginAllowedToAllowWildcardSubdomains()
  );

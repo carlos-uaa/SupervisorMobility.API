@@ -288,7 +288,8 @@ namespace SupervisorMobility.API.Controllers
 
             }
 
-           
+            await _supervisorMobilityRepository.SaveChangesAsync();
+
 
             return Ok();
         }
@@ -327,6 +328,8 @@ namespace SupervisorMobility.API.Controllers
             UploadUsersResult ResultToReturn = new UploadUsersResult();
             foreach (var item in UsersToCreate)
             {
+
+
                 List<Area> Areas = new List<Area>();
                 List<User> Users = new List<User>();
                 bool haveAreas = false;
@@ -366,7 +369,7 @@ namespace SupervisorMobility.API.Controllers
                 {
                     if (!await _supervisorMobilityRepository.AreaExistAsync((int)item.GroupId))
                     {
-                        return NotFound("No Area");
+                        return NotFound("No Group");
                     }
                 }
 
@@ -374,8 +377,8 @@ namespace SupervisorMobility.API.Controllers
                 {
                     item.DistributionId = null;
                 }
-                else if(item.DistributionId != null)
-                { 
+                else if (item.DistributionId != null)
+                {
                     if (!await _supervisorMobilityRepository.DistributionExistsAsync((int)item.DistributionId))
                     {
                         return NotFound("No Distribution");
@@ -415,17 +418,17 @@ namespace SupervisorMobility.API.Controllers
                 }
 
                 ///////////////////
-                if (item.UserId == 0)
+                if (item.UserId == -1)
                 {
                     bool existUser = false;
                     int typeUser = 0;
-                    if(item.Payroll != null)
+                    if (item.Payroll != null)
                     {
                         existUser = await _supervisorMobilityRepository.UserExistByPayrollAsync((int)item.Payroll);
                         typeUser = existUser ? 1 : 0;
                     }
 
-                    if (item.Email != "" )
+                    if (item.Email != "")
                     {
                         existUser = await _supervisorMobilityRepository.UserExistByEmailAsync(item.Email);
                         typeUser = existUser ? 2 : 0;
@@ -434,7 +437,7 @@ namespace SupervisorMobility.API.Controllers
                     if (existUser)
                     {
                         var entityentity = typeUser == 1 ? await _supervisorMobilityRepository.GetUserByPayrollAsync((int)item.Payroll) : await _supervisorMobilityRepository.GetUserByEmailAsync(item.Email);
-                       
+
                         if (entityentity == null)
                         {
                             var usertoCreate = _mapper.Map<UsersForCreation>(item);
@@ -449,10 +452,10 @@ namespace SupervisorMobility.API.Controllers
                         {
                             var userToCompare = _mapper.Map<User>(item);
 
-                            if (entityentity != userToCompare)
+                            if (!entityentity.Equals(userToCompare))
                             {
-                               var userToUpdate = _mapper.Map<UsersForUpdateDto>(entityentity);
-                               await UpdateUser(entityentity.UserId, userToUpdate);
+                                var userToUpdate = _mapper.Map<UsersForUpdateDto>(userToCompare);
+                                await _supervisorMobilityRepository.UpdateUser(userToUpdate, entityentity.UserId);
                                 ResultToReturn.UsersUpdated++;
                             }
                             else
@@ -483,7 +486,7 @@ namespace SupervisorMobility.API.Controllers
 
                     if (entityUserwhitId == null)
                     {
-                        //Si tiene un id erroneo, entra aqui
+                        //Si tiene un id erroneo, entra aqui para busqueda avanzada
                         bool existUser = false;
                         int typeUser = 0;
                         if (item.Payroll != null)
@@ -515,11 +518,10 @@ namespace SupervisorMobility.API.Controllers
                             {
                                 var userToCompare = _mapper.Map<User>(item);
 
-                                if (entityentity != userToCompare)
+                                if (!entityentity.Equals(userToCompare))
                                 {
-                                    var userToUpdate = _mapper.Map<UsersForUpdateDto>(entityentity);
-                                
-                                    await UpdateUser(entityentity.UserId, userToUpdate);
+                                    var userToUpdate = _mapper.Map<UsersForUpdateDto>(userToCompare);
+                                    await _supervisorMobilityRepository.UpdateUser(userToUpdate, entityentity.UserId);
                                     ResultToReturn.UsersUpdated++;
                                 }
                                 else
@@ -543,11 +545,11 @@ namespace SupervisorMobility.API.Controllers
                     else
                     {
                         var userToCompare = _mapper.Map<User>(item);
-
-                        if (entityUserwhitId != userToCompare)
+                        if (!entityUserwhitId.Equals(userToCompare))
                         {
-                            var userToUpdate = _mapper.Map<UsersForUpdateDto>(entityUserwhitId); 
-                            await UpdateUser(entityUserwhitId.UserId, userToUpdate);
+
+                            var userToUpdate = _mapper.Map<UsersForUpdateDto>(userToCompare);
+                            await _supervisorMobilityRepository.UpdateUser(userToUpdate, entityUserwhitId.UserId);
                             ResultToReturn.UsersUpdated++;
                         }
                         else
@@ -558,7 +560,7 @@ namespace SupervisorMobility.API.Controllers
 
                     }
 
-                } 
+                }
 
                 if (haveUsers)
                 {
@@ -591,19 +593,19 @@ namespace SupervisorMobility.API.Controllers
             foreach (var item in UsesToCreateInSuperior)
             {
                 if(item.SuperiorId != null)
-                if(item.SuperiorId != superiorId)
-                {
-                    User exsuperior = await _supervisorMobilityRepository.GetUserAsync((int)item.SuperiorId, true);
-                    var usertoRemove = _mapper.Map<User>(item);
+                    if(item.SuperiorId != superiorId)
+                    {
+                        User exsuperior = await _supervisorMobilityRepository.GetUserAsync((int)item.SuperiorId, true);
+                        var usertoRemove = _mapper.Map<User>(item);
 
-                    _supervisorMobilityRepository.UserRemoveSubordinated(exsuperior, usertoRemove);
+                        _supervisorMobilityRepository.UserRemoveSubordinated(exsuperior, usertoRemove);
 
-                        item.SuperiorId = superiorId;
-                        item.PlantId = MasterUser.PlantId;
-                        item.GroupId = MasterUser.GroupId;
+                            item.SuperiorId = superiorId;
+                            item.PlantId = MasterUser.PlantId;
+                            item.GroupId = MasterUser.GroupId;
 
-                        if(item.UserType == 4)
-                            item.AreaId = MasterUser.AreaId;
+                            if(item.UserType == 4)
+                                item.AreaId = MasterUser.AreaId;
 
                     }
 

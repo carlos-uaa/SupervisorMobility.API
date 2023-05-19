@@ -859,7 +859,6 @@ namespace SupervisorMobility.API.Services
 
             _mapper.Map(user, entityUser);
             
-            await _context.SaveChangesAsync();
         }
         public async void UserAddSubordinated(User Master, User Slave)
         {
