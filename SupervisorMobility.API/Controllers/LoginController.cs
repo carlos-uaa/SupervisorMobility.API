@@ -14,8 +14,11 @@ namespace SupervisorMobility.API.Controllers
 
         public LoginController()
         {
+            //Prod
+            //_httpClient = new HttpClient { BaseAddress = new Uri("http://10.91.116.212:4251/") };
 
-            _httpClient = new HttpClient { BaseAddress = new Uri("http://10.91.116.212:4251/") };
+            //Dev
+            _httpClient = new HttpClient { BaseAddress = new Uri("http://10.91.49.9:4251/") };
         }
 
         [HttpPost]
