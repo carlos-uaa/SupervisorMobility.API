@@ -64,22 +64,22 @@ namespace SupervisorMobility.API.DataAccess.Entities
 
             switch (UserType)
             {
-                case 4:
-                    return Payroll == other.Payroll &&
-                           Name == other.Name &&
-                           SuperiorId == other.SuperiorId &&
-                           DistributionId == other.DistributionId;
+               
                 case 2:
                     return Name == other.Name &&
                            Email == other.Email &&
                            PlantId == other.PlantId &&
-                           AreaId == other.AreaId &&
                            GroupId == other.GroupId;
                 case 3:
                     return Name == other.Name &&
                            Email == other.Email &&
                            SuperiorId == other.SuperiorId &&
                            AreaId == other.AreaId;
+                case 4:
+                    return Payroll == other.Payroll &&
+                           Name == other.Name &&
+                           SuperiorId == other.SuperiorId &&
+                           DistributionId == other.DistributionId;
                 default:
                     return false;
             }

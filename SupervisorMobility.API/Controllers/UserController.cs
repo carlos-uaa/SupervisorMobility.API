@@ -238,7 +238,7 @@ namespace SupervisorMobility.API.Controllers
                 {
                     _supervisorMobilityRepository.UserAddSubordinated(UserToReturn, item);
                 }
-                   
+
             }
 
             if (haveAreas)
@@ -247,7 +247,7 @@ namespace SupervisorMobility.API.Controllers
                 {
                     _supervisorMobilityRepository.UserAddArea(UserToReturn, item);
                 }
-                    
+
             }
 
             await _supervisorMobilityRepository.SaveChangesAsync();
@@ -274,7 +274,7 @@ namespace SupervisorMobility.API.Controllers
                 user.Areas = null;
             }
 
-          
+
             await _assyChartService.UpdateUserAsync(user, userId);
 
             var UserToReturn = _mapper.Map<User>(user);
@@ -322,12 +322,336 @@ namespace SupervisorMobility.API.Controllers
         //******* Upload users    **********//
 
         [HttpPost("MasiveUpload")]
-        public async Task<ActionResult<UploadUsersResult>> MassiveUpload(List<UsersWithPeopleAndWithoutNavigationDetails>  UsersToCreate)
+        public async Task<ActionResult<UploadUsersResult>> MassiveUpload(List<UsersWithPeopleAndWithoutNavigationDetails> UsersToCreate)
         {
-            
+
             UploadUsersResult ResultToReturn = new UploadUsersResult();
             foreach (var item in UsersToCreate)
             {
+                List<Area> Areas = new List<Area>();
+                List<User> Users = new List<User>();
+                bool haveAreas = false;
+                bool haveUsers = false;
+
+                var UserToReturn = new User();
+
+                if (item.PlantId == 0)
+                {
+                    item.PlantId = null;
+                }
+                else if (item.PlantId != null)
+                {
+                    if (!await _supervisorMobilityRepository.PlantExistAsync((int)item.PlantId))
+                    {
+                        return NotFound("No Planta");
+                    }
+                }
+
+                if (item.AreaId == 0)
+                {
+                    item.AreaId = null;
+                }
+                else if (item.AreaId != null)
+                {
+                    if (!await _supervisorMobilityRepository.AreaExistAsync((int)item.AreaId))
+                    {
+                        return NotFound("No Area");
+                    }
+                }
+
+                if (item.GroupId == 0)
+                {
+                    item.GroupId = null;
+                }
+                else if (item.GroupId != null)
+                {
+                    if (!await _supervisorMobilityRepository.AreaExistAsync((int)item.GroupId))
+                    {
+                        return NotFound("No Group");
+                    }
+                }
+
+                if (item.DistributionId == 0)
+                {
+                    item.DistributionId = null;
+                }
+                else if (item.DistributionId != null)
+                {
+                    if (!await _supervisorMobilityRepository.DistributionExistsAsync((int)item.DistributionId))
+                    {
+                        return NotFound("No Distribution");
+                    }
+                }
+
+                if (item.Payroll == 0)
+                {
+                    item.Payroll = null;
+                }
+
+                if (item.SuperiorId == 0)
+                {
+                    item.SuperiorId = null;
+                }
+
+
+                if (item.Subordinates != null)
+                {
+                    haveUsers = true;
+                    foreach (var Sub in item.Subordinates)
+                    {
+                        Users.Add(await _assyChartService.FetchUserAsync(Sub.UserId));
+                    }
+
+                    item.Subordinates = null;
+                }
+
+                if (item.Areas != null)
+                {
+                    haveAreas = true;
+                    foreach (var AreainList in item.Areas)
+                    {
+                        Areas.Add(await _supervisorMobilityRepository.GetAreaForPlantAsync((int)item.PlantId, AreainList.AreaId));
+                    }
+                    item.Areas = null;
+                }
+
+                ///////////////////
+                if (item.UserId == -1)
+                {
+                    bool existUser = false;
+                    int typeUser = 0;
+                    if (item.Payroll != null)
+                    {
+                        existUser = await _supervisorMobilityRepository.UserExistByPayrollAsync((int)item.Payroll);
+                        typeUser = existUser ? 1 : 0;
+                    }
+
+                    if (item.Email != "")
+                    {
+                        existUser = await _supervisorMobilityRepository.UserExistByEmailAsync(item.Email);
+                        typeUser = existUser ? 2 : 0;
+                    }
+
+                    if (existUser)
+                    {
+                        var entityentity = typeUser == 1 ? await _supervisorMobilityRepository.GetUserByPayrollAsync((int)item.Payroll) : await _supervisorMobilityRepository.GetUserByEmailAsync(item.Email);
+
+                        if (entityentity == null)
+                        {
+                            var usertoCreate = _mapper.Map<UsersForCreation>(item);
+                            var finalUser = await _assyChartService.CreateUserAsync(usertoCreate);
+                            if (finalUser != null)
+                                ResultToReturn.UsersCreated++;
+
+                            UserToReturn = _mapper.Map<User>(finalUser);
+
+                        }
+                        else
+                        {
+                            var userToCompare = _mapper.Map<User>(item);
+
+                            if (!entityentity.Equals(userToCompare))
+                            {
+
+                                if (userToCompare.SuperiorId != entityentity.SuperiorId)
+                                {
+                                    if (userToCompare.SuperiorId != null && entityentity.SuperiorId != null)
+                                    {
+                                        User exsuperior = await _supervisorMobilityRepository.GetUserAsync((int)entityentity.SuperiorId, true);
+                                        var usertoRemove = _mapper.Map<User>(entityentity);
+
+                                        _supervisorMobilityRepository.UserRemoveSubordinated(exsuperior, usertoRemove);
+
+                                        User actualSuperior = await _supervisorMobilityRepository.GetUserAsync((int)item.SuperiorId, true);
+                                        _supervisorMobilityRepository.UserAddSubordinated(actualSuperior, usertoRemove);
+
+                                        item.PlantId = actualSuperior.PlantId;
+                                        item.GroupId = actualSuperior.GroupId;
+
+                                        if (item.UserType == 4)
+                                            item.AreaId = actualSuperior.AreaId;
+
+                                        userToCompare = _mapper.Map<User>(item);
+                                    }
+                                }
+
+
+                                var userToUpdate = _mapper.Map<UsersForUpdateDto>(userToCompare);
+                                await _supervisorMobilityRepository.UpdateUser(userToUpdate, entityentity.UserId);
+                                ResultToReturn.UsersUpdated++;
+                            }
+                            else
+                            {
+                                ResultToReturn.UsersExist++;
+                            }
+
+                            UserToReturn = _mapper.Map<User>(item);
+
+                        }
+                    }
+                    else
+                    {
+                        var usertoCreate = _mapper.Map<UsersForCreation>(item);
+                        var finalUser = await _assyChartService.CreateUserAsync(usertoCreate);
+                        if (finalUser != null)
+                            ResultToReturn.UsersCreated++;
+                        UserToReturn = _mapper.Map<User>(finalUser);
+
+
+                    }
+
+                }
+                else
+                {
+                    //User con id
+                    var entityUserwhitId = await _assyChartService.FetchUserAsync((int)item.UserId);
+
+                    if (entityUserwhitId == null)
+                    {
+                        //Si tiene un id erroneo, entra aqui para busqueda avanzada
+                        bool existUser = false;
+                        int typeUser = 0;
+                        if (item.Payroll != null)
+                        {
+                            existUser = await _supervisorMobilityRepository.UserExistByPayrollAsync((int)item.Payroll);
+                            typeUser = existUser ? 1 : 0;
+                        }
+
+                        if (item.Email != "")
+                        {
+                            existUser = await _supervisorMobilityRepository.UserExistByEmailAsync(item.Email);
+                            typeUser = existUser ? 2 : 0;
+                        }
+
+                        if (existUser)
+                        {
+                            var entityentity = typeUser == 1 ? await _supervisorMobilityRepository.GetUserByPayrollAsync((int)item.Payroll) : await _supervisorMobilityRepository.GetUserByEmailAsync(item.Email);
+
+                            if (entityentity == null)
+                            {
+                                var usertoCreate = _mapper.Map<UsersForCreation>(item);
+                                var finalUser = await _assyChartService.CreateUserAsync(usertoCreate);
+                                if (finalUser != null)
+                                    ResultToReturn.UsersCreated++;
+                                UserToReturn = _mapper.Map<User>(finalUser);
+
+                            }
+                            else
+                            {
+                                var userToCompare = _mapper.Map<User>(item);
+
+                                if (!entityentity.Equals(userToCompare))
+                                {
+                                    if (userToCompare.SuperiorId != entityentity.SuperiorId)
+                                    {
+                                        if (userToCompare.SuperiorId != null && entityentity.SuperiorId != null)
+                                        {
+                                            User exsuperior = await _supervisorMobilityRepository.GetUserAsync((int)entityentity.SuperiorId, true);
+                                            var usertoRemove = _mapper.Map<User>(entityentity);
+
+                                            _supervisorMobilityRepository.UserRemoveSubordinated(exsuperior, usertoRemove);
+
+                                            User actualSuperior = await _supervisorMobilityRepository.GetUserAsync((int)item.SuperiorId, true);
+                                            _supervisorMobilityRepository.UserAddSubordinated(actualSuperior, usertoRemove);
+
+                                            item.PlantId = actualSuperior.PlantId;
+                                            item.GroupId = actualSuperior.GroupId;
+
+                                            if (item.UserType == 4)
+                                                item.AreaId = actualSuperior.AreaId;
+
+                                             userToCompare = _mapper.Map<User>(item);
+                                        }
+                                    }
+
+                                    var userToUpdate = _mapper.Map<UsersForUpdateDto>(userToCompare);
+                                    await _supervisorMobilityRepository.UpdateUser(userToUpdate, entityentity.UserId);
+                                    ResultToReturn.UsersUpdated++;
+                                }
+                                else
+                                {
+                                    ResultToReturn.UsersExist++;
+                                }
+                                UserToReturn = _mapper.Map<User>(item);
+
+                            }
+                        }
+                        else
+                        {
+                            var usertoCreate = _mapper.Map<UsersForCreation>(item);
+                            var finalUser = await _assyChartService.CreateUserAsync(usertoCreate);
+                            if (finalUser != null)
+                                ResultToReturn.UsersCreated++;
+                            UserToReturn = _mapper.Map<User>(finalUser);
+
+                        }
+                    }
+                    else
+                    {
+                        var userToCompare = _mapper.Map<User>(item);
+                        if (!entityUserwhitId.Equals(userToCompare))
+                        {
+
+                            var userToUpdate = _mapper.Map<UsersForUpdateDto>(userToCompare);
+                            await _supervisorMobilityRepository.UpdateUser(userToUpdate, entityUserwhitId.UserId);
+                            ResultToReturn.UsersUpdated++;
+                        }
+                        else
+                        {
+                            ResultToReturn.UsersExist++;
+                        }
+                        UserToReturn = _mapper.Map<User>(item);
+
+                    }
+
+                }
+
+                if (haveUsers)
+                {
+                    foreach (var elemntUser in Users)
+                    {
+                        _supervisorMobilityRepository.UserAddSubordinated(UserToReturn, elemntUser);
+                    }
+                }
+
+                if (haveAreas)
+                {
+                    foreach (var elemntArea in Areas)
+                    {
+                        _supervisorMobilityRepository.UserAddArea(UserToReturn, elemntArea);
+                    }
+                }
+
+            }
+
+            await _supervisorMobilityRepository.SaveChangesAsync();
+            return Ok(ResultToReturn);
+
+        }
+
+        [HttpPost("MasiveUpload/Superior/{superiorId}")]
+        public async Task<ActionResult<UploadUsersResult>> MassiveUsersToSuperior(List<UsersWithPeopleAndWithoutNavigationDetails> UsesToCreateInSuperior, int superiorId)
+        {
+            User MasterUser = await _supervisorMobilityRepository.GetUserAsync(superiorId, true);
+            UploadUsersResult ResultToReturn = new UploadUsersResult();
+            foreach (var item in UsesToCreateInSuperior)
+            {
+                if (item.SuperiorId != null)
+                    if (item.SuperiorId != superiorId)
+                    {
+                        User exsuperior = await _supervisorMobilityRepository.GetUserAsync((int)item.SuperiorId, true);
+                        var usertoRemove = _mapper.Map<User>(item);
+
+                        _supervisorMobilityRepository.UserRemoveSubordinated(exsuperior, usertoRemove);
+
+                        item.SuperiorId = superiorId;
+                        item.PlantId = MasterUser.PlantId;
+                        item.GroupId = MasterUser.GroupId;
+
+                        if (item.UserType == 4)
+                            item.AreaId = MasterUser.AreaId;
+
+                    }
 
 
                 List<Area> Areas = new List<Area>();
@@ -578,285 +902,6 @@ namespace SupervisorMobility.API.Controllers
                     }
                 }
 
-            }
-            
-                await _supervisorMobilityRepository.SaveChangesAsync();
-            return Ok(ResultToReturn);
-
-        }
-
-        [HttpPost("MasiveUpload/Superior/{superiorId}")]
-        public async Task<ActionResult<UploadUsersResult>> MassiveUsersToSuperior(List<UsersWithPeopleAndWithoutNavigationDetails> UsesToCreateInSuperior, int superiorId)
-        {
-            User MasterUser = await _supervisorMobilityRepository.GetUserAsync(superiorId, true);
-            UploadUsersResult ResultToReturn = new UploadUsersResult();
-            foreach (var item in UsesToCreateInSuperior)
-            {
-                if(item.SuperiorId != null)
-                    if(item.SuperiorId != superiorId)
-                    {
-                        User exsuperior = await _supervisorMobilityRepository.GetUserAsync((int)item.SuperiorId, true);
-                        var usertoRemove = _mapper.Map<User>(item);
-
-                        _supervisorMobilityRepository.UserRemoveSubordinated(exsuperior, usertoRemove);
-
-                            item.SuperiorId = superiorId;
-                            item.PlantId = MasterUser.PlantId;
-                            item.GroupId = MasterUser.GroupId;
-
-                            if(item.UserType == 4)
-                                item.AreaId = MasterUser.AreaId;
-
-                    }
-
-
-                List<Area> Areas = new List<Area>();
-                List<User> Users = new List<User>();
-                bool haveAreas = false;
-                bool haveUsers = false;
-
-                var UserToReturn = new User();
-
-                if (item.PlantId == 0)
-                {
-                    item.PlantId = null;
-                }
-                else if (item.PlantId != null)
-                {
-                    if (!await _supervisorMobilityRepository.PlantExistAsync((int)item.PlantId))
-                    {
-                        return NotFound("No Planta");
-                    }
-                }
-
-                if (item.AreaId == 0)
-                {
-                    item.AreaId = null;
-                }
-                else if (item.AreaId != null)
-                {
-                    if (!await _supervisorMobilityRepository.AreaExistAsync((int)item.AreaId))
-                    {
-                        return NotFound("No Area");
-                    }
-                }
-
-                if (item.GroupId == 0)
-                {
-                    item.GroupId = null;
-                }
-                else if (item.GroupId != null)
-                {
-                    if (!await _supervisorMobilityRepository.AreaExistAsync((int)item.GroupId))
-                    {
-                        return NotFound("No Group");
-                    }
-                }
-
-                if (item.DistributionId == 0)
-                {
-                    item.DistributionId = null;
-                }
-                else if (item.DistributionId != null)
-                {
-                    if (!await _supervisorMobilityRepository.DistributionExistsAsync((int)item.DistributionId))
-                    {
-                        return NotFound("No Distribution");
-                    }
-                }
-
-                if (item.Payroll == 0)
-                {
-                    item.Payroll = null;
-                }
-
-                if (item.SuperiorId == 0)
-                {
-                    item.SuperiorId = null;
-                }
-
-
-                if (item.Subordinates != null)
-                {
-                    haveUsers = true;
-                    foreach (var Sub in item.Subordinates)
-                    {
-                        Users.Add(await _assyChartService.FetchUserAsync(Sub.UserId));
-                    }
-
-                    item.Subordinates = null;
-                }
-
-                if (item.Areas != null)
-                {
-                    haveAreas = true;
-                    foreach (var AreainList in item.Areas)
-                    {
-                        Areas.Add(await _supervisorMobilityRepository.GetAreaForPlantAsync((int)item.PlantId, AreainList.AreaId));
-                    }
-                    item.Areas = null;
-                }
-
-                ///////////////////
-                if (item.UserId == -1)
-                {
-                    bool existUser = false;
-                    int typeUser = 0;
-                    if (item.Payroll != null)
-                    {
-                        existUser = await _supervisorMobilityRepository.UserExistByPayrollAsync((int)item.Payroll);
-                        typeUser = existUser ? 1 : 0;
-                    }
-
-                    if (item.Email != "")
-                    {
-                        existUser = await _supervisorMobilityRepository.UserExistByEmailAsync(item.Email);
-                        typeUser = existUser ? 2 : 0;
-                    }
-
-                    if (existUser)
-                    {
-                        var entityentity = typeUser == 1 ? await _supervisorMobilityRepository.GetUserByPayrollAsync((int)item.Payroll) : await _supervisorMobilityRepository.GetUserByEmailAsync(item.Email);
-
-                        if (entityentity == null)
-                        {
-                            var usertoCreate = _mapper.Map<UsersForCreation>(item);
-                            var finalUser = await _assyChartService.CreateUserAsync(usertoCreate);
-                            if (finalUser != null)
-                                ResultToReturn.UsersCreated++;
-
-                            UserToReturn = _mapper.Map<User>(finalUser);
-
-                        }
-                        else
-                        {
-                            var userToCompare = _mapper.Map<User>(item);
-
-                            if (!entityentity.Equals(userToCompare))
-                            {
-                                var userToUpdate = _mapper.Map<UsersForUpdateDto>(userToCompare);
-                                await _supervisorMobilityRepository.UpdateUser(userToUpdate, entityentity.UserId);
-                                ResultToReturn.UsersUpdated++;
-                            }
-                            else
-                            {
-                                ResultToReturn.UsersExist++;
-                            }
-
-                            UserToReturn = _mapper.Map<User>(item);
-
-                        }
-                    }
-                    else
-                    {
-                        var usertoCreate = _mapper.Map<UsersForCreation>(item);
-                        var finalUser = await _assyChartService.CreateUserAsync(usertoCreate);
-                        if (finalUser != null)
-                            ResultToReturn.UsersCreated++;
-                        UserToReturn = _mapper.Map<User>(finalUser);
-
-
-                    }
-
-                }
-                else
-                {
-                    //User con id
-                    var entityUserwhitId = await _assyChartService.FetchUserAsync((int)item.UserId);
-
-                    if (entityUserwhitId == null)
-                    {
-                        //Si tiene un id erroneo, entra aqui para busqueda avanzada
-                        bool existUser = false;
-                        int typeUser = 0;
-                        if (item.Payroll != null)
-                        {
-                            existUser = await _supervisorMobilityRepository.UserExistByPayrollAsync((int)item.Payroll);
-                            typeUser = existUser ? 1 : 0;
-                        }
-
-                        if (item.Email != "")
-                        {
-                            existUser = await _supervisorMobilityRepository.UserExistByEmailAsync(item.Email);
-                            typeUser = existUser ? 2 : 0;
-                        }
-
-                        if (existUser)
-                        {
-                            var entityentity = typeUser == 1 ? await _supervisorMobilityRepository.GetUserByPayrollAsync((int)item.Payroll) : await _supervisorMobilityRepository.GetUserByEmailAsync(item.Email);
-
-                            if (entityentity == null)
-                            {
-                                var usertoCreate = _mapper.Map<UsersForCreation>(item);
-                                var finalUser = await _assyChartService.CreateUserAsync(usertoCreate);
-                                if (finalUser != null)
-                                    ResultToReturn.UsersCreated++;
-                                UserToReturn = _mapper.Map<User>(finalUser);
-
-                            }
-                            else
-                            {
-                                var userToCompare = _mapper.Map<User>(item);
-
-                                if (!entityentity.Equals(userToCompare))
-                                {
-                                    var userToUpdate = _mapper.Map<UsersForUpdateDto>(userToCompare);
-                                    await _supervisorMobilityRepository.UpdateUser(userToUpdate, entityentity.UserId);
-                                    ResultToReturn.UsersUpdated++;
-                                }else
-                                {
-                                    ResultToReturn.UsersExist++;
-                                }
-                                UserToReturn = _mapper.Map<User>(item);
-
-                            }
-                        }
-                        else
-                        {
-                            var usertoCreate = _mapper.Map<UsersForCreation>(item);
-                            var finalUser = await _assyChartService.CreateUserAsync(usertoCreate);
-                            if (finalUser != null)
-                                ResultToReturn.UsersCreated++;
-                            UserToReturn = _mapper.Map<User>(finalUser);
-
-                        }
-                    }
-                    else
-                    {
-                        var userToCompare = _mapper.Map<User>(item);
-                        if (!entityUserwhitId.Equals(userToCompare))
-                        {
-                          
-                            var userToUpdate = _mapper.Map<UsersForUpdateDto>(userToCompare);
-                            await _supervisorMobilityRepository.UpdateUser(userToUpdate, entityUserwhitId.UserId);
-                            ResultToReturn.UsersUpdated++;
-                        }
-                        else
-                        {
-                            ResultToReturn.UsersExist++;
-                        }
-                        UserToReturn = _mapper.Map<User>(item);
-
-                    }
-
-                }
-
-                if (haveUsers)
-                {
-                    foreach (var elemntUser in Users)
-                    {
-                        _supervisorMobilityRepository.UserAddSubordinated(UserToReturn, elemntUser);
-                    }
-                }
-
-                if (haveAreas)
-                {
-                    foreach (var elemntArea in Areas)
-                    {
-                        _supervisorMobilityRepository.UserAddArea(UserToReturn, elemntArea);
-                    }
-                }
-                
                 _supervisorMobilityRepository.UserAddSubordinated(MasterUser, UserToReturn);
             }
 
@@ -870,7 +915,7 @@ namespace SupervisorMobility.API.Controllers
             string file = Directory.GetCurrentDirectory().ToString() + "\\uploads\\users\\" + FileToInsert.StorageFileName;
             string originalPath = System.IO.Path.Combine(System.IO.Path.GetDirectoryName(file), System.IO.Path.GetFileNameWithoutExtension(file) + System.IO.Path.GetExtension(file));
 
-            
+
             List<UsersWithoutNavigationDetails> UsersListToSave = new List<UsersWithoutNavigationDetails>();
 
             if (FileToInsert.ContentType == "text/csv")

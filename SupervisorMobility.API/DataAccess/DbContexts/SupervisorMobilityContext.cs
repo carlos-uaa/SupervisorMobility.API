@@ -103,6 +103,9 @@ namespace SupervisorMobility.API.Context
                 .HasDefaultValue(true);
 
             //Users
+            modelBuilder.Entity<User>()
+             .Property(p => p.IsActive)
+             .HasDefaultValue(true);
 
             modelBuilder.Entity<User>()
                 .Property(u => u.UserId)
@@ -124,9 +127,7 @@ namespace SupervisorMobility.API.Context
                 );
 
 
-            modelBuilder.Entity<User>()
-                .Property(p => p.IsActive)
-                .HasDefaultValue(true);
+         
             //area
 
             

@@ -33,6 +33,8 @@ namespace SupervisorMobility.API.DataAccess.Services
                     client.Connect(_emailConfig.SmtpServer, _emailConfig.Port, SecureSocketOptions.None);
                     //client.Authenticate(_emailConfig.UserName, _emailConfig.Password);
                     client.Send(mailMessage);
+                    client.Disconnect(true);
+                    client.Dispose();
                 }
                 catch
                 {
