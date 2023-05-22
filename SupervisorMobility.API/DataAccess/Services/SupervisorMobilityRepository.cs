@@ -858,7 +858,8 @@ namespace SupervisorMobility.API.Services
             var entityUser = await _context.Users.FirstOrDefaultAsync(u => u.UserId == userId);
 
             _mapper.Map(user, entityUser);
-            
+
+            _context.SaveChanges();
         }
         public async void UserAddSubordinated(User Master, User Slave)
         {
@@ -874,6 +875,8 @@ namespace SupervisorMobility.API.Services
                
                 Master.Subordinates.Add(Slave);
             }
+            _context.SaveChanges();
+
         }
 
         public async void UserRemoveSubordinated(User Master, User Slave)
@@ -896,6 +899,7 @@ namespace SupervisorMobility.API.Services
                 Master.Areas = new List<Area>();
                 Master.Areas.Add(Slave);
             }
+            _context.SaveChanges();
         }
 
 

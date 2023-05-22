@@ -20,6 +20,7 @@ using ClosedXML.Excel;
 using DocumentFormat.OpenXml.Spreadsheet;
 using System.Drawing.Text;
 using Microsoft.EntityFrameworkCore.ChangeTracking;
+using DocumentFormat.OpenXml.Wordprocessing;
 
 namespace SupervisorMobility.API.Controllers
 {
@@ -328,8 +329,8 @@ namespace SupervisorMobility.API.Controllers
             UploadUsersResult ResultToReturn = new UploadUsersResult();
             foreach (var item in UsersToCreate)
             {
-                List<Area> Areas = new List<Area>();
-                List<User> Users = new List<User>();
+                List<Area> AreasInUser = new List<Area>();
+                List<User> UsersInUser = new List<User>();
                 bool haveAreas = false;
                 bool haveUsers = false;
 
@@ -399,7 +400,7 @@ namespace SupervisorMobility.API.Controllers
                     haveUsers = true;
                     foreach (var Sub in item.Subordinates)
                     {
-                        Users.Add(await _assyChartService.FetchUserAsync(Sub.UserId));
+                        UsersInUser.Add(await _assyChartService.FetchUserAsync(Sub.UserId));
                     }
 
                     item.Subordinates = null;
@@ -410,7 +411,7 @@ namespace SupervisorMobility.API.Controllers
                     haveAreas = true;
                     foreach (var AreainList in item.Areas)
                     {
-                        Areas.Add(await _supervisorMobilityRepository.GetAreaForPlantAsync((int)item.PlantId, AreainList.AreaId));
+                        AreasInUser.Add(await _supervisorMobilityRepository.GetAreaForPlantAsync((int)item.PlantId, AreainList.AreaId));
                     }
                     item.Areas = null;
                 }
@@ -465,6 +466,7 @@ namespace SupervisorMobility.API.Controllers
                                         User actualSuperior = await _supervisorMobilityRepository.GetUserAsync((int)item.SuperiorId, true);
                                         _supervisorMobilityRepository.UserAddSubordinated(actualSuperior, usertoRemove);
 
+                                        item.SuperiorId = actualSuperior.UserId;
                                         item.PlantId = actualSuperior.PlantId;
                                         item.GroupId = actualSuperior.GroupId;
 
@@ -476,16 +478,19 @@ namespace SupervisorMobility.API.Controllers
                                 }
 
 
+
                                 var userToUpdate = _mapper.Map<UsersForUpdateDto>(userToCompare);
+                                userToUpdate.CreatedDate = (DateTime)entityentity.CreatedDate;
                                 await _supervisorMobilityRepository.UpdateUser(userToUpdate, entityentity.UserId);
+                                UserToReturn = _mapper.Map<User>(userToUpdate);
                                 ResultToReturn.UsersUpdated++;
                             }
                             else
                             {
+                                UserToReturn = _mapper.Map<User>(entityentity);
                                 ResultToReturn.UsersExist++;
                             }
 
-                            UserToReturn = _mapper.Map<User>(item);
 
                         }
                     }
@@ -554,25 +559,30 @@ namespace SupervisorMobility.API.Controllers
                                             User actualSuperior = await _supervisorMobilityRepository.GetUserAsync((int)item.SuperiorId, true);
                                             _supervisorMobilityRepository.UserAddSubordinated(actualSuperior, usertoRemove);
 
+                                            item.SuperiorId = actualSuperior.UserId;
                                             item.PlantId = actualSuperior.PlantId;
                                             item.GroupId = actualSuperior.GroupId;
 
                                             if (item.UserType == 4)
                                                 item.AreaId = actualSuperior.AreaId;
 
-                                             userToCompare = _mapper.Map<User>(item);
+                                            userToCompare = _mapper.Map<User>(item);
                                         }
                                     }
 
                                     var userToUpdate = _mapper.Map<UsersForUpdateDto>(userToCompare);
+
+                                    userToUpdate.CreatedDate = (DateTime)entityentity.CreatedDate;
                                     await _supervisorMobilityRepository.UpdateUser(userToUpdate, entityentity.UserId);
+                                    UserToReturn = _mapper.Map<User>(userToUpdate);
                                     ResultToReturn.UsersUpdated++;
                                 }
                                 else
                                 {
+
+                                    UserToReturn = _mapper.Map<User>(entityentity);
                                     ResultToReturn.UsersExist++;
                                 }
-                                UserToReturn = _mapper.Map<User>(item);
 
                             }
                         }
@@ -591,16 +601,41 @@ namespace SupervisorMobility.API.Controllers
                         var userToCompare = _mapper.Map<User>(item);
                         if (!entityUserwhitId.Equals(userToCompare))
                         {
+                            if (userToCompare.SuperiorId != entityUserwhitId.SuperiorId)
+                            {
+                                if (userToCompare.SuperiorId != null && entityUserwhitId.SuperiorId != null)
+                                {
+                                    User exsuperior = await _supervisorMobilityRepository.GetUserAsync((int)entityUserwhitId.SuperiorId, true);
+                                    var usertoRemove = _mapper.Map<User>(entityUserwhitId);
+
+                                    _supervisorMobilityRepository.UserRemoveSubordinated(exsuperior, usertoRemove);
+
+                                    User actualSuperior = await _supervisorMobilityRepository.GetUserAsync((int)item.SuperiorId, true);
+                                    _supervisorMobilityRepository.UserAddSubordinated(actualSuperior, usertoRemove);
+
+                                    item.SuperiorId = actualSuperior.UserId;
+                                    item.PlantId = actualSuperior.PlantId;
+                                    item.GroupId = actualSuperior.GroupId;
+
+                                    if (item.UserType == 4)
+                                        item.AreaId = actualSuperior.AreaId;
+
+                                    userToCompare = _mapper.Map<User>(item);
+                                }
+                            }
 
                             var userToUpdate = _mapper.Map<UsersForUpdateDto>(userToCompare);
+                            userToUpdate.CreatedDate = (DateTime)entityUserwhitId.CreatedDate;
                             await _supervisorMobilityRepository.UpdateUser(userToUpdate, entityUserwhitId.UserId);
+                            UserToReturn = _mapper.Map<User>(userToUpdate);
+
                             ResultToReturn.UsersUpdated++;
                         }
                         else
                         {
                             ResultToReturn.UsersExist++;
+                            UserToReturn = _mapper.Map<User>(entityUserwhitId);
                         }
-                        UserToReturn = _mapper.Map<User>(item);
 
                     }
 
@@ -608,7 +643,7 @@ namespace SupervisorMobility.API.Controllers
 
                 if (haveUsers)
                 {
-                    foreach (var elemntUser in Users)
+                    foreach (var elemntUser in UsersInUser)
                     {
                         _supervisorMobilityRepository.UserAddSubordinated(UserToReturn, elemntUser);
                     }
@@ -616,7 +651,7 @@ namespace SupervisorMobility.API.Controllers
 
                 if (haveAreas)
                 {
-                    foreach (var elemntArea in Areas)
+                    foreach (var elemntArea in AreasInUser)
                     {
                         _supervisorMobilityRepository.UserAddArea(UserToReturn, elemntArea);
                     }
@@ -654,8 +689,8 @@ namespace SupervisorMobility.API.Controllers
                     }
 
 
-                List<Area> Areas = new List<Area>();
-                List<User> Users = new List<User>();
+                List<Area> AreasInUser = new List<Area>();
+                List<User> UsersInUser = new List<User>();
                 bool haveAreas = false;
                 bool haveUsers = false;
 
@@ -720,12 +755,13 @@ namespace SupervisorMobility.API.Controllers
                 }
 
 
+
                 if (item.Subordinates != null)
                 {
                     haveUsers = true;
                     foreach (var Sub in item.Subordinates)
                     {
-                        Users.Add(await _assyChartService.FetchUserAsync(Sub.UserId));
+                        UsersInUser.Add(await _assyChartService.FetchUserAsync(Sub.UserId));
                     }
 
                     item.Subordinates = null;
@@ -736,7 +772,7 @@ namespace SupervisorMobility.API.Controllers
                     haveAreas = true;
                     foreach (var AreainList in item.Areas)
                     {
-                        Areas.Add(await _supervisorMobilityRepository.GetAreaForPlantAsync((int)item.PlantId, AreainList.AreaId));
+                        AreasInUser.Add(await _supervisorMobilityRepository.GetAreaForPlantAsync((int)item.PlantId, AreainList.AreaId));
                     }
                     item.Areas = null;
                 }
@@ -778,16 +814,20 @@ namespace SupervisorMobility.API.Controllers
 
                             if (!entityentity.Equals(userToCompare))
                             {
+
                                 var userToUpdate = _mapper.Map<UsersForUpdateDto>(userToCompare);
+                                userToUpdate.CreatedDate = (DateTime)entityentity.CreatedDate;
+
                                 await _supervisorMobilityRepository.UpdateUser(userToUpdate, entityentity.UserId);
+                                UserToReturn = _mapper.Map<User>(userToUpdate);
                                 ResultToReturn.UsersUpdated++;
                             }
                             else
                             {
+                                UserToReturn = _mapper.Map<User>(entityentity);
                                 ResultToReturn.UsersExist++;
                             }
 
-                            UserToReturn = _mapper.Map<User>(item);
 
                         }
                     }
@@ -844,15 +884,21 @@ namespace SupervisorMobility.API.Controllers
 
                                 if (!entityentity.Equals(userToCompare))
                                 {
+
                                     var userToUpdate = _mapper.Map<UsersForUpdateDto>(userToCompare);
+
+                                    userToUpdate.CreatedDate = (DateTime)entityentity.CreatedDate;
+
                                     await _supervisorMobilityRepository.UpdateUser(userToUpdate, entityentity.UserId);
+                                    UserToReturn = _mapper.Map<User>(userToUpdate);
                                     ResultToReturn.UsersUpdated++;
                                 }
                                 else
                                 {
+
+                                    UserToReturn = _mapper.Map<User>(entityentity);
                                     ResultToReturn.UsersExist++;
                                 }
-                                UserToReturn = _mapper.Map<User>(item);
 
                             }
                         }
@@ -873,14 +919,18 @@ namespace SupervisorMobility.API.Controllers
                         {
 
                             var userToUpdate = _mapper.Map<UsersForUpdateDto>(userToCompare);
+                            userToUpdate.CreatedDate = (DateTime)entityUserwhitId.CreatedDate;
+
                             await _supervisorMobilityRepository.UpdateUser(userToUpdate, entityUserwhitId.UserId);
+                            UserToReturn = _mapper.Map<User>(entityUserwhitId);
+
                             ResultToReturn.UsersUpdated++;
                         }
                         else
                         {
                             ResultToReturn.UsersExist++;
+                            UserToReturn = _mapper.Map<User>(entityUserwhitId);
                         }
-                        UserToReturn = _mapper.Map<User>(item);
 
                     }
 
@@ -888,7 +938,7 @@ namespace SupervisorMobility.API.Controllers
 
                 if (haveUsers)
                 {
-                    foreach (var elemntUser in Users)
+                    foreach (var elemntUser in UsersInUser)
                     {
                         _supervisorMobilityRepository.UserAddSubordinated(UserToReturn, elemntUser);
                     }
@@ -896,7 +946,7 @@ namespace SupervisorMobility.API.Controllers
 
                 if (haveAreas)
                 {
-                    foreach (var elemntArea in Areas)
+                    foreach (var elemntArea in AreasInUser)
                     {
                         _supervisorMobilityRepository.UserAddArea(UserToReturn, elemntArea);
                     }
@@ -950,199 +1000,249 @@ namespace SupervisorMobility.API.Controllers
                     return NotFound();
                 }
 
-
                 try
                 {
+                    List<string[]> DataInFile = new List<string[]>();
+                    List<string> RowsInFile = new List<string>();
 
                     using (var workBook = new XLWorkbook(file))
                     {
                         IXLWorksheet ws = workBook.Worksheet(1);
-
-                        //Forcar a que la columna contenga estilo, si es vacia, sea detectada 
-                        //userid
-                        ws.Column("A").Style.Font.Underline = XLFontUnderlineValues.Single;
-                        //nomian
-                        ws.Column("B").Style.Font.Underline = XLFontUnderlineValues.Single;
-                        //planta area grupo
-                        ws.Column("D").Style.Font.Underline = XLFontUnderlineValues.Single;
-                        ws.Column("E").Style.Font.Underline = XLFontUnderlineValues.Single;
-                        ws.Column("F").Style.Font.Underline = XLFontUnderlineValues.Single;
-                        //permissions 
-                        ws.Column("G").Style.Font.Underline = XLFontUnderlineValues.Single;
-                        //date
-                        ws.Column("H").Style.Font.Underline = XLFontUnderlineValues.Single;
-                        ws.Column("I").Style.Font.Underline = XLFontUnderlineValues.Single;
-                        ws.Column("J").Style.Font.Underline = XLFontUnderlineValues.Single;
-                        //is active
-                        ws.Column("K").Style.Font.Underline = XLFontUnderlineValues.Single;
-
-                        //Loop through the Worksheet rows.
-                        bool firstRow = true;
-                        int i = 2;
                         foreach (IXLRow row in ws.Rows())
                         {
-                            //Use the first row to add columns to DataTable.
-                            if (firstRow)
+                            if (!row.IsEmpty())
                             {
-                                firstRow = false;
-                            }
-                            else
-                            {
-                                if (!row.IsEmpty())
+                                RowsInFile.Clear();
+
+                                foreach (IXLCell cell in row.Cells(1, 12))
                                 {
-                                    var userToInsert = new UsersWithoutNavigationDetails();
-                                    //UserId	ObjectId	Payroll	Name	Plant	Area	Grupo	Permission	CreateDate	UpdateDate	DisableDate	IsActive
-                                    //1         2           3       4       5       6       7       8           9           10          11          12          
-                                    //UserPorp
-                                    userToInsert.UserId = ws.Cell(i, 1).Value.ToString() != "" ? int.Parse(ws.Cell(i, 1).Value.ToString()) : -1;
-                                    //
-                                    userToInsert.ObjectId = ws.Cell(i, 2).Value.ToString() != "" ? ws.Cell(i, 2).Value.ToString() : "";
-                                    userToInsert.Payroll = ws.Cell(i, 3).Value.ToString() != "" ? int.Parse(ws.Cell(i, 3).Value.ToString()) : 0;
-                                    userToInsert.Name = ws.Cell(i, 4).Value.ToString() != "" ? ws.Cell(i, 4).Value.ToString() : "";
-                                    //Navigation Porpieties
-                                    userToInsert.PlantId = ws.Cell(i, 5).Value.ToString() != "" ? int.Parse(ws.Cell(i, 5).Value.ToString()) : -1;
-                                    userToInsert.AreaId = ws.Cell(i, 6).Value.ToString() != "" ? int.Parse(ws.Cell(i, 6).Value.ToString()) : -1;
-                                    userToInsert.GroupId = ws.Cell(i, 7).Value.ToString() != "" ? int.Parse(ws.Cell(i, 7).Value.ToString()) : -1;
-                                    //Permission
-                                    userToInsert.UserType = ws.Cell(i, 8).Value.ToString() != "" ? int.Parse(ws.Cell(i, 8).Value.ToString()) : 0;
+                                    string toinsert = "§";
 
-
-                                    //Date Controlls
-                                    try
+                                    // Verificar si la celda no está vacía antes de obtener su valor
+                                    if (!cell.IsEmpty())
                                     {
-                                        //create date
-                                        userToInsert.CreatedDate = ws.Cell(i, 9).Value.ToString() != "" ? DateTime.Parse(ws.Cell(i, 9).GetValue<string>()) : DateTime.Now;
-                                    }
-                                    catch (Exception ex)
-                                    {
-                                        userToInsert.CreatedDate = DateTime.Now;
-                                    }
-                                    try
-                                    {
-                                        //update
-                                        userToInsert.LastUpdated = ws.Cell(i, 10).Value.ToString() != "" ? DateTime.Parse(ws.Cell(i, 10).GetValue<string>()) : DateTime.Now;
-                                    }
-                                    catch (Exception ex)
-                                    {
-                                        userToInsert.LastUpdated = DateTime.Now;
+                                        toinsert = cell.Value.ToString();
                                     }
 
-                                    try
-                                    {
-                                        //disabel
-                                        userToInsert.DisabledDate = ws.Cell(i, 11).GetString() != "" ? DateTime.Parse(ws.Cell(i, 11).GetValue<string>()) : null;
-                                    }
-                                    catch (Exception ex)
-                                    {
-                                        userToInsert.DisabledDate = null;
-                                    }
-                                    //Is acctive
-                                    userToInsert.IsActive = ws.Cell(i, 12).GetString() != "" ? bool.Parse(ws.Cell(i, 12).Value.ToString()) : false;
-                                    //UserId	ObjectId	Payroll	Name	Plant	Area	Grupo	Permission	CreateDate	UpdateDate	DisableDate	IsActive
-                                    //1         2           3       4       5       6       7       8           9           10          11          12   
+                                    RowsInFile.Add(toinsert);
+                                }
+                                DataInFile.Add(RowsInFile.ToArray());
+                            }
 
 
-                                    UsersListToSave.Add(userToInsert);
-
-                                    i++;
-                                }//end is not empety row
-                            }//end else first roe
-
-                        }//end foreach
-
-                    }//end using
+                        }
+                    }
 
 
 
-                }//end try
+                }
                 catch (Exception ex)
                 {
-                    Debug.WriteLine(ex.ToString());
-                }//end trycatch to add excel to list
+
+                }
+
+                try
+                {
+
+
+
+                } catch (Exception ex)
+                {
+
+                }
+
+                //try
+                //{
+
+                //    using (var workBook = new XLWorkbook(file))
+                //    {
+                //        IXLWorksheet ws = workBook.Worksheet(1);
+
+                //        //Forcar a que la columna contenga estilo, si es vacia, sea detectada 
+                //        //userid
+                //        ws.Column("A").Style.Font.Underline = XLFontUnderlineValues.Single;
+                //        //nomian
+                //        ws.Column("B").Style.Font.Underline = XLFontUnderlineValues.Single;
+                //        //planta area grupo
+                //        ws.Column("D").Style.Font.Underline = XLFontUnderlineValues.Single;
+                //        ws.Column("E").Style.Font.Underline = XLFontUnderlineValues.Single;
+                //        ws.Column("F").Style.Font.Underline = XLFontUnderlineValues.Single;
+                //        //permissions 
+                //        ws.Column("G").Style.Font.Underline = XLFontUnderlineValues.Single;
+                //        //date
+                //        ws.Column("H").Style.Font.Underline = XLFontUnderlineValues.Single;
+                //        ws.Column("I").Style.Font.Underline = XLFontUnderlineValues.Single;
+                //        ws.Column("J").Style.Font.Underline = XLFontUnderlineValues.Single;
+                //        //is active
+                //        ws.Column("K").Style.Font.Underline = XLFontUnderlineValues.Single;
+
+                //        //Loop through the Worksheet rows.
+                //        bool firstRow = true;
+                //        int i = 2;
+                //        foreach (IXLRow row in ws.Rows())
+                //        {
+                //            //Use the first row to add columns to DataTable.
+                //            if (firstRow)
+                //            {
+                //                firstRow = false;
+                //            }
+                //            else
+                //            {
+                //                if (!row.IsEmpty())
+                //                {
+                //                    var userToInsert = new UsersWithoutNavigationDetails();
+                //                    //UserId	ObjectId	Payroll	Name	Plant	Area	Grupo	Permission	CreateDate	UpdateDate	DisableDate	IsActive
+                //                    //1         2           3       4       5       6       7       8           9           10          11          12          
+                //                    //UserPorp
+                //                    userToInsert.UserId = ws.Cell(i, 1).Value.ToString() != "" ? int.Parse(ws.Cell(i, 1).Value.ToString()) : -1;
+                //                    //
+                //                    userToInsert.ObjectId = ws.Cell(i, 2).Value.ToString() != "" ? ws.Cell(i, 2).Value.ToString() : "";
+                //                    userToInsert.Payroll = ws.Cell(i, 3).Value.ToString() != "" ? int.Parse(ws.Cell(i, 3).Value.ToString()) : 0;
+                //                    userToInsert.Name = ws.Cell(i, 4).Value.ToString() != "" ? ws.Cell(i, 4).Value.ToString() : "";
+                //                    //Navigation Porpieties
+                //                    userToInsert.PlantId = ws.Cell(i, 5).Value.ToString() != "" ? int.Parse(ws.Cell(i, 5).Value.ToString()) : -1;
+                //                    userToInsert.AreaId = ws.Cell(i, 6).Value.ToString() != "" ? int.Parse(ws.Cell(i, 6).Value.ToString()) : -1;
+                //                    userToInsert.GroupId = ws.Cell(i, 7).Value.ToString() != "" ? int.Parse(ws.Cell(i, 7).Value.ToString()) : -1;
+                //                    //Permission
+                //                    userToInsert.UserType = ws.Cell(i, 8).Value.ToString() != "" ? int.Parse(ws.Cell(i, 8).Value.ToString()) : 0;
+
+
+                //                    //Date Controlls
+                //                    try
+                //                    {
+                //                        //create date
+                //                        userToInsert.CreatedDate = ws.Cell(i, 9).Value.ToString() != "" ? DateTime.Parse(ws.Cell(i, 9).GetValue<string>()) : DateTime.Now;
+                //                    }
+                //                    catch (Exception ex)
+                //                    {
+                //                        userToInsert.CreatedDate = DateTime.Now;
+                //                    }
+                //                    try
+                //                    {
+                //                        //update
+                //                        userToInsert.LastUpdated = ws.Cell(i, 10).Value.ToString() != "" ? DateTime.Parse(ws.Cell(i, 10).GetValue<string>()) : DateTime.Now;
+                //                    }
+                //                    catch (Exception ex)
+                //                    {
+                //                        userToInsert.LastUpdated = DateTime.Now;
+                //                    }
+
+                //                    try
+                //                    {
+                //                        //disabel
+                //                        userToInsert.DisabledDate = ws.Cell(i, 11).GetString() != "" ? DateTime.Parse(ws.Cell(i, 11).GetValue<string>()) : null;
+                //                    }
+                //                    catch (Exception ex)
+                //                    {
+                //                        userToInsert.DisabledDate = null;
+                //                    }
+                //                    //Is acctive
+                //                    userToInsert.IsActive = ws.Cell(i, 12).GetString() != "" ? bool.Parse(ws.Cell(i, 12).Value.ToString()) : false;
+                //                    //UserId	ObjectId	Payroll	Name	Plant	Area	Grupo	Permission	CreateDate	UpdateDate	DisableDate	IsActive
+                //                    //1         2           3       4       5       6       7       8           9           10          11          12   
+
+
+                //                    UsersListToSave.Add(userToInsert);
+
+                //                    i++;
+                //                }//end is not empety row
+                //            }//end else first roe
+
+                //        }//end foreach
+
+                //    }//end using
+
+
+
+                //}//end try
+                //catch (Exception ex)
+                //{
+                //    Debug.WriteLine(ex.ToString());
+                //}//end trycatch to add excel to list
             }
 
             UploadUsersResult ResultToReturn = new UploadUsersResult();
 
-            foreach (var userItem in UsersListToSave)
-            {
-                if (userItem.UserId == -1)
-                {
-                    //Usuario sin id
-                    //Busqueda avanzada
-                    var entityUserPayAndExtras = await _supervisorMobilityRepository.GetUserByPayrollAndMoreAsync((int)userItem.Payroll, (int)userItem.PlantId, (int)userItem.AreaId, (int)userItem.GroupId);
+            //foreach (var userItem in UsersListToSave)
+            //{
+            //    if (userItem.UserId == -1)
+            //    {
+            //        //Usuario sin id
+            //        //Busqueda avanzada
+            //        var entityUserPayAndExtras = await _supervisorMobilityRepository.GetUserByPayrollAndMoreAsync((int)userItem.Payroll, (int)userItem.PlantId, (int)userItem.AreaId, (int)userItem.GroupId);
 
-                    if (entityUserPayAndExtras == null)
-                    {
-                        //new user
-                        UsersForCreation newuser = new UsersForCreation()
-                        {
-                            Name = userItem.Name,
-                            ObjectId = userItem.ObjectId,
-                            Payroll = userItem.Payroll,
-                            PlantId = (int)userItem.PlantId,
-                            AreaId = (int)userItem.AreaId,
-                            GroupId = (int)userItem.GroupId,
-                            UserType = (int)userItem.UserType,
-                            LastUpdated = userItem.LastUpdated,
-                            DisabledDate = userItem.DisabledDate,
-                            IsActive = userItem.IsActive
-                        };
+            //        if (entityUserPayAndExtras == null)
+            //        {
+            //            //new user
+            //            UsersForCreation newuser = new UsersForCreation()
+            //            {
+            //                Name = userItem.Name,
+            //                ObjectId = userItem.ObjectId,
+            //                Payroll = userItem.Payroll,
+            //                PlantId = (int)userItem.PlantId,
+            //                AreaId = (int)userItem.AreaId,
+            //                GroupId = (int)userItem.GroupId,
+            //                UserType = (int)userItem.UserType,
+            //                LastUpdated = userItem.LastUpdated,
+            //                DisabledDate = userItem.DisabledDate,
+            //                IsActive = userItem.IsActive
+            //            };
 
-                        var finalUser = await _assyChartService.CreateUserAsync(newuser);
-                        if (finalUser != null)
-                            ResultToReturn.UsersCreated++;
-                    }
-                    else
-                    {
-                        //User ya existe
-                        ResultToReturn.UsersExist++;
-                    }
+            //            var finalUser = await _assyChartService.CreateUserAsync(newuser);
+            //            if (finalUser != null)
+            //                ResultToReturn.UsersCreated++;
+            //        }
+            //        else
+            //        {
+            //            //User ya existe
+            //            ResultToReturn.UsersExist++;
+            //        }
 
-                }
-                else
-                {
-                    //User con id
-                    var entityUser = await _assyChartService.FetchUserAsync((int)userItem.UserId);
+            //    }
+            //    else
+            //    {
+            //        //User con id
+            //        var entityUser = await _assyChartService.FetchUserAsync((int)userItem.UserId);
 
-                    if (entityUser == null)
-                    {
-                        //Si tiene un id erroneo, entra aqui
-                        var entityUserPayAndExtras = await _supervisorMobilityRepository.GetUserByPayrollAndMoreAsync((int)userItem.Payroll, (int)userItem.PlantId, (int)userItem.AreaId, (int)userItem.GroupId);
-                        if (entityUserPayAndExtras == null)
-                        {
-                            //new user porque no existe
-                            UsersForCreation newuser = new UsersForCreation()
-                            {
-                                Name = userItem.Name,
-                                ObjectId = userItem.ObjectId,
-                                Payroll = userItem.Payroll,
-                                PlantId = (int)userItem.PlantId,
-                                AreaId = (int)userItem.AreaId,
-                                GroupId = (int)userItem.GroupId,
-                                UserType = (int)userItem.UserType,
-                                LastUpdated = userItem.LastUpdated,
-                                DisabledDate = userItem.DisabledDate,
-                                IsActive = userItem.IsActive
-                            };
+            //        if (entityUser == null)
+            //        {
+            //            //Si tiene un id erroneo, entra aqui
+            //            var entityUserPayAndExtras = await _supervisorMobilityRepository.GetUserByPayrollAndMoreAsync((int)userItem.Payroll, (int)userItem.PlantId, (int)userItem.AreaId, (int)userItem.GroupId);
+            //            if (entityUserPayAndExtras == null)
+            //            {
+            //                //new user porque no existe
+            //                UsersForCreation newuser = new UsersForCreation()
+            //                {
+            //                    Name = userItem.Name,
+            //                    ObjectId = userItem.ObjectId,
+            //                    Payroll = userItem.Payroll,
+            //                    PlantId = (int)userItem.PlantId,
+            //                    AreaId = (int)userItem.AreaId,
+            //                    GroupId = (int)userItem.GroupId,
+            //                    UserType = (int)userItem.UserType,
+            //                    LastUpdated = userItem.LastUpdated,
+            //                    DisabledDate = userItem.DisabledDate,
+            //                    IsActive = userItem.IsActive
+            //                };
 
-                            var finalUser = await _assyChartService.CreateUserAsync(newuser);
-                            if (finalUser != null)
-                                ResultToReturn.UsersCreated++;
-                        }
-                        else
-                        {
-                            ResultToReturn.UsersExist++;
-                        }
-                    }
-                    else
-                    {
-                        //Si el usuario existe entra aqui
-                        ResultToReturn.UsersExist++;
-                    }
+            //                var finalUser = await _assyChartService.CreateUserAsync(newuser);
+            //                if (finalUser != null)
+            //                    ResultToReturn.UsersCreated++;
+            //            }
+            //            else
+            //            {
+            //                ResultToReturn.UsersExist++;
+            //            }
+            //        }
+            //        else
+            //        {
+            //            //Si el usuario existe entra aqui
+            //            ResultToReturn.UsersExist++;
+            //        }
 
-                }
+            //    }
 
-            }
+            //}
             //restore extencion of file
             System.IO.File.Move(file, originalPath);
 
@@ -1163,17 +1263,16 @@ namespace SupervisorMobility.API.Controllers
             //ROW Data identificators
 
             ws.SetCellValue("A1", "UserId");
-            ws.SetCellValue("B1", "ObjectId");
+            ws.SetCellValue("B1", "UserName@compasdcpcs.local");
             ws.SetCellValue("C1", "Payroll");
             ws.SetCellValue("D1", "Name");
-            ws.SetCellValue("E1", "Plant");
-            ws.SetCellValue("F1", "Area");
-            ws.SetCellValue("G1", "Group");
-            ws.SetCellValue("H1", "Permission");
-            ws.SetCellValue("I1", "User creation date");
-            ws.SetCellValue("J1", "User update date");
-            ws.SetCellValue("K1", "User disable date");
-            ws.SetCellValue("L1", "Is Active");
+            ws.SetCellValue("E1", "Email");
+            ws.SetCellValue("F1", "UserType");
+            ws.SetCellValue("G1", "SuperiorId");
+            ws.SetCellValue("H1", "Plant");
+            ws.SetCellValue("I1", "Area");
+            ws.SetCellValue("J1", "Group");
+            ws.SetCellValue("K1", "Distribution");
 
 
             ws.SaveAs(ms);

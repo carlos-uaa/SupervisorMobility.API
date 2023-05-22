@@ -2,6 +2,7 @@
 using DocumentFormat.OpenXml.Wordprocessing;
 using Microsoft.EntityFrameworkCore;
 using SupervisorMobility.API.DataAccess.Entities;
+using SupervisorMobility.API.DataAccess.Entities.Logger;
 using SupervisorMobility.API.Entities;
 using System.Globalization;
 
@@ -32,7 +33,12 @@ namespace SupervisorMobility.API.Context
         public DbSet<JobObservationVersion> JobObservationHistory { get; set; }
         public DbSet<Notification> Notifications { get; set; }
         public DbSet<Attendance> Attendances { get; set; }
+        public DbSet<DataLogger> DataLoggs { get; set; }
+        public DbSet<Event> Events { get; set; }
+        public DbSet<SpecificEvent> SepecificEvents { get; set; }
         #endregion
+
+       
 
         public SupervisorMobilityContext(DbContextOptions<SupervisorMobilityContext> options)
             : base(options)
@@ -67,8 +73,6 @@ namespace SupervisorMobility.API.Context
             modelBuilder.Entity<Plant>()
                 .Property(p => p.IsActive)
                 .HasDefaultValue(true);
-
-
 
             modelBuilder.Entity<Distribution>()
                 .Property(p => p.IsActive)
@@ -111,7 +115,6 @@ namespace SupervisorMobility.API.Context
                 .Property(u => u.UserId)
                 .UseIdentityColumn();
 
-
             modelBuilder.Entity<User>()
                 .HasMany(u => u.Areas)
                 .WithMany(a => a.Users)
@@ -129,13 +132,22 @@ namespace SupervisorMobility.API.Context
 
          
             //area
-
             
             modelBuilder.Entity<Area>()
                 .Property(p => p.IsActive)
                 .HasDefaultValue(true);
 
+            modelBuilder.Entity<DataLogger>()
+               .Property(D => D.LogId)
+               .UseIdentityColumn();
 
+            modelBuilder.Entity<Event>()
+              .Property(e => e.EventId)
+              .UseIdentityColumn();           
+            
+            modelBuilder.Entity<SpecificEvent>()
+              .Property(e => e.SpecificEventId)
+              .UseIdentityColumn();
 
             modelBuilder.Entity<Notification>()
                 .Property(p => p.IsActive)

@@ -18,11 +18,11 @@ namespace SupervisorMobility.API.DataAccess.Services
         public MimeMessage CreateEmailMessage(string email, string message)
         {
             var emailMessage = new MimeMessage();
-            emailMessage.From.Add(MailboxAddress.Parse(_emailConfig.From));
+            emailMessage.From.Add(MailboxAddress.Parse(_emailConfig.UserName));
             emailMessage.To.Add(MailboxAddress.Parse(email));
-            emailMessage.Subject = "Notification Subject";
+            emailMessage.Subject = $"{_emailConfig.UserName}";
             emailMessage.Body = new TextPart(MimeKit.Text.TextFormat.Text) { Text = message };
-            return emailMessage;
+            return emailMessage; 
         }
         public void Send(MimeMessage mailMessage)
         {
