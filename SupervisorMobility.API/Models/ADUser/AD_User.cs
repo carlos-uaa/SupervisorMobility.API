@@ -10,6 +10,7 @@ namespace SupervisorMobility.API.Models.ADUser
         public string distinguishedName { get; set; }
         public string userPrincipalName { get; set; }
         public string sAMAccountName { get; set; }
+        public string mail { get; set; }
         public string whenCreated { get; set; }
         public string pwdLastSet { get; set; }
         public string userAccountControl { get; set; }
@@ -17,5 +18,7 @@ namespace SupervisorMobility.API.Models.ADUser
         public string givenName { get; set; }
         public string cn { get; set; }
         public string displayName { get; set; }
+
+               
     }
 }
