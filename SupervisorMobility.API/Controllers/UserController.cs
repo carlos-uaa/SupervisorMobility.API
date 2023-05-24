@@ -228,7 +228,7 @@ namespace SupervisorMobility.API.Controllers
                 }
                 newUser.Areas = null;
             }
-
+            newUser.LastUpdated = newUser.CreatedDate;
             var finalUser = await _assyChartService.CreateUserAsync(newUser);
 
             var UserToReturn = _mapper.Map<User>(finalUser);
@@ -260,33 +260,148 @@ namespace SupervisorMobility.API.Controllers
         [HttpPut("{userId}")]
         public async Task<ActionResult> UpdateUser(int userId, UsersForUpdateDto user)
         {
-            List<Area> Areas = new List<Area>();
-            List<User> Users = new List<User>();
+            List<Area> AreasInUser = new List<Area>();
+            List<User> UsersInUser = new List<User>();
             bool haveAreas = false;
             bool haveUsers = false;
+
+            var UserToReturn = new User();
+
+            if (user.PlantId == 0)
+            {
+                user.PlantId = null;
+            }
+            else if (user.PlantId != null)
+            {
+                if (!await _supervisorMobilityRepository.PlantExistAsync((int)user.PlantId))
+                {
+                    return NotFound("No Planta");
+                }
+            }
+
+            if (user.AreaId == 0)
+            {
+                user.AreaId = null;
+            }
+            else if (user.AreaId != null)
+            {
+                if (!await _supervisorMobilityRepository.AreaExistAsync((int)user.AreaId))
+                {
+                    return NotFound("No Area");
+                }
+            }
+
+            if (user.GroupId == 0)
+            {
+                user.GroupId = null;
+            }
+            else if (user.GroupId != null)
+            {
+                if (!await _supervisorMobilityRepository.AreaExistAsync((int)user.GroupId))
+                {
+                    return NotFound("No Group");
+                }
+            }
+
+            if (user.DistributionId == 0)
+            {
+                user.DistributionId = null;
+            }
+            else if (user.DistributionId != null)
+            {
+                if (!await _supervisorMobilityRepository.DistributionExistsAsync((int)user.DistributionId))
+                {
+                    return NotFound("No Distribution");
+                }
+            }
+
+            if (user.Payroll == 0)
+            {
+                user.Payroll = null;
+            }
+
+            if (user.SuperiorId == 0)
+            {
+                user.SuperiorId = null;
+            }
+
+            if (user.Subordinates != null)
+            {
+                haveUsers = true;
+                foreach (var Sub in user.Subordinates)
+                {
+                    UsersInUser.Add(await _assyChartService.FetchUserAsync(Sub.UserId));
+                }
+
+                user.Subordinates = null;
+            }
 
             if (user.Areas != null)
             {
                 haveAreas = true;
                 foreach (var AreainList in user.Areas)
                 {
-                    Areas.Add(await _supervisorMobilityRepository.GetAreaForPlantAsync((int)user.PlantId, AreainList.AreaId));
+                    AreasInUser.Add(await _supervisorMobilityRepository.GetAreaForPlantAsync((int)user.PlantId, AreainList.AreaId));
                 }
                 user.Areas = null;
             }
 
+            var userToCompare = _mapper.Map<User>(user);
+            var entityentity = await _assyChartService.FetchUserAsync(userId);
+
+            if (!entityentity.Equals(userToCompare))
+            {
+
+                if (userToCompare.SuperiorId != entityentity.SuperiorId)
+                {
+                    if (userToCompare.SuperiorId != null && entityentity.SuperiorId != null)
+                    {
+                        User exsuperior = await _supervisorMobilityRepository.GetUserAsync((int)entityentity.SuperiorId, true);
+                        var usertoRemove = _mapper.Map<User>(entityentity);
+
+                        _supervisorMobilityRepository.UserRemoveSubordinated(exsuperior, usertoRemove);
+
+                        User actualSuperior = await _supervisorMobilityRepository.GetUserAsync((int)user.SuperiorId, true);
+                        _supervisorMobilityRepository.UserAddSubordinated(actualSuperior, usertoRemove);
+
+                        user.SuperiorId = actualSuperior.UserId;
+                        user.PlantId = actualSuperior.PlantId;
+                        user.GroupId = actualSuperior.GroupId;
+
+                        if (user.UserType == 4)
+                            user.AreaId = actualSuperior.AreaId;
+
+
+                    }
+                }
+
+
+
+
+                user.CreatedDate = (DateTime)entityentity.CreatedDate;
+                await _supervisorMobilityRepository.UpdateUser(user, entityentity.UserId);
+                UserToReturn = _mapper.Map<User>(user);
+
+            }
 
             await _assyChartService.UpdateUserAsync(user, userId);
 
-            var UserToReturn = _mapper.Map<User>(user);
+
+
+            if (haveUsers)
+            {
+                foreach (var elemntUser in UsersInUser)
+                {
+                    _supervisorMobilityRepository.UserAddSubordinated(UserToReturn, elemntUser);
+                }
+            }
 
             if (haveAreas)
             {
-                foreach (var item in Areas)
+                foreach (var elemntArea in AreasInUser)
                 {
-                    _supervisorMobilityRepository.UserAddArea(UserToReturn, item);
+                    _supervisorMobilityRepository.UserAddArea(UserToReturn, elemntArea);
                 }
-
             }
 
             await _supervisorMobilityRepository.SaveChangesAsync();
@@ -966,7 +1081,39 @@ namespace SupervisorMobility.API.Controllers
             string originalPath = System.IO.Path.Combine(System.IO.Path.GetDirectoryName(file), System.IO.Path.GetFileNameWithoutExtension(file) + System.IO.Path.GetExtension(file));
 
 
-            List<UsersWithoutNavigationDetails> UsersListToSave = new List<UsersWithoutNavigationDetails>();
+
+            IEnumerable<User> _allUsers = new List<User>();
+
+            IEnumerable<Plant> _plants = new List<Plant>();
+            List<IEnumerable<Area>> _areas = new List<IEnumerable<Area>>();
+            Dictionary<int, Dictionary<int, IEnumerable<Distribution>>> _distributions = new Dictionary<int, Dictionary<int, IEnumerable<Distribution>>>();
+            IEnumerable<Entities.Group> _groups = new List<Entities.Group>();
+
+
+            _plants = await _supervisorMobilityRepository.GetPlantsAsync();
+
+            foreach (var plant in _plants)
+            {
+                var areas = await _supervisorMobilityRepository.GetAreasForPlantAsync(plant.PlantId);
+                _areas.Add(areas);
+                var areaDistributions = new Dictionary<int, IEnumerable<Distribution>>();
+                foreach (var area in areas)
+                {
+                    var distributions = await _supervisorMobilityRepository.GetDistributionsForAreaAsync(area.AreaId);
+                    areaDistributions.Add(area.AreaId, distributions);
+                }
+                _distributions.Add(plant.PlantId, areaDistributions);
+            }
+
+
+            _groups = await _supervisorMobilityRepository.GetGroupsAsync();
+
+            _allUsers = await _supervisorMobilityRepository.GetAllUsersAsync();
+
+
+            List<string[]> DataInFile = new List<string[]>();
+            List<User> ListOfUsers = new List<User>();
+
 
             if (FileToInsert.ContentType == "text/csv")
             {
@@ -1002,7 +1149,7 @@ namespace SupervisorMobility.API.Controllers
 
                 try
                 {
-                    List<string[]> DataInFile = new List<string[]>();
+
                     List<string> RowsInFile = new List<string>();
 
                     using (var workBook = new XLWorkbook(file))
@@ -1032,9 +1179,6 @@ namespace SupervisorMobility.API.Controllers
 
                         }
                     }
-
-
-
                 }
                 catch (Exception ex)
                 {
@@ -1043,206 +1187,863 @@ namespace SupervisorMobility.API.Controllers
 
                 try
                 {
+                    foreach (string[] row in DataInFile)
+                    {
+
+                        bool allEqual = row.All(item => item.Equals("§"));
+
+                        if (allEqual)
+                        {
+                            // Todos los elementos son iguales a "§"
+                            Console.WriteLine("Todos los elementos son iguales a '§'.");
+                            break;
+                        }
+
+                        try
+                        {
+                            var ToInsertIntoList = new User();
+
+                            try
+                            {
+                                ToInsertIntoList.UserType = row[5] != "§" ? int.Parse(row[5]) : -1;
+
+
+                            }
+                            catch (Exception ex)
+                            {
+                                Console.Write($"{ex.Message}");
+                            }
+
+
+                            switch (ToInsertIntoList.UserType)
+                            {
+                                case 1:
+                                    try
+                                    {
+                                        ToInsertIntoList.UserId = row[0] != "§" ? int.Parse(row[0]) : -1;
+
+                                        try
+                                        {
+                                            ToInsertIntoList.ObjectId = row[1] != "§" ? row[2] : row[403];
+                                        }
+                                        catch (Exception ex)
+                                        {
+
+                                        }
+
+                                        try
+                                        {
+                                            ToInsertIntoList.Name = row[3] != "§" ? row[3] : row[403];
+                                        }
+                                        catch (Exception ex)
+                                        {
+
+                                        }
+
+                                        try
+                                        {
+                                            ToInsertIntoList.Email = row[4] != "§" ? row[4] : row[403];
+
+                                        }
+                                        catch (Exception ex)
+                                        {
+
+                                        }
+
+                                    }
+                                    catch (Exception ex)
+                                    {
+
+                                        break;
+                                    }
+                                    break;
+                                case 2:
+                                    try
+                                    {
+                                        ToInsertIntoList.UserId = row[0] != "§" ? int.Parse(row[0]) : -1;
+
+                                        try
+                                        {
+                                            ToInsertIntoList.ObjectId = row[1] != "§" ? row[1] : row[403];
+                                        }
+                                        catch (Exception ex)
+                                        {
+
+                                            break;
+                                        }
+
+                                        try
+                                        {
+                                            ToInsertIntoList.Name = row[3] != "§" ? row[3] : row[403];
+                                        }
+                                        catch (Exception ex)
+                                        {
+
+
+                                            break;
+                                        }
+
+                                        try
+                                        {
+                                            ToInsertIntoList.Email = row[4] != "§" ? row[4] : row[403];
+
+                                        }
+                                        catch (Exception ex)
+                                        {
+
+
+                                            break;
+                                        }
+
+                                        try
+                                        {
+                                            if (row[7].Contains(','))
+                                            {
+                                                string[]? SplitedSubordinates = row[7] != "§" ? row[7].Split(',') : null;
+
+                                                if (SplitedSubordinates != null)
+                                                {
+                                                    if (ToInsertIntoList.Subordinates != null)
+                                                    {
+                                                        foreach (var item in SplitedSubordinates)
+                                                        {
+                                                            ToInsertIntoList.Subordinates.Add(_allUsers.ToList().Find(u => u.UserId == int.Parse(item)));
+                                                        }
+                                                    }
+                                                    else
+                                                    {
+                                                        ToInsertIntoList.Subordinates = new List<User>();
+                                                        foreach (var item in SplitedSubordinates)
+                                                        {
+                                                            ToInsertIntoList.Subordinates.Add(_allUsers.ToList().Find(u => u.UserId == int.Parse(item)));
+                                                        }
+                                                    }
+
+                                                }
+                                            }
+                                            else
+                                            {
+                                                if (row[7] != "§")
+                                                {
+                                                    if (ToInsertIntoList.Subordinates != null)
+                                                    {
+
+                                                        ToInsertIntoList.Subordinates.Add(_allUsers.ToList().Find(u => u.UserId == int.Parse(row[7])));
+
+                                                    }
+                                                    else
+                                                    {
+                                                        ToInsertIntoList.Subordinates = new List<User>();
+                                                        ToInsertIntoList.Subordinates.Add(_allUsers.ToList().Find(u => u.UserId == int.Parse(row[7])));
+                                                    }
+                                                }
+                                            }
+                                        }
+                                        catch (Exception ex)
+                                        {
+
+                                            break;
+                                        }
+
+
+                                        try
+                                        {
+                                            ToInsertIntoList.PlantId = row[8] != "§" ? int.Parse(row[8]) : int.Parse(row[403]);
+
+                                            try
+                                            {
+                                                ToInsertIntoList.Plant = _plants.ToList().Find(p => p.PlantId == ToInsertIntoList.PlantId);
+                                            }
+                                            catch (Exception ex)
+                                            {
+
+                                                break;
+                                            }
+
+                                        }
+                                        catch (Exception ex)
+                                        {
+
+                                            break;
+                                        }
+
+                                        //subordinados
+
+                                        try
+                                        {
+                                            if (row[9].Contains(','))
+                                            {
+                                                string[]? SplitedAreas = row[9] != "§" ? row[9].Split(',') : null;
+
+                                                if (SplitedAreas != null)
+                                                {
+                                                    if (ToInsertIntoList.Areas != null)
+                                                    {
+                                                        foreach (var item in SplitedAreas)
+                                                        {
+                                                            ToInsertIntoList.Areas.Add(_areas[_plants.ToList().FindIndex(e => e.PlantId == ToInsertIntoList.PlantId)].ToList().Find(a => a.AreaId == int.Parse(item)));
+                                                        }
+                                                    }
+                                                    else
+                                                    {
+                                                        ToInsertIntoList.Areas = new List<Area>();
+                                                        foreach (var item in SplitedAreas)
+                                                        {
+                                                            ToInsertIntoList.Areas.Add(_areas[_plants.ToList().FindIndex(e => e.PlantId == ToInsertIntoList.PlantId)].ToList().Find(a => a.AreaId == int.Parse(item)));
+                                                        }
+                                                    }
+
+                                                }
+                                            }
+                                            else
+                                            {
+                                                if (row[9] != "§")
+                                                {
+                                                    if (ToInsertIntoList.Areas != null)
+                                                    {
+
+                                                        ToInsertIntoList.Areas.Add(_areas[_plants.ToList().FindIndex(e => e.PlantId == ToInsertIntoList.PlantId)].ToList().Find(a => a.AreaId == int.Parse(row[9])));
+
+                                                    }
+                                                    else
+                                                    {
+                                                        ToInsertIntoList.Areas = new List<Area>();
+                                                        ToInsertIntoList.Areas.Add(_areas[_plants.ToList().FindIndex(e => e.PlantId == ToInsertIntoList.PlantId)].ToList().Find(a => a.AreaId == int.Parse(row[9])));
+
+                                                    }
+                                                }
+                                            }
+                                        }
+                                        catch (Exception ex)
+                                        {
+
+
+                                            break;
+                                        }
+
+                                        try
+                                        {
+                                            ToInsertIntoList.GroupId = row[10] != "§" ? int.Parse(row[10]) : int.Parse(row[403]);
+
+                                            try
+                                            {
+                                                ToInsertIntoList.Group = _groups.ToList().Find(p => p.GroupId == ToInsertIntoList.GroupId);
+                                            }
+                                            catch (Exception ex)
+                                            {
+
+                                            }
+                                        }
+                                        catch (Exception ex)
+                                        {
+
+                                        }
+                                    }
+                                    catch (Exception ex)
+                                    {
+
+                                    }
+                                    break;
+                                case 3:
+                                    try
+                                    {
+                                        ToInsertIntoList.UserId = row[0] != "§" ? int.Parse(row[0]) : -1;
+
+                                        try
+                                        {
+                                            ToInsertIntoList.ObjectId = row[1] != "§" ? row[1] : row[403];
+                                        }
+                                        catch (Exception ex)
+                                        {
+
+                                        }
+
+                                        try
+                                        {
+                                            ToInsertIntoList.Name = row[3] != "§" ? row[3] : row[403];
+                                        }
+                                        catch (Exception ex)
+                                        {
+
+                                        }
+
+                                        try
+                                        {
+                                            ToInsertIntoList.Email = row[4] != "§" ? row[4] : row[403];
+
+                                        }
+                                        catch (Exception ex)
+                                        {
+
+                                        }
+
+                                        try
+                                        {
+                                            ToInsertIntoList.SuperiorId = row[6] != "§" ? int.Parse(row[6]) : int.Parse(row[403]);
+
+                                            try
+                                            {
+                                                ToInsertIntoList.Superior = _allUsers.ToList().Find(p => p.UserId == ToInsertIntoList.SuperiorId);
+
+                                                try
+                                                {
+                                                    ToInsertIntoList.PlantId = ToInsertIntoList.Superior?.PlantId;
+                                                    ToInsertIntoList.Plant = ToInsertIntoList.Superior?.Plant;
+                                                }
+                                                catch (Exception ex)
+                                                {
+
+                                                }
+
+                                                try
+                                                {
+                                                    ToInsertIntoList.Group = ToInsertIntoList.Superior?.Group;
+                                                    ToInsertIntoList.GroupId = ToInsertIntoList.Superior?.GroupId;
+                                                }
+                                                catch (Exception ex)
+                                                {
+
+                                                }
+
+                                            }
+                                            catch (Exception ex)
+                                            {
+
+                                            }
+                                        }
+                                        catch (Exception ex)
+                                        {
+
+                                        }
+
+                                        try
+                                        {
+                                            if (row[7].Contains(','))
+                                            {
+                                                string[]? SplitedSubordinates = row[7] != "§" ? row[7].Split(',') : null;
+
+                                                if (SplitedSubordinates != null)
+                                                {
+                                                    if (ToInsertIntoList.Subordinates != null)
+                                                    {
+                                                        foreach (var item in SplitedSubordinates)
+                                                        {
+                                                            ToInsertIntoList.Subordinates.Add(_allUsers.ToList().Find(u => u.UserId == int.Parse(item)));
+                                                        }
+                                                    }
+                                                    else
+                                                    {
+                                                        ToInsertIntoList.Subordinates = new List<User>();
+                                                        foreach (var item in SplitedSubordinates)
+                                                        {
+                                                            ToInsertIntoList.Subordinates.Add(_allUsers.ToList().Find(u => u.UserId == int.Parse(item)));
+                                                        }
+                                                    }
+
+                                                }
+                                            }
+                                            else
+                                            {
+                                                if (row[7] != "§")
+                                                {
+                                                    if (ToInsertIntoList.Subordinates != null)
+                                                    {
+
+                                                        ToInsertIntoList.Subordinates.Add(_allUsers.ToList().Find(u => u.UserId == int.Parse(row[7])));
+
+                                                    }
+                                                    else
+                                                    {
+                                                        ToInsertIntoList.Subordinates = new List<User>();
+                                                        ToInsertIntoList.Subordinates.Add(_allUsers.ToList().Find(u => u.UserId == int.Parse(row[7])));
+                                                    }
+                                                }
+                                            }
+                                        }
+                                        catch (Exception ex)
+                                        {
+
+
+                                        }
+
+                                        try
+                                        {
+                                            ToInsertIntoList.AreaId = row[9] != "§" ? int.Parse(row[9]) : int.Parse(row[403]);
+                                            try
+                                            {
+                                                ToInsertIntoList.Area = ToInsertIntoList.Superior?.Areas.ToList().Find(a => a.AreaId == ToInsertIntoList.AreaId);
+                                            }
+                                            catch (Exception ex)
+                                            {
+
+                                            }
+                                        }
+                                        catch (Exception ex)
+                                        {
+
+                                        }
+                                    }
+                                    catch (Exception ex)
+                                    {
+
+                                    }
+                                    break;
+                                case 4:
+                                    try
+                                    {
+                                        ToInsertIntoList.UserId = row[0] != "§" ? int.Parse(row[0]) : -1;
+
+                                        try
+                                        {
+                                            ToInsertIntoList.Payroll = row[2] != "§" ? int.Parse(row[2]) : int.Parse(row[403]);
+                                        }
+                                        catch (Exception ex)
+                                        {
+
+                                        }
+
+                                        try
+                                        {
+                                            ToInsertIntoList.Name = row[3] != "§" ? row[3] : row[403];
+                                        }
+                                        catch (Exception ex)
+                                        {
+
+                                        }
+
+                                        try
+                                        {
+                                            ToInsertIntoList.SuperiorId = row[6] != "§" ? int.Parse(row[6]) : int.Parse(row[403]);
+                                            try
+                                            {
+                                                ToInsertIntoList.Superior = _allUsers.ToList().Find(p => p.UserId == ToInsertIntoList.SuperiorId);
+
+                                                try
+                                                {
+                                                    ToInsertIntoList.PlantId = ToInsertIntoList.Superior?.PlantId;
+                                                    ToInsertIntoList.Plant = ToInsertIntoList.Superior?.Plant;
+                                                }
+                                                catch (Exception ex)
+                                                {
+
+                                                }
+
+                                                try
+                                                {
+                                                    ToInsertIntoList.AreaId = ToInsertIntoList.Superior?.AreaId;
+                                                    ToInsertIntoList.Area = ToInsertIntoList.Superior?.Area;
+                                                }
+                                                catch (Exception ex)
+                                                {
+
+                                                }
+
+                                                try
+                                                {
+                                                    ToInsertIntoList.Group = ToInsertIntoList.Superior?.Group;
+                                                    ToInsertIntoList.GroupId = ToInsertIntoList.Superior?.GroupId;
+                                                }
+                                                catch (Exception ex)
+                                                {
+
+                                                }
+
+                                            }
+                                            catch (Exception ex)
+                                            {
+
+                                            }
+
+
+                                        }
+                                        catch (Exception ex)
+                                        {
+
+                                        }
+
+                                        try
+                                        {
+                                            ToInsertIntoList.DistributionId = row[11] != "§" ? int.Parse(row[11]) : int.Parse(row[403]);
+
+                                            try
+                                            {
+                                                ToInsertIntoList.Distribution = _distributions[(int)ToInsertIntoList.PlantId][(int)ToInsertIntoList.AreaId].ToList().Find(d => d.DistributionId == ToInsertIntoList.DistributionId);
+                                            }
+                                            catch (Exception ex)
+                                            {
+
+
+                                            }
+                                        }
+                                        catch (Exception ex)
+                                        {
+
+                                        }
+                                    }
+                                    catch (Exception ex)
+                                    {
+                                        Console.WriteLine($"Case 4 => Create All Users:{ex.Message}");
+
+                                    }
+                                    break;
+                            }
 
 
 
-                } catch (Exception ex)
+                            ListOfUsers.Add(ToInsertIntoList);
+                        }
+                        catch (Exception ex)
+                        {
+
+
+                        }
+                    }
+
+                }
+                catch (Exception ex)
                 {
 
                 }
-
-                //try
-                //{
-
-                //    using (var workBook = new XLWorkbook(file))
-                //    {
-                //        IXLWorksheet ws = workBook.Worksheet(1);
-
-                //        //Forcar a que la columna contenga estilo, si es vacia, sea detectada 
-                //        //userid
-                //        ws.Column("A").Style.Font.Underline = XLFontUnderlineValues.Single;
-                //        //nomian
-                //        ws.Column("B").Style.Font.Underline = XLFontUnderlineValues.Single;
-                //        //planta area grupo
-                //        ws.Column("D").Style.Font.Underline = XLFontUnderlineValues.Single;
-                //        ws.Column("E").Style.Font.Underline = XLFontUnderlineValues.Single;
-                //        ws.Column("F").Style.Font.Underline = XLFontUnderlineValues.Single;
-                //        //permissions 
-                //        ws.Column("G").Style.Font.Underline = XLFontUnderlineValues.Single;
-                //        //date
-                //        ws.Column("H").Style.Font.Underline = XLFontUnderlineValues.Single;
-                //        ws.Column("I").Style.Font.Underline = XLFontUnderlineValues.Single;
-                //        ws.Column("J").Style.Font.Underline = XLFontUnderlineValues.Single;
-                //        //is active
-                //        ws.Column("K").Style.Font.Underline = XLFontUnderlineValues.Single;
-
-                //        //Loop through the Worksheet rows.
-                //        bool firstRow = true;
-                //        int i = 2;
-                //        foreach (IXLRow row in ws.Rows())
-                //        {
-                //            //Use the first row to add columns to DataTable.
-                //            if (firstRow)
-                //            {
-                //                firstRow = false;
-                //            }
-                //            else
-                //            {
-                //                if (!row.IsEmpty())
-                //                {
-                //                    var userToInsert = new UsersWithoutNavigationDetails();
-                //                    //UserId	ObjectId	Payroll	Name	Plant	Area	Grupo	Permission	CreateDate	UpdateDate	DisableDate	IsActive
-                //                    //1         2           3       4       5       6       7       8           9           10          11          12          
-                //                    //UserPorp
-                //                    userToInsert.UserId = ws.Cell(i, 1).Value.ToString() != "" ? int.Parse(ws.Cell(i, 1).Value.ToString()) : -1;
-                //                    //
-                //                    userToInsert.ObjectId = ws.Cell(i, 2).Value.ToString() != "" ? ws.Cell(i, 2).Value.ToString() : "";
-                //                    userToInsert.Payroll = ws.Cell(i, 3).Value.ToString() != "" ? int.Parse(ws.Cell(i, 3).Value.ToString()) : 0;
-                //                    userToInsert.Name = ws.Cell(i, 4).Value.ToString() != "" ? ws.Cell(i, 4).Value.ToString() : "";
-                //                    //Navigation Porpieties
-                //                    userToInsert.PlantId = ws.Cell(i, 5).Value.ToString() != "" ? int.Parse(ws.Cell(i, 5).Value.ToString()) : -1;
-                //                    userToInsert.AreaId = ws.Cell(i, 6).Value.ToString() != "" ? int.Parse(ws.Cell(i, 6).Value.ToString()) : -1;
-                //                    userToInsert.GroupId = ws.Cell(i, 7).Value.ToString() != "" ? int.Parse(ws.Cell(i, 7).Value.ToString()) : -1;
-                //                    //Permission
-                //                    userToInsert.UserType = ws.Cell(i, 8).Value.ToString() != "" ? int.Parse(ws.Cell(i, 8).Value.ToString()) : 0;
-
-
-                //                    //Date Controlls
-                //                    try
-                //                    {
-                //                        //create date
-                //                        userToInsert.CreatedDate = ws.Cell(i, 9).Value.ToString() != "" ? DateTime.Parse(ws.Cell(i, 9).GetValue<string>()) : DateTime.Now;
-                //                    }
-                //                    catch (Exception ex)
-                //                    {
-                //                        userToInsert.CreatedDate = DateTime.Now;
-                //                    }
-                //                    try
-                //                    {
-                //                        //update
-                //                        userToInsert.LastUpdated = ws.Cell(i, 10).Value.ToString() != "" ? DateTime.Parse(ws.Cell(i, 10).GetValue<string>()) : DateTime.Now;
-                //                    }
-                //                    catch (Exception ex)
-                //                    {
-                //                        userToInsert.LastUpdated = DateTime.Now;
-                //                    }
-
-                //                    try
-                //                    {
-                //                        //disabel
-                //                        userToInsert.DisabledDate = ws.Cell(i, 11).GetString() != "" ? DateTime.Parse(ws.Cell(i, 11).GetValue<string>()) : null;
-                //                    }
-                //                    catch (Exception ex)
-                //                    {
-                //                        userToInsert.DisabledDate = null;
-                //                    }
-                //                    //Is acctive
-                //                    userToInsert.IsActive = ws.Cell(i, 12).GetString() != "" ? bool.Parse(ws.Cell(i, 12).Value.ToString()) : false;
-                //                    //UserId	ObjectId	Payroll	Name	Plant	Area	Grupo	Permission	CreateDate	UpdateDate	DisableDate	IsActive
-                //                    //1         2           3       4       5       6       7       8           9           10          11          12   
-
-
-                //                    UsersListToSave.Add(userToInsert);
-
-                //                    i++;
-                //                }//end is not empety row
-                //            }//end else first roe
-
-                //        }//end foreach
-
-                //    }//end using
-
-
-
-                //}//end try
-                //catch (Exception ex)
-                //{
-                //    Debug.WriteLine(ex.ToString());
-                //}//end trycatch to add excel to list
             }
 
             UploadUsersResult ResultToReturn = new UploadUsersResult();
+            foreach (var item in ListOfUsers)
+            {
+                List<Area> AreasInUser = new List<Area>();
+                List<User> UsersInUser = new List<User>();
+                bool haveAreas = false;
+                bool haveUsers = false;
 
-            //foreach (var userItem in UsersListToSave)
-            //{
-            //    if (userItem.UserId == -1)
-            //    {
-            //        //Usuario sin id
-            //        //Busqueda avanzada
-            //        var entityUserPayAndExtras = await _supervisorMobilityRepository.GetUserByPayrollAndMoreAsync((int)userItem.Payroll, (int)userItem.PlantId, (int)userItem.AreaId, (int)userItem.GroupId);
+                var UserToReturn = new User();
 
-            //        if (entityUserPayAndExtras == null)
-            //        {
-            //            //new user
-            //            UsersForCreation newuser = new UsersForCreation()
-            //            {
-            //                Name = userItem.Name,
-            //                ObjectId = userItem.ObjectId,
-            //                Payroll = userItem.Payroll,
-            //                PlantId = (int)userItem.PlantId,
-            //                AreaId = (int)userItem.AreaId,
-            //                GroupId = (int)userItem.GroupId,
-            //                UserType = (int)userItem.UserType,
-            //                LastUpdated = userItem.LastUpdated,
-            //                DisabledDate = userItem.DisabledDate,
-            //                IsActive = userItem.IsActive
-            //            };
+                if (item.PlantId == 0)
+                {
+                    item.PlantId = null;
+                }
+                else if (item.PlantId != null)
+                {
+                    if (!await _supervisorMobilityRepository.PlantExistAsync((int)item.PlantId))
+                    {
+                        return NotFound("No Planta");
+                    }
+                }
 
-            //            var finalUser = await _assyChartService.CreateUserAsync(newuser);
-            //            if (finalUser != null)
-            //                ResultToReturn.UsersCreated++;
-            //        }
-            //        else
-            //        {
-            //            //User ya existe
-            //            ResultToReturn.UsersExist++;
-            //        }
+                if (item.AreaId == 0)
+                {
+                    item.AreaId = null;
+                }
+                else if (item.AreaId != null)
+                {
+                    if (!await _supervisorMobilityRepository.AreaExistAsync((int)item.AreaId))
+                    {
+                        return NotFound("No Area");
+                    }
+                }
 
-            //    }
-            //    else
-            //    {
-            //        //User con id
-            //        var entityUser = await _assyChartService.FetchUserAsync((int)userItem.UserId);
+                if (item.GroupId == 0)
+                {
+                    item.GroupId = null;
+                }
+                else if (item.GroupId != null)
+                {
+                    if (!await _supervisorMobilityRepository.AreaExistAsync((int)item.GroupId))
+                    {
+                        return NotFound("No Group");
+                    }
+                }
 
-            //        if (entityUser == null)
-            //        {
-            //            //Si tiene un id erroneo, entra aqui
-            //            var entityUserPayAndExtras = await _supervisorMobilityRepository.GetUserByPayrollAndMoreAsync((int)userItem.Payroll, (int)userItem.PlantId, (int)userItem.AreaId, (int)userItem.GroupId);
-            //            if (entityUserPayAndExtras == null)
-            //            {
-            //                //new user porque no existe
-            //                UsersForCreation newuser = new UsersForCreation()
-            //                {
-            //                    Name = userItem.Name,
-            //                    ObjectId = userItem.ObjectId,
-            //                    Payroll = userItem.Payroll,
-            //                    PlantId = (int)userItem.PlantId,
-            //                    AreaId = (int)userItem.AreaId,
-            //                    GroupId = (int)userItem.GroupId,
-            //                    UserType = (int)userItem.UserType,
-            //                    LastUpdated = userItem.LastUpdated,
-            //                    DisabledDate = userItem.DisabledDate,
-            //                    IsActive = userItem.IsActive
-            //                };
+                if (item.DistributionId == 0)
+                {
+                    item.DistributionId = null;
+                }
+                else if (item.DistributionId != null)
+                {
+                    if (!await _supervisorMobilityRepository.DistributionExistsAsync((int)item.DistributionId))
+                    {
+                        return NotFound("No Distribution");
+                    }
+                }
 
-            //                var finalUser = await _assyChartService.CreateUserAsync(newuser);
-            //                if (finalUser != null)
-            //                    ResultToReturn.UsersCreated++;
-            //            }
-            //            else
-            //            {
-            //                ResultToReturn.UsersExist++;
-            //            }
-            //        }
-            //        else
-            //        {
-            //            //Si el usuario existe entra aqui
-            //            ResultToReturn.UsersExist++;
-            //        }
+                if (item.Payroll == 0)
+                {
+                    item.Payroll = null;
+                }
 
-            //    }
+                if (item.SuperiorId == 0)
+                {
+                    item.SuperiorId = null;
+                }
 
-            //}
+
+                if (item.Subordinates != null)
+                {
+                    haveUsers = true;
+                    foreach (var Sub in item.Subordinates)
+                    {
+                        UsersInUser.Add(await _assyChartService.FetchUserAsync(Sub.UserId));
+                    }
+
+                    item.Subordinates = null;
+                }
+
+                if (item.Areas != null)
+                {
+                    haveAreas = true;
+                    foreach (var AreainList in item.Areas)
+                    {
+                        AreasInUser.Add(await _supervisorMobilityRepository.GetAreaForPlantAsync((int)item.PlantId, AreainList.AreaId));
+                    }
+                    item.Areas = null;
+                }
+
+                ///////////////////
+                if (item.UserId == -1)
+                {
+                    bool existUser = false;
+                    int typeUser = 0;
+                    if (item.Payroll != null)
+                    {
+                        existUser = await _supervisorMobilityRepository.UserExistByPayrollAsync((int)item.Payroll);
+                        typeUser = existUser ? 1 : 0;
+                    }
+
+                    if (item.Email != "")
+                    {
+                        existUser = await _supervisorMobilityRepository.UserExistByEmailAsync(item.Email);
+                        typeUser = existUser ? 2 : 0;
+                    }
+
+                    if (existUser)
+                    {
+                        var entityentity = typeUser == 1 ? await _supervisorMobilityRepository.GetUserByPayrollAsync((int)item.Payroll) : await _supervisorMobilityRepository.GetUserByEmailAsync(item.Email);
+
+                        if (entityentity == null)
+                        {
+                            var usertoCreate = _mapper.Map<UsersForCreation>(item);
+                            var finalUser = await _assyChartService.CreateUserAsync(usertoCreate);
+                            if (finalUser != null)
+                                ResultToReturn.UsersCreated++;
+
+                            UserToReturn = _mapper.Map<User>(finalUser);
+
+                        }
+                        else
+                        {
+                            var userToCompare = _mapper.Map<User>(item);
+
+                            if (!entityentity.Equals(userToCompare))
+                            {
+
+                                if (userToCompare.SuperiorId != entityentity.SuperiorId)
+                                {
+                                    if (userToCompare.SuperiorId != null && entityentity.SuperiorId != null)
+                                    {
+                                        User exsuperior = await _supervisorMobilityRepository.GetUserAsync((int)entityentity.SuperiorId, true);
+                                        var usertoRemove = _mapper.Map<User>(entityentity);
+
+                                        _supervisorMobilityRepository.UserRemoveSubordinated(exsuperior, usertoRemove);
+
+                                        User actualSuperior = await _supervisorMobilityRepository.GetUserAsync((int)item.SuperiorId, true);
+                                        _supervisorMobilityRepository.UserAddSubordinated(actualSuperior, usertoRemove);
+
+                                        item.SuperiorId = actualSuperior.UserId;
+                                        item.PlantId = actualSuperior.PlantId;
+                                        item.GroupId = actualSuperior.GroupId;
+
+                                        if (item.UserType == 4)
+                                            item.AreaId = actualSuperior.AreaId;
+
+                                        userToCompare = _mapper.Map<User>(item);
+                                    }
+                                }
+
+
+
+                                var userToUpdate = _mapper.Map<UsersForUpdateDto>(userToCompare);
+                                userToUpdate.CreatedDate = (DateTime)entityentity.CreatedDate;
+                                await _supervisorMobilityRepository.UpdateUser(userToUpdate, entityentity.UserId);
+                                UserToReturn = _mapper.Map<User>(userToUpdate);
+                                ResultToReturn.UsersUpdated++;
+                            }
+                            else
+                            {
+                                UserToReturn = _mapper.Map<User>(entityentity);
+                                ResultToReturn.UsersExist++;
+                            }
+
+
+                        }
+                    }
+                    else
+                    {
+                        var usertoCreate = _mapper.Map<UsersForCreation>(item);
+                        var finalUser = await _assyChartService.CreateUserAsync(usertoCreate);
+                        if (finalUser != null)
+                            ResultToReturn.UsersCreated++;
+                        UserToReturn = _mapper.Map<User>(finalUser);
+
+
+                    }
+
+                }
+                else
+                {
+                    //User con id
+                    var entityUserwhitId = await _assyChartService.FetchUserAsync((int)item.UserId);
+
+                    if (entityUserwhitId == null)
+                    {
+                        //Si tiene un id erroneo, entra aqui para busqueda avanzada
+                        bool existUser = false;
+                        int typeUser = 0;
+                        if (item.Payroll != null)
+                        {
+                            existUser = await _supervisorMobilityRepository.UserExistByPayrollAsync((int)item.Payroll);
+                            typeUser = existUser ? 1 : 0;
+                        }
+
+                        if (item.Email != "")
+                        {
+                            existUser = await _supervisorMobilityRepository.UserExistByEmailAsync(item.Email);
+                            typeUser = existUser ? 2 : 0;
+                        }
+
+                        if (existUser)
+                        {
+                            var entityentity = typeUser == 1 ? await _supervisorMobilityRepository.GetUserByPayrollAsync((int)item.Payroll) : await _supervisorMobilityRepository.GetUserByEmailAsync(item.Email);
+
+                            if (entityentity == null)
+                            {
+                                var usertoCreate = _mapper.Map<UsersForCreation>(item);
+                                var finalUser = await _assyChartService.CreateUserAsync(usertoCreate);
+                                if (finalUser != null)
+                                    ResultToReturn.UsersCreated++;
+                                UserToReturn = _mapper.Map<User>(finalUser);
+
+                            }
+                            else
+                            {
+                                var userToCompare = _mapper.Map<User>(item);
+
+                                if (!entityentity.Equals(userToCompare))
+                                {
+                                    if (userToCompare.SuperiorId != entityentity.SuperiorId)
+                                    {
+                                        if (userToCompare.SuperiorId != null && entityentity.SuperiorId != null)
+                                        {
+                                            User exsuperior = await _supervisorMobilityRepository.GetUserAsync((int)entityentity.SuperiorId, true);
+                                            var usertoRemove = _mapper.Map<User>(entityentity);
+
+                                            _supervisorMobilityRepository.UserRemoveSubordinated(exsuperior, usertoRemove);
+
+                                            User actualSuperior = await _supervisorMobilityRepository.GetUserAsync((int)item.SuperiorId, true);
+                                            _supervisorMobilityRepository.UserAddSubordinated(actualSuperior, usertoRemove);
+
+                                            item.SuperiorId = actualSuperior.UserId;
+                                            item.PlantId = actualSuperior.PlantId;
+                                            item.GroupId = actualSuperior.GroupId;
+
+                                            if (item.UserType == 4)
+                                                item.AreaId = actualSuperior.AreaId;
+
+                                            userToCompare = _mapper.Map<User>(item);
+                                        }
+                                    }
+
+                                    var userToUpdate = _mapper.Map<UsersForUpdateDto>(userToCompare);
+
+                                    userToUpdate.CreatedDate = (DateTime)entityentity.CreatedDate;
+                                    await _supervisorMobilityRepository.UpdateUser(userToUpdate, entityentity.UserId);
+                                    UserToReturn = _mapper.Map<User>(userToUpdate);
+                                    ResultToReturn.UsersUpdated++;
+                                }
+                                else
+                                {
+
+                                    UserToReturn = _mapper.Map<User>(entityentity);
+                                    ResultToReturn.UsersExist++;
+                                }
+
+                            }
+                        }
+                        else
+                        {
+                            var usertoCreate = _mapper.Map<UsersForCreation>(item);
+                            var finalUser = await _assyChartService.CreateUserAsync(usertoCreate);
+                            if (finalUser != null)
+                                ResultToReturn.UsersCreated++;
+                            UserToReturn = _mapper.Map<User>(finalUser);
+
+                        }
+                    }
+                    else
+                    {
+                        var userToCompare = _mapper.Map<User>(item);
+                        if (!entityUserwhitId.Equals(userToCompare))
+                        {
+                            if (userToCompare.SuperiorId != entityUserwhitId.SuperiorId)
+                            {
+                                if (userToCompare.SuperiorId != null && entityUserwhitId.SuperiorId != null)
+                                {
+                                    User exsuperior = await _supervisorMobilityRepository.GetUserAsync((int)entityUserwhitId.SuperiorId, true);
+                                    var usertoRemove = _mapper.Map<User>(entityUserwhitId);
+
+                                    _supervisorMobilityRepository.UserRemoveSubordinated(exsuperior, usertoRemove);
+
+                                    User actualSuperior = await _supervisorMobilityRepository.GetUserAsync((int)item.SuperiorId, true);
+                                    _supervisorMobilityRepository.UserAddSubordinated(actualSuperior, usertoRemove);
+
+                                    item.SuperiorId = actualSuperior.UserId;
+                                    item.PlantId = actualSuperior.PlantId;
+                                    item.GroupId = actualSuperior.GroupId;
+
+                                    if (item.UserType == 4)
+                                        item.AreaId = actualSuperior.AreaId;
+
+                                    userToCompare = _mapper.Map<User>(item);
+                                }
+                            }
+
+                            var userToUpdate = _mapper.Map<UsersForUpdateDto>(userToCompare);
+                            userToUpdate.CreatedDate = (DateTime)entityUserwhitId.CreatedDate;
+                            await _supervisorMobilityRepository.UpdateUser(userToUpdate, entityUserwhitId.UserId);
+                            UserToReturn = _mapper.Map<User>(userToUpdate);
+
+                            ResultToReturn.UsersUpdated++;
+                        }
+                        else
+                        {
+                            ResultToReturn.UsersExist++;
+                            UserToReturn = _mapper.Map<User>(entityUserwhitId);
+                        }
+
+                    }
+
+                }
+
+                if (haveUsers)
+                {
+                    foreach (var elemntUser in UsersInUser)
+                    {
+                        _supervisorMobilityRepository.UserAddSubordinated(UserToReturn, elemntUser);
+                    }
+                }
+
+                if (haveAreas)
+                {
+                    foreach (var elemntArea in AreasInUser)
+                    {
+                        _supervisorMobilityRepository.UserAddArea(UserToReturn, elemntArea);
+                    }
+                }
+
+            }
+
+            await _supervisorMobilityRepository.SaveChangesAsync();
+
+
+
+
             //restore extencion of file
             System.IO.File.Move(file, originalPath);
 
@@ -1269,10 +2070,11 @@ namespace SupervisorMobility.API.Controllers
             ws.SetCellValue("E1", "Email");
             ws.SetCellValue("F1", "UserType");
             ws.SetCellValue("G1", "SuperiorId");
-            ws.SetCellValue("H1", "Plant");
-            ws.SetCellValue("I1", "Area");
-            ws.SetCellValue("J1", "Group");
-            ws.SetCellValue("K1", "Distribution");
+            ws.SetCellValue("H1", "SubordinadosId's");
+            ws.SetCellValue("I1", "Plant");
+            ws.SetCellValue("J1", "Area");
+            ws.SetCellValue("K1", "Group");
+            ws.SetCellValue("L1", "Distribution");
 
 
             ws.SaveAs(ms);
