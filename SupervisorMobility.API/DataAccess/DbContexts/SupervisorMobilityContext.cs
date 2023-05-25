@@ -28,6 +28,7 @@ namespace SupervisorMobility.API.Context
         public DbSet<Product> Products { get; set; }
         public DbSet<AssyChart> AssyCharts { get; set; }
         public DbSet<User> Users { get; set; }
+        
         public DbSet<FileUpload> Files { get; set; }
         public DbSet<Guides> Guides { get; set; }
         public DbSet<JobObservationVersion> JobObservationHistory { get; set; }
@@ -35,6 +36,8 @@ namespace SupervisorMobility.API.Context
         public DbSet<Attendance> Attendances { get; set; }
         public DbSet<DataLogger> DataLoggs { get; set; }
         public DbSet<Event> Events { get; set; }
+
+        
         public DbSet<SpecificEvent> SepecificEvents { get; set; }
         #endregion
 

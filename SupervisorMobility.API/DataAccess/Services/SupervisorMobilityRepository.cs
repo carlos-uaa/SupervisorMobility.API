@@ -1,5 +1,7 @@
 ﻿
 using AutoMapper;
+using DocumentFormat.OpenXml.Spreadsheet;
+using Microsoft.Data.SqlClient;
 using Microsoft.EntityFrameworkCore;
 using SupervisorMobility.API.Context;
 using SupervisorMobility.API.DataAccess.Entities;
@@ -866,13 +868,13 @@ namespace SupervisorMobility.API.Services
        
             if (Master.Subordinates != null)
             {
-               
+                Slave.SuperiorId = Master.UserId;
                 Master.Subordinates.Add(Slave);
             }
             else
             { 
                 Master.Subordinates = new List<User>();
-               
+                Slave.SuperiorId = Master.UserId;
                 Master.Subordinates.Add(Slave);
             }
             _context.SaveChanges();
@@ -882,10 +884,42 @@ namespace SupervisorMobility.API.Services
         public async void UserRemoveSubordinated(User Master, User Slave)
         {
             Master.Subordinates?.Remove(Slave);
-        } 
-        public async void UserRemoveAllSubordinated(User Master)
+            _context.SaveChanges();
+        }
+        public async Task<AsyncVoidMethodBuilder> UserRemoveAllSubordinated(User Master)
         {
-            Master.Subordinates?.Clear();
+           
+            var UsersList = await _context.Users.Where(u => u.SuperiorId == Master.UserId)
+                 .OrderBy(c => c.UserId).ToListAsync();
+
+            if (UsersList?.Count > 0)
+            {
+                foreach (User sub in UsersList)
+                {
+                    sub.SuperiorId = null;
+                }
+
+                Master.Subordinates?.Clear();
+                _context.SaveChanges();
+            }
+
+            return new AsyncVoidMethodBuilder();
+        }
+
+        public async Task<AsyncVoidMethodBuilder> UserRemoveAllAreas(User Master)
+        {
+            Master.Areas?.Clear();
+            // Eliminar todas las entradas relacionadas en la tabla UserAreas para el usuario especificado
+            string sqlQuery = "DELETE FROM UserAreas WHERE UserId = @userId";
+
+            int executeCount = _context.Database.ExecuteSqlRaw(sqlQuery,
+                    new SqlParameter("@userId", Master.UserId));
+
+            Debug.WriteLine($"Este es executeCount: {executeCount}");
+
+            _context.SaveChanges();
+            return new AsyncVoidMethodBuilder();
+
         }
 
         public void UserAddArea(User Master, Area Slave)

@@ -379,8 +379,12 @@ namespace SupervisorMobility.API.Controllers
 
             UserToReturn = await _assyChartService.FetchUserAsync(userId);
 
+            
+
             if (haveUsers)
             {
+                await _supervisorMobilityRepository.UserRemoveAllSubordinated(UserToReturn);
+                UserToReturn.Subordinates = null;
                 foreach (var elemntUser in UsersInUser)
                 {
                     _supervisorMobilityRepository.UserAddSubordinated(UserToReturn, elemntUser);
@@ -389,6 +393,8 @@ namespace SupervisorMobility.API.Controllers
 
             if (haveAreas)
             {
+                await _supervisorMobilityRepository.UserRemoveAllAreas(UserToReturn);
+                UserToReturn.Areas = null;
                 foreach (var elemntArea in AreasInUser)
                 {
                     _supervisorMobilityRepository.UserAddArea(UserToReturn, elemntArea);
