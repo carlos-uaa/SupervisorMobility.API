@@ -297,7 +297,7 @@ namespace SupervisorMobility.API.Controllers
             }
             else if (user.GroupId != null)
             {
-                if (!await _supervisorMobilityRepository.AreaExistAsync((int)user.GroupId))
+                if (!await _supervisorMobilityRepository.GroupExistAsync((int)user.GroupId))
                 {
                     return NotFound("No Group");
                 }
@@ -481,7 +481,7 @@ namespace SupervisorMobility.API.Controllers
                 }
                 else if (item.GroupId != null)
                 {
-                    if (!await _supervisorMobilityRepository.AreaExistAsync((int)item.GroupId))
+                    if (!await _supervisorMobilityRepository.GroupExistAsync((int)item.GroupId))
                     {
                         return NotFound("No Group");
                     }
@@ -841,7 +841,7 @@ namespace SupervisorMobility.API.Controllers
                 }
                 else if (item.GroupId != null)
                 {
-                    if (!await _supervisorMobilityRepository.AreaExistAsync((int)item.GroupId))
+                    if (!await _supervisorMobilityRepository.GroupExistAsync((int)item.GroupId))
                     {
                         return NotFound("No Group");
                     }
@@ -1184,6 +1184,8 @@ namespace SupervisorMobility.API.Controllers
                 {
 
                 }
+                //remove titles 
+                DataInFile.RemoveAt(0);
 
                 try
                 {
