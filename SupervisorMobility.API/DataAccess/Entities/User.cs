@@ -2,6 +2,7 @@
 using System.ComponentModel.DataAnnotations;
 using SupervisorMobility.API.Entities;
 using System.Text.Json.Serialization;
+using SupervisorMobility.API.DataAccess.Entities.ILU;
 
 namespace SupervisorMobility.API.DataAccess.Entities
 {
@@ -21,6 +22,8 @@ namespace SupervisorMobility.API.DataAccess.Entities
         public User? Superior { get; set; }
         [InverseProperty("Superior")]
         public ICollection<User>? Subordinates { get; set; }
+
+        public ICollection<ILUOperatorRegister>? ILURegisers { get; set; }
 
         [Column(TypeName = "Date")]
         public DateTime? CreatedDate { get; set; } = DateTime.Now;
