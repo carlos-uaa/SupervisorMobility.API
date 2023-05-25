@@ -370,16 +370,11 @@ namespace SupervisorMobility.API.Controllers
 
                         if (user.UserType == 4)
                             user.AreaId = actualSuperior.AreaId;
-
-
                     }
-                }
-
-                user.CreatedDate = (DateTime)entityentity.CreatedDate;
-                await _supervisorMobilityRepository.UpdateUser(user, entityentity.UserId);
-             
+                }  
             }
 
+            user.CreatedDate = (DateTime)entityentity.CreatedDate;
             await _assyChartService.UpdateUserAsync(user, userId);
 
             UserToReturn = await _assyChartService.FetchUserAsync(userId);
