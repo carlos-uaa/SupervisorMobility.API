@@ -375,18 +375,14 @@ namespace SupervisorMobility.API.Controllers
                     }
                 }
 
-
-
-
                 user.CreatedDate = (DateTime)entityentity.CreatedDate;
                 await _supervisorMobilityRepository.UpdateUser(user, entityentity.UserId);
-                UserToReturn = _mapper.Map<User>(user);
-
+             
             }
 
             await _assyChartService.UpdateUserAsync(user, userId);
 
-
+            UserToReturn = await _assyChartService.FetchUserAsync(userId);
 
             if (haveUsers)
             {
