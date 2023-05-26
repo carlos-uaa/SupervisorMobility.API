@@ -23,7 +23,7 @@ namespace SupervisorMobility.API.DataAccess.Entities
         [InverseProperty("Superior")]
         public ICollection<User>? Subordinates { get; set; }
 
-        public ICollection<ILUOperatorRegister>? ILURegisers { get; set; }
+        public ICollection<ILURegister>? ILURegisers { get; set; }
 
         [Column(TypeName = "Date")]
         public DateTime? CreatedDate { get; set; } = DateTime.Now;

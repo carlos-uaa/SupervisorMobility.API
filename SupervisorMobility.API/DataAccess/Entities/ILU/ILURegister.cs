@@ -6,10 +6,10 @@ using SupervisorMobility.API.DataAccess.Entities.LUP;
 
 namespace SupervisorMobility.API.DataAccess.Entities.ILU
 {
-    public class ILUOperatorRegister
+    public class ILURegister
     {
         [Key, DatabaseGenerated(DatabaseGeneratedOption.Identity)]
-        public int ILUORid { get; set; }
+        public int ILURegisterid { get; set; }
 
         [Column(TypeName = "Date")]
         public DateTime? AcquisitionDate { get; set; } = DateTime.Now;

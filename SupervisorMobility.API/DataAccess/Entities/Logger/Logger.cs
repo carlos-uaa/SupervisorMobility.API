@@ -3,7 +3,7 @@ using System.ComponentModel.DataAnnotations;
 
 namespace SupervisorMobility.API.DataAccess.Entities.Logger
 {
-    public class DataLogger
+    public class Logger
     {
         [Key, DatabaseGenerated(DatabaseGeneratedOption.Identity)]
         public int LogId { get; set; }
@@ -15,8 +15,10 @@ namespace SupervisorMobility.API.DataAccess.Entities.Logger
         public string? EventPhase { get; set; }
 
         public int EventId { get; set; }
-        public int SpecificEventId { get; set; }
+        public LogEvent Event { get; set; }
 
+        public int SpecificEventId { get; set; }
+        public LogSpecificEvent SpecificEvent { get; set; }
 
         [Column(TypeName = "Date")]
         public DateTime? DateOfEvent { get; set; } = DateTime.Now;

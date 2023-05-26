@@ -1,4 +1,6 @@
 ﻿using SupervisorMobility.API.DataAccess.Entities;
+using SupervisorMobility.API.DataAccess.Entities.ILU;
+using SupervisorMobility.API.DataAccess.Entities.LUP;
 using SupervisorMobility.API.Entities;
 using SupervisorMobility.API.Models.AssyChart;
 using SupervisorMobility.API.Models.AttendanceDtos;
@@ -228,6 +230,34 @@ namespace SupervisorMobility.API.Services
         Task<IEnumerable<Attendance>> GetAllAttendance();
         Task<IEnumerable<Attendance>> GetAllAttendanceOfSupervisor(int idsupervisor);
         #endregion
+        #region ILU
+        Task<ILULevel> GetILULevel(int idILU);
+        Task AddILU(ILULevel lU);
+        Task UpdateILU(ILULevel iluforUpdate, ILULevel iluEntity);
+        Task RemoveILU(ILULevel lU);
+
+        #endregion
+        #region ILURegister
+        Task<ILULevel> GetILURegister(int idILUR);
+        Task AddILURegister(ILURegister id);
+        Task UpdateILURegister(ILURegister iluRforUpdate, ILURegister iluREntity);
+        Task RemoveILURegister(ILURegister id);
+
+        #endregion
+        #region PAT
+        Task<PAT> GetPat (int patId);
+        Task<PAT> GetPatForYearOfSV (int sv, int Year);
+        Task UpdatePAT(PAT patForUpdate, PAT PatEntity);
+        Task<IEnumerable<PAT>> GetAllPATs();
+        Task<IEnumerable<PAT>> GetAllPATsOfSv(int svId);
+        Task<IEnumerable<PAT>> GetAllPATsofSSV(int ssvID);
+        
+        #endregion
+        #region Logger
+
+        #endregion
+
+
         #region CommonOperations
 
         Task<bool> SaveChangesAsync();

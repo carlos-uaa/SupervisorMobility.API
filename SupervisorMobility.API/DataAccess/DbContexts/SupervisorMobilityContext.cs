@@ -36,11 +36,11 @@ namespace SupervisorMobility.API.Context
         public DbSet<JobObservationVersion> JobObservationHistory { get; set; }
         public DbSet<Notification> Notifications { get; set; }
         public DbSet<Attendance> Attendances { get; set; }
-        public DbSet<DataLogger> DataLoggs { get; set; }
+        public DbSet<Logger> DataLoggs { get; set; }
         public DbSet<LogEvent> LogEvents { get; set; }
         public DbSet<LogSpecificEvent> LogSepecificEvents { get; set; }
         public DbSet<ILULevel> ILULevels { get; set; }
-        public DbSet<ILUOperatorRegister> ILUOperatorRegisters { get; set; }
+        public DbSet<ILURegister> ILURegisters { get; set; }
         public DbSet<PAT> PATs { get; set; }
         #endregion
 
@@ -143,7 +143,7 @@ namespace SupervisorMobility.API.Context
                 .Property(p => p.IsActive)
                 .HasDefaultValue(true);
 
-            modelBuilder.Entity<DataLogger>()
+            modelBuilder.Entity<Logger>()
                .Property(D => D.LogId)
                .UseIdentityColumn();
 
@@ -163,8 +163,8 @@ namespace SupervisorMobility.API.Context
            .Property(e => e.ILULevelId)
            .UseIdentityColumn();
 
-            modelBuilder.Entity<ILUOperatorRegister>()
-           .Property(e => e.ILUORid)
+            modelBuilder.Entity<ILURegister>()
+           .Property(e => e.ILURegisterid)
            .UseIdentityColumn();
 
             modelBuilder.Entity<Notification>()
