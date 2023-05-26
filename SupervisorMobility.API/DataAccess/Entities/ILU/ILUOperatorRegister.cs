@@ -24,7 +24,6 @@ namespace SupervisorMobility.API.DataAccess.Entities.ILU
         public User? Operator { get; set; }
 
 
-
         public int? ILULevelId { get; set; }
         [ForeignKey("OperatorId")]
         public ILULevel? ILULevel { get; set; }

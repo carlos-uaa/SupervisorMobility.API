@@ -2,7 +2,9 @@
 using DocumentFormat.OpenXml.Wordprocessing;
 using Microsoft.EntityFrameworkCore;
 using SupervisorMobility.API.DataAccess.Entities;
+using SupervisorMobility.API.DataAccess.Entities.ILU;
 using SupervisorMobility.API.DataAccess.Entities.Logger;
+using SupervisorMobility.API.DataAccess.Entities.LUP;
 using SupervisorMobility.API.Entities;
 using System.Globalization;
 
@@ -35,10 +37,11 @@ namespace SupervisorMobility.API.Context
         public DbSet<Notification> Notifications { get; set; }
         public DbSet<Attendance> Attendances { get; set; }
         public DbSet<DataLogger> DataLoggs { get; set; }
-        public DbSet<Event> Events { get; set; }
-
-        
-        public DbSet<SpecificEvent> SepecificEvents { get; set; }
+        public DbSet<LogEvent> LogEvents { get; set; }
+        public DbSet<LogSpecificEvent> LogSepecificEvents { get; set; }
+        public DbSet<ILULevel> ILULevels { get; set; }
+        public DbSet<ILUOperatorRegister> ILUOperatorRegisters { get; set; }
+        public DbSet<PAT> PATs { get; set; }
         #endregion
 
        
@@ -144,13 +147,25 @@ namespace SupervisorMobility.API.Context
                .Property(D => D.LogId)
                .UseIdentityColumn();
 
-            modelBuilder.Entity<Event>()
-              .Property(e => e.EventId)
+            modelBuilder.Entity<LogEvent>()
+              .Property(e => e.LogEventId)
               .UseIdentityColumn();           
             
-            modelBuilder.Entity<SpecificEvent>()
-              .Property(e => e.SpecificEventId)
+            modelBuilder.Entity<LogSpecificEvent>()
+              .Property(e => e.LogSpecificEventId)
               .UseIdentityColumn();
+
+            modelBuilder.Entity<PAT>()
+              .Property(e => e.PATid)
+              .UseIdentityColumn();
+
+            modelBuilder.Entity<ILULevel>()
+           .Property(e => e.ILULevelId)
+           .UseIdentityColumn();
+
+            modelBuilder.Entity<ILUOperatorRegister>()
+           .Property(e => e.ILUORid)
+           .UseIdentityColumn();
 
             modelBuilder.Entity<Notification>()
                 .Property(p => p.IsActive)

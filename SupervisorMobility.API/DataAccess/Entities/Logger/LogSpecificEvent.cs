@@ -3,10 +3,10 @@ using System.ComponentModel.DataAnnotations;
 
 namespace SupervisorMobility.API.DataAccess.Entities.Logger
 {
-    public class SpecificEvent
+    public class LogSpecificEvent
     {
         [Key, DatabaseGenerated(DatabaseGeneratedOption.Identity)]
-        public int SpecificEventId { get; set; }
+        public int LogSpecificEventId { get; set; }
         public string SpecificEventDescription { get; set; }
     }
 }

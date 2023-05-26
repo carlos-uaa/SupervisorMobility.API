@@ -30,18 +30,19 @@ namespace SupervisorMobility.API.DataAccess.Entities
         }
         private User? _supervisor;
 
+        public int? SSVresponsibleID { get; set; }
+        [ForeignKey("SSVresponsibleID")]
+        public User? SSVresponsible { get; set; }
+
 
         public int AreaId { get; set; }
         [ForeignKey("AreaId")]
         public Area? Area { get; set; }
-        
 
+        public int DistributionId { get; set; }
+        [ForeignKey("DistributionId")]
+        public Distribution? Distribution { get; set; }
 
-
-
-        public int? SSVresponsibleID { get; set; }
-        [ForeignKey("SSVresponsibleID")]
-        public User? SSVresponsible { get; set; }
 
 
         [Column(TypeName = "Date")]
