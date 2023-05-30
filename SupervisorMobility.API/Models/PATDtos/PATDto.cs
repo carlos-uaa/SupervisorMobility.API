@@ -1,16 +1,16 @@
-﻿using System.ComponentModel.DataAnnotations.Schema;
-using System.ComponentModel.DataAnnotations;
+﻿
 
-namespace SupervisorMobility.API.DataAccess.Entities
+using SupervisorMobility.API.Models.Users;
+
+namespace SupervisorMobility.API.Models.PATDtos
 {
-    public class PAT
+    public class PATDto
     {
-        [Key, DatabaseGenerated(DatabaseGeneratedOption.Identity)]
         public int PATid { get; set; }
 
         public int SupervisorId { get; set; }
 
-        public User? Supervisor
+        public UsersWithNavigationDetails? Supervisor
         {
             get { return _supervisor; }
             set
@@ -27,21 +27,20 @@ namespace SupervisorMobility.API.DataAccess.Entities
                 }
             }
         }
-        private User? _supervisor;
+        private UsersWithNavigationDetails? _supervisor;
 
         public int? SSVresponsibleID { get; set; }
-        public User? SSVresponsible { get; set; }
+        public UsersWithNavigationDetails? SSVresponsible { get; set; }
 
 
         public int AreaId { get; set; }
-        public Area? Area { get; set; }
+        public AreaDtos.AreaWithoutNavigationPropertiesDto? Area { get; set; }
 
         public int DistributionId { get; set; }
-        public Distribution? Distribution { get; set; }
+        public DistributionDtos.DistributionWithoutNavigationPropertiesDto? Distribution { get; set; }
 
 
 
-        [Column(TypeName = "Date")]
         public DateTime? AplicationDate { get; set; }
         public int? AplicationYear
         {
@@ -50,15 +49,10 @@ namespace SupervisorMobility.API.DataAccess.Entities
         }
 
 
-        [Column(TypeName = "Date")]
         public DateTime? CreationDate { get; set; }
 
-        [Column(TypeName = "Date")]
         public DateTime? EditionDate { get; set; }
 
-        [Column(TypeName = "Date")]
         public DateTime? ApprovalDate { get; set; }
-
-        public bool isActive { get; set; }
     }
 }

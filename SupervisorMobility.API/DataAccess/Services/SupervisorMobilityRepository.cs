@@ -5,6 +5,8 @@ using Microsoft.Data.SqlClient;
 using Microsoft.EntityFrameworkCore;
 using SupervisorMobility.API.Context;
 using SupervisorMobility.API.DataAccess.Entities;
+using SupervisorMobility.API.DataAccess.Entities.ILU;
+using SupervisorMobility.API.DataAccess.Entities.LUP;
 using SupervisorMobility.API.Entities;
 using SupervisorMobility.API.Models.Users;
 using System.Diagnostics;
@@ -1238,6 +1240,105 @@ namespace SupervisorMobility.API.Services
         }
 
         #endregion
+
+        #region ILU
+        public async Task<ILULevel?> GetILULevel(int idILU) {
+            return await _context.ILULevels
+            .Where(p => p.ILULevelId == idILU).FirstOrDefaultAsync();
+        }
+        public async Task<int> AddILU(ILULevel lU) {
+            _context.ILULevels.Add(lU);
+
+            return _context.SaveChanges();
+        }
+        public async Task<int> UpdateILU(ILULevel iluforUpdate, ILULevel iluEntity) {
+            
+            _mapper.Map(iluforUpdate, iluEntity);
+
+            return _context.SaveChanges();
+
+        }
+        public async Task RemoveILU(ILULevel lU) 
+        {
+            var ilu = await _context.ILULevels.Where(i => i.ILULevelId == lU.ILULevelId).FirstOrDefaultAsync();
+            ilu.isActive = false;
+            _context.SaveChanges();
+        }
+
+        #endregion
+        #region ILURegister
+        public async Task<ILURegister?> GetILURegister(int idILUR) {
+            return await _context.ILURegisters
+               .Where(p => p.ILURegisterid == idILUR).FirstOrDefaultAsync();
+        }
+        public async Task<int> AddILURegister(ILURegister iLURegister) {
+            _context.ILURegisters.Add(iLURegister);
+
+            return _context.SaveChanges();
+        }
+        public async Task<int> AddILURegToUser(ILURegister iLURegister, User Master) {
+            Master.ILURegisers?.Add(iLURegister);
+
+            return _context.SaveChanges();
+        }
+        public async Task<int> UpdateILURegister(ILURegister iluRforUpdate, ILURegister iluREntity) {
+            _mapper.Map(iluRforUpdate, iluREntity);
+
+            return _context.SaveChanges();
+        }
+        public async Task<int> RemoveILURegister(ILURegister ILUReg) {
+            var entity = await _context.ILURegisters.Where(u => u.ILURegisterid == ILUReg.ILURegisterid).FirstOrDefaultAsync();
+
+            entity.isActive = false;
+
+            return _context.SaveChanges();
+        }
+
+        #endregion
+        #region PAT
+        public async Task<int> AddPat(PAT patForAdd)
+        {
+            _context.PATs.Add(patForAdd); 
+            return _context.SaveChanges();
+        }
+
+        public async Task<PAT?> GetPat(int patId) {
+            return await _context.PATs.Where(p => p.PATid == patId).FirstOrDefaultAsync(); 
+        }
+        public async Task<PAT?> GetPatForYearOfSV(int sv, int Year) { 
+            return await _context.PATs.Where(p => p.SupervisorId == sv && p.AplicationYear==Year).FirstOrDefaultAsync();
+        }
+        public async Task<int> UpdatePAT(PAT patForUpdate, PAT PatEntity) {
+
+            _mapper.Map(patForUpdate, PatEntity);
+
+            return _context.SaveChanges();
+        }
+        public async Task<IEnumerable<PAT>> GetAllPATs() {
+            return await _context.PATs
+                   .Include(a => a.Area)
+                   .Include(sv => sv.Supervisor)
+                   .Include(ssv => ssv.SSVresponsible)
+                    .OrderBy(c => c.PATid).ToListAsync();
+        }
+        public async Task<IEnumerable<PAT>> GetAllPATsOfSv(int svId) {
+            return await _context.PATs
+                       .Include(a => a.Area)
+                       .Include(sv => sv.Supervisor)
+                       .Include(ssv => ssv.SSVresponsible)
+                       .Where(p => p.SupervisorId == svId)
+                        .OrderBy(c => c.PATid).ToListAsync();
+        }
+        public async Task<IEnumerable<PAT>> GetAllPATsofSSV(int ssvID) {
+            return await _context.PATs
+                           .Include(a => a.Area)
+                           .Include(sv => sv.Supervisor)
+                           .Include(ssv => ssv.SSVresponsible)
+                           .Where(p => p.SSVresponsibleID == ssvID)
+                            .OrderBy(c => c.PATid).ToListAsync();
+        }
+        #endregion
+
         #region CommonOperations
         public async Task<bool> SaveChangesAsync()
         {

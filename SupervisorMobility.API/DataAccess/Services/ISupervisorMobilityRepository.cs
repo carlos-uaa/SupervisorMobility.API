@@ -231,23 +231,25 @@ namespace SupervisorMobility.API.Services
         Task<IEnumerable<Attendance>> GetAllAttendanceOfSupervisor(int idsupervisor);
         #endregion
         #region ILU
-        Task<ILULevel> GetILULevel(int idILU);
-        Task AddILU(ILULevel lU);
-        Task UpdateILU(ILULevel iluforUpdate, ILULevel iluEntity);
+        Task<ILULevel?> GetILULevel(int idILU);
+        Task<int> AddILU(ILULevel lU);
+        Task<int> UpdateILU(ILULevel iluforUpdate, ILULevel iluEntity);
         Task RemoveILU(ILULevel lU);
 
         #endregion
         #region ILURegister
-        Task<ILULevel> GetILURegister(int idILUR);
-        Task AddILURegister(ILURegister id);
-        Task UpdateILURegister(ILURegister iluRforUpdate, ILURegister iluREntity);
-        Task RemoveILURegister(ILURegister id);
+        Task<ILURegister> GetILURegister(int idILUR);
+        Task<int> AddILURegister(ILURegister iLURegister);
+        Task<int> AddILURegToUser(ILURegister iLURegister, User Master);
+        Task<int> UpdateILURegister(ILURegister iluRforUpdate, ILURegister iluREntity);
+        Task<int> RemoveILURegister(ILURegister id);
 
         #endregion
         #region PAT
-        Task<PAT> GetPat (int patId);
-        Task<PAT> GetPatForYearOfSV (int sv, int Year);
-        Task UpdatePAT(PAT patForUpdate, PAT PatEntity);
+        Task<PAT?> GetPat (int patId);
+        Task<int> AddPat (PAT patForAdd);
+        Task<PAT?> GetPatForYearOfSV (int sv, int Year);
+        Task<int> UpdatePAT(PAT patForUpdate, PAT PatEntity);
         Task<IEnumerable<PAT>> GetAllPATs();
         Task<IEnumerable<PAT>> GetAllPATsOfSv(int svId);
         Task<IEnumerable<PAT>> GetAllPATsofSSV(int ssvID);

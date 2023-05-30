@@ -28,5 +28,7 @@ namespace SupervisorMobility.API.DataAccess.Entities.ILU
         [ForeignKey("OperatorId")]
         public ILULevel? ILULevel { get; set; }
 
+        public bool isActive { get; set; }
+
     }
 }

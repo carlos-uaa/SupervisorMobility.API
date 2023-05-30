@@ -12,6 +12,8 @@ namespace SupervisorMobility.API.DataAccess.Entities.LUP
 
         public char ILULevelCode { get; set; }
         public string ILULevelDescription { get; set; } = string.Empty;
+        
+        public bool isActive { get; set; }
 
     }
 }
