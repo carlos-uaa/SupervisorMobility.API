@@ -4,6 +4,8 @@ namespace SupervisorMobility.API.Models.PATDtos
     public class PATwithoutNavigations
     {
 
+        public int PATid { get; set; }
+
         public int SupervisorId { get; set; }
 
         public int? SSVresponsibleID { get; set; }

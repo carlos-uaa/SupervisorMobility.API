@@ -1319,6 +1319,7 @@ namespace SupervisorMobility.API.Services
                    .Include(a => a.Area)
                    .Include(sv => sv.Supervisor)
                    .Include(ssv => ssv.SSVresponsible)
+                   .Include(d => d.Distribution)
                     .OrderBy(c => c.PATid).ToListAsync();
         }
         public async Task<IEnumerable<PAT>> GetAllPATsOfSv(int svId) {
@@ -1326,6 +1327,7 @@ namespace SupervisorMobility.API.Services
                        .Include(a => a.Area)
                        .Include(sv => sv.Supervisor)
                        .Include(ssv => ssv.SSVresponsible)
+                       .Include(d => d.Distribution)
                        .Where(p => p.SupervisorId == svId)
                         .OrderBy(c => c.PATid).ToListAsync();
         }
@@ -1334,6 +1336,7 @@ namespace SupervisorMobility.API.Services
                            .Include(a => a.Area)
                            .Include(sv => sv.Supervisor)
                            .Include(ssv => ssv.SSVresponsible)
+                           .Include(d => d.Distribution)
                            .Where(p => p.SSVresponsibleID == ssvID)
                             .OrderBy(c => c.PATid).ToListAsync();
         }
