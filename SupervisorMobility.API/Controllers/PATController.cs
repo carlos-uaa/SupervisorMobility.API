@@ -40,56 +40,65 @@ namespace SupervisorMobility.API.Controllers
 
 
         [HttpGet("{PATid}")]
-        public async Task<ActionResult<IEnumerable<PATDto>>> getPatById(
+        public async Task<ActionResult<PATDto>> getPatById(
                   int PATid, bool includeCollections = false)
         {
             if (includeCollections)
             {
                 var PatsWhitCollections = await _supervisorMobilityRepository.GetPat(PATid);
-                return Ok(_mapper.Map<IEnumerable<PATDto>>(PatsWhitCollections));
+                return Ok(_mapper.Map<PATDto>(PatsWhitCollections));
 
             }
             else
             {
                 var Pat = await _supervisorMobilityRepository
                                 .GetPat(PATid);
-                return Ok(_mapper.Map<IEnumerable<PATwithoutNavigations>>(Pat));
+                return Ok(_mapper.Map<PATwithoutNavigations>(Pat));
 
             }
         }
-        [HttpGet("SV/{PATid}")]
+
+        [HttpGet]
+            
+        public async Task<ActionResult<IEnumerable<PATDto>>> getAllPats()
+        {
+                var Pats = await _supervisorMobilityRepository.GetAllPATs();
+                return Ok(_mapper.Map<IEnumerable<PATwithoutNavigations>>(Pats));
+        }
+
+        [HttpGet("SV/{idSV}")]
         public async Task<ActionResult<IEnumerable<PATDto>>> getAllPatsSV(
-                    int idSup, bool includeCollections = false)
+                    int idSV, bool includeCollections = false)
         {
             if (includeCollections)
             {
-                var PatsWhitCollections = await _supervisorMobilityRepository.GetAllPATsOfSv(idSup);
+                var PatsWhitCollections = await _supervisorMobilityRepository.GetAllPATsOfSv(idSV);
                 return Ok(_mapper.Map<IEnumerable<PATDto>>(PatsWhitCollections));
 
             }
             else
             {
                 var Pats = await _supervisorMobilityRepository
-                                .GetAllPATsOfSv(idSup);
+                                .GetAllPATsOfSv(idSV);
                 return Ok(_mapper.Map<IEnumerable<PATwithoutNavigations>>(Pats));
 
             }
         }
 
-        [HttpGet("SSV/{PATid}")]
+        [HttpGet("SSV/{idSSV}")]
         public async Task<ActionResult<IEnumerable<PATDto>>> getAllPatsSSV(
-                    int idSup, bool includeCollections = false)
+                    int idSSV, bool includeCollections = false)
         {
             if (includeCollections)
             {
-                var PatsWhitCollections = await _supervisorMobilityRepository.GetAllPATsofSSV(idSup);
+                var PatsWhitCollections = await _supervisorMobilityRepository.GetAllPATsofSSV(idSSV);
                 return Ok(_mapper.Map<IEnumerable<PATDto>>(PatsWhitCollections));
 
             }
             else
             {
                 var Pats = await _supervisorMobilityRepository
-                                .GetAllPATsofSSV(idSup);
+                                .GetAllPATsofSSV(idSSV);
                 return Ok(_mapper.Map<IEnumerable<PATwithoutNavigations>>(Pats));
 
             }

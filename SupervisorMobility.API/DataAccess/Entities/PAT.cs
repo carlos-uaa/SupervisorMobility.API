@@ -8,7 +8,7 @@ namespace SupervisorMobility.API.DataAccess.Entities
         [Key, DatabaseGenerated(DatabaseGeneratedOption.Identity)]
         public int PATid { get; set; }
 
-        public int SupervisorId { get; set; }
+        public int? SupervisorId { get; set; }
 
         public User? Supervisor
         {
@@ -30,13 +30,16 @@ namespace SupervisorMobility.API.DataAccess.Entities
         private User? _supervisor;
 
         public int? SSVresponsibleID { get; set; }
+
         public User? SSVresponsible { get; set; }
 
-
-        public int AreaId { get; set; }
+        public int? AreaId { get; set; }
+        [ForeignKey("AreaId")]
         public Area? Area { get; set; }
 
-        public int DistributionId { get; set; }
+        public int? DistributionId { get; set; }
+        [ForeignKey("DistributionId")]
+        [NotMapped]
         public Distribution? Distribution { get; set; }
 
 
@@ -59,6 +62,6 @@ namespace SupervisorMobility.API.DataAccess.Entities
         [Column(TypeName = "Date")]
         public DateTime? ApprovalDate { get; set; }
 
-        public bool isActive { get; set; }
+        public bool IsActive { get; set; }
     }
 }

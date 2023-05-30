@@ -18,7 +18,28 @@ namespace SupervisorMobility.API.Models.PATDtos
         public int? AplicationYear
         {
             get { return AplicationDate?.Year; }
-            set { AplicationDate = value != null ? new DateTime(value.Value, 1, 1) : null; }
+            set
+            {
+                if (value != null)
+                {
+                    int year = value.Value;
+                    if (year >= 1 && year <= 9999)
+                    {
+                        AplicationDate = new DateTime(year, 1, 1);
+                    }
+                    else
+                    {
+                        // Manejar el caso en el que el año está fuera del rango válido
+                        // Puedes lanzar una excepción, asignar un valor predeterminado, etc.
+                        // Por ejemplo:
+                        throw new ArgumentOutOfRangeException("El año está fuera del rango válido.");
+                    }
+                }
+                else
+                {
+                    AplicationDate = null;
+                }
+            }
         }
 
         public DateTime? CreationDate { get; set; }

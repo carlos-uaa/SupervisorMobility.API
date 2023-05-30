@@ -149,8 +149,10 @@ namespace SupervisorMobility.API.Context
 
             modelBuilder.Entity<LogEvent>()
               .Property(e => e.LogEventId)
-              .UseIdentityColumn();           
-            
+              .UseIdentityColumn();
+
+     
+
             modelBuilder.Entity<LogSpecificEvent>()
               .Property(e => e.LogSpecificEventId)
               .UseIdentityColumn();
@@ -158,6 +160,34 @@ namespace SupervisorMobility.API.Context
             modelBuilder.Entity<PAT>()
               .Property(e => e.PATid)
               .UseIdentityColumn();
+
+            modelBuilder.Entity<PAT>()
+              .Property(p => p.IsActive)
+              .HasDefaultValue(true);
+
+            modelBuilder.Entity<PAT>()
+               .HasOne(p => p.Area)
+               .WithMany()
+               .HasForeignKey(p => p.AreaId)
+               .OnDelete(DeleteBehavior.NoAction);
+
+            modelBuilder.Entity<PAT>()
+                .HasOne(p => p.SSVresponsible)
+                .WithMany()
+                .HasForeignKey(p => p.SSVresponsibleID)
+                .OnDelete(DeleteBehavior.NoAction);
+            
+            modelBuilder.Entity<PAT>()
+                .HasOne(p => p.Supervisor)
+                .WithMany()
+                .HasForeignKey(p => p.SupervisorId)
+                .OnDelete(DeleteBehavior.NoAction);
+
+            modelBuilder.Entity<PAT>()
+                .HasOne(p => p.Distribution)
+                .WithMany()
+                .HasForeignKey(p => p.DistributionId)
+                .OnDelete(DeleteBehavior.NoAction);
 
             modelBuilder.Entity<ILULevel>()
            .Property(e => e.ILULevelId)
