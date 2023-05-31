@@ -59,11 +59,18 @@ namespace SupervisorMobility.API.Controllers
         }
 
         [HttpGet]
-            
-        public async Task<ActionResult<IEnumerable<PATDto>>> getAllPats()
+        public async Task<ActionResult<IEnumerable<PATDto>>> getAllPats(bool includeCollections = false)
         {
+            if (includeCollections)
+            {
+                var PatWithCollections = await _supervisorMobilityRepository.GetAllPATs();
+                return Ok(_mapper.Map<IEnumerable<PATDto>>(PatWithCollections));
+            }
+            else
+            {
                 var Pats = await _supervisorMobilityRepository.GetAllPATs();
                 return Ok(_mapper.Map<IEnumerable<PATwithoutNavigations>>(Pats));
+            }
         }
 
         [HttpGet("SV/{idSV}")]
