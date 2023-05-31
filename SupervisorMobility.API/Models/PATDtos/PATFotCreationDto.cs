@@ -1,4 +1,5 @@
 ﻿using SupervisorMobility.API.DataAccess.Entities;
+using SupervisorMobility.API.Entities;
 using System.ComponentModel.DataAnnotations.Schema;
 
 namespace SupervisorMobility.API.Models.PATDtos
@@ -9,6 +10,8 @@ namespace SupervisorMobility.API.Models.PATDtos
 
         public int? SSVresponsibleID { get; set; }
 
+
+        public int PlantId { get; set; }
         public int AreaId { get; set; }
 
         public int DistributionId { get; set; }

@@ -1,4 +1,6 @@
-﻿namespace SupervisorMobility.API.Models.PATDtos
+﻿using SupervisorMobility.API.Entities;
+
+namespace SupervisorMobility.API.Models.PATDtos
 {
     public class PATForUpdateDto
     {
@@ -6,6 +8,8 @@
 
         public int? SSVresponsibleID { get; set; }
 
+
+        public int PlantId { get; set; }
         public int AreaId { get; set; }
 
         public int DistributionId { get; set; }

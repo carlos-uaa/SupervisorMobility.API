@@ -1,5 +1,7 @@
 ﻿
 
+using SupervisorMobility.API.Entities;
+using SupervisorMobility.API.Models.PlantDtos;
 using SupervisorMobility.API.Models.Users;
 
 namespace SupervisorMobility.API.Models.PATDtos
@@ -33,6 +35,8 @@ namespace SupervisorMobility.API.Models.PATDtos
         public UsersWithNavigationDetails? SSVresponsible { get; set; }
 
 
+        public int PlantId { get; set; }
+        public PlantDto? Plant { get; set; }
         public int AreaId { get; set; }
         public AreaDtos.AreaWithoutNavigationPropertiesDto? Area { get; set; }
 
