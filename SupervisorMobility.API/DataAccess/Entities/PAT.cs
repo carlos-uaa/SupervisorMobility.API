@@ -1,5 +1,6 @@
 ﻿using System.ComponentModel.DataAnnotations.Schema;
 using System.ComponentModel.DataAnnotations;
+using SupervisorMobility.API.Entities;
 
 namespace SupervisorMobility.API.DataAccess.Entities
 {
@@ -33,8 +34,16 @@ namespace SupervisorMobility.API.DataAccess.Entities
 
         public User? SSVresponsible { get; set; }
 
+        public int? PlantId { get; set; }
+        [ForeignKey("PlantId")]
+        [NotMapped]
+
+        public Plant? Plant { get; set; }
+
         public int? AreaId { get; set; }
         [ForeignKey("AreaId")]
+        [NotMapped]
+
         public Area? Area { get; set; }
 
         public int? DistributionId { get; set; }

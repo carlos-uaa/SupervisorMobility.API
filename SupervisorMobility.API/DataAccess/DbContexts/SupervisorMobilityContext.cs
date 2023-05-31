@@ -897,6 +897,26 @@ namespace SupervisorMobility.API.Context
                         NotificationText = "Example of notify Read and delete"
                     });
 
+            modelBuilder.Entity<ILULevel>()
+                    .HasData(
+                            new ILULevel()
+                            {
+                                ILULevelId = 1,
+                                ILULevelCode = 'I',
+                                ILULevelDescription = "el operador necesita entrenamiento para realizar la operación"
+                            },
+                            new ILULevel()
+                            {
+                                ILULevelId = 2,
+                                ILULevelCode = 'L',
+                                ILULevelDescription = "el operador ya la puede realizar por si mismo"
+                            }, new ILULevel()
+                            {
+                                ILULevelId = 3,
+                                ILULevelCode = 'U',
+                                ILULevelDescription = "el operador domina la operación y puede enseñar"
+                            }
+                    );
 
             base.OnModelCreating(modelBuilder);
         }
