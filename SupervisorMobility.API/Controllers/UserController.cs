@@ -59,6 +59,20 @@ namespace SupervisorMobility.API.Controllers
                 return Ok(_mapper.Map<IEnumerable<UsersWithoutNavigationDetails>>(userEntity));
             }
         }
+        
+        [HttpGet("{SupervisorId}/Subordinates")]
+        public async Task<ActionResult<IEnumerable<UsersWithNavigationDetails>>> GetSubordinates(int SupervisorId, bool collections = false)
+        {
+            var userEntity = await _supervisorMobilityRepository.GetUserAsync(SupervisorId, true);
+            if (collections)
+            {
+                return Ok(_mapper.Map<IEnumerable<UsersWithNavigationDetails>>(userEntity.Subordinates));
+            }
+            else
+            {
+                return Ok(_mapper.Map<IEnumerable<UsersWithoutNavigationDetails>>(userEntity.Subordinates));
+            }
+        }
 
         [HttpGet("{userId}")]
         public async Task<ActionResult<UsersWithNavigationDetails>> GetUser(int userId, bool collections = false)
