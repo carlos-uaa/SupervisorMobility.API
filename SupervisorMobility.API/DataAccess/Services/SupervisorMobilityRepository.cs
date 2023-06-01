@@ -1246,6 +1246,12 @@ namespace SupervisorMobility.API.Services
             return await _context.ILULevels
             .Where(p => p.ILULevelId == idILU).FirstOrDefaultAsync();
         }
+
+        public async Task<IEnumerable<ILULevel>> GetAllILULevel()
+        {
+            return await _context.ILULevels
+                    .OrderBy(c => c.ILULevelId).ToListAsync();
+        }
         public async Task<int> AddILU(ILULevel lU) {
             _context.ILULevels.Add(lU);
 

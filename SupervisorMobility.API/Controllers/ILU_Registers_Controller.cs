@@ -5,9 +5,11 @@ using Microsoft.AspNetCore.Mvc;
 using SupervisorMobility.API.DataAccess.Entities;
 using SupervisorMobility.API.DataAccess.Entities.ILU;
 using SupervisorMobility.API.Models.AreaDtos;
+using SupervisorMobility.API.Models.ILU;
 using SupervisorMobility.API.Models.ILURegisterDtos;
 using SupervisorMobility.API.Models.PATDtos;
 using SupervisorMobility.API.Services;
+using System.Collections.Generic;
 
 namespace SupervisorMobility.API.Controllers
 {
@@ -31,7 +33,7 @@ namespace SupervisorMobility.API.Controllers
 
 
         [HttpPost("Register")]
-        public async Task<ActionResult> AddNewPat(ILURegisterForCreationDto ILUToRegister, int userID)
+        public async Task<ActionResult> AddNewILU(ILURegisterForCreationDto ILUToRegister, int userID)
         {
             var finalILURegister = _mapper.Map<ILURegister>(ILUToRegister);
 
@@ -65,6 +67,23 @@ namespace SupervisorMobility.API.Controllers
             {
                 var Pat = await _supervisorMobilityRepository.GetPat(ILURegisterId);
                 return Ok(_mapper.Map<ILURegisterWithoutNavigationDto>(Pat));
+            }
+        }
+
+
+        [HttpGet("Levels")]
+        public async Task<ActionResult<IEnumerable<ILULevelDto>>> GetAllLevelsILU(bool includeCollections = false)
+        {
+            if (includeCollections)
+            {
+                var PatsWhitCollections = await _supervisorMobilityRepository.GetAllILULevel();
+                return Ok(_mapper.Map<IEnumerable<ILULevelDto>> (PatsWhitCollections));
+
+            }
+            else
+            {
+                var Pat = await _supervisorMobilityRepository.GetAllILULevel();
+                return Ok(_mapper.Map<IEnumerable<ILULevelDto>>(Pat));
             }
         }
 

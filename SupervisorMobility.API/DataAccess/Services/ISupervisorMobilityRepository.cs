@@ -232,6 +232,7 @@ namespace SupervisorMobility.API.Services
         #endregion
         #region ILU
         Task<ILULevel?> GetILULevel(int idILU);
+        Task<IEnumerable<ILULevel>> GetAllILULevel();
         Task<int> AddILU(ILULevel lU);
         Task<int> UpdateILU(ILULevel iluforUpdate, ILULevel iluEntity);
         Task RemoveILU(ILULevel lU);
