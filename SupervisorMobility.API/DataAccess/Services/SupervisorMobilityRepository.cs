@@ -1314,7 +1314,11 @@ namespace SupervisorMobility.API.Services
         }
 
         public async Task<PAT?> GetPat(int patId) {
-            return await _context.PATs.Where(p => p.PATid == patId).FirstOrDefaultAsync(); 
+            return await _context.PATs
+                   .Include(a => a.Area)
+                   .Include(sv => sv.Supervisor)
+                   .Include(ssv => ssv.SSVresponsible)
+                   .Include(d => d.Distribution).Where(p => p.PATid == patId).FirstOrDefaultAsync(); 
         }
         public async Task<PAT?> GetPatForYearOfSV(int sv, int Year) { 
             return await _context.PATs.Where(p => p.SupervisorId == sv && p.AplicationYear==Year).FirstOrDefaultAsync();
