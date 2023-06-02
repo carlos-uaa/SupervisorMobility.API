@@ -197,9 +197,14 @@ namespace SupervisorMobility.API.Context
            .Property(e => e.ILURegisterid)
            .UseIdentityColumn();
 
+            modelBuilder.Entity<ILURegister>()
+                .Property(p => p.isActive)
+                .HasDefaultValue(true); 
+
             modelBuilder.Entity<Notification>()
                 .Property(p => p.IsActive)
                 .HasDefaultValue(true);
+
 
             modelBuilder.Entity<JobObservationVersion>()
                 .Property(p => p.IsActive)

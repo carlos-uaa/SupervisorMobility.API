@@ -766,6 +766,7 @@ namespace SupervisorMobility.API.Services
                 .Include(s => s.Superior)
                 .Include(ss => ss.Subordinates)
                 .Include(aa => aa.Areas)
+                .Include(ILU => ILU.ILURegisers)
                  .OrderBy(c => c.UserId).ToListAsync();
         }
         public async Task<IEnumerable<User>> GetAllUsersWhitPlantAreaAndGroupAsync()
@@ -789,6 +790,7 @@ namespace SupervisorMobility.API.Services
                 .Include(g => g.Group)
                 .Include(s => s.Superior)
                 .Include(ss => ss.Subordinates)
+                .Include(ILU => ILU.ILURegisers)
                 .Include(aa => aa.Areas)
                 .Where(p => p.UserId == userId).FirstOrDefaultAsync();
             }
@@ -803,6 +805,7 @@ namespace SupervisorMobility.API.Services
                 .Include(g => g.Group)
                 .Include(s => s.Superior)
                 .Include(ss => ss.Subordinates)
+                .Include(ILU => ILU.ILURegisers)
                 .Include(aa => aa.Areas)
             .Where(p => p.ObjectId == objectId).FirstOrDefaultAsync();
         }
@@ -816,6 +819,7 @@ namespace SupervisorMobility.API.Services
                 .Include(g => g.Group)
                 .Include(s => s.Superior)
                 .Include(ss => ss.Subordinates)
+                .Include(ILU => ILU.ILURegisers)
                 .Include(aa => aa.Areas)
             .Where(p => p.Email == email).FirstOrDefaultAsync();
         } 
@@ -829,6 +833,7 @@ namespace SupervisorMobility.API.Services
                 .Include(s => s.Superior)
                 .Include(ss => ss.Subordinates)
                 .Include(aa => aa.Areas)
+                .Include(ILU => ILU.ILURegisers)
             .Where(p => p.Payroll == payroll).FirstOrDefaultAsync();
         }
 

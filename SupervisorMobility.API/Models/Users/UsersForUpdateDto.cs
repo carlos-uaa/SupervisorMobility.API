@@ -1,4 +1,6 @@
-﻿ namespace SupervisorMobility.API.Models.Users
+﻿using SupervisorMobility.API.Models.ILURegisterDtos;
+
+namespace SupervisorMobility.API.Models.Users
 {
     public class UsersForUpdateDto
     {
@@ -22,6 +24,8 @@
         public int? GroupId { get; set; }
         public int? DistributionId { get; set; }
         public ICollection<UsersWithoutNavigationDetails>? Subordinates { get; set; }
+        public ICollection<ILURegisterWithoutNavigationDto>? ILURegisers { get; set; }
+
         public ICollection<AreaDtos.AreaWithoutNavigationPropertiesDto>? Areas { get; set; }
 
 

@@ -1,6 +1,7 @@
 ﻿using SupervisorMobility.API.Models.AreaDtos;
 using SupervisorMobility.API.Models.DistributionDtos;
 using SupervisorMobility.API.Models.GroupDtos;
+using SupervisorMobility.API.Models.ILURegisterDtos;
 using SupervisorMobility.API.Models.PlantDtos;
 
 namespace SupervisorMobility.API.Models.Users
@@ -31,6 +32,7 @@ namespace SupervisorMobility.API.Models.Users
         public PlantDto? Plant { get; set; } = new PlantDto();
         public AreaWithoutNavigationPropertiesDto? Area { get; set; } = new AreaWithoutNavigationPropertiesDto();
         public GroupDto? Group { get; set; } = new GroupDto();
+        public ICollection<ILURegisterWithoutNavigationDto>? ILURegisers { get; set; }
 
 
 

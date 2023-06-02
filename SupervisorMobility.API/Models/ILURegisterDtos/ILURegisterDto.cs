@@ -23,5 +23,6 @@ namespace SupervisorMobility.API.Models.ILURegisterDtos
 
         public int? ILULevelId { get; set; }
         public ILULevelDto? ILULevel { get; set; }
+        public bool isActive { get; set; }
     }
 }

@@ -16,12 +16,12 @@ namespace SupervisorMobility.API.Controllers
         [Route("api/ILU")]
         [ApiController]
 
-    public class ILU_RegistersController : ControllerBase
+    public class ILU_Controller : ControllerBase
     {
         private readonly IMapper _mapper;
         private readonly ISupervisorMobilityRepository _supervisorMobilityRepository;
 
-        public ILU_RegistersController(ISupervisorMobilityRepository supervisorMobilityRepository,
+        public ILU_Controller(ISupervisorMobilityRepository supervisorMobilityRepository,
             IMapper mapper)
         {
             _supervisorMobilityRepository = supervisorMobilityRepository ??
@@ -41,10 +41,12 @@ namespace SupervisorMobility.API.Controllers
           
             if(MasterUser != null)
             {
-                var result = await _supervisorMobilityRepository.AddILURegToUser(finalILURegister, MasterUser);
+                var Createresult =  await _supervisorMobilityRepository.AddILURegister(finalILURegister);
 
-                if (result > 0)
+                if (Createresult > 0)
                 {
+                    var AddToUserResult = await _supervisorMobilityRepository.AddILURegToUser(finalILURegister, MasterUser);
+                   
                     return Ok(finalILURegister);
                 }
 
