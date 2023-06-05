@@ -30,7 +30,11 @@ x86/
 [Aa][Rr][Mm]64/
 bld/
 [Bb]in/
-[Uu]ploads/
+[Uu]ploads/[Aa]ssycharts/*
+[Uu]ploads/[Aa]ttendance/*
+[Uu]ploads/[Ee]vidence/*
+[Uu]ploads/[Gg]uides/*
+[Uu]ploads/[Mm]assive/*
 [Mm]igrations/
 [Oo]bj/
 [Oo]ut/
