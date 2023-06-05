@@ -647,56 +647,47 @@ namespace SupervisorMobility.API.Context
                 new User
                 {
                     UserId = 1,
-                    PlantId = 1,
-                    AreaId = 1,
-                    DistributionId = null,
-                    GroupId = 1,
+                    ObjectId = "pmunozsinco@compasdcpcs.local",
                     Name = "Pedro",
-                    Email = "pmunozsinco@compasdcpcs.local",
-                    Payroll = null,
+                    Email = "pmunoz@gruposinco.com.mx",
                     IsActive = true,
                     UserType = 1
                 },
                 new User
                 {
                     UserId = 2,
-                    PlantId = 1,
-                    AreaId = 1,
-                    DistributionId = null,
-                    GroupId = 1,
-                    Name = "Marco",
-                    ObjectId = "4f54e317",
-                    Payroll = 239935,
-                    IsActive = true,
-                    UserType = 4
-
-                },
-                new User
-                {
-                    UserId = 3,
-                    PlantId = 1,
-                    AreaId = 1,
-                    DistributionId = null,
-                    GroupId = 1,
-                    ObjectId = "bb5a1c89-b35e-482a-8e92-931917221add",
+                    ObjectId = "maguayosinco@compasdcpcs.local",
                     Name = "Marco Aguayo",
-                    Payroll = 0906,
+                    Email = "maguayo@gruposinco.com.mx",
                     IsActive = true,
                     UserType = 1,
                 }
                 , new User
                 {
-                    UserId = 4,
+                    UserId = 3,
+                    ObjectId = "SSV@compasdcpcs.local",
                     PlantId = 1,
                     AreaId = 1,
                     DistributionId = null,
                     GroupId = 1,
                     Name = "SeniorSupervisor",
-                    ObjectId = "4fe317",
                     Payroll = 4,
                     IsActive = true,
                     UserType = 2,
-                    SuperiorId = 3
+                }, new User
+                {
+                    UserId = 4,
+                    ObjectId = "SV@compasdcpcs.local",
+                    PlantId = 1,
+                    AreaId = 1,
+                    DistributionId = null,
+                    GroupId = 1,
+                    Name = "Supervisor",
+                    Payroll = 5,
+                    IsActive = true,
+                    UserType = 3,
+                    SuperiorId = 3,
+
                 }, new User
                 {
                     UserId = 5,
@@ -704,26 +695,24 @@ namespace SupervisorMobility.API.Context
                     AreaId = 1,
                     DistributionId = null,
                     GroupId = 1,
-                    Name = "Supervisor",
-                    ObjectId = "4f5317",
-                    Payroll = 5,
+                    Name = "Operador 1",
+                    Payroll = 6,
                     IsActive = true,
-                    UserType = 3,
+                    UserType = 4,
                     SuperiorId = 4,
-
-                }, new User
+                },
+                new User
                 {
                     UserId = 6,
                     PlantId = 1,
                     AreaId = 1,
                     DistributionId = null,
                     GroupId = 1,
-                    Name = "Operador 1",
-                    ObjectId = "4f54e7",
-                    Payroll = 6,
+                    Name = "Operador 2",
+                    Payroll = 7,
                     IsActive = true,
                     UserType = 4,
-                    SuperiorId = 5,
+                    SuperiorId = 4,
                 },
                 new User
                 {
@@ -732,12 +721,11 @@ namespace SupervisorMobility.API.Context
                     AreaId = 1,
                     DistributionId = null,
                     GroupId = 1,
-                    Name = "Operador 2",
-                    ObjectId = "4f54e7",
-                    Payroll = 7,
+                    Name = "Operador 3",
+                    Payroll = 8,
                     IsActive = true,
                     UserType = 4,
-                    SuperiorId = 1,
+                    SuperiorId = 4,
                 },
                 new User
                 {
@@ -746,40 +734,11 @@ namespace SupervisorMobility.API.Context
                     AreaId = 1,
                     DistributionId = null,
                     GroupId = 1,
-                    Name = "Operador 3",
-                    ObjectId = "4f54e7",
-                    Payroll = 8,
-                    IsActive = true,
-                    UserType = 4,
-                    SuperiorId = 1,
-                },
-                new User
-                {
-                    UserId = 9,
-                    PlantId = 1,
-                    AreaId = 1,
-                    DistributionId = null,
-                    GroupId = 1,
                     Name = "Operador 4",
-                    ObjectId = "4f54e7",
                     Payroll = 9,
                     IsActive = true,
                     UserType = 4,
-                    SuperiorId = 1,
-                },
-                new User
-                {
-                    UserId = 10,
-                    PlantId = 1,
-                    AreaId = 1,
-                    DistributionId = null,
-                    GroupId = 1,
-                    Name = "pmunoz@gruposinco.com.mx",
-                    ObjectId = "7f223478-bd34-445b-b662-0f64caa9998c",
-                    Payroll = 10,
-                    IsActive = true,
-                    UserType = 1,
-                    SuperiorId = 1,
+                    SuperiorId = 4,
                 }
                 );;
 
