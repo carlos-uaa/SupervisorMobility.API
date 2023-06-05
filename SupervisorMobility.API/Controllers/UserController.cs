@@ -462,7 +462,7 @@ namespace SupervisorMobility.API.Controllers
 
                 var UserToReturn = new User();
 
-                if (item.PlantId == 0)
+                if (item.PlantId == 0 || item.PlantId == -1)
                 {
                     item.PlantId = null;
                 }
@@ -474,7 +474,7 @@ namespace SupervisorMobility.API.Controllers
                     }
                 }
 
-                if (item.AreaId == 0)
+                if (item.AreaId == 0 || item.AreaId == -1)
                 {
                     item.AreaId = null;
                 }
@@ -486,7 +486,7 @@ namespace SupervisorMobility.API.Controllers
                     }
                 }
 
-                if (item.GroupId == 0)
+                if (item.GroupId == 0 || item.GroupId == -1)
                 {
                     item.GroupId = null;
                 }
@@ -498,7 +498,7 @@ namespace SupervisorMobility.API.Controllers
                     }
                 }
 
-                if (item.DistributionId == 0)
+                if (item.DistributionId == 0 || item.DistributionId == -1)
                 {
                     item.DistributionId = null;
                 }
@@ -510,12 +510,12 @@ namespace SupervisorMobility.API.Controllers
                     }
                 }
 
-                if (item.Payroll == 0)
+                if (item.Payroll == 0 || item.Payroll == -1)
                 {
                     item.Payroll = null;
                 }
 
-                if (item.SuperiorId == 0)
+                if (item.SuperiorId == 0 || item.SuperiorId == -1)
                 {
                     item.SuperiorId = null;
                 }
@@ -822,7 +822,7 @@ namespace SupervisorMobility.API.Controllers
 
                 var UserToReturn = new User();
 
-                if (item.PlantId == 0)
+                if (item.PlantId == 0 || item.PlantId == -1)
                 {
                     item.PlantId = null;
                 }
@@ -834,7 +834,7 @@ namespace SupervisorMobility.API.Controllers
                     }
                 }
 
-                if (item.AreaId == 0)
+                if (item.AreaId == 0 || item.AreaId == -1)
                 {
                     item.AreaId = null;
                 }
@@ -846,7 +846,7 @@ namespace SupervisorMobility.API.Controllers
                     }
                 }
 
-                if (item.GroupId == 0)
+                if (item.GroupId == 0 || item.GroupId == -1)
                 {
                     item.GroupId = null;
                 }
@@ -858,7 +858,7 @@ namespace SupervisorMobility.API.Controllers
                     }
                 }
 
-                if (item.DistributionId == 0)
+                if (item.DistributionId == 0 || item.DistributionId == -1)
                 {
                     item.DistributionId = null;
                 }
@@ -870,12 +870,12 @@ namespace SupervisorMobility.API.Controllers
                     }
                 }
 
-                if (item.Payroll == 0)
+                if (item.Payroll == 0 || item.Payroll == -1)
                 {
                     item.Payroll = null;
                 }
 
-                if (item.SuperiorId == 0)
+                if (item.SuperiorId == 0 || item.SuperiorId == -1)
                 {
                     item.SuperiorId = null;
                 }
@@ -1172,7 +1172,7 @@ namespace SupervisorMobility.API.Controllers
                             {
                                 RowsInFile.Clear();
 
-                                foreach (IXLCell cell in row.Cells(1, 12))
+                                foreach (IXLCell cell in row.Cells(1, 13))
                                 {
                                     string toinsert = "§";
 
@@ -2074,8 +2074,7 @@ namespace SupervisorMobility.API.Controllers
 
             ws.RenameWorksheet(SLDocument.DefaultFirstSheetName, "Users Bulk");
 
-            //ROW Data identificators
-
+         
             ws.SetCellValue("A1", "UserId");
             ws.SetCellValue("B1", "UserName@compasdcpcs.local");
             ws.SetCellValue("C1", "Payroll");
@@ -2089,6 +2088,31 @@ namespace SupervisorMobility.API.Controllers
             ws.SetCellValue("K1", "Group");
             ws.SetCellValue("L1", "Distribution");
 
+
+            ws.SetCellValue("A2", "This field is used for the User_id registered in the Mobility supervisor system,");
+            ws.SetCellValue("B2", "This field is used for the UserName");
+            ws.SetCellValue("C2", "This field is used for the Payroll");
+            ws.SetCellValue("D2", "This field is used for the staff name");
+            ws.SetCellValue("E2", "This field is for the e-mail address, to which the notifications will be sent.");
+            ws.SetCellValue("F2", "This field belongs to the user's privilege level within the system.");
+            ws.SetCellValue("G2", "This field is used for the User_id Superior registered in the Mobility supervisor system");
+            ws.SetCellValue("H2", "This field is used for the User_id's Subordinates registered in the Mobility supervisor system");
+            ws.SetCellValue("I2", "This field is used for the Plant_id registered in the Mobility supervisor system");
+            ws.SetCellValue("J2", "This field is used for the Area_id registered in the Mobility supervisor system");
+            ws.SetCellValue("K2", "This field is used for the Group_id registered in the Mobility supervisor system");
+            ws.SetCellValue("L2", "This field is used for the Distribution_id registered in the Mobility supervisor system");
+
+            ws.SetCellValue("A3", "in case it already exists, the user information will be updated.");
+            ws.SetCellValue("B3", "Is the email provided by the activedirectory under the name PrincipalName");
+            ws.SetCellValue("E3", "Preferably the e-mail address that the person uses to receive the job information.");
+            ws.SetCellValue("F3", "1 - Admin: Full access to the entire system, 2 - SSV, 3 - SV, 4 - Operator");
+            ws.SetCellValue("J3", "In case you are registering an SSV, which has several areas, it is necessary to separate them by commas. eg (1,2,3) without parentheses");
+            ws.SetCellValue("H3", "In case only have one Subordinate, the User_ID of subordinated register in Mobility supervisor system");
+            ws.SetCellValue("L3", "Can be left blank");
+
+            ws.SetCellValue("H4", "In case you are registering many Subordinates, it is necessary to separate them by commas. eg: (1,2,3) without parentheses ");
+            ws.SetCellValue("J4", "In case you are registering an SV,the id of one of the areas administering the SSV who will be his or her superior");
+           
 
             ws.SaveAs(ms);
 
@@ -2117,6 +2141,20 @@ namespace SupervisorMobility.API.Controllers
             ws.SetCellValue("D1", "Plant");
             ws.SetCellValue("E1", "Group");
             ws.SetCellValue("F1", "AreasManage");
+            ws.SetCellValue("G1", "UserName@compasdcpcs.local");
+
+            ws.SetCellValue("A2", "This field is used for the User_id registered in the Mobility supervisor system,");
+            ws.SetCellValue("B2", "This field is used for the staff name");
+            ws.SetCellValue("C2", "This field is for the e-mail address, to which the notifications will be sent.");
+            ws.SetCellValue("D2", "This field is used for the Plant_id registered in the Mobility supervisor system");
+            ws.SetCellValue("E2", "This field is used for the Group_id registered in the Mobility supervisor system");
+            ws.SetCellValue("F2", "This field is used for the Area_id registered in the Mobility supervisor system");
+            ws.SetCellValue("G2", "This field is used for the UserName");
+
+            ws.SetCellValue("A3", "in case it already exists, the user information will be updated.");
+            ws.SetCellValue("C3", "Preferably the e-mail address that the person uses to receive the job information.");
+            ws.SetCellValue("F3", "In case of having several areas, it is necessary to separate them by commas. eg (1,2,3) without parentheses");
+            ws.SetCellValue("G3", "Is the email provided by the activedirectory under the name PrincipalName");
 
             ws.SaveAs(ms);
 
@@ -2145,6 +2183,23 @@ namespace SupervisorMobility.API.Controllers
             ws.SetCellValue("C1", "Email");
             ws.SetCellValue("D1", "SSV_Id Superior");
             ws.SetCellValue("E1", "Assign Area_ID");
+            ws.SetCellValue("F1", "UserName@compasdcpcs.local");
+
+
+
+            ws.SetCellValue("A2", "This field is used for the User_id registered in the Mobility supervisor system,");
+            ws.SetCellValue("B2", "This field is used for the staff name");
+            ws.SetCellValue("C2", "This field is for the e-mail address, to which the notifications will be sent.");
+            ws.SetCellValue("D2", "This field is used for the User_id registered in the Mobility supervisor system");
+            ws.SetCellValue("E2", "This field is used for the Area_id registered in the Mobility supervisor system");
+            ws.SetCellValue("F2", "This field is used for the UserName");
+
+            ws.SetCellValue("A3", "in case it already exists, the user information will be updated.");
+            ws.SetCellValue("C3", "Preferably the e-mail address that the person uses to receive the job information.");
+            ws.SetCellValue("D3", "the id of the person who will be his or her superior");
+            ws.SetCellValue("E3", "the id of one of the areas administering the SSV who will be his or her superior");
+            ws.SetCellValue("F3", "Is the email provided by the activedirectory under the name PrincipalName");
+
 
             ws.SaveAs(ms);
 
@@ -2173,6 +2228,15 @@ namespace SupervisorMobility.API.Controllers
             ws.SetCellValue("C1", "Name");
             ws.SetCellValue("D1", "Distribution Id");
             ws.SetCellValue("E1", "Supervisor_Id Superior");
+
+            ws.SetCellValue("A2", "This field is used for the User_id registered in the Mobility supervisor system,");
+            ws.SetCellValue("B2", "This field is used for the Payroll");
+            ws.SetCellValue("C2", "This field is used for the UserName");
+            ws.SetCellValue("D2", "This field is used for the Distribution_id registered in the Mobility supervisor system");
+            ws.SetCellValue("E2", "This field is used for the User_id Superior registered in the Mobility supervisor system");
+            
+            ws.SetCellValue("A3", "in case it already exists, the user information will be updated.");
+            ws.SetCellValue("D3", "Can be left blank");
 
             ws.SaveAs(ms);
 

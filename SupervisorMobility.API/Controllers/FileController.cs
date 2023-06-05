@@ -1220,6 +1220,70 @@ namespace SupervisorMobility.API.Controllers
         }
 
         [EnableCors("Cors")]
+        [HttpGet("Users/DownloadAllExample")]
+        public async Task<IActionResult> DownloadAllExample()
+        {
+            var path = Path.Combine(_env.ContentRootPath, "Documents\\All_Example.xlsx");
+
+            var memory = new MemoryStream();
+            using (var stream = new FileStream(path, FileMode.Open))
+            {
+                await stream.CopyToAsync(memory);
+            }
+            memory.Position = 0;
+            return File(memory, "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet", Path.GetFileName(path));
+
+        }//end download file function 
+
+        [EnableCors("Cors")]
+        [HttpGet("Users/DownloadSSVExample")]
+        public async Task<IActionResult> DownloadSSVExample()
+        {
+            var path = Path.Combine(_env.ContentRootPath, "Documents\\SSV_Example.xlsx");
+
+            var memory = new MemoryStream();
+            using (var stream = new FileStream(path, FileMode.Open))
+            {
+                await stream.CopyToAsync(memory);
+            }
+            memory.Position = 0;
+            return File(memory, "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet", Path.GetFileName(path));
+
+        }//end download file function 
+
+        [EnableCors("Cors")]
+        [HttpGet("Users/DownloadSupervisorExample")]
+        public async Task<IActionResult> DownloadSupervisorExample()
+        {
+
+            var path = Path.Combine(_env.ContentRootPath, "Documents\\SV_Example.xlsx");
+
+            var memory = new MemoryStream();
+            using (var stream = new FileStream(path, FileMode.Open))
+            {
+                await stream.CopyToAsync(memory);
+            }
+            memory.Position = 0;
+            return File(memory, "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet", Path.GetFileName(path));
+        }//end download file function 
+
+        [EnableCors("Cors")]
+        [HttpGet("Users/DownloadOperatorsExample")]
+        public async Task<IActionResult> DownloadOperatorsExample()
+        {
+            var path = Path.Combine(_env.ContentRootPath, "Documents\\Operators_Exmaple.xlsx");
+
+            var memory = new MemoryStream();
+            using (var stream = new FileStream(path, FileMode.Open))
+            {
+                await stream.CopyToAsync(memory);
+            }
+            memory.Position = 0;
+            return File(memory, "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet", Path.GetFileName(path));
+        }//end download file function 
+
+
+        [EnableCors("Cors")]
         [HttpGet("Evidence/{fileid}")]
         public async Task<IActionResult> DownloadEvidence(int fileid)
         {
