@@ -254,13 +254,21 @@ namespace SupervisorMobility.API.Services
         Task<IEnumerable<PAT>> GetAllPATs();
         Task<IEnumerable<PAT>> GetAllPATsOfSv(int svId);
         Task<IEnumerable<PAT>> GetAllPATsofSSV(int ssvID);
-        
+
         #endregion
         #region Logger
 
         #endregion
 
+        #region UserNotFound
 
+        Task<IEnumerable<UserNotFound>> GetAllUsersNotFoundAsync();
+        Task<UserNotFound?> GetUserNotFoundAsync(int userNotFoundId);
+
+        Task UpdateUserNotFound(UserNotFoundForUpdateDto userNotFound, int userNotFoundId);
+
+        Task AddUserNotFoundAsync(UserNotFound userNotFound);
+        #endregion
         #region CommonOperations
 
         Task<bool> SaveChangesAsync();

@@ -30,6 +30,7 @@ namespace SupervisorMobility.API.Context
         public DbSet<Product> Products { get; set; }
         public DbSet<AssyChart> AssyCharts { get; set; }
         public DbSet<User> Users { get; set; }
+        public DbSet<UserNotFound> UsersNotFound { get; set; }
         
         public DbSet<FileUpload> Files { get; set; }
         public DbSet<Guides> Guides { get; set; }
@@ -112,6 +113,9 @@ namespace SupervisorMobility.API.Context
                 .Property(p => p.IsActive)
                 .HasDefaultValue(true);
 
+            modelBuilder.Entity<UserNotFound>()
+                 .Property(p => p.IsActive)
+                 .HasDefaultValue(true);
             //Users
             modelBuilder.Entity<User>()
              .Property(p => p.IsActive)

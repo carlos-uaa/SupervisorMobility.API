@@ -106,5 +106,11 @@ namespace SupervisorMobility.API.Business
         Task<IEnumerable<Attendance>> GetAllAttendanceAsync();
         Task<IEnumerable<Attendance>> GetAllAttendanceOfSupervisorAsync(int idsupervisor);
         #endregion
+
+        #region UserNotFound 
+        Task<UserNotFound?> FetchUserNotFoundAsync(int userNotFoundId);
+        Task<UserNotFound> CreateUserNotFoundAsync(UserNotFoundForCreation userNotFound);
+        Task UpdateUserNotFoundAsync(UserNotFoundForUpdateDto userNotFoundForUpdate, int userNotFoundId);
+        #endregion
     }
 }

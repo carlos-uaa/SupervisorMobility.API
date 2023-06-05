@@ -404,7 +404,27 @@ namespace SupervisorMobility.API.Business
             return await _repository.GetAllAttendanceOfSupervisor(idsupervisor);
         }
 
-      
+
+        #endregion
+
+        #region UserNotFound
+
+        public async Task<UserNotFound?> FetchUserNotFoundAsync(int userNotFoundId)
+        {
+            return await _repository.GetUserNotFoundAsync(userNotFoundId);
+        }
+        public async Task<UserNotFound> CreateUserNotFoundAsync(UserNotFoundForCreation newuser)
+        {
+            var finaluser = _mapper.Map<UserNotFound>(newuser);
+            await _repository.AddUserNotFoundAsync(finaluser);
+            return finaluser;
+        }
+
+        public async Task UpdateUserNotFoundAsync(UserNotFoundForUpdateDto userNotFoundForUpdate, int userNotFoundId)
+        {
+            await _repository.UpdateUserNotFound(userNotFoundForUpdate, userNotFoundId);
+        }
+
         #endregion
     }
 }

@@ -1357,6 +1357,32 @@ namespace SupervisorMobility.API.Services
         }
         #endregion
 
+        #region UserNotFound
+        public async Task<IEnumerable<UserNotFound>> GetAllUsersNotFoundAsync()
+        {
+            return await _context.UsersNotFound.ToListAsync();
+        }
+        public async Task<UserNotFound?> GetUserNotFoundAsync(int userNotFoundId)
+        {
+            return await _context.UsersNotFound.Where(u => u.UserNotFoundId == userNotFoundId).FirstOrDefaultAsync();
+        }
+
+        public async Task UpdateUserNotFound(UserNotFoundForUpdateDto userNotFound, int userNotFoundId)
+        {
+            var entityUserNotFound = await _context.UsersNotFound.FirstOrDefaultAsync(u => u.UserNotFoundId == userNotFoundId);
+
+            _mapper.Map(userNotFound, entityUserNotFound);
+
+            _context.SaveChanges();
+        }
+
+        public async Task AddUserNotFoundAsync(UserNotFound userNotFound)
+        {
+            _context.UsersNotFound.Add(userNotFound);
+            await _context.SaveChangesAsync();
+        }
+        #endregion
+
         #region CommonOperations
         public async Task<bool> SaveChangesAsync()
         {
