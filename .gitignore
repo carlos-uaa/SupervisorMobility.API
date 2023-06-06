@@ -374,3 +374,5 @@ SupervisorMobility.API/appsettings.Development.json
 appsettings.Development.json
 appsettings.json
 SupervisorMobility.API/Migrations/SupervisorMobilityContextModelSnapshot.cs
+*.xlsx
+*.csv
