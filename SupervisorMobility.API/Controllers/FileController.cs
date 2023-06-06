@@ -1420,7 +1420,7 @@ namespace SupervisorMobility.API.Controllers
                                         Description = DescriptionArea,
                                         IsActive = true
                                     };
-                                    var finalArea = _mapper.Map<Area>(area);
+                                    var finalArea = _mapper.Map<Area>(newarea);
                                     finalArea.PlantId = plantid;
 
                                     await _supervisorMobilityRepository.AddArea(finalArea);
@@ -1429,7 +1429,7 @@ namespace SupervisorMobility.API.Controllers
                                 }
 
                                 var distribution = await _supervisorMobilityRepository.GetDistributionForAreaByCodeAndDescriptionAsync(area.AreaId, CodeDistribution, DescriptionDistribution);
-                                ;
+                                
                                 if (distribution is null)
                                 {
                                     DistributionForCreationDto newdistribution = new DistributionForCreationDto()
@@ -1463,7 +1463,7 @@ namespace SupervisorMobility.API.Controllers
                                 i++;
                             }//end is not empety row
                         }//end else first roe
-
+                        Debug.WriteLine("");
                     }//end foreach
                     await _supervisorMobilityRepository.SaveChangesAsync();
                 }//end using
