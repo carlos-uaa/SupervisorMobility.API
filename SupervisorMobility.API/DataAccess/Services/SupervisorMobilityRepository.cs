@@ -1360,7 +1360,7 @@ namespace SupervisorMobility.API.Services
         #region UserNotFound
         public async Task<IEnumerable<UserNotFound>> GetAllUsersNotFoundAsync()
         {
-            return await _context.UsersNotFound.ToListAsync();
+            return await _context.UsersNotFound.Where(u => u.IsActive == true).ToListAsync();
         }
         public async Task<UserNotFound?> GetUserNotFoundAsync(int userNotFoundId)
         {
