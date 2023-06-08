@@ -1324,10 +1324,12 @@ namespace SupervisorMobility.API.Services
         public async Task<PAT?> GetPat(int patId)
         {
             return await _context.PATs
+                   .Include(p => p.Plant)
                    .Include(a => a.Area)
+                   .Include(d => d.Distribution)
                    .Include(sv => sv.Supervisor)
                    .Include(ssv => ssv.SSVresponsible)
-                   .Include(d => d.Distribution).Where(p => p.PATid == patId).FirstOrDefaultAsync();
+                   .Where(p => p.PATid == patId).FirstOrDefaultAsync();
         }
         public async Task<PAT?> GetPatForYearOfSV(int sv, int Year)
         {
@@ -1343,29 +1345,32 @@ namespace SupervisorMobility.API.Services
         public async Task<IEnumerable<PAT>> GetAllPATs()
         {
             return await _context.PATs
+                   .Include(p => p.Plant)
                    .Include(a => a.Area)
+                   .Include(d => d.Distribution)
                    .Include(sv => sv.Supervisor)
                    .Include(ssv => ssv.SSVresponsible)
-                   .Include(d => d.Distribution)
                     .OrderBy(c => c.PATid).ToListAsync();
         }
         public async Task<IEnumerable<PAT>> GetAllPATsOfSv(int svId)
         {
             return await _context.PATs
-                       .Include(a => a.Area)
-                       .Include(sv => sv.Supervisor)
-                       .Include(ssv => ssv.SSVresponsible)
-                       .Include(d => d.Distribution)
-                       .Where(p => p.SupervisorId == svId)
-                        .OrderBy(c => c.PATid).ToListAsync();
+                    .Include(p => p.Plant)
+                    .Include(a => a.Area)
+                    .Include(d => d.Distribution)
+                    .Include(sv => sv.Supervisor)
+                    .Include(ssv => ssv.SSVresponsible)
+                    .Where(p => p.SupervisorId == svId)
+                    .OrderBy(c => c.PATid).ToListAsync();
         }
         public async Task<IEnumerable<PAT>> GetAllPATsofSSV(int ssvID)
         {
             return await _context.PATs
-                           .Include(a => a.Area)
-                           .Include(sv => sv.Supervisor)
-                           .Include(ssv => ssv.SSVresponsible)
-                           .Include(d => d.Distribution)
+                           .Include(p => p.Plant)
+                   .Include(a => a.Area)
+                   .Include(d => d.Distribution)
+                   .Include(sv => sv.Supervisor)
+                   .Include(ssv => ssv.SSVresponsible)
                            .Where(p => p.SSVresponsibleID == ssvID)
                             .OrderBy(c => c.PATid).ToListAsync();
         }

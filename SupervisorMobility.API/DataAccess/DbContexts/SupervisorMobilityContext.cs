@@ -160,10 +160,6 @@ namespace SupervisorMobility.API.Context
               .UseIdentityColumn();
 
             modelBuilder.Entity<PAT>()
-              .Property(e => e.PATid)
-              .UseIdentityColumn();
-
-            modelBuilder.Entity<PAT>()
               .Property(p => p.IsActive)
               .HasDefaultValue(true);
 
@@ -172,6 +168,12 @@ namespace SupervisorMobility.API.Context
                .WithMany()
                .HasForeignKey(p => p.AreaId)
                .OnDelete(DeleteBehavior.NoAction);
+
+            modelBuilder.Entity<PAT>()
+              .HasOne(p => p.Plant)
+              .WithMany()
+              .HasForeignKey(p => p.PlantId)
+              .OnDelete(DeleteBehavior.NoAction);
 
             modelBuilder.Entity<PAT>()
                 .HasOne(p => p.SSVresponsible)
@@ -770,7 +772,7 @@ namespace SupervisorMobility.API.Context
                         IsAccepted = true,
                         IsActive = true,
                         MadeBy = "Marco Aguayo",
-                        UserId = 3,
+                        UserId = 2,
                         NotificationType = "info",
                         NotificationText = "Example of notify"
                     },
@@ -781,7 +783,7 @@ namespace SupervisorMobility.API.Context
                         IsAccepted = true,
                         IsActive = true,
                         MadeBy = "Marco Aguayo",
-                        UserId = 3,
+                        UserId = 2,
                         NotificationType = "Supervisor",
                         NotificationText = "Example of notify Active and not read"
                     },
@@ -803,7 +805,7 @@ namespace SupervisorMobility.API.Context
                         IsAccepted = true,
                         IsActive = false,
                         MadeBy = "Marco Aguayo",
-                        UserId = 3,
+                        UserId = 2,
                         NotificationType = "Supervisor",
                         NotificationText = "Example of notify Read and delete"
                     },
@@ -814,7 +816,7 @@ namespace SupervisorMobility.API.Context
                         IsAccepted = false,
                         IsActive = false,
                         MadeBy = "Marco Aguayo",
-                        UserId = 3,
+                        UserId = 2,
                         NotificationType = "Supervisor",
                         NotificationText = "Example of notify Read and delete"
                     },

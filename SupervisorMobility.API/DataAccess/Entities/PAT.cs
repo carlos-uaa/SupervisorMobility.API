@@ -37,7 +37,6 @@ namespace SupervisorMobility.API.DataAccess.Entities
         public int? PlantId { get; set; }
         [ForeignKey("PlantId")]
         [NotMapped]
-
         public Plant? Plant { get; set; }
 
         public int? AreaId { get; set; }
