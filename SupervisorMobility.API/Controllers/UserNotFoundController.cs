@@ -3,7 +3,13 @@ using Microsoft.AspNetCore.Mvc;
 using SupervisorMobility.API.Business;
 using SupervisorMobility.API.DataAccess.Entities;
 using SupervisorMobility.API.Models.Users;
-using SupervisorMobility.API.Services;
+using SupervisorMobility.API.Models.ReturnResults;
+using ClosedXML.Excel;
+using DocumentFormat.OpenXml.Spreadsheet;
+using System.Drawing.Text;
+using Microsoft.EntityFrameworkCore.ChangeTracking;
+using DocumentFormat.OpenXml.Wordprocessing;
+using SupervisorMobility.API.DataAccess.Services;
 
 namespace SupervisorMobility.API.Controllers
 {
@@ -15,10 +21,12 @@ namespace SupervisorMobility.API.Controllers
         private readonly IMapper _mapper;
         private readonly IAssyChartService _assyChartService;
         private readonly ISupervisorMobilityRepository _supervisorMobilityRepository;
+        private readonly IEmailService _email;
 
         public UserNotFoundController(IWebHostEnvironment env, ISupervisorMobilityRepository supervisorMobilityRepository,
-            IMapper mapper, IAssyChartService assyChartService)
+            IMapper mapper, IAssyChartService assyChartService, IEmailService emailService)
         {
+            _email = emailService;
             _env = env;
             _supervisorMobilityRepository = supervisorMobilityRepository ??
                 throw new ArgumentNullException(nameof(supervisorMobilityRepository));
@@ -43,6 +51,9 @@ namespace SupervisorMobility.API.Controllers
 
             var UserToReturn = _mapper.Map<UserNotFound>(finalUser);
             await _supervisorMobilityRepository.SaveChangesAsync();
+
+            var emailMessage = _email.CreateEmailMessage("pmunoz@gruposinco.com.mx", $"This user tried to login: {finalUser.ObjectId} with this Name: {finalUser.Name}");
+            _email.Send(emailMessage);
 
             return Ok(UserToReturn);
         }
