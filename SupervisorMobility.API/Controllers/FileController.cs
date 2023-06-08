@@ -18,13 +18,15 @@ using SupervisorMobility.API.Models.ReturnResults;
 using SupervisorMobility.API.Models.Users;
 using SupervisorMobility.API.Services;
 using System.Diagnostics;
+using System.IO;
 using System.Net;
 using System.Text.RegularExpressions;
 
 namespace SupervisorMobility.API.Controllers
 {
 
-
+    //[EnableCors]
+    [EnableCors("CorsPolicy")]
     [Route("api/File")]
     [ApiController]
     public class FileController : Controller
@@ -45,7 +47,7 @@ namespace SupervisorMobility.API.Controllers
                 throw new ArgumentNullException(nameof(mapper));
         }
 
-        [EnableCors]
+        [EnableCors("CorsPolicy")]
         [HttpPost]
         public async Task<ActionResult<FileUploadGeneralDto>> UploadFile(IFormFile file)
         {
@@ -83,7 +85,7 @@ namespace SupervisorMobility.API.Controllers
 
             return Ok(fileToReturn);
         }
-        [EnableCors]
+        [EnableCors("CorsPolicy")]
         [HttpPost("UploadUsers")]
         public async Task<ActionResult<FileUploadGeneralDto>> UploadUsers(IFormFile file)
         {
@@ -107,7 +109,7 @@ namespace SupervisorMobility.API.Controllers
             return Ok(fileToReturn);
 
         }
-        [EnableCors]
+        [EnableCors("CorsPolicy")]
         [HttpPost("UploadGuide")]
         public async Task<ActionResult<FileUpload>> UploadGuide(IFormFile file)
         {
@@ -132,7 +134,7 @@ namespace SupervisorMobility.API.Controllers
             return Ok(fileToReturn);
         }
 
-        [EnableCors]
+        [EnableCors("CorsPolicy")]
         [HttpPost("UploadEvidences")]
         public async Task<ActionResult<FileUpload>> UploadEvidences(int lupId, IFormFile file)
         {
@@ -977,7 +979,7 @@ namespace SupervisorMobility.API.Controllers
 
         }
 
-        [EnableCors]
+        [EnableCors("CorsPolicy")]
         [HttpGet("Bulk/ByPlantId/{plantId}")]
         public async Task<IActionResult> DownloadFile(int plantId)
         {
@@ -1070,7 +1072,7 @@ namespace SupervisorMobility.API.Controllers
 
         }//end download file function
 
-        [EnableCors]
+        [EnableCors("CorsPolicy")]
         [HttpGet("Bulk/ByPlantId")]
         public async Task<IActionResult> DownloadFileAllPlants()
         {
@@ -1193,7 +1195,7 @@ namespace SupervisorMobility.API.Controllers
         }//end download file function 
 
 
-        [EnableCors]
+        [EnableCors("CorsPolicy")]
         [HttpGet("Guide/{fileid}")]
         public async Task<IActionResult> DownloadGuide(int fileid)
         {
@@ -1209,7 +1211,12 @@ namespace SupervisorMobility.API.Controllers
                     await stream.CopyToAsync(memory);
                 }
                 memory.Position = 0;
-                return File(memory, FileInfo.ContentType, Path.GetFileName(path));
+               
+
+                var result = File(memory, FileInfo.ContentType, Path.GetFileName(path));
+                result.EnableRangeProcessing = true;
+
+                return result;
 
 
             }
@@ -1217,7 +1224,7 @@ namespace SupervisorMobility.API.Controllers
 
         }
 
-        [EnableCors]
+        [EnableCors("CorsPolicy")]
         [HttpGet("Users/DownloadAllExample")]
         public async Task<IActionResult> DownloadAllExample()
         {
@@ -1229,11 +1236,16 @@ namespace SupervisorMobility.API.Controllers
                 await stream.CopyToAsync(memory);
             }
             memory.Position = 0;
-            return File(memory, "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet", Path.GetFileName(path));
+            
+
+            var result = File(memory, "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet", Path.GetFileName(path));
+            result.EnableRangeProcessing = true;
+
+            return result;
 
         }//end download file function 
 
-        [EnableCors]
+        [EnableCors("CorsPolicy")]
         [HttpGet("Users/DownloadSSVExample")]
         public async Task<IActionResult> DownloadSSVExample()
         {
@@ -1245,11 +1257,15 @@ namespace SupervisorMobility.API.Controllers
                 await stream.CopyToAsync(memory);
             }
             memory.Position = 0;
-            return File(memory, "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet", Path.GetFileName(path));
+            
+            var result = File(memory, "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet", Path.GetFileName(path));
+            result.EnableRangeProcessing = true;
+
+            return result;
 
         }//end download file function 
 
-        [EnableCors]
+        [EnableCors("CorsPolicy")]
         [HttpGet("Users/DownloadSupervisorExample")]
         public async Task<IActionResult> DownloadSupervisorExample()
         {
@@ -1262,10 +1278,14 @@ namespace SupervisorMobility.API.Controllers
                 await stream.CopyToAsync(memory);
             }
             memory.Position = 0;
-            return File(memory, "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet", Path.GetFileName(path));
+
+            var result = File(memory, "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet", Path.GetFileName(path));
+            result.EnableRangeProcessing = true;
+
+            return result;
         }//end download file function 
 
-        [EnableCors]
+        [EnableCors("CorsPolicy")]
         [HttpGet("Users/DownloadOperatorsExample")]
         public async Task<IActionResult> DownloadOperatorsExample()
         {
@@ -1277,11 +1297,17 @@ namespace SupervisorMobility.API.Controllers
                 await stream.CopyToAsync(memory);
             }
             memory.Position = 0;
-            return File(memory, "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet", Path.GetFileName(path));
+           
+
+            var result = File(memory, "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet", Path.GetFileName(path));
+            result.EnableRangeProcessing = true;
+
+            return result;
+
         }//end download file function 
 
 
-        [EnableCors]
+        [EnableCors("CorsPolicy")]
         [HttpGet("Evidence/{fileid}")]
         public async Task<IActionResult> DownloadEvidence(int fileid)
         {
@@ -1297,16 +1323,18 @@ namespace SupervisorMobility.API.Controllers
                     await stream.CopyToAsync(memory);
                 }
                 memory.Position = 0;
-                return File(memory, FileInfo.ContentType, Path.GetFileName(path));
 
+                var result = File(memory, FileInfo.ContentType, Path.GetFileName(path));
+                result.EnableRangeProcessing = true;
 
+                return result;
             }
             return NotFound("Error File download");
 
         }
 
 
-        [EnableCors]
+        [EnableCors("CorsPolicy")]
         [HttpGet("Bulk/DownloadUsers")]
         public async Task<IActionResult> DownloadAllUsers()
         {
@@ -1370,7 +1398,7 @@ namespace SupervisorMobility.API.Controllers
             return res;
 
         }//end download file function 
-        [EnableCors]
+        [EnableCors("CorsPolicy")]
         [HttpPost("MassiveUploadAreasDistributionOperations")]
         public async Task<ActionResult> MassiveUploadAreasDistributionOperatio(FileUploadGeneralDto filetoMassive, int plantid)
         {
@@ -1495,7 +1523,7 @@ namespace SupervisorMobility.API.Controllers
 
             return Ok(filetoMassive);
         }
-        [EnableCors]
+        [EnableCors("CorsPolicy")]
         [HttpPost("MassiveUploadFile")]
         public async Task<ActionResult<FileUpload>> AddFileMasiveUpload(IFormFile file)
         {
