@@ -1,6 +1,5 @@
 ﻿
 using AutoMapper;
-using DocumentFormat.OpenXml.Spreadsheet;
 using Microsoft.Data.SqlClient;
 using Microsoft.EntityFrameworkCore;
 using SupervisorMobility.API.Context;
@@ -221,13 +220,13 @@ namespace SupervisorMobility.API.Services
         public async Task<bool> AreaExistAsync(int areaId)
         {
             return await _context.Areas.AnyAsync(p => p.AreaId == areaId);
-        } 
+        }
         public async Task<AsyncVoidMethodBuilder> AddArea(Area area)
         {
             var resp = new AsyncVoidMethodBuilder();
             await _context.Areas.AddAsync(area);
             await _context.SaveChangesAsync();
-            return resp;  
+            return resp;
         }
 
 
@@ -238,7 +237,7 @@ namespace SupervisorMobility.API.Services
 
         public async Task AddAreaForPlantAsync(int plantId, Area area)
         {
-     
+
             var plant = await GetPlantAsync(plantId);
             if (plant != null)
             {
@@ -822,7 +821,7 @@ namespace SupervisorMobility.API.Services
                 .Include(ILU => ILU.ILURegisers)
                 .Include(aa => aa.Areas)
             .Where(p => p.Email == email).FirstOrDefaultAsync();
-        } 
+        }
         public async Task<User?> GetUserByPayrollAsync(int payroll)
         {
             return await _context.Users.Include(a => a.Area)
@@ -841,17 +840,17 @@ namespace SupervisorMobility.API.Services
         public async Task<User?> GetUserByPayrollAndMoreAsync(int payroll, int plantid, int areaid, int groupid)
         {
             return await _context.Users.Where(p => p.Payroll == payroll && p.PlantId == plantid && p.AreaId == areaid && p.GroupId == groupid).FirstOrDefaultAsync();
-        } 
-       
+        }
+
 
         public async Task<bool> UserExistAsync(int userId)
         {
             return await _context.Users.AnyAsync(p => p.UserId == userId);
-        } 
+        }
         public async Task<bool> UserExistByPayrollAsync(int payroll)
         {
             return await _context.Users.AnyAsync(p => p.Payroll == payroll);
-        }  
+        }
         public async Task<bool> UserExistByEmailAsync(string email)
         {
             return await _context.Users.AnyAsync(p => p.Email == email);
@@ -872,14 +871,14 @@ namespace SupervisorMobility.API.Services
         }
         public async void UserAddSubordinated(User Master, User Slave)
         {
-       
+
             if (Master.Subordinates != null)
             {
                 Slave.SuperiorId = Master.UserId;
                 Master.Subordinates.Add(Slave);
             }
             else
-            { 
+            {
                 Master.Subordinates = new List<User>();
                 Slave.SuperiorId = Master.UserId;
                 Master.Subordinates.Add(Slave);
@@ -895,7 +894,7 @@ namespace SupervisorMobility.API.Services
         }
         public async Task<AsyncVoidMethodBuilder> UserRemoveAllSubordinated(User Master)
         {
-           
+
             var UsersList = await _context.Users.Where(u => u.SuperiorId == Master.UserId)
                  .OrderBy(c => c.UserId).ToListAsync();
 
@@ -1214,20 +1213,21 @@ namespace SupervisorMobility.API.Services
                 .Include(c => c.currentdistribution)
                   .Where(p => p.AttendanceId == AttendanceId).FirstOrDefaultAsync();
         }
-        public void AddAttendance(Attendance Attendance){
+        public void AddAttendance(Attendance Attendance)
+        {
             _context.Attendances.Add(Attendance);
         }
         public async Task<IEnumerable<Attendance>> GetAllAttendance()
-        { 
+        {
             return await _context.Attendances
                 .Include(a => a.User)
                 .Include(g => g.Superior)
                 .Include(c => c.currentdistribution)
                .OrderBy(c => c.AttendanceId).ToListAsync();
         }
-        
+
         public async Task<IEnumerable<Attendance>> GetAllAttendanceOfSupervisor(int idsuperior)
-        { 
+        {
             return await _context.Attendances
                 .Include(a => a.User)
                 .Include(g => g.Superior)
@@ -1247,7 +1247,8 @@ namespace SupervisorMobility.API.Services
         #endregion
 
         #region ILU
-        public async Task<ILULevel?> GetILULevel(int idILU) {
+        public async Task<ILULevel?> GetILULevel(int idILU)
+        {
             return await _context.ILULevels
             .Where(p => p.ILULevelId == idILU).FirstOrDefaultAsync();
         }
@@ -1257,19 +1258,21 @@ namespace SupervisorMobility.API.Services
             return await _context.ILULevels
                     .OrderBy(c => c.ILULevelId).ToListAsync();
         }
-        public async Task<int> AddILU(ILULevel lU) {
+        public async Task<int> AddILU(ILULevel lU)
+        {
             _context.ILULevels.Add(lU);
 
             return _context.SaveChanges();
         }
-        public async Task<int> UpdateILU(ILULevel iluforUpdate, ILULevel iluEntity) {
-            
+        public async Task<int> UpdateILU(ILULevel iluforUpdate, ILULevel iluEntity)
+        {
+
             _mapper.Map(iluforUpdate, iluEntity);
 
             return _context.SaveChanges();
 
         }
-        public async Task RemoveILU(ILULevel lU) 
+        public async Task RemoveILU(ILULevel lU)
         {
             var ilu = await _context.ILULevels.Where(i => i.ILULevelId == lU.ILULevelId).FirstOrDefaultAsync();
             ilu.isActive = false;
@@ -1278,26 +1281,31 @@ namespace SupervisorMobility.API.Services
 
         #endregion
         #region ILURegister
-        public async Task<ILURegister?> GetILURegister(int idILUR) {
+        public async Task<ILURegister?> GetILURegister(int idILUR)
+        {
             return await _context.ILURegisters
                .Where(p => p.ILURegisterid == idILUR).FirstOrDefaultAsync();
         }
-        public async Task<int> AddILURegister(ILURegister iLURegister) {
+        public async Task<int> AddILURegister(ILURegister iLURegister)
+        {
             _context.ILURegisters.Add(iLURegister);
 
             return _context.SaveChanges();
         }
-        public async Task<int> AddILURegToUser(ILURegister iLURegister, User Master) {
+        public async Task<int> AddILURegToUser(ILURegister iLURegister, User Master)
+        {
             Master.ILURegisers?.Add(iLURegister);
 
             return _context.SaveChanges();
         }
-        public async Task<int> UpdateILURegister(ILURegister iluRforUpdate, ILURegister iluREntity) {
+        public async Task<int> UpdateILURegister(ILURegister iluRforUpdate, ILURegister iluREntity)
+        {
             _mapper.Map(iluRforUpdate, iluREntity);
 
             return _context.SaveChanges();
         }
-        public async Task<int> RemoveILURegister(ILURegister ILUReg) {
+        public async Task<int> RemoveILURegister(ILURegister ILUReg)
+        {
             var entity = await _context.ILURegisters.Where(u => u.ILURegisterid == ILUReg.ILURegisterid).FirstOrDefaultAsync();
 
             entity.isActive = false;
@@ -1309,27 +1317,31 @@ namespace SupervisorMobility.API.Services
         #region PAT
         public async Task<int> AddPat(PAT patForAdd)
         {
-            _context.PATs.Add(patForAdd); 
+            _context.PATs.Add(patForAdd);
             return _context.SaveChanges();
         }
 
-        public async Task<PAT?> GetPat(int patId) {
+        public async Task<PAT?> GetPat(int patId)
+        {
             return await _context.PATs
                    .Include(a => a.Area)
                    .Include(sv => sv.Supervisor)
                    .Include(ssv => ssv.SSVresponsible)
-                   .Include(d => d.Distribution).Where(p => p.PATid == patId).FirstOrDefaultAsync(); 
+                   .Include(d => d.Distribution).Where(p => p.PATid == patId).FirstOrDefaultAsync();
         }
-        public async Task<PAT?> GetPatForYearOfSV(int sv, int Year) { 
-            return await _context.PATs.Where(p => p.SupervisorId == sv && p.AplicationYear==Year).FirstOrDefaultAsync();
+        public async Task<PAT?> GetPatForYearOfSV(int sv, int Year)
+        {
+            return await _context.PATs.Where(p => p.SupervisorId == sv && p.AplicationYear == Year).FirstOrDefaultAsync();
         }
-        public async Task<int> UpdatePAT(PAT patForUpdate, PAT PatEntity) {
+        public async Task<int> UpdatePAT(PAT patForUpdate, PAT PatEntity)
+        {
 
             _mapper.Map(patForUpdate, PatEntity);
 
             return _context.SaveChanges();
         }
-        public async Task<IEnumerable<PAT>> GetAllPATs() {
+        public async Task<IEnumerable<PAT>> GetAllPATs()
+        {
             return await _context.PATs
                    .Include(a => a.Area)
                    .Include(sv => sv.Supervisor)
@@ -1337,7 +1349,8 @@ namespace SupervisorMobility.API.Services
                    .Include(d => d.Distribution)
                     .OrderBy(c => c.PATid).ToListAsync();
         }
-        public async Task<IEnumerable<PAT>> GetAllPATsOfSv(int svId) {
+        public async Task<IEnumerable<PAT>> GetAllPATsOfSv(int svId)
+        {
             return await _context.PATs
                        .Include(a => a.Area)
                        .Include(sv => sv.Supervisor)
@@ -1346,7 +1359,8 @@ namespace SupervisorMobility.API.Services
                        .Where(p => p.SupervisorId == svId)
                         .OrderBy(c => c.PATid).ToListAsync();
         }
-        public async Task<IEnumerable<PAT>> GetAllPATsofSSV(int ssvID) {
+        public async Task<IEnumerable<PAT>> GetAllPATsofSSV(int ssvID)
+        {
             return await _context.PATs
                            .Include(a => a.Area)
                            .Include(sv => sv.Supervisor)

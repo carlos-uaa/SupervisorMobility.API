@@ -1,6 +1,4 @@
-﻿using System.ComponentModel.DataAnnotations;
-
-namespace SupervisorMobility.API.Models.JobObservationDtos
+﻿namespace SupervisorMobility.API.Models.JobObservationDtos
 {
     public class JobObservationForUpdateDto
     {

@@ -1,27 +1,25 @@
 ﻿using AutoMapper;
+using ClosedXML.Excel;
+using Microsoft.AspNetCore.Cors;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.VisualBasic.FileIO;
 using SpreadsheetLight;
+using SupervisorMobility.API.Business;
+using SupervisorMobility.API.DataAccess.Entities;
 using SupervisorMobility.API.Entities;
 using SupervisorMobility.API.Models.AreaDtos;
 using SupervisorMobility.API.Models.AssyChart;
+using SupervisorMobility.API.Models.DistributionDtos;
+using SupervisorMobility.API.Models.FileUploadDto;
+using SupervisorMobility.API.Models.OperationDtos;
+using SupervisorMobility.API.Models.PlantDtos;
+using SupervisorMobility.API.Models.ProductDtos;
+using SupervisorMobility.API.Models.ReturnResults;
+using SupervisorMobility.API.Models.Users;
+using SupervisorMobility.API.Services;
 using System.Diagnostics;
 using System.Net;
 using System.Text.RegularExpressions;
-using SupervisorMobility.API.Services;
-using SupervisorMobility.API.Models.PlantDtos;
-using SupervisorMobility.API.Business;
-using SupervisorMobility.API.Models.OperationDtos;
-using SupervisorMobility.API.Models.DistributionDtos;
-using SupervisorMobility.API.Models.ProductDtos;
-using SupervisorMobility.API.DataAccess.Entities;
-using Microsoft.AspNetCore.Cors;
-using ClosedXML.Excel;
-using SupervisorMobility.API.Models.FileUploadDto;
-using SupervisorMobility.API.Models.Users;
-using SupervisorMobility.API.Models.ReturnResults;
-using System.Collections.Generic;
-using System.Formats.Asn1;
 
 namespace SupervisorMobility.API.Controllers
 {
@@ -47,7 +45,7 @@ namespace SupervisorMobility.API.Controllers
                 throw new ArgumentNullException(nameof(mapper));
         }
 
-
+        [EnableCors]
         [HttpPost]
         public async Task<ActionResult<FileUploadGeneralDto>> UploadFile(IFormFile file)
         {
@@ -85,7 +83,7 @@ namespace SupervisorMobility.API.Controllers
 
             return Ok(fileToReturn);
         }
-
+        [EnableCors]
         [HttpPost("UploadUsers")]
         public async Task<ActionResult<FileUploadGeneralDto>> UploadUsers(IFormFile file)
         {
@@ -109,7 +107,7 @@ namespace SupervisorMobility.API.Controllers
             return Ok(fileToReturn);
 
         }
-
+        [EnableCors]
         [HttpPost("UploadGuide")]
         public async Task<ActionResult<FileUpload>> UploadGuide(IFormFile file)
         {
@@ -134,7 +132,7 @@ namespace SupervisorMobility.API.Controllers
             return Ok(fileToReturn);
         }
 
-
+        [EnableCors]
         [HttpPost("UploadEvidences")]
         public async Task<ActionResult<FileUpload>> UploadEvidences(int lupId, IFormFile file)
         {
@@ -979,7 +977,7 @@ namespace SupervisorMobility.API.Controllers
 
         }
 
-        [EnableCors("Cors")]
+        [EnableCors]
         [HttpGet("Bulk/ByPlantId/{plantId}")]
         public async Task<IActionResult> DownloadFile(int plantId)
         {
@@ -1072,7 +1070,7 @@ namespace SupervisorMobility.API.Controllers
 
         }//end download file function
 
-        [EnableCors("Cors")]
+        [EnableCors]
         [HttpGet("Bulk/ByPlantId")]
         public async Task<IActionResult> DownloadFileAllPlants()
         {
@@ -1195,7 +1193,7 @@ namespace SupervisorMobility.API.Controllers
         }//end download file function 
 
 
-        [EnableCors("Cors")]
+        [EnableCors]
         [HttpGet("Guide/{fileid}")]
         public async Task<IActionResult> DownloadGuide(int fileid)
         {
@@ -1219,7 +1217,7 @@ namespace SupervisorMobility.API.Controllers
 
         }
 
-        [EnableCors("Cors")]
+        [EnableCors]
         [HttpGet("Users/DownloadAllExample")]
         public async Task<IActionResult> DownloadAllExample()
         {
@@ -1235,7 +1233,7 @@ namespace SupervisorMobility.API.Controllers
 
         }//end download file function 
 
-        [EnableCors("Cors")]
+        [EnableCors]
         [HttpGet("Users/DownloadSSVExample")]
         public async Task<IActionResult> DownloadSSVExample()
         {
@@ -1251,7 +1249,7 @@ namespace SupervisorMobility.API.Controllers
 
         }//end download file function 
 
-        [EnableCors("Cors")]
+        [EnableCors]
         [HttpGet("Users/DownloadSupervisorExample")]
         public async Task<IActionResult> DownloadSupervisorExample()
         {
@@ -1267,7 +1265,7 @@ namespace SupervisorMobility.API.Controllers
             return File(memory, "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet", Path.GetFileName(path));
         }//end download file function 
 
-        [EnableCors("Cors")]
+        [EnableCors]
         [HttpGet("Users/DownloadOperatorsExample")]
         public async Task<IActionResult> DownloadOperatorsExample()
         {
@@ -1283,7 +1281,7 @@ namespace SupervisorMobility.API.Controllers
         }//end download file function 
 
 
-        [EnableCors("Cors")]
+        [EnableCors]
         [HttpGet("Evidence/{fileid}")]
         public async Task<IActionResult> DownloadEvidence(int fileid)
         {
@@ -1308,7 +1306,7 @@ namespace SupervisorMobility.API.Controllers
         }
 
 
-        [EnableCors("Cors")]
+        [EnableCors]
         [HttpGet("Bulk/DownloadUsers")]
         public async Task<IActionResult> DownloadAllUsers()
         {
@@ -1371,10 +1369,8 @@ namespace SupervisorMobility.API.Controllers
             res.EnableRangeProcessing = true;
             return res;
 
-
-
         }//end download file function 
-
+        [EnableCors]
         [HttpPost("MassiveUploadAreasDistributionOperations")]
         public async Task<ActionResult> MassiveUploadAreasDistributionOperatio(FileUploadGeneralDto filetoMassive, int plantid)
         {
@@ -1393,6 +1389,7 @@ namespace SupervisorMobility.API.Controllers
                     foreach (IXLRow row in ws.Rows())
                     {
                         //Use the first row to add columns to DataTable.
+
                         if (firstRow)
                         {
                             firstRow = false;
@@ -1401,19 +1398,23 @@ namespace SupervisorMobility.API.Controllers
                         {
                             if (!row.IsEmpty())
                             {
+                                Debug.WriteLine($"Int value: {i}");
+
                                 var CodeArea = ws.Cell(i, 1).Value.ToString() != "" ? ws.Cell(i, 1).Value.ToString() : "";
                                 var DescriptionArea = ws.Cell(i, 2).Value.ToString() != "" ? ws.Cell(i, 2).Value.ToString() : "";
 
-                                var DescriptionDistribution  = ws.Cell(i, 3).Value.ToString() != "" ? ws.Cell(i, 3).Value.ToString() : "";
+                                var DescriptionDistribution = ws.Cell(i, 3).Value.ToString() != "" ? ws.Cell(i, 3).Value.ToString() : "";
                                 var CodeDistribution = ws.Cell(i, 4).Value.ToString() != "" ? ws.Cell(i, 4).Value.ToString() : "";
 
-                                var DescriptionOperation  = ws.Cell(i, 5).Value.ToString() != "" ? ws.Cell(i, 5).Value.ToString() : "";
+                                var DescriptionOperation = ws.Cell(i, 5).Value.ToString() != "" ? ws.Cell(i, 5).Value.ToString() : "";
                                 var CodeOperation = ws.Cell(i, 6).Value.ToString() != "" ? ws.Cell(i, 6).Value.ToString() : "";
 
                                 var area = await _supervisorMobilityRepository.GetAreaForPlantByCodeAndDescriptionAsync(plantid, CodeArea, DescriptionArea);
 
                                 if (area is null)
                                 {
+                                    Debug.WriteLine($"Area No existe: {i}");
+
                                     AreaForCreationDto newarea = new AreaForCreationDto()
                                     {
                                         Code = CodeArea,
@@ -1427,11 +1428,18 @@ namespace SupervisorMobility.API.Controllers
 
                                     area = finalArea;
                                 }
+                                else
+                                {
+                                    Debug.WriteLine($"Area existe");
+
+                                }
 
                                 var distribution = await _supervisorMobilityRepository.GetDistributionForAreaByCodeAndDescriptionAsync(area.AreaId, CodeDistribution, DescriptionDistribution);
-                                
+
                                 if (distribution is null)
                                 {
+                                    Debug.WriteLine($"Distribucion no existe: {i}");
+
                                     DistributionForCreationDto newdistribution = new DistributionForCreationDto()
                                     {
                                         Code = CodeDistribution,
@@ -1445,8 +1453,13 @@ namespace SupervisorMobility.API.Controllers
                                         area.AreaId, finalDistribution);
                                     distribution = finalDistribution;
                                 }
+                                else
+                                {
+                                    Debug.WriteLine($"Distribucion existe: {i}");
 
-                                var operation = await _supervisorMobilityRepository.GetOperationForDistributionByCodeAndDescriptionAsync(area.AreaId, CodeOperation, DescriptionOperation);
+                                }
+
+                                var operation = await _supervisorMobilityRepository.GetOperationForDistributionByCodeAndDescriptionAsync(distribution.DistributionId, CodeOperation, DescriptionOperation);
 
                                 if (operation is null)
                                 {
@@ -1460,10 +1473,14 @@ namespace SupervisorMobility.API.Controllers
 
                                     await _assyChartService.CreateOperationAsync(area.AreaId, distribution.DistributionId, finalOperation);
                                 }
+                                else
+                                {
+                                    Debug.WriteLine($"Operacion existe: {i}");
+
+                                }
                                 i++;
                             }//end is not empety row
                         }//end else first roe
-                        Debug.WriteLine("");
                     }//end foreach
                     await _supervisorMobilityRepository.SaveChangesAsync();
                 }//end using
@@ -1478,7 +1495,7 @@ namespace SupervisorMobility.API.Controllers
 
             return Ok(filetoMassive);
         }
-
+        [EnableCors]
         [HttpPost("MassiveUploadFile")]
         public async Task<ActionResult<FileUpload>> AddFileMasiveUpload(IFormFile file)
         {
@@ -1525,7 +1542,7 @@ namespace SupervisorMobility.API.Controllers
 
             return Ok(fileToReturn);
 
-            }
+        }
 
 
 

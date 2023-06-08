@@ -1,9 +1,4 @@
-﻿using Microsoft.EntityFrameworkCore.Metadata.Internal;
-using SupervisorMobility.API.DataAccess.Entities;
-using SupervisorMobility.API.Entities;
-using SupervisorMobility.API.Models.OperationDtos;
-using System.ComponentModel.DataAnnotations;
-using System.ComponentModel.DataAnnotations.Schema;
+﻿using SupervisorMobility.API.Models.OperationDtos;
 
 namespace SupervisorMobility.API.Models.AssyChart
 {

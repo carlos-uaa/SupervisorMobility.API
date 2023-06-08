@@ -1,6 +1,4 @@
-﻿using SupervisorMobility.API.Models.Users;
-
-namespace SupervisorMobility.API.Models.NotificationDtos
+﻿namespace SupervisorMobility.API.Models.NotificationDtos
 {
     public class NotificationForUpdateDto
     {

@@ -1,8 +1,4 @@
-﻿using SupervisorMobility.API.DataAccess.Entities;
-using SupervisorMobility.API.Entities;
-using System.ComponentModel.DataAnnotations.Schema;
-
-namespace SupervisorMobility.API.Models.PATDtos
+﻿namespace SupervisorMobility.API.Models.PATDtos
 {
     public class PATFotCreationDto
     {

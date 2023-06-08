@@ -6,7 +6,8 @@ namespace SupervisorMobility.API.MapperProfiles
 {
     public class ILUProfile : Profile
     {
-        public ILUProfile() {
+        public ILUProfile()
+        {
             CreateMap<ILULevel, Models.ILU.ILULevelDto>().ReverseMap();
             CreateMap<ILULevel, Models.ILU.ILULevelForCreateDto>().ReverseMap();
             CreateMap<ILULevel, Models.ILU.ILULevelsForUpdate>().ReverseMap();
@@ -17,5 +18,5 @@ namespace SupervisorMobility.API.MapperProfiles
         }
     }
 
-   
+
 }

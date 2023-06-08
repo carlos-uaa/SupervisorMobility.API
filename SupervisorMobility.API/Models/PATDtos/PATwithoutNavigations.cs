@@ -1,7 +1,4 @@
-﻿
-using SupervisorMobility.API.Entities;
-
-namespace SupervisorMobility.API.Models.PATDtos
+﻿namespace SupervisorMobility.API.Models.PATDtos
 {
     public class PATwithoutNavigations
     {

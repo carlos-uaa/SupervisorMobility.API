@@ -1,8 +1,7 @@
-﻿using System.ComponentModel.DataAnnotations.Schema;
-using System.ComponentModel.DataAnnotations;
+﻿using SupervisorMobility.API.DataAccess.Entities.LUP;
 using SupervisorMobility.API.Entities;
-using System.Text.Json.Serialization;
-using SupervisorMobility.API.DataAccess.Entities.LUP;
+using System.ComponentModel.DataAnnotations;
+using System.ComponentModel.DataAnnotations.Schema;
 
 namespace SupervisorMobility.API.DataAccess.Entities.ILU
 {
@@ -17,7 +16,7 @@ namespace SupervisorMobility.API.DataAccess.Entities.ILU
         public int? OperationId { get; set; }
         [ForeignKey("OperationId")]
         public Operation? Operation { get; set; }
-         
+
 
         public int? OperatorId { get; set; }
         [ForeignKey("OperatorId")]

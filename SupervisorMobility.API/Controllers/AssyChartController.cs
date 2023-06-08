@@ -3,11 +3,7 @@ using Microsoft.AspNetCore.Cors;
 using Microsoft.AspNetCore.Mvc;
 using SpreadsheetLight;
 using SupervisorMobility.API.Business;
-using SupervisorMobility.API.DataAccess.Entities;
-using SupervisorMobility.API.Entities;
-using SupervisorMobility.API.Models.AreaDtos;
 using SupervisorMobility.API.Models.AssyChart;
-using SupervisorMobility.API.Models.OperationDtos;
 using SupervisorMobility.API.Services;
 
 namespace SupervisorMobility.API.Controllers
@@ -32,9 +28,9 @@ namespace SupervisorMobility.API.Controllers
 
         }
 
-       
 
-    [HttpPost]
+
+        [HttpPost]
         public async Task<ActionResult<AssyChartWithoutNavigationProperties>> CreateAssyChart(AssyChartForCreation newAssyChart)
         {
             if (!await _supervisorMobilityRepository.PlantExistAsync(newAssyChart.PlantId))
@@ -94,7 +90,7 @@ namespace SupervisorMobility.API.Controllers
         [HttpGet("plant/{plantId}/area/{areaId}")]
         public async Task<ActionResult<IEnumerable<AssyChartWhitInfo>>> GetAssyChartsOfArea(int plantId, int areaId)
         {
-            var assyChartsForPlant = await _supervisorMobilityRepository.GetAssyChartByAreaAsync(plantId, areaId) ;
+            var assyChartsForPlant = await _supervisorMobilityRepository.GetAssyChartByAreaAsync(plantId, areaId);
             return Ok(_mapper.Map<IEnumerable<AssyChartWhitInfo>>(assyChartsForPlant));
         }
 

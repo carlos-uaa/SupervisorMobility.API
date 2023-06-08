@@ -1,5 +1,4 @@
 ﻿using AutoMapper;
-using SupervisorMobility.API.DataAccess;
 
 namespace SupervisorMobility.API.MapperProfiles
 {

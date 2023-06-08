@@ -1,6 +1,6 @@
-﻿using System.ComponentModel.DataAnnotations.Schema;
+﻿using SupervisorMobility.API.DataAccess.Entities;
 using System.ComponentModel.DataAnnotations;
-using SupervisorMobility.API.DataAccess.Entities;
+using System.ComponentModel.DataAnnotations.Schema;
 
 namespace SupervisorMobility.API.Entities
 {
@@ -34,7 +34,7 @@ namespace SupervisorMobility.API.Entities
 
         public int? OperationId { get; set; }
         public Operation? Operation { get; set; }
-        
+
 
     }
 

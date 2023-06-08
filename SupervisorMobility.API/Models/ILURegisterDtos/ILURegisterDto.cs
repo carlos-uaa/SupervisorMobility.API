@@ -1,9 +1,6 @@
-﻿using SupervisorMobility.API.DataAccess.Entities.LUP;
-using SupervisorMobility.API.DataAccess.Entities;
-using System.ComponentModel.DataAnnotations.Schema;
+﻿using SupervisorMobility.API.Models.ILU;
 using SupervisorMobility.API.Models.OperationDtos;
 using SupervisorMobility.API.Models.Users;
-using SupervisorMobility.API.Models.ILU;
 
 namespace SupervisorMobility.API.Models.ILURegisterDtos
 {

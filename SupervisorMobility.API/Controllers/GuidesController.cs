@@ -1,11 +1,7 @@
 ﻿using AutoMapper;
 using Microsoft.AspNetCore.Mvc;
 using SupervisorMobility.API.Business;
-using SupervisorMobility.API.DataAccess.Entities;
-using SupervisorMobility.API.Models.AreaDtos;
-using SupervisorMobility.API.Models.DistributionDtos;
 using SupervisorMobility.API.Models.GuidesDtos;
-using SupervisorMobility.API.Models.PlantDtos;
 using SupervisorMobility.API.Services;
 
 namespace SupervisorMobility.API.Controllers

@@ -1,7 +1,4 @@
-﻿using SupervisorMobility.API.Models.Users;
-using System.ComponentModel.DataAnnotations;
-
-namespace SupervisorMobility.API.Models.NotificationDtos
+﻿namespace SupervisorMobility.API.Models.NotificationDtos
 {
     public class NotificationToCreateDto
     {

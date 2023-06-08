@@ -15,7 +15,7 @@ namespace SupervisorMobility.API.Models.Users
 
         public DateTime CreatedDate { get; set; }
         public DateTime LastUpdated { get; set; } = DateTime.Now;
-        public DateTime? DisabledDate { get; set; } 
+        public DateTime? DisabledDate { get; set; }
 
         public bool? IsActive { get; set; }
 

@@ -1,6 +1,4 @@
-﻿using System.ComponentModel.DataAnnotations;
-
-namespace SupervisorMobility.API.Models.GlosaryDtos
+﻿namespace SupervisorMobility.API.Models.GlosaryDtos
 {
     public class GlosaryForCreationDto
     {

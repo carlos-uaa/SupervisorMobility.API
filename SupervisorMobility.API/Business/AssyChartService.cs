@@ -1,5 +1,4 @@
 ﻿using AutoMapper;
-using DocumentFormat.OpenXml.Spreadsheet;
 using SupervisorMobility.API.DataAccess.Entities;
 using SupervisorMobility.API.Entities;
 using SupervisorMobility.API.Models.AssyChart;
@@ -12,7 +11,6 @@ using SupervisorMobility.API.Models.PlantDtos;
 using SupervisorMobility.API.Models.ProductDtos;
 using SupervisorMobility.API.Models.SupportDocumentTypeDtos;
 using SupervisorMobility.API.Models.Users;
-using SupervisorMobility.API.Profiles;
 using SupervisorMobility.API.Services;
 
 namespace SupervisorMobility.API.Business
@@ -215,7 +213,7 @@ namespace SupervisorMobility.API.Business
         public async Task<User?> FetchUserAsync(int userId)
         {
             return await _repository.GetUserAsync(userId);
-        } 
+        }
         public async Task<User?> FetchUserWhitObjectIdAsync(string objectId)
         {
             return await _repository.GetUserByObjectIdAsync(objectId);
@@ -378,7 +376,7 @@ namespace SupervisorMobility.API.Business
         {
             return await _repository.GetAttendanceById(AttendanceId);
         }
-    
+
         public async Task<Attendance> CreateAttendanceAsync(AttendanceForCreationDto AttendanceForCreate)
         {
             var AttendanceToAdd = _mapper.Map<Attendance>(AttendanceForCreate);

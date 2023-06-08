@@ -27,7 +27,7 @@ namespace SupervisorMobility.API.Controllers
             return Ok(_mapper.Map<IEnumerable<NotificationDto>>(Notifications));
         }
 
-      
+
         [HttpGet("{iduser}")]
         public async Task<ActionResult<IEnumerable<NotificationDto>>> GetAllNotificationsFromUser(int iduser)
         {

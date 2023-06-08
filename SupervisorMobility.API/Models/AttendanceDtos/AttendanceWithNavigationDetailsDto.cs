@@ -1,6 +1,5 @@
-﻿using SupervisorMobility.API.DataAccess.Entities;
+﻿using SupervisorMobility.API.Models.DistributionDtos;
 using SupervisorMobility.API.Models.Users;
-using SupervisorMobility.API.Models.DistributionDtos;
 
 namespace SupervisorMobility.API.Models.AttendanceDtos
 {
@@ -16,7 +15,7 @@ namespace SupervisorMobility.API.Models.AttendanceDtos
         public UsersWhitoutPeopleNavigation? Superior { get; set; } = new UsersWhitoutPeopleNavigation();
         public DistributionWithoutNavigationPropertiesDto? Currentdistribution { get; set; } = new DistributionWithoutNavigationPropertiesDto();
 
-        
+
         public bool Compas { get; set; }
         public bool Station { get; set; }
     }

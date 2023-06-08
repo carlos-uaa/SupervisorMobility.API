@@ -1,9 +1,4 @@
-﻿using MailKit.Net.Smtp;
-using Microsoft.AspNetCore.Http;
-using Microsoft.AspNetCore.Mvc;
-using Microsoft.Extensions.Configuration;
-using MimeKit;
-using SupervisorMobility.API.DataAccess.Entities;
+﻿using Microsoft.AspNetCore.Mvc;
 using SupervisorMobility.API.DataAccess.Services;
 
 namespace SupervisorMobility.API.Controllers

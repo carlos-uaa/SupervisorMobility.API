@@ -1,6 +1,4 @@
-﻿using System.ComponentModel.DataAnnotations;
-
-namespace SupervisorMobility.API.Models.AreaDtos
+﻿namespace SupervisorMobility.API.Models.AreaDtos
 {
     public class AreaWithoutNavigationPropertiesDto
     {

@@ -1,6 +1,4 @@
-﻿using System.Reflection;
-
-namespace SupervisorMobility.API.Models.ReturnResults
+﻿namespace SupervisorMobility.API.Models.ReturnResults
 {
     public class UploadAssyChartResult
     {

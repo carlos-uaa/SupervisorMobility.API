@@ -1,5 +1,3 @@
-using DocumentFormat.OpenXml.Office2016.Drawing.ChartDrawing;
-using Microsoft.AspNetCore.Hosting;
 using Newtonsoft.Json;
 using Serilog;
 using SupervisorMobility.API;
@@ -15,15 +13,17 @@ Log.Logger = new LoggerConfiguration()
 var builder = WebApplication.CreateBuilder(args);
 
 //Add Cors
-builder.Services.AddCors(policy => {
 
-    policy.AddPolicy("Cors", builder =>
+builder.Services.AddCors(policy =>
+{
+    policy.AddDefaultPolicy(builder =>
+    {
         builder.WithOrigins("*")
-        .AllowAnyMethod().AllowAnyHeader()
-        .SetIsOriginAllowedToAllowWildcardSubdomains()
- );
+                .AllowAnyMethod()
+                .AllowAnyHeader()
+                .SetIsOriginAllowedToAllowWildcardSubdomains();
+    });
 });
-
 
 //add json file to builder configuration
 var env = builder.Environment;
@@ -36,7 +36,7 @@ else
     builder.Configuration.AddJsonFile("appsettings.json", optional: false, reloadOnChange: true);
 }
 // Add services to the container.
- 
+
 builder.Host.UseSerilog();
 
 builder.Services.AddControllers(options =>
@@ -67,7 +67,7 @@ builder.Services.AddControllers()
 
 builder.WebHost.ConfigureKestrel(serverOptions =>
 {
-    serverOptions.Limits.MaxRequestBodySize= 1073741824;
+    serverOptions.Limits.MaxRequestBodySize = 1073741824;
 });
 
 //mail
@@ -81,7 +81,6 @@ builder.Services.AddSingleton(emailConfig);
 var app = builder.Build();
 
 // Configure the HTTP request pipeline.
-app.UseCors("Cors");
 
 // Configure the HTTP request pipeline.
 if (app.Environment.IsDevelopment() || app.Environment.IsProduction())
@@ -91,10 +90,12 @@ if (app.Environment.IsDevelopment() || app.Environment.IsProduction())
 }
 
 //app.UseHttpsRedirection();
+app.UseCors("Cors");
+app.UseCors();
+
 
 app.UseAuthorization();
 
 app.MapControllers();
 
 app.Run();
-AppContext.SetSwitch("Switch.Microsoft.AspNetCore.Mvc.EnableRangeProcessing",true);

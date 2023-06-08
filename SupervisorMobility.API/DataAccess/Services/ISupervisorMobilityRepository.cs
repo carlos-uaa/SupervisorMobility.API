@@ -2,11 +2,7 @@
 using SupervisorMobility.API.DataAccess.Entities.ILU;
 using SupervisorMobility.API.DataAccess.Entities.LUP;
 using SupervisorMobility.API.Entities;
-using SupervisorMobility.API.Models.AssyChart;
-using SupervisorMobility.API.Models.AttendanceDtos;
-using SupervisorMobility.API.Models.FileUploadDto;
 using SupervisorMobility.API.Models.Users;
-using System;
 using System.Runtime.CompilerServices;
 
 namespace SupervisorMobility.API.Services
@@ -225,7 +221,7 @@ namespace SupervisorMobility.API.Services
         #endregion
         #region Attendance
         Task<Attendance> GetAttendanceById(int AttendanceId);
-      
+
         void AddAttendance(Attendance Attendance);
         Task<IEnumerable<Attendance>> GetAllAttendance();
         Task<IEnumerable<Attendance>> GetAllAttendanceOfSupervisor(int idsupervisor);
@@ -247,9 +243,9 @@ namespace SupervisorMobility.API.Services
 
         #endregion
         #region PAT
-        Task<PAT?> GetPat (int patId);
-        Task<int> AddPat (PAT patForAdd);
-        Task<PAT?> GetPatForYearOfSV (int sv, int Year);
+        Task<PAT?> GetPat(int patId);
+        Task<int> AddPat(PAT patForAdd);
+        Task<PAT?> GetPatForYearOfSV(int sv, int Year);
         Task<int> UpdatePAT(PAT patForUpdate, PAT PatEntity);
         Task<IEnumerable<PAT>> GetAllPATs();
         Task<IEnumerable<PAT>> GetAllPATsOfSv(int svId);

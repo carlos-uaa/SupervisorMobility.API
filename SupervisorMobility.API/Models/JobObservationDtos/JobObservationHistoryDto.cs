@@ -1,6 +1,5 @@
 ﻿using SupervisorMobility.API.Models.AreaDtos;
 using SupervisorMobility.API.Models.DistributionDtos;
-using SupervisorMobility.API.Models.LupDtos;
 using SupervisorMobility.API.Models.OperationDtos;
 using SupervisorMobility.API.Models.PlantDtos;
 using SupervisorMobility.API.Models.Users;

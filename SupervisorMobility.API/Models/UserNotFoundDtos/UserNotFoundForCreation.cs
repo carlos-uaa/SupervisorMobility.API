@@ -1,6 +1,4 @@
-﻿using SupervisorMobility.API.Models.ILURegisterDtos;
-
-namespace SupervisorMobility.API.Models.Users
+﻿namespace SupervisorMobility.API.Models.Users
 {
     public class UserNotFoundForCreation
     {

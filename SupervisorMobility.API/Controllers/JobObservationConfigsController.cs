@@ -1,14 +1,6 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Threading.Tasks;
-using AutoMapper;
-using Microsoft.AspNetCore.Http;
+﻿using AutoMapper;
 using Microsoft.AspNetCore.JsonPatch;
 using Microsoft.AspNetCore.Mvc;
-using Microsoft.EntityFrameworkCore;
-using SupervisorMobility.API.Context;
-using SupervisorMobility.API.Entities;
 using SupervisorMobility.API.Models.JobObservationConfigsDtos;
 using SupervisorMobility.API.Services;
 
@@ -23,9 +15,9 @@ namespace SupervisorMobility.API.Controllers
 
         public JobObservationConfigsController(ISupervisorMobilityRepository supervisorMobilityRepository, IMapper mapper)
         {
-            _supervisorMobilityRepository = supervisorMobilityRepository ?? 
+            _supervisorMobilityRepository = supervisorMobilityRepository ??
                 throw new ArgumentNullException(nameof(supervisorMobilityRepository));
-            _mapper = mapper ?? 
+            _mapper = mapper ??
                 throw new ArgumentNullException(nameof(mapper));
         }
 
@@ -37,7 +29,7 @@ namespace SupervisorMobility.API.Controllers
             {
                 return NotFound();
             }
-          
+
             var jobObservationConfigForJobObservationType = await _supervisorMobilityRepository
                 .GetJobOperationConfigsForJobOperationTypeAsync(jobObservationTypeId);
 
@@ -84,12 +76,12 @@ namespace SupervisorMobility.API.Controllers
             var createdJobObservationConfigToReturn =
                 _mapper.Map<JobObservationConfigsWithoutNavigationPropertiesDto>(finalJobObservationConfig);
 
-            return CreatedAtAction("GetJobObservationConfig", 
-                new 
-                { 
+            return CreatedAtAction("GetJobObservationConfig",
+                new
+                {
                     jobObservationTypeId = jobObservationTypeId,
                     jobObservationConfigId = createdJobObservationConfigToReturn.JobObservationConfigId
-                }, 
+                },
                 createdJobObservationConfigToReturn);
         }
 
@@ -156,7 +148,7 @@ namespace SupervisorMobility.API.Controllers
             return NoContent();
         }
 
-        
+
         [HttpDelete("{jobobservationconfigid}")]
         public async Task<IActionResult> DeleteJobObservationConfig(
             int jobObservationTypeId, int jobObservationConfigId)

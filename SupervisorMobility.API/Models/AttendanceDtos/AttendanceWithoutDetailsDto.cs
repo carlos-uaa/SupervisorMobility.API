@@ -1,7 +1,4 @@
-﻿using SupervisorMobility.API.Models.AreaDtos;
-using SupervisorMobility.API.Models.GroupDtos;
-
-namespace SupervisorMobility.API.Models.AttendanceDtos
+﻿namespace SupervisorMobility.API.Models.AttendanceDtos
 {
     public class AttendanceWithoutDetailsDto
     {

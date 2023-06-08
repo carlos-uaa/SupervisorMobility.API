@@ -6,7 +6,8 @@ namespace SupervisorMobility.API.MapperProfiles
 {
     public class UserNotFoundProfile : Profile
     {
-        public UserNotFoundProfile() { 
+        public UserNotFoundProfile()
+        {
             CreateMap<UserNotFound, UserNotFoundWithNavigationDetails>().ReverseMap();
             CreateMap<UserNotFound, UserNotFoundForCreation>().ReverseMap();
             CreateMap<UserNotFound, UserNotFoundForUpdateDto>().ReverseMap();

@@ -3,7 +3,6 @@ using Microsoft.AspNetCore.JsonPatch;
 using Microsoft.AspNetCore.Mvc;
 using SupervisorMobility.API.Business;
 using SupervisorMobility.API.Models.ChecklistCategoryDtos;
-using SupervisorMobility.API.Services;
 
 namespace SupervisorMobility.API.Controllers
 {
@@ -14,8 +13,8 @@ namespace SupervisorMobility.API.Controllers
         private readonly IJobObservationService _checklistCategoryService;
         private readonly IMapper _mapper;
 
-        public ChecklistCategoriesController( 
-            IMapper mapper, 
+        public ChecklistCategoriesController(
+            IMapper mapper,
             IJobObservationService checklistCategoryService)
         {
             _mapper = mapper;
@@ -53,7 +52,7 @@ namespace SupervisorMobility.API.Controllers
         {
             var finalChecklistCategory = await _checklistCategoryService.CreateChecklistCategoryAsync(checklistCategory);
 
-            var createChecklistCategoryToReturn = 
+            var createChecklistCategoryToReturn =
                 _mapper.Map<ChecklistCategoryDto>(finalChecklistCategory);
 
             return CreatedAtRoute("GetChecklistCategory",
@@ -146,7 +145,7 @@ namespace SupervisorMobility.API.Controllers
                 return NoContent();
             }
 
-            if (checklistCategory.Sequence < 1 
+            if (checklistCategory.Sequence < 1
                 || checklistCategory.Sequence > await _checklistCategoryService.FetchChecklistCategoriesMaxSequenceAsync())
             {
                 return BadRequest("Sequence must be greater than 1 and lower that the current max sequence.");

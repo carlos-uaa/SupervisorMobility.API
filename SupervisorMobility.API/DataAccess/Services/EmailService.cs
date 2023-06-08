@@ -22,7 +22,7 @@ namespace SupervisorMobility.API.DataAccess.Services
             emailMessage.To.Add(MailboxAddress.Parse(email));
             emailMessage.Subject = $"{_emailConfig.UserName}";
             emailMessage.Body = new TextPart(MimeKit.Text.TextFormat.Text) { Text = message };
-            return emailMessage; 
+            return emailMessage;
         }
         public void Send(MimeMessage mailMessage)
         {

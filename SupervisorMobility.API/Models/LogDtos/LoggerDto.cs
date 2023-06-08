@@ -1,8 +1,6 @@
-﻿using SupervisorMobility.API.DataAccess.Entities;
-using SupervisorMobility.API.Models.LogEventDtos;
+﻿using SupervisorMobility.API.Models.LogEventDtos;
 using SupervisorMobility.API.Models.LogSpecificEventDtos;
 using SupervisorMobility.API.Models.Users;
-using System.ComponentModel.DataAnnotations.Schema;
 
 namespace SupervisorMobility.API.Models.LOG
 {

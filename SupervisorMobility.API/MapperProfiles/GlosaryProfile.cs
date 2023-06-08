@@ -2,7 +2,7 @@
 
 namespace SupervisorMobility.API.Profiles
 {
-    public class GlosaryProfile: Profile
+    public class GlosaryProfile : Profile
     {
         public GlosaryProfile()
         {

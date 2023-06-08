@@ -1,8 +1,8 @@
-﻿using System.ComponentModel.DataAnnotations.Schema;
-using System.ComponentModel.DataAnnotations;
+﻿using SupervisorMobility.API.DataAccess.Entities.ILU;
 using SupervisorMobility.API.Entities;
+using System.ComponentModel.DataAnnotations;
+using System.ComponentModel.DataAnnotations.Schema;
 using System.Text.Json.Serialization;
-using SupervisorMobility.API.DataAccess.Entities.ILU;
 
 namespace SupervisorMobility.API.DataAccess.Entities
 {
@@ -28,7 +28,7 @@ namespace SupervisorMobility.API.DataAccess.Entities
         [Column(TypeName = "Date")]
         public DateTime? CreatedDate { get; set; } = DateTime.Now;
         [Column(TypeName = "Date")]
-        public DateTime LastUpdated { get; set; } 
+        public DateTime LastUpdated { get; set; }
         [Column(TypeName = "Date")]
         public DateTime? DisabledDate { get; set; }
 
@@ -67,7 +67,7 @@ namespace SupervisorMobility.API.DataAccess.Entities
 
             switch (UserType)
             {
-               
+
                 case 2:
                     return Name == other.Name &&
                            Email == other.Email &&

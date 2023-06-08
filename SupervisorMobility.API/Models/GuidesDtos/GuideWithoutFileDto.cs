@@ -1,6 +1,4 @@
-﻿using System.ComponentModel.DataAnnotations;
-
-namespace SupervisorMobility.API.Models.GuidesDtos
+﻿namespace SupervisorMobility.API.Models.GuidesDtos
 {
     public class GuideWithoutFileDto
     {

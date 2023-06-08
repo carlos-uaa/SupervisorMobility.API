@@ -1,20 +1,15 @@
 ﻿using AutoMapper;
-using DocumentFormat.OpenXml.Spreadsheet;
-using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
 using SupervisorMobility.API.DataAccess.Entities;
 using SupervisorMobility.API.DataAccess.Entities.ILU;
-using SupervisorMobility.API.Models.AreaDtos;
 using SupervisorMobility.API.Models.ILU;
 using SupervisorMobility.API.Models.ILURegisterDtos;
-using SupervisorMobility.API.Models.PATDtos;
 using SupervisorMobility.API.Services;
-using System.Collections.Generic;
 
 namespace SupervisorMobility.API.Controllers
 {
-        [Route("api/ILU")]
-        [ApiController]
+    [Route("api/ILU")]
+    [ApiController]
 
     public class ILU_Controller : ControllerBase
     {
@@ -38,15 +33,15 @@ namespace SupervisorMobility.API.Controllers
             var finalILURegister = _mapper.Map<ILURegister>(ILUToRegister);
 
             User MasterUser = await _supervisorMobilityRepository.GetUserAsync(userID);
-          
-            if(MasterUser != null)
+
+            if (MasterUser != null)
             {
-                var Createresult =  await _supervisorMobilityRepository.AddILURegister(finalILURegister);
+                var Createresult = await _supervisorMobilityRepository.AddILURegister(finalILURegister);
 
                 if (Createresult > 0)
                 {
                     var AddToUserResult = await _supervisorMobilityRepository.AddILURegToUser(finalILURegister, MasterUser);
-                   
+
                     return Ok(finalILURegister);
                 }
 
@@ -79,7 +74,7 @@ namespace SupervisorMobility.API.Controllers
             if (includeCollections)
             {
                 var PatsWhitCollections = await _supervisorMobilityRepository.GetAllILULevel();
-                return Ok(_mapper.Map<IEnumerable<ILULevelDto>> (PatsWhitCollections));
+                return Ok(_mapper.Map<IEnumerable<ILULevelDto>>(PatsWhitCollections));
 
             }
             else

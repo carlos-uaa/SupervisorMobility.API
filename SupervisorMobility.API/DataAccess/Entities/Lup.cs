@@ -1,6 +1,6 @@
-﻿using System.ComponentModel.DataAnnotations;
+﻿using SupervisorMobility.API.DataAccess.Entities;
+using System.ComponentModel.DataAnnotations;
 using System.ComponentModel.DataAnnotations.Schema;
-using SupervisorMobility.API.DataAccess.Entities;
 
 namespace SupervisorMobility.API.Entities
 {
@@ -21,7 +21,7 @@ namespace SupervisorMobility.API.Entities
         public string? Justification { get; set; }
         public int? Status { get; set; }
         public DateTime? CreatedDate { get; set; }
-        public DateTime? EndDate { get; set;}
+        public DateTime? EndDate { get; set; }
         public ICollection<FileUpload>? Evidences { get; set; }
             = new List<FileUpload>();
     }

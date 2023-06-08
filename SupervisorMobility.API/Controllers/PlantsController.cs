@@ -2,8 +2,6 @@
 using Microsoft.AspNetCore.JsonPatch;
 using Microsoft.AspNetCore.Mvc;
 using SupervisorMobility.API.Business;
-using SupervisorMobility.API.Entities;
-using SupervisorMobility.API.Models.GroupDtos;
 using SupervisorMobility.API.Models.PlantDtos;
 using SupervisorMobility.API.Services;
 

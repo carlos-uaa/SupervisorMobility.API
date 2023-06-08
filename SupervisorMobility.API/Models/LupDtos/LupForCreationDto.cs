@@ -1,6 +1,4 @@
-﻿using System.ComponentModel.DataAnnotations;
-
-namespace SupervisorMobility.API.Models.LupDtos
+﻿namespace SupervisorMobility.API.Models.LupDtos
 {
     public class LupForCreationDto
     {

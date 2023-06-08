@@ -1,6 +1,4 @@
-﻿using DocumentFormat.OpenXml.EMMA;
-using DocumentFormat.OpenXml.Wordprocessing;
-using Microsoft.EntityFrameworkCore;
+﻿using Microsoft.EntityFrameworkCore;
 using SupervisorMobility.API.DataAccess.Entities;
 using SupervisorMobility.API.DataAccess.Entities.ILU;
 using SupervisorMobility.API.DataAccess.Entities.Logger;
@@ -31,7 +29,7 @@ namespace SupervisorMobility.API.Context
         public DbSet<AssyChart> AssyCharts { get; set; }
         public DbSet<User> Users { get; set; }
         public DbSet<UserNotFound> UsersNotFound { get; set; }
-        
+
         public DbSet<FileUpload> Files { get; set; }
         public DbSet<Guides> Guides { get; set; }
         public DbSet<JobObservationVersion> JobObservationHistory { get; set; }
@@ -45,7 +43,7 @@ namespace SupervisorMobility.API.Context
         public DbSet<PAT> PATs { get; set; }
         #endregion
 
-       
+
 
         public SupervisorMobilityContext(DbContextOptions<SupervisorMobilityContext> options)
             : base(options)
@@ -140,9 +138,9 @@ namespace SupervisorMobility.API.Context
                 );
 
 
-         
+
             //area
-            
+
             modelBuilder.Entity<Area>()
                 .Property(p => p.IsActive)
                 .HasDefaultValue(true);
@@ -155,7 +153,7 @@ namespace SupervisorMobility.API.Context
               .Property(e => e.LogEventId)
               .UseIdentityColumn();
 
-     
+
 
             modelBuilder.Entity<LogSpecificEvent>()
               .Property(e => e.LogSpecificEventId)
@@ -180,7 +178,7 @@ namespace SupervisorMobility.API.Context
                 .WithMany()
                 .HasForeignKey(p => p.SSVresponsibleID)
                 .OnDelete(DeleteBehavior.NoAction);
-            
+
             modelBuilder.Entity<PAT>()
                 .HasOne(p => p.Supervisor)
                 .WithMany()
@@ -203,7 +201,7 @@ namespace SupervisorMobility.API.Context
 
             modelBuilder.Entity<ILURegister>()
                 .Property(p => p.isActive)
-                .HasDefaultValue(true); 
+                .HasDefaultValue(true);
 
             modelBuilder.Entity<Notification>()
                 .Property(p => p.IsActive)
@@ -645,7 +643,7 @@ namespace SupervisorMobility.API.Context
                 }
             );
 
-            
+
 
             modelBuilder.Entity<User>().HasData(
                 new User
@@ -744,7 +742,7 @@ namespace SupervisorMobility.API.Context
                     UserType = 4,
                     SuperiorId = 4,
                 }
-                );;
+                ); ;
 
             modelBuilder.Entity<Lup>()
                  .HasData(

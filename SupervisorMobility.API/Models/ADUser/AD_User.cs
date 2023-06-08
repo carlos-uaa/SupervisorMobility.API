@@ -1,8 +1,4 @@
-﻿using System.ComponentModel.DataAnnotations.Schema;
-using System.ComponentModel.DataAnnotations;
-using SupervisorMobility.API.Entities;
-
-namespace SupervisorMobility.API.Models.ADUser
+﻿namespace SupervisorMobility.API.Models.ADUser
 {
     public class AD_User
     {
@@ -19,6 +15,6 @@ namespace SupervisorMobility.API.Models.ADUser
         public string cn { get; set; }
         public string displayName { get; set; }
 
-               
+
     }
 }

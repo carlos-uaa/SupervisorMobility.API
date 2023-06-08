@@ -1,7 +1,4 @@
-﻿using SupervisorMobility.API.Entities;
-using SupervisorMobility.API.Models.FileUploadDto;
-using SupervisorMobility.API.Models.JobObservationDtos;
-using SupervisorMobility.API.Models.PlantDtos;
+﻿using SupervisorMobility.API.Models.FileUploadDto;
 
 namespace SupervisorMobility.API.Models.LupDtos
 {

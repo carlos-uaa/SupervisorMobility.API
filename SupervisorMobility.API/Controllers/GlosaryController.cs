@@ -1,9 +1,7 @@
 ﻿using AutoMapper;
-using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.JsonPatch;
 using Microsoft.AspNetCore.Mvc;
 using SupervisorMobility.API.Models.GlosaryDtos;
-using SupervisorMobility.API.Models.GroupDtos;
 using SupervisorMobility.API.Services;
 
 namespace SupervisorMobility.API.Controllers

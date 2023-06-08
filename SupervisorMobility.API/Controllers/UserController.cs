@@ -1,26 +1,15 @@
 ﻿using AutoMapper;
+using ClosedXML.Excel;
+using Microsoft.AspNetCore.Cors;
 using Microsoft.AspNetCore.Mvc;
-using Microsoft.VisualBasic.FileIO;
 using SpreadsheetLight;
-using SupervisorMobility.API.Entities;
-using SupervisorMobility.API.Models.AreaDtos;
-using SupervisorMobility.API.Models.AssyChart;
-using System.Diagnostics;
-using System.Net;
-using System.Text.RegularExpressions;
-using SupervisorMobility.API.Services;
-using SupervisorMobility.API.Models.PlantDtos;
 using SupervisorMobility.API.Business;
 using SupervisorMobility.API.DataAccess.Entities;
-using Microsoft.AspNetCore.Cors;
+using SupervisorMobility.API.Entities;
 using SupervisorMobility.API.Models.FileUploadDto;
-using SupervisorMobility.API.Models.Users;
 using SupervisorMobility.API.Models.ReturnResults;
-using ClosedXML.Excel;
-using DocumentFormat.OpenXml.Spreadsheet;
-using System.Drawing.Text;
-using Microsoft.EntityFrameworkCore.ChangeTracking;
-using DocumentFormat.OpenXml.Wordprocessing;
+using SupervisorMobility.API.Models.Users;
+using SupervisorMobility.API.Services;
 
 namespace SupervisorMobility.API.Controllers
 {
@@ -59,7 +48,7 @@ namespace SupervisorMobility.API.Controllers
                 return Ok(_mapper.Map<IEnumerable<UsersWithoutNavigationDetails>>(userEntity));
             }
         }
-        
+
         [HttpGet("{SupervisorId}/Subordinates")]
         public async Task<ActionResult<IEnumerable<UsersWithNavigationDetails>>> GetSubordinates(int SupervisorId, bool collections = false)
         {
@@ -385,7 +374,7 @@ namespace SupervisorMobility.API.Controllers
                         if (user.UserType == 4)
                             user.AreaId = actualSuperior.AreaId;
                     }
-                }  
+                }
             }
 
             user.CreatedDate = (DateTime)entityentity.CreatedDate;
@@ -393,7 +382,7 @@ namespace SupervisorMobility.API.Controllers
 
             UserToReturn = await _assyChartService.FetchUserAsync(userId);
 
-            
+
 
             if (haveUsers)
             {
@@ -2074,7 +2063,7 @@ namespace SupervisorMobility.API.Controllers
 
             ws.RenameWorksheet(SLDocument.DefaultFirstSheetName, "Users Bulk");
 
-         
+
             ws.SetCellValue("A1", "UserId");
             ws.SetCellValue("B1", "UserName@compasdcpcs.local");
             ws.SetCellValue("C1", "Payroll");
@@ -2112,7 +2101,7 @@ namespace SupervisorMobility.API.Controllers
 
             ws.SetCellValue("H4", "In case you are registering many Subordinates, it is necessary to separate them by commas. eg: (1,2,3) without parentheses ");
             ws.SetCellValue("J4", "In case you are registering an SV,the id of one of the areas administering the SSV who will be his or her superior");
-           
+
 
             ws.SaveAs(ms);
 
@@ -2234,7 +2223,7 @@ namespace SupervisorMobility.API.Controllers
             ws.SetCellValue("C2", "This field is used for the UserName");
             ws.SetCellValue("D2", "This field is used for the Distribution_id registered in the Mobility supervisor system");
             ws.SetCellValue("E2", "This field is used for the User_id Superior registered in the Mobility supervisor system");
-            
+
             ws.SetCellValue("A3", "in case it already exists, the user information will be updated.");
             ws.SetCellValue("D3", "Can be left blank");
 

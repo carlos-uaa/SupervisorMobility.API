@@ -1,6 +1,6 @@
-﻿using System.ComponentModel.DataAnnotations.Schema;
+﻿using SupervisorMobility.API.DataAccess.Entities;
 using System.ComponentModel.DataAnnotations;
-using SupervisorMobility.API.DataAccess.Entities;
+using System.ComponentModel.DataAnnotations.Schema;
 
 namespace SupervisorMobility.API.Entities
 {
@@ -17,7 +17,7 @@ namespace SupervisorMobility.API.Entities
         public int JobObservationId { get; set; }
         public bool? IsActive { get; set; }
 
-          public Plant? Plant { get; set; }
+        public Plant? Plant { get; set; }
         public int? PlantId { get; set; }
         public Area? Area { get; set; }
         public int? AreaId { get; set; }

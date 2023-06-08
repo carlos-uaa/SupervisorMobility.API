@@ -4,10 +4,8 @@ using Microsoft.AspNetCore.Mvc;
 using SupervisorMobility.API.Business;
 using SupervisorMobility.API.DataAccess.Entities;
 using SupervisorMobility.API.Models.DistributionDtos;
-using SupervisorMobility.API.Models.PlantDtos;
 using SupervisorMobility.API.Models.ProductDtos;
 using SupervisorMobility.API.Services;
-using System.Diagnostics;
 
 namespace SupervisorMobility.API.Controllers
 {
@@ -38,7 +36,7 @@ namespace SupervisorMobility.API.Controllers
         public async Task<ActionResult<ProductWhitNavigationPropietiesDto>> GetProduct(int productId, bool collections = false)
         {
             //Find Job Observation type
-            
+
 
             if (collections)
             {
@@ -84,7 +82,7 @@ namespace SupervisorMobility.API.Controllers
                 createProductToReturn);
         }
 
-       
+
 
         [HttpGet("{productId}/distributions/{distributionId}")]
         public async Task<ActionResult<DistributionWithNavigationPropertiesDto>> GetOneDistributionOnlyById(
@@ -121,7 +119,7 @@ namespace SupervisorMobility.API.Controllers
                 return NotFound("No product Exist");
             }
 
-         
+
             var finalDistribution = _mapper.Map<Distribution>(distribution);
             finalDistribution.AreaId = areaId;
             await _supervisorMobilityRepository.AddDistributionForProductAsync(productId, finalDistribution);
@@ -288,7 +286,7 @@ namespace SupervisorMobility.API.Controllers
             return Ok();
         }
 
-       
+
 
     }
 }

@@ -1,6 +1,7 @@
 ﻿using SupervisorMobility.API.DataAccess.Entities;
 using SupervisorMobility.API.Entities;
 using SupervisorMobility.API.Models.AssyChart;
+using SupervisorMobility.API.Models.AttendanceDtos;
 using SupervisorMobility.API.Models.FileUploadDto;
 using SupervisorMobility.API.Models.GuidesDtos;
 using SupervisorMobility.API.Models.NotificationDtos;
@@ -9,7 +10,6 @@ using SupervisorMobility.API.Models.PlantDtos;
 using SupervisorMobility.API.Models.ProductDtos;
 using SupervisorMobility.API.Models.SupportDocumentTypeDtos;
 using SupervisorMobility.API.Models.Users;
-using SupervisorMobility.API.Models.AttendanceDtos;
 
 namespace SupervisorMobility.API.Business
 {
@@ -53,7 +53,7 @@ namespace SupervisorMobility.API.Business
         #region Distribution
         Task<bool> CheckDistributionExistance(int distributionId);
         #endregion
-        
+
 
         #region AssyChart
         Task<AssyChart> CreateAssyChartAsync(AssyChartForCreation assyChart);
@@ -100,7 +100,7 @@ namespace SupervisorMobility.API.Business
         #endregion
         #region attendance
         Task<Attendance> FetchAttendanceByIdAsync(int AttendanceId);
-  
+
         Task<Attendance> CreateAttendanceAsync(AttendanceForCreationDto Attendance);
         Task<bool> UpdateAttendanceAsync(AttendanceForUpdateDto ForUpdate, Attendance Attendance);
         Task<IEnumerable<Attendance>> GetAllAttendanceAsync();

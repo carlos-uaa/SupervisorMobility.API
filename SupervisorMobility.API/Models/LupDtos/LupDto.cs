@@ -1,8 +1,4 @@
-﻿using SupervisorMobility.API.Entities;
-using SupervisorMobility.API.Models.JobObservationDtos;
-using SupervisorMobility.API.Models.PlantDtos;
-
-namespace SupervisorMobility.API.Models.LupDtos
+﻿namespace SupervisorMobility.API.Models.LupDtos
 {
     public class LupDto
     {

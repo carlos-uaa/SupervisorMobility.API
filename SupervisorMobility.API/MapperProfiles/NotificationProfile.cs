@@ -6,7 +6,8 @@ namespace SupervisorMobility.API.MapperProfiles
 {
     public class NotificationProfile : Profile
     {
-        public NotificationProfile() {
+        public NotificationProfile()
+        {
             CreateMap<Notification, NotificationDto>();
             CreateMap<Notification, NotificationToCreateDto>().ReverseMap();
             CreateMap<Notification, NotificationForUpdateDto>().ReverseMap();

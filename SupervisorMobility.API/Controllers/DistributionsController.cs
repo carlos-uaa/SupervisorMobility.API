@@ -1,16 +1,11 @@
 ﻿using AutoMapper;
-using DocumentFormat.OpenXml.Bibliography;
-using Irony.Parsing;
 using Microsoft.AspNetCore.JsonPatch;
 using Microsoft.AspNetCore.Mvc;
 using SupervisorMobility.API.Business;
 using SupervisorMobility.API.DataAccess.Entities;
-using SupervisorMobility.API.Models.AreaDtos;
 using SupervisorMobility.API.Models.DistributionDtos;
-using SupervisorMobility.API.Models.OperationDtos;
 using SupervisorMobility.API.Models.ProductDtos;
 using SupervisorMobility.API.Services;
-using System.Diagnostics;
 
 namespace SupervisorMobility.API.Controllers
 {
@@ -108,7 +103,7 @@ namespace SupervisorMobility.API.Controllers
 
         }
 
-       
+
 
         [HttpPost]
         public async Task<ActionResult<DistributionWithoutNavigationPropertiesDto>> CreateDistribution(
@@ -175,7 +170,7 @@ namespace SupervisorMobility.API.Controllers
             return Ok();
         }
 
-       
+
 
         [HttpPatch("{distributionid}")]
         public async Task<ActionResult> PartiallyUpdateDistribution(
@@ -248,7 +243,7 @@ namespace SupervisorMobility.API.Controllers
 
 
         [HttpPost("{distributionId}/products")]
-        public async Task<ActionResult<DistributionWithoutNavigationPropertiesDto>> CreateProduct(int plantId, int areaId, int distributionId, 
+        public async Task<ActionResult<DistributionWithoutNavigationPropertiesDto>> CreateProduct(int plantId, int areaId, int distributionId,
       ProductForCreationDto product)
         {
             if (!await _supervisorMobilityRepository.PlantExistAsync(plantId))
@@ -259,8 +254,8 @@ namespace SupervisorMobility.API.Controllers
             if (!await _supervisorMobilityRepository.AreaExistAsync(areaId))
             {
                 return NotFound("No Area Exist");
-            }  
-            
+            }
+
             if (!await _supervisorMobilityRepository.DistributionExistsAsync(distributionId))
             {
                 return NotFound("No Distribution Exist");
@@ -315,7 +310,7 @@ namespace SupervisorMobility.API.Controllers
 
 
             Distribution? finalDistribution = await _supervisorMobilityRepository.GetDistributionForAreaAsync(areaId, distributionId);
-          
+
             await _supervisorMobilityRepository.AddDistributionForProductAsync(product.ProductId, finalDistribution);
 
             await _supervisorMobilityRepository.SaveChangesAsync();

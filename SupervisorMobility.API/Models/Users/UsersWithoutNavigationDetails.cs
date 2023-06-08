@@ -1,10 +1,4 @@
-﻿using SupervisorMobility.API.DataAccess.Entities;
-using SupervisorMobility.API.Entities;
-using SupervisorMobility.API.Models.AreaDtos;
-using SupervisorMobility.API.Models.GroupDtos;
-using SupervisorMobility.API.Models.PlantDtos;
-using SupervisorMobility.API.Models.Users;
-using System.ComponentModel.DataAnnotations.Schema;
+﻿using System.ComponentModel.DataAnnotations.Schema;
 
 namespace SupervisorMobility.API.Models.Users
 {
@@ -14,7 +8,7 @@ namespace SupervisorMobility.API.Models.Users
         public string? ObjectId { get; set; }
         public int? Payroll { get; set; }
         public string Name { get; set; } = string.Empty;
-        public string? Email { get; set; } 
+        public string? Email { get; set; }
         public int UserType { get; set; }
 
         public int? SuperiorId { get; set; }

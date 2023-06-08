@@ -1,11 +1,8 @@
 ﻿using AutoMapper;
 using CsvHelper;
-using DocumentFormat.OpenXml.InkML;
 using Microsoft.AspNetCore.Mvc;
-using Microsoft.Kiota.Abstractions;
 using SupervisorMobility.API.Business;
 using SupervisorMobility.API.DataAccess.Entities;
-using SupervisorMobility.API.Models.AreaDtos;
 using SupervisorMobility.API.Models.AttendanceDtos;
 using SupervisorMobility.API.Models.FileUploadDto;
 using SupervisorMobility.API.Models.Users;
@@ -116,20 +113,20 @@ namespace SupervisorMobility.API.Controllers
                 if (!mismoDia)
                 {
                     //es un dia diferente
-                    if(existingRecordInAttendance != null)
+                    if (existingRecordInAttendance != null)
                     {
                         //ya se encuentra en la lista
-                            var updateRecord = new AttendanceForUpdateDto
-                            {
-                                UserId = user.UserId,
-                                SuperiorId = user.SuperiorId,
-                                CurrentdistributionId = user.DistributionId,
-                                Compas = false,
-                                Station = false
-                            };
+                        var updateRecord = new AttendanceForUpdateDto
+                        {
+                            UserId = user.UserId,
+                            SuperiorId = user.SuperiorId,
+                            CurrentdistributionId = user.DistributionId,
+                            Compas = false,
+                            Station = false
+                        };
 
-                            bool update = await _assyChartService.UpdateAttendanceAsync(updateRecord, existingRecordInAttendance);
-                       //se actualiza dado que es de un dia pasado y no estara en la planta 
+                        bool update = await _assyChartService.UpdateAttendanceAsync(updateRecord, existingRecordInAttendance);
+                        //se actualiza dado que es de un dia pasado y no estara en la planta 
                     }
                     else
                     {
@@ -162,9 +159,9 @@ namespace SupervisorMobility.API.Controllers
                         inico = DateTime.Parse((string)record.Inicio);
                     else
                         continue;
-                      
+
                     //el inicio puede estar vacio por que es turno vespertino u horas extras
-                    if((string)record.Inicio == "")
+                    if ((string)record.Inicio == "")
                     {
                         if (existingRecordInAttendance != null)
                         {

@@ -2,9 +2,7 @@
 using Microsoft.AspNetCore.JsonPatch;
 using Microsoft.AspNetCore.Mvc;
 using SupervisorMobility.API.Business;
-using SupervisorMobility.API.Models.PlantDtos;
 using SupervisorMobility.API.Models.SupportDocumentTypeDtos;
-using SupervisorMobility.API.Services;
 
 namespace SupervisorMobility.API.Controllers
 {

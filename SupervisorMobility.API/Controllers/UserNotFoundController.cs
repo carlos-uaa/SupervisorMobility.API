@@ -1,26 +1,9 @@
 ﻿using AutoMapper;
 using Microsoft.AspNetCore.Mvc;
-using Microsoft.VisualBasic.FileIO;
-using SpreadsheetLight;
-using SupervisorMobility.API.Entities;
-using SupervisorMobility.API.Models.AreaDtos;
-using SupervisorMobility.API.Models.AssyChart;
-using System.Diagnostics;
-using System.Net;
-using System.Text.RegularExpressions;
-using SupervisorMobility.API.Services;
-using SupervisorMobility.API.Models.PlantDtos;
 using SupervisorMobility.API.Business;
 using SupervisorMobility.API.DataAccess.Entities;
-using Microsoft.AspNetCore.Cors;
-using SupervisorMobility.API.Models.FileUploadDto;
 using SupervisorMobility.API.Models.Users;
-using SupervisorMobility.API.Models.ReturnResults;
-using ClosedXML.Excel;
-using DocumentFormat.OpenXml.Spreadsheet;
-using System.Drawing.Text;
-using Microsoft.EntityFrameworkCore.ChangeTracking;
-using DocumentFormat.OpenXml.Wordprocessing;
+using SupervisorMobility.API.Services;
 
 namespace SupervisorMobility.API.Controllers
 {

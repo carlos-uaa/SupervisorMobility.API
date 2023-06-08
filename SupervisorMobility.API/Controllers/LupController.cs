@@ -1,17 +1,7 @@
 ﻿using AutoMapper;
 using Microsoft.AspNetCore.Mvc;
-using SupervisorMobility.API.DataAccess.Entities;
 using SupervisorMobility.API.Entities;
-using SupervisorMobility.API.Models.AssyChart;
-using SupervisorMobility.API.Models.DistributionDtos;
-using SupervisorMobility.API.Models.FileUploadDto;
-using SupervisorMobility.API.Models.GuidesDtos;
-using SupervisorMobility.API.Models.JobObservationDtos;
 using SupervisorMobility.API.Models.LupDtos;
-using SupervisorMobility.API.Models.OperationDtos;
-using SupervisorMobility.API.Models.PlantDtos;
-using SupervisorMobility.API.Models.ProductDtos;
-using SupervisorMobility.API.Profiles;
 using SupervisorMobility.API.Services;
 
 namespace SupervisorMobility.API.Controllers

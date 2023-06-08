@@ -1,7 +1,5 @@
-﻿using System.ComponentModel.DataAnnotations.Schema;
-using System.ComponentModel.DataAnnotations;
-using SupervisorMobility.API.Entities;
-using System.Text.Json.Serialization;
+﻿using System.ComponentModel.DataAnnotations;
+using System.ComponentModel.DataAnnotations.Schema;
 
 namespace SupervisorMobility.API.DataAccess.Entities.LUP
 {
@@ -12,7 +10,7 @@ namespace SupervisorMobility.API.DataAccess.Entities.LUP
 
         public char ILULevelCode { get; set; }
         public string ILULevelDescription { get; set; } = string.Empty;
-        
+
         public bool isActive { get; set; }
 
     }

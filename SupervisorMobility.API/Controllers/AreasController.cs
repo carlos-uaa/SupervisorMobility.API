@@ -2,10 +2,8 @@
 using AutoMapper;
 using Microsoft.AspNetCore.JsonPatch;
 using Microsoft.AspNetCore.Mvc;
-using Microsoft.EntityFrameworkCore.Query;
 using SupervisorMobility.API.DataAccess.Entities;
 using SupervisorMobility.API.Models.AreaDtos;
-using SupervisorMobility.API.Models.ChecklistQuestionDtos;
 using SupervisorMobility.API.Services;
 
 namespace SupervisorMobility.API.Controllers

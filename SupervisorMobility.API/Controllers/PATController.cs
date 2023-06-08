@@ -1,15 +1,13 @@
 ﻿using AutoMapper;
-using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
 using SupervisorMobility.API.DataAccess.Entities;
-using SupervisorMobility.API.Models.AreaDtos;
 using SupervisorMobility.API.Models.PATDtos;
 using SupervisorMobility.API.Services;
 
 namespace SupervisorMobility.API.Controllers
 {
-        [Route("api/PAT")]
-        [ApiController]
+    [Route("api/PAT")]
+    [ApiController]
 
     public class PATController : ControllerBase
     {
@@ -30,8 +28,9 @@ namespace SupervisorMobility.API.Controllers
         {
             var finalPat = _mapper.Map<PAT>(PatForCreate);
             var result = await _supervisorMobilityRepository.AddPat(finalPat);
-            
-            if(result > 0){
+
+            if (result > 0)
+            {
                 return Ok(finalPat);
             }
 

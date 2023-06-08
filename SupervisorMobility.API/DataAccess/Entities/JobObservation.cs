@@ -1,6 +1,6 @@
-﻿using System.ComponentModel.DataAnnotations;
+﻿using SupervisorMobility.API.DataAccess.Entities;
+using System.ComponentModel.DataAnnotations;
 using System.ComponentModel.DataAnnotations.Schema;
-using SupervisorMobility.API.DataAccess.Entities;
 
 namespace SupervisorMobility.API.Entities
 {

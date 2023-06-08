@@ -1,5 +1,4 @@
 ﻿using AutoMapper;
-using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.JsonPatch;
 using Microsoft.AspNetCore.Mvc;
 using SupervisorMobility.API.Models.GroupDtos;
@@ -13,12 +12,12 @@ namespace SupervisorMobility.API.Controllers
     {
         readonly ISupervisorMobilityRepository _supervisorMobilityRepository;
         readonly IMapper _mapper;
-        public GroupsController(ISupervisorMobilityRepository supervisorMobilityRepository, 
+        public GroupsController(ISupervisorMobilityRepository supervisorMobilityRepository,
             IMapper mapper)
         {
             _supervisorMobilityRepository = supervisorMobilityRepository ??
                 throw new ArgumentNullException(nameof(supervisorMobilityRepository));
-            _mapper = mapper ?? 
+            _mapper = mapper ??
                 throw new ArgumentNullException(nameof(mapper));
         }
 

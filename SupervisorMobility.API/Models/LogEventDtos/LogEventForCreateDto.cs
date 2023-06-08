@@ -1,5 +1,4 @@
-﻿using SupervisorMobility.API.DataAccess.Entities.Logger;
-using SupervisorMobility.API.Models.LogSpecificEventDtos;
+﻿using SupervisorMobility.API.Models.LogSpecificEventDtos;
 
 namespace SupervisorMobility.API.Models.LogEventDtos
 {

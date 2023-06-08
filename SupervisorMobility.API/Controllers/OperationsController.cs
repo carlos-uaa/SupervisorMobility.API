@@ -4,8 +4,6 @@ using Microsoft.AspNetCore.Mvc;
 using SupervisorMobility.API.Business;
 using SupervisorMobility.API.Entities;
 using SupervisorMobility.API.Models.OperationDtos;
-using SupervisorMobility.API.Services;
-using System.Xml.Linq;
 
 namespace SupervisorMobility.API.Controllers
 {
@@ -152,7 +150,7 @@ namespace SupervisorMobility.API.Controllers
 
         [HttpPatch("{operationid}")]
         public async Task<ActionResult> PartiallyUpdateOperation(
-            int plantId, int areaId, int distributionId,int operationId,
+            int plantId, int areaId, int distributionId, int operationId,
             JsonPatchDocument<OperationForUpdateDto> patchDocumentOperation)
         {
             if (!await _assyChartService.CheckPlantExistance(plantId))
