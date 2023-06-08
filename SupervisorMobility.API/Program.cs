@@ -14,27 +14,15 @@ Log.Logger = new LoggerConfiguration()
 var builder = WebApplication.CreateBuilder(args);
 
 //Add Cors
+builder.Services.AddCors(policy => {
 
-//builder.Services.AddCors(policy =>
-//{
-//    policy.AddDefaultPolicy(builder =>
-//    {
-//        builder.WithOrigins("*")
-//                .AllowAnyMethod()
-//                .AllowAnyHeader()
-//                .AllowAnyOrigin()
-//                .SetIsOriginAllowedToAllowWildcardSubdomains();
-//    });
-//});
-
-builder.Services.AddCors(options =>
-{
-    options.AddPolicy("CorsPolicy",
-        builder => builder
-            .AllowAnyOrigin()
-            .AllowAnyMethod()
-            .AllowAnyHeader());
+    policy.AddPolicy("Cors", builder =>
+        builder.WithOrigins("*")
+        .AllowAnyMethod().AllowAnyHeader()
+        .SetIsOriginAllowedToAllowWildcardSubdomains()
+ );
 });
+
 
 //add json file to builder configuration
 var env = builder.Environment;
@@ -101,10 +89,7 @@ if (app.Environment.IsDevelopment() || app.Environment.IsProduction())
 }
 
 //app.UseHttpsRedirection();
-
-app.UseCors("CorsPolicy");
-
-
+app.UseCors("Cors");
 app.UseAuthorization();
 
 app.MapControllers();
