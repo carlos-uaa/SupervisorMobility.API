@@ -10,7 +10,7 @@ namespace SupervisorMobility.API.DataAccess.Entities.ILU
         [Key, DatabaseGenerated(DatabaseGeneratedOption.Identity)]
         public int ILURegisterid { get; set; }
 
-        [Column(TypeName = "Date")]
+        [Column(TypeName = "DateTime")]
         public DateTime? AcquisitionDate { get; set; } = DateTime.Now;
 
         public int? OperationId { get; set; }
@@ -24,7 +24,7 @@ namespace SupervisorMobility.API.DataAccess.Entities.ILU
 
 
         public int? ILULevelId { get; set; }
-        [ForeignKey("OperatorId")]
+        [ForeignKey("ILULevelId")]
         public ILULevel? ILULevel { get; set; }
 
         public bool isActive { get; set; }

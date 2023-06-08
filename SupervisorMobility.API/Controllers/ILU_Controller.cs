@@ -31,21 +31,23 @@ namespace SupervisorMobility.API.Controllers
         public async Task<ActionResult> AddNewILU(ILURegisterForCreationDto ILUToRegister, int userID)
         {
             var finalILURegister = _mapper.Map<ILURegister>(ILUToRegister);
+            var Createresult = await _supervisorMobilityRepository.AddILURegister(finalILURegister);
 
-            User MasterUser = await _supervisorMobilityRepository.GetUserAsync(userID);
-
-            if (MasterUser != null)
+            if (Createresult > 0)
             {
-                var Createresult = await _supervisorMobilityRepository.AddILURegister(finalILURegister);
 
-                if (Createresult > 0)
+                User MasterUser = await _supervisorMobilityRepository.GetUserAsync(userID);
+
+                if (MasterUser != null)
                 {
                     var AddToUserResult = await _supervisorMobilityRepository.AddILURegToUser(finalILURegister, MasterUser);
-
-                    return Ok(finalILURegister);
                 }
 
+
+                return Ok(finalILURegister);
             }
+
+
 
             return NotFound();
         }

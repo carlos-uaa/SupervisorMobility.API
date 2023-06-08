@@ -52,14 +52,14 @@ namespace SupervisorMobility.API.Controllers
         [HttpGet("{SupervisorId}/Subordinates")]
         public async Task<ActionResult<IEnumerable<UsersWithNavigationDetails>>> GetSubordinates(int SupervisorId, bool collections = false)
         {
-            var userEntity = await _supervisorMobilityRepository.GetUserAsync(SupervisorId, true);
+            var userEntity = await _supervisorMobilityRepository.GetAllSubordinatesAsync(SupervisorId);
             if (collections)
             {
-                return Ok(_mapper.Map<IEnumerable<UsersWithNavigationDetails>>(userEntity.Subordinates));
+                return Ok(_mapper.Map<IEnumerable<UsersWithNavigationDetails>>(userEntity));
             }
             else
             {
-                return Ok(_mapper.Map<IEnumerable<UsersWithoutNavigationDetails>>(userEntity.Subordinates));
+                return Ok(_mapper.Map<IEnumerable<UsersWithoutNavigationDetails>>(userEntity));
             }
         }
 
