@@ -35,8 +35,8 @@ namespace SupervisorMobility.API.Models.Users
         public GroupDto? Group { get; set; } = new GroupDto();
 
 
-        public UsersWithoutNavigationDetails? Superior { get; set; }
-        public ICollection<UsersWithoutNavigationDetails>? Subordinates { get; set; }
+        public UsersWithNavigationDetails? Superior { get; set; }
+        public ICollection<UsersWithNavigationDetails>? Subordinates { get; set; }
         public ICollection<AreaDtos.AreaWithoutNavigationPropertiesDto>? Areas { get; set; }
         public ICollection<ILURegisterWithoutNavigationDto>? ILURegisers { get; set; }
 
