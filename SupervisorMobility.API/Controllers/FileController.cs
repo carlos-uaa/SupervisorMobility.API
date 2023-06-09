@@ -111,7 +111,8 @@ namespace SupervisorMobility.API.Controllers
             return Ok(fileToReturn);
 
         }
-        //[EnableCors("CorsPolicy")]
+
+        [DisableCors]
         [HttpPost("UploadGuide")]
         public async Task<ActionResult<FileUpload>> UploadGuide(IFormFile file)
         {
@@ -1351,15 +1352,15 @@ namespace SupervisorMobility.API.Controllers
         [HttpGet("Bulk/DownloadUsers")]
         public async Task<IActionResult> DownloadAllUsers()
         {
-            List<UsersWithNavigationDetails> allUsersList = _mapper.Map<List<UsersWithNavigationDetails>>(await _supervisorMobilityRepository.GetAllUsersWhitPlantAreaAndGroupAsync());
+            IEnumerable<User> allUsersList = await _supervisorMobilityRepository.GetAllUsersAsync(); 
 
 
-            if (allUsersList.Count == 0)
+            if (allUsersList.ToList().Count == 0)
             {
                 return BadRequest("No Users");
             }
 
-            MemoryStream ms = new MemoryStream(6000 * 65536);
+            MemoryStream ms = new MemoryStream();
             SLDocument ws = new SLDocument();
 
 
@@ -1368,35 +1369,78 @@ namespace SupervisorMobility.API.Controllers
             //ROW Data identificators
 
             ws.SetCellValue("A1", "UserId");
-            ws.SetCellValue("B1", "ObjectId");
+            ws.SetCellValue("B1", "UserName@compasdcpcs.local");
             ws.SetCellValue("C1", "Payroll");
             ws.SetCellValue("D1", "Name");
-            ws.SetCellValue("E1", "Plant");
-            ws.SetCellValue("F1", "Area");
-            ws.SetCellValue("G1", "Group");
-            ws.SetCellValue("H1", "Permission");
-            ws.SetCellValue("I1", "User creation date");
-            ws.SetCellValue("J1", "User update date");
-            ws.SetCellValue("K1", "User disable date");
-            ws.SetCellValue("L1", "Is Active");
+            ws.SetCellValue("E1", "Email");
+            ws.SetCellValue("F1", "UserType");
+            ws.SetCellValue("G1", "SuperiorId");
+            ws.SetCellValue("H1", "SubordinadosId's");
+            ws.SetCellValue("I1", "Plant");
+            ws.SetCellValue("J1", "Area");
+            ws.SetCellValue("K1", "Group");
+            ws.SetCellValue("L1", "Distribution");
 
 
 
             int row = 2;
             foreach (var itemUser in allUsersList)
             {
+                ws.SetCellValue("A1", "UserId");
+                ws.SetCellValue("B1", "UserName@compasdcpcs.local");
+                ws.SetCellValue("C1", "Payroll");
+                ws.SetCellValue("D1", "Name");
+                ws.SetCellValue("E1", "Email");
+                ws.SetCellValue("F1", "UserType");
+                ws.SetCellValue("G1", "SuperiorId");
+                ws.SetCellValue("H1", "SubordinadosId's");
+                ws.SetCellValue("I1", "Plant");
+                ws.SetCellValue("J1", "Area");
+                ws.SetCellValue("K1", "Group");
+                ws.SetCellValue("L1", "Distribution");
                 ws.SetCellValue($"A{row}", itemUser.UserId.ToString() ?? "");
-                ws.SetCellValue($"B{row}", itemUser.ObjectId.ToString() ?? "");
+                ws.SetCellValue($"B{row}", itemUser.ObjectId?.ToString() ?? "");
                 ws.SetCellValue($"C{row}", itemUser.Payroll.ToString() ?? "");
-                ws.SetCellValue($"D{row}", itemUser.Name.ToString() ?? ""); ;
-                ws.SetCellValue($"E{row}", itemUser.PlantId.ToString() ?? ""); ;
-                ws.SetCellValue($"F{row}", itemUser.AreaId.ToString() ?? "");
-                ws.SetCellValue($"G{row}", itemUser.GroupId.ToString() ?? "");
-                ws.SetCellValue($"H{row}", itemUser.UserType.ToString() ?? "");
-                ws.SetCellValue($"I{row}", itemUser.CreatedDate.ToString() ?? "");
-                ws.SetCellValue($"J{row}", itemUser.LastUpdated.ToString() ?? "");
-                ws.SetCellValue($"K{row}", itemUser.DisabledDate.ToString() ?? "");
-                ws.SetCellValue($"L{row}", itemUser.IsActive.ToString() ?? "");
+                ws.SetCellValue($"D{row}", itemUser.Name.ToString() ?? ""); 
+                ws.SetCellValue($"E{row}", itemUser.Email?.ToString() ?? ""); ;
+                
+                ws.SetCellValue($"F{row}", itemUser.UserType.ToString() ?? "");
+                
+                ws.SetCellValue($"G{row}", itemUser.SuperiorId.ToString() ?? "");
+                var subs = "";
+                if(itemUser.Subordinates?.Count > 0)
+                {
+                    foreach(var subitem in itemUser.Subordinates)
+                    {
+                        subs += $"{subitem.UserId},";
+                    }
+                     ws.SetCellValue($"H{row}", subs ?? "");
+
+                }
+                
+                ws.SetCellValue($"I{row}", itemUser.PlantId?.ToString() ?? "");
+
+                if(itemUser.UserType == 2)
+                {
+                    var areas = "";
+                    if (itemUser.Areas?.Count > 0)
+                    {
+                        foreach (var itemArea in itemUser.Areas)
+                        {
+                            areas += $"{itemArea.AreaId},";
+                        }
+                    }
+                    ws.SetCellValue($"J{row}", areas ?? "");
+
+                }
+                else
+                {
+                    ws.SetCellValue($"J{row}", itemUser.AreaId?.ToString() ?? "");
+
+                }
+
+                ws.SetCellValue($"K{row}", itemUser.GroupId?.ToString() ?? "");
+                ws.SetCellValue($"L{row}", itemUser.DistributionId?.ToString() ?? "");
                 row++;
             }
 

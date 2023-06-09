@@ -56,5 +56,6 @@
 		<MakeDir Directories="$(PublishUrl)\uploads\evidence\" />
 		<MakeDir Directories="$(PublishUrl)\uploads\guides\" />
 		<MakeDir Directories="$(PublishUrl)\uploads\massive\" />
+		<MakeDir Directories="$(PublishUrl)\logs\" />
 	</Target>
 </Project>

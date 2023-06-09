@@ -1,4 +1,3 @@
-using DocumentFormat.OpenXml.Office2016.Drawing.ChartDrawing;
 using Newtonsoft.Json;
 using Serilog;
 using SupervisorMobility.API;
@@ -14,14 +13,14 @@ Log.Logger = new LoggerConfiguration()
 var builder = WebApplication.CreateBuilder(args);
 
 //Add Cors
-builder.Services.AddCors(options =>
-{
-    options.AddPolicy("CorsPolicy", builder => builder
-        .WithOrigins("*")
-        .AllowAnyMethod()
-        .AllowAnyHeader());
-});
+builder.Services.AddCors(policy => {
 
+    policy.AddPolicy("Cors", builder =>
+        builder.WithOrigins("*")
+        .AllowAnyMethod().AllowAnyHeader().AllowAnyOrigin()
+        .SetIsOriginAllowedToAllowWildcardSubdomains()
+ );
+});
 
 
 //add json file to builder configuration
@@ -88,8 +87,8 @@ if (app.Environment.IsDevelopment() || app.Environment.IsProduction())
     app.UseSwaggerUI();
 }
 
-app.UseHttpsRedirection();
-app.UseCors("CorsPolicy");
+//app.UseHttpsRedirection();
+app.UseCors("Cors");
 app.UseAuthorization();
 
 app.MapControllers();

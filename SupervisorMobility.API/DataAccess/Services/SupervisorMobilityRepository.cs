@@ -1,5 +1,6 @@
 ﻿
 using AutoMapper;
+using DocumentFormat.OpenXml.Wordprocessing;
 using Microsoft.Data.SqlClient;
 using Microsoft.EntityFrameworkCore;
 using SupervisorMobility.API.Context;
@@ -39,7 +40,9 @@ namespace SupervisorMobility.API.Services
 
         public void DeleteChecklistCategory(ChecklistCategory checklistCategory)
         {
-            _context.ChecklistCategories.Remove(checklistCategory);
+            checklistCategory.IsActive = false;
+            _context.SaveChanges();
+            //_context.ChecklistCategories.Remove(checklistCategory);
         }
 
         public async Task<IEnumerable<ChecklistCategory>> GetChecklistCategoriesAsync()
@@ -104,7 +107,9 @@ namespace SupervisorMobility.API.Services
 
         public void DeleteJobObservationType(JobObservationType jobObservationType)
         {
-            _context.JobObservationTypes.Remove(jobObservationType);
+            //_context.JobObservationTypes.Remove(jobObservationType);
+            jobObservationType.IsActive = false;
+            _context.SaveChanges();
         }
 
         public async Task<bool> JobObservationTypeExistAsync(int jobObservationTypeId)
@@ -138,7 +143,9 @@ namespace SupervisorMobility.API.Services
 
         public void DeleteGroup(Entities.Group group)
         {
-            _context.Groups.Remove(group);
+            //_context.Groups.Remove(group);
+            group.IsActive = false;
+            _context.SaveChanges();
         }
         #endregion
         #region PlantOperations
@@ -180,7 +187,9 @@ namespace SupervisorMobility.API.Services
 
         public void DeletePlant(Plant plant)
         {
-            _context.Plants.Remove(plant);
+            //_context.Plants.Remove(plant);
+            plant.IsActive = false;
+            _context.SaveChanges();
         }
         #endregion
         #region AreaOperations
@@ -246,7 +255,9 @@ namespace SupervisorMobility.API.Services
         }
         public void DeleteArea(Area area)
         {
-            _context.Areas.Remove(area);
+            //_context.Areas.Remove(area);
+            area.IsActive = false;
+            _context.SaveChanges();
         }
         #endregion
         #region DistributionOperations
@@ -335,7 +346,9 @@ namespace SupervisorMobility.API.Services
         }
         public void DeleteDistribution(Distribution distribution)
         {
-            _context.Distributions.Remove(distribution);
+            //_context.Distributions.Remove(distribution);
+            distribution.IsActive = false;
+            _context.SaveChanges();
         }
         #endregion
         #region OperationOperations
@@ -374,7 +387,9 @@ namespace SupervisorMobility.API.Services
         }
         public void DeleteOperation(Operation operation)
         {
-            _context.Operations.Remove(operation);
+            //_context.Operations.Remove(operation);
+            operation.IsActive = false;
+            _context.SaveChanges();
         }
         #endregion
         #region QuestionTypeOperations
@@ -432,7 +447,9 @@ namespace SupervisorMobility.API.Services
 
         public void DeleteChecklistQuestions(ChecklistQuestion checklistQuestion)
         {
-            _context.ChecklistQuestions.Remove(checklistQuestion);
+            //_context.ChecklistQuestions.Remove(checklistQuestion);
+            checklistQuestion.IsActive = false;
+            _context.SaveChanges();
         }
 
         public async Task<IEnumerable<ChecklistQuestion>> GetChecklistQuestionsForUpdateSequenceAsync(
@@ -474,6 +491,7 @@ namespace SupervisorMobility.API.Services
         public void DeleteJobOperationConfig(JobObservationConfig jobObservationConfig)
         {
             _context.JobObservationConfigs.Remove(jobObservationConfig);
+            
         }
 
 
@@ -502,7 +520,9 @@ namespace SupervisorMobility.API.Services
 
         public void DeleteSupportDocumentType(SupportDocumentType supportDocumentType)
         {
-            _context.SupportDocumentTypes.Remove(supportDocumentType);
+            //_context.SupportDocumentTypes.Remove(supportDocumentType);
+            supportDocumentType.IsActive = false;
+            _context.SaveChanges();
         }
         #endregion
         #region ProductOperations
@@ -591,7 +611,9 @@ namespace SupervisorMobility.API.Services
 
         public void DeleteProduct(Product product)
         {
-            _context.Products.Remove(product);
+            //_context.Products.Remove(product);
+            product.IsActive = false;
+            _context.SaveChanges();
         }
         #endregion
         #region AssyChart
@@ -673,7 +695,9 @@ namespace SupervisorMobility.API.Services
 
         public void DeleteAssyChartAsync(AssyChart assyChart)
         {
-            _context.AssyCharts.Remove(assyChart);
+            //_context.AssyCharts.Remove(assyChart);
+            assyChart.IsActive = false;
+            _context.SaveChanges();
         }
         #endregion
         #region HistoryJobObservation
@@ -713,7 +737,9 @@ namespace SupervisorMobility.API.Services
 
         public void DeleteHistoyJobObservationAsync(JobObservationVersion jobObservationHistory)
         {
-            _context.JobObservationHistory.Remove(jobObservationHistory);
+            //_context.JobObservationHistory.Remove(jobObservationHistory);
+            jobObservationHistory.IsActive = false;
+            _context.SaveChanges();
         }
 
         public async Task<bool> DeleteHistoyFromJobObservationAsync(JobObservationVersion HistoryVersion, JobObservation jobObservation)
@@ -967,7 +993,9 @@ namespace SupervisorMobility.API.Services
 
         public void DeleteUserAsync(User user)
         {
-            _context.Users.Remove(user);
+            //_context.Users.Remove(user);
+            user.IsActive = false;
+            _context.SaveChanges();
         }
         #endregion
         #region File
@@ -986,6 +1014,8 @@ namespace SupervisorMobility.API.Services
         public void DeleteUploadFile(FileUpload fileUplaod)
         {
             _context.Files.Remove(fileUplaod);
+            //fileUplaod.IsActive = false;
+            //_context.SaveChanges();
         }
         #endregion
         #region Guide
@@ -1019,7 +1049,9 @@ namespace SupervisorMobility.API.Services
 
         public void DeleteGuide(Guides guide)
         {
-            _context.Guides.Remove(guide);
+            //_context.Guides.Remove(guide);
+            guide.IsActive = false;
+            _context.SaveChanges();
         }
         #endregion
         #region JobObservationOperations
@@ -1082,7 +1114,9 @@ namespace SupervisorMobility.API.Services
 
         public void DeleteJobObservation(JobObservation jobObservation)
         {
-            _context.JobObservations.Remove(jobObservation);
+            //_context.JobObservations.Remove(jobObservation);
+            jobObservation.IsActive = false;
+            _context.SaveChanges();
         }
         public async Task<bool> JobObservationExistAsync(int jobObservationId)
         {
@@ -1111,7 +1145,9 @@ namespace SupervisorMobility.API.Services
 
         public void DeleteGlosaryWord(Glosary glosaryWord)
         {
-            _context.Glosary.Remove(glosaryWord);
+            //_context.Glosary.Remove(glosaryWord);
+            glosaryWord.IsActive = false;
+            _context.SaveChanges();
         }
         #endregion
         #region LupOperations
@@ -1141,7 +1177,9 @@ namespace SupervisorMobility.API.Services
 
         public void DeleteLup(Lup lup)
         {
-            _context.Lup.Remove(lup);
+            //_context.Lup.Remove(lup);
+            lup.IsActive = false;
+            _context.SaveChanges();
         }
 
         public async Task<bool> LupExistAsync(int lupId)
@@ -1217,6 +1255,7 @@ namespace SupervisorMobility.API.Services
         public void DeleteNotificationAsync(Notification notify)
         {
             notify.IsActive = false;
+            _context.SaveChanges();
             //_context.Notifications.Remove(notify);
         }
         #endregion
