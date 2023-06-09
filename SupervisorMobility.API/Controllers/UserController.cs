@@ -2053,7 +2053,7 @@ namespace SupervisorMobility.API.Controllers
 
         }
 
-        [EnableCors("Cors")]
+        //[EnableCors("Cors")]
         [HttpGet("Bulk/DownloadAllUsersFormat")]
         public async Task<IActionResult> DownloadAllUsersFormat()
         {
@@ -2113,7 +2113,7 @@ namespace SupervisorMobility.API.Controllers
 
         }//end download file function 
 
-        [EnableCors("Cors")]
+        //[EnableCors("Cors")]
         [HttpGet("Bulk/DownloadSSVFormat")]
         public async Task<IActionResult> DownloadSSVFormat()
         {
@@ -2155,7 +2155,7 @@ namespace SupervisorMobility.API.Controllers
 
         }//end download file function 
 
-        [EnableCors("Cors")]
+        //[EnableCors("Cors")]
         [HttpGet("Bulk/DownloadSupervisorFormat")]
         public async Task<IActionResult> DownloadSupervisorFormat()
         {
@@ -2200,7 +2200,7 @@ namespace SupervisorMobility.API.Controllers
 
         }//end download file function 
 
-        [EnableCors("Cors")]
+        //[EnableCors("Cors")]
         [HttpGet("Bulk/DownloadOperatorsFormat")]
         public async Task<IActionResult> DownloadOperatorsFormat()
         {

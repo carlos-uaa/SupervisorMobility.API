@@ -164,7 +164,7 @@ namespace SupervisorMobility.API.Controllers
         }
 
 
-        [EnableCors("Cors")]
+        //[EnableCors("Cors")]
         [HttpGet("DownloadAssyChartFormat")]
         public async Task<IActionResult> DownloadAssyChartFormat()
         {

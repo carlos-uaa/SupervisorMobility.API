@@ -1,7 +1,9 @@
 ﻿using AutoMapper;
 using ClosedXML.Excel;
+using DocumentFormat.OpenXml.Office2010.Excel;
 using Microsoft.AspNetCore.Cors;
 using Microsoft.AspNetCore.Mvc;
+using Microsoft.AspNetCore.StaticFiles;
 using Microsoft.VisualBasic.FileIO;
 using SpreadsheetLight;
 using SupervisorMobility.API.Business;
@@ -26,7 +28,7 @@ namespace SupervisorMobility.API.Controllers
 {
 
     //[EnableCors]
-    [EnableCors("CorsPolicy")]
+    //[EnableCors("CorsPolicy")]
     [Route("api/File")]
     [ApiController]
     public class FileController : Controller
@@ -47,7 +49,7 @@ namespace SupervisorMobility.API.Controllers
                 throw new ArgumentNullException(nameof(mapper));
         }
 
-        [EnableCors("CorsPolicy")]
+        //[EnableCors("CorsPolicy")]
         [HttpPost]
         public async Task<ActionResult<FileUploadGeneralDto>> UploadFile(IFormFile file)
         {
@@ -85,7 +87,7 @@ namespace SupervisorMobility.API.Controllers
 
             return Ok(fileToReturn);
         }
-        [EnableCors("CorsPolicy")]
+        //[EnableCors("CorsPolicy")]
         [HttpPost("UploadUsers")]
         public async Task<ActionResult<FileUploadGeneralDto>> UploadUsers(IFormFile file)
         {
@@ -109,7 +111,7 @@ namespace SupervisorMobility.API.Controllers
             return Ok(fileToReturn);
 
         }
-        [EnableCors("CorsPolicy")]
+        //[EnableCors("CorsPolicy")]
         [HttpPost("UploadGuide")]
         public async Task<ActionResult<FileUpload>> UploadGuide(IFormFile file)
         {
@@ -134,7 +136,7 @@ namespace SupervisorMobility.API.Controllers
             return Ok(fileToReturn);
         }
 
-        [EnableCors("CorsPolicy")]
+        //[EnableCors("CorsPolicy")]
         [HttpPost("UploadEvidences")]
         public async Task<ActionResult<FileUpload>> UploadEvidences(int lupId, IFormFile file)
         {
@@ -979,7 +981,7 @@ namespace SupervisorMobility.API.Controllers
 
         }
 
-        [EnableCors("CorsPolicy")]
+        //[EnableCors("CorsPolicy")]
         [HttpGet("Bulk/ByPlantId/{plantId}")]
         public async Task<IActionResult> DownloadFile(int plantId)
         {
@@ -1072,7 +1074,7 @@ namespace SupervisorMobility.API.Controllers
 
         }//end download file function
 
-        [EnableCors("CorsPolicy")]
+        //[EnableCors("CorsPolicy")]
         [HttpGet("Bulk/ByPlantId")]
         public async Task<IActionResult> DownloadFileAllPlants()
         {
@@ -1195,7 +1197,7 @@ namespace SupervisorMobility.API.Controllers
         }//end download file function 
 
 
-        [EnableCors("CorsPolicy")]
+        //[EnableCors("CorsPolicy")]
         [HttpGet("Guide/{fileid}")]
         public async Task<IActionResult> DownloadGuide(int fileid)
         {
@@ -1224,10 +1226,21 @@ namespace SupervisorMobility.API.Controllers
 
         }
 
-        [EnableCors("CorsPolicy")]
+        //[EnableCors("CorsPolicy")]
         [HttpGet("Users/DownloadAllExample")]
         public async Task<IActionResult> DownloadAllExample()
         {
+            string filePath = _env.ContentRootPath + "Documents\\All_Example.xlsx";
+
+            var provider = new FileExtensionContentTypeProvider();
+            if (!provider.TryGetContentType(filePath, out var contentType))
+            {
+                contentType = "application/octet-stream";
+            }
+
+            var bytes = await System.IO.File.ReadAllBytesAsync(filePath);
+            return File(bytes, contentType, Path.GetFileName(filePath));
+
             var path = Path.Combine(_env.ContentRootPath, "Documents\\All_Example.xlsx");
 
             var memory = new MemoryStream();
@@ -1245,7 +1258,7 @@ namespace SupervisorMobility.API.Controllers
 
         }//end download file function 
 
-        [EnableCors("CorsPolicy")]
+        //[EnableCors("CorsPolicy")]
         [HttpGet("Users/DownloadSSVExample")]
         public async Task<IActionResult> DownloadSSVExample()
         {
@@ -1265,7 +1278,7 @@ namespace SupervisorMobility.API.Controllers
 
         }//end download file function 
 
-        [EnableCors("CorsPolicy")]
+        //[EnableCors("CorsPolicy")]
         [HttpGet("Users/DownloadSupervisorExample")]
         public async Task<IActionResult> DownloadSupervisorExample()
         {
@@ -1285,7 +1298,7 @@ namespace SupervisorMobility.API.Controllers
             return result;
         }//end download file function 
 
-        [EnableCors("CorsPolicy")]
+        //[EnableCors("CorsPolicy")]
         [HttpGet("Users/DownloadOperatorsExample")]
         public async Task<IActionResult> DownloadOperatorsExample()
         {
@@ -1307,7 +1320,7 @@ namespace SupervisorMobility.API.Controllers
         }//end download file function 
 
 
-        [EnableCors("CorsPolicy")]
+        //[EnableCors("CorsPolicy")]
         [HttpGet("Evidence/{fileid}")]
         public async Task<IActionResult> DownloadEvidence(int fileid)
         {
@@ -1334,7 +1347,7 @@ namespace SupervisorMobility.API.Controllers
         }
 
 
-        [EnableCors("CorsPolicy")]
+        //[EnableCors("CorsPolicy")]
         [HttpGet("Bulk/DownloadUsers")]
         public async Task<IActionResult> DownloadAllUsers()
         {
@@ -1398,7 +1411,7 @@ namespace SupervisorMobility.API.Controllers
             return res;
 
         }//end download file function 
-        [EnableCors("CorsPolicy")]
+        //[EnableCors("CorsPolicy")]
         [HttpPost("MassiveUploadAreasDistributionOperations")]
         public async Task<ActionResult> MassiveUploadAreasDistributionOperatio(FileUploadGeneralDto filetoMassive, int plantid)
         {
@@ -1523,7 +1536,7 @@ namespace SupervisorMobility.API.Controllers
 
             return Ok(filetoMassive);
         }
-        [EnableCors("CorsPolicy")]
+        //[EnableCors("CorsPolicy")]
         [HttpPost("MassiveUploadFile")]
         public async Task<ActionResult<FileUpload>> AddFileMasiveUpload(IFormFile file)
         {

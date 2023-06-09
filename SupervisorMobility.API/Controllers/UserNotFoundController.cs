@@ -10,6 +10,7 @@ using System.Drawing.Text;
 using Microsoft.EntityFrameworkCore.ChangeTracking;
 using DocumentFormat.OpenXml.Wordprocessing;
 using SupervisorMobility.API.DataAccess.Services;
+using SupervisorMobility.API.Services;
 
 namespace SupervisorMobility.API.Controllers
 {
@@ -20,7 +21,7 @@ namespace SupervisorMobility.API.Controllers
         private readonly IWebHostEnvironment _env;
         private readonly IMapper _mapper;
         private readonly IAssyChartService _assyChartService;
-        private readonly ISupervisorMobilityRepository _supervisorMobilityRepository;
+        private readonly Services.ISupervisorMobilityRepository _supervisorMobilityRepository;
         private readonly IEmailService _email;
 
         public UserNotFoundController(IWebHostEnvironment env, ISupervisorMobilityRepository supervisorMobilityRepository,
