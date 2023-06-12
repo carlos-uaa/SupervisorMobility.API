@@ -7,7 +7,7 @@ namespace SupervisorMobility.API.Models.PATDtos
     {
 
         public int PATid { get; set; }
-
+        public int Status { get; set; }
         public int SupervisorId { get; set; }
         public UsersWithoutNavigationDetails? Supervisor { get; set; }
         public int? SSVresponsibleID { get; set; }

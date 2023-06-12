@@ -1,7 +1,9 @@
 ﻿using AutoMapper;
 using Microsoft.AspNetCore.Mvc;
+using SupervisorMobility.API.Business;
 using SupervisorMobility.API.DataAccess.Entities;
 using SupervisorMobility.API.Models.PATDtos;
+using SupervisorMobility.API.Models.PlantDtos;
 using SupervisorMobility.API.Services;
 
 namespace SupervisorMobility.API.Controllers
@@ -12,11 +14,13 @@ namespace SupervisorMobility.API.Controllers
     public class PATController : ControllerBase
     {
         private readonly IMapper _mapper;
+        readonly IAssyChartService _assyChartService;
         private readonly ISupervisorMobilityRepository _supervisorMobilityRepository;
 
-        public PATController(ISupervisorMobilityRepository supervisorMobilityRepository,
+        public PATController(ISupervisorMobilityRepository supervisorMobilityRepository, IAssyChartService assyChartService,
             IMapper mapper)
         {
+            _assyChartService = assyChartService;
             _supervisorMobilityRepository = supervisorMobilityRepository ??
                 throw new ArgumentNullException(nameof(supervisorMobilityRepository));
             _mapper = mapper ??
@@ -108,6 +112,22 @@ namespace SupervisorMobility.API.Controllers
                 return Ok(_mapper.Map<IEnumerable<PATwithoutNavigations>>(Pats));
 
             }
+        }
+
+        [HttpPut("{patId}")]
+        public async Task<ActionResult> UpdatePat(int patId,
+            PATForUpdateDto pat)
+        {
+            var patEntity = await _assyChartService.FetchPatAsync(patId);
+            if (patEntity == null)
+            {
+                return NotFound();
+            }
+
+            await _supervisorMobilityRepository.UpdatePAT(pat, patEntity);
+
+            return Ok();
+
         }
     }
 }

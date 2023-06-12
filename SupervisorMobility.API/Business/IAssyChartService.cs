@@ -112,5 +112,9 @@ namespace SupervisorMobility.API.Business
         Task<UserNotFound> CreateUserNotFoundAsync(UserNotFoundForCreation userNotFound);
         Task UpdateUserNotFoundAsync(UserNotFoundForUpdateDto userNotFoundForUpdate, int userNotFoundId);
         #endregion
+
+        #region Pat
+        Task<PAT?> FetchPatAsync(int plantId);
+        #endregion
     }
 }

@@ -424,5 +424,14 @@ namespace SupervisorMobility.API.Business
         }
 
         #endregion
+
+        #region Pat
+
+        public async Task<PAT?> FetchPatAsync(int plantId)
+        {
+            return await _repository.GetPat(plantId);
+        }
+
+        #endregion
     }
 }

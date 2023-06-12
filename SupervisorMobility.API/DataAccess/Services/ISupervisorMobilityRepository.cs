@@ -2,6 +2,7 @@
 using SupervisorMobility.API.DataAccess.Entities.ILU;
 using SupervisorMobility.API.DataAccess.Entities.LUP;
 using SupervisorMobility.API.Entities;
+using SupervisorMobility.API.Models.PATDtos;
 using SupervisorMobility.API.Models.Users;
 using System.Runtime.CompilerServices;
 
@@ -247,7 +248,7 @@ namespace SupervisorMobility.API.Services
         Task<PAT?> GetPat(int patId);
         Task<int> AddPat(PAT patForAdd);
         Task<PAT?> GetPatForYearOfSV(int sv, int Year);
-        Task<int> UpdatePAT(PAT patForUpdate, PAT PatEntity);
+        Task<int> UpdatePAT(PATForUpdateDto patForUpdate, PAT PatEntity);
         Task<IEnumerable<PAT>> GetAllPATs();
         Task<IEnumerable<PAT>> GetAllPATsOfSv(int svId);
         Task<IEnumerable<PAT>> GetAllPATsofSSV(int ssvID);

@@ -8,6 +8,7 @@ using SupervisorMobility.API.DataAccess.Entities;
 using SupervisorMobility.API.DataAccess.Entities.ILU;
 using SupervisorMobility.API.DataAccess.Entities.LUP;
 using SupervisorMobility.API.Entities;
+using SupervisorMobility.API.Models.PATDtos;
 using SupervisorMobility.API.Models.Users;
 using System.Diagnostics;
 using System.Runtime.CompilerServices;
@@ -1390,7 +1391,7 @@ namespace SupervisorMobility.API.Services
         {
             return await _context.PATs.Where(p => p.SupervisorId == sv && p.AplicationYear == Year).FirstOrDefaultAsync();
         }
-        public async Task<int> UpdatePAT(PAT patForUpdate, PAT PatEntity)
+        public async Task<int> UpdatePAT(PATForUpdateDto patForUpdate, PAT PatEntity)
         {
 
             _mapper.Map(patForUpdate, PatEntity);

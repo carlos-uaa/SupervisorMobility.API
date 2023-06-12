@@ -10,6 +10,7 @@ namespace SupervisorMobility.API.DataAccess.Entities
         public int PATid { get; set; }
 
         public int? SupervisorId { get; set; }
+        public int Status { get; set; }
 
         public User? Supervisor
         {

@@ -3,7 +3,7 @@
     public class PATForUpdateDto
     {
         public int SupervisorId { get; set; }
-
+        public int Status { get; set; }
         public int? SSVresponsibleID { get; set; }
 
 
