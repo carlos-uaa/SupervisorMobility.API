@@ -88,9 +88,14 @@ if (app.Environment.IsDevelopment() || app.Environment.IsProduction())
 }
 
 //app.UseHttpsRedirection();
+app.UseHttpsRedirection();
+app.UseStaticFiles();
+app.UseRouting();
+
 app.UseCors("Cors");
+
 app.UseAuthorization();
 
 app.MapControllers();
-
+app.MapRazorPages();
 app.Run();
