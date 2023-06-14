@@ -112,7 +112,7 @@ namespace SupervisorMobility.API.Controllers
 
         }
 
-        [DisableCors]
+        
         [HttpPost("UploadGuide")]
         public async Task<ActionResult<FileUpload>> UploadGuide(IFormFile file)
         {
