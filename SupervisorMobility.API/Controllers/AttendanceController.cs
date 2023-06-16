@@ -86,11 +86,11 @@ namespace SupervisorMobility.API.Controllers
                 else
                     continue;
 
-                string concepto = "";
-                if ((string)record.Concepto != "")
-                    concepto = (string)record.Concepto;
-                else
-                    continue;
+                //string concepto = "";
+                //if ((string)record.Concepto != "")
+                //    concepto = (string)record.Concepto;
+                //else
+                //    continue;
 
 
                 DateTime fecha = DateTime.Now;
@@ -155,17 +155,54 @@ namespace SupervisorMobility.API.Controllers
                     DateTime inico = DateTime.Now;
                     DateTime fin = DateTime.Now;
 
-                    if ((string)record.Inicio != "")
-                        inico = DateTime.Parse((string)record.Inicio);
-                    else
-                        continue;
+
+
 
                     //el inicio puede estar vacio por que es turno vespertino u horas extras
                     if ((string)record.Inicio == "")
                     {
-                        if (existingRecordInAttendance != null)
+                        //ya existe registro de el en tabla de asistencia
+                        if ((string)record.Fin != "")
                         {
+                            //Update, ya salio
+                            var updateRecord = new AttendanceForUpdateDto
+                            {
+                                UserId = user.UserId,
+                                SuperiorId = user.SuperiorId,
+                                CurrentdistributionId = user.DistributionId,
+                                Compas = false,
+                                Station = false
+                            };
+
+                            bool update = await _assyChartService.UpdateAttendanceAsync(updateRecord, existingRecordInAttendance);
+                        continue;
+                        }
+                    }
+                    else
+                    {
+                        if ((string)record.Fin == "")
+                        {
+                           //aun no sale, no se hace nada
+                            if (existingRecordInAttendance != null)
+                            {
+                                continue;
+                            }
+                        }
+                        else
+                        {
+                            //Update, ya salio
+                            var updateRecord = new AttendanceForUpdateDto
+                            {
+                                UserId = user.UserId,
+                                SuperiorId = user.SuperiorId,
+                                CurrentdistributionId = user.DistributionId,
+                                Compas = false,
+                                Station = false
+                            };
+
+                            bool update = await _assyChartService.UpdateAttendanceAsync(updateRecord, existingRecordInAttendance);
                             continue;
+
                         }
                     }
 
