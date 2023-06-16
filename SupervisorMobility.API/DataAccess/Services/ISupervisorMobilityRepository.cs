@@ -141,6 +141,7 @@ namespace SupervisorMobility.API.Services
         #region Users
         Task<IEnumerable<User>> GetAllUsersAsync();
         Task<IEnumerable<User>> GetAllSubordinatesAsync(int superiorId);
+        Task<IEnumerable<User>> GetAllUserByTypeAsync(int typeUser);
         Task<IEnumerable<User>> GetAllUsersWhitPlantAreaAndGroupAsync();
         Task<User?> GetUserAsync(int userId, bool collection = false);
         Task<User?> GetUserByObjectIdAsync(string objectId);

@@ -796,6 +796,20 @@ namespace SupervisorMobility.API.Services
                  .OrderBy(c => c.UserId).ToListAsync();
         }
 
+        public async Task<IEnumerable<User>> GetAllUserByTypeAsync(int typeUser)
+        {
+            return await _context.Users
+                .Include(p => p.Plant)
+                .Include(a => a.Area)
+                .Include(d => d.Distribution)
+                .Include(g => g.Group)
+                .Include(s => s.Superior)
+                .Include(ss => ss.Subordinates)
+                .Include(aa => aa.Areas)
+                .Include(ILU => ILU.ILURegisers)
+                .Where(u => u.UserType == typeUser)
+                 .OrderBy(c => c.UserId).ToListAsync();
+        }
 
         public async Task<IEnumerable<User>> GetAllSubordinatesAsync(int superiorid)
         {

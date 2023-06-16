@@ -55,6 +55,9 @@ builder.Services.RegisterDataServices(builder.Configuration);
 builder.Services.AddAutoMapper(AppDomain.CurrentDomain.GetAssemblies());
 
 
+builder.Services.AddHostedService<ScheduledTask>();
+
+
 //Odmitir Referencias ciruclares
 builder.Services.AddControllers()
     .AddNewtonsoftJson(options =>

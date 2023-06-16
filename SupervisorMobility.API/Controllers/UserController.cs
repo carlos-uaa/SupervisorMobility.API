@@ -90,6 +90,20 @@ namespace SupervisorMobility.API.Controllers
             }
         }
 
+        [HttpGet("ByUserType")]
+        public async Task<ActionResult<IEnumerable<UsersWithNavigationDetails>>> GetUserByType(int typeUser, bool collections = false)
+        {
+            var userEntity = await _supervisorMobilityRepository.GetAllUserByTypeAsync(typeUser);
+            if (collections)
+            {
+                return Ok(_mapper.Map<IEnumerable<UsersWithNavigationDetails>>(userEntity));
+            }
+            else
+            {
+                return Ok(_mapper.Map<IEnumerable<UsersWithoutNavigationDetails>>(userEntity));
+            }
+        }
+
         [HttpGet("ByObjectId")]
         public async Task<ActionResult<UsersWithNavigationDetails>> GetUserByObject(string ObjectId, bool collections = false)
         {
