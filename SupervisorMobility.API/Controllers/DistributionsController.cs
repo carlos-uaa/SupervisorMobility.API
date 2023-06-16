@@ -261,32 +261,33 @@ namespace SupervisorMobility.API.Controllers
                 return NotFound("No Distribution Exist");
             }
 
-            //var finalDistribution = _mapper.Map<Distribution>(distribution);
-
-            //await _supervisorMobilityRepository.AddDistributionForPlantAsync(plantId,
-            //    areaId, finalDistribution);
-
-            ////add distribution to product
-
-            //await _supervisorMobilityRepository.AddDistributionForProductAsync(productId, finalDistribution);
+            var finalProduct = await _assyChartService.CreateProductAsync(product);
 
 
-            //await _supervisorMobilityRepository.SaveChangesAsync();
+            var createProductToReturn =
+                _mapper.Map<ProductDto>(finalProduct);
 
-            //var createdDistributionToReturn =
-            //    _mapper.Map<DistributionWithoutNavigationPropertiesDto>(finalDistribution);
 
-            //return CreatedAtRoute("GetDistribution",
-            //    new
-            //    {
-            //        plantId,
-            //        areaId,
-            //        distributionId = createdDistributionToReturn.DistributionId
-            //    },
-            //    createdDistributionToReturn);
+            Distribution? finalDistribution = await _supervisorMobilityRepository.GetDistributionForAreaAsync(areaId, distributionId);
 
-            return Ok();
-        }
+            await _supervisorMobilityRepository.AddDistributionForProductAsync(createProductToReturn.ProductId, finalDistribution);
+
+            await _supervisorMobilityRepository.SaveChangesAsync();
+
+
+            var createdDistributionToReturn =
+               _mapper.Map<DistributionWithoutNavigationPropertiesDto>(finalDistribution);
+
+            return CreatedAtRoute("GetDistribution",
+                new
+                {
+                    plantId,
+                    areaId,
+                    distributionId = createdDistributionToReturn.DistributionId
+                },
+                createdDistributionToReturn);
+        
+    }
 
         [HttpPost("{distributionId}/products/add")]
         public async Task<ActionResult<DistributionWithoutNavigationPropertiesDto>> AddProduct(int plantId, int areaId, int distributionId,
