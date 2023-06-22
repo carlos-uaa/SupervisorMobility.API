@@ -1,7 +1,9 @@
+using DocumentFormat.OpenXml.Office2016.Drawing.ChartDrawing;
 using Newtonsoft.Json;
 using Serilog;
 using SupervisorMobility.API;
 using SupervisorMobility.API.DataAccess.Entities;
+using SupervisorMobility.API.DataAccess.Services;
 
 //Configure Serilog
 Log.Logger = new LoggerConfiguration()
@@ -47,6 +49,9 @@ builder.Services.AddControllers(options =>
 builder.Services.AddEndpointsApiExplorer();
 builder.Services.AddSwaggerGen();
 
+//Trea
+
+
 //Add other services
 builder.Services.RegisterBusinessServices();
 builder.Services.RegisterDataServices(builder.Configuration);
@@ -55,7 +60,6 @@ builder.Services.RegisterDataServices(builder.Configuration);
 builder.Services.AddAutoMapper(AppDomain.CurrentDomain.GetAssemblies());
 
 
-builder.Services.AddHostedService<ScheduledTask>();
 
 
 //Odmitir Referencias ciruclares
@@ -77,6 +81,11 @@ var emailConfig = builder.Configuration
         .Get<EmailConfiguration>();
 builder.Services.AddSingleton(emailConfig);
 
+
+//peticion api
+builder.Services.AddHostedService<MyScheduledTaskService>();
+//using namespaces
+//builder.Services.AddHostedService<MyScheduledTask>();
 
 
 var app = builder.Build();

@@ -1,68 +1,94 @@
 ﻿using AutoMapper;
 using CsvHelper;
-using Microsoft.AspNetCore.Mvc;
 using SupervisorMobility.API.Business;
 using SupervisorMobility.API.DataAccess.Entities;
 using SupervisorMobility.API.Models.AttendanceDtos;
-using SupervisorMobility.API.Models.FileUploadDto;
 using SupervisorMobility.API.Models.Users;
 using SupervisorMobility.API.Services;
 using System.Globalization;
 
-namespace SupervisorMobility.API.Controllers
+namespace SupervisorMobility.API.DataAccess.Services
 {
-    [Route("api/[controller]")]
-    [ApiController]
-    public class AttendanceController : ControllerBase
+
+    public class MyScheduledTask : BackgroundService
     {
-        private readonly IWebHostEnvironment _env;
-        private readonly IMapper _mapper;
-        private readonly IAssyChartService _assyChartService;
+        private readonly ILogger<MyScheduledTask> _logger;
+        private readonly IServiceScopeFactory _serviceScopeFactory;
+     
 
-        public AttendanceController(IWebHostEnvironment env, IMapper mapper, ISupervisorMobilityRepository supervisorMobilityRepository,
-            IAssyChartService assyChartService)
+        public MyScheduledTask(IServiceScopeFactory serviceScopeFactory, ILogger<MyScheduledTask> logger)
         {
-            _assyChartService = assyChartService;
-            _env = env;
-            _mapper = mapper ??
-                throw new ArgumentNullException(nameof(mapper));
+            _serviceScopeFactory = serviceScopeFactory;
+            _logger = logger;         
         }
 
-        [HttpPost("UploadAttendance")]
-        public async Task<ActionResult<FileUploadGeneralDto>> UploadAttendance(IFormFile file)
+        protected override async Task ExecuteAsync(CancellationToken stoppingToken)
         {
-            var uploadResult = new FileUploadForCreationDto();
-            string trustedFileNameForStorage = string.Empty;
-            var unstrustedFileName = file.FileName;
+            // Obtener el scope del servicio
+                _logger.LogInformation("La tarea programada se Inicio...");
 
-            trustedFileNameForStorage = Path.GetRandomFileName();
-            var path = Path.Combine(_env.ContentRootPath, "uploads\\attendance", trustedFileNameForStorage);
 
-            await using FileStream fs = new(path, FileMode.Create);
-            await file.CopyToAsync(fs);
+            // Implementar tu lógica para la ejecución en segundo plano
+            while (!stoppingToken.IsCancellationRequested)
+            {
+                var currentTime = DateTime.Now.TimeOfDay;
+                using (var scope = _serviceScopeFactory.CreateScope())
+                {
+                    var serviceProvider = scope.ServiceProvider;
 
-            uploadResult.FileName = unstrustedFileName;
-            uploadResult.StorageFileName = trustedFileNameForStorage;
-            uploadResult.ContentType = file.ContentType;
-            uploadResult.UploadDate = DateTime.Now;
+                    var _assyChartService = serviceProvider.GetService<IAssyChartService>();
+                    var _mapper = serviceProvider.GetService<IMapper>();
 
-            var fileToReturn = await _assyChartService.CreateFileAsync(uploadResult);
-
-            return Ok(fileToReturn);
-
+                    if (IsWithinTimeInterval(currentTime, TimeSpan.FromHours(6.25), TimeSpan.FromHours(9.25)))
+                    {
+                        _logger.LogInformation("La tarea programada se está ejecutando De 6:15 am a 9:15 am...");
+                        Execute(_assyChartService, _mapper);
+                        await Task.Delay(TimeSpan.FromMinutes(30), stoppingToken); // Espera 30 minutos antes de la siguiente ejecución
+                    }
+                    else if (IsWithinTimeInterval(currentTime, TimeSpan.FromHours(10), TimeSpan.FromHours(22)))
+                    {
+                        _logger.LogInformation("La tarea programada se está ejecutando De 10:00 am a 10:00 pm");
+                        Execute(_assyChartService, _mapper);
+                        await Task.Delay(TimeSpan.FromMinutes(60), stoppingToken);
+                    }
+                    else if (IsWithinTimeInterval(currentTime, TimeSpan.FromHours(22.25), TimeSpan.FromHours(25.25)))
+                    {
+                        _logger.LogInformation("La tarea programada se está ejecutando De De 10:15 pm a 1:15 am ...");
+                        Execute(_assyChartService, _mapper);
+                        await Task.Delay(TimeSpan.FromMinutes(30), stoppingToken); // Espera 30 minutos antes de la siguiente ejecución
+                    }
+                    else if (IsWithinTimeInterval(currentTime, TimeSpan.FromHours(2), TimeSpan.FromHours(6)))
+                    {
+                        _logger.LogInformation("La tarea programada se está ejecutandoDe 2:00 am a 6 am...");
+                        Execute(_assyChartService, _mapper);
+                        await Task.Delay(TimeSpan.FromMinutes(60), stoppingToken);
+                    }
+                    else
+                    {
+                        _logger.LogInformation("La tarea programada se está ejecutando...");
+                        await Task.Delay(TimeSpan.FromMinutes(1), stoppingToken); // Espera 1 minutos antes de la siguiente ejecución
+                    }
+                }
+               
+            }
         }
 
-        [HttpGet]
-        public async Task<ActionResult> GetAllAttendance(int idsuperior)
+        public override async Task StopAsync(CancellationToken stoppingToken)
         {
-            List<AttendanceWithNavigationDetailsDto> allattendance = _mapper.Map<List<AttendanceWithNavigationDetailsDto>>(await _assyChartService.GetAllAttendanceOfSupervisorAsync(idsuperior));
+            // Implementar la lógica de limpieza o liberación de recursos al detener el servicio
+            // ...
+            _logger.LogInformation("La tarea programada se detuvo...");
 
-            return Ok(allattendance);
+            await base.StopAsync(stoppingToken);
         }
 
+        private bool IsWithinTimeInterval(TimeSpan currentTime, TimeSpan startTime, TimeSpan endTime)
+        {
+            // Verifica si la hora actual está dentro del intervalo de tiempo especificado
+            return currentTime >= startTime && currentTime <= endTime;
+        }
 
-        [HttpGet("Assign")]
-        public async Task<ActionResult> AssignEmployees()
+        public async void Execute(IAssyChartService _assyChartService, IMapper _mapper)
         {
             string filePath = Directory.GetCurrentDirectory().ToString() + "\\uploads\\attendance\\attendance.csv";
             //string filePath = @"C:\LenelInfo\attendance.csv";
@@ -88,12 +114,6 @@ namespace SupervisorMobility.API.Controllers
                     id = int.Parse(record.Id_Empleado);
                 else
                     continue;
-
-                //string concepto = "";
-                //if ((string)record.Concepto != "")
-                //    concepto = (string)record.Concepto;
-                //else
-                //    continue;
 
 
                 DateTime fecha = DateTime.Now;
@@ -231,30 +251,11 @@ namespace SupervisorMobility.API.Controllers
 
             }
 
-            return Ok(allattendanceadded);
         }
-
-        [HttpPost("updatelist")]
-        public async Task<ActionResult> updatelist(List<AttendanceWithoutDetailsDto> lista)
-        {
-            //update lista
-            List<Attendance> allattendance = _mapper.Map<List<Attendance>>(await _assyChartService.GetAllAttendanceAsync());
-
-            foreach (var item in lista)
-            {
-                var AttendaceforUpdate = allattendance.Find(e => e.AttendanceId == item.AttendanceId);
-
-                if (AttendaceforUpdate != null)
-                {
-                    bool update = await _assyChartService.UpdateAttendanceAsync(_mapper.Map<AttendanceForUpdateDto>(item), AttendaceforUpdate);
-                }
-
-            }
-
-            allattendance = _mapper.Map<List<Attendance>>(await _assyChartService.GetAllAttendanceAsync());
-
-            return Ok(allattendance);
-        }
-
     }
+
+
+
+
+
 }
