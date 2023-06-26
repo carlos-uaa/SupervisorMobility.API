@@ -118,38 +118,54 @@ namespace SupervisorMobility.API.Controllers
                     //es un dia diferente
                     if (existingRecordInAttendance != null)
                     {
-                        //ya se encuentra en la lista
-                        var updateRecord = new AttendanceForUpdateDto
+                        if ((string)record.Inicio == "")
                         {
-                            UserId = user.UserId,
-                            SuperiorId = user.SuperiorId,
-                            CurrentdistributionId = user.DistributionId,
-                            Compas = false,
-                            Station = false
-                        };
+                            //turno vespertino
+                            //ya existe registro de el en tabla de asistencia
+                            if ((string)record.Fin != "")
+                            {
+                                //Update, ya salio
+                                var updateRecord = new AttendanceForUpdateDto
+                                {
+                                    UserId = user.UserId,
+                                    SuperiorId = user.SuperiorId,
+                                    CurrentdistributionId = user.DistributionId,
+                                    Compas = false,
+                                    Station = false
+                                };
 
-                        bool update = await _assyChartService.UpdateAttendanceAsync(updateRecord, existingRecordInAttendance);
+                                bool update = await _assyChartService.UpdateAttendanceAsync(updateRecord, existingRecordInAttendance);
+                            }
+                                continue;
+                        }
+                        else
+                        {
+                            if ((string)record.Fin == "")
+                            {
+                                //aun no sale, esta desde el dia anterior
+                                if (existingRecordInAttendance != null)
+                                {
+                                    continue;
+                                }
+                            }
+                            else
+                            {
+                                //Update, ya salio
+                                var updateRecord = new AttendanceForUpdateDto
+                                {
+                                    UserId = user.UserId,
+                                    SuperiorId = user.SuperiorId,
+                                    CurrentdistributionId = user.DistributionId,
+                                    Compas = false,
+                                    Station = false
+                                };
+
+                                bool update = await _assyChartService.UpdateAttendanceAsync(updateRecord, existingRecordInAttendance);
+                                continue;
+                            }
+                        }
                         //se actualiza dado que es de un dia pasado y no estara en la planta 
-                    }
-                    else
-                    {
-                        //El registro no existe y es un dia diferente
-
-                        var newRecorddifday = new AttendanceForCreationDto
-                        {
-                            UserId = user.UserId,
-                            SuperiorId = user.SuperiorId,
-                            CurrentdistributionId = user.DistributionId,
-                            Compas = mismoDia,
-                            Station = false
-                        };
-
-
-                        var processAttendanceYesterday = await _assyChartService.CreateAttendanceAsync(newRecorddifday);
-                        allattendanceadded.Add(processAttendanceYesterday);
-                    }
-
-                    continue;
+                    }             
 
                 }
                 else
@@ -164,6 +180,7 @@ namespace SupervisorMobility.API.Controllers
                     //el inicio puede estar vacio por que es turno vespertino u horas extras
                     if ((string)record.Inicio == "")
                     {
+                        //turno vespertino
                         //ya existe registro de el en tabla de asistencia
                         if ((string)record.Fin != "")
                         {
@@ -185,11 +202,25 @@ namespace SupervisorMobility.API.Controllers
                     {
                         if ((string)record.Fin == "")
                         {
-                            //aun no sale, no se hace nada
+                            //aun no sale, pero llego
                             if (existingRecordInAttendance != null)
                             {
-                                continue;
+                                //se comprueba el registro, para actualizarlo en caso de ser necesario
+                                if (!existingRecordInAttendance.Compas)
+                                {
+                                    var updateRecord = new AttendanceForUpdateDto
+                                    {
+                                        UserId = user.UserId,
+                                        SuperiorId = user.SuperiorId,
+                                        CurrentdistributionId = user.DistributionId,
+                                        Compas = true,
+                                        Station = false
+                                    };
+
+                                    bool update = await _assyChartService.UpdateAttendanceAsync(updateRecord, existingRecordInAttendance);
+                                }
                             }
+                                continue;
                         }
                         else
                         {
