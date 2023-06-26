@@ -48,7 +48,7 @@ namespace SupervisorMobility.API.Services
 
         public async Task<IEnumerable<ChecklistCategory>> GetChecklistCategoriesAsync()
         {
-            return await _context.ChecklistCategories
+            return await _context.ChecklistCategories.Where(u => u.IsActive == true)
                 .OrderBy(c => c.Sequence).ToListAsync();
         }
 
@@ -57,7 +57,7 @@ namespace SupervisorMobility.API.Services
             if (includeChecklistQuestion)
             {
                 return await _context.ChecklistCategories.Include(cq => cq.ChecklistQuestions)
-                    .Where(c => c.ChecklistCategoryId == categoryId).FirstOrDefaultAsync();
+                    .Where(c => c.ChecklistCategoryId == categoryId ).FirstOrDefaultAsync();
             }
 
             return await _context.ChecklistCategories
@@ -78,14 +78,15 @@ namespace SupervisorMobility.API.Services
             return await _context.ChecklistCategories
                         .Where(c => c.Sequence >= lowerValue
                             && c.Sequence <= upperValue
-                            && c.ChecklistCategoryId != categoryId)
+                            && c.ChecklistCategoryId != categoryId 
+                            && c.IsActive == true)
                         .OrderBy(c => c.Sequence).ToListAsync();
         }
         #endregion
         #region JobObservationTypesOperations
         public async Task<IEnumerable<JobObservationType>> GetJobObservationTypesAsync()
         {
-            return await _context.JobObservationTypes
+            return await _context.JobObservationTypes.Where(u => u.IsActive == true)
                 .OrderBy(c => c.JobObservationTypeId).ToListAsync();
         }
 
@@ -98,7 +99,7 @@ namespace SupervisorMobility.API.Services
             }
 
             return await _context.JobObservationTypes
-                .Where(c => c.JobObservationTypeId == id).FirstOrDefaultAsync();
+                .Where(c => c.JobObservationTypeId == id ).FirstOrDefaultAsync();
         }
 
         public void AddJobObservationType(JobObservationType jobObservationType)
@@ -121,7 +122,7 @@ namespace SupervisorMobility.API.Services
         #region GroupOperations
         public async Task<IEnumerable<Entities.Group>> GetGroupsAsync()
         {
-            return await _context.Groups
+            return await _context.Groups.Where(u => u.IsActive == true)
                 .OrderBy(c => c.GroupId).ToListAsync();
         }
 
@@ -152,7 +153,7 @@ namespace SupervisorMobility.API.Services
         #region PlantOperations
         public async Task<IEnumerable<Plant>> GetPlantsAsync()
         {
-            return await _context.Plants
+            return await _context.Plants.Where(u => u.IsActive == true)
                 .OrderBy(c => c.PlantId).ToListAsync();
         }
 
@@ -161,11 +162,11 @@ namespace SupervisorMobility.API.Services
             if (includeAreas)
             {
                 return await _context.Plants.Include(p => p.Areas)
-                    .Where(p => p.PlantId == plantId).FirstOrDefaultAsync();
+                    .Where(p => p.PlantId == plantId ).FirstOrDefaultAsync();
             }
 
             return await _context.Plants
-                .Where(p => p.PlantId == plantId).FirstOrDefaultAsync();
+                .Where(p => p.PlantId == plantId ).FirstOrDefaultAsync();
         }
         public async Task<Plant?> GetPlantByCodeAndDescriptionAsync(string code, string description)
         {
@@ -200,11 +201,11 @@ namespace SupervisorMobility.API.Services
             if (includeCollections)
             {
                 return await _context.Areas.Include(a => a.Distributions)
-              .Where(a => a.PlantId == plantId).ToListAsync();
+              .Where(a => a.PlantId == plantId && a.IsActive == true).ToListAsync();
             }
 
             return await _context.Areas
-                .Where(a => a.PlantId == plantId).ToListAsync();
+                .Where(a => a.PlantId == plantId && a.IsActive == true).ToListAsync();
         }
         public async Task<Area?> GetAreaForPlantAsync(int plantId,
             int areaId, bool includeOperations = false)
@@ -212,11 +213,11 @@ namespace SupervisorMobility.API.Services
             if (includeOperations)
             {
                 return await _context.Areas.Include(a => a.Distributions)
-                .Where(a => a.PlantId == plantId && a.AreaId == areaId)
+                .Where(a => a.PlantId == plantId && a.AreaId == areaId )
                 .FirstOrDefaultAsync();
             }
             return await _context.Areas
-                .Where(a => a.PlantId == plantId && a.AreaId == areaId)
+                .Where(a => a.PlantId == plantId && a.AreaId == areaId )
                 .FirstOrDefaultAsync();
         }
         public async Task<Area?> GetAreaForPlantByCodeAndDescriptionAsync(int plantId,
@@ -269,25 +270,25 @@ namespace SupervisorMobility.API.Services
             if (includecollections)
             {
                 return await _context.Distributions.Include(o => o.Operations).Include(p => p.Products)
-                     .Where(o => o.AreaId == areaId)
+                     .Where(o => o.AreaId == areaId && o.IsActive == true)
                     .ToListAsync();
             }
 
             return await _context.Distributions
-                .Where(o => o.AreaId == areaId).ToListAsync();
+                .Where(o => o.AreaId == areaId && o.IsActive == true).ToListAsync();
         }
         public async Task<Distribution?> GetDistributionForAreaAsync(int areaId, int distributionId, bool includeCollections = false)
         {
             if (includeCollections)
             {
                 return await _context.Distributions.Include(o => o.Operations).Include(p => p.Products)
-                     .Where(o => o.AreaId == areaId && o.DistributionId == distributionId)
+                     .Where(o => o.AreaId == areaId && o.DistributionId == distributionId )
                     .FirstOrDefaultAsync();
             }
 
 
             return await _context.Distributions
-                .Where(o => o.AreaId == areaId && o.DistributionId == distributionId)
+                .Where(o => o.AreaId == areaId && o.DistributionId == distributionId )
                 .FirstOrDefaultAsync();
         }
         public async Task<Distribution?> GetDistributionOnlyIdAsync(int distributionId, bool includeCollections = false)
@@ -356,7 +357,7 @@ namespace SupervisorMobility.API.Services
         public async Task<IEnumerable<Operation>> GetOperationsForDistributionAsync(int distributionId)
         {
             return await _context.Operations
-                .Where(o => o.DistributionId == distributionId).ToListAsync();
+                .Where(o => o.DistributionId == distributionId && o.IsActive == true).ToListAsync();
         }
         public async Task<Operation?> GetOperationForDistributionAsync(int distributionId, int operationId)
         {
@@ -397,7 +398,7 @@ namespace SupervisorMobility.API.Services
 
         public async Task<IEnumerable<QuestionType>> GetQuestionTypesAsync()
         {
-            return await _context.QuestionTypes.OrderBy(q => q.QuestionTypeId).ToListAsync();
+            return await _context.QuestionTypes.Where(u => u.IsActive == true).OrderBy(q => q.QuestionTypeId).ToListAsync();
         }
 
         public async Task<QuestionType?> GetQuestionTypeAsync(int questionTypeId, bool includeChecklistQuestions = false)
@@ -419,7 +420,7 @@ namespace SupervisorMobility.API.Services
         public async Task<IEnumerable<ChecklistQuestion>> GetChecklistQuestionsForCategoryAsync(int categoryId)
         {
             return await _context.ChecklistQuestions
-                .Where(cq => cq.ChecklistCategoryId == categoryId)
+                .Where(cq => cq.ChecklistCategoryId == categoryId && cq.IsActive == true)
                 .OrderBy(cq => cq.CategorySequence).ToListAsync();
         }
         public async Task<ChecklistQuestion?> GetChecklistQuestionForCategoryAsync(int categoryId,
@@ -463,7 +464,7 @@ namespace SupervisorMobility.API.Services
                         .Where(c => c.ChecklistCategoryId == categoryId
                             && c.CategorySequence >= lowerValue
                             && c.CategorySequence <= upperValue
-                            && c.QuestionID != checklistQuestionId)
+                            && c.QuestionID != checklistQuestionId && c.IsActive == true)
                         .OrderBy(c => c.CategorySequence).ToListAsync();
         }
         #endregion
@@ -500,7 +501,7 @@ namespace SupervisorMobility.API.Services
         #region SupportDocumentTypeOperations
         public async Task<IEnumerable<SupportDocumentType>> GetSupportDocumentTypesAsync()
         {
-            return await _context.SupportDocumentTypes
+            return await _context.SupportDocumentTypes.Where(u => u.IsActive == true)
                 .OrderBy(c => c.SupportDocumentTypeId).ToListAsync();
         }
 
@@ -625,7 +626,7 @@ namespace SupervisorMobility.API.Services
                 .Include(p => p.Plant)
                 .Include(d => d.Distribution)
                 .Include(o => o.Operation)
-                .Include(pr => pr.Product)
+                .Include(pr => pr.Product).Where(u => u.IsActive == true)
                  .OrderBy(c => c.AssyChardId).ToListAsync();
         }
         public async Task<AssyChart?> GetAssyChartAsync(int asssychartId)
@@ -646,7 +647,7 @@ namespace SupervisorMobility.API.Services
                 .Include(p => p.Plant)
                 .Include(d => d.Distribution)
                 .Include(o => o.Operation)
-                .Include(pr => pr.Product)
+                .Include(pr => pr.Product).Where(u => u.IsActive == true)
                 .OrderBy(c => c.AssyChardId).ToListAsync();
         }
 
@@ -657,7 +658,7 @@ namespace SupervisorMobility.API.Services
                 .Include(p => p.Plant)
                 .Include(d => d.Distribution)
                 .Include(o => o.Operation)
-                .Include(pr => pr.Product)
+                .Include(pr => pr.Product).Where(u => u.IsActive == true)
                 .OrderBy(c => c.AssyChardId).ToListAsync();
         }
 
@@ -668,7 +669,7 @@ namespace SupervisorMobility.API.Services
                 .Include(p => p.Plant)
                 .Include(d => d.Distribution)
                 .Include(o => o.Operation)
-                .Include(pr => pr.Product)
+                .Include(pr => pr.Product).Where(u => u.IsActive == true)
                 .OrderBy(c => c.AssyChardId).ToListAsync();
         }
 
@@ -726,7 +727,7 @@ namespace SupervisorMobility.API.Services
                     .Include(l => l.Lup)
                     .Include(s => s.Supervisor)
                     .Include(o => o.Operator)
-                    .Where(h => h.JobObservationId == jobObservationId)
+                    .Where(h => h.JobObservationId == jobObservationId && h.IsActive == true)
                  .OrderBy(c => c.JobObservationVersionId).ToListAsync();
         }
 
@@ -792,7 +793,7 @@ namespace SupervisorMobility.API.Services
                 .Include(s => s.Superior)
                 .Include(ss => ss.Subordinates)
                 .Include(aa => aa.Areas)
-                .Include(ILU => ILU.ILURegisers)
+                .Include(ILU => ILU.ILURegisers).Where(u => u.IsActive == true)
                  .OrderBy(c => c.UserId).ToListAsync();
         }
 
@@ -807,7 +808,7 @@ namespace SupervisorMobility.API.Services
                 .Include(ss => ss.Subordinates)
                 .Include(aa => aa.Areas)
                 .Include(ILU => ILU.ILURegisers)
-                .Where(u => u.UserType == typeUser)
+                .Where(u => u.UserType == typeUser).Where(u => u.IsActive == true)
                  .OrderBy(c => c.UserId).ToListAsync();
         }
 
@@ -822,7 +823,7 @@ namespace SupervisorMobility.API.Services
                 .Include(ss => ss.Subordinates)
                 .Include(aa => aa.Areas)
                 .Include(ILU => ILU.ILURegisers)
-                .Where(u =>  u.SuperiorId == superiorid)
+                .Where(u =>  u.SuperiorId == superiorid && u.IsActive==true)
                  .OrderBy(c => c.UserId).ToListAsync();
         }
         public async Task<IEnumerable<User>> GetAllUsersWhitPlantAreaAndGroupAsync()
@@ -831,7 +832,7 @@ namespace SupervisorMobility.API.Services
                 .Include(a => a.Area)
                 .Include(p => p.Plant)
                 .Include(g => g.Group)
-                .Include(o => o.Distribution)
+                .Include(o => o.Distribution).Where(u => u.IsActive == true)
                  .OrderBy(c => c.UserId).ToListAsync();
         }
 
@@ -1051,10 +1052,10 @@ namespace SupervisorMobility.API.Services
         {
             if (includeFile)
             {
-                return await _context.Guides.Include(p => p.FileUpload).OrderBy(g => g.GuideId).ToListAsync();
+                return await _context.Guides.Include(p => p.FileUpload).Where(u => u.IsActive == true).OrderBy(g => g.GuideId).ToListAsync();
             }
 
-            return await _context.Guides.OrderBy(g => g.GuideId).ToListAsync();
+            return await _context.Guides.OrderBy(g => g.GuideId).Where(u => u.IsActive == true).ToListAsync();
         }
 
         public void AddGuide(Guides guide)
@@ -1083,7 +1084,7 @@ namespace SupervisorMobility.API.Services
                     .Include(o => o.Operation)
                     .Include(l => l.Lup)
                     .Include(s => s.Supervisor)
-                    .Include(o => o.Operator)
+                    .Include(o => o.Operator).Where(u => u.IsActive == true)
                      .OrderBy(c => c.JobObservationId).ToListAsync();
             }
 
@@ -1093,7 +1094,7 @@ namespace SupervisorMobility.API.Services
                 .Include(d => d.Distribution)
                 .Include(o => o.Operation)
                 .Include(s => s.Supervisor)
-                .Include(o => o.Operator)
+                .Include(o => o.Operator).Where(u => u.IsActive == true)
                  .OrderBy(c => c.JobObservationId).ToListAsync();
 
         }
@@ -1143,7 +1144,7 @@ namespace SupervisorMobility.API.Services
 
         public async Task<IEnumerable<Glosary>> GetGlosaryAsync()
         {
-            return await _context.Glosary
+            return await _context.Glosary.Where(u => u.IsActive == true)
                 .OrderBy(c => c.GlosaryWordId).ToListAsync();
         }
 
@@ -1179,7 +1180,7 @@ namespace SupervisorMobility.API.Services
 
         public async Task<IEnumerable<Lup>> GetAllLupAsync()
         {
-            return await _context.Lup
+            return await _context.Lup.Where(u => u.IsActive == true)
                  .OrderBy(c => c.LupId).ToListAsync();
 
         }
@@ -1325,7 +1326,7 @@ namespace SupervisorMobility.API.Services
 
         public async Task<IEnumerable<ILULevel>> GetAllILULevel()
         {
-            return await _context.ILULevels
+            return await _context.ILULevels.Where(u => u.isActive == true)
                     .OrderBy(c => c.ILULevelId).ToListAsync();
         }
         public async Task<int> AddILU(ILULevel lU)
@@ -1419,7 +1420,7 @@ namespace SupervisorMobility.API.Services
                    .Include(a => a.Area)
                    .Include(d => d.Distribution)
                    .Include(sv => sv.Supervisor)
-                   .Include(ssv => ssv.SSVresponsible)
+                   .Include(ssv => ssv.SSVresponsible).Where(u => u.IsActive == true)
                     .OrderBy(c => c.PATid).ToListAsync();
         }
         public async Task<IEnumerable<PAT>> GetAllPATsOfSv(int svId)
@@ -1430,7 +1431,7 @@ namespace SupervisorMobility.API.Services
                     .Include(d => d.Distribution)
                     .Include(sv => sv.Supervisor)
                     .Include(ssv => ssv.SSVresponsible)
-                    .Where(p => p.SupervisorId == svId)
+                    .Where(p => p.SupervisorId == svId && p.IsActive ==true)
                     .OrderBy(c => c.PATid).ToListAsync();
         }
         public async Task<IEnumerable<PAT>> GetAllPATsofSSV(int ssvID)
@@ -1441,7 +1442,7 @@ namespace SupervisorMobility.API.Services
                    .Include(d => d.Distribution)
                    .Include(sv => sv.Supervisor)
                    .Include(ssv => ssv.SSVresponsible)
-                           .Where(p => p.SSVresponsibleID == ssvID)
+                           .Where(p => p.SSVresponsibleID == ssvID && p.IsActive ==true )
                             .OrderBy(c => c.PATid).ToListAsync();
         }
         #endregion
