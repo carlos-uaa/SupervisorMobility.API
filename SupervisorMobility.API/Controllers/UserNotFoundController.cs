@@ -53,7 +53,7 @@ namespace SupervisorMobility.API.Controllers
             var UserToReturn = _mapper.Map<UserNotFound>(finalUser);
             await _supervisorMobilityRepository.SaveChangesAsync();
 
-            var emailMessage = _email.CreateEmailMessage("pmunoz@gruposinco.com.mx", $"This user tried to login: {finalUser.ObjectId} with this Name: {finalUser.Name}");
+            var emailMessage = _email.CreateEmailMessage("juan.herreraespinoza@compas-mx.com", $"This user tried to login: {finalUser.ObjectId} with this Name: {finalUser.Name}");
             _email.Send(emailMessage);
 
             return Ok(UserToReturn);
