@@ -864,7 +864,7 @@ namespace SupervisorMobility.API.Services
                 .Include(ss => ss.Subordinates)
                 .Include(ILU => ILU.ILURegisers)
                 .Include(aa => aa.Areas)
-            .Where(p => p.ObjectId == objectId).FirstOrDefaultAsync();
+            .Where(p => p.ObjectId!.ToLower() == objectId.ToLower()).FirstOrDefaultAsync();
         }
 
         public async Task<User?> GetUserByEmailAsync(string email)
