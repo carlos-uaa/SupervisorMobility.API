@@ -9,6 +9,7 @@ using SupervisorMobility.API.DataAccess.Entities.ILU;
 using SupervisorMobility.API.DataAccess.Entities.LUP;
 using SupervisorMobility.API.Entities;
 using SupervisorMobility.API.Models.PATDtos;
+using SupervisorMobility.API.Models.SOSReviewDtos;
 using SupervisorMobility.API.Models.Users;
 using System.Diagnostics;
 using System.Runtime.CompilerServices;
@@ -1470,6 +1471,49 @@ namespace SupervisorMobility.API.Services
         {
             _context.UsersNotFound.Add(userNotFound);
             await _context.SaveChangesAsync();
+        }
+        #endregion
+
+        #region SOS_Reviews
+
+        public async Task<IEnumerable<SOSReviewProgram>> GetAllSOSReviews()
+        {
+            return await _context.SOSReviews
+                   .Include(p => p.Plant)
+                   .Include(a => a.Area)
+                   .Include(UA => UA.UserA)
+                   .Include(UB => UB.UserA)
+                   .Include(UC => UC.UserA)
+                   .Where(u => u.IsActive == true)
+                    .OrderBy(c => c.SOSid).ToListAsync();
+
+        }
+
+       public async Task<SOSReviewProgram?> GetSOSasync(int sosId)
+        {
+            return await _context.SOSReviews
+                   .Include(p => p.Plant)
+                   .Include(a => a.Area)
+                   .Include(UA => UA.UserA)
+                   .Include(UB => UB.UserA)
+                   .Include(UC => UC.UserA)
+                   .Where(p => p.SOSid == sosId).FirstOrDefaultAsync();
+        }
+        public async Task<int> AddSOSReview(SOSReviewProgram SOSEntity)
+        {
+            _context.SOSReviews.Add(SOSEntity);
+            return _context.SaveChanges();
+        }
+        public async Task<int> DeleteSOSReview(SOSReviewProgram SOSEntity)
+        {
+            SOSEntity.IsActive = false;
+            return _context.SaveChanges();
+        }
+        public async Task<int> UpdateSOSReview(SOSReviewForUpdateDto SOSForUpdate, SOSReviewProgram SOSEntity)
+        {
+            _mapper.Map(SOSForUpdate, SOSEntity);
+
+            return _context.SaveChanges();
         }
         #endregion
 

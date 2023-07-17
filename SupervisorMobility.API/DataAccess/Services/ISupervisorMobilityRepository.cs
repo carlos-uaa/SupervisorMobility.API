@@ -3,6 +3,7 @@ using SupervisorMobility.API.DataAccess.Entities.ILU;
 using SupervisorMobility.API.DataAccess.Entities.LUP;
 using SupervisorMobility.API.Entities;
 using SupervisorMobility.API.Models.PATDtos;
+using SupervisorMobility.API.Models.SOSReviewDtos;
 using SupervisorMobility.API.Models.Users;
 using System.Runtime.CompilerServices;
 
@@ -268,6 +269,17 @@ namespace SupervisorMobility.API.Services
 
         Task AddUserNotFoundAsync(UserNotFound userNotFound);
         #endregion
+
+        #region SOS_Reviews
+
+        Task<IEnumerable<SOSReviewProgram>> GetAllSOSReviews();
+
+        Task<SOSReviewProgram?> GetSOSasync(int sosId);
+        Task<int> AddSOSReview(SOSReviewProgram SOSEntity);
+        Task<int> DeleteSOSReview(SOSReviewProgram SOSEntity);
+        Task<int> UpdateSOSReview(SOSReviewForUpdateDto SOSForUpdate, SOSReviewProgram SOSEntity);
+        #endregion
+
         #region CommonOperations
 
         Task<bool> SaveChangesAsync();

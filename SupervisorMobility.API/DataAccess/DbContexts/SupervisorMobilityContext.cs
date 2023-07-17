@@ -41,6 +41,9 @@ namespace SupervisorMobility.API.Context
         public DbSet<ILULevel> ILULevels { get; set; }
         public DbSet<ILURegister> ILURegisters { get; set; }
         public DbSet<PAT> PATs { get; set; }
+        
+        public DbSet<SOSReviewProgram> SOSReviews { get; set; }
+        
         #endregion
 
 
@@ -58,6 +61,10 @@ namespace SupervisorMobility.API.Context
             modelBuilder.Entity<ChecklistCategory>()
                 .Property(p => p.IsActive)
                 .HasDefaultValue(true);
+
+            modelBuilder.Entity<SOSReviewProgram>()
+               .Property(p => p.IsActive)
+               .HasDefaultValue(true);
 
             modelBuilder.Entity<QuestionType>()
                 .Property(p => p.IsActive)
