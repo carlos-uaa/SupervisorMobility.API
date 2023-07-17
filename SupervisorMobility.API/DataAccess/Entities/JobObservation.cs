@@ -50,6 +50,9 @@ namespace SupervisorMobility.API.Entities
         public ICollection<Lup> Lup { get; set; } = new List<Lup>();
         public ICollection<JobObservationVersion> History { get; set; } = new List<JobObservationVersion>();
 
+        public int? AssychartId { get; set; }
+        public AssyChart? AssyChart { get; set; }
+
 
     }
 }
