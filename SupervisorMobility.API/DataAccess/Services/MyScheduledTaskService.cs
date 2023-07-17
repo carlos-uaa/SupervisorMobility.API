@@ -24,8 +24,8 @@ namespace SupervisorMobility.API.DataAccess.Services
         
         public MyScheduledTaskService(ILogger<MyScheduledTaskService> logger)
         {
-            //_httpClient = new HttpClient { BaseAddress = new Uri("http://10.91.117.12:10201/") };
-            _httpClient = new HttpClient { BaseAddress = new Uri("http://localhost:10201/") };
+            _httpClient = new HttpClient { BaseAddress = new Uri("http://10.91.117.12:10201/") };
+            //_httpClient = new HttpClient { BaseAddress = new Uri("http://localhost:10201/") };
             _logger = logger;
         }
 

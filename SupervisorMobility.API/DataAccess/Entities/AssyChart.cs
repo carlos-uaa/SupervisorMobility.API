@@ -18,6 +18,7 @@ namespace SupervisorMobility.API.Entities
         [Column(TypeName = "Date")]
         public DateTime ModificationDate { get; set; }
 
+        public int CriticalType { get; set; }
         //Navigation properties
         public int? ProductId { get; set; }
         public Product? Product { get; set; }

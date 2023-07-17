@@ -64,8 +64,8 @@ namespace SupervisorMobility.API.Controllers
         [HttpGet("Assign")]
         public async Task<ActionResult> AssignEmployees()
         {
-            string filePath = Directory.GetCurrentDirectory().ToString() + "\\uploads\\attendance\\attendance.csv";
-            //string filePath = @"C:\LenelInfo\attendance.csv";
+            //string filePath = Directory.GetCurrentDirectory().ToString() + "\\uploads\\attendance\\attendance.csv";
+            string filePath = @"C:\LenelInfo\attendance.csv";
 
 
             using var reader = new StreamReader(filePath);

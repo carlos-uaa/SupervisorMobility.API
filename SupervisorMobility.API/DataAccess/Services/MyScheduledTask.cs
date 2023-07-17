@@ -90,8 +90,8 @@ namespace SupervisorMobility.API.DataAccess.Services
 
         public async void Execute(IAssyChartService _assyChartService, IMapper _mapper)
         {
-            string filePath = Directory.GetCurrentDirectory().ToString() + "\\uploads\\attendance\\attendance.csv";
-            //string filePath = @"C:\LenelInfo\attendance.csv";
+            //string filePath = Directory.GetCurrentDirectory().ToString() + "\\uploads\\attendance\\attendance.csv";
+            string filePath = @"C:\LenelInfo\attendance.csv";
 
 
             using var reader = new StreamReader(filePath);
