@@ -2,7 +2,7 @@
 using System.ComponentModel.DataAnnotations.Schema;
 using System.ComponentModel.DataAnnotations;
 
-namespace SupervisorMobility.API.DataAccess.Entities
+namespace SupervisorMobility.API.DataAccess.Entities.SOS_Review
 {
     public class SOSReviewProgram
     {

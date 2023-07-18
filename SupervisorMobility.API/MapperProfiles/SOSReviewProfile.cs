@@ -1,4 +1,5 @@
 ﻿using AutoMapper;
+using SupervisorMobility.API.DataAccess.Entities.SOS_Review;
 
 namespace SupervisorMobility.API.MapperProfiles
 {
@@ -6,10 +7,10 @@ namespace SupervisorMobility.API.MapperProfiles
     {
 
         public SOSReviewProfile() {
-            CreateMap<DataAccess.Entities.SOSReviewProgram, Models.SOSReviewDtos.SOSReviewWithAllDto>().ReverseMap();
-            CreateMap<DataAccess.Entities.SOSReviewProgram, Models.SOSReviewDtos.SOSReviewWithOutDataDto>().ReverseMap();
-            CreateMap<DataAccess.Entities.SOSReviewProgram, Models.SOSReviewDtos.SOSReviewForCreateDto>().ReverseMap();
-            CreateMap<DataAccess.Entities.SOSReviewProgram, Models.SOSReviewDtos.SOSReviewForUpdateDto>().ReverseMap();
+            CreateMap<SOSReviewProgram, Models.SOSReviewDtos.SOSReviewWithAllDto>().ReverseMap();
+            CreateMap<SOSReviewProgram, Models.SOSReviewDtos.SOSReviewWithOutDataDto>().ReverseMap();
+            CreateMap<SOSReviewProgram, Models.SOSReviewDtos.SOSReviewForCreateDto>().ReverseMap();
+            CreateMap<SOSReviewProgram, Models.SOSReviewDtos.SOSReviewForUpdateDto>().ReverseMap();
         }
     }
 }
