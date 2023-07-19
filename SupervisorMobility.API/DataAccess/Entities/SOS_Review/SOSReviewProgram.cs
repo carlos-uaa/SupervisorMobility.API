@@ -23,11 +23,11 @@ namespace SupervisorMobility.API.DataAccess.Entities.SOS_Review
         public User? UserC { get; set; }
 
 
-        public int? PlantId { get; set; }
+        public int PlantId { get; set; }
         [ForeignKey("PlantId")]
         public Plant? Plant { get; set; }
 
-        public int? AreaId { get; set; }
+        public int AreaId { get; set; }
         [ForeignKey("AreaId")]
 
         public Area? Area { get; set; }
