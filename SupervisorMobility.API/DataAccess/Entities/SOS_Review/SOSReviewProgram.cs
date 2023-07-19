@@ -10,18 +10,9 @@ namespace SupervisorMobility.API.DataAccess.Entities.SOS_Review
         public int SOSid { get; set; }
         public int Status { get; set; }
 
-        public int? UserAid { get; set; }
-        [ForeignKey("UserAid")]
-        public User? UserA { get; set; }
-
-        public int? UserBid { get; set; }
-        [ForeignKey("UserBid")]
-        public User? UserB { get; set; }
-
-        public int? UserCid { get; set; }
-        [ForeignKey("UserCid")]
-        public User? UserC { get; set; }
-
+        public int? Supervisorid { get; set; }
+        [ForeignKey("Supervisorid")]
+        public User? Supervisor { get; set; }
 
         public int PlantId { get; set; }
         [ForeignKey("PlantId")]

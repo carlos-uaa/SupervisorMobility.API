@@ -1482,9 +1482,7 @@ namespace SupervisorMobility.API.Services
             return await _context.SOSReviews
                    .Include(p => p.Plant)
                    .Include(a => a.Area)
-                   .Include(UA => UA.UserA)
-                   .Include(UB => UB.UserB)
-                   .Include(UC => UC.UserC)
+                   .Include(s => s.Supervisor)
                    .Where(u => u.IsActive == true)
                     .OrderBy(c => c.SOSid).ToListAsync();
 
@@ -1495,9 +1493,7 @@ namespace SupervisorMobility.API.Services
             return await _context.SOSReviews
                    .Include(p => p.Plant)
                    .Include(a => a.Area)
-                   .Include(UA => UA.UserA)
-                   .Include(UB => UB.UserB)
-                   .Include(UC => UC.UserC)
+                   .Include(s => s.Supervisor)
                    .Where(p => p.SOSid == sosId).FirstOrDefaultAsync();
         }
         public async Task<int> AddSOSReview(SOSReviewProgram SOSEntity)

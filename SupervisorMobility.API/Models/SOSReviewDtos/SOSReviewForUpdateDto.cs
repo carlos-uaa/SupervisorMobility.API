@@ -1,6 +1,8 @@
-﻿using SupervisorMobility.API.Models.AreaDtos;
+﻿using SupervisorMobility.API.DataAccess.Entities;
+using SupervisorMobility.API.Models.AreaDtos;
 using SupervisorMobility.API.Models.PlantDtos;
 using SupervisorMobility.API.Models.Users;
+using System.ComponentModel.DataAnnotations.Schema;
 
 namespace SupervisorMobility.API.Models.SOSReviewDtos
 {
@@ -8,14 +10,8 @@ namespace SupervisorMobility.API.Models.SOSReviewDtos
     {
         public int Status { get; set; }
 
-        public int? UserAid { get; set; }
-        public UsersWithoutNavigationDetails? UserA;
-
-        public int? UserBid { get; set; }
-        public UsersWithoutNavigationDetails? UserB;
-
-        public int? UserCid { get; set; }
-        public UsersWithoutNavigationDetails? UserC;
+        public int? Supervisorid { get; set; }
+        public UsersWithoutNavigationDetails? Supervisor { get; set; }
 
 
         public int? PlantId { get; set; }
