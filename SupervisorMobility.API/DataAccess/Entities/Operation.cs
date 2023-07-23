@@ -15,6 +15,8 @@ namespace SupervisorMobility.API.Entities
         [Required]
         [MaxLength(200)]
         public string Description { get; set; }
+        public int CriticalType { get; set; }
+
         public bool? IsActive { get; set; }
 
         //Navigation properties
