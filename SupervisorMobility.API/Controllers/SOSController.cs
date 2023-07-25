@@ -1,7 +1,10 @@
 ﻿using AutoMapper;
+using DocumentFormat.OpenXml.Office2010.Drawing;
 using Microsoft.AspNetCore.Mvc;
 using SupervisorMobility.API.DataAccess.Entities.SOS_Review;
+using SupervisorMobility.API.Entities;
 using SupervisorMobility.API.Models.AreaDtos;
+using SupervisorMobility.API.Models.JobObservationDtos;
 using SupervisorMobility.API.Models.SOSReviewDtos;
 using SupervisorMobility.API.Services;
 
@@ -44,6 +47,25 @@ namespace SupervisorMobility.API.Controllers
             }
 
         }//end get all
+        
+        [HttpGet("Registers/{SOSid}")]
+        public async Task<ActionResult<IEnumerable<SOSReviewsRegisterDto>>> SOSReviewRegisters(int SOSid, bool includeCollections = false)
+        {
+
+            if (includeCollections)
+            {
+                var SOSRevierWhitDistributions = await _supervisorMobilityRepository.GetAllSOSReviewsRegisters(SOSid);
+                return Ok(_mapper.Map<IEnumerable<SOSReviewsRegisterDto>>(SOSRevierWhitDistributions));
+
+            }
+            else
+            {
+                var SOS_Reviews = await _supervisorMobilityRepository
+                                .GetAllSOSReviewsRegisters(SOSid);
+                return Ok(_mapper.Map<IEnumerable<SOSReviewsRegisterDto>>(SOS_Reviews));
+            }
+
+        }//end get all registers
 
         [HttpGet("{sosId}", Name = "GetSOS")]
         public async Task<ActionResult<SOSReviewWithAllDto>> GetSOS(int sosId, bool includeCollections = false)
@@ -90,6 +112,55 @@ namespace SupervisorMobility.API.Controllers
 
             
         }//end post create 
+
+
+        [HttpPost("Registers/{SOSid}")]
+        public async Task<ActionResult<SOSReviewWithAllDto>> CreateSOSRegister(int SOSid, int month, int year, JobObservationForCreationDto JobEntity)
+        {
+
+            var finalJob =  _mapper.Map<JobObservation>(JobEntity);
+
+            if(finalJob.OperationId == 0)
+            {
+                finalJob.OperationId = null;
+            }
+
+            if(finalJob.OperatorId == 0)
+            {
+                finalJob.OperatorId = null;
+            }
+           
+            _supervisorMobilityRepository.AddJobObservation(finalJob);
+            await _supervisorMobilityRepository.SaveChangesAsync();
+
+            SOSRegisterJobObservation finalSOSReview = new();
+
+            finalSOSReview.SOSReviewProgramid = SOSid;
+            finalSOSReview.Month = month;
+            finalSOSReview.Year = year;
+            finalSOSReview.JobObservationId = finalJob.JobObservationId;
+            finalSOSReview.DistributionId = finalJob.DistributionId;
+            
+               
+            var result = await _supervisorMobilityRepository.AddSOSReviewRegister(finalSOSReview);
+
+
+            if (result > 0)
+            {
+                await _supervisorMobilityRepository.SaveChangesAsync();
+
+                var createdRegisterToReturn =
+                    _mapper.Map<SOSReviewsRegisterDto>(finalSOSReview);
+
+                return Ok(createdRegisterToReturn);
+            }
+            else
+            {
+                return NotFound();
+            }
+
+
+        }//end post create register
 
         [HttpPut("{SOSid}")]
         public async Task<ActionResult> UpdateArea(int SOSid,

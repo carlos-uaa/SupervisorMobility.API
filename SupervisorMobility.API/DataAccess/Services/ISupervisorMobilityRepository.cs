@@ -144,6 +144,7 @@ namespace SupervisorMobility.API.Services
         Task<IEnumerable<User>> GetAllUsersAsync();
         Task<IEnumerable<User>> GetAllSubordinatesAsync(int superiorId);
         Task<IEnumerable<User>> GetAllUserByTypeAsync(int typeUser);
+        Task<IEnumerable<User>> GetAllUserByTypeInPlantAreaAsync(int plantId, int areaId, int typeUser);
         Task<IEnumerable<User>> GetAllUsersWhitPlantAreaAndGroupAsync();
         Task<User?> GetUserAsync(int userId, bool collection = false);
         Task<User?> GetUserByObjectIdAsync(string objectId);
@@ -274,9 +275,11 @@ namespace SupervisorMobility.API.Services
         #region SOS_Reviews
 
         Task<IEnumerable<SOSReviewProgram>> GetAllSOSReviews();
+        Task<IEnumerable<SOSRegisterJobObservation>> GetAllSOSReviewsRegisters(int SosId);
 
         Task<SOSReviewProgram?> GetSOSasync(int sosId);
         Task<int> AddSOSReview(SOSReviewProgram SOSEntity);
+        Task<int> AddSOSReviewRegister(SOSRegisterJobObservation RegEntity);
         Task<int> DeleteSOSReview(SOSReviewProgram SOSEntity);
         Task<int> UpdateSOSReview(SOSReviewForUpdateDto SOSForUpdate, SOSReviewProgram SOSEntity);
         #endregion

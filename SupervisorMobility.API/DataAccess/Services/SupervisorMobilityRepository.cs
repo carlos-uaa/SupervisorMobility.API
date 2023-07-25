@@ -814,6 +814,21 @@ namespace SupervisorMobility.API.Services
                  .OrderBy(c => c.UserId).ToListAsync();
         }
 
+        public async Task<IEnumerable<User>> GetAllUserByTypeInPlantAreaAsync(int plantId,int areaId,int typeUser)
+        {
+            return await _context.Users
+                .Include(p => p.Plant)
+                .Include(a => a.Area)
+                .Include(d => d.Distribution)
+                .Include(g => g.Group)
+                .Include(s => s.Superior)
+                .Include(ss => ss.Subordinates)
+                .Include(aa => aa.Areas)
+                .Include(ILU => ILU.ILURegisers)
+                .Where(u => u.UserType == typeUser && u.PlantId == plantId && u.AreaId == areaId).Where(u => u.IsActive == true)
+                 .OrderBy(c => c.UserId).ToListAsync();
+        }
+
         public async Task<IEnumerable<User>> GetAllSubordinatesAsync(int superiorid)
         {
             return await _context.Users
@@ -1486,6 +1501,17 @@ namespace SupervisorMobility.API.Services
                    .Where(u => u.IsActive == true)
                     .OrderBy(c => c.SOSid).ToListAsync();
 
+        }    
+        
+        public async Task<IEnumerable<SOSRegisterJobObservation>> GetAllSOSReviewsRegisters(int SosId)
+        {
+            return await _context.SOSRegisters
+                   .Include(j => j.JobObservation)
+                   .Include(d => d.Distribution)
+                   .Include(s => s.SOSReviewProgram)
+                   .Where(u => u.SOSReviewProgramid == SosId)
+                    .OrderBy(c => c.SOSRegisterJobid).ToListAsync();
+
         }
 
        public async Task<SOSReviewProgram?> GetSOSasync(int sosId)
@@ -1499,6 +1525,11 @@ namespace SupervisorMobility.API.Services
         public async Task<int> AddSOSReview(SOSReviewProgram SOSEntity)
         {
             _context.SOSReviews.Add(SOSEntity);
+            return _context.SaveChanges();
+        } 
+        public async Task<int> AddSOSReviewRegister(SOSRegisterJobObservation RegEntity)
+        {
+            _context.SOSRegisters.Add(RegEntity);
             return _context.SaveChanges();
         }
         public async Task<int> DeleteSOSReview(SOSReviewProgram SOSEntity)

@@ -11,6 +11,7 @@ namespace SupervisorMobility.API.MapperProfiles
             CreateMap<SOSReviewProgram, Models.SOSReviewDtos.SOSReviewWithOutDataDto>().ReverseMap();
             CreateMap<SOSReviewProgram, Models.SOSReviewDtos.SOSReviewForCreateDto>().ReverseMap();
             CreateMap<SOSReviewProgram, Models.SOSReviewDtos.SOSReviewForUpdateDto>().ReverseMap();
+            CreateMap<SOSRegisterJobObservation, Models.SOSReviewDtos.SOSReviewsRegisterDto>().ReverseMap();
         }
     }
 }

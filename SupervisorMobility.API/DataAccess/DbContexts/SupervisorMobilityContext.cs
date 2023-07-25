@@ -44,6 +44,7 @@ namespace SupervisorMobility.API.Context
         public DbSet<PAT> PATs { get; set; }
         
         public DbSet<SOSReviewProgram> SOSReviews { get; set; }
+        public DbSet<SOSRegisterJobObservation> SOSRegisters { get; set; }
         
         #endregion
 
@@ -65,7 +66,7 @@ namespace SupervisorMobility.API.Context
 
             modelBuilder.Entity<SOSReviewProgram>()
                .Property(p => p.IsActive)
-               .HasDefaultValue(true);
+               .HasDefaultValue(true); 
 
             modelBuilder.Entity<QuestionType>()
                 .Property(p => p.IsActive)
@@ -879,18 +880,21 @@ namespace SupervisorMobility.API.Context
                             {
                                 ILULevelId = 1,
                                 ILULevelCode = 'I',
-                                ILULevelDescription = "el operador necesita entrenamiento para realizar la operación"
+                                ILULevelDescription = "el operador necesita entrenamiento para realizar la operación",
+                                isActive = true
                             },
                             new ILULevel()
                             {
                                 ILULevelId = 2,
                                 ILULevelCode = 'L',
-                                ILULevelDescription = "el operador ya la puede realizar por si mismo"
+                                ILULevelDescription = "el operador ya la puede realizar por si mismo",
+                                isActive = true
                             }, new ILULevel()
                             {
                                 ILULevelId = 3,
                                 ILULevelCode = 'U',
-                                ILULevelDescription = "el operador domina la operación y puede enseñar"
+                                ILULevelDescription = "el operador domina la operación y puede enseñar",
+                                isActive = true
                             }
                     );
 
