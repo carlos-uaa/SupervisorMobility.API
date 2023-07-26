@@ -53,6 +53,6 @@ namespace SupervisorMobility.API.Entities
         public int? AssychartId { get; set; }
         public AssyChart? AssyChart { get; set; }
 
-
+        public string? ReleasedFeedback { get; set; }
     }
 }
