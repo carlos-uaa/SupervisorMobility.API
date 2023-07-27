@@ -9,7 +9,7 @@ using SupervisorMobility.API.DataAccess.Services;
 Log.Logger = new LoggerConfiguration()
     .MinimumLevel.Debug()
     .WriteTo.Console()
-    .WriteTo.File("logs/cityinfo.txt", rollingInterval: RollingInterval.Day)
+    .WriteTo.File("logs/Supervisor.txt", rollingInterval: RollingInterval.Day)
     .CreateLogger();
 
 var builder = WebApplication.CreateBuilder(args);
