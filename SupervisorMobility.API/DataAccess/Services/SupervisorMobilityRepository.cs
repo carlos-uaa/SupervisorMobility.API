@@ -828,6 +828,21 @@ namespace SupervisorMobility.API.Services
                 .Where(u => u.UserType == typeUser && u.PlantId == plantId && u.AreaId == areaId).Where(u => u.IsActive == true)
                  .OrderBy(c => c.UserId).ToListAsync();
         }
+        
+        public async Task<IEnumerable<User>> GetAllUserByTypeInPlantAsync(int plantId,int typeUser)
+        {
+            return await _context.Users
+                .Include(p => p.Plant)
+                .Include(a => a.Area)
+                .Include(d => d.Distribution)
+                .Include(g => g.Group)
+                .Include(s => s.Superior)
+                .Include(ss => ss.Subordinates)
+                .Include(aa => aa.Areas)
+                .Include(ILU => ILU.ILURegisers)
+                .Where(u => u.UserType == typeUser && u.PlantId == plantId).Where(u => u.IsActive == true)
+                 .OrderBy(c => c.UserId).ToListAsync();
+        }
 
         public async Task<IEnumerable<User>> GetAllSubordinatesAsync(int superiorid)
         {
@@ -1333,7 +1348,6 @@ namespace SupervisorMobility.API.Services
         }
 
         #endregion
-
         #region ILU
         public async Task<ILULevel?> GetILULevel(int idILU)
         {
@@ -1463,7 +1477,6 @@ namespace SupervisorMobility.API.Services
                             .OrderBy(c => c.PATid).ToListAsync();
         }
         #endregion
-
         #region UserNotFound
         public async Task<IEnumerable<UserNotFound>> GetAllUsersNotFoundAsync()
         {
@@ -1489,7 +1502,6 @@ namespace SupervisorMobility.API.Services
             await _context.SaveChangesAsync();
         }
         #endregion
-
         #region SOS_Reviews
 
         public async Task<IEnumerable<SOSReviewProgram>> GetAllSOSReviews()
@@ -1544,7 +1556,6 @@ namespace SupervisorMobility.API.Services
             return _context.SaveChanges();
         }
         #endregion
-
         #region CommonOperations
         public async Task<bool> SaveChangesAsync()
         {

@@ -145,6 +145,7 @@ namespace SupervisorMobility.API.Services
         Task<IEnumerable<User>> GetAllSubordinatesAsync(int superiorId);
         Task<IEnumerable<User>> GetAllUserByTypeAsync(int typeUser);
         Task<IEnumerable<User>> GetAllUserByTypeInPlantAreaAsync(int plantId, int areaId, int typeUser);
+        Task<IEnumerable<User>> GetAllUserByTypeInPlantAsync(int plantId, int typeUser);
         Task<IEnumerable<User>> GetAllUsersWhitPlantAreaAndGroupAsync();
         Task<User?> GetUserAsync(int userId, bool collection = false);
         Task<User?> GetUserByObjectIdAsync(string objectId);
