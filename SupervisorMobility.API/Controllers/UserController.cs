@@ -35,36 +35,6 @@ namespace SupervisorMobility.API.Controllers
             _assyChartService = assyChartService;
         }
 
-        [HttpGet]
-        public async Task<ActionResult<IEnumerable<UsersWithNavigationAndPeopleDetails>>> GetUsers(bool collections = false)
-        {
-            var userEntity = await _supervisorMobilityRepository.GetAllUsersAsync();
-            if (collections)
-            {
-
-                return Ok(_mapper.Map<IEnumerable<UsersWithNavigationAndPeopleDetails>>(userEntity));
-            }
-            else
-            {
-
-                return Ok(_mapper.Map<IEnumerable<UsersWithoutNavigationWithoutPeopleDetails>>(userEntity));
-            }
-        }
-
-        [HttpGet("{SupervisorId}/Subordinates")]
-        public async Task<ActionResult<IEnumerable<UsersWithNavigationAndPeopleDetails>>> GetSubordinates(int SupervisorId, bool collections = false)
-        {
-            var userEntity = await _supervisorMobilityRepository.GetAllSubordinatesAsync(SupervisorId);
-            if (collections)
-            {
-                return Ok(_mapper.Map<IEnumerable<UsersWithNavigationAndPeopleDetails>>(userEntity));
-            }
-            else
-            {
-                return Ok(_mapper.Map<IEnumerable<UsersWithoutNavigationWithoutPeopleDetails>>(userEntity));
-            }
-        }
-
         [HttpGet("{userId}")]
         public async Task<ActionResult<UsersWithNavigationAndPeopleDetails>> GetUser(int userId, bool collections = false)
         {
@@ -91,6 +61,41 @@ namespace SupervisorMobility.API.Controllers
                 return NotFound();
             }
         }
+
+        [HttpGet("{SupervisorId}/Subordinates")]
+        public async Task<ActionResult<IEnumerable<UsersWithNavigationAndPeopleDetails>>> GetSubordinates(int SupervisorId, bool collections = false)
+        {
+            var userEntity = await _supervisorMobilityRepository.GetAllSubordinatesAsync(SupervisorId);
+            if (collections)
+            {
+                return Ok(_mapper.Map<IEnumerable<UsersWithNavigationAndPeopleDetails>>(userEntity));
+            }
+            else
+            {
+                return Ok(_mapper.Map<IEnumerable<UsersWithoutNavigationWithoutPeopleDetails>>(userEntity));
+            }
+        }
+
+        [HttpGet]
+        public async Task<ActionResult<IEnumerable<UsersWithNavigationAndPeopleDetails>>> GetUsers(bool includeCollections = false, bool includeSubordinates = false)
+        {
+            var userEntity = await _supervisorMobilityRepository.GetAllUsersAsync();
+            if (includeCollections)
+            {
+                if (includeSubordinates)
+                    return Ok(_mapper.Map<IEnumerable<UsersWithNavigationAndPeopleDetails>>(userEntity));
+                else
+                    return Ok(_mapper.Map<IEnumerable<UsersWithoutPeopleWithNavigation>>(userEntity));
+            }
+            else
+            {
+                if (includeSubordinates)
+                    return Ok(_mapper.Map<IEnumerable<UsersWithPeopleWithoutNavigationDetails>>(userEntity));
+                else
+                    return Ok(_mapper.Map<IEnumerable<UsersWithoutNavigationWithoutPeopleDetails>>(userEntity));
+            }
+        }
+
 
         [HttpGet("ByUserType")]
         public async Task<ActionResult<IEnumerable<UsersWithNavigationAndPeopleDetails>>> GetUserByType(int typeUser, bool includeCollections = false, bool includeSubordinates = false)
