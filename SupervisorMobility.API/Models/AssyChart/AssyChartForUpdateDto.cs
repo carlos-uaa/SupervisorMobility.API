@@ -19,7 +19,6 @@ namespace SupervisorMobility.API.Models.AssyChart
         public int AreaId { get; set; }
         public int DistributionId { get; set; }
         public int OperationId { get; set; }
-        public OperationWithoutNavigationPropertiesDto Operation { get; set; } = new OperationWithoutNavigationPropertiesDto();
 
     }
 }

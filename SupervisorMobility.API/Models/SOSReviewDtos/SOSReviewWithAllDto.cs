@@ -14,7 +14,7 @@ namespace SupervisorMobility.API.Models.SOSReviewDtos
 
         public int?  Supervisorid { get; set; }
 
-        public UsersWithoutNavigationDetails? Supervisor { get; set; }  
+        public UsersWithoutNavigationWithoutPeopleDetails? Supervisor { get; set; }  
 
         public int? PlantId { get; set; }
     

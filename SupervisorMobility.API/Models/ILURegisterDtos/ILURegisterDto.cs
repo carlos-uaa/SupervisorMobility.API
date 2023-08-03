@@ -15,7 +15,7 @@ namespace SupervisorMobility.API.Models.ILURegisterDtos
 
 
         public int? OperatorId { get; set; }
-        public UsersWithoutNavigationDetails? Operator { get; set; }
+        public UsersWithoutNavigationWithoutPeopleDetails? Operator { get; set; }
 
 
         public int? ILULevelId { get; set; }

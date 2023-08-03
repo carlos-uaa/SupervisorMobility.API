@@ -9,7 +9,7 @@ namespace SupervisorMobility.API.Models.LOG
         public int LogId { get; set; }
 
         public int UserId { get; set; }
-        public UsersWithoutNavigationDetails? User { get; set; }
+        public UsersWithoutNavigationWithoutPeopleDetails? User { get; set; }
 
         public string? EventPhase { get; set; }
 

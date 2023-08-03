@@ -1,6 +1,7 @@
 ﻿using AutoMapper;
 using ClosedXML.Excel;
 using Microsoft.AspNetCore.Cors;
+using Microsoft.AspNetCore.Identity;
 using Microsoft.AspNetCore.Mvc;
 using SpreadsheetLight;
 using SupervisorMobility.API.Business;
@@ -10,6 +11,7 @@ using SupervisorMobility.API.Models.FileUploadDto;
 using SupervisorMobility.API.Models.ReturnResults;
 using SupervisorMobility.API.Models.Users;
 using SupervisorMobility.API.Services;
+using System.Drawing;
 
 namespace SupervisorMobility.API.Controllers
 {
@@ -34,44 +36,44 @@ namespace SupervisorMobility.API.Controllers
         }
 
         [HttpGet]
-        public async Task<ActionResult<IEnumerable<UsersWithNavigationDetails>>> GetUsers(bool collections = false)
+        public async Task<ActionResult<IEnumerable<UsersWithNavigationAndPeopleDetails>>> GetUsers(bool collections = false)
         {
             var userEntity = await _supervisorMobilityRepository.GetAllUsersAsync();
             if (collections)
             {
 
-                return Ok(_mapper.Map<IEnumerable<UsersWithNavigationDetails>>(userEntity));
+                return Ok(_mapper.Map<IEnumerable<UsersWithNavigationAndPeopleDetails>>(userEntity));
             }
             else
             {
 
-                return Ok(_mapper.Map<IEnumerable<UsersWithoutNavigationDetails>>(userEntity));
+                return Ok(_mapper.Map<IEnumerable<UsersWithoutNavigationWithoutPeopleDetails>>(userEntity));
             }
         }
 
         [HttpGet("{SupervisorId}/Subordinates")]
-        public async Task<ActionResult<IEnumerable<UsersWithNavigationDetails>>> GetSubordinates(int SupervisorId, bool collections = false)
+        public async Task<ActionResult<IEnumerable<UsersWithNavigationAndPeopleDetails>>> GetSubordinates(int SupervisorId, bool collections = false)
         {
             var userEntity = await _supervisorMobilityRepository.GetAllSubordinatesAsync(SupervisorId);
             if (collections)
             {
-                return Ok(_mapper.Map<IEnumerable<UsersWithNavigationDetails>>(userEntity));
+                return Ok(_mapper.Map<IEnumerable<UsersWithNavigationAndPeopleDetails>>(userEntity));
             }
             else
             {
-                return Ok(_mapper.Map<IEnumerable<UsersWithoutNavigationDetails>>(userEntity));
+                return Ok(_mapper.Map<IEnumerable<UsersWithoutNavigationWithoutPeopleDetails>>(userEntity));
             }
         }
 
         [HttpGet("{userId}")]
-        public async Task<ActionResult<UsersWithNavigationDetails>> GetUser(int userId, bool collections = false)
+        public async Task<ActionResult<UsersWithNavigationAndPeopleDetails>> GetUser(int userId, bool collections = false)
         {
             if (collections)
             {
                 var userEntity = await _supervisorMobilityRepository.GetUserAsync(userId, collections);
                 if (userEntity != null)
                 {
-                    return Ok(_mapper.Map<UsersWithNavigationDetails>(userEntity));
+                    return Ok(_mapper.Map<UsersWithNavigationAndPeopleDetails>(userEntity));
 
                 }
 
@@ -82,7 +84,7 @@ namespace SupervisorMobility.API.Controllers
                 var userEntity = await _supervisorMobilityRepository.GetUserAsync(userId);
                 if (userEntity != null)
                 {
-                    return Ok(_mapper.Map<UsersWithoutNavigationDetails>(userEntity));
+                    return Ok(_mapper.Map<UsersWithoutNavigationWithoutPeopleDetails>(userEntity));
 
                 }
 
@@ -91,52 +93,70 @@ namespace SupervisorMobility.API.Controllers
         }
 
         [HttpGet("ByUserType")]
-        public async Task<ActionResult<IEnumerable<UsersWithNavigationDetails>>> GetUserByType(int typeUser, bool collections = false)
+        public async Task<ActionResult<IEnumerable<UsersWithNavigationAndPeopleDetails>>> GetUserByType(int typeUser, bool includeCollections = false, bool includeSubordinates = false)
         {
             var userEntity = await _supervisorMobilityRepository.GetAllUserByTypeAsync(typeUser);
-            if (collections)
+            if (includeCollections)
             {
-                return Ok(_mapper.Map<IEnumerable<UsersWithNavigationDetails>>(userEntity));
+                if(includeSubordinates)
+                    return Ok(_mapper.Map<IEnumerable<UsersWithNavigationAndPeopleDetails>>(userEntity));
+                else
+                     return Ok(_mapper.Map<IEnumerable<UsersWithoutPeopleWithNavigation>>(userEntity));
             }
             else
             {
-                return Ok(_mapper.Map<IEnumerable<UsersWithoutNavigationDetails>>(userEntity));
+                if(includeSubordinates)
+                return Ok(_mapper.Map<IEnumerable<UsersWithPeopleWithoutNavigationDetails>>(userEntity));
+                else
+                return Ok(_mapper.Map<IEnumerable<UsersWithoutNavigationWithoutPeopleDetails>>(userEntity));
             }
         }
 
 
         [HttpGet("ByUserTypeInPlantAndArea")]
-        public async Task<ActionResult<IEnumerable<UsersWithNavigationDetails>>> ByUserTypeInPlantAndArea(int plantid, int areaid, int typeUser, bool collections = false)
+        public async Task<ActionResult<IEnumerable<UsersWithNavigationAndPeopleDetails>>> ByUserTypeInPlantAndArea(int plantid, int areaid, int typeUser, bool includeCollections = false, bool includeSubordinates = false)
         {
-         
+
             var userEntity = await _supervisorMobilityRepository.GetAllUserByTypeInPlantAreaAsync(plantid, areaid, typeUser);
-            if (collections)
+            if (includeCollections)
             {
-                return Ok(_mapper.Map<IEnumerable<UsersWithNavigationDetails>>(userEntity));
+                if (includeSubordinates)
+                    return Ok(_mapper.Map<IEnumerable<UsersWithNavigationAndPeopleDetails>>(userEntity));
+                else
+                    return Ok(_mapper.Map<IEnumerable<UsersWithoutPeopleWithNavigation>>(userEntity));
             }
             else
             {
-                return Ok(_mapper.Map<IEnumerable<UsersWithoutNavigationDetails>>(userEntity));
+                if (includeSubordinates)
+                    return Ok(_mapper.Map<IEnumerable<UsersWithPeopleWithoutNavigationDetails>>(userEntity));
+                else
+                    return Ok(_mapper.Map<IEnumerable<UsersWithoutNavigationWithoutPeopleDetails>>(userEntity));
             }
         }
 
         [HttpGet("ByUserTypeInPlant")]
-        public async Task<ActionResult<IEnumerable<UsersWithNavigationDetails>>> ByUserTypeInPlantAndArea(int plantid, int typeUser, bool collections = false)
+        public async Task<ActionResult<IEnumerable<UsersWithNavigationAndPeopleDetails>>> ByUserTypeInPlantAndArea(int plantid, int typeUser, bool includeCollections = false, bool includeSubordinates = false)
         {
 
             var userEntity = await _supervisorMobilityRepository.GetAllUserByTypeInPlantAsync(plantid, typeUser);
-            if (collections)
+            if (includeCollections)
             {
-                return Ok(_mapper.Map<IEnumerable<UsersWithNavigationDetails>>(userEntity));
+                if (includeSubordinates)
+                    return Ok(_mapper.Map<IEnumerable<UsersWithNavigationAndPeopleDetails>>(userEntity));
+                else
+                    return Ok(_mapper.Map<IEnumerable<UsersWithoutPeopleWithNavigation>>(userEntity));
             }
             else
             {
-                return Ok(_mapper.Map<IEnumerable<UsersWithoutNavigationDetails>>(userEntity));
+                if (includeSubordinates)
+                    return Ok(_mapper.Map<IEnumerable<UsersWithPeopleWithoutNavigationDetails>>(userEntity));
+                else
+                    return Ok(_mapper.Map<IEnumerable<UsersWithoutNavigationWithoutPeopleDetails>>(userEntity));
             }
         }
 
         [HttpGet("ByObjectId")]
-        public async Task<ActionResult<UsersWithNavigationDetails>> GetUserByObject(string ObjectId, bool collections = false)
+        public async Task<ActionResult<UsersWithNavigationAndPeopleDetails>> GetUserByObject(string ObjectId, bool collections = false)
         {
 
             var userEntity = await _assyChartService.FetchUserWhitObjectIdAsync(ObjectId);
@@ -145,7 +165,7 @@ namespace SupervisorMobility.API.Controllers
             {
                 if (userEntity != null)
                 {
-                    return Ok(_mapper.Map<UsersWithNavigationDetails>(userEntity));
+                    return Ok(_mapper.Map<UsersWithNavigationAndPeopleDetails>(userEntity));
 
                 }
 
@@ -155,7 +175,7 @@ namespace SupervisorMobility.API.Controllers
             {
                 if (userEntity != null)
                 {
-                    return Ok(_mapper.Map<UsersWithoutNavigationDetails>(userEntity));
+                    return Ok(_mapper.Map<UsersWithoutNavigationWithoutPeopleDetails>(userEntity));
                 }
                 return NotFound();
             }
@@ -163,7 +183,7 @@ namespace SupervisorMobility.API.Controllers
 
 
         [HttpGet("ByEmail")]
-        public async Task<ActionResult<UsersWithNavigationDetails>> GetUserByEmail(string email, bool collections = false)
+        public async Task<ActionResult<UsersWithNavigationAndPeopleDetails>> GetUserByEmail(string email, bool collections = false)
         {
 
             var userEntity = await _assyChartService.FetchUserByEmailAsync(email);
@@ -172,7 +192,7 @@ namespace SupervisorMobility.API.Controllers
             {
                 if (userEntity != null)
                 {
-                    return Ok(_mapper.Map<UsersWithNavigationDetails>(userEntity));
+                    return Ok(_mapper.Map<UsersWithNavigationAndPeopleDetails>(userEntity));
 
                 }
 
@@ -182,7 +202,7 @@ namespace SupervisorMobility.API.Controllers
             {
                 if (userEntity != null)
                 {
-                    return Ok(_mapper.Map<UsersWithoutNavigationDetails>(userEntity));
+                    return Ok(_mapper.Map<UsersWithoutNavigationWithoutPeopleDetails>(userEntity));
                 }
                 return NotFound();
             }
@@ -190,7 +210,7 @@ namespace SupervisorMobility.API.Controllers
 
 
         [HttpPost]
-        public async Task<ActionResult<UsersWithNavigationDetails>> CreateUser(UsersForCreation newUser)
+        public async Task<ActionResult<UsersWithNavigationAndPeopleDetails>> CreateUser(UsersForCreation newUser)
         {
             List<Area> Areas = new List<Area>();
             List<User> Users = new List<User>();
@@ -276,6 +296,7 @@ namespace SupervisorMobility.API.Controllers
                 }
                 newUser.Areas = null;
             }
+
             newUser.LastUpdated = newUser.CreatedDate;
             var finalUser = await _assyChartService.CreateUserAsync(newUser);
 
@@ -310,6 +331,206 @@ namespace SupervisorMobility.API.Controllers
         {
             List<Area> AreasInUser = new List<Area>();
             List<User> UsersInUser = new List<User>();
+            bool haveAreas = false;
+            bool haveUsers = false;
+            bool haveUsersDB = false;
+
+            var UserToReturn = new User();
+
+            if (user.PlantId == 0)
+            {
+                user.PlantId = null;
+            }
+            else if (user.PlantId != null)
+            {
+                if (!await _supervisorMobilityRepository.PlantExistAsync((int)user.PlantId))
+                {
+                    return NotFound("No Planta");
+                }
+            }
+
+            if (user.AreaId == 0)
+            {
+                user.AreaId = null;
+            }
+            else if (user.AreaId != null)
+            {
+                if (!await _supervisorMobilityRepository.AreaExistAsync((int)user.AreaId))
+                {
+                    return NotFound("No Area");
+                }
+            }
+
+            if (user.GroupId == 0)
+            {
+                user.GroupId = null;
+            }
+            else if (user.GroupId != null)
+            {
+                if (!await _supervisorMobilityRepository.GroupExistAsync((int)user.GroupId))
+                {
+                    return NotFound("No Group");
+                }
+            }
+
+            if (user.DistributionId == 0)
+            {
+                user.DistributionId = null;
+            }
+            else if (user.DistributionId != null)
+            {
+                if (!await _supervisorMobilityRepository.DistributionExistsAsync((int)user.DistributionId))
+                {
+                    return NotFound("No Distribution");
+                }
+            }
+
+            if (user.Payroll == 0)
+            {
+                user.Payroll = null;
+            }
+
+            if (user.SuperiorId == 0)
+            {
+                user.SuperiorId = null;
+            }
+
+            if (user.Subordinates != null && user.Subordinates?.Count > 0)
+            {
+                haveUsers = true;
+                foreach (var Sub in user.Subordinates)
+                {
+                    var userInDB = await _assyChartService.FetchUserAsync(Sub.UserId);
+                    _mapper.Map(Sub, userInDB);
+
+                    UsersInUser.Add(userInDB);
+                }
+
+                user.Subordinates = null;
+            }
+
+            if (user.Areas != null && user.Areas?.Count > 0)
+            {
+                haveAreas = true;
+                foreach (var AreainList in user.Areas)
+                {
+                    AreasInUser.Add(await _supervisorMobilityRepository.GetAreaForPlantAsync((int)user.PlantId, AreainList.AreaId));
+                }
+                user.Areas = null;
+            }
+
+            var userToCompare = _mapper.Map<User>(user);
+            var entityentity = await _supervisorMobilityRepository.GetUserAsync(userId, true);
+
+            if (entityentity.Subordinates?.Count() > 0)
+            {
+                haveUsersDB = true;
+            }
+
+            if (!entityentity.Equals(userToCompare))
+            {
+
+                if (userToCompare.SuperiorId != entityentity.SuperiorId)
+                {
+                    if (userToCompare.SuperiorId != null && entityentity.SuperiorId != null)
+                    {
+                        User exsuperior = await _supervisorMobilityRepository.GetUserAsync((int)entityentity.SuperiorId, true);
+                        var usertoRemove = _mapper.Map<User>(entityentity);
+
+                        _supervisorMobilityRepository.UserRemoveSubordinated(exsuperior, usertoRemove);
+
+                        User actualSuperior = await _supervisorMobilityRepository.GetUserAsync((int)user.SuperiorId, true);
+                        _supervisorMobilityRepository.UserAddSubordinated(actualSuperior, usertoRemove);
+
+                        user.SuperiorId = actualSuperior.UserId;
+                        user.PlantId = actualSuperior.PlantId;
+                        user.GroupId = actualSuperior.GroupId;
+
+                        if (user.UserType == 4)
+                            user.AreaId = actualSuperior.AreaId;
+                    }
+                }
+            }
+
+            user.CreatedDate = (DateTime)entityentity.CreatedDate;
+            user.LastUpdated = DateTime.Now;
+            await _assyChartService.UpdateUserAsync(user, userId);
+
+            UserToReturn = await _assyChartService.FetchUserAsync(userId);
+
+
+
+            if (haveUsers)
+            {
+                await _supervisorMobilityRepository.UserRemoveAllSubordinated(UserToReturn);
+                UserToReturn.Subordinates = null;
+
+                foreach (var elementUserInList in UsersInUser)
+                {
+                    var elementAux = _mapper.Map<UsersForUpdateDto>(elementUserInList);
+                    switch (UserToReturn.UserType)
+                    {
+                        case 2:
+                            //itero sobre SV
+                            elementAux.SuperiorId = UserToReturn.UserId;
+                            elementAux.GroupId = UserToReturn.GroupId;
+                            elementAux.PlantId = UserToReturn.PlantId;
+                            //await _supervisorMobilityRepository.UserUpdateAllSubordinated(elemntUser);
+                            
+                                var Operators = await _supervisorMobilityRepository.GetAllSubordinatesAsync(elementUserInList.UserId);
+                                foreach (User Op in Operators)
+                                {
+                                Op.SuperiorId = elementUserInList.UserId;
+                                    Op.PlantId = elementAux.PlantId;
+                                    Op.AreaId = elementAux.AreaId;
+                                    Op.GroupId = elementAux.GroupId;                                 
+                                }
+                            
+                            break;
+                        case 3:
+                            //itero sobre OP
+                            elementAux.SuperiorId = UserToReturn.UserId;
+                            elementAux.GroupId = UserToReturn.GroupId;
+                            elementAux.PlantId = UserToReturn.PlantId;
+                            elementAux.AreaId = UserToReturn.AreaId;
+                            //await _supervisorMobilityRepository.UserUpdateAllSubordinated(elementUserInList);
+                            break;
+                        case 5:
+                            //itero sobre SV
+                            elementAux.SuperiorId = UserToReturn.UserId;
+                            elementAux.PlantId = UserToReturn?.PlantId;
+                            //await _supervisorMobilityRepository.UserUpdateAllSubordinated(elementUserInList);
+                            break;
+                    }
+
+                    await _assyChartService.UpdateUserAsync(elementAux, elementUserInList.UserId);
+
+                    _supervisorMobilityRepository.UserAddSubordinated(UserToReturn, elementUserInList);
+                }
+            }
+
+            if (haveAreas)
+            {
+                await _supervisorMobilityRepository.UserRemoveAllAreas(UserToReturn);
+                UserToReturn.Areas = null;
+                foreach (var elemntArea in AreasInUser)
+                {
+                    _supervisorMobilityRepository.UserAddArea(UserToReturn, elemntArea);
+                }
+            }
+
+            await _supervisorMobilityRepository.SaveChangesAsync();
+
+
+            return Ok();
+        }
+
+        [HttpPut("ReassingToNewSuperior/{userId}")]
+        public async Task<ActionResult> UpdateUserAndAssignNewSuperior(int userId, int NewSuperiorId, UsersForUpdateDto user)
+        {
+            List<Area> AreasInUser = new List<Area>();
+            List<User> UsersInUser = new List<User>();
+            List<User> UsersToReassing = new List<User>();
             bool haveAreas = false;
             bool haveUsers = false;
 
@@ -373,12 +594,18 @@ namespace SupervisorMobility.API.Controllers
                 user.SuperiorId = null;
             }
 
-            if (user.Subordinates != null)
+            if (user.Subordinates != null && user.Subordinates?.Count > 0)
             {
                 haveUsers = true;
+
                 foreach (var Sub in user.Subordinates)
                 {
-                    UsersInUser.Add(await _assyChartService.FetchUserAsync(Sub.UserId));
+                    if ((Sub.SuperiorId == 0 || Sub.SuperiorId == null) && (Sub.AreaId == 0 || Sub.AreaId == null) && (Sub.GroupId == 0 || Sub.GroupId == null))
+                        UsersInUser.Add(await _assyChartService.FetchUserAsync(Sub.UserId));
+                    else
+                        UsersToReassing.Add(await _assyChartService.FetchUserAsync(Sub.UserId));
+
+
                 }
 
                 user.Subordinates = null;
@@ -433,10 +660,61 @@ namespace SupervisorMobility.API.Controllers
             {
                 await _supervisorMobilityRepository.UserRemoveAllSubordinated(UserToReturn);
                 UserToReturn.Subordinates = null;
+
+                var SuperiorNewData = await _assyChartService.FetchUserAsync(NewSuperiorId);
+
+                foreach (var elemntUser in UsersToReassing)
+                {
+                    var elementAux = _mapper.Map<UsersForUpdateDto>(elemntUser);
+                    switch (SuperiorNewData.UserType)
+                    {
+                        case 2:
+                            elementAux.SuperiorId = NewSuperiorId;
+                            elementAux.GroupId = SuperiorNewData.GroupId;
+                            elementAux.PlantId = SuperiorNewData.PlantId;
+                            break;
+                        case 3:
+                            elementAux.SuperiorId = NewSuperiorId;
+                            elementAux.GroupId = SuperiorNewData.GroupId;
+                            elementAux.PlantId = SuperiorNewData.PlantId;
+                            elementAux.AreaId = SuperiorNewData.AreaId;
+                            break;
+                    }
+
+
+                    await _assyChartService.UpdateUserAsync(elementAux, elemntUser.UserId);
+
+                    _supervisorMobilityRepository.UserAddSubordinated(SuperiorNewData, elemntUser);
+                }
+
                 foreach (var elemntUser in UsersInUser)
                 {
+                    var elementAux = _mapper.Map<UsersForUpdateDto>(elemntUser);
+                    switch (UserToReturn.UserType)
+                    {
+                        case 2:
+                            elementAux.SuperiorId = UserToReturn.UserId;
+                            elementAux.GroupId = UserToReturn.GroupId;
+                            elementAux.PlantId = UserToReturn.PlantId;
+                            break;
+                        case 3:
+                            elementAux.SuperiorId = UserToReturn.UserId;
+                            elementAux.GroupId = UserToReturn.GroupId;
+                            elementAux.PlantId = UserToReturn.PlantId;
+                            elementAux.AreaId = UserToReturn.AreaId;
+                            break;
+                        case 5:
+                            elementAux.SuperiorId = UserToReturn.UserId;
+                            break;
+                    }
+
+                    await _assyChartService.UpdateUserAsync(elementAux, elemntUser.UserId);
+
+                    //var updatedSub = _mapper.Map<User>(elementAux);
                     _supervisorMobilityRepository.UserAddSubordinated(UserToReturn, elemntUser);
                 }
+
+
             }
 
             if (haveAreas)
@@ -472,18 +750,10 @@ namespace SupervisorMobility.API.Controllers
         }
 
 
-        [HttpPost("/massderegistration")]
-        public async Task<ActionResult> Masderegistration()
-        {
-            //
-
-            return Ok();
-        }
-
         //******* Upload users    **********//
 
         [HttpPost("MasiveUpload")]
-        public async Task<ActionResult<UploadUsersResult>> MassiveUpload(List<UsersWithPeopleAndWithoutNavigationDetails> UsersToCreate)
+        public async Task<ActionResult<UploadUsersResult>> MassiveUpload(List<UsersWithPeopleWithoutNavigationDetails> UsersToCreate)
         {
 
             UploadUsersResult ResultToReturn = new UploadUsersResult();
@@ -825,7 +1095,7 @@ namespace SupervisorMobility.API.Controllers
         }
 
         [HttpPost("MasiveUpload/Superior/{superiorId}")]
-        public async Task<ActionResult<UploadUsersResult>> MassiveUsersToSuperior(List<UsersWithPeopleAndWithoutNavigationDetails> UsesToCreateInSuperior, int superiorId)
+        public async Task<ActionResult<UploadUsersResult>> MassiveUsersToSuperior(List<UsersWithPeopleWithoutNavigationDetails> UsesToCreateInSuperior, int superiorId)
         {
             User MasterUser = await _supervisorMobilityRepository.GetUserAsync(superiorId, true);
             UploadUsersResult ResultToReturn = new UploadUsersResult();

@@ -6,7 +6,7 @@ using SupervisorMobility.API.Models.PlantDtos;
 
 namespace SupervisorMobility.API.Models.Users
 {
-    public class UsersWithNavigationDetails
+    public class UsersWithoutPeopleWithNavigation
     {
         public int UserId { get; set; }
         public string? ObjectId { get; set; }
@@ -28,17 +28,13 @@ namespace SupervisorMobility.API.Models.Users
         public int? GroupId { get; set; }
         public int? DistributionId { get; set; }
 
-
         public DistributionWithoutNavigationPropertiesDto? Distribution { get; set; }
         public PlantDto? Plant { get; set; } = new PlantDto();
         public AreaWithoutNavigationPropertiesDto? Area { get; set; } = new AreaWithoutNavigationPropertiesDto();
         public GroupDto? Group { get; set; } = new GroupDto();
-
-
-        public UsersWithNavigationDetails? Superior { get; set; }
-        public ICollection<UsersWithNavigationDetails>? Subordinates { get; set; }
-        public ICollection<AreaDtos.AreaWithoutNavigationPropertiesDto>? Areas { get; set; }
         public ICollection<ILURegisterWithoutNavigationDto>? ILURegisers { get; set; }
+
+
 
     }
 }

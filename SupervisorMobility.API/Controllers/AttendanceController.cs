@@ -74,7 +74,7 @@ namespace SupervisorMobility.API.Controllers
             var records = csv.GetRecords<dynamic>();
 
             List<Attendance> allattendance = _mapper.Map<List<Attendance>>(await _assyChartService.GetAllAttendanceAsync());
-            List<UsersWithoutNavigationDetails> alluser = _mapper.Map<List<UsersWithoutNavigationDetails>>(await _assyChartService.GetAllUsers());
+            List<UsersWithoutNavigationWithoutPeopleDetails> alluser = _mapper.Map<List<UsersWithoutNavigationWithoutPeopleDetails>>(await _assyChartService.GetAllUsers());
             var fecha2 = DateTime.Now;
 
             List<Attendance> allattendanceadded = new List<Attendance>();

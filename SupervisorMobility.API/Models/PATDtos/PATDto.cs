@@ -9,9 +9,9 @@ namespace SupervisorMobility.API.Models.PATDtos
         public int PATid { get; set; }
         public int Status { get; set; }
         public int SupervisorId { get; set; }
-        public UsersWithoutNavigationDetails? Supervisor { get; set; }
+        public UsersWithoutNavigationWithoutPeopleDetails? Supervisor { get; set; }
         public int? SSVresponsibleID { get; set; }
-        public UsersWithoutNavigationDetails? SSVresponsible { get; set; }
+        public UsersWithoutNavigationWithoutPeopleDetails? SSVresponsible { get; set; }
 
         public int PlantId { get; set; }
         public PlantDto? Plant { get; set; }

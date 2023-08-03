@@ -1,9 +1,8 @@
-﻿using SupervisorMobility.API.Models.ILURegisterDtos;
-using System.ComponentModel.DataAnnotations.Schema;
+﻿using System.ComponentModel.DataAnnotations.Schema;
 
 namespace SupervisorMobility.API.Models.Users
 {
-    public class UsersWithPeopleAndWithoutNavigationDetails
+    public class UsersWithoutNavigationWithoutPeopleDetails
     {
         public int UserId { get; set; }
         public string? ObjectId { get; set; }
@@ -27,10 +26,7 @@ namespace SupervisorMobility.API.Models.Users
         public int? AreaId { get; set; }
         public int? GroupId { get; set; }
         public int? DistributionId { get; set; }
-
-        public ICollection<UsersWithoutNavigationDetails>? Subordinates { get; set; }
-        public ICollection<AreaDtos.AreaWithoutNavigationPropertiesDto>? Areas { get; set; }
-        public ICollection<ILURegisterWithoutNavigationDto>? ILURegisers { get; set; }
-
     }
 }
+
+

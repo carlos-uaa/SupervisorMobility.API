@@ -18,8 +18,8 @@ namespace SupervisorMobility.API.Models.JobObservationDtos
         public DistributionWithoutNavigationPropertiesDto Distribution { get; set; } = new DistributionWithoutNavigationPropertiesDto();
         public OperationWithoutNavigationPropertiesDto Operation { get; set; } = new OperationWithoutNavigationPropertiesDto();
 
-        public UsersWithoutNavigationDetails Supervisor { get; set; } = new UsersWithoutNavigationDetails();
-        public UsersWithoutNavigationDetails Operator { get; set; } = new UsersWithoutNavigationDetails();
+        public UsersWithoutNavigationWithoutPeopleDetails Supervisor { get; set; } = new UsersWithoutNavigationWithoutPeopleDetails();
+        public UsersWithoutNavigationWithoutPeopleDetails Operator { get; set; } = new UsersWithoutNavigationWithoutPeopleDetails();
 
 
         public int JobObservationId { get; set; }

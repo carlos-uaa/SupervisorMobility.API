@@ -8,14 +8,14 @@ namespace SupervisorMobility.API.MapperProfiles
     {
         public UserProfile()
         {
-            CreateMap<User, UsersWithNavigationDetails>().ReverseMap();
-            CreateMap<User, UsersWithoutNavigationDetails>().ReverseMap();
-            CreateMap<User, UsersWithPeopleAndWithoutNavigationDetails>().ReverseMap();
-            CreateMap<User, UsersWhitoutPeopleNavigation>().ReverseMap();
+            CreateMap<User, UsersWithNavigationAndPeopleDetails>().ReverseMap();
+            CreateMap<User, UsersWithoutNavigationWithoutPeopleDetails>().ReverseMap();
+            CreateMap<User, UsersWithPeopleWithoutNavigationDetails>().ReverseMap();
+            CreateMap<User, UsersWithoutPeopleWithNavigation>().ReverseMap();
             CreateMap<User, UsersForCreation>().ReverseMap();
             CreateMap<User, UsersForUpdateDto>().ReverseMap();
-            CreateMap<UsersForCreation, UsersWithPeopleAndWithoutNavigationDetails>().ReverseMap();
-            CreateMap<UsersForUpdateDto, UsersWithPeopleAndWithoutNavigationDetails>().ReverseMap();
+            CreateMap<UsersForCreation, UsersWithPeopleWithoutNavigationDetails>().ReverseMap();
+            CreateMap<UsersForUpdateDto, UsersWithPeopleWithoutNavigationDetails>().ReverseMap();
         }
     }
 }

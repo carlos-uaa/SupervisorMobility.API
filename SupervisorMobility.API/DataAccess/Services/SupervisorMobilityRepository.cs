@@ -878,6 +878,7 @@ namespace SupervisorMobility.API.Services
                 .Include(d => d.Distribution)
                 .Include(g => g.Group)
                 .Include(s => s.Superior)
+                .Include(s => s.Superior.Areas)
                 .Include(ss => ss.Subordinates)
                 .Include(ILU => ILU.ILURegisers)
                 .Include(aa => aa.Areas)
@@ -996,6 +997,40 @@ namespace SupervisorMobility.API.Services
                 }
 
                 Master.Subordinates?.Clear();
+                _context.SaveChanges();
+            }
+
+            return new AsyncVoidMethodBuilder();
+        } 
+        public async Task<AsyncVoidMethodBuilder> UserUpdateAllSubordinated(User Master)
+        {
+
+            var UsersList = await _context.Users.Where(u => u.SuperiorId == Master.UserId)
+                 .OrderBy(c => c.UserId).ToListAsync();
+
+            if (UsersList?.Count > 0)
+            {
+                foreach (User sub in UsersList)
+                {
+                    switch (sub.UserType)
+                    {
+                        case 2:
+                            sub.PlantId = Master.PlantId;
+                            await UserUpdateAllSubordinated(sub);
+                            break;
+                        case 3:
+                            sub.PlantId = Master.PlantId;
+                            sub.GroupId = Master.GroupId;
+                            await UserUpdateAllSubordinated(sub);
+                            break;
+                        case 4:
+                            sub.PlantId = Master.PlantId;
+                            sub.AreaId = Master.AreaId;
+                            sub.GroupId = Master.GroupId;
+                            break;
+                    }
+                }
+
                 _context.SaveChanges();
             }
 

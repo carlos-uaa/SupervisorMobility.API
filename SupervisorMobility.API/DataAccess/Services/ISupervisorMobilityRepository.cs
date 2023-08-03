@@ -158,6 +158,7 @@ namespace SupervisorMobility.API.Services
         Task<bool> UserExistAdvanceAsync(string nombre, int nomina, int plantid, int areaid, int grupoid);
         void UserAddSubordinated(User Master, User Slave);
         void UserRemoveSubordinated(User Master, User Slave);
+        Task<AsyncVoidMethodBuilder> UserUpdateAllSubordinated(User Master);
         Task<AsyncVoidMethodBuilder> UserRemoveAllSubordinated(User Master);
         Task<AsyncVoidMethodBuilder> UserRemoveAllAreas(User Master);
         void UserAddArea(User Master, Area Slave);

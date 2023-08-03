@@ -6,7 +6,7 @@ namespace SupervisorMobility.API.Models.LogDtos
 {
     public class LoggerForUpdateDto
     {
-        public UsersWithoutNavigationDetails? User { get; set; }
+        public UsersWithoutNavigationWithoutPeopleDetails? User { get; set; }
 
         public string? EventPhase { get; set; }
 
