@@ -141,11 +141,11 @@ namespace SupervisorMobility.API.Services
 
         #endregion
         #region Users
-        Task<IEnumerable<User>> GetAllUsersAsync();
+        Task<IEnumerable<User>> GetAllUsersAsync(bool includeCollections = false, bool includeSubordinates = false);
         Task<IEnumerable<User>> GetAllSubordinatesAsync(int superiorId);
-        Task<IEnumerable<User>> GetAllUserByTypeAsync(int typeUser);
-        Task<IEnumerable<User>> GetAllUserByTypeInPlantAreaAsync(int plantId, int areaId, int typeUser);
-        Task<IEnumerable<User>> GetAllUserByTypeInPlantAsync(int plantId, int typeUser);
+        Task<IEnumerable<User>> GetAllUserByTypeAsync(int typeUser, bool includeCollections = false, bool includeSubordinates = false);
+        Task<IEnumerable<User>> GetAllUserByTypeInPlantAreaAsync(int plantId, int areaId, int typeUser, bool includeCollections = false, bool includeSubordinates = false);
+        Task<IEnumerable<User>> GetAllUserByTypeInPlantAsync(int plantId, int typeUser, bool includeCollections = false, bool includeSubordinates = false);
         Task<IEnumerable<User>> GetAllUsersWhitPlantAreaAndGroupAsync();
         Task<User?> GetUserAsync(int userId, bool collection = false);
         Task<User?> GetUserByObjectIdAsync(string objectId);

@@ -59,7 +59,7 @@ namespace SupervisorMobility.API.Services
             if (includeChecklistQuestion)
             {
                 return await _context.ChecklistCategories.Include(cq => cq.ChecklistQuestions)
-                    .Where(c => c.ChecklistCategoryId == categoryId ).FirstOrDefaultAsync();
+                    .Where(c => c.ChecklistCategoryId == categoryId).FirstOrDefaultAsync();
             }
 
             return await _context.ChecklistCategories
@@ -80,7 +80,7 @@ namespace SupervisorMobility.API.Services
             return await _context.ChecklistCategories
                         .Where(c => c.Sequence >= lowerValue
                             && c.Sequence <= upperValue
-                            && c.ChecklistCategoryId != categoryId 
+                            && c.ChecklistCategoryId != categoryId
                             && c.IsActive == true)
                         .OrderBy(c => c.Sequence).ToListAsync();
         }
@@ -101,7 +101,7 @@ namespace SupervisorMobility.API.Services
             }
 
             return await _context.JobObservationTypes
-                .Where(c => c.JobObservationTypeId == id ).FirstOrDefaultAsync();
+                .Where(c => c.JobObservationTypeId == id).FirstOrDefaultAsync();
         }
 
         public void AddJobObservationType(JobObservationType jobObservationType)
@@ -164,11 +164,11 @@ namespace SupervisorMobility.API.Services
             if (includeAreas)
             {
                 return await _context.Plants.Include(p => p.Areas)
-                    .Where(p => p.PlantId == plantId ).FirstOrDefaultAsync();
+                    .Where(p => p.PlantId == plantId).FirstOrDefaultAsync();
             }
 
             return await _context.Plants
-                .Where(p => p.PlantId == plantId ).FirstOrDefaultAsync();
+                .Where(p => p.PlantId == plantId).FirstOrDefaultAsync();
         }
         public async Task<Plant?> GetPlantByCodeAndDescriptionAsync(string code, string description)
         {
@@ -215,11 +215,11 @@ namespace SupervisorMobility.API.Services
             if (includeOperations)
             {
                 return await _context.Areas.Include(a => a.Distributions)
-                .Where(a => a.PlantId == plantId && a.AreaId == areaId )
+                .Where(a => a.PlantId == plantId && a.AreaId == areaId)
                 .FirstOrDefaultAsync();
             }
             return await _context.Areas
-                .Where(a => a.PlantId == plantId && a.AreaId == areaId )
+                .Where(a => a.PlantId == plantId && a.AreaId == areaId)
                 .FirstOrDefaultAsync();
         }
         public async Task<Area?> GetAreaForPlantByCodeAndDescriptionAsync(int plantId,
@@ -284,13 +284,13 @@ namespace SupervisorMobility.API.Services
             if (includeCollections)
             {
                 return await _context.Distributions.Include(o => o.Operations).Include(p => p.Products)
-                     .Where(o => o.AreaId == areaId && o.DistributionId == distributionId )
+                     .Where(o => o.AreaId == areaId && o.DistributionId == distributionId)
                     .FirstOrDefaultAsync();
             }
 
 
             return await _context.Distributions
-                .Where(o => o.AreaId == areaId && o.DistributionId == distributionId )
+                .Where(o => o.AreaId == areaId && o.DistributionId == distributionId)
                 .FirstOrDefaultAsync();
         }
         public async Task<Distribution?> GetDistributionOnlyIdAsync(int distributionId, bool includeCollections = false)
@@ -495,7 +495,7 @@ namespace SupervisorMobility.API.Services
         public void DeleteJobOperationConfig(JobObservationConfig jobObservationConfig)
         {
             _context.JobObservationConfigs.Remove(jobObservationConfig);
-            
+
         }
 
 
@@ -785,63 +785,180 @@ namespace SupervisorMobility.API.Services
         }
         #endregion
         #region Users
-        public async Task<IEnumerable<User>> GetAllUsersAsync()
+        public async Task<IEnumerable<User>> GetAllUsersAsync(bool includeCollections = false, bool includeSubordinates = false)
         {
-            return await _context.Users
+            if (includeCollections)
+            {
+                if (includeSubordinates)
+                    return await _context.Users
+                    .Include(p => p.Plant)
+                    .Include(a => a.Area)
+                    .Include(d => d.Distribution)
+                    .Include(g => g.Group)
+                    .Include(s => s.Superior)
+                    .Include(ss => ss.Subordinates)
+                    .Include(aa => aa.Areas)
+                    .Include(ILU => ILU.ILURegisers).Where(u => u.IsActive == true)
+                     .OrderBy(c => c.UserId).ToListAsync();
+                else
+                    return await _context.Users
                 .Include(p => p.Plant)
                 .Include(a => a.Area)
                 .Include(d => d.Distribution)
                 .Include(g => g.Group)
                 .Include(s => s.Superior)
-                .Include(ss => ss.Subordinates)
                 .Include(aa => aa.Areas)
                 .Include(ILU => ILU.ILURegisers).Where(u => u.IsActive == true)
                  .OrderBy(c => c.UserId).ToListAsync();
+            }
+            else
+            {
+                if (includeSubordinates)
+                    return await _context.Users
+                    .Include(s => s.Superior)
+                    .Include(ss => ss.Subordinates)
+                     .OrderBy(c => c.UserId).ToListAsync();
+                else
+                    return await _context.Users
+                     .OrderBy(c => c.UserId).ToListAsync();
+            }
+
         }
 
-        public async Task<IEnumerable<User>> GetAllUserByTypeAsync(int typeUser)
+        public async Task<IEnumerable<User>> GetAllUserByTypeAsync(int typeUser, bool includeCollections = false, bool includeSubordinates = false)
         {
-            return await _context.Users
-                .Include(p => p.Plant)
-                .Include(a => a.Area)
-                .Include(d => d.Distribution)
-                .Include(g => g.Group)
-                .Include(s => s.Superior)
-                .Include(ss => ss.Subordinates)
-                .Include(aa => aa.Areas)
-                .Include(ILU => ILU.ILURegisers)
-                .Where(u => u.UserType == typeUser).Where(u => u.IsActive == true)
+            if (includeCollections)
+            {
+                if (includeSubordinates)
+                    return await _context.Users
+                    .Include(p => p.Plant)
+                    .Include(a => a.Area)
+                    .Include(d => d.Distribution)
+                    .Include(g => g.Group)
+                    .Include(s => s.Superior)
+                    .Include(ss => ss.Subordinates)
+                    .Include(aa => aa.Areas)
+                    .Include(ILU => ILU.ILURegisers).Where(u => u.IsActive == true)
+                    .Where(u => u.UserType == typeUser).Where(u => u.IsActive == true)
                  .OrderBy(c => c.UserId).ToListAsync();
-        }
-
-        public async Task<IEnumerable<User>> GetAllUserByTypeInPlantAreaAsync(int plantId,int areaId,int typeUser)
-        {
-            return await _context.Users
+                else
+                    return await _context.Users
                 .Include(p => p.Plant)
                 .Include(a => a.Area)
                 .Include(d => d.Distribution)
                 .Include(g => g.Group)
                 .Include(s => s.Superior)
-                .Include(ss => ss.Subordinates)
+                .Include(aa => aa.Areas)
+                .Include(ILU => ILU.ILURegisers).Where(u => u.UserType == typeUser).Where(u => u.IsActive == true)
+                 .OrderBy(c => c.UserId).ToListAsync();
+            }
+            else
+            {
+                if (includeSubordinates)
+                    return await _context.Users
+                    .Include(s => s.Superior)
+                    .Include(ss => ss.Subordinates)
+                   .Where(u => u.UserType == typeUser).Where(u => u.IsActive == true)
+                 .OrderBy(c => c.UserId).ToListAsync();
+                else
+                    return await _context.Users
+                     .Where(u => u.UserType == typeUser).Where(u => u.IsActive == true)
+                 .OrderBy(c => c.UserId).ToListAsync();
+            }
+
+
+        }
+
+        public async Task<IEnumerable<User>> GetAllUserByTypeInPlantAreaAsync(int plantId, int areaId, int typeUser, bool includeCollections = false, bool includeSubordinates = false)
+        {
+            if (includeCollections)
+            {
+                if (includeSubordinates)
+                    return await _context.Users
+                    .Include(p => p.Plant)
+                    .Include(a => a.Area)
+                    .Include(d => d.Distribution)
+                    .Include(g => g.Group)
+                    .Include(s => s.Superior)
+                    .Include(ss => ss.Subordinates)
+                    .Include(aa => aa.Areas)
+                    .Include(ILU => ILU.ILURegisers).Where(u => u.IsActive == true)
+
+                .Where(u => u.UserType == typeUser && u.PlantId == plantId && u.AreaId == areaId).Where(u => u.IsActive == true)
+                 .OrderBy(c => c.UserId).ToListAsync();
+                else
+                    return await _context.Users
+                .Include(p => p.Plant)
+                .Include(a => a.Area)
+                .Include(d => d.Distribution)
+                .Include(g => g.Group)
+                .Include(s => s.Superior)
                 .Include(aa => aa.Areas)
                 .Include(ILU => ILU.ILURegisers)
                 .Where(u => u.UserType == typeUser && u.PlantId == plantId && u.AreaId == areaId).Where(u => u.IsActive == true)
                  .OrderBy(c => c.UserId).ToListAsync();
+            }
+            else
+            {
+                if (includeSubordinates)
+                    return await _context.Users
+                    .Include(s => s.Superior)
+                    .Include(ss => ss.Subordinates)
+
+                .Where(u => u.UserType == typeUser && u.PlantId == plantId && u.AreaId == areaId).Where(u => u.IsActive == true)
+                 .OrderBy(c => c.UserId).ToListAsync();
+                else
+                    return await _context.Users
+
+                .Where(u => u.UserType == typeUser && u.PlantId == plantId && u.AreaId == areaId).Where(u => u.IsActive == true)
+                 .OrderBy(c => c.UserId).ToListAsync();
+            }
+
         }
-        
-        public async Task<IEnumerable<User>> GetAllUserByTypeInPlantAsync(int plantId,int typeUser)
+
+        public async Task<IEnumerable<User>> GetAllUserByTypeInPlantAsync(int plantId, int typeUser, bool includeCollections = false, bool includeSubordinates = false)
         {
-            return await _context.Users
+            if (includeCollections)
+            {
+                if (includeSubordinates)
+                    return await _context.Users
+                    .Include(p => p.Plant)
+                    .Include(a => a.Area)
+                    .Include(d => d.Distribution)
+                    .Include(g => g.Group)
+                    .Include(s => s.Superior)
+                    .Include(ss => ss.Subordinates)
+                    .Include(aa => aa.Areas)
+                    .Include(ILU => ILU.ILURegisers).Where(u => u.IsActive == true)
+                       .Where(u => u.UserType == typeUser && u.PlantId == plantId).Where(u => u.IsActive == true)
+                 .OrderBy(c => c.UserId).ToListAsync();
+                else
+                    return await _context.Users
                 .Include(p => p.Plant)
                 .Include(a => a.Area)
                 .Include(d => d.Distribution)
                 .Include(g => g.Group)
                 .Include(s => s.Superior)
-                .Include(ss => ss.Subordinates)
                 .Include(aa => aa.Areas)
-                .Include(ILU => ILU.ILURegisers)
-                .Where(u => u.UserType == typeUser && u.PlantId == plantId).Where(u => u.IsActive == true)
+                .Include(ILU => ILU.ILURegisers).Where(u => u.UserType == typeUser && u.PlantId == plantId).Where(u => u.IsActive == true)
                  .OrderBy(c => c.UserId).ToListAsync();
+            }
+            else
+            {
+                if (includeSubordinates)
+                    return await _context.Users
+                    .Include(s => s.Superior)
+                    .Include(ss => ss.Subordinates)
+                       .Where(u => u.UserType == typeUser && u.PlantId == plantId).Where(u => u.IsActive == true)
+                 .OrderBy(c => c.UserId).ToListAsync();
+                else
+                    return await _context.Users
+   .Where(u => u.UserType == typeUser && u.PlantId == plantId).Where(u => u.IsActive == true)
+                 .OrderBy(c => c.UserId).ToListAsync();
+            }
+
+
+
         }
 
         public async Task<IEnumerable<User>> GetAllSubordinatesAsync(int superiorid)
@@ -855,7 +972,7 @@ namespace SupervisorMobility.API.Services
                 .Include(ss => ss.Subordinates)
                 .Include(aa => aa.Areas)
                 .Include(ILU => ILU.ILURegisers)
-                .Where(u =>  u.SuperiorId == superiorid && u.IsActive==true)
+                .Where(u => u.SuperiorId == superiorid && u.IsActive == true)
                  .OrderBy(c => c.UserId).ToListAsync();
         }
         public async Task<IEnumerable<User>> GetAllUsersWhitPlantAreaAndGroupAsync()
@@ -1001,7 +1118,7 @@ namespace SupervisorMobility.API.Services
             }
 
             return new AsyncVoidMethodBuilder();
-        } 
+        }
         public async Task<AsyncVoidMethodBuilder> UserUpdateAllSubordinated(User Master)
         {
 
@@ -1497,7 +1614,7 @@ namespace SupervisorMobility.API.Services
                     .Include(d => d.Distribution)
                     .Include(sv => sv.Supervisor)
                     .Include(ssv => ssv.SSVresponsible)
-                    .Where(p => p.SupervisorId == svId && p.IsActive ==true)
+                    .Where(p => p.SupervisorId == svId && p.IsActive == true)
                     .OrderBy(c => c.PATid).ToListAsync();
         }
         public async Task<IEnumerable<PAT>> GetAllPATsofSSV(int ssvID)
@@ -1508,7 +1625,7 @@ namespace SupervisorMobility.API.Services
                    .Include(d => d.Distribution)
                    .Include(sv => sv.Supervisor)
                    .Include(ssv => ssv.SSVresponsible)
-                           .Where(p => p.SSVresponsibleID == ssvID && p.IsActive ==true )
+                           .Where(p => p.SSVresponsibleID == ssvID && p.IsActive == true)
                             .OrderBy(c => c.PATid).ToListAsync();
         }
         #endregion
@@ -1548,8 +1665,8 @@ namespace SupervisorMobility.API.Services
                    .Where(u => u.IsActive == true)
                     .OrderBy(c => c.SOSid).ToListAsync();
 
-        }    
-        
+        }
+
         public async Task<IEnumerable<SOSRegisterJobObservation>> GetAllSOSReviewsRegisters(int SosId)
         {
             return await _context.SOSRegisters
@@ -1561,7 +1678,7 @@ namespace SupervisorMobility.API.Services
 
         }
 
-       public async Task<SOSReviewProgram?> GetSOSasync(int sosId)
+        public async Task<SOSReviewProgram?> GetSOSasync(int sosId)
         {
             return await _context.SOSReviews
                    .Include(p => p.Plant)
@@ -1573,7 +1690,7 @@ namespace SupervisorMobility.API.Services
         {
             _context.SOSReviews.Add(SOSEntity);
             return _context.SaveChanges();
-        } 
+        }
         public async Task<int> AddSOSReviewRegister(SOSRegisterJobObservation RegEntity)
         {
             _context.SOSRegisters.Add(RegEntity);
