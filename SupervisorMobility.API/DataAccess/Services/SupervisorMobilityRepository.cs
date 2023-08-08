@@ -153,6 +153,12 @@ namespace SupervisorMobility.API.Services
         }
         #endregion
         #region PlantOperations
+        public async Task<Plant?> GetPlantOnlyIdAsync(int plantid)
+        {
+            return await _context.Plants
+                           .Where(a => a.PlantId == plantid)
+                           .FirstOrDefaultAsync();
+        }
         public async Task<IEnumerable<Plant>> GetPlantsAsync()
         {
             return await _context.Plants.Where(u => u.IsActive == true)
@@ -208,7 +214,15 @@ namespace SupervisorMobility.API.Services
 
             return await _context.Areas
                 .Where(a => a.PlantId == plantId && a.IsActive == true).ToListAsync();
+        }  
+        
+        public async Task<Area?> GetAreaOnlyIdAsync(int areaId)
+        {
+            return await _context.Areas
+                           .Where(a => a.AreaId == areaId)
+                           .FirstOrDefaultAsync();
         }
+        
         public async Task<Area?> GetAreaForPlantAsync(int plantId,
             int areaId, bool includeOperations = false)
         {
@@ -550,6 +564,11 @@ namespace SupervisorMobility.API.Services
         {
             return await _context.Products
                 .Where(p => p.Code == code && p.Description == description).FirstOrDefaultAsync();
+        } 
+        public async Task<Product?> GetProductByCodeAsync(string code)
+        {
+            return await _context.Products
+                .Where(p => p.Code == code).FirstOrDefaultAsync();
         }
         public async Task<bool> ProductExistAsync(int productId)
         {

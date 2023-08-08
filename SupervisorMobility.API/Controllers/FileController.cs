@@ -1456,7 +1456,8 @@ namespace SupervisorMobility.API.Controllers
 
         }//end download file function 
         //[EnableCors("CorsPolicy")]
-        [HttpPost("MassiveUploadAreasDistributionOperations")]
+
+        [HttpPost("ContinueMassiveOperationOnDistributions")]
         public async Task<ActionResult> MassiveUploadAreasDistributionOperatio(FileUploadGeneralDto filetoMassive, int plantid)
         {
             string filepath = Directory.GetCurrentDirectory().ToString() + "\\uploads\\massive\\" + filetoMassive.StorageFileName;
@@ -1581,8 +1582,8 @@ namespace SupervisorMobility.API.Controllers
             return Ok(filetoMassive);
         }
         //[EnableCors("CorsPolicy")]
-        [HttpPost("MassiveUploadFile")]
-        public async Task<ActionResult<FileUpload>> AddFileMasiveUpload(IFormFile file)
+        [HttpPost("MassiveUploadAreasDistributionOperations")]
+        public async Task<ActionResult<FileUpload>> AddFileMasiveUpload(IFormFile file, int plantid)
         {
 
             var uploadResult = new FileUploadForCreationDto();
@@ -1605,29 +1606,233 @@ namespace SupervisorMobility.API.Controllers
 
             await _supervisorMobilityRepository.SaveChangesAsync();
 
-            //// hacer el desmadre aqui
-            //string filetoOpen = "";
 
-            //if (uploadResult.ContentType == "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet")
-            //{
-            //    // Obtiene la nueva ruta del archivo con la nueva extensión
-            //    string newPath = System.IO.Path.ChangeExtension(trustedFileNameForStorage, ".xlsx");
-            //    // Mueve el archivo a la nueva ruta
-            //    System.IO.File.Move(trustedFileNameForStorage, newPath);
-            //    filetoOpen = newPath;
-            //}
-            //else if (uploadResult.ContentType == "application/vnd.ms-excel")
-            //{
-            //    // Obtiene la nueva ruta del archivo con la nueva extensión
-            //    string newPath = System.IO.Path.ChangeExtension(trustedFileNameForStorage, ".xls");
-            //    // Mueve el archivo a la nueva ruta
-            //    System.IO.File.Move(trustedFileNameForStorage, newPath);
-            //    filetoOpen = newPath;
-            //}
 
-            return Ok(fileToReturn);
+
+            var response = MassiveUploadAreasDistributionOperatio(_mapper.Map<FileUploadGeneralDto>(fileToReturn), plantid);
+
+
+            return Ok(response);
 
         }
+
+        [HttpPost("MassiveUploadOperationOnDistributions")]
+        public async Task<ActionResult<FileUpload>> UploadFileFromMassiveUpload(IFormFile file)
+        {
+
+            var uploadResult = new FileUploadForCreationDto();
+            string trustedFileNameForStorage = string.Empty;
+            var unstrustedFileName = file.FileName;
+
+            trustedFileNameForStorage = Path.GetRandomFileName();
+            trustedFileNameForStorage = System.IO.Path.ChangeExtension(trustedFileNameForStorage, ".xlsx");
+            var path = Path.Combine(_env.ContentRootPath, "uploads\\massive", trustedFileNameForStorage);
+
+            await using (FileStream fs = new FileStream(path, FileMode.Create))
+            {
+                // Utiliza "await" para asegurarte de que se complete la copia del archivo antes de continuar
+                await file.CopyToAsync(fs);
+            }
+
+            uploadResult.FileName = unstrustedFileName;
+            uploadResult.StorageFileName = trustedFileNameForStorage;
+            uploadResult.ContentType = file.ContentType;
+            uploadResult.UploadDate = DateTime.Now;
+
+            var fileToReturn = await _assyChartService.CreateFileAsync(uploadResult);
+
+            await _supervisorMobilityRepository.SaveChangesAsync();
+
+
+            //Start Massive Upload 
+            string filepath = Directory.GetCurrentDirectory().ToString() + "\\uploads\\massive\\" + trustedFileNameForStorage;
+            try
+            {
+                using (var workBook = new XLWorkbook(filepath))
+                {
+
+                    for(int p=3; p<=3; p++)
+                    {
+                        IXLWorksheet ws = workBook.Worksheet(p);
+
+                        var productCode =  ws.Name;
+                        Debug.WriteLine($"Product Name: {productCode}");
+
+                        bool firstRow = true;
+                        int i = 2;
+                        foreach (IXLRow row in ws.Rows())
+                        {
+                            //Use the first row to add columns to DataTable.
+
+                            if (firstRow)
+                            {
+                                firstRow = false;
+                            }
+                            else
+                            {
+                                if (!row.IsEmpty())
+                                {
+                                    Debug.WriteLine($"Int value: {i}");
+
+                                    var CodeOperation = ws.Cell(i, 1).Value.ToString() != "" ? ws.Cell(i, 1).Value.ToString() : "";
+                                  
+
+                                    var DescriptionOperation = ws.Cell(i, 4).Value.ToString() != "" ? ws.Cell(i, 4).Value.ToString() : "";
+
+                                    var CodeArea = ws.Cell(i, 3).Value.ToString() != "" ? ws.Cell(i, 3).Value.ToString() : "";
+
+                                    var DescriptionDistribution = ws.Cell(i, 5).Value.ToString() != "" ? ws.Cell(i, 5).Value.ToString() : "";
+                                    var idDistribution = ws.Cell(i, 6).Value.ToString() != "" ? ws.Cell(i, 6).Value.ToString() : "";
+
+
+
+                                    var distribution = await _supervisorMobilityRepository.GetDistributionOnlyIdAsync(int.Parse(idDistribution));
+
+                                    if (distribution is null)
+                                    {
+                                        Debug.WriteLine($"Distribucion no existe: {i}");
+                                       
+                                        //DistributionForCreationDto newdistribution = new DistributionForCreationDto()
+                                        //{
+                                        //    Code = CodeDistribution,
+                                        //    Description = DescriptionDistribution,
+                                        //    IsActive = true
+                                        //};
+
+                                        //var finalDistribution = _mapper.Map<Distribution>(newdistribution);
+
+                                        //await _supervisorMobilityRepository.AddDistributionForPlantAsync(plantid,
+                                        //    area.AreaId, finalDistribution);
+                                        //distribution = finalDistribution;
+                                    }
+                                    else
+                                    {
+                                        Debug.WriteLine($"Distribucion existe: {i}");
+                                    }
+
+
+
+
+                                    var area = await _supervisorMobilityRepository.GetAreaOnlyIdAsync(distribution.AreaId);
+
+                                    if (area is null)
+                                    {
+                                        Debug.WriteLine($"Area No existe: {i}");
+
+                                        //AreaForCreationDto newarea = new AreaForCreationDto()
+                                        //{
+                                        //    Code = CodeArea,
+                                        //    Description = DescriptionArea,
+                                        //    IsActive = true
+                                        //};
+                                        //var finalArea = _mapper.Map<Area>(newarea);
+                                        //finalArea.PlantId = plantid;
+
+                                        //await _supervisorMobilityRepository.AddArea(finalArea);
+
+                                        //area = finalArea;
+                                    }
+                                    else
+                                    {
+                                        Debug.WriteLine($"Area existe");
+
+                                    }
+
+                                    var planta = await _supervisorMobilityRepository.GetPlantOnlyIdAsync(area.PlantId);
+
+                                    if (planta is null)
+                                    {
+                                        Debug.WriteLine($"Planta No existe: {i}");
+
+                                        //AreaForCreationDto newarea = new AreaForCreationDto()
+                                        //{
+                                        //    Code = CodeArea,
+                                        //    Description = DescriptionArea,
+                                        //    IsActive = true
+                                        //};
+                                        //var finalArea = _mapper.Map<Area>(newarea);
+                                        //finalArea.PlantId = plantid;
+
+                                        //await _supervisorMobilityRepository.AddArea(finalArea);
+
+                                        //area = finalArea;
+                                    }
+                                    else
+                                    {
+                                        Debug.WriteLine($"Planta existe");
+                                    }
+
+                                    var operation = await _supervisorMobilityRepository.GetOperationForDistributionByCodeAndDescriptionAsync(distribution.DistributionId, CodeOperation, DescriptionOperation);
+
+                                    if (operation is null)
+                                    {
+                                        OperationForCreationDto newoperation = new OperationForCreationDto()
+                                        {
+                                            Code = CodeOperation,
+                                            Description = DescriptionOperation,
+                                            IsActive = true
+                                        };
+                                        operation = _mapper.Map<Operation>(newoperation);
+
+                                        await _assyChartService.CreateOperationAsync(area.AreaId, distribution.DistributionId, operation);
+                                    }
+                                    else
+                                    {
+                                        Debug.WriteLine($"Operacion existe: {i}");
+
+                                    }
+
+                                    var product = await _supervisorMobilityRepository.GetProductByCodeAsync(productCode);
+
+                                    if (product is null)
+                                    {
+                                       Debug.WriteLine($" Producto NO existe: {i}");
+                                    }
+                                    else
+                                    {
+                                        Debug.WriteLine($" Producto existe: {i}");
+                                    }
+
+
+                                    AssyChartForCreation newAssyChart = new();
+
+                                    newAssyChart.ProductId = product.ProductId;
+                                    newAssyChart.OperationId = operation.OperationId;
+                                    newAssyChart.DistributionId = distribution.DistributionId;
+                                    newAssyChart.AreaId = area.AreaId;
+                                    newAssyChart.PlantId = planta.PlantId;
+
+
+                                    var finalAssyChart = await _assyChartService.CreateAssyChartAsync(newAssyChart);
+
+
+                                    i++;
+                                }//end is not empety row
+                            }//end else first roe
+                        }//end foreach
+                        await _supervisorMobilityRepository.SaveChangesAsync();
+
+                    }//for de paginas
+
+                }//end using
+
+
+
+            }//end try
+            catch (Exception ex)
+            {
+                Debug.WriteLine(ex.ToString());
+            }//end trycatch to add excel to list
+
+
+
+
+
+
+            return Ok();
+
+        }
+
 
 
 

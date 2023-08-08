@@ -337,6 +337,7 @@ namespace SupervisorMobility.API.Controllers
         {
             List<Area> AreasInUser = new List<Area>();
             List<User> UsersInUser = new List<User>();
+            List<User> UsersWithoutChanges = new List<User>();
             bool haveAreas = false;
             bool haveUsers = false;
             bool haveUsersDB = false;
@@ -412,6 +413,10 @@ namespace SupervisorMobility.API.Controllers
                     {
                         _mapper.Map(Sub, userInDB);
                         UsersInUser.Add(userInDB);
+                    }
+                    else
+                    {
+                        UsersWithoutChanges.Add(userInDB);
                     }
 
                 }
@@ -511,6 +516,11 @@ namespace SupervisorMobility.API.Controllers
                     }
 
                     _supervisorMobilityRepository.UserAddSubordinated(UserToReturn, elementUserInList);
+                }
+
+                foreach(var userRestore in UsersWithoutChanges)
+                {
+                    _supervisorMobilityRepository.UserAddSubordinated(UserToReturn, userRestore);
                 }
             }
 

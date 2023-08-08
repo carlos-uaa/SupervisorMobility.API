@@ -41,6 +41,8 @@ namespace SupervisorMobility.API.Services
         #endregion
         #region PlantOperations
         Task<IEnumerable<Plant>> GetPlantsAsync();
+        Task<Plant?> GetPlantOnlyIdAsync(int PlantId);
+
         Task<Plant?> GetPlantAsync(int plantId, bool includeAreas = false);
         Task<Plant?> GetPlantByCodeAndDescriptionAsync(string code, string description);
         Task<bool> PlantExistAsync(int plantId);
@@ -51,7 +53,9 @@ namespace SupervisorMobility.API.Services
         #region AreaOperations
         Task<IEnumerable<Area>> GetAreasForPlantAsync(int plantId, bool includeCollections = false);
         Task<Area?> GetAreaForPlantAsync(int plantId,
-            int areaId, bool includeOperations = false);
+            int areaId, bool includeOperations = false); 
+        
+        Task<Area?> GetAreaOnlyIdAsync(int areaId);
         Task<Area?> GetAreaForPlantByCodeAndDescriptionAsync(int plantId,
             string code, string description);
         Task<bool> AreaExistAsync(int areaId);
@@ -118,6 +122,7 @@ namespace SupervisorMobility.API.Services
         Task<IEnumerable<Product>> GetProductsAsync();
         Task<Product?> GetProductAsync(int productId, bool collection = false);
         Task<Product?> GetProductByCodeAndDescriptionAsync(string code, string description);
+        Task<Product?> GetProductByCodeAsync(string code);
         Task<bool> ProductExistAsync(int productId);
         Task<bool> ProductExistByCodeAndDescriptionAsync(string code, string description);
         void AddProduct(Product product);
