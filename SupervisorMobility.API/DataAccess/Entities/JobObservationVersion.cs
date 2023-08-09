@@ -54,7 +54,7 @@ namespace SupervisorMobility.API.Entities
         public string? SsvSignature { get; set; }
         public string? OperatorSignature { get; set; }
 
-
+        public string? ReleasedFeedback { get; set; }
         public ICollection<Lup> Lup { get; set; } = new List<Lup>();
     }
 }

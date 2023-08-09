@@ -290,6 +290,10 @@ namespace SupervisorMobility.API.Controllers
             {
                 resumeChanges += "OperatorSignature, ";
             }
+            if (jobObservationEntity.ReleasedFeedback != jobObservationForUpdate.ReleasedFeedback)
+            {
+                resumeChanges += "ReleasedFeedback , ";
+            }
 
             // Remove the trailing comma and space
             if (resumeChanges.EndsWith(", "))
