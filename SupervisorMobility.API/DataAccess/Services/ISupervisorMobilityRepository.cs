@@ -136,6 +136,9 @@ namespace SupervisorMobility.API.Services
         Task<AssyChart?> GetAssyChartAsync(int asssychartId);
         Task<AssyChart?> GetAssyChartForJobObservationAsync(int PlantId, int AreaId, int DistributionId, int OperationId);
         Task<AssyChart?> GetAssyChartAdvanceAsync(string GOS, string CCP, string HOE, int PlantId, int AreaId, int DistributionId, int OperationId, int Productid);
+        Task<AssyChart?> GetAssyChartAdvanceByOperationAsync(int plantId, int areaId, int distributionId, int operationId);
+        Task<AssyChart?> GetAssyChartAdvanceByProductAsync(int plantId, int areaId, int distributionId, int ProductId);
+        Task<AssyChart?> GetAssyChartAdvanceByOperationAndProductAsync(int plantId, int areaId, int distributionId, int operationId, int ProductId);
         Task<IEnumerable<AssyChart>> GetAssyChartByPlantAsync(int plantId);
         Task<IEnumerable<AssyChart>> GetAssyChartByAreaAsync(int plantId, int areaId);
         Task<IEnumerable<AssyChart>> GetAssyChartByDistributionAsync(int plantId, int areaId, int distributionId);
@@ -165,6 +168,7 @@ namespace SupervisorMobility.API.Services
         void UserRemoveSubordinated(User Master, User Slave);
         Task<AsyncVoidMethodBuilder> UserUpdateAllSubordinated(User Master);
         Task<AsyncVoidMethodBuilder> UserRemoveAllSubordinated(User Master);
+        Task RemoveAllAreasFromUser(User user);
         Task<AsyncVoidMethodBuilder> UserRemoveAllAreas(User Master);
         void UserAddArea(User Master, Area Slave);
 

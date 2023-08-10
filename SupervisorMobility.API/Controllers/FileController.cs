@@ -1650,8 +1650,9 @@ namespace SupervisorMobility.API.Controllers
             {
                 using (var workBook = new XLWorkbook(filepath))
                 {
+                    var pages = workBook.Worksheets.Count-1;
 
-                    for(int p=3; p<=3; p++)
+                    for (int p=1; p<= pages; p++)
                     {
                         IXLWorksheet ws = workBook.Worksheet(p);
 
@@ -1682,128 +1683,109 @@ namespace SupervisorMobility.API.Controllers
                                     var CodeArea = ws.Cell(i, 3).Value.ToString() != "" ? ws.Cell(i, 3).Value.ToString() : "";
 
                                     var DescriptionDistribution = ws.Cell(i, 5).Value.ToString() != "" ? ws.Cell(i, 5).Value.ToString() : "";
-                                    var idDistribution = ws.Cell(i, 6).Value.ToString() != "" ? ws.Cell(i, 6).Value.ToString() : "";
+                                    string idDistributionStr = ws.Cell(i, 6).Value.ToString();
+                                    int idDistribution;
 
-
-
-                                    var distribution = await _supervisorMobilityRepository.GetDistributionOnlyIdAsync(int.Parse(idDistribution));
-
-                                    if (distribution is null)
+                                    if (!string.IsNullOrWhiteSpace(idDistributionStr) && int.TryParse(idDistributionStr, out idDistribution))
                                     {
-                                        Debug.WriteLine($"Distribucion no existe: {i}");
                                        
-                                        //DistributionForCreationDto newdistribution = new DistributionForCreationDto()
-                                        //{
-                                        //    Code = CodeDistribution,
-                                        //    Description = DescriptionDistribution,
-                                        //    IsActive = true
-                                        //};
-
-                                        //var finalDistribution = _mapper.Map<Distribution>(newdistribution);
-
-                                        //await _supervisorMobilityRepository.AddDistributionForPlantAsync(plantid,
-                                        //    area.AreaId, finalDistribution);
-                                        //distribution = finalDistribution;
                                     }
                                     else
                                     {
-                                        Debug.WriteLine($"Distribucion existe: {i}");
+                                        return NotFound();
                                     }
 
+                                    int maxRetries = 5; // Número máximo de intentos
+                                    TimeSpan retryInterval = TimeSpan.FromSeconds(5); // Intervalo de tiempo entre intentos (5 segundos en este caso)
+                                    int retries = 0;
 
+                                    
 
-
-                                    var area = await _supervisorMobilityRepository.GetAreaOnlyIdAsync(distribution.AreaId);
-
-                                    if (area is null)
+                                    while (retries < maxRetries)
                                     {
-                                        Debug.WriteLine($"Area No existe: {i}");
-
-                                        //AreaForCreationDto newarea = new AreaForCreationDto()
-                                        //{
-                                        //    Code = CodeArea,
-                                        //    Description = DescriptionArea,
-                                        //    IsActive = true
-                                        //};
-                                        //var finalArea = _mapper.Map<Area>(newarea);
-                                        //finalArea.PlantId = plantid;
-
-                                        //await _supervisorMobilityRepository.AddArea(finalArea);
-
-                                        //area = finalArea;
-                                    }
-                                    else
-                                    {
-                                        Debug.WriteLine($"Area existe");
-
-                                    }
-
-                                    var planta = await _supervisorMobilityRepository.GetPlantOnlyIdAsync(area.PlantId);
-
-                                    if (planta is null)
-                                    {
-                                        Debug.WriteLine($"Planta No existe: {i}");
-
-                                        //AreaForCreationDto newarea = new AreaForCreationDto()
-                                        //{
-                                        //    Code = CodeArea,
-                                        //    Description = DescriptionArea,
-                                        //    IsActive = true
-                                        //};
-                                        //var finalArea = _mapper.Map<Area>(newarea);
-                                        //finalArea.PlantId = plantid;
-
-                                        //await _supervisorMobilityRepository.AddArea(finalArea);
-
-                                        //area = finalArea;
-                                    }
-                                    else
-                                    {
-                                        Debug.WriteLine($"Planta existe");
-                                    }
-
-                                    var operation = await _supervisorMobilityRepository.GetOperationForDistributionByCodeAndDescriptionAsync(distribution.DistributionId, CodeOperation, DescriptionOperation);
-
-                                    if (operation is null)
-                                    {
-                                        OperationForCreationDto newoperation = new OperationForCreationDto()
+                                        try
                                         {
-                                            Code = CodeOperation,
-                                            Description = DescriptionOperation,
-                                            IsActive = true
-                                        };
-                                        operation = _mapper.Map<Operation>(newoperation);
+                                            // Intenta realizar la operación aquí
+                                            var distribution = await _supervisorMobilityRepository.GetDistributionOnlyIdAsync(idDistribution);
+                                          
+                                       
 
-                                        await _assyChartService.CreateOperationAsync(area.AreaId, distribution.DistributionId, operation);
+                                            var area = await _supervisorMobilityRepository.GetAreaOnlyIdAsync(distribution.AreaId);
+
+                              
+
+                                            var planta = await _supervisorMobilityRepository.GetPlantOnlyIdAsync(area.PlantId);
+
+                                        
+                                            var operation = await _supervisorMobilityRepository.GetOperationForDistributionByCodeAndDescriptionAsync(distribution.DistributionId, CodeOperation, DescriptionOperation);
+
+                                            if (operation is null)
+                                            {
+                                                OperationForCreationDto newoperation = new OperationForCreationDto()
+                                                {
+                                                    Code = CodeOperation,
+                                                    Description = DescriptionOperation,
+                                                    IsActive = true
+                                                };
+                                                operation = _mapper.Map<Operation>(newoperation);
+
+                                                await _assyChartService.CreateOperationAsync(area.AreaId, distribution.DistributionId, operation);
+                                            }
+                                            else
+                                            {
+                                                Debug.WriteLine($"Operacion existe: {i}");
+                                            }
+
+                                            var product = await _supervisorMobilityRepository.GetProductByCodeAsync(productCode);
+
+                                          
+                                            var assychart = _supervisorMobilityRepository.GetAssyChartAdvanceByOperationAndProductAsync(planta.PlantId, area.AreaId, distribution.DistributionId, operation.OperationId, product.ProductId);
+
+                                            if (assychart is null)
+                                            {
+                                                Debug.WriteLine($" assychart NO existe: {i}");
+                                                AssyChartForCreation newAssyChart = new();
+
+                                                newAssyChart.ProductId = product.ProductId;
+                                                newAssyChart.OperationId = operation.OperationId;
+                                                newAssyChart.DistributionId = distribution.DistributionId;
+                                                newAssyChart.AreaId = area.AreaId;
+                                                newAssyChart.PlantId = planta.PlantId;
+
+
+                                                var finalAssyChart = await _assyChartService.CreateAssyChartAsync(newAssyChart);
+                                            }
+                                            else
+                                            {
+                                                Debug.WriteLine($" assychart existe: {i}");
+                                                await _supervisorMobilityRepository.SaveChangesAsync();
+                                            }
+
+                                            retries = 0;
+                                            // Si la operación tiene éxito, puedes salir del bucle
+                                            break;
+                                        }
+                                        catch (Exception ex)
+                                        {
+                                            // Maneja la excepción aquí, si es necesario
+                                            Console.WriteLine($"Intento {retries + 1} falló: {ex.Message}");
+
+                                            // Incrementa el número de intentos
+                                            retries++;
+
+                                            // Espera el intervalo de tiempo antes de volver a intentarlo
+                                            await Task.Delay(retryInterval);
+                                        }
+
+                                        
+
                                     }
-                                    else
-                                    {
-                                        Debug.WriteLine($"Operacion existe: {i}");
 
-                                    }
-
-                                    var product = await _supervisorMobilityRepository.GetProductByCodeAsync(productCode);
-
-                                    if (product is null)
-                                    {
-                                       Debug.WriteLine($" Producto NO existe: {i}");
-                                    }
-                                    else
-                                    {
-                                        Debug.WriteLine($" Producto existe: {i}");
-                                    }
+                                    
 
 
-                                    AssyChartForCreation newAssyChart = new();
+                                 
 
-                                    newAssyChart.ProductId = product.ProductId;
-                                    newAssyChart.OperationId = operation.OperationId;
-                                    newAssyChart.DistributionId = distribution.DistributionId;
-                                    newAssyChart.AreaId = area.AreaId;
-                                    newAssyChart.PlantId = planta.PlantId;
-
-
-                                    var finalAssyChart = await _assyChartService.CreateAssyChartAsync(newAssyChart);
 
 
                                     i++;

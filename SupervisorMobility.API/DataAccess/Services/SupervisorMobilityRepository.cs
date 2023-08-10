@@ -1,6 +1,8 @@
 ﻿
 using AutoMapper;
+using DocumentFormat.OpenXml.Drawing;
 using DocumentFormat.OpenXml.Wordprocessing;
+using Irony.Parsing;
 using Microsoft.Data.SqlClient;
 using Microsoft.EntityFrameworkCore;
 using SupervisorMobility.API.Context;
@@ -692,15 +694,33 @@ namespace SupervisorMobility.API.Services
                 .Include(o => o.Operation)
                 .Include(pr => pr.Product).Where(u => u.IsActive == true)
                 .OrderBy(c => c.AssyChardId).ToListAsync();
-        }
+        } 
+        
+        
 
 
         public async Task<AssyChart?> GetAssyChartAdvanceAsync(string GOS, string CCP, string HOE, int PlantId, int AreaId, int DistributionId, int OperationId, int Productid)
         {
             //return whit info
-            return await _context.AssyCharts
-                 .Where(p => p.GOS == GOS && p.CCP == CCP && p.HOE == HOE && p.PlantId == PlantId && p.AreaId == AreaId && p.DistributionId == DistributionId && p.OperationId == OperationId && p.ProductId == Productid).FirstOrDefaultAsync();
+            return await _context.AssyCharts.Where(p => p.GOS == GOS && p.CCP == CCP && p.HOE == HOE && p.PlantId == PlantId && p.AreaId == AreaId && p.DistributionId == DistributionId && p.OperationId == OperationId && p.ProductId == Productid).FirstOrDefaultAsync();
         }
+
+        public async Task<AssyChart?> GetAssyChartAdvanceByOperationAsync(int plantId, int areaId, int distributionId, int operationId)
+        {
+            return await _context.AssyCharts.Where(p => p.PlantId == plantId && p.AreaId == areaId && p.DistributionId == distributionId && p.OperationId == operationId).FirstOrDefaultAsync();
+        }
+
+        public async Task<AssyChart?> GetAssyChartAdvanceByOperationAndProductAsync(int plantId, int areaId, int distributionId, int operationId, int ProductId)
+        {
+            return await _context.AssyCharts.Where(p => p.PlantId == plantId && p.AreaId == areaId && p.DistributionId == distributionId && p.OperationId == operationId && p.ProductId == ProductId).FirstOrDefaultAsync();
+
+        }
+        public async Task<AssyChart?> GetAssyChartAdvanceByProductAsync(int plantId, int areaId, int distributionId, int ProductId)
+        {
+            return await _context.AssyCharts.Where(p => p.PlantId == plantId && p.AreaId == areaId && p.DistributionId == distributionId && p.ProductId == ProductId).FirstOrDefaultAsync();
+
+        }
+
 
         public async Task<bool> AssyChartExistAsync(int assychartID)
         {
@@ -1137,6 +1157,18 @@ namespace SupervisorMobility.API.Services
             }
 
             return new AsyncVoidMethodBuilder();
+        }
+
+        public async Task RemoveAllAreasFromUser(User user)
+        {
+            var userWithAreas = await _context.Users.Include(u => u.Areas).FirstOrDefaultAsync(u => u.UserId == user.UserId);
+
+            if (userWithAreas != null)
+            {
+                userWithAreas.Areas?.Clear();
+
+                await _context.SaveChangesAsync(); 
+            }
         }
         public async Task<AsyncVoidMethodBuilder> UserUpdateAllSubordinated(User Master)
         {

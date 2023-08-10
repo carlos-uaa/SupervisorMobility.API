@@ -335,6 +335,7 @@ namespace SupervisorMobility.API.Controllers
         [HttpPut("{userId}")]
         public async Task<ActionResult> UpdateUser(int userId, UsersForUpdateDto user)
         {
+            
             List<Area> AreasInUser = new List<Area>();
             List<User> UsersInUser = new List<User>();
             List<User> UsersWithoutChanges = new List<User>();
@@ -543,6 +544,8 @@ namespace SupervisorMobility.API.Controllers
         [HttpPut("ReassingToNewSuperior/{userId}")]
         public async Task<ActionResult> UpdateUserAndAssignNewSuperior(int userId, int NewSuperiorId, UsersForUpdateDto user)
         {
+            
+
             List<Area> AreasInUser = new List<Area>();
             List<User> UsersInUser = new List<User>();
             List<User> UsersToReassing = new List<User>();
@@ -619,8 +622,6 @@ namespace SupervisorMobility.API.Controllers
                         UsersInUser.Add(await _assyChartService.FetchUserAsync(Sub.UserId));
                     else
                         UsersToReassing.Add(await _assyChartService.FetchUserAsync(Sub.UserId));
-
-
                 }
 
                 user.Subordinates = null;
@@ -766,7 +767,7 @@ namespace SupervisorMobility.API.Controllers
 
 
         //******* Upload users    **********//
-
+        [EnableCors("Cors")]
         [HttpPost("MasiveUpload")]
         public async Task<ActionResult<UploadUsersResult>> MassiveUpload(List<UsersWithPeopleWithoutNavigationDetails> UsersToCreate)
         {
@@ -1096,6 +1097,7 @@ namespace SupervisorMobility.API.Controllers
 
                 if (haveAreas)
                 {
+                    await _supervisorMobilityRepository.RemoveAllAreasFromUser(UserToReturn);
                     foreach (var elemntArea in AreasInUser)
                     {
                         _supervisorMobilityRepository.UserAddArea(UserToReturn, elemntArea);
