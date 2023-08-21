@@ -9,18 +9,15 @@ namespace SupervisorMobility.API.Entities
         [Key, DatabaseGenerated(DatabaseGeneratedOption.Identity)]
         public int AssyChardId { get; set; }
         public bool? IsActive { get; set; }
-        public string? GOS { get; set; } = string.Empty;
-        public string? CCP { get; set; } = string.Empty;
-        public string? HOE { get; set; } = string.Empty;
-
+     
         [Column(TypeName = "Date")]
         public DateTime CreationDate { get; set; }
         [Column(TypeName = "Date")]
         public DateTime ModificationDate { get; set; }
 
-        //Navigation properties
-        public int? ProductId { get; set; }
-        public Product? Product { get; set; }
+        ////Navigation properties
+        //public int? ProductId { get; set; }
+        //public Product? Product { get; set; }
 
         //arbol
         public int? PlantId { get; set; }
@@ -35,6 +32,8 @@ namespace SupervisorMobility.API.Entities
         public int? OperationId { get; set; }
         public Operation? Operation { get; set; }
 
+        public ICollection<RouteProductAssyChart> RoutesProductsAssyChart { get; set; }
+          = new List<RouteProductAssyChart>();
 
     }
 

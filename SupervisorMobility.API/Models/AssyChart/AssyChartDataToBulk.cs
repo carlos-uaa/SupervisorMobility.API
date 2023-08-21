@@ -6,20 +6,12 @@ namespace SupervisorMobility.API.Models.AssyChart
     {
         public int? AssyChardId { get; set; }
         public bool? IsActive { get; set; }
-        public string? GOS { get; set; } = string.Empty;
-        public string? CCP { get; set; } = string.Empty;
-        public string? HOE { get; set; } = string.Empty;
-
+   
 
         public DateTime? CreationDate { get; set; }
         public DateTime? ModificationDate { get; set; }
 
-        //Product info
-        public int? ProductId { get; set; }
-        public string? ProductCode { get; set; }
-        public string? ProductDescription { get; set; }
-        public bool? ProductIsActive { get; set; }
-
+    
         //PLANT INFO
         public int? PlantId { get; set; }
         public Plant? Plant { get; set; }

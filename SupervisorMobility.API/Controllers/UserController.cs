@@ -341,7 +341,6 @@ namespace SupervisorMobility.API.Controllers
             List<User> UsersWithoutChanges = new List<User>();
             bool haveAreas = false;
             bool haveUsers = false;
-            bool haveUsersDB = false;
 
             var UserToReturn = new User();
 
@@ -438,10 +437,7 @@ namespace SupervisorMobility.API.Controllers
             var userToCompare = _mapper.Map<User>(user);
             var entityentity = await _supervisorMobilityRepository.GetUserAsync(userId, true);
 
-            if (entityentity.Subordinates?.Count() > 0)
-            {
-                haveUsersDB = true;
-            }
+           
 
             if (!entityentity.Equals(userToCompare))
             {
@@ -549,6 +545,8 @@ namespace SupervisorMobility.API.Controllers
             List<Area> AreasInUser = new List<Area>();
             List<User> UsersInUser = new List<User>();
             List<User> UsersToReassing = new List<User>();
+            List<User> UsersWithoutChanges = new List<User>();
+
             bool haveAreas = false;
             bool haveUsers = false;
 
@@ -618,8 +616,23 @@ namespace SupervisorMobility.API.Controllers
 
                 foreach (var Sub in user.Subordinates)
                 {
-                    if ((Sub.SuperiorId == 0 || Sub.SuperiorId == null) && (Sub.AreaId == 0 || Sub.AreaId == null) && (Sub.GroupId == 0 || Sub.GroupId == null))
-                        UsersInUser.Add(await _assyChartService.FetchUserAsync(Sub.UserId));
+
+                    if (Sub.SuperiorId == -2)
+                    {
+                        var userInDB = await _assyChartService.FetchUserAsync(Sub.UserId);
+
+                        if (userInDB.AreaId != Sub.AreaId)
+                        {
+                            Sub.SuperiorId = null;
+                            _mapper.Map(Sub, userInDB);
+                            UsersInUser.Add(userInDB);
+                        }
+                        else
+                        {
+                            UsersWithoutChanges.Add(userInDB);
+                        }
+
+                    }
                     else
                         UsersToReassing.Add(await _assyChartService.FetchUserAsync(Sub.UserId));
                 }
@@ -666,6 +679,7 @@ namespace SupervisorMobility.API.Controllers
             }
 
             user.CreatedDate = (DateTime)entityentity.CreatedDate;
+            user.LastUpdated = DateTime.Now;
             await _assyChartService.UpdateUserAsync(user, userId);
 
             UserToReturn = await _assyChartService.FetchUserAsync(userId);
@@ -728,6 +742,11 @@ namespace SupervisorMobility.API.Controllers
 
                     //var updatedSub = _mapper.Map<User>(elementAux);
                     _supervisorMobilityRepository.UserAddSubordinated(UserToReturn, elemntUser);
+                }
+
+                foreach (var userRestore in UsersWithoutChanges)
+                {
+                    _supervisorMobilityRepository.UserAddSubordinated(UserToReturn, userRestore);
                 }
 
 

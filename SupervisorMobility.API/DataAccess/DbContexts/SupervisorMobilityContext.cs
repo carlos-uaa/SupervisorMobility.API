@@ -28,6 +28,7 @@ namespace SupervisorMobility.API.Context
         public DbSet<SupportDocumentType> SupportDocumentTypes { get; set; }
         public DbSet<Product> Products { get; set; }
         public DbSet<AssyChart> AssyCharts { get; set; }
+        public DbSet<RouteProductAssyChart> RoutesProductsAssyChart { get; set; }
         public DbSet<User> Users { get; set; }
         public DbSet<UserNotFound> UsersNotFound { get; set; }
 
@@ -113,6 +114,10 @@ namespace SupervisorMobility.API.Context
                 .HasDefaultValue(true);
 
             modelBuilder.Entity<AssyChart>()
+                .Property(p => p.IsActive)
+                .HasDefaultValue(true); 
+            
+            modelBuilder.Entity<RouteProductAssyChart>()
                 .Property(p => p.IsActive)
                 .HasDefaultValue(true);
 
@@ -540,12 +545,10 @@ namespace SupervisorMobility.API.Context
                 {
                     AssyChardId = 1,
                     IsActive = true,
-                    GOS = "01. PRESS/01. MANUFACTURA/01. X247",
-                    CCP = "01. PRESS/01. CCP",
-                    HOE = "1§01. PRESS/5§01. CALIDAD",
+                   
                     CreationDate = DateTime.Parse("2023-02-25T12:55:58.303-06:00"),
                     ModificationDate = new DateTime(),
-                    ProductId = 1,
+                  
                     PlantId = 1,
                     AreaId = 1,
                     DistributionId = 1,

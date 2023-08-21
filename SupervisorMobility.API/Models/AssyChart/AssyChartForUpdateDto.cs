@@ -1,4 +1,5 @@
 ﻿using SupervisorMobility.API.Models.OperationDtos;
+using SupervisorMobility.API.Models.RouteProductAssyChartDtos;
 
 namespace SupervisorMobility.API.Models.AssyChart
 {
@@ -6,15 +7,16 @@ namespace SupervisorMobility.API.Models.AssyChart
     {
         public int AssyChardId { get; set; }
         public bool? IsActive { get; set; }
-        public string GOS { get; set; } = string.Empty;
-        public string CCP { get; set; } = string.Empty;
-        public string HOE { get; set; } = string.Empty;
+
 
         public DateTime CreationDate { get; set; }
         public DateTime ModificationDate { get; set; } = DateTime.Now;
 
+        public ICollection<RouteProductAssyChartForUpdateDto> RoutesProductsAssyChart { get; set; } = new List<RouteProductAssyChartForUpdateDto>();
+
+
         //Navigation properties
-        public int ProductId { get; set; }
+
         public int PlantId { get; set; }
         public int AreaId { get; set; }
         public int DistributionId { get; set; }

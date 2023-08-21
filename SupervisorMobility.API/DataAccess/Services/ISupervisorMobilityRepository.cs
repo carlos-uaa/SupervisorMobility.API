@@ -135,7 +135,7 @@ namespace SupervisorMobility.API.Services
         Task<IEnumerable<AssyChart>> GetAllAssyChartsAsync();
         Task<AssyChart?> GetAssyChartAsync(int asssychartId);
         Task<AssyChart?> GetAssyChartForJobObservationAsync(int PlantId, int AreaId, int DistributionId, int OperationId);
-        Task<AssyChart?> GetAssyChartAdvanceAsync(string GOS, string CCP, string HOE, int PlantId, int AreaId, int DistributionId, int OperationId, int Productid);
+        Task<AssyChart?> GetAssyChartAdvanceAsync( int PlantId, int AreaId, int DistributionId, int OperationId);
         Task<AssyChart?> GetAssyChartAdvanceByOperationAsync(int plantId, int areaId, int distributionId, int operationId);
         Task<AssyChart?> GetAssyChartAdvanceByProductAsync(int plantId, int areaId, int distributionId, int ProductId);
         Task<AssyChart?> GetAssyChartAdvanceByOperationAndProductAsync(int plantId, int areaId, int distributionId, int operationId, int ProductId);
@@ -143,10 +143,14 @@ namespace SupervisorMobility.API.Services
         Task<IEnumerable<AssyChart>> GetAssyChartByAreaAsync(int plantId, int areaId);
         Task<IEnumerable<AssyChart>> GetAssyChartByDistributionAsync(int plantId, int areaId, int distributionId);
         Task<bool> AssyChartExistAsync(int assychartID);
-        Task<bool> AssyChartExistAdvanceAsync(string GOS, string CCP, string HOE, int PlantId, int AreaId, int DistributionId, int OperationId, int Productid);
+        Task<bool> AssyChartExistAdvanceAsync(int PlantId, int AreaId, int DistributionId, int OperationId);
         void AddAssyChartAsync(AssyChart assychart);
         void DeleteAssyChartAsync(AssyChart assyChart);
 
+        #endregion
+        #region RouteProductAssychart
+        Task AssychartCreateRoute(RouteProductAssyChart RouteAssychart);
+        void AssychartAddRoute(AssyChart Master, RouteProductAssyChart Slave);
         #endregion
         #region Users
         Task<IEnumerable<User>> GetAllUsersAsync(bool includeCollections = false, bool includeSubordinates = false);
@@ -171,10 +175,12 @@ namespace SupervisorMobility.API.Services
         Task RemoveAllAreasFromUser(User user);
         Task<AsyncVoidMethodBuilder> UserRemoveAllAreas(User Master);
         void UserAddArea(User Master, Area Slave);
+       
 
         Task UpdateUser(UsersForUpdateDto user, int userId);
 
         Task AddUserAsync(User user);
+     
         void DeleteUserAsync(User user);
         #endregion
         #region HistoyJobObservation

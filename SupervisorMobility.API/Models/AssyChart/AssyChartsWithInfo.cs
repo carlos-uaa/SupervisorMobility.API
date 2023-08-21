@@ -3,6 +3,7 @@ using SupervisorMobility.API.Models.DistributionDtos;
 using SupervisorMobility.API.Models.OperationDtos;
 using SupervisorMobility.API.Models.PlantDtos;
 using SupervisorMobility.API.Models.ProductDtos;
+using SupervisorMobility.API.Models.RouteProductAssyChartDtos;
 
 namespace SupervisorMobility.API.Models.AssyChart
 {
@@ -10,16 +11,15 @@ namespace SupervisorMobility.API.Models.AssyChart
     {
         public int AssyChardId { get; set; }
         public bool? IsActive { get; set; }
-        public string GOS { get; set; } = string.Empty;
-        public string CCP { get; set; } = string.Empty;
-        public string HOE { get; set; } = string.Empty;
+       
 
         public DateTime CreationDate { get; set; }
         public DateTime ModificationDate { get; set; }
 
-        //Product info
-        public int ProductId { get; set; }
-        public ProductDto Product { get; set; } = new ProductDto();
+        //Routes
+        public ICollection<RouteProductAssyChartWithNavigations> RoutesProductsAssyChart { get; set; } = new List<RouteProductAssyChartWithNavigations>();
+
+
         //PLANT INFO
         public int PlantId { get; set; }
         public PlantDto Plant { get; set; } = new PlantDto();

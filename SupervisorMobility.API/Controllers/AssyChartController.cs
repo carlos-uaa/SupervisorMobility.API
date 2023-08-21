@@ -3,7 +3,9 @@ using Microsoft.AspNetCore.Cors;
 using Microsoft.AspNetCore.Mvc;
 using SpreadsheetLight;
 using SupervisorMobility.API.Business;
+using SupervisorMobility.API.DataAccess.Entities;
 using SupervisorMobility.API.Models.AssyChart;
+using SupervisorMobility.API.Models.RouteProductAssyChartDtos;
 using SupervisorMobility.API.Services;
 
 namespace SupervisorMobility.API.Controllers
@@ -33,24 +35,94 @@ namespace SupervisorMobility.API.Controllers
         [HttpPost]
         public async Task<ActionResult<AssyChartWithoutNavigationProperties>> CreateAssyChart(AssyChartForCreation newAssyChart)
         {
-            if (!await _supervisorMobilityRepository.PlantExistAsync(newAssyChart.PlantId))
+            List<RouteProductAssyChartForCreationDto> RoutesInAssyChart = new List<RouteProductAssyChartForCreationDto>();
+            bool haveRoutes = false;
+
+
+            if (newAssyChart.PlantId == 0)
             {
-                return NotFound("No Planta");
+                newAssyChart.PlantId = null;
+            }
+            else if (newAssyChart.PlantId != null)
+            {
+                if (!await _supervisorMobilityRepository.PlantExistAsync((int)newAssyChart.PlantId))
+                {
+                    return NotFound("No Planta");
+                }
             }
 
-            if (!await _supervisorMobilityRepository.AreaExistAsync(newAssyChart.AreaId))
+
+            if (newAssyChart.AreaId == 0)
             {
-                return NotFound("No Area");
+                newAssyChart.AreaId = null;
+            }
+            else if (newAssyChart.AreaId != null)
+            {
+                if (!await _supervisorMobilityRepository.AreaExistAsync((int)newAssyChart.AreaId))
+                {
+                    return NotFound("No Area");
+                }
             }
 
-            if (!await _supervisorMobilityRepository.DistributionExistsAsync(newAssyChart.DistributionId))
+
+            if (newAssyChart.DistributionId == 0)
             {
-                return NotFound("No Distributio");
+                newAssyChart.DistributionId = null;
+            }
+            else if (newAssyChart.DistributionId != null)
+            {
+                if (!await _supervisorMobilityRepository.DistributionExistsAsync((int)newAssyChart.DistributionId))
+                {
+                    return NotFound("No Distributio");
+                }
+
             }
 
+
+
+            if (newAssyChart.RoutesProductsAssyChart != null && newAssyChart.RoutesProductsAssyChart?.Count > 0)
+            {
+                haveRoutes = true;
+                foreach (var RouteInList in newAssyChart.RoutesProductsAssyChart)
+                {
+                    RoutesInAssyChart.Add(RouteInList);
+                }
+                newAssyChart.RoutesProductsAssyChart = null;
+            }
+
+
+            if (newAssyChart.OperationId == 0)
+            {
+                newAssyChart.OperationId = null;
+            }
+            else if (newAssyChart.OperationId != null)
+            {
+                if (!await _supervisorMobilityRepository.OperationExistsAsync((int)newAssyChart.OperationId))
+                {
+                    return NotFound("No Operation");
+                }
+            }
 
             var finalAssyChart = await _assyChartService.CreateAssyChartAsync(newAssyChart);
 
+
+            if (haveRoutes)
+            {
+                foreach (RouteProductAssyChartForCreationDto elementInList in RoutesInAssyChart)
+                {
+                    elementInList.AssyChardId = finalAssyChart.AssyChardId;
+
+                    var finalRouteAssyChart = _mapper.Map<RouteProductAssyChart>(elementInList);
+
+                    await _supervisorMobilityRepository.AssychartCreateRoute(finalRouteAssyChart);
+
+
+                    _supervisorMobilityRepository.AssychartAddRoute(finalAssyChart, finalRouteAssyChart);
+                }
+
+            }
+
+            await _supervisorMobilityRepository.SaveChangesAsync();
 
             return Ok(finalAssyChart);
             //return CreatedAtRoute("GetAssyChart",

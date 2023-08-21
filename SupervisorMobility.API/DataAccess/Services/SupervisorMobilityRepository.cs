@@ -12,6 +12,7 @@ using SupervisorMobility.API.DataAccess.Entities.LUP;
 using SupervisorMobility.API.DataAccess.Entities.SOS_Review;
 using SupervisorMobility.API.Entities;
 using SupervisorMobility.API.Models.PATDtos;
+using SupervisorMobility.API.Models.RouteProductAssyChartDtos;
 using SupervisorMobility.API.Models.SOSReviewDtos;
 using SupervisorMobility.API.Models.Users;
 using System.Diagnostics;
@@ -649,7 +650,9 @@ namespace SupervisorMobility.API.Services
                 .Include(p => p.Plant)
                 .Include(d => d.Distribution)
                 .Include(o => o.Operation)
-                .Include(pr => pr.Product).Where(u => u.IsActive == true)
+                .Include(pr => pr.RoutesProductsAssyChart)
+                .ThenInclude(r => r.Product)
+                .Where(u => u.IsActive == true)
                  .OrderBy(c => c.AssyChardId).ToListAsync();
         }
         public async Task<AssyChart?> GetAssyChartAsync(int asssychartId)
@@ -670,7 +673,7 @@ namespace SupervisorMobility.API.Services
                 .Include(p => p.Plant)
                 .Include(d => d.Distribution)
                 .Include(o => o.Operation)
-                .Include(pr => pr.Product).Where(u => u.IsActive == true)
+                .Include(pr => pr.RoutesProductsAssyChart).Where(u => u.IsActive == true)
                 .OrderBy(c => c.AssyChardId).ToListAsync();
         }
 
@@ -681,7 +684,7 @@ namespace SupervisorMobility.API.Services
                 .Include(p => p.Plant)
                 .Include(d => d.Distribution)
                 .Include(o => o.Operation)
-                .Include(pr => pr.Product).Where(u => u.IsActive == true)
+                .Include(pr => pr.RoutesProductsAssyChart).Where(u => u.IsActive == true)
                 .OrderBy(c => c.AssyChardId).ToListAsync();
         }
 
@@ -692,17 +695,17 @@ namespace SupervisorMobility.API.Services
                 .Include(p => p.Plant)
                 .Include(d => d.Distribution)
                 .Include(o => o.Operation)
-                .Include(pr => pr.Product).Where(u => u.IsActive == true)
+                .Include(pr => pr.RoutesProductsAssyChart).Where(u => u.IsActive == true)
                 .OrderBy(c => c.AssyChardId).ToListAsync();
         } 
         
         
 
 
-        public async Task<AssyChart?> GetAssyChartAdvanceAsync(string GOS, string CCP, string HOE, int PlantId, int AreaId, int DistributionId, int OperationId, int Productid)
+        public async Task<AssyChart?> GetAssyChartAdvanceAsync(int PlantId, int AreaId, int DistributionId, int OperationId)
         {
             //return whit info
-            return await _context.AssyCharts.Where(p => p.GOS == GOS && p.CCP == CCP && p.HOE == HOE && p.PlantId == PlantId && p.AreaId == AreaId && p.DistributionId == DistributionId && p.OperationId == OperationId && p.ProductId == Productid).FirstOrDefaultAsync();
+            return await _context.AssyCharts.Where(p => p.PlantId == PlantId && p.AreaId == AreaId && p.DistributionId == DistributionId && p.OperationId == OperationId).FirstOrDefaultAsync();
         }
 
         public async Task<AssyChart?> GetAssyChartAdvanceByOperationAsync(int plantId, int areaId, int distributionId, int operationId)
@@ -712,13 +715,14 @@ namespace SupervisorMobility.API.Services
 
         public async Task<AssyChart?> GetAssyChartAdvanceByOperationAndProductAsync(int plantId, int areaId, int distributionId, int operationId, int ProductId)
         {
-            return await _context.AssyCharts.Where(p => p.PlantId == plantId && p.AreaId == areaId && p.DistributionId == distributionId && p.OperationId == operationId && p.ProductId == ProductId).FirstOrDefaultAsync();
+            return await _context.AssyCharts.Where(p => p.PlantId == plantId && p.AreaId == areaId && p.DistributionId == distributionId && p.OperationId == operationId).Include(a => a.RoutesProductsAssyChart).ThenInclude(p => p.ProductId == ProductId).FirstOrDefaultAsync();
 
         }
         public async Task<AssyChart?> GetAssyChartAdvanceByProductAsync(int plantId, int areaId, int distributionId, int ProductId)
         {
-            return await _context.AssyCharts.Where(p => p.PlantId == plantId && p.AreaId == areaId && p.DistributionId == distributionId && p.ProductId == ProductId).FirstOrDefaultAsync();
-
+            return await _context.AssyCharts.Where(p => p.PlantId == plantId && p.AreaId == areaId && p.DistributionId == distributionId)
+                .Include(a => a.RoutesProductsAssyChart).ThenInclude(r => r.ProductId == ProductId)
+                .FirstOrDefaultAsync();
         }
 
 
@@ -726,9 +730,9 @@ namespace SupervisorMobility.API.Services
         {
             return await _context.AssyCharts.AnyAsync(p => p.AssyChardId == assychartID);
         }
-        public async Task<bool> AssyChartExistAdvanceAsync(string GOS, string CCP, string HOE, int PlantId, int AreaId, int DistributionId, int OperationId, int Productid)
+        public async Task<bool> AssyChartExistAdvanceAsync(int PlantId, int AreaId, int DistributionId, int OperationId)
         {
-            return await _context.AssyCharts.AnyAsync(p => p.GOS == GOS && p.CCP == CCP && p.HOE == HOE && p.PlantId == PlantId && p.AreaId == AreaId && p.DistributionId == DistributionId && p.OperationId == OperationId && p.ProductId == Productid);
+            return await _context.AssyCharts.AnyAsync(p => p.PlantId == PlantId && p.AreaId == AreaId && p.DistributionId == DistributionId && p.OperationId == OperationId);
         }
 
         public void AddAssyChartAsync(AssyChart assychart)
@@ -1036,6 +1040,7 @@ namespace SupervisorMobility.API.Services
                 .Include(s => s.Superior)
                 .Include(s => s.Superior.Areas)
                 .Include(ss => ss.Subordinates)
+                    .ThenInclude(sub => sub.Area)
                 .Include(ILU => ILU.ILURegisers)
                 .Include(aa => aa.Areas)
                 .Where(p => p.UserId == userId).FirstOrDefaultAsync();
@@ -1247,6 +1252,28 @@ namespace SupervisorMobility.API.Services
             //_context.Users.Remove(user);
             user.IsActive = false;
             _context.SaveChanges();
+        }
+        #endregion
+        #region RouteAssychart
+
+        public void AssychartAddRoute(AssyChart Master, RouteProductAssyChart Slave)
+        {
+            if (Master.RoutesProductsAssyChart != null)
+            {
+                Master.RoutesProductsAssyChart.Add(Slave);
+            }
+            else
+            {
+                Master.RoutesProductsAssyChart = new List<RouteProductAssyChart>();
+                Master.RoutesProductsAssyChart.Add(Slave);
+            }
+            _context.SaveChanges();
+        }
+
+        public async Task AssychartCreateRoute(RouteProductAssyChart RouteAssychart)
+        {
+            _context.RoutesProductsAssyChart.Add(RouteAssychart);
+            await _context.SaveChangesAsync();
         }
         #endregion
         #region File

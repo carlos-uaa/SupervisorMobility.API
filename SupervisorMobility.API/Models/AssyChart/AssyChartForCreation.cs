@@ -1,22 +1,22 @@
-﻿namespace SupervisorMobility.API.Models.AssyChart
+﻿using SupervisorMobility.API.Models.RouteProductAssyChartDtos;
+
+namespace SupervisorMobility.API.Models.AssyChart
 {
     public class AssyChartForCreation
     {
         public bool? IsActive { get; set; }
-        public string GOS { get; set; } = string.Empty;
-        public string CCP { get; set; } = string.Empty;
-        public string HOE { get; set; } = string.Empty;
+      
 
         public DateTime CreationDate { get; set; } = DateTime.Now;
         public DateTime ModificationDate { get; set; }
 
         //Navigation properties
-        public int ProductId { get; set; }
+        public ICollection<RouteProductAssyChartForCreationDto> RoutesProductsAssyChart { get; set; }  = new List<RouteProductAssyChartForCreationDto>();
 
         //arbol
-        public int PlantId { get; set; }
-        public int AreaId { get; set; }
-        public int DistributionId { get; set; }
-        public int OperationId { get; set; }
+        public int? PlantId { get; set; }
+        public int? AreaId { get; set; }
+        public int? DistributionId { get; set; }
+        public int? OperationId { get; set; }
     }
 }
