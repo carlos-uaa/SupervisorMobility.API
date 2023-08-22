@@ -540,8 +540,6 @@ namespace SupervisorMobility.API.Controllers
         [HttpPut("ReassingToNewSuperior/{userId}")]
         public async Task<ActionResult> UpdateUserAndAssignNewSuperior(int userId, int NewSuperiorId, UsersForUpdateDto user)
         {
-            
-
             List<Area> AreasInUser = new List<Area>();
             List<User> UsersInUser = new List<User>();
             List<User> UsersToReassing = new List<User>();
