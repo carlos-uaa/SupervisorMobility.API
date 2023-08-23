@@ -1,11 +1,14 @@
 ﻿using AutoMapper;
+using DocumentFormat.OpenXml.Spreadsheet;
 using Microsoft.AspNetCore.Cors;
 using Microsoft.AspNetCore.Mvc;
+using Microsoft.AspNetCore.SignalR;
 using SpreadsheetLight;
 using SupervisorMobility.API.Business;
 using SupervisorMobility.API.DataAccess.Entities;
 using SupervisorMobility.API.Models.AssyChart;
 using SupervisorMobility.API.Models.RouteProductAssyChartDtos;
+using SupervisorMobility.API.Models.Users;
 using SupervisorMobility.API.Services;
 
 namespace SupervisorMobility.API.Controllers
@@ -202,25 +205,64 @@ namespace SupervisorMobility.API.Controllers
         [HttpPut("{assychartId}")]
         public async Task<ActionResult> UpdateAssyChart(int assychartId, AssyChartForUpdateDto AssyCharttoUpdate)
         {
-            if (!await _supervisorMobilityRepository.PlantExistAsync(AssyCharttoUpdate.PlantId))
+            List<RouteProductAssyChart> RoutesInAssyChart = new List<RouteProductAssyChart>();
+            List<RouteProductAssyChart> RoutesWithoutChanges = new List<RouteProductAssyChart>();
+            List<RouteProductAssyChartForCreationDto> RoutesForCreate = new List<RouteProductAssyChartForCreationDto>();
+            bool haveRoutes = false;
+
+            if (AssyCharttoUpdate.PlantId == 0)
             {
-                return NotFound("No Planta");
+                AssyCharttoUpdate.PlantId = null;
+            }
+            else if (AssyCharttoUpdate.PlantId != null)
+            {
+                if (!await _supervisorMobilityRepository.PlantExistAsync((int)AssyCharttoUpdate.PlantId))
+                {
+                    return NotFound("No Planta");
+                }
             }
 
-            if (!await _supervisorMobilityRepository.AreaExistAsync(AssyCharttoUpdate.AreaId))
+
+            if (AssyCharttoUpdate.AreaId == 0)
             {
-                return NotFound("No Area");
+                AssyCharttoUpdate.AreaId = null;
+            }
+            else if (AssyCharttoUpdate.AreaId != null)
+            {
+                if (!await _supervisorMobilityRepository.AreaExistAsync((int)AssyCharttoUpdate.AreaId))
+                {
+                    return NotFound("No Area");
+                }
             }
 
-            if (!await _supervisorMobilityRepository.DistributionExistsAsync(AssyCharttoUpdate.DistributionId))
+
+            if (AssyCharttoUpdate.DistributionId == 0)
             {
-                return NotFound("No Distributio");
+                AssyCharttoUpdate.DistributionId = null;
+            }
+            else if (AssyCharttoUpdate.DistributionId != null)
+            {
+                if (!await _supervisorMobilityRepository.DistributionExistsAsync((int)AssyCharttoUpdate.DistributionId))
+                {
+                    return NotFound("No Distributio");
+                }
+
             }
 
-            if (!await _supervisorMobilityRepository.OperationExistsAsync(AssyCharttoUpdate.OperationId))
+
+
+            if (AssyCharttoUpdate.OperationId == 0)
             {
-                return NotFound("No Operation");
+                AssyCharttoUpdate.OperationId = null;
             }
+            else if (AssyCharttoUpdate.OperationId != null)
+            {
+                if (!await _supervisorMobilityRepository.OperationExistsAsync((int)AssyCharttoUpdate.OperationId))
+                {
+                    return NotFound("No Operation");
+                }
+            }
+
 
             var assyChartEntity = await _supervisorMobilityRepository.GetAssyChartAsync(assychartId);
 
@@ -229,7 +271,91 @@ namespace SupervisorMobility.API.Controllers
                 return NotFound("AssyChart Not Found");
             }
 
+            if (AssyCharttoUpdate.RoutesProductsAssyChart != null && AssyCharttoUpdate.RoutesProductsAssyChart?.Count > 0)
+            {
+                haveRoutes = true;
+                foreach (var RouteInList in AssyCharttoUpdate.RoutesProductsAssyChart)
+                {
+
+                    if(RouteInList.AssyChardId != 0 && RouteInList.RouteProductAssyChartId != 0)
+                    {
+                        var RouteInDb = await _supervisorMobilityRepository.GetAssyChartRouteItemAsync(RouteInList.RouteProductAssyChartId);
+
+                        if (RouteInDb.GOS != RouteInList.GOS || RouteInDb.CCP != RouteInList.CCP || RouteInDb.HOE != RouteInList.HOE)
+                        {
+                            _mapper.Map(RouteInList, RouteInDb);
+                            RoutesInAssyChart.Add(RouteInDb);
+                        }
+                        else
+                        {
+                            RoutesWithoutChanges.Add(RouteInDb);
+                        }
+                    }
+                    else
+                    {
+                        var SearchRouteInDb = await _supervisorMobilityRepository.TryFindGetAssyChartRouteItemAsync(assychartId, (int)RouteInList.ProductId);
+
+                        if(SearchRouteInDb != null)
+                        {
+                            if (SearchRouteInDb.GOS != RouteInList.GOS || SearchRouteInDb.CCP != RouteInList.CCP || SearchRouteInDb.HOE != RouteInList.HOE)
+                            {
+                                RouteInList.RouteProductAssyChartId = SearchRouteInDb.RouteProductAssyChartId;
+                                _mapper.Map(RouteInList, SearchRouteInDb);
+                                RoutesInAssyChart.Add(SearchRouteInDb);
+                            }
+                            else
+                            {
+                                RoutesWithoutChanges.Add(SearchRouteInDb);
+                            }
+                        }
+                        else
+                        {
+                            RoutesForCreate.Add(_mapper.Map<RouteProductAssyChartForCreationDto>(RouteInList));
+
+                        }
+
+                    }
+
+
+                }
+                AssyCharttoUpdate.RoutesProductsAssyChart = null;
+            }
+
+            AssyCharttoUpdate.CreationDate = assyChartEntity.CreationDate;
+            AssyCharttoUpdate.ModificationDate = DateTime.Now;
+
             await _assyChartService.UpdateAssyChartAsync(AssyCharttoUpdate, assyChartEntity);
+
+
+
+            if (haveRoutes)
+            {
+                await _supervisorMobilityRepository.AssyChartRemoveAllRoutes(assyChartEntity);
+
+                foreach (var RouteInList in RoutesInAssyChart)
+                {
+                    _supervisorMobilityRepository.AssychartAddRoute(assyChartEntity, RouteInList);
+                }
+
+                foreach (var RouteRestore in RoutesWithoutChanges)
+                {
+                    _supervisorMobilityRepository.AssychartAddRoute(assyChartEntity, RouteRestore);
+                }
+
+                foreach (RouteProductAssyChartForCreationDto elementInList in RoutesForCreate)
+                {
+                    elementInList.AssyChardId = assyChartEntity.AssyChardId;
+
+                    var finalRouteAssyChart = _mapper.Map<RouteProductAssyChart>(elementInList);
+
+                    await _supervisorMobilityRepository.AssychartCreateRoute(finalRouteAssyChart);
+
+                    _supervisorMobilityRepository.AssychartAddRoute(assyChartEntity, finalRouteAssyChart);
+                }
+
+            }
+
+
 
             return Ok();
 

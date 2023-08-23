@@ -9,6 +9,7 @@
         public int AssyChardId { get; set; }
 
         public int? ProductId { get; set; }
+        public ProductDtos.ProductDto? Product { get; set; } 
 
         public bool? IsActive { get; set; }
     }

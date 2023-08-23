@@ -658,8 +658,12 @@ namespace SupervisorMobility.API.Services
         public async Task<AssyChart?> GetAssyChartAsync(int asssychartId)
         {
             return await _context.AssyCharts.Include(o => o.Operation)
+                .Include(pr => pr.RoutesProductsAssyChart)
+                .ThenInclude(r => r.Product)
                  .Where(p => p.AssyChardId == asssychartId).FirstOrDefaultAsync();
         }
+
+     
         public async Task<AssyChart?> GetAssyChartForJobObservationAsync(int PlantId, int AreaId, int DistributionId, int OperationId)
         {
             return await _context.AssyCharts
@@ -1255,6 +1259,30 @@ namespace SupervisorMobility.API.Services
         }
         #endregion
         #region RouteAssychart
+        public async Task<RouteProductAssyChart?> GetAssyChartRouteItemAsync(int RouteId)
+        {
+            return await _context.RoutesProductsAssyChart
+                .Where(p => p.RouteProductAssyChartId == RouteId).FirstOrDefaultAsync();
+        }
+
+        public async Task<RouteProductAssyChart?> TryFindGetAssyChartRouteItemAsync(int assychartId, int productId)
+        {
+            return await _context.RoutesProductsAssyChart
+                .Where(p => p.AssyChardId == assychartId && p.ProductId == productId).FirstOrDefaultAsync();
+        }
+
+        public async Task AssyChartRemoveAllRoutes(AssyChart AssyChart)
+        {
+            var AssychartEntity = await _context.AssyCharts.Include(u => u.RoutesProductsAssyChart).FirstOrDefaultAsync(u => u.AssyChardId == AssyChart.AssyChardId);
+
+            if (AssychartEntity != null)
+            {
+                AssychartEntity.RoutesProductsAssyChart?.Clear();
+
+                await _context.SaveChangesAsync();
+            }
+        }
+
 
         public void AssychartAddRoute(AssyChart Master, RouteProductAssyChart Slave)
         {

@@ -12,6 +12,7 @@ namespace SupervisorMobility.API.MapperProfiles
             CreateMap<RouteProductAssyChart, RouteProductAssyChartForUpdateDto>().ReverseMap();
             CreateMap<RouteProductAssyChart, RouteProductAssyChartWithNavigations>().ReverseMap();
             CreateMap<RouteProductAssyChart, RouteProductAssyChartWithOutNavigations>().ReverseMap();
+            CreateMap<RouteProductAssyChartWithOutNavigations, RouteProductAssyChartForCreationDto>().ReverseMap();
         }
     }
 }

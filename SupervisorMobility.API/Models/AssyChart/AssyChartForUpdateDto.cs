@@ -12,15 +12,15 @@ namespace SupervisorMobility.API.Models.AssyChart
         public DateTime CreationDate { get; set; }
         public DateTime ModificationDate { get; set; } = DateTime.Now;
 
-        public ICollection<RouteProductAssyChartForUpdateDto> RoutesProductsAssyChart { get; set; } = new List<RouteProductAssyChartForUpdateDto>();
+        public ICollection<RouteProductAssyChartWithOutNavigations> RoutesProductsAssyChart { get; set; } = new List<RouteProductAssyChartWithOutNavigations>();
 
 
         //Navigation properties
 
-        public int PlantId { get; set; }
-        public int AreaId { get; set; }
-        public int DistributionId { get; set; }
-        public int OperationId { get; set; }
+        public int? PlantId { get; set; }
+        public int? AreaId { get; set; }
+        public int? DistributionId { get; set; }
+        public int? OperationId { get; set; }
 
     }
 }

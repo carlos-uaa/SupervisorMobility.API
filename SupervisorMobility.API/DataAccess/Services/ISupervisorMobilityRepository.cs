@@ -149,6 +149,12 @@ namespace SupervisorMobility.API.Services
 
         #endregion
         #region RouteProductAssychart
+
+        Task<RouteProductAssyChart?> GetAssyChartRouteItemAsync(int RouteId);
+        Task<RouteProductAssyChart?> TryFindGetAssyChartRouteItemAsync(int assychartId, int productId);
+
+        Task AssyChartRemoveAllRoutes(AssyChart AssyChart);
+
         Task AssychartCreateRoute(RouteProductAssyChart RouteAssychart);
         void AssychartAddRoute(AssyChart Master, RouteProductAssyChart Slave);
         #endregion
