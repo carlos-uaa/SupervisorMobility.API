@@ -14,7 +14,7 @@ namespace SupervisorMobility.API.DataAccess.Entities
         public string? HOE { get; set; } = string.Empty;
 
         public int? AssyChardId { get; set; }
-        public AssyChart? AssyChart { get; set; }
+        public AssyChart? AssyChart { get; set; } 
 
         public int? ProductId { get; set; }
         public Product? Product { get; set; }

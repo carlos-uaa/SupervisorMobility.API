@@ -169,7 +169,7 @@ namespace SupervisorMobility.API.Controllers
             return Ok(_mapper.Map<IEnumerable<AssyChartWhitInfo>>(assyChartsForPlant));
         }
 
-        [HttpGet("plant/{plantId}/area/{areaId}/distribution/{distributionId}")]
+        [HttpGet("plant/{plantId}/area/{areaId}/distribution/{distributionId}/list")]
         public async Task<ActionResult<IEnumerable<AssyChartWhitInfo>>> GetAssyChartsOfDistribution(int plantId, int areaId, int distributionId)
         {
             var assyChartsForPlant = await _supervisorMobilityRepository.GetAssyChartByDistributionAsync(plantId, areaId, distributionId);
@@ -177,12 +177,21 @@ namespace SupervisorMobility.API.Controllers
         }
 
         [HttpGet("plant/{plantId}/area/{areaId}/distribution/{distributionId}/operation/{operationId}")]
-        public async Task<ActionResult<AssyChartForUpdateDto>> GetAssyChartForJobObservation(int plantId, int areaId, int distributionId, int operationId)
+        public async Task<ActionResult<AssyChartWhitInfo>> GetAssyChartAdvance(int plantId, int areaId, int distributionId, int operationId)
         {
 
-            var asssychart = await _supervisorMobilityRepository.GetAssyChartForJobObservationAsync(plantId, areaId, distributionId, operationId);
+            var asssychart = await _supervisorMobilityRepository.GetAssyChartAdvanceAsync(plantId, areaId, distributionId, operationId);
 
-            return Ok(_mapper.Map<AssyChartForUpdateDto>(asssychart));
+            return Ok(_mapper.Map<AssyChartWhitInfo>(asssychart));
+        }
+
+        [HttpGet("plant/{plantId}/area/{areaId}/distribution/{distributionId}/one")]
+        public async Task<ActionResult<AssyChartWhitInfo>> GetAssyChartForJobObservation(int plantId, int areaId, int distributionId)
+        {
+
+            var asssychart = await _supervisorMobilityRepository.GetAssyChartForJobObservationAsync(plantId, areaId, distributionId);
+
+            return Ok(_mapper.Map<AssyChartWhitInfo>(asssychart));
         }
 
 

@@ -664,10 +664,11 @@ namespace SupervisorMobility.API.Services
         }
 
      
-        public async Task<AssyChart?> GetAssyChartForJobObservationAsync(int PlantId, int AreaId, int DistributionId, int OperationId)
+        public async Task<AssyChart?> GetAssyChartForJobObservationAsync(int PlantId, int AreaId, int DistributionId)
         {
-            return await _context.AssyCharts
-            .Where(p => p.PlantId == PlantId && p.AreaId == AreaId && p.DistributionId == DistributionId && p.OperationId == OperationId).FirstOrDefaultAsync();
+            return await _context.AssyCharts.Include(pr => pr.RoutesProductsAssyChart)
+                .ThenInclude(r => r.Product)
+            .Where(p => p.PlantId == PlantId && p.AreaId == AreaId && p.DistributionId == DistributionId).FirstOrDefaultAsync();
 
         }
         public async Task<IEnumerable<AssyChart>> GetAssyChartByPlantAsync(int plantId)
@@ -677,7 +678,8 @@ namespace SupervisorMobility.API.Services
                 .Include(p => p.Plant)
                 .Include(d => d.Distribution)
                 .Include(o => o.Operation)
-                .Include(pr => pr.RoutesProductsAssyChart).Where(u => u.IsActive == true)
+                .Include(pr => pr.RoutesProductsAssyChart)
+                .ThenInclude(r => r.Product).Where(u => u.IsActive == true)
                 .OrderBy(c => c.AssyChardId).ToListAsync();
         }
 
@@ -688,7 +690,8 @@ namespace SupervisorMobility.API.Services
                 .Include(p => p.Plant)
                 .Include(d => d.Distribution)
                 .Include(o => o.Operation)
-                .Include(pr => pr.RoutesProductsAssyChart).Where(u => u.IsActive == true)
+                .Include(pr => pr.RoutesProductsAssyChart)
+                .ThenInclude(r => r.Product).Where(u => u.IsActive == true)
                 .OrderBy(c => c.AssyChardId).ToListAsync();
         }
 
