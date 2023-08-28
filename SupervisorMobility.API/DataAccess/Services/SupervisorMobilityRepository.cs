@@ -1403,7 +1403,7 @@ namespace SupervisorMobility.API.Services
             if (includeLup)
             {
                 return await _context.JobObservations
-                    .Include(l => l.Lup)
+                    .Include(l => l.Lup.Where(lup => lup.IsActive == true))
                     .Include(s => s.Supervisor)
                     .Include(o => o.Operator)
                     .Include(h => h.History)
