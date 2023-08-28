@@ -991,7 +991,7 @@ namespace SupervisorMobility.API.Controllers
         [HttpGet("Bulk/ByPlantId/{plantId}")]
         public async Task<IActionResult> DownloadFile(int plantId)
         {
-            List<AssyChartWhitInfo> assyChartsForPlant = _mapper.Map<List<AssyChartWhitInfo>>(await _supervisorMobilityRepository.GetAssyChartByPlantAsync(plantId));
+            List<AssyChartWhitInfo> assyChartsForPlant = _mapper.Map<List<AssyChartWhitInfo>>(await _supervisorMobilityRepository.GetAllAssyChartsByPlantAsync(plantId));
 
             if (assyChartsForPlant.Count == 0)
             {
@@ -1146,7 +1146,7 @@ namespace SupervisorMobility.API.Controllers
                 ws.SetCellValue("V2", "DistributionDescription");
                 ws.SetCellValue("W2", "DistributionIsActive");
 
-                var assyChartsEntitys = await _supervisorMobilityRepository.GetAssyChartByPlantAsync(plant.PlantId);
+                var assyChartsEntitys = await _supervisorMobilityRepository.GetAllAssyChartsByPlantAsync(plant.PlantId);
                 List<AssyChartWhitInfo> assyChartsForPlant = new List<AssyChartWhitInfo>();
                 if (assyChartsEntitys != null)
                 {

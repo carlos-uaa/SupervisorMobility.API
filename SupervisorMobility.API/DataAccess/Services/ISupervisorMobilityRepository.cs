@@ -66,6 +66,7 @@ namespace SupervisorMobility.API.Services
         #endregion
         #region DistributionOperations
         Task<IEnumerable<Distribution>> GetDistributionsForAreaAsync(int areaId, bool includecollections = false);
+        Task<IEnumerable<Distribution>> GetAllDistributions();
 
         Task<Distribution?> GetDistributionForAreaAsync(int areaId, int distributionId, bool includeCollections = false);
         Task<Distribution?> GetDistributionOnlyIdAsync(int distributionId, bool includeCollections = false);
@@ -134,14 +135,13 @@ namespace SupervisorMobility.API.Services
         #region AssyChart
         Task<IEnumerable<AssyChart>> GetAllAssyChartsAsync();
         Task<AssyChart?> GetAssyChartAsync(int asssychartId);
-        Task<AssyChart?> GetAssyChartForJobObservationAsync(int PlantId, int AreaId, int DistributionId);
         Task<AssyChart?> GetAssyChartAdvanceAsync( int PlantId, int AreaId, int DistributionId, int OperationId);
-        Task<AssyChart?> GetAssyChartAdvanceByOperationAsync(int plantId, int areaId, int distributionId, int operationId);
+        Task<AssyChart?> GetAssyChartForJobObservationAsync(int PlantId, int AreaId, int DistributionId);
         Task<AssyChart?> GetAssyChartAdvanceByProductAsync(int plantId, int areaId, int distributionId, int ProductId);
         Task<AssyChart?> GetAssyChartAdvanceByOperationAndProductAsync(int plantId, int areaId, int distributionId, int operationId, int ProductId);
-        Task<IEnumerable<AssyChart>> GetAssyChartByPlantAsync(int plantId);
-        Task<IEnumerable<AssyChart>> GetAssyChartByAreaAsync(int plantId, int areaId);
-        Task<IEnumerable<AssyChart>> GetAssyChartByDistributionAsync(int plantId, int areaId, int distributionId);
+        Task<IEnumerable<AssyChart>> GetAllAssyChartsByPlantAsync(int plantId);
+        Task<IEnumerable<AssyChart>> GetAllAssyChartsByAreaAsync(int plantId, int areaId);
+        Task<IEnumerable<AssyChart>> GetAllAssyChartsByDistributionAsync(int plantId, int areaId, int distributionId);
         Task<bool> AssyChartExistAsync(int assychartID);
         Task<bool> AssyChartExistAdvanceAsync(int PlantId, int AreaId, int DistributionId, int OperationId);
         void AddAssyChartAsync(AssyChart assychart);

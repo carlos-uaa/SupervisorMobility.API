@@ -6,10 +6,14 @@ using Microsoft.AspNetCore.SignalR;
 using SpreadsheetLight;
 using SupervisorMobility.API.Business;
 using SupervisorMobility.API.DataAccess.Entities;
+using SupervisorMobility.API.Entities;
 using SupervisorMobility.API.Models.AssyChart;
+using SupervisorMobility.API.Models.OperationDtos;
 using SupervisorMobility.API.Models.RouteProductAssyChartDtos;
 using SupervisorMobility.API.Models.Users;
 using SupervisorMobility.API.Services;
+using System.Diagnostics;
+using System.Linq.Expressions;
 
 namespace SupervisorMobility.API.Controllers
 {
@@ -158,21 +162,21 @@ namespace SupervisorMobility.API.Controllers
         [HttpGet("plant/{plantId}")]
         public async Task<ActionResult<IEnumerable<AssyChartWhitInfo>>> GetAssyChartsOfPlant(int plantId)
         {
-            var assyChartsForPlant = await _supervisorMobilityRepository.GetAssyChartByPlantAsync(plantId);
+            var assyChartsForPlant = await _supervisorMobilityRepository.GetAllAssyChartsByPlantAsync(plantId);
             return Ok(_mapper.Map<IEnumerable<AssyChartWhitInfo>>(assyChartsForPlant));
         }
 
         [HttpGet("plant/{plantId}/area/{areaId}")]
         public async Task<ActionResult<IEnumerable<AssyChartWhitInfo>>> GetAssyChartsOfArea(int plantId, int areaId)
         {
-            var assyChartsForPlant = await _supervisorMobilityRepository.GetAssyChartByAreaAsync(plantId, areaId);
+            var assyChartsForPlant = await _supervisorMobilityRepository.GetAllAssyChartsByAreaAsync(plantId, areaId);
             return Ok(_mapper.Map<IEnumerable<AssyChartWhitInfo>>(assyChartsForPlant));
         }
 
         [HttpGet("plant/{plantId}/area/{areaId}/distribution/{distributionId}/list")]
         public async Task<ActionResult<IEnumerable<AssyChartWhitInfo>>> GetAssyChartsOfDistribution(int plantId, int areaId, int distributionId)
         {
-            var assyChartsForPlant = await _supervisorMobilityRepository.GetAssyChartByDistributionAsync(plantId, areaId, distributionId);
+            var assyChartsForPlant = await _supervisorMobilityRepository.GetAllAssyChartsByDistributionAsync(plantId, areaId, distributionId);
             return Ok(_mapper.Map<IEnumerable<AssyChartWhitInfo>>(assyChartsForPlant));
         }
 
@@ -194,6 +198,100 @@ namespace SupervisorMobility.API.Controllers
             return Ok(_mapper.Map<AssyChartWhitInfo>(asssychart));
         }
 
+
+        [HttpGet("madeAssyChartsAllDistributionsExist")]
+        public async Task<ActionResult<AssyChartWhitInfo>> madeAssyCharts()
+        {
+
+            IEnumerable<Distribution> _distributions = await _supervisorMobilityRepository.GetAllDistributions();
+
+            int countDistMade = 0;
+            foreach(var Dist in _distributions)
+            {
+
+            
+                int maxRetries = 5; // Número máximo de intentos
+                TimeSpan retryInterval = TimeSpan.FromSeconds(5); // Intervalo de tiempo entre intentos (5 segundos en este caso)
+                int retries = 1;
+
+
+                while (retries < maxRetries)
+                {
+                    try
+                    {
+                        // Intenta realizar la operación aquí
+                        
+                        var area = await _supervisorMobilityRepository.GetAreaOnlyIdAsync(Dist.AreaId);
+                       
+                        var planta = await _supervisorMobilityRepository.GetPlantOnlyIdAsync(area.PlantId);
+
+                        AssyChart? assychart = await _supervisorMobilityRepository.GetAssyChartForJobObservationAsync(planta.PlantId, area.AreaId, Dist.DistributionId);
+
+                        if (assychart is null)
+                        {
+                            Debug.WriteLine($" assychart NO existe: {countDistMade}");
+                            AssyChartForCreation newAssyChart = new();
+
+                            //newAssyChart.ProductId = product.ProductId;
+                            newAssyChart.DistributionId = Dist.DistributionId;
+                            newAssyChart.AreaId = area.AreaId;
+                            newAssyChart.PlantId = planta.PlantId;
+
+
+                            var finalAssyChart = await _assyChartService.CreateAssyChartAsync(newAssyChart);
+
+
+                            foreach (var ProdInDist in Dist.Products)
+                            {
+
+                                RouteProductAssyChartForCreationDto elementInList = new();
+
+                                elementInList.ProductId = ProdInDist.ProductId;
+                                elementInList.AssyChardId = finalAssyChart.AssyChardId;
+                                elementInList.IsActive = true;
+
+                                var finalRouteAssyChart = _mapper.Map<RouteProductAssyChart>(elementInList);
+
+                                await _supervisorMobilityRepository.AssychartCreateRoute(finalRouteAssyChart);
+
+
+                                _supervisorMobilityRepository.AssychartAddRoute(finalAssyChart, finalRouteAssyChart);
+                                Debug.WriteLine($"  Route of `{ProdInDist.Code}` for: {countDistMade} creada");
+                            }
+                        }
+                        else
+                        {
+                            Debug.WriteLine($" assychart existe: {countDistMade}");
+                            await _supervisorMobilityRepository.SaveChangesAsync();
+                        }
+
+                        retries = 0;
+                        // Si la operación tiene éxito, puedes salir del bucle
+                        break;
+                    }
+                    catch (Exception ex)
+                    {
+                        // Maneja la excepción aquí, si es necesario
+                        Console.WriteLine($"Intento {retries + 1} falló: {ex.Message}");
+
+                        // Incrementa el número de intentos
+                        retries++;
+
+                        // Espera el intervalo de tiempo antes de volver a intentarlo
+                        await Task.Delay(retryInterval);
+                    }//tryatch para intentos
+
+
+                }//while de intentos para la informacion
+
+                countDistMade++;
+            }//for de todas las distribuciones
+
+            await _supervisorMobilityRepository.SaveChangesAsync();
+
+
+            return Ok(countDistMade);
+        }
 
         [HttpDelete("{assychartId}")]
         public async Task<ActionResult> DeleteAssyChart(int assychartId)
