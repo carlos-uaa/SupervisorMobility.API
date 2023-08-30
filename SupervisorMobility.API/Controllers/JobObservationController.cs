@@ -258,13 +258,9 @@ namespace SupervisorMobility.API.Controllers
             {
                 resumeChanges += "Anomaly, ";
             }
-            if (jobObservationEntity.Time1HOE != jobObservationForUpdate.Time1HOE)
+            if (jobObservationEntity.HOEStandardTimes != jobObservationForUpdate.HOEStandardTimes)
             {
-                resumeChanges += "Timers 1, ";
-            }
-            if (jobObservationEntity.Time2HOE != jobObservationForUpdate.Time2HOE)
-            {
-                resumeChanges += "Timers 2, ";
+                resumeChanges += "HOEStandardTimes, ";
             }
             if (jobObservationEntity.Models != jobObservationForUpdate.Models)
             {

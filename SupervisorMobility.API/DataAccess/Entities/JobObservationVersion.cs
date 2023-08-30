@@ -42,10 +42,7 @@ namespace SupervisorMobility.API.Entities
         public int? Status { get; set; }
         public int? Option { get; set; }
         public string? Anomaly { get; set; }
-
-
-        public string? Time1HOE { get; set; }
-        public string? Time2HOE { get; set; }
+        public string? HOEStandardTimes { get; set; }
         public string? Models { get; set; }
         public string? Cicles { get; set; }
 
