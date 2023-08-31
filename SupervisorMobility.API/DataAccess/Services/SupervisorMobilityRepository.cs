@@ -1369,6 +1369,56 @@ namespace SupervisorMobility.API.Services
         #endregion
         #region JobObservationOperations
 
+        public async Task<IEnumerable<JobObservation>> GetJobObservationsByFiltersAsync(DateTime startDate, DateTime endDate, int plantId, int areaId, int supervisorId, int status)
+        {
+
+            var query = _context.JobObservations
+                //.Include(a => a.Area)
+                //.Include(p => p.Plant)
+                //.Include(d => d.Distribution)
+                //.Include(o => o.Operation)
+                //.Include(s => s.Supervisor)
+                //.Include(o => o.Operator)
+                .Where(u => u.IsActive == true);
+
+            if (plantId != default(int))
+            {
+                query = query.Where(j => j.PlantId == plantId);
+
+            }
+            if (areaId != default(int))
+            {
+                query = query.Where(j => j.AreaId == areaId);
+            }
+
+            if (supervisorId != default(int))
+            {
+                query = query.Where(j => j.SupervisorId == supervisorId);
+            }
+
+            if (status != default(int))
+            {
+                query = query.Where(j => j.Status == status);
+            }
+
+            if (startDate != default(DateTime))
+            {
+                query = query.Where(j => j.StartDate.HasValue && j.StartDate.Value.Date >= startDate.Date || (j.StartDate.HasValue && j.StartDate.Value.Date <= startDate.Date && (j.EndDate.HasValue && j.EndDate.Value.Date >= startDate.Date)));
+            }
+
+            if (endDate != default(DateTime))
+            {
+                query = query.Where(j => j.StartDate.HasValue && j.StartDate.Value.Date <= endDate.Date);
+            }
+
+
+
+            return await query.OrderBy(c => c.StartDate).ToListAsync();
+
+        }
+
+
+
         public async Task<IEnumerable<JobObservation>> GetAllJobObservationsAsync(bool includeLup)
         {
 

@@ -9,7 +9,6 @@ using SupervisorMobility.API.Models.JobObservationDtos;
 using SupervisorMobility.API.Models.NotificationDtos;
 using SupervisorMobility.API.Services;
 
-
 namespace SupervisorMobility.API.Controllers
 {
     [EnableCors("Cors")]
@@ -63,6 +62,28 @@ namespace SupervisorMobility.API.Controllers
             _supervisorMobilityRepository.AddJobObservation(finalJobObservation);
             await _supervisorMobilityRepository.SaveChangesAsync();
             return Ok(finalJobObservation);
+        }
+
+        [HttpGet("filters")]
+        public async Task<ActionResult<IEnumerable<JobObservationDto>>> GetJobObservationsByFilters(
+            DateTime startDate,
+            DateTime endDate,
+            int plantId,
+            int areaId,
+            int supervisorId,
+            int status)
+        {
+
+            var allJobObservations = await _supervisorMobilityRepository.GetJobObservationsByFiltersAsync(startDate, endDate, plantId, areaId, supervisorId, status);
+            if(allJobObservations.Count() > 0)
+            {
+                return Ok(_mapper.Map<IEnumerable<JobObservationDto>>(allJobObservations));
+
+            }
+            else
+            {
+                return Ok(new { Message = "No results" });
+            }
         }
 
 
