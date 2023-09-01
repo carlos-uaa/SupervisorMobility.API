@@ -21,12 +21,8 @@ namespace SupervisorMobility.API.Models.PATDtos
         public DistributionDtos.DistributionWithoutNavigationPropertiesDto? Distribution { get; set; }
 
         public DateTime? AplicationDate { get; set; }
-        public int? AplicationYear
-        {
-            get { return AplicationDate?.Year; }
-            set { AplicationDate = value != null ? new DateTime(value.Value, 1, 1) : null; }
-        }
-
+        public int? AplicationYear { get; set; }
+     
         public DateTime? CreationDate { get; set; }
 
         public DateTime? EditionDate { get; set; }

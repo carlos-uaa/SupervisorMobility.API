@@ -35,6 +35,8 @@ namespace SupervisorMobility.API.Entities
         public ICollection<RouteProductAssyChart> RoutesProductsAssyChart { get; set; }
           = new List<RouteProductAssyChart>();
 
+        //public ICollection<RouteProductAssyChart> Codes { get; set; }
+        //     = new List<RouteProductAssyChart>();
     }
 
 }
