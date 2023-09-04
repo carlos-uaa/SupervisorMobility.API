@@ -1396,11 +1396,14 @@ namespace SupervisorMobility.API.Services
                 query = query.Where(j => j.SupervisorId == supervisorId);
             }
 
+            if (status == default(int))
+            {
+                query = query.Where(j => j.Status != 7);
+            }
             if (status != default(int))
             {
                 query = query.Where(j => j.Status == status);
             }
-
             if (startDate != default(DateTime))
             {
                 query = query.Where(j => j.StartDate.HasValue && j.StartDate.Value.Date >= startDate.Date || (j.StartDate.HasValue && j.StartDate.Value.Date <= startDate.Date && (j.EndDate.HasValue && j.EndDate.Value.Date >= startDate.Date)));
