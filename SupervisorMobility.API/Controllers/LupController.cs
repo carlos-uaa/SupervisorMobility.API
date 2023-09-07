@@ -55,6 +55,23 @@ namespace SupervisorMobility.API.Controllers
 
         }
 
+        [HttpGet("lups")]
+        public async Task<ActionResult<IEnumerable<LupDto>>> GetJobObservationsWithLupByFilters(
+            int year,
+            int operationId)
+        {
+
+            var allJobObservations = await _supervisorMobilityRepository.GetLupsByFiltersAsync(year, operationId);
+            if (allJobObservations.Count() > 0)
+            {
+                return Ok(_mapper.Map<IEnumerable<LupDto>>(allJobObservations));
+            }
+            else
+            {
+                return Ok(new { Message = "No results" });
+            }
+        }
+
         [HttpPost]
         public async Task<ActionResult<LupWithoutNavigationPropertiesDto>> CreateLup(
             LupForCreationDto lup)

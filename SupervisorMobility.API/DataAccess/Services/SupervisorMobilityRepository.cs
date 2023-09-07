@@ -1376,9 +1376,10 @@ namespace SupervisorMobility.API.Services
                 //.Include(a => a.Area)
                 //.Include(p => p.Plant)
                 //.Include(d => d.Distribution)
+                //.Include(l => l.Lup.Where(lup => lup.IsActive == true))
                 //.Include(o => o.Operation)
                 //.Include(s => s.Supervisor)
-                //.Include(o => o.Operator)
+                //.Include(o => o.Operator).Where(u => u.IsActive == true)
                 .Where(u => u.IsActive == true);
 
             if (plantId != default(int))
@@ -1419,8 +1420,6 @@ namespace SupervisorMobility.API.Services
             return await query.OrderBy(c => c.StartDate).ToListAsync();
 
         }
-
-
 
         public async Task<IEnumerable<JobObservation>> GetAllJobObservationsAsync(bool includeLup)
         {
@@ -1535,6 +1534,14 @@ namespace SupervisorMobility.API.Services
 
         }
 
+        public async Task<IEnumerable<Lup>> GetLupsByFiltersAsync(int year, int operationId)
+        {
+            var query = _context.JobObservations
+                .Where(j => j.IsActive == true && j.OperationId == operationId && j.Lup.Count() > 0 && j.Lup.Any(lup => lup.IsActive == true))
+                .SelectMany(j => j.Lup.Where(lup => lup.IsActive == true && lup.CreatedDate.HasValue && lup.CreatedDate.Value.Year == year));
+
+            return await query.OrderBy(l => l.CreatedDate).ToListAsync();
+        }
 
         public void AddLup(Lup lup)
         {

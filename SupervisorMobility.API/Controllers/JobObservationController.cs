@@ -6,6 +6,7 @@ using SupervisorMobility.API.DataAccess.Services;
 using SupervisorMobility.API.Entities;
 using SupervisorMobility.API.Models.ADUser;
 using SupervisorMobility.API.Models.JobObservationDtos;
+using SupervisorMobility.API.Models.LupDtos;
 using SupervisorMobility.API.Models.NotificationDtos;
 using SupervisorMobility.API.Services;
 
@@ -85,7 +86,6 @@ namespace SupervisorMobility.API.Controllers
                 return Ok(new { Message = "No results" });
             }
         }
-
 
         [HttpGet]
         public async Task<ActionResult<IEnumerable<JobObservationDto>>> GetAllJobObservationsAsync(bool includeLup = false)
