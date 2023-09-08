@@ -90,9 +90,9 @@ namespace SupervisorMobility.API.Controllers
             if (newAssyChart.RoutesProductsAssyChart != null && newAssyChart.RoutesProductsAssyChart?.Count > 0)
             {
                 haveRoutes = true;
-                foreach (var RouteInList in newAssyChart.RoutesProductsAssyChart)
+                foreach (var CodePathInList in newAssyChart.RoutesProductsAssyChart)
                 {
-                    RoutesInAssyChart.Add(RouteInList);
+                    RoutesInAssyChart.Add(CodePathInList);
                 }
                 newAssyChart.RoutesProductsAssyChart = null;
             }
@@ -119,12 +119,12 @@ namespace SupervisorMobility.API.Controllers
                 {
                     elementInList.AssyChardId = finalAssyChart.AssyChardId;
 
-                    var finalRouteAssyChart = _mapper.Map<RouteProductAssyChart>(elementInList);
+                    var finalRouteAssyChart = _mapper.Map<SOSCodePath>(elementInList);
 
-                    await _supervisorMobilityRepository.AssychartCreateRoute(finalRouteAssyChart);
+                    await _supervisorMobilityRepository.AssychartCreateCodePath(finalRouteAssyChart);
 
 
-                    _supervisorMobilityRepository.AssychartAddRoute(finalAssyChart, finalRouteAssyChart);
+                    _supervisorMobilityRepository.AssychartAddCodePath(finalAssyChart, finalRouteAssyChart);
                 }
 
             }
@@ -140,6 +140,56 @@ namespace SupervisorMobility.API.Controllers
             //    createdAssychartToReturn);
         }
 
+        [HttpPost("CodePath")]
+        public async Task<ActionResult<AssyChartWhitInfo>> CreatePathRoute(RouteProductAssyChartForCreationDto _newCodePath)
+        {
+
+            var assyChartEntity = await _supervisorMobilityRepository.GetAssyChartAsync((int)_newCodePath.AssyChardId);
+
+
+            var finalRouteAssyChart = _mapper.Map<SOSCodePath>(_newCodePath);
+
+            await _supervisorMobilityRepository.AssychartCreateCodePath(finalRouteAssyChart);
+
+            _supervisorMobilityRepository.AssychartAddCodePath(assyChartEntity, finalRouteAssyChart);
+
+            return Ok(assyChartEntity);
+        }
+
+        [HttpGet("CodePath")]
+        public async Task<ActionResult<IEnumerable<RouteProductAssyChartWithNavigations>>> GetAllPathsRoute()
+        {
+            var allAssyCharts = await _supervisorMobilityRepository.GetAllCodePathsAsync();
+
+            return Ok(_mapper.Map<IEnumerable<RouteProductAssyChartWithNavigations>>(allAssyCharts));
+
+      
+        }
+
+
+        [HttpGet("CodePath/{CodePathId}")]
+        public async Task<ActionResult<IEnumerable<RouteProductAssyChartWithNavigations>>> GetCodePathOnly(int CodePathId)
+        {
+            var CodePath = await _supervisorMobilityRepository.GetCodePathItemAsync(CodePathId);
+
+            return Ok(_mapper.Map<RouteProductAssyChartWithNavigations>(CodePath));
+
+        }
+
+
+
+        [HttpPut("CodePath/{CodePathId}")]
+        public async Task<ActionResult<RouteProductAssyChartWithNavigations>> UpdateCodePathOnly(int CodePathId, RouteProductAssyChartForUpdateDto CodePathForUpdate)
+        {
+            var CodePathInDB = await _supervisorMobilityRepository.GetCodePathItemAsync(CodePathId);
+
+            _mapper.Map(CodePathForUpdate, CodePathInDB);
+
+            await _supervisorMobilityRepository.SaveChangesAsync();
+
+            return (_mapper.Map<RouteProductAssyChartWithNavigations>(CodePathInDB));
+        }
+
 
         [HttpGet]
         public async Task<ActionResult<IEnumerable<AssyChartWhitInfo>>> GetAllAssyCharts()
@@ -151,12 +201,12 @@ namespace SupervisorMobility.API.Controllers
         }
 
         [HttpGet("{assychartId}")]
-        public async Task<ActionResult<AssyChartForUpdateDto>> GetAssyChart(int assychartId)
+        public async Task<ActionResult<AssyChartWhitInfo>> GetAssyChart(int assychartId)
         {
 
             var asssychart = await _supervisorMobilityRepository.GetAssyChartAsync(assychartId);
 
-            return Ok(_mapper.Map<AssyChartForUpdateDto>(asssychart));
+            return Ok(_mapper.Map<AssyChartWhitInfo>(asssychart));
         }
 
         [HttpGet("plant/{plantId}")]
@@ -250,12 +300,12 @@ namespace SupervisorMobility.API.Controllers
                                 elementInList.AssyChardId = finalAssyChart.AssyChardId;
                                 elementInList.IsActive = true;
 
-                                var finalRouteAssyChart = _mapper.Map<RouteProductAssyChart>(elementInList);
+                                var finalRouteAssyChart = _mapper.Map<SOSCodePath>(elementInList);
 
-                                await _supervisorMobilityRepository.AssychartCreateRoute(finalRouteAssyChart);
+                                await _supervisorMobilityRepository.AssychartCreateCodePath(finalRouteAssyChart);
 
 
-                                _supervisorMobilityRepository.AssychartAddRoute(finalAssyChart, finalRouteAssyChart);
+                                _supervisorMobilityRepository.AssychartAddCodePath(finalAssyChart, finalRouteAssyChart);
                                 Debug.WriteLine($"  Route of `{ProdInDist.Code}` for: {countDistMade} creada");
                             }
                         }
@@ -312,8 +362,8 @@ namespace SupervisorMobility.API.Controllers
         [HttpPut("{assychartId}")]
         public async Task<ActionResult> UpdateAssyChart(int assychartId, AssyChartForUpdateDto AssyCharttoUpdate)
         {
-            List<RouteProductAssyChart> RoutesInAssyChart = new List<RouteProductAssyChart>();
-            List<RouteProductAssyChart> RoutesWithoutChanges = new List<RouteProductAssyChart>();
+            List<SOSCodePath> RoutesInAssyChart = new List<SOSCodePath>();
+            List<SOSCodePath> RoutesWithoutChanges = new List<SOSCodePath>();
             List<RouteProductAssyChartForCreationDto> RoutesForCreate = new List<RouteProductAssyChartForCreationDto>();
             bool haveRoutes = false;
 
@@ -381,44 +431,49 @@ namespace SupervisorMobility.API.Controllers
             if (AssyCharttoUpdate.RoutesProductsAssyChart != null && AssyCharttoUpdate.RoutesProductsAssyChart?.Count > 0)
             {
                 haveRoutes = true;
-                foreach (var RouteInList in AssyCharttoUpdate.RoutesProductsAssyChart)
+                foreach (var CodePathInList in AssyCharttoUpdate.RoutesProductsAssyChart)
                 {
 
-                    if(RouteInList.AssyChardId != 0 && RouteInList.RouteProductAssyChartId != 0)
+                    if(CodePathInList.AssyChardId != 0 && CodePathInList.SOSCodePathId != 0)
                     {
-                        var RouteInDb = await _supervisorMobilityRepository.GetAssyChartRouteItemAsync(RouteInList.RouteProductAssyChartId);
+                        var CodePathInDB = await _supervisorMobilityRepository.GetCodePathItemAsync(CodePathInList.SOSCodePathId);
 
-                        if (RouteInDb.GOS != RouteInList.GOS || RouteInDb.CCP != RouteInList.CCP || RouteInDb.HOE != RouteInList.HOE)
+                        if (CodePathInDB.GOS != CodePathInList.GOS || 
+                            CodePathInDB.CCP != CodePathInList.CCP || 
+                            CodePathInDB.HOE != CodePathInList.HOE ||
+                            CodePathInDB.CommonDirectionGOS != CodePathInList.CommonDirectionGOS || 
+                            CodePathInDB.CommonDirectionCCP != CodePathInList.CommonDirectionCCP || 
+                            CodePathInDB.CommonDirectionHOE != CodePathInList.CommonDirectionHOE || 
+                            CodePathInDB.Code != CodePathInList.Code)
                         {
-                            _mapper.Map(RouteInList, RouteInDb);
-                            RoutesInAssyChart.Add(RouteInDb);
+                            _mapper.Map(CodePathInList, CodePathInDB);
+                            RoutesInAssyChart.Add(CodePathInDB);
                         }
                         else
                         {
-                            RoutesWithoutChanges.Add(RouteInDb);
+                            RoutesWithoutChanges.Add(CodePathInDB);
                         }
                     }
                     else
                     {
-                        var SearchRouteInDb = await _supervisorMobilityRepository.TryFindGetAssyChartRouteItemAsync(assychartId, (int)RouteInList.ProductId);
+                        var SearchCodePathInDb = await _supervisorMobilityRepository.TryFindCodePathItemAsync(assychartId, CodePathInList.Code);
 
-                        if(SearchRouteInDb != null)
+                        if(SearchCodePathInDb != null)
                         {
-                            if (SearchRouteInDb.GOS != RouteInList.GOS || SearchRouteInDb.CCP != RouteInList.CCP || SearchRouteInDb.HOE != RouteInList.HOE)
+                            if (SearchCodePathInDb.GOS != CodePathInList.GOS || SearchCodePathInDb.CCP != CodePathInList.CCP || SearchCodePathInDb.HOE != CodePathInList.HOE)
                             {
-                                RouteInList.RouteProductAssyChartId = SearchRouteInDb.RouteProductAssyChartId;
-                                _mapper.Map(RouteInList, SearchRouteInDb);
-                                RoutesInAssyChart.Add(SearchRouteInDb);
+                                //CodePathInList.SOSCodePathId = SearchCodePathInDb.SOSCodePathId;
+                                _mapper.Map(CodePathInList, SearchCodePathInDb);
+                                RoutesInAssyChart.Add(SearchCodePathInDb);
                             }
                             else
                             {
-                                RoutesWithoutChanges.Add(SearchRouteInDb);
+                                RoutesWithoutChanges.Add(SearchCodePathInDb);
                             }
                         }
                         else
                         {
-                            RoutesForCreate.Add(_mapper.Map<RouteProductAssyChartForCreationDto>(RouteInList));
-
+                            RoutesForCreate.Add(_mapper.Map<RouteProductAssyChartForCreationDto>(CodePathInList));
                         }
 
                     }
@@ -437,27 +492,27 @@ namespace SupervisorMobility.API.Controllers
 
             if (haveRoutes)
             {
-                await _supervisorMobilityRepository.AssyChartRemoveAllRoutes(assyChartEntity);
+                await _supervisorMobilityRepository.AssyChartRemoveAllCodePaths(assyChartEntity);
 
-                foreach (var RouteInList in RoutesInAssyChart)
+                foreach (var CodePathInList in RoutesInAssyChart)
                 {
-                    _supervisorMobilityRepository.AssychartAddRoute(assyChartEntity, RouteInList);
+                    _supervisorMobilityRepository.AssychartAddCodePath(assyChartEntity, CodePathInList);
                 }
 
                 foreach (var RouteRestore in RoutesWithoutChanges)
                 {
-                    _supervisorMobilityRepository.AssychartAddRoute(assyChartEntity, RouteRestore);
+                    _supervisorMobilityRepository.AssychartAddCodePath(assyChartEntity, RouteRestore);
                 }
 
                 foreach (RouteProductAssyChartForCreationDto elementInList in RoutesForCreate)
                 {
                     elementInList.AssyChardId = assyChartEntity.AssyChardId;
 
-                    var finalRouteAssyChart = _mapper.Map<RouteProductAssyChart>(elementInList);
+                    var finalRouteAssyChart = _mapper.Map<SOSCodePath>(elementInList);
 
-                    await _supervisorMobilityRepository.AssychartCreateRoute(finalRouteAssyChart);
+                    await _supervisorMobilityRepository.AssychartCreateCodePath(finalRouteAssyChart);
 
-                    _supervisorMobilityRepository.AssychartAddRoute(assyChartEntity, finalRouteAssyChart);
+                    _supervisorMobilityRepository.AssychartAddCodePath(assyChartEntity, finalRouteAssyChart);
                 }
 
             }

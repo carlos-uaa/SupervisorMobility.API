@@ -1,11 +1,14 @@
-﻿using SupervisorMobility.API.DataAccess.Entities;
-using SupervisorMobility.API.Models.AssyChart;
+﻿using System.ComponentModel.DataAnnotations.Schema;
+using System.ComponentModel.DataAnnotations;
+using SupervisorMobility.API.Entities;
 
-namespace SupervisorMobility.API.Models.RouteProductAssyChartDtos
+namespace SupervisorMobility.API.DataAccess.Entities
 {
-    public class RouteProductAssyChartWithNavigations
+    public class SOSCodePath
     {
+        [Key, DatabaseGenerated(DatabaseGeneratedOption.Identity)]
         public int SOSCodePathId { get; set; }
+
 
         public string Code { get; set; } = string.Empty;
 
@@ -17,12 +20,13 @@ namespace SupervisorMobility.API.Models.RouteProductAssyChartDtos
         public string? CommonDirectionHOE { get; set; } = string.Empty;
 
         public int DistributionId { get; set; }
+        public Distribution? Distribution { get; set; }
 
         public int? ProductId { get; set; }
-        public ProductDtos.ProductDto? Product { get; set; }
+        public Product? Product { get; set; }
 
         public int? AssyChardId { get; set; }
-        public AssyChartOnlyNavigation? AssyChart { get; set; }
+        public AssyChart? AssyChart { get; set; }
 
         public bool? IsActive { get; set; }
     }

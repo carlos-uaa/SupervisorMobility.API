@@ -7,12 +7,13 @@ namespace SupervisorMobility.API.MapperProfiles
     public class RouteProductAssyChartProfile : Profile
     {
         public RouteProductAssyChartProfile(){        
-            CreateMap<RouteProductAssyChart, RouteProductAssyChartForCreationDto>().ReverseMap();
-            CreateMap<RouteProductAssyChartForCreationDto, RouteProductAssyChart>().ReverseMap();
-            CreateMap<RouteProductAssyChart, RouteProductAssyChartForUpdateDto>().ReverseMap();
-            CreateMap<RouteProductAssyChart, RouteProductAssyChartWithNavigations>().ReverseMap();
-            CreateMap<RouteProductAssyChart, RouteProductAssyChartWithOutNavigations>().ReverseMap();
+            CreateMap<SOSCodePath, RouteProductAssyChartForCreationDto>().ReverseMap();
             CreateMap<RouteProductAssyChartWithOutNavigations, RouteProductAssyChartForCreationDto>().ReverseMap();
+            CreateMap<RouteProductAssyChartForCreationDto, SOSCodePath>().ReverseMap();
+            CreateMap<SOSCodePath, RouteProductAssyChartForUpdateDto>().ReverseMap();
+            CreateMap<SOSCodePath, RouteProductAssyChartWithNavigations>().ReverseMap();
+            CreateMap<SOSCodePath, RouteProductAssyChartWithOutNavigations>().ReverseMap();
+            CreateMap<RouteProductAssyChartWithOutNavigations, SOSCodePath>().ReverseMap();
         }
     }
 }

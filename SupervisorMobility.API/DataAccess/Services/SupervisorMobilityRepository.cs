@@ -665,7 +665,11 @@ namespace SupervisorMobility.API.Services
         }
         public async Task<AssyChart?> GetAssyChartAsync(int asssychartId)
         {
-            return await _context.AssyCharts.Include(o => o.Operation)
+            return await _context.AssyCharts
+                .Include(o => o.Plant)
+                .Include(o => o.Area)
+                .Include(o => o.Distribution)
+                .Include(o => o.Operation)
                 .Include(pr => pr.RoutesProductsAssyChart)
                 .ThenInclude(r => r.Product)
                  .Where(p => p.AssyChardId == asssychartId).FirstOrDefaultAsync();
@@ -1266,19 +1270,35 @@ namespace SupervisorMobility.API.Services
         }
         #endregion
         #region RouteAssychart
-        public async Task<RouteProductAssyChart?> GetAssyChartRouteItemAsync(int RouteId)
+        public async Task<SOSCodePath?> GetCodePathItemAsync(int RouteId)
         {
-            return await _context.RoutesProductsAssyChart
-                .Where(p => p.RouteProductAssyChartId == RouteId).FirstOrDefaultAsync();
+            return await _context.CodePaths
+                .Include(p => p.Product)
+                .Include(p => p.Distribution)
+                .Include(p => p.AssyChart)
+                .Include(a => a.AssyChart.Plant)
+                .Include(a => a.AssyChart.Area)
+                .Include(a => a.AssyChart.Distribution)
+                .Where(p => p.SOSCodePathId == RouteId).FirstOrDefaultAsync();
         }
 
-        public async Task<RouteProductAssyChart?> TryFindGetAssyChartRouteItemAsync(int assychartId, int productId)
+        public async Task<SOSCodePath?> TryFindCodePathItemAsync(int assychartId, string code)
         {
-            return await _context.RoutesProductsAssyChart
-                .Where(p => p.AssyChardId == assychartId && p.ProductId == productId).FirstOrDefaultAsync();
+            return await _context.CodePaths
+                .Where(p => p.AssyChardId == assychartId && p.Code == code).FirstOrDefaultAsync();
         }
 
-        public async Task AssyChartRemoveAllRoutes(AssyChart AssyChart)
+        public async Task<IEnumerable<SOSCodePath>> GetAllCodePathsAsync()
+        {
+            return await _context.CodePaths
+                 .Include(cp => cp.AssyChart.Plant)
+                 .Include(cp => cp.AssyChart.Area)
+                 .Include(a => a.Product)
+                .Where(u => u.IsActive == true)
+                 .OrderBy(c => c.SOSCodePathId).ToListAsync();
+        }
+
+        public async Task AssyChartRemoveAllCodePaths(AssyChart AssyChart)
         {
             var AssychartEntity = await _context.AssyCharts.Include(u => u.RoutesProductsAssyChart).FirstOrDefaultAsync(u => u.AssyChardId == AssyChart.AssyChardId);
 
@@ -1289,9 +1309,13 @@ namespace SupervisorMobility.API.Services
                 await _context.SaveChangesAsync();
             }
         }
+        public async Task AssychartCreateCodePath(SOSCodePath RouteAssychart)
+        {
+            _context.CodePaths.Add(RouteAssychart);
+            await _context.SaveChangesAsync();
+        }
 
-
-        public void AssychartAddRoute(AssyChart Master, RouteProductAssyChart Slave)
+        public void AssychartAddCodePath(AssyChart Master, SOSCodePath Slave)
         {
             if (Master.RoutesProductsAssyChart != null)
             {
@@ -1299,17 +1323,13 @@ namespace SupervisorMobility.API.Services
             }
             else
             {
-                Master.RoutesProductsAssyChart = new List<RouteProductAssyChart>();
+                Master.RoutesProductsAssyChart = new List<SOSCodePath>();
                 Master.RoutesProductsAssyChart.Add(Slave);
             }
             _context.SaveChanges();
         }
 
-        public async Task AssychartCreateRoute(RouteProductAssyChart RouteAssychart)
-        {
-            _context.RoutesProductsAssyChart.Add(RouteAssychart);
-            await _context.SaveChangesAsync();
-        }
+       
         #endregion
         #region File
         public void AddUploadFile(FileUpload fileUplaod)
@@ -1879,6 +1899,20 @@ namespace SupervisorMobility.API.Services
             _mapper.Map(SOSForUpdate, SOSEntity);
 
             return _context.SaveChanges();
+        }
+        #endregion
+        #region HeadCount
+        public async void RemoveAllHeadCouns()
+        {
+            var oldData = _context.headCounts.ToList();
+            _context.headCounts.RemoveRange(oldData);
+            await _context.SaveChangesAsync();
+        }
+
+        public async Task AddHeadCoutAsync(HeadCount user)
+        {
+            _context.headCounts.Add(user);
+            await _context.SaveChangesAsync();
         }
         #endregion
         #region CommonOperations

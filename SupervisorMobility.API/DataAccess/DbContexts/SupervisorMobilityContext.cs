@@ -12,6 +12,7 @@ namespace SupervisorMobility.API.Context
     public class SupervisorMobilityContext : DbContext
     {
         #region DbSets
+        public DbSet<HeadCount> headCounts { get; set; }
         public DbSet<ChecklistCategory> ChecklistCategories { get; set; }
         public DbSet<QuestionType> QuestionTypes { get; set; }
         public DbSet<ChecklistQuestion> ChecklistQuestions { get; set; }
@@ -28,7 +29,7 @@ namespace SupervisorMobility.API.Context
         public DbSet<SupportDocumentType> SupportDocumentTypes { get; set; }
         public DbSet<Product> Products { get; set; }
         public DbSet<AssyChart> AssyCharts { get; set; }
-        public DbSet<RouteProductAssyChart> RoutesProductsAssyChart { get; set; }
+        public DbSet<SOSCodePath> CodePaths { get; set; }
         public DbSet<User> Users { get; set; }
         public DbSet<UserNotFound> UsersNotFound { get; set; }
 
@@ -117,7 +118,7 @@ namespace SupervisorMobility.API.Context
                 .Property(p => p.IsActive)
                 .HasDefaultValue(true); 
             
-            modelBuilder.Entity<RouteProductAssyChart>()
+            modelBuilder.Entity<SOSCodePath>()
                 .Property(p => p.IsActive)
                 .HasDefaultValue(true);
 

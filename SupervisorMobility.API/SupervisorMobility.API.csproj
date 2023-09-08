@@ -37,6 +37,7 @@
 		<Folder Include="uploads\evidence\NewFolder\" />
 		<Folder Include="uploads\guides\" />
 		<Folder Include="uploads\massive\" />
+		<Folder Include="uploads\headcount\" />
 	</ItemGroup>
 
 	<Target Name="PublishFrontend" AfterTargets="ComputeFilesToPublish">
@@ -56,6 +57,7 @@
 		<MakeDir Directories="$(PublishUrl)\uploads\evidence\" />
 		<MakeDir Directories="$(PublishUrl)\uploads\guides\" />
 		<MakeDir Directories="$(PublishUrl)\uploads\massive\" />
+		<MakeDir Directories="$(PublishUrl)\uploads\headcount\" />
 		<MakeDir Directories="$(PublishUrl)\logs\" />
 	</Target>
 </Project>

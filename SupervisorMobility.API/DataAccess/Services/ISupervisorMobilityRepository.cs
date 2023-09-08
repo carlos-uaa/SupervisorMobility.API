@@ -150,13 +150,14 @@ namespace SupervisorMobility.API.Services
         #endregion
         #region RouteProductAssychart
 
-        Task<RouteProductAssyChart?> GetAssyChartRouteItemAsync(int RouteId);
-        Task<RouteProductAssyChart?> TryFindGetAssyChartRouteItemAsync(int assychartId, int productId);
+        Task<SOSCodePath?> GetCodePathItemAsync(int RouteId);
+        Task<SOSCodePath?> TryFindCodePathItemAsync(int assychartId, string code);
 
-        Task AssyChartRemoveAllRoutes(AssyChart AssyChart);
+        Task<IEnumerable<SOSCodePath>> GetAllCodePathsAsync();
+        Task AssyChartRemoveAllCodePaths(AssyChart AssyChart);
 
-        Task AssychartCreateRoute(RouteProductAssyChart RouteAssychart);
-        void AssychartAddRoute(AssyChart Master, RouteProductAssyChart Slave);
+        Task AssychartCreateCodePath(SOSCodePath RouteAssychart);
+        void AssychartAddCodePath(AssyChart Master, SOSCodePath Slave);
         #endregion
         #region Users
         Task<IEnumerable<User>> GetAllUsersAsync(bool includeCollections = false, bool includeSubordinates = false);
@@ -308,7 +309,10 @@ namespace SupervisorMobility.API.Services
         Task<int> DeleteSOSReview(SOSReviewProgram SOSEntity);
         Task<int> UpdateSOSReview(SOSReviewForUpdateDto SOSForUpdate, SOSReviewProgram SOSEntity);
         #endregion
-
+        #region headcount
+        void RemoveAllHeadCouns();
+        Task AddHeadCoutAsync(HeadCount user);
+        #endregion
         #region CommonOperations
 
         Task<bool> SaveChangesAsync();

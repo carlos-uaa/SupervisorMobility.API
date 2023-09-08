@@ -32,8 +32,8 @@ namespace SupervisorMobility.API.Entities
         public int? OperationId { get; set; }
         public Operation? Operation { get; set; }
 
-        public ICollection<RouteProductAssyChart> RoutesProductsAssyChart { get; set; }
-          = new List<RouteProductAssyChart>();
+        public ICollection<SOSCodePath> RoutesProductsAssyChart { get; set; }
+          = new List<SOSCodePath>();
 
         //public ICollection<RouteProductAssyChart> Codes { get; set; }
         //     = new List<RouteProductAssyChart>();
