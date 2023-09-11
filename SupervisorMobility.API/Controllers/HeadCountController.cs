@@ -182,31 +182,23 @@ namespace SupervisorMobility.API.Controllers
                                         try
                                         {
                                             var valueFunctionDescription = ws.Cell(i, 5).GetString() != "" ? ws.Cell(i, 5).GetValue<string>() : "";
-                                            
-                                            //try
-                                            //{
-                                            //    _headCount.Cost_center = int.Parse(splitedDepartament[0]);
-                                            //}
-                                            //catch (Exception ex)
-                                            //{
 
-                                            //}
-                                            //try
-                                            //{
-                                            //    _headCount.ID_Departamento = splitedDepartament[1];
-                                            //}
-                                            //catch (Exception ex)
-                                            //{
+                                            try
+                                            {
+                                                _headCount.ID_subarea = i;
+                                            }
+                                            catch (Exception ex)
+                                            {
 
-                                            //}
-                                            //try
-                                            //{
-                                            //    _headCount.Nombre_Departamento = CostDepartament[1];
-                                            //}
-                                            //catch (Exception ex)
-                                            //{
+                                            }
+                                            try
+                                            {
+                                                _headCount.nombre_subarea = $"Subarea {i}";
+                                            }
+                                            catch (Exception ex)
+                                            {
 
-                                            //}
+                                            }
                                         }
                                         catch (Exception ex)
                                         {
@@ -247,7 +239,7 @@ namespace SupervisorMobility.API.Controllers
                                         }
                                         try
                                         {
-                                            var valueHC = ws.Cell(i, 10).GetString() != "" ? ws.Cell(i, 10).GetValue<string>() : "";
+                                            var valueHC = ws.Cell(i, 1).GetString() != "" ? ws.Cell(i, 1).Value.ToString() : "";
                                             try
                                             {
                                                 _headCount.HC = int.Parse(valueHC);
@@ -302,6 +294,8 @@ namespace SupervisorMobility.API.Controllers
 
                                         }
 
+                                        await _supervisorMobilityRepository.AddHeadCoutAsync(_headCount);
+
 
                                         retries = 0;
                                         // Si la operación tiene éxito, puedes salir del bucle
@@ -325,7 +319,6 @@ namespace SupervisorMobility.API.Controllers
 
                             }//end is not empety row
                         }//end else first roe
-                        await _supervisorMobilityRepository.AddHeadCoutAsync(_headCount);
                         i++;
                     }//end foreach
                     await _supervisorMobilityRepository.SaveChangesAsync();
