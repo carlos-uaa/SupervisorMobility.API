@@ -1,15 +1,9 @@
-﻿using DocumentFormat.OpenXml.Bibliography;
-using DocumentFormat.OpenXml.Spreadsheet;
-using Microsoft.Identity.Client;
-using System;
-using System.ComponentModel.DataAnnotations;
-using System.ComponentModel.DataAnnotations.Schema;
+﻿using System.ComponentModel.DataAnnotations.Schema;
 
-namespace SupervisorMobility.API.DataAccess.Entities
+namespace SupervisorMobility.API.Models.HeadCount
 {
-    public class HeadCount
+    public class HeadCountDto
     {
-        [Key, DatabaseGenerated(DatabaseGeneratedOption.Identity)]
         public int HeadCountId { get; set; }
         public int Codigo { get; set; }
         public string CO { get; set; }
@@ -28,10 +22,8 @@ namespace SupervisorMobility.API.DataAccess.Entities
         public int HC { get; set; }
         public string? Comentarios { get; set; }
         public string LABOR_TYPE { get; set; }
-        [Column(TypeName = "Date")]
         public DateTime Fecha_de_alta { get; set; }
         public string Usuario_de_alta { get; set; }
         public int? UserUploadId { get; set; }
-
     }
 }

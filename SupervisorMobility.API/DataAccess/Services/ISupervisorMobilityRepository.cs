@@ -310,6 +310,7 @@ namespace SupervisorMobility.API.Services
         Task<int> UpdateSOSReview(SOSReviewForUpdateDto SOSForUpdate, SOSReviewProgram SOSEntity);
         #endregion
         #region headcount
+        Task<IEnumerable<HeadCount>> GetAllHeadCountsDataAsync();
         void RemoveAllHeadCouns();
         Task AddHeadCoutAsync(HeadCount user);
         #endregion

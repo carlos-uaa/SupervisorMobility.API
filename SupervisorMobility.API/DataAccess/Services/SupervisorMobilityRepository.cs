@@ -1902,6 +1902,11 @@ namespace SupervisorMobility.API.Services
         }
         #endregion
         #region HeadCount
+        public async Task<IEnumerable<HeadCount>> GetAllHeadCountsDataAsync()
+        {
+            return await _context.headCounts.ToListAsync();
+        }
+
         public async void RemoveAllHeadCouns()
         {
             var oldData = _context.headCounts.ToList();

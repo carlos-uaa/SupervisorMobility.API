@@ -6,7 +6,9 @@ using SupervisorMobility.API.Business;
 using SupervisorMobility.API.DataAccess.Entities;
 using SupervisorMobility.API.Models.AssyChart;
 using SupervisorMobility.API.Models.FileUploadDto;
+using SupervisorMobility.API.Models.HeadCount;
 using SupervisorMobility.API.Models.OperationDtos;
+using SupervisorMobility.API.Models.Users;
 using SupervisorMobility.API.Services;
 using System.Diagnostics;
 
@@ -34,9 +36,18 @@ namespace SupervisorMobility.API.Controllers
                 throw new ArgumentNullException(nameof(mapper));
         }
 
+        [HttpGet]
+        public async Task<ActionResult<IEnumerable<HeadCountDto>>> GetAllData()
+        {
+            var data = await _supervisorMobilityRepository.GetAllHeadCountsDataAsync();
+
+            return Ok(_mapper.Map<IEnumerable<HeadCountDto>>(data));
+        }
+
         [HttpPost("Upload")]
         public async Task<ActionResult<FileUpload>> UploadFileFromMassiveUpload(IFormFile file, int UserIdUpload)
         {
+           
 
             var uploadResult = new FileUploadForCreationDto();
             string trustedFileNameForStorage = string.Empty;
@@ -183,22 +194,77 @@ namespace SupervisorMobility.API.Controllers
                                         {
                                             var valueFunctionDescription = ws.Cell(i, 5).GetString() != "" ? ws.Cell(i, 5).GetValue<string>() : "";
 
-                                            try
+                                            bool contieneEspacio = valueFunctionDescription.Contains(" ");
+
+                                            if (contieneEspacio)
                                             {
-                                                _headCount.ID_subarea = i;
-                                            }
-                                            catch (Exception ex)
-                                            {
+                                                bool contieneNumero = valueFunctionDescription.Any(char.IsDigit);
+
+                                                string[] resultado = valueFunctionDescription.Split(new[] { ' ' }, 2, StringSplitOptions.RemoveEmptyEntries);
+                                                // 0 es la funcion y el resto de area
+                                                if (contieneNumero)
+                                                {
+                                                    //Tiene id de subarea,  extraemos numero
+                                                    string numeroString = new string(resultado[1].Where(char.IsDigit).ToArray());
+
+                                                    //convertimos
+                                                    if (int.TryParse(numeroString, out int numero))
+                                                    {
+                                                        //guaramos id
+                                                        _headCount.ID_subarea = numero;
+                                                        
+                                                        try
+                                                        {
+                                                            _headCount.nombre_subarea = resultado[1].Replace(numeroString, "");
+                                                        }
+                                                        catch (Exception ex)
+                                                        {
+
+                                                        }
+                                                    }
+                                                    else
+                                                    {
+                                                        //fallo el numero asignamos default
+                                                        _headCount.ID_subarea = 0;
+                                                    }
+                                                }
+                                                else
+                                                {
+                                                    //No tiene id de subarea
+                                                    _headCount.ID_subarea = 0;
+
+                                                    try
+                                                    {
+                                                        _headCount.nombre_subarea = resultado[1];
+                                                    }
+                                                    catch (Exception ex)
+                                                    {
+
+                                                    }
+
+                                                }
+
+                                                try
+                                                {
+                                                    _headCount.Fuction_Type = resultado[0];
+                                                }
+                                                catch (Exception ex)
+                                                {
+
+                                                }
+
+                                               
 
                                             }
-                                            try
+                                            else
                                             {
-                                                _headCount.nombre_subarea = $"Subarea {i}";
+                                                _headCount.ID_subarea = 0;
+                                                _headCount.nombre_subarea = "N/a";
+                                                _headCount.Fuction_Type = valueFunctionDescription;
                                             }
-                                            catch (Exception ex)
-                                            {
 
-                                            }
+
+
                                         }
                                         catch (Exception ex)
                                         {
@@ -298,13 +364,16 @@ namespace SupervisorMobility.API.Controllers
 
 
                                         retries = 0;
+
+                                        Console.WriteLine($"Intento {retries + 1} Linea Position [{i}]");
+
                                         // Si la operación tiene éxito, puedes salir del bucle
                                         break;
                                     }
                                     catch (Exception ex)
                                     {
                                         // Maneja la excepción aquí, si es necesario
-                                        Console.WriteLine($"Intento {retries + 1} falló: {ex.Message}");
+                                        Console.WriteLine($"Intento {retries + 1} Linea Position [{i}] falló: {ex.Message}");
 
                                         // Incrementa el número de intentos
                                         retries++;
