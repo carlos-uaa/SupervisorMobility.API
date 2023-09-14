@@ -311,7 +311,8 @@ namespace SupervisorMobility.API.Services
         #endregion
         #region headcount
         Task<IEnumerable<HeadCount>> GetAllHeadCountsDataAsync();
-        void RemoveAllHeadCouns();
+        Task<HeadCount?> GetHeadCountByIdAsync(int HeadId);
+        Task<AsyncVoidMethodBuilder> RemoveAllHeadCountRegisters();
         Task AddHeadCoutAsync(HeadCount user);
         #endregion
         #region CommonOperations

@@ -4,6 +4,7 @@ using DocumentFormat.OpenXml.Spreadsheet;
 using Microsoft.AspNetCore.Mvc;
 using SupervisorMobility.API.Business;
 using SupervisorMobility.API.DataAccess.Entities;
+using SupervisorMobility.API.Models.AreaDtos;
 using SupervisorMobility.API.Models.AssyChart;
 using SupervisorMobility.API.Models.FileUploadDto;
 using SupervisorMobility.API.Models.HeadCount;
@@ -36,13 +37,7 @@ namespace SupervisorMobility.API.Controllers
                 throw new ArgumentNullException(nameof(mapper));
         }
 
-        [HttpGet]
-        public async Task<ActionResult<IEnumerable<HeadCountDto>>> GetAllData()
-        {
-            var data = await _supervisorMobilityRepository.GetAllHeadCountsDataAsync();
-
-            return Ok(_mapper.Map<IEnumerable<HeadCountDto>>(data));
-        }
+       
 
         [HttpPost("Upload")]
         public async Task<ActionResult<FileUpload>> UploadFileFromMassiveUpload(IFormFile file, int UserIdUpload)
@@ -71,6 +66,7 @@ namespace SupervisorMobility.API.Controllers
             var fileToReturn = await _assyChartService.CreateFileAsync(uploadResult);
 
             await _supervisorMobilityRepository.SaveChangesAsync();
+            await _supervisorMobilityRepository.RemoveAllHeadCountRegisters();
 
 
             //Start Massive Upload 
@@ -411,6 +407,31 @@ namespace SupervisorMobility.API.Controllers
 
             return Ok();
 
+        }
+
+        [HttpGet]
+        public async Task<ActionResult<IEnumerable<HeadCountDto>>> GetAllData()
+        {
+            var data = await _supervisorMobilityRepository.GetAllHeadCountsDataAsync();
+
+            return Ok(_mapper.Map<IEnumerable<HeadCountDto>>(data));
+        }
+
+        [HttpPut("{HeadId}")]
+        public async Task<ActionResult> UpdateArea(int HeadId, HeadCountDto ForUpdate)
+        {
+           
+            var HeadCounEntity = await _supervisorMobilityRepository.GetHeadCountByIdAsync(HeadId);
+            if (HeadCounEntity == null)
+            {
+                return NotFound();
+            }
+
+            _mapper.Map(ForUpdate, HeadCounEntity);
+
+            await _supervisorMobilityRepository.SaveChangesAsync();
+
+            return Ok();
         }
 
     }

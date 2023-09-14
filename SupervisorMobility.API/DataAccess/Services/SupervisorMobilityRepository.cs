@@ -5,6 +5,7 @@ using DocumentFormat.OpenXml.Wordprocessing;
 using Irony.Parsing;
 using Microsoft.Data.SqlClient;
 using Microsoft.EntityFrameworkCore;
+using Microsoft.EntityFrameworkCore.Storage;
 using SupervisorMobility.API.Context;
 using SupervisorMobility.API.DataAccess.Entities;
 using SupervisorMobility.API.DataAccess.Entities.ILU;
@@ -1907,17 +1908,23 @@ namespace SupervisorMobility.API.Services
             return await _context.headCounts.ToListAsync();
         }
 
-        public async void RemoveAllHeadCouns()
+        public async Task<AsyncVoidMethodBuilder> RemoveAllHeadCountRegisters()
         {
-            var oldData = _context.headCounts.ToList();
-            _context.headCounts.RemoveRange(oldData);
+            _context.headCounts.RemoveRange(_context.headCounts);
             await _context.SaveChangesAsync();
+
+            return new AsyncVoidMethodBuilder();
         }
 
         public async Task AddHeadCoutAsync(HeadCount user)
         {
             _context.headCounts.Add(user);
             await _context.SaveChangesAsync();
+        }
+
+        public async Task<HeadCount?> GetHeadCountByIdAsync(int HeadId)
+        {
+            return await _context.headCounts.Where(a => a.HeadCountId == HeadId).FirstOrDefaultAsync();
         }
         #endregion
         #region CommonOperations
