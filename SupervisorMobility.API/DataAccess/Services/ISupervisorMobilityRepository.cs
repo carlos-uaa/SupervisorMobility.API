@@ -225,7 +225,7 @@ namespace SupervisorMobility.API.Services
         #region JobObservationOperations
 
         Task<IEnumerable<JobObservation>> GetAllJobObservationsAsync(bool includeLup);
-        Task<IEnumerable<JobObservation>> GetJobObservationsByFiltersAsync(DateTime startDate, DateTime endDate, int plantId, int areaId, int supervisorId, int status);
+        Task<IEnumerable<JobObservation>> GetJobObservationsByFiltersAsync(DateTime startDate, DateTime endDate, int plantId, int areaId, int distributionId, int operationId, int supervisorId, int status);
         Task<JobObservation?> GetJobObservationAsync(int jobObservationId, bool includeLup);
         void AddJobObservation(JobObservation jobObservation);
         void DeleteJobObservation(JobObservation jobObservation);
@@ -242,7 +242,7 @@ namespace SupervisorMobility.API.Services
         #region LupOperations
         Task<IEnumerable<Lup>> GetAllLupAsync();
         Task<Lup?> GetLupAsync(int guideId, bool includeFile = false);
-        Task<IEnumerable<Lup>> GetLupsByFiltersAsync(int year, int operationId);
+        Task<IEnumerable<Lup>> GetLupsByFiltersAsync(DateTime startDate, DateTime endDate, int plantId, int areaId, int distributionId, int operationId, int supervisorId, int status);
         void AddLup(Lup lup);
         void DeleteLup(Lup lup);
         Task<bool> LupExistAsync(int lupId);

@@ -3,6 +3,7 @@ using AutoMapper;
 using DocumentFormat.OpenXml.Drawing;
 using DocumentFormat.OpenXml.Wordprocessing;
 using Irony.Parsing;
+using Microsoft.AspNetCore.Mvc;
 using Microsoft.Data.SqlClient;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Storage;
@@ -1390,7 +1391,7 @@ namespace SupervisorMobility.API.Services
         #endregion
         #region JobObservationOperations
 
-        public async Task<IEnumerable<JobObservation>> GetJobObservationsByFiltersAsync(DateTime startDate, DateTime endDate, int plantId, int areaId, int supervisorId, int status)
+        public async Task<IEnumerable<JobObservation>> GetJobObservationsByFiltersAsync(DateTime startDate, DateTime endDate, int plantId, int areaId, int distributionId, int operationId, int supervisorId, int status)
         {
 
             var query = _context.JobObservations
@@ -1411,6 +1412,16 @@ namespace SupervisorMobility.API.Services
             if (areaId != default(int))
             {
                 query = query.Where(j => j.AreaId == areaId);
+            }
+
+            if (distributionId != default(int))
+            {
+                query = query.Where(j => j.DistributionId == distributionId);
+
+            }
+            if (operationId != default(int))
+            {
+                query = query.Where(j => j.OperationId == operationId);
             }
 
             if (supervisorId != default(int))
@@ -1555,14 +1566,82 @@ namespace SupervisorMobility.API.Services
 
         }
 
-        public async Task<IEnumerable<Lup>> GetLupsByFiltersAsync(int year, int operationId)
+        //public async Task<IEnumerable<Lup>> GetLupsByFiltersAsync(int year, int operationId)
+        //{
+
+        //    var query = _context.JobObservations
+        //        .Where(j => j.IsActive == true && j.OperationId == operationId && j.Lup.Count() > 0 && j.Lup.Any(lup => lup.IsActive == true))
+        //        .SelectMany(j => j.Lup.Where(lup => lup.IsActive == true && lup.CreatedDate.HasValue && lup.CreatedDate.Value.Year == year));
+
+        //    return await query.OrderBy(l => l.CreatedDate).ToListAsync();
+        //}
+
+        [HttpGet("lups")]
+        public async Task<IEnumerable<Lup>> GetLupsByFiltersAsync(DateTime startDate, DateTime endDate, int plantId, int areaId, int distributionId, int operationId, int supervisorId, int status)
         {
             var query = _context.JobObservations
-                .Where(j => j.IsActive == true && j.OperationId == operationId && j.Lup.Count() > 0 && j.Lup.Any(lup => lup.IsActive == true))
-                .SelectMany(j => j.Lup.Where(lup => lup.IsActive == true && lup.CreatedDate.HasValue && lup.CreatedDate.Value.Year == year));
+                .Where(j => j.IsActive == true);
 
-            return await query.OrderBy(l => l.CreatedDate).ToListAsync();
+            if (plantId != default(int))
+            {
+                query = query.Where(j => j.PlantId == plantId);
+
+            }
+            if (areaId != default(int))
+            {
+                query = query.Where(j => j.AreaId == areaId);
+            }
+
+            if (distributionId != default(int))
+            {
+                query = query.Where(j => j.DistributionId == distributionId);
+
+            }
+            if (operationId != default(int))
+            {
+                query = query.Where(j => j.OperationId == operationId);
+            }
+
+            if (supervisorId != default(int))
+            {
+                query = query.Where(j => j.SupervisorId == supervisorId);
+            }
+
+            if (endDate != default(DateTime))
+            {
+                query = query.Where(j => j.StartDate.HasValue && j.StartDate.Value.Date <= endDate.Date);
+            }
+            var lups = await query
+                .SelectMany(j => j.Lup.Where(lup => lup.IsActive == true))
+                .ToListAsync();
+
+            if (startDate != default(DateTime))
+            {
+                lups = lups
+                    .Where(lup => lup.CreatedDate.HasValue && lup.CreatedDate.Value.Date >= startDate.Date ||
+                                   (lup.CreatedDate.HasValue && lup.CreatedDate.Value.Date <= startDate.Date &&
+                                    (lup.EndDate.HasValue && lup.EndDate.Value.Date >= startDate.Date)))
+                    .ToList();
+            }
+
+            if (endDate != default(DateTime))
+            {
+                lups = lups
+                    .Where(lup => lup.CreatedDate.HasValue && lup.CreatedDate.Value.Date <= endDate.Date)
+                    .ToList();
+            }
+
+            if (status != default(int))
+            {
+                lups = lups
+                    .Where(lup => lup.Status == status)
+                    .ToList();
+            }
+
+            return lups;
         }
+
+
 
         public void AddLup(Lup lup)
         {

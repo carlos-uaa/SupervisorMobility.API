@@ -71,20 +71,14 @@ namespace SupervisorMobility.API.Controllers
             DateTime endDate,
             int plantId,
             int areaId,
+            int distributionId, 
+            int operationId,
             int supervisorId,
             int status)
         {
 
-            var allJobObservations = await _supervisorMobilityRepository.GetJobObservationsByFiltersAsync(startDate, endDate, plantId, areaId, supervisorId, status);
-            if(allJobObservations.Count() > 0)
-            {
-                return Ok(_mapper.Map<IEnumerable<JobObservationDto>>(allJobObservations));
-
-            }
-            else
-            {
-                return Ok(new { Message = "No results" });
-            }
+            var allJobObservations = await _supervisorMobilityRepository.GetJobObservationsByFiltersAsync(startDate, endDate, plantId, areaId, distributionId, operationId, supervisorId, status);
+            return Ok(_mapper.Map<IEnumerable<JobObservationDto>>(allJobObservations));
         }
 
         [HttpGet]
