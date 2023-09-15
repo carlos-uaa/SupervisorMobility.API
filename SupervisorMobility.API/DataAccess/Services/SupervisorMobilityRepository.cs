@@ -2005,6 +2005,10 @@ namespace SupervisorMobility.API.Services
         {
             return await _context.headCounts.Where(a => a.HeadCountId == HeadId).FirstOrDefaultAsync();
         }
+
+
+
+
         #endregion
         #region CommonOperations
         public async Task<bool> SaveChangesAsync()

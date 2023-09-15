@@ -2,6 +2,7 @@
 using ClosedXML.Excel;
 using DocumentFormat.OpenXml.Spreadsheet;
 using Microsoft.AspNetCore.Mvc;
+using SpreadsheetLight;
 using SupervisorMobility.API.Business;
 using SupervisorMobility.API.DataAccess.Entities;
 using SupervisorMobility.API.Models.AreaDtos;
@@ -433,6 +434,77 @@ namespace SupervisorMobility.API.Controllers
 
             return Ok();
         }
+
+        [HttpGet("Bulk/DownloadAllUsersFormat")]
+        public async Task<IActionResult> DownloadAllUsersFormat()
+        {
+            var data = await _supervisorMobilityRepository.GetAllHeadCountsDataAsync();
+
+            MemoryStream ms = new MemoryStream(6000 * 65536);
+            SLDocument ws = new SLDocument();
+
+            ws.RenameWorksheet(SLDocument.DefaultFirstSheetName, "Users Bulk");
+
+
+            ws.SetCellValue("A1", "IdSupervisorMobility");
+            ws.SetCellValue("B1", "Codigo");
+            ws.SetCellValue("C1", "CO");
+            ws.SetCellValue("D1", "ID_AREA");
+            ws.SetCellValue("E1", "NOMBRE_AREA");
+            ws.SetCellValue("F1", "COST_CENTER");
+            ws.SetCellValue("G1", "ID_DEPARTAMENT");
+            ws.SetCellValue("H1", "FUNCTION");
+            ws.SetCellValue("I1", "ID_SUBAREA");
+            ws.SetCellValue("J1", "SUBAREA");
+            ws.SetCellValue("K1", "NIVEL");
+            ws.SetCellValue("L1", "GRUPO");
+            ws.SetCellValue("M1", "BUDGET");
+            ws.SetCellValue("N1", "RTO");
+            ws.SetCellValue("O1", "HC");
+            ws.SetCellValue("P1", "COMENTARIOS");
+            ws.SetCellValue("Q1", "LABORTYPE");
+            ws.SetCellValue("R1", "FECHADEALTA");
+            ws.SetCellValue("S1", "USUARIODEALTA");
+            ws.SetCellValue("T1", "USRIdSupervisorMobility");
+
+
+            int row = 2;
+            foreach(var element in data)
+            {
+                ws.SetCellValue($"A{row}", element.HeadCountId.ToString() ?? "");
+                ws.SetCellValue($"B{row}", element.Codigo.ToString() ?? "");
+                ws.SetCellValue($"C{row}", element.CO ?? "");
+                ws.SetCellValue($"D{row}", element.ID_Area.ToString() ?? "");
+                ws.SetCellValue($"E{row}", element.Nombre_Area ?? "");
+                ws.SetCellValue($"F{row}", element.Cost_center.ToString() ?? "");
+                ws.SetCellValue($"G{row}", element.ID_Departamento.ToString() ?? "");
+                ws.SetCellValue($"H{row}", element.Fuction_Type.ToString() ?? "");
+                ws.SetCellValue($"I{row}", element.ID_subarea.ToString() ?? "");
+                ws.SetCellValue($"J{row}", element.nombre_subarea.ToString() ?? "");
+                ws.SetCellValue($"K{row}", element.Nivel.ToString() ?? "");
+                ws.SetCellValue($"L{row}", element.Group.ToString() ?? "");
+                ws.SetCellValue($"M{row}", element.BUDGET.ToString() ?? "");
+                ws.SetCellValue($"N{row}", element.RTO.ToString() ?? "");
+                ws.SetCellValue($"O{row}", element.HC.ToString() ?? "");
+                ws.SetCellValue($"P{row}", element.Comentarios?.ToString() ?? "");
+                ws.SetCellValue($"Q{row}", element.LABOR_TYPE.ToString() ?? "");
+                ws.SetCellValue($"R{row}", element.Fecha_de_alta.ToString()  ?? "");
+                ws.SetCellValue($"S{row}", element.Usuario_de_alta.ToString() ?? "");
+                ws.SetCellValue($"T{row}", element.UserUploadId.ToString() ?? "");
+
+                row++;
+            }
+
+            ws.SaveAs(ms);
+
+            ms.Position = 0;
+
+            var res = File(ms, "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet", "AllHeadCount.xlsx");
+            res.EnableRangeProcessing = true;
+            return res;
+
+        }//end download file function 
+
 
     }
 }
