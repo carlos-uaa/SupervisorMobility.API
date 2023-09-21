@@ -1,4 +1,5 @@
-﻿using SupervisorMobility.API.DataAccess.Entities.ILU;
+﻿using DocumentFormat.OpenXml.Drawing.Charts;
+using SupervisorMobility.API.DataAccess.Entities.ILU;
 using SupervisorMobility.API.Entities;
 using System.ComponentModel.DataAnnotations;
 using System.ComponentModel.DataAnnotations.Schema;
@@ -67,22 +68,39 @@ namespace SupervisorMobility.API.DataAccess.Entities
 
             switch (UserType)
             {
-
+                case 1:
+                case 6:
+                    return Name == other.Name &&
+                           ObjectId == other.ObjectId &&
+                           Email == other.Email;
                 case 2:
                     return Name == other.Name &&
-                           Email == other.Email &&
-                           PlantId == other.PlantId &&
+                          ObjectId == other.ObjectId &&
+                          Email == other.Email &&
+                          SuperiorId == other.SuperiorId &&
+                          PlantId == other.PlantId &&
                            GroupId == other.GroupId;
                 case 3:
                     return Name == other.Name &&
+                           ObjectId == other.ObjectId &&
                            Email == other.Email &&
                            SuperiorId == other.SuperiorId &&
-                           AreaId == other.AreaId;
+                           PlantId == other.PlantId &&
+                           AreaId == other.AreaId &&
+                           GroupId == other.GroupId;
                 case 4:
                     return Payroll == other.Payroll &&
                            Name == other.Name &&
                            SuperiorId == other.SuperiorId &&
-                           DistributionId == other.DistributionId;
+                           PlantId == other.PlantId &&
+                           AreaId == other.AreaId &&
+                           DistributionId == other.DistributionId &&
+                           GroupId == other.GroupId;
+                case 5:
+                    return Name == other.Name &&
+                          ObjectId == other.ObjectId &&
+                          Email == other.Email &&
+                          PlantId == other.PlantId;
                 default:
                     return false;
             }
@@ -97,24 +115,46 @@ namespace SupervisorMobility.API.DataAccess.Entities
 
                 switch (UserType)
                 {
-                    case 4:
-                        hash = hash * 23 + Payroll.GetHashCode();
+
+                    case 1:
+                    case 6:
                         hash = hash * 23 + (Name != null ? Name.GetHashCode() : 0);
-                        hash = hash * 23 + (SuperiorId != null ? SuperiorId.GetHashCode() : 0);
-                        hash = hash * 23 + (DistributionId != null ? DistributionId.GetHashCode() : 0);
+                        hash = hash * 23 + (ObjectId != null ? ObjectId.GetHashCode() : 0);
+                        hash = hash * 23 + (Email != null ? Email.GetHashCode() : 0);
                         break;
                     case 2:
                         hash = hash * 23 + (Name != null ? Name.GetHashCode() : 0);
+                        hash = hash * 23 + (ObjectId != null ? ObjectId.GetHashCode() : 0);
                         hash = hash * 23 + (Email != null ? Email.GetHashCode() : 0);
+                        hash = hash * 23 + (SuperiorId!= null ? SuperiorId.GetHashCode() : 0);
+                        hash = hash * 23 + (PlantId != null ? PlantId.GetHashCode() : 0);
+                        hash = hash * 23 + (GroupId != null ? GroupId.GetHashCode() : 0);
+                        break;
+                    case 3:
+
+                        hash = hash * 23 + (Name != null ? Name.GetHashCode() : 0);
+                        hash = hash * 23 + (ObjectId != null ? ObjectId.GetHashCode() : 0);
+                        hash = hash * 23 + (Email != null ? Email.GetHashCode() : 0);
+                        hash = hash * 23 + (SuperiorId != null ? SuperiorId.GetHashCode() : 0);
                         hash = hash * 23 + (PlantId != null ? PlantId.GetHashCode() : 0);
                         hash = hash * 23 + (AreaId != null ? AreaId.GetHashCode() : 0);
                         hash = hash * 23 + (GroupId != null ? GroupId.GetHashCode() : 0);
                         break;
-                    case 3:
+                       
+                    case 4:
+                        hash = hash * 23 + Payroll.GetHashCode();
                         hash = hash * 23 + (Name != null ? Name.GetHashCode() : 0);
-                        hash = hash * 23 + (Email != null ? Email.GetHashCode() : 0);
                         hash = hash * 23 + (SuperiorId != null ? SuperiorId.GetHashCode() : 0);
+                        hash = hash * 23 + (PlantId != null ? PlantId.GetHashCode() : 0);
                         hash = hash * 23 + (AreaId != null ? AreaId.GetHashCode() : 0);
+                        hash = hash * 23 + (DistributionId != null ? DistributionId.GetHashCode() : 0);
+                        hash = hash * 23 + (GroupId != null ? GroupId.GetHashCode() : 0);
+                        break;
+                    case 5:
+                        hash = hash * 23 + (Name != null ? Name.GetHashCode() : 0);
+                        hash = hash * 23 + (ObjectId != null ? ObjectId.GetHashCode() : 0);
+                        hash = hash * 23 + (Email != null ? Email.GetHashCode() : 0);
+                        hash = hash * 23 + (PlantId != null ? PlantId.GetHashCode() : 0);
                         break;
                 }
 

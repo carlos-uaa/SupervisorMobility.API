@@ -219,15 +219,15 @@ namespace SupervisorMobility.API.Services
 
             return await _context.Areas
                 .Where(a => a.PlantId == plantId && a.IsActive == true).ToListAsync();
-        }  
-        
+        }
+
         public async Task<Area?> GetAreaOnlyIdAsync(int areaId)
         {
             return await _context.Areas
                            .Where(a => a.AreaId == areaId)
                            .FirstOrDefaultAsync();
         }
-        
+
         public async Task<Area?> GetAreaForPlantAsync(int plantId,
             int areaId, bool includeOperations = false)
         {
@@ -297,14 +297,14 @@ namespace SupervisorMobility.API.Services
 
             return await _context.Distributions
                 .Where(o => o.AreaId == areaId && o.IsActive == true).ToListAsync();
-        } 
-        
+        }
+
         public async Task<IEnumerable<Distribution>> GetAllDistributions()
         {
-           
-                return await _context.Distributions.Include(p => p.Products)
-                     .Where(o => o.IsActive == true)
-                    .ToListAsync();
+
+            return await _context.Distributions.Include(p => p.Products)
+                 .Where(o => o.IsActive == true)
+                .ToListAsync();
         }
         public async Task<Distribution?> GetDistributionForAreaAsync(int areaId, int distributionId, bool includeCollections = false)
         {
@@ -577,7 +577,7 @@ namespace SupervisorMobility.API.Services
         {
             return await _context.Products
                 .Where(p => p.Code == code && p.Description == description).FirstOrDefaultAsync();
-        } 
+        }
         public async Task<Product?> GetProductByCodeAsync(string code)
         {
             return await _context.Products
@@ -677,7 +677,7 @@ namespace SupervisorMobility.API.Services
                  .Where(p => p.AssyChardId == asssychartId).FirstOrDefaultAsync();
         }
 
-     
+
         public async Task<AssyChart?> GetAssyChartForJobObservationAsync(int PlantId, int AreaId, int DistributionId)
         {
             return await _context.AssyCharts.Include(pr => pr.RoutesProductsAssyChart)
@@ -718,9 +718,9 @@ namespace SupervisorMobility.API.Services
                 .Include(o => o.Operation)
                 .Include(pr => pr.RoutesProductsAssyChart).Where(u => u.IsActive == true)
                 .OrderBy(c => c.AssyChardId).ToListAsync();
-        } 
-        
-        
+        }
+
+
 
 
         public async Task<AssyChart?> GetAssyChartAdvanceAsync(int PlantId, int AreaId, int DistributionId, int OperationId)
@@ -1123,6 +1123,10 @@ namespace SupervisorMobility.API.Services
         public async Task<bool> UserExistByEmailAsync(string email)
         {
             return await _context.Users.AnyAsync(p => p.Email == email);
+        } 
+        public async Task<bool> UserExistByObjectIdAsync(string ObjectId)
+        {
+            return await _context.Users.AnyAsync(p => p.ObjectId == ObjectId);
         }
 
         public async Task<bool> UserExistAdvanceAsync(string nombre, int nomina, int plantid, int areaid, int grupoid)
@@ -1189,7 +1193,7 @@ namespace SupervisorMobility.API.Services
             {
                 userWithAreas.Areas?.Clear();
 
-                await _context.SaveChangesAsync(); 
+                await _context.SaveChangesAsync();
             }
         }
         public async Task<AsyncVoidMethodBuilder> UserUpdateAllSubordinated(User Master)
@@ -1331,7 +1335,7 @@ namespace SupervisorMobility.API.Services
             _context.SaveChanges();
         }
 
-       
+
         #endregion
         #region File
         public void AddUploadFile(FileUpload fileUplaod)

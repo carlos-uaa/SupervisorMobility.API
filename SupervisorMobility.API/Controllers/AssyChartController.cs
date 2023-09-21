@@ -185,6 +185,14 @@ namespace SupervisorMobility.API.Controllers
 
             _mapper.Map(CodePathForUpdate, CodePathInDB);
 
+
+            var assyChartEntity = await _supervisorMobilityRepository.GetAssyChartAsync((int)CodePathForUpdate.AssyChardId);
+
+          
+
+            _supervisorMobilityRepository.AssychartAddCodePath(assyChartEntity, CodePathInDB);
+
+
             await _supervisorMobilityRepository.SaveChangesAsync();
 
             return (_mapper.Map<RouteProductAssyChartWithNavigations>(CodePathInDB));

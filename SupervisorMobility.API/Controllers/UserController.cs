@@ -164,7 +164,7 @@ namespace SupervisorMobility.API.Controllers
         public async Task<ActionResult<UsersWithNavigationAndPeopleDetails>> GetUserByObject(string ObjectId, bool collections = false)
         {
 
-            
+
             var userEntity = await _assyChartService.FetchUserWhitObjectIdAsync(ObjectId);
 
             if (collections)
@@ -335,7 +335,7 @@ namespace SupervisorMobility.API.Controllers
         [HttpPut("{userId}")]
         public async Task<ActionResult> UpdateUser(int userId, UsersForUpdateDto user)
         {
-            
+
             List<Area> AreasInUser = new List<Area>();
             List<User> UsersInUser = new List<User>();
             List<User> UsersWithoutChanges = new List<User>();
@@ -409,7 +409,7 @@ namespace SupervisorMobility.API.Controllers
                 {
                     var userInDB = await _assyChartService.FetchUserAsync(Sub.UserId);
 
-                    if(userInDB.AreaId != Sub.AreaId)
+                    if (userInDB.AreaId != Sub.AreaId)
                     {
                         _mapper.Map(Sub, userInDB);
                         UsersInUser.Add(userInDB);
@@ -437,7 +437,7 @@ namespace SupervisorMobility.API.Controllers
             var userToCompare = _mapper.Map<User>(user);
             var entityentity = await _supervisorMobilityRepository.GetUserAsync(userId, true);
 
-           
+
 
             if (!entityentity.Equals(userToCompare))
             {
@@ -515,7 +515,7 @@ namespace SupervisorMobility.API.Controllers
                     _supervisorMobilityRepository.UserAddSubordinated(UserToReturn, elementUserInList);
                 }
 
-                foreach(var userRestore in UsersWithoutChanges)
+                foreach (var userRestore in UsersWithoutChanges)
                 {
                     _supervisorMobilityRepository.UserAddSubordinated(UserToReturn, userRestore);
                 }
@@ -790,7 +790,7 @@ namespace SupervisorMobility.API.Controllers
         {
 
             UploadUsersResult ResultToReturn = new UploadUsersResult();
-            foreach (var item in UsersToCreate)
+            foreach (var ItemInUserList in UsersToCreate)
             {
                 List<Area> AreasInUser = new List<Area>();
                 List<User> UsersInUser = new List<User>();
@@ -799,110 +799,110 @@ namespace SupervisorMobility.API.Controllers
 
                 var UserToReturn = new User();
 
-                if (item.PlantId == 0 || item.PlantId == -1)
+                if (ItemInUserList.PlantId == 0 || ItemInUserList.PlantId == -1)
                 {
-                    item.PlantId = null;
+                    ItemInUserList.PlantId = null;
                 }
-                else if (item.PlantId != null)
+                else if (ItemInUserList.PlantId != null)
                 {
-                    if (!await _supervisorMobilityRepository.PlantExistAsync((int)item.PlantId))
+                    if (!await _supervisorMobilityRepository.PlantExistAsync((int)ItemInUserList.PlantId))
                     {
                         return NotFound("No Planta");
                     }
                 }
 
-                if (item.AreaId == 0 || item.AreaId == -1)
+                if (ItemInUserList.AreaId == 0 || ItemInUserList.AreaId == -1)
                 {
-                    item.AreaId = null;
+                    ItemInUserList.AreaId = null;
                 }
-                else if (item.AreaId != null)
+                else if (ItemInUserList.AreaId != null)
                 {
-                    if (!await _supervisorMobilityRepository.AreaExistAsync((int)item.AreaId))
+                    if (!await _supervisorMobilityRepository.AreaExistAsync((int)ItemInUserList.AreaId))
                     {
                         return NotFound("No Area");
                     }
                 }
 
-                if (item.GroupId == 0 || item.GroupId == -1)
+                if (ItemInUserList.GroupId == 0 || ItemInUserList.GroupId == -1)
                 {
-                    item.GroupId = null;
+                    ItemInUserList.GroupId = null;
                 }
-                else if (item.GroupId != null)
+                else if (ItemInUserList.GroupId != null)
                 {
-                    if (!await _supervisorMobilityRepository.GroupExistAsync((int)item.GroupId))
+                    if (!await _supervisorMobilityRepository.GroupExistAsync((int)ItemInUserList.GroupId))
                     {
                         return NotFound("No Group");
                     }
                 }
 
-                if (item.DistributionId == 0 || item.DistributionId == -1)
+                if (ItemInUserList.DistributionId == 0 || ItemInUserList.DistributionId == -1)
                 {
-                    item.DistributionId = null;
+                    ItemInUserList.DistributionId = null;
                 }
-                else if (item.DistributionId != null)
+                else if (ItemInUserList.DistributionId != null)
                 {
-                    if (!await _supervisorMobilityRepository.DistributionExistsAsync((int)item.DistributionId))
+                    if (!await _supervisorMobilityRepository.DistributionExistsAsync((int)ItemInUserList.DistributionId))
                     {
                         return NotFound("No Distribution");
                     }
                 }
 
-                if (item.Payroll == 0 || item.Payroll == -1)
+                if (ItemInUserList.Payroll == 0 || ItemInUserList.Payroll == -1)
                 {
-                    item.Payroll = null;
+                    ItemInUserList.Payroll = null;
                 }
 
-                if (item.SuperiorId == 0 || item.SuperiorId == -1)
+                if (ItemInUserList.SuperiorId == 0 || ItemInUserList.SuperiorId == -1)
                 {
-                    item.SuperiorId = null;
+                    ItemInUserList.SuperiorId = null;
                 }
 
 
-                if (item.Subordinates != null)
+                if (ItemInUserList.Subordinates != null)
                 {
                     haveUsers = true;
-                    foreach (var Sub in item.Subordinates)
+                    foreach (var Sub in ItemInUserList.Subordinates)
                     {
                         UsersInUser.Add(await _assyChartService.FetchUserAsync(Sub.UserId));
                     }
 
-                    item.Subordinates = null;
+                    ItemInUserList.Subordinates = null;
                 }
 
-                if (item.Areas != null)
+                if (ItemInUserList.Areas != null)
                 {
                     haveAreas = true;
-                    foreach (var AreainList in item.Areas)
+                    foreach (var AreainList in ItemInUserList.Areas)
                     {
-                        AreasInUser.Add(await _supervisorMobilityRepository.GetAreaForPlantAsync((int)item.PlantId, AreainList.AreaId));
+                        AreasInUser.Add(await _supervisorMobilityRepository.GetAreaForPlantAsync((int)ItemInUserList.PlantId, AreainList.AreaId));
                     }
-                    item.Areas = null;
+                    ItemInUserList.Areas = null;
                 }
 
                 ///////////////////
-                if (item.UserId == -1)
+                if (ItemInUserList.UserId == -1)
                 {
                     bool existUser = false;
                     int typeUser = 0;
-                    if (item.Payroll != null)
+                    if (ItemInUserList.Payroll != null)
                     {
-                        existUser = await _supervisorMobilityRepository.UserExistByPayrollAsync((int)item.Payroll);
+                        existUser = await _supervisorMobilityRepository.UserExistByPayrollAsync((int)ItemInUserList.Payroll);
                         typeUser = existUser ? 1 : 0;
                     }
 
-                    if (item.Email != "")
+                    if (ItemInUserList.Email != "")
                     {
-                        existUser = await _supervisorMobilityRepository.UserExistByEmailAsync(item.Email);
+                        existUser = await _supervisorMobilityRepository.UserExistByEmailAsync(ItemInUserList.Email);
                         typeUser = existUser ? 2 : 0;
                     }
 
                     if (existUser)
                     {
-                        var entityentity = typeUser == 1 ? await _supervisorMobilityRepository.GetUserByPayrollAsync((int)item.Payroll) : await _supervisorMobilityRepository.GetUserByEmailAsync(item.Email);
+                        var entityentity = typeUser == 1 ? await _supervisorMobilityRepository.GetUserByPayrollAsync((int)ItemInUserList.Payroll) : await _supervisorMobilityRepository.GetUserByEmailAsync(ItemInUserList.Email);
 
                         if (entityentity == null)
                         {
-                            var usertoCreate = _mapper.Map<UsersForCreation>(item);
+                            var usertoCreate = _mapper.Map<UsersForCreation>(ItemInUserList);
                             var finalUser = await _assyChartService.CreateUserAsync(usertoCreate);
                             if (finalUser != null)
                                 ResultToReturn.UsersCreated++;
@@ -912,37 +912,37 @@ namespace SupervisorMobility.API.Controllers
                         }
                         else
                         {
-                            var userToCompare = _mapper.Map<User>(item);
+                            var InComingUserToCompare = _mapper.Map<User>(ItemInUserList);
 
-                            if (!entityentity.Equals(userToCompare))
+                            if (!entityentity.Equals(InComingUserToCompare))
                             {
 
-                                if (userToCompare.SuperiorId != entityentity.SuperiorId)
+                                if (InComingUserToCompare.SuperiorId != entityentity.SuperiorId)
                                 {
-                                    if (userToCompare.SuperiorId != null && entityentity.SuperiorId != null)
+                                    if (InComingUserToCompare.SuperiorId != null && entityentity.SuperiorId != null)
                                     {
                                         User exsuperior = await _supervisorMobilityRepository.GetUserAsync((int)entityentity.SuperiorId, true);
                                         var usertoRemove = _mapper.Map<User>(entityentity);
 
                                         _supervisorMobilityRepository.UserRemoveSubordinated(exsuperior, usertoRemove);
 
-                                        User actualSuperior = await _supervisorMobilityRepository.GetUserAsync((int)item.SuperiorId, true);
+                                        User actualSuperior = await _supervisorMobilityRepository.GetUserAsync((int)ItemInUserList.SuperiorId, true);
                                         _supervisorMobilityRepository.UserAddSubordinated(actualSuperior, usertoRemove);
 
-                                        item.SuperiorId = actualSuperior.UserId;
-                                        item.PlantId = actualSuperior.PlantId;
-                                        item.GroupId = actualSuperior.GroupId;
+                                        ItemInUserList.SuperiorId = actualSuperior.UserId;
+                                        ItemInUserList.PlantId = actualSuperior.PlantId;
+                                        ItemInUserList.GroupId = actualSuperior.GroupId;
 
-                                        if (item.UserType == 4)
-                                            item.AreaId = actualSuperior.AreaId;
+                                        if (ItemInUserList.UserType == 4)
+                                            ItemInUserList.AreaId = actualSuperior.AreaId;
 
-                                        userToCompare = _mapper.Map<User>(item);
+                                        InComingUserToCompare = _mapper.Map<User>(ItemInUserList);
                                     }
                                 }
 
 
 
-                                var userToUpdate = _mapper.Map<UsersForUpdateDto>(userToCompare);
+                                var userToUpdate = _mapper.Map<UsersForUpdateDto>(InComingUserToCompare);
                                 userToUpdate.CreatedDate = (DateTime)entityentity.CreatedDate;
                                 await _supervisorMobilityRepository.UpdateUser(userToUpdate, entityentity.UserId);
                                 UserToReturn = _mapper.Map<User>(userToUpdate);
@@ -959,7 +959,7 @@ namespace SupervisorMobility.API.Controllers
                     }
                     else
                     {
-                        var usertoCreate = _mapper.Map<UsersForCreation>(item);
+                        var usertoCreate = _mapper.Map<UsersForCreation>(ItemInUserList);
                         var finalUser = await _assyChartService.CreateUserAsync(usertoCreate);
                         if (finalUser != null)
                             ResultToReturn.UsersCreated++;
@@ -972,32 +972,35 @@ namespace SupervisorMobility.API.Controllers
                 else
                 {
                     //User con id
-                    var entityUserwhitId = await _assyChartService.FetchUserAsync((int)item.UserId);
+                    var UserInDb = await _assyChartService.FetchUserAsync((int)ItemInUserList.UserId);
 
-                    if (entityUserwhitId == null)
+                    if (UserInDb == null)
                     {
                         //Si tiene un id erroneo, entra aqui para busqueda avanzada
                         bool existUser = false;
                         int typeUser = 0;
-                        if (item.Payroll != null)
+                        if (ItemInUserList.Payroll != null)
                         {
-                            existUser = await _supervisorMobilityRepository.UserExistByPayrollAsync((int)item.Payroll);
+                            existUser = await _supervisorMobilityRepository.UserExistByPayrollAsync((int)ItemInUserList.Payroll);
                             typeUser = existUser ? 1 : 0;
                         }
 
-                        if (item.Email != "")
+                        if (ItemInUserList.ObjectId != "")
                         {
-                            existUser = await _supervisorMobilityRepository.UserExistByEmailAsync(item.Email);
+                            existUser = await _supervisorMobilityRepository.UserExistByObjectIdAsync(ItemInUserList.ObjectId);
                             typeUser = existUser ? 2 : 0;
                         }
 
                         if (existUser)
                         {
-                            var entityentity = typeUser == 1 ? await _supervisorMobilityRepository.GetUserByPayrollAsync((int)item.Payroll) : await _supervisorMobilityRepository.GetUserByEmailAsync(item.Email);
+                            //el usuario existe 
+                            var entityentity = typeUser == 1 ? await _supervisorMobilityRepository.GetUserByPayrollAsync((int)ItemInUserList.Payroll) : await _supervisorMobilityRepository.GetUserByObjectIdAsync(ItemInUserList.ObjectId);
+                            //si fue un operador lo traigo mediante su payroll, si es es de otro tipo lo traigo mediante objectid
 
                             if (entityentity == null)
                             {
-                                var usertoCreate = _mapper.Map<UsersForCreation>(item);
+                                //usuario no existe, se crea
+                                var usertoCreate = _mapper.Map<UsersForCreation>(ItemInUserList);
                                 var finalUser = await _assyChartService.CreateUserAsync(usertoCreate);
                                 if (finalUser != null)
                                     ResultToReturn.UsersCreated++;
@@ -1006,52 +1009,129 @@ namespace SupervisorMobility.API.Controllers
                             }
                             else
                             {
-                                var userToCompare = _mapper.Map<User>(item);
-
-                                if (!entityentity.Equals(userToCompare))
+                                var InComingUserToCompare = _mapper.Map<User>(ItemInUserList);
+                                if (!UserInDb.Equals(InComingUserToCompare))
                                 {
-                                    if (userToCompare.SuperiorId != entityentity.SuperiorId)
+                                    //El Usuario es diferente al de la base de datos
+                                    if (InComingUserToCompare.SuperiorId != UserInDb.SuperiorId)
                                     {
-                                        if (userToCompare.SuperiorId != null && entityentity.SuperiorId != null)
+                                        //Superior es diferente
+                                        if (InComingUserToCompare.SuperiorId != null && UserInDb.SuperiorId == null)
                                         {
-                                            User exsuperior = await _supervisorMobilityRepository.GetUserAsync((int)entityentity.SuperiorId, true);
-                                            var usertoRemove = _mapper.Map<User>(entityentity);
+                                            //Verifico que los SuperiorId sean validos
+                                            //Me aseguro de que eliminar al usuario como subordinado del anterior SUPERIRO y lo reasigno al nuevo superior
+                                            User exsuperior = await _supervisorMobilityRepository.GetUserAsync((int)UserInDb.SuperiorId, true);
 
-                                            _supervisorMobilityRepository.UserRemoveSubordinated(exsuperior, usertoRemove);
+                                            _supervisorMobilityRepository.UserRemoveSubordinated(exsuperior, UserInDb);
 
-                                            User actualSuperior = await _supervisorMobilityRepository.GetUserAsync((int)item.SuperiorId, true);
-                                            _supervisorMobilityRepository.UserAddSubordinated(actualSuperior, usertoRemove);
+                                            User actualSuperior = await _supervisorMobilityRepository.GetUserAsync((int)ItemInUserList.SuperiorId, true);
 
-                                            item.SuperiorId = actualSuperior.UserId;
-                                            item.PlantId = actualSuperior.PlantId;
-                                            item.GroupId = actualSuperior.GroupId;
+                                            InComingUserToCompare.SuperiorId = actualSuperior.UserId;
+                                            InComingUserToCompare.PlantId = actualSuperior.PlantId;
+                                            InComingUserToCompare.GroupId = actualSuperior.GroupId;
 
-                                            if (item.UserType == 4)
-                                                item.AreaId = actualSuperior.AreaId;
+                                            if (ItemInUserList.UserType == 4)
+                                                InComingUserToCompare.AreaId = actualSuperior.AreaId;
 
-                                            userToCompare = _mapper.Map<User>(item);
+                                            _supervisorMobilityRepository.UserAddSubordinated(actualSuperior, UserInDb);
+
+                                            var userToUpdate = _mapper.Map<UsersForUpdateDto>(InComingUserToCompare);
+                                            userToUpdate.CreatedDate = (DateTime)UserInDb.CreatedDate;
+                                            await _supervisorMobilityRepository.UpdateUser(userToUpdate, UserInDb.UserId);
+                                            UserToReturn = _mapper.Map<User>(userToUpdate);
+
+                                            ResultToReturn.UsersUpdated++;
+                                        }
+                                        else if (InComingUserToCompare.SuperiorId != null && UserInDb.SuperiorId == null)
+                                        {
+                                            //Usuario sin Superior, asigno uno por primera ves
+                                            User actualSuperior = await _supervisorMobilityRepository.GetUserAsync((int)ItemInUserList.SuperiorId, true);
+
+                                            InComingUserToCompare.PlantId = actualSuperior.PlantId;
+                                            InComingUserToCompare.GroupId = actualSuperior.GroupId;
+
+                                            if (ItemInUserList.UserType == 4)
+                                                InComingUserToCompare.AreaId = actualSuperior.AreaId;
+
+                                            _supervisorMobilityRepository.UserAddSubordinated(actualSuperior, UserInDb);
+
+
+                                            var userToUpdate = _mapper.Map<UsersForUpdateDto>(InComingUserToCompare);
+                                            userToUpdate.CreatedDate = (DateTime)UserInDb.CreatedDate;
+                                            await _supervisorMobilityRepository.UpdateUser(userToUpdate, UserInDb.UserId);
+                                            UserToReturn = _mapper.Map<User>(userToUpdate);
+
+                                            ResultToReturn.UsersUpdated++;
+                                        }
+                                        else if (InComingUserToCompare.SuperiorId == null && UserInDb.SuperiorId != null)
+                                        {
+                                            //Elimina el supervisor y ya
+                                            User exsuperior = await _supervisorMobilityRepository.GetUserAsync((int)UserInDb.SuperiorId, true);
+
+                                            _supervisorMobilityRepository.UserRemoveSubordinated(exsuperior, UserInDb);
                                         }
                                     }
+                                    else
+                                    {
+                                        User actualSuperior = await _supervisorMobilityRepository.GetUserAsync((int)InComingUserToCompare.SuperiorId, true);
+                                        if (UserInDb.PlantId != actualSuperior.PlantId || InComingUserToCompare.AreaId != actualSuperior.AreaId || UserInDb.GroupId != actualSuperior.GroupId)
+                                        {
+                                            InComingUserToCompare.PlantId = actualSuperior.PlantId;
+                                            InComingUserToCompare.GroupId = actualSuperior.GroupId;
 
-                                    var userToUpdate = _mapper.Map<UsersForUpdateDto>(userToCompare);
+                                            if (InComingUserToCompare.UserType == 4)
+                                                InComingUserToCompare.AreaId = actualSuperior.AreaId;
 
-                                    userToUpdate.CreatedDate = (DateTime)entityentity.CreatedDate;
-                                    await _supervisorMobilityRepository.UpdateUser(userToUpdate, entityentity.UserId);
-                                    UserToReturn = _mapper.Map<User>(userToUpdate);
-                                    ResultToReturn.UsersUpdated++;
+                                            var userToUpdate = _mapper.Map<UsersForUpdateDto>(InComingUserToCompare);
+                                            userToUpdate.CreatedDate = (DateTime)UserInDb.CreatedDate;
+                                            await _supervisorMobilityRepository.UpdateUser(userToUpdate, UserInDb.UserId);
+
+                                            ResultToReturn.UsersUpdated++;
+                                            UserToReturn = _mapper.Map<User>(userToUpdate);
+                                        }
+                                        else
+                                        {
+                                            ResultToReturn.UsersExist++;
+                                            UserToReturn = _mapper.Map<User>(UserInDb);
+                                        }
+
+                                    }
+
                                 }
                                 else
                                 {
+                                    //el usuario es el mismo en la base de datos, pero la comparacion no valida que siga siendo la misma informacion del superior y el usuario
 
-                                    UserToReturn = _mapper.Map<User>(entityentity);
-                                    ResultToReturn.UsersExist++;
-                                }
+                                    User actualSuperior = await _supervisorMobilityRepository.GetUserAsync((int)UserInDb.SuperiorId, true);
 
-                            }
+                                    if (InComingUserToCompare.PlantId != actualSuperior.PlantId || InComingUserToCompare.AreaId != actualSuperior.AreaId || InComingUserToCompare.GroupId != actualSuperior.GroupId)
+                                    {
+                                        InComingUserToCompare.PlantId = actualSuperior.PlantId;
+                                        InComingUserToCompare.GroupId = actualSuperior.GroupId;
+
+                                        if (InComingUserToCompare.UserType == 4)
+                                            InComingUserToCompare.AreaId = actualSuperior.AreaId;
+
+                                        var userToUpdate = _mapper.Map<UsersForUpdateDto>(InComingUserToCompare);
+                                        userToUpdate.CreatedDate = (DateTime)UserInDb.CreatedDate;
+                                        await _supervisorMobilityRepository.UpdateUser(userToUpdate, UserInDb.UserId);
+
+                                        ResultToReturn.UsersUpdated++;
+                                        UserToReturn = _mapper.Map<User>(userToUpdate);
+                                    }
+                                    else
+                                    {
+                                        ResultToReturn.UsersExist++;
+                                        UserToReturn = _mapper.Map<User>(UserInDb);
+                                    }
+                                }//end else son iguales
+
+
+                            }//end else usuario si existia
                         }
                         else
                         {
-                            var usertoCreate = _mapper.Map<UsersForCreation>(item);
+                            var usertoCreate = _mapper.Map<UsersForCreation>(ItemInUserList);
                             var finalUser = await _assyChartService.CreateUserAsync(usertoCreate);
                             if (finalUser != null)
                                 ResultToReturn.UsersCreated++;
@@ -1061,48 +1141,126 @@ namespace SupervisorMobility.API.Controllers
                     }
                     else
                     {
-                        var userToCompare = _mapper.Map<User>(item);
-                        if (!entityUserwhitId.Equals(userToCompare))
+                        var InComingUserToCompare = _mapper.Map<User>(ItemInUserList);
+                        if (!UserInDb.Equals(InComingUserToCompare))
                         {
-                            if (userToCompare.SuperiorId != entityUserwhitId.SuperiorId)
+                            //El Usuario es diferente al de la base de datos
+                            if (InComingUserToCompare.SuperiorId != UserInDb.SuperiorId)
                             {
-                                if (userToCompare.SuperiorId != null && entityUserwhitId.SuperiorId != null)
+                                //Superior es diferente
+                                if (InComingUserToCompare.SuperiorId != null && UserInDb.SuperiorId == null)
                                 {
-                                    User exsuperior = await _supervisorMobilityRepository.GetUserAsync((int)entityUserwhitId.SuperiorId, true);
-                                    var usertoRemove = _mapper.Map<User>(entityUserwhitId);
+                                    //Verifico que los SuperiorId sean validos
+                                    //Me aseguro de que eliminar al usuario como subordinado del anterior SUPERIRO y lo reasigno al nuevo superior
+                                    User exsuperior = await _supervisorMobilityRepository.GetUserAsync((int)UserInDb.SuperiorId, true);
 
-                                    _supervisorMobilityRepository.UserRemoveSubordinated(exsuperior, usertoRemove);
+                                    _supervisorMobilityRepository.UserRemoveSubordinated(exsuperior, UserInDb);
 
-                                    User actualSuperior = await _supervisorMobilityRepository.GetUserAsync((int)item.SuperiorId, true);
-                                    _supervisorMobilityRepository.UserAddSubordinated(actualSuperior, usertoRemove);
+                                    User actualSuperior = await _supervisorMobilityRepository.GetUserAsync((int)ItemInUserList.SuperiorId, true);
 
-                                    item.SuperiorId = actualSuperior.UserId;
-                                    item.PlantId = actualSuperior.PlantId;
-                                    item.GroupId = actualSuperior.GroupId;
+                                    InComingUserToCompare.SuperiorId = actualSuperior.UserId;
+                                    InComingUserToCompare.PlantId = actualSuperior.PlantId;
+                                    InComingUserToCompare.GroupId = actualSuperior.GroupId;
 
-                                    if (item.UserType == 4)
-                                        item.AreaId = actualSuperior.AreaId;
+                                    if (ItemInUserList.UserType == 4)
+                                        InComingUserToCompare.AreaId = actualSuperior.AreaId;
 
-                                    userToCompare = _mapper.Map<User>(item);
+                                    _supervisorMobilityRepository.UserAddSubordinated(actualSuperior, UserInDb);
+
+                                    var userToUpdate = _mapper.Map<UsersForUpdateDto>(InComingUserToCompare);
+                                    userToUpdate.CreatedDate = (DateTime)UserInDb.CreatedDate;
+                                    await _supervisorMobilityRepository.UpdateUser(userToUpdate, UserInDb.UserId);
+                                    UserToReturn = _mapper.Map<User>(userToUpdate);
+
+                                    ResultToReturn.UsersUpdated++;
+                                }
+                                else if (InComingUserToCompare.SuperiorId != null && UserInDb.SuperiorId == null)
+                                {
+                                    //Usuario sin Superior, asigno uno por primera ves
+                                    User actualSuperior = await _supervisorMobilityRepository.GetUserAsync((int)ItemInUserList.SuperiorId, true);
+
+                                    InComingUserToCompare.PlantId = actualSuperior.PlantId;
+                                    InComingUserToCompare.GroupId = actualSuperior.GroupId;
+
+                                    if (ItemInUserList.UserType == 4)
+                                        InComingUserToCompare.AreaId = actualSuperior.AreaId;
+
+                                    _supervisorMobilityRepository.UserAddSubordinated(actualSuperior, UserInDb);
+
+
+                                    var userToUpdate = _mapper.Map<UsersForUpdateDto>(InComingUserToCompare);
+                                    userToUpdate.CreatedDate = (DateTime)UserInDb.CreatedDate;
+                                    await _supervisorMobilityRepository.UpdateUser(userToUpdate, UserInDb.UserId);
+                                    UserToReturn = _mapper.Map<User>(userToUpdate);
+
+                                    ResultToReturn.UsersUpdated++;
+                                }
+                                else if (InComingUserToCompare.SuperiorId == null && UserInDb.SuperiorId != null)
+                                {
+                                    //Elimina el supervisor y ya
+                                    User exsuperior = await _supervisorMobilityRepository.GetUserAsync((int)UserInDb.SuperiorId, true);
+
+                                    _supervisorMobilityRepository.UserRemoveSubordinated(exsuperior, UserInDb);
                                 }
                             }
+                            else
+                            {
+                                User actualSuperior = await _supervisorMobilityRepository.GetUserAsync((int)InComingUserToCompare.SuperiorId, true);
+                                if (InComingUserToCompare.PlantId != actualSuperior.PlantId || InComingUserToCompare.AreaId != actualSuperior.AreaId || InComingUserToCompare.GroupId != actualSuperior.GroupId)
+                                {
+                                    InComingUserToCompare.PlantId = actualSuperior.PlantId;
+                                    InComingUserToCompare.GroupId = actualSuperior.GroupId;
 
-                            var userToUpdate = _mapper.Map<UsersForUpdateDto>(userToCompare);
-                            userToUpdate.CreatedDate = (DateTime)entityUserwhitId.CreatedDate;
-                            await _supervisorMobilityRepository.UpdateUser(userToUpdate, entityUserwhitId.UserId);
-                            UserToReturn = _mapper.Map<User>(userToUpdate);
+                                    if (InComingUserToCompare.UserType == 4)
+                                        InComingUserToCompare.AreaId = actualSuperior.AreaId;
 
-                            ResultToReturn.UsersUpdated++;
+                                    var userToUpdate = _mapper.Map<UsersForUpdateDto>(InComingUserToCompare);
+                                    userToUpdate.CreatedDate = (DateTime)UserInDb.CreatedDate;
+                                    await _supervisorMobilityRepository.UpdateUser(userToUpdate, UserInDb.UserId);
+
+                                    ResultToReturn.UsersUpdated++;
+                                    UserToReturn = _mapper.Map<User>(userToUpdate);
+                                }
+                                else
+                                {
+                                    ResultToReturn.UsersExist++;
+                                    UserToReturn = _mapper.Map<User>(UserInDb);
+                                }
+
+                            }
+
                         }
                         else
                         {
-                            ResultToReturn.UsersExist++;
-                            UserToReturn = _mapper.Map<User>(entityUserwhitId);
-                        }
+                            //el usuario es el mismo en la base de datos, pero la comparacion no valida que siga siendo la misma informacion del superior y el usuario
 
-                    }
+                            User actualSuperior = await _supervisorMobilityRepository.GetUserAsync((int)UserInDb.SuperiorId, true);
 
-                }
+                            if (UserInDb.PlantId != actualSuperior.PlantId || UserInDb.AreaId != actualSuperior.AreaId || UserInDb.GroupId != actualSuperior.GroupId)
+                            {
+                                InComingUserToCompare.PlantId = actualSuperior.PlantId;
+                                InComingUserToCompare.GroupId = actualSuperior.GroupId;
+
+                                if (InComingUserToCompare.UserType == 4)
+                                    InComingUserToCompare.AreaId = actualSuperior.AreaId;
+
+                                var userToUpdate = _mapper.Map<UsersForUpdateDto>(InComingUserToCompare);
+                                userToUpdate.CreatedDate = (DateTime)UserInDb.CreatedDate;
+                                await _supervisorMobilityRepository.UpdateUser(userToUpdate, UserInDb.UserId);
+
+                                ResultToReturn.UsersUpdated++;
+                                UserToReturn = _mapper.Map<User>(userToUpdate);
+                            }
+                            else
+                            {
+                                ResultToReturn.UsersExist++;
+                                UserToReturn = _mapper.Map<User>(UserInDb);
+                            }
+                        }//end else son iguales
+
+                    }//end else existe en base de datos
+
+                }//end else tiene id
 
                 if (haveUsers)
                 {
@@ -2158,9 +2316,9 @@ namespace SupervisorMobility.API.Controllers
                         typeUser = existUser ? 1 : 0;
                     }
 
-                    if (item.Email != "")
+                    if (item.ObjectId != "")
                     {
-                        existUser = await _supervisorMobilityRepository.UserExistByEmailAsync(item.Email);
+                        existUser = await _supervisorMobilityRepository.UserExistByObjectIdAsync(item.ObjectId);
                         typeUser = existUser ? 2 : 0;
                     }
 
