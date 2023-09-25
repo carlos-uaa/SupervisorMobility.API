@@ -17,7 +17,7 @@ namespace SupervisorMobility.API.Models.RouteProductAssyChartDtos
         public string? CommonDirectionHOE { get; set; } = string.Empty;
 
         public int DistributionId { get; set; }
-
+        public DistributionDtos.DistributionWithoutNavigationPropertiesDto? Distribution {  get; set; }
         public int? ProductId { get; set; }
         public ProductDtos.ProductDto? Product { get; set; }
 

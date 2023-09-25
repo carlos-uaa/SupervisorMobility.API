@@ -1297,6 +1297,7 @@ namespace SupervisorMobility.API.Services
         public async Task<IEnumerable<SOSCodePath>> GetAllCodePathsAsync()
         {
             return await _context.CodePaths
+                .Include(p => p.Distribution)
                  .Include(cp => cp.AssyChart.Plant)
                  .Include(cp => cp.AssyChart.Area)
                  .Include(a => a.Product)

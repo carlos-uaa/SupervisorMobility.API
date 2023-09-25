@@ -54,6 +54,7 @@ namespace SupervisorMobility.API.DataAccess.Entities.SOS_Review
 
         [Column(TypeName = "Date")]
         public DateTime? ApprovalDate { get; set; }
+        public bool SuggestionApplied { get; set; }
 
         public bool IsActive { get; set; }
     }
