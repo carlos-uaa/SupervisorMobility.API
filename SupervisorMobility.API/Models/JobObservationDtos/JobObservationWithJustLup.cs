@@ -1,4 +1,5 @@
-﻿using SupervisorMobility.API.Models.LupDtos;
+﻿using SupervisorMobility.API.Models.DistributionDtos;
+using SupervisorMobility.API.Models.LupDtos;
 
 namespace SupervisorMobility.API.Models.JobObservationDtos
 {
@@ -7,6 +8,7 @@ namespace SupervisorMobility.API.Models.JobObservationDtos
 
         public ICollection<LupDto> Lup { get; set; } = new List<LupDto>();
         public ICollection<JobObservationHistoryDto> History { get; set; } = new List<JobObservationHistoryDto>();
+        public DistributionWithoutNavigationPropertiesDto Distribution { get; set; } = new DistributionWithoutNavigationPropertiesDto();
 
         public int JobObservationId { get; set; }
         public bool? IsActive { get; set; }
