@@ -10,7 +10,7 @@
         public int OperationId { get; set; }
 
         public int SupervisorId { get; set; }
-        public int OperatorId { get; set; }
+        public int? OperatorId { get; set; }
 
         public int? Type { get; set; }
         public DateTime? StartDate { get; set; }
@@ -28,7 +28,7 @@
 
         public string? HOEStandardTimes { get; set; }
         public string? Models { get; set; }
-        public string? Cicles { get; set; }
+        public string? Cycles { get; set; }
 
         public string? SsvCommentary { get; set; }
         public string? OperatorCommentary { get; set; }

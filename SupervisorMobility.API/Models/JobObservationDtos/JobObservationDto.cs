@@ -15,7 +15,7 @@ namespace SupervisorMobility.API.Models.JobObservationDtos
         public OperationWithoutNavigationPropertiesDto Operation { get; set; } = new OperationWithoutNavigationPropertiesDto();
 
         public UsersWithoutNavigationWithoutPeopleDetails Supervisor { get; set; } = new UsersWithoutNavigationWithoutPeopleDetails();
-        public UsersWithoutNavigationWithoutPeopleDetails Operator { get; set; } = new UsersWithoutNavigationWithoutPeopleDetails();
+        public UsersWithoutNavigationWithoutPeopleDetails? Operator { get; set; } = new UsersWithoutNavigationWithoutPeopleDetails();
 
 
         public int JobObservationId { get; set; }
@@ -42,7 +42,7 @@ namespace SupervisorMobility.API.Models.JobObservationDtos
         public string? Anomaly { get; set; }
         public string? HOEStandardTimes { get; set; }
         public string? Models { get; set; }
-        public string? Cicles { get; set; }
+        public string? Cycles { get; set; }
 
         public string? SsvCommentary { get; set; }
         public string? OperatorCommentary { get; set; }

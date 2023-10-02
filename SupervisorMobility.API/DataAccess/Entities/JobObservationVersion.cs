@@ -44,7 +44,7 @@ namespace SupervisorMobility.API.Entities
         public string? Anomaly { get; set; }
         public string? HOEStandardTimes { get; set; }
         public string? Models { get; set; }
-        public string? Cicles { get; set; }
+        public string? Cycles { get; set; }
 
         public string? SsvCommentary { get; set; }
         public string? OperatorCommentary { get; set; }

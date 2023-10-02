@@ -279,9 +279,9 @@ namespace SupervisorMobility.API.Context
                     Option = 1,
                     SupervisorId = 1,
                     OperatorId = 2,
-                    HOEStandardTimes = "2000|1500|2000|3000|2500",
+                    HOEStandardTimes = "0.4|0.3|0.25|0.35|0.6",
                     Models = "1|1|1|1|1",
-                    Cicles = "3000|2500|3000|4000|1500",
+                    Cycles = "0.4|0.35|0.0.25|0.4|0.5",
                     SsvCommentary = "Senior Supervisor Commentary",
                     OperatorCommentary = "Operator Commentary",
 

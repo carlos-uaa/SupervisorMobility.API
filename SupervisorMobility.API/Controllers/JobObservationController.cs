@@ -59,7 +59,15 @@ namespace SupervisorMobility.API.Controllers
             }
 
             var finalJobObservation = _mapper.Map<JobObservation>(jobObservation);
+            if (finalJobObservation.OperationId == 0)
+            {
+                finalJobObservation.OperationId = null;
+            }
 
+            if (finalJobObservation.OperatorId == 0)
+            {
+                finalJobObservation.OperatorId = null;
+            }
             _supervisorMobilityRepository.AddJobObservation(finalJobObservation);
             await _supervisorMobilityRepository.SaveChangesAsync();
             return Ok(finalJobObservation);
@@ -181,7 +189,6 @@ namespace SupervisorMobility.API.Controllers
 
 
             var jobObservationEntity = await _supervisorMobilityRepository.GetJobObservationAsync(jobObservationId, false);
-
             if (jobObservationEntity == null)
             {
                 return NotFound("Job Observation Not Found");
@@ -281,7 +288,7 @@ namespace SupervisorMobility.API.Controllers
             {
                 resumeChanges += "Models, ";
             }
-            if (jobObservationEntity.Cicles != jobObservationForUpdate.Cicles)
+            if (jobObservationEntity.Cycles != jobObservationForUpdate.Cycles)
             {
                 resumeChanges += "Cicles, ";
             }
@@ -310,6 +317,11 @@ namespace SupervisorMobility.API.Controllers
             if (resumeChanges.EndsWith(", "))
             {
                 resumeChanges = resumeChanges.Substring(0, resumeChanges.Length - 2);
+            }
+
+            if (jobObservationForUpdate.OperatorId == 0)
+            {
+                jobObservationForUpdate.OperatorId = null;
             }
 
             //Actualiza la jobobsevation

@@ -1509,9 +1509,10 @@ namespace SupervisorMobility.API.Services
                  .Where(p => p.JobObservationId == jobObservationId).FirstOrDefaultAsync();
         }
 
-        public void AddJobObservation(JobObservation jobObservation)
+        public async Task<int> AddJobObservation(JobObservation jobObservation)
         {
             _context.JobObservations.Add(jobObservation);
+            return _context.SaveChanges();
         }
 
         public void DeleteJobObservation(JobObservation jobObservation)

@@ -228,7 +228,7 @@ namespace SupervisorMobility.API.Services
         Task<IEnumerable<JobObservation>> GetAllJobObservationsAsync(bool includeLup);
         Task<IEnumerable<JobObservation>> GetJobObservationsByFiltersAsync(DateTime startDate, DateTime endDate, int plantId, int areaId, int distributionId, int operationId, int supervisorId, int status);
         Task<JobObservation?> GetJobObservationAsync(int jobObservationId, bool includeLup);
-        void AddJobObservation(JobObservation jobObservation);
+        Task<int> AddJobObservation(JobObservation jobObservation);
         void DeleteJobObservation(JobObservation jobObservation);
         Task<bool> JobObservationExistAsync(int jobObservationId);
 
