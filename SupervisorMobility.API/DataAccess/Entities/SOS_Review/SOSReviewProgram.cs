@@ -10,9 +10,7 @@ namespace SupervisorMobility.API.DataAccess.Entities.SOS_Review
         public int SOSid { get; set; }
         public int Status { get; set; }
 
-        public int? Supervisorid { get; set; }
-        [ForeignKey("Supervisorid")]
-        public User? Supervisor { get; set; }
+        public ICollection<User>? Supervisors { get; set; }
 
         public int? PlantId { get; set; }
         [ForeignKey("PlantId")]
@@ -22,8 +20,6 @@ namespace SupervisorMobility.API.DataAccess.Entities.SOS_Review
         [ForeignKey("AreaId")]
 
         public Area? Area { get; set; }
-
-
 
         [Column(TypeName = "Date")]
         public DateTime? CreationDate { get; set; }
@@ -47,7 +43,6 @@ namespace SupervisorMobility.API.DataAccess.Entities.SOS_Review
                 }
             }
         }
-
 
         [Column(TypeName = "Date")]
         public DateTime? EditionDate { get; set; }

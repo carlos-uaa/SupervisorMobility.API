@@ -288,7 +288,6 @@ namespace SupervisorMobility.API.Services
         #region Logger
 
         #endregion
-
         #region UserNotFound
 
         Task<IEnumerable<UserNotFound>> GetAllUsersNotFoundAsync();
@@ -298,17 +297,30 @@ namespace SupervisorMobility.API.Services
 
         Task AddUserNotFoundAsync(UserNotFound userNotFound);
         #endregion
-
         #region SOS_Reviews
-
-        Task<IEnumerable<SOSReviewProgram>> GetAllSOSReviews();
-        Task<IEnumerable<SOSRegisterJobObservation>> GetAllSOSReviewsRegisters(int SosId);
-
-        Task<SOSReviewProgram?> GetSOSasync(int sosId);
+        //startRegion
         Task<int> AddSOSReview(SOSReviewProgram SOSEntity);
-        Task<int> AddSOSReviewRegister(SOSRegisterJobObservation RegEntity);
-        Task<int> DeleteSOSReview(SOSReviewProgram SOSEntity);
+        Task<IEnumerable<SOSReviewProgram>> GetAllSOSReviews();
+        Task<SOSReviewProgram?> GetSOSasync(int sosId);
         Task<int> UpdateSOSReview(SOSReviewForUpdateDto SOSForUpdate, SOSReviewProgram SOSEntity);
+        Task<int> DeleteSOSReview(SOSReviewProgram SOSEntity);
+        
+        // add Supervisor Responsable
+        void SOSReviewAddUser(SOSReviewProgram Master, User Slave);
+        //EndRegion
+        #endregion 
+        #region SOS_RegOperationJobObservartion
+        //startRegion
+        Task<IEnumerable<SOSRegisterJobObservation>> GetAllSOSReviewsRegisters(int SosId);
+        Task<int> AddSOSReviewRegister(SOSRegisterJobObservation RegEntity);
+        //EndRegion
+        #endregion
+        #region SOS_RegUserOperation
+        //startRegion
+        Task<int> AddSOSRegUserOperation(SOSRegUserOperation RegEntity);
+        Task<IEnumerable<SOSRegUserOperation>> GetAllSOSRegUserOperations(int SosId);
+        //EndRegion
+
         #endregion
         #region headcount
         Task<IEnumerable<HeadCount>> GetAllHeadCountsDataAsync();

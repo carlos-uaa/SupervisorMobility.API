@@ -1940,20 +1940,29 @@ namespace SupervisorMobility.API.Services
             return await _context.SOSReviews
                    .Include(p => p.Plant)
                    .Include(a => a.Area)
-                   .Include(s => s.Supervisor)
+                   .Include(s => s.Supervisors)
                    .Where(u => u.IsActive == true)
                     .OrderBy(c => c.SOSid).ToListAsync();
-
         }
 
         public async Task<IEnumerable<SOSRegisterJobObservation>> GetAllSOSReviewsRegisters(int SosId)
         {
             return await _context.SOSRegisters
                    .Include(j => j.JobObservation)
-                   .Include(d => d.Distribution)
+                   .Include(d => d.Operation)
                    .Include(s => s.SOSReviewProgram)
                    .Where(u => u.SOSReviewProgramid == SosId)
                     .OrderBy(c => c.SOSRegisterJobid).ToListAsync();
+
+        }
+        public async Task<IEnumerable<SOSRegUserOperation>> GetAllSOSRegUserOperations(int SosId)
+        {
+            return await _context.SOSRegsUserOperation
+                   .Include(d => d.Operation)
+                   .Include(U => U.Supervisor)
+                   .Include(s => s.SOSReviewProgram)
+                   .Where(u => u.SOSReviewProgramid == SosId)
+                    .OrderBy(c => c.SOSRegUserOperationId).ToListAsync();
 
         }
 
@@ -1962,7 +1971,7 @@ namespace SupervisorMobility.API.Services
             return await _context.SOSReviews
                    .Include(p => p.Plant)
                    .Include(a => a.Area)
-                   .Include(s => s.Supervisor)
+                   .Include(s => s.Supervisors)
                    .Where(p => p.SOSid == sosId).FirstOrDefaultAsync();
         }
         public async Task<int> AddSOSReview(SOSReviewProgram SOSEntity)
@@ -1970,9 +1979,21 @@ namespace SupervisorMobility.API.Services
             _context.SOSReviews.Add(SOSEntity);
             return _context.SaveChanges();
         }
+
+        public async void SOSReviewAddUser(SOSReviewProgram Master, User Slave)
+        {
+            Master.Supervisors?.Add(Slave);
+            _context.SaveChanges();
+        }
+
         public async Task<int> AddSOSReviewRegister(SOSRegisterJobObservation RegEntity)
         {
             _context.SOSRegisters.Add(RegEntity);
+            return _context.SaveChanges();
+        }
+        public async Task<int> AddSOSRegUserOperation(SOSRegUserOperation RegEntity)
+        {
+            _context.SOSRegsUserOperation.Add(RegEntity);
             return _context.SaveChanges();
         }
         public async Task<int> DeleteSOSReview(SOSReviewProgram SOSEntity)

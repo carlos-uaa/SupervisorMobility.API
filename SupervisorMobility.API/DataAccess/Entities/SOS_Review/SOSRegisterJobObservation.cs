@@ -8,16 +8,17 @@ namespace SupervisorMobility.API.DataAccess.Entities.SOS_Review
     {
         [Key, DatabaseGenerated(DatabaseGeneratedOption.Identity)]
         public int SOSRegisterJobid { get; set; }
+        public int? SOSReviewProgramid { get; set; }
+        public SOSReviewProgram? SOSReviewProgram { get; set; }
 
         public int? JobObservationId { get; set; }
         public JobObservation? JobObservation { get; set; }
 
-        public int? DistributionId { get; set; }
-        public Distribution? Distribution { get; set; }
+        public int? OperationId { get; set; }
+        public Operation? Operation { get; set; }
 
-        public int? SOSReviewProgramid { get; set; }
-        public SOSReviewProgram? SOSReviewProgram { get; set; } 
-
+        public string? Commentary { get; set; }
+  
         [Column(TypeName = "DateTime")]
         public DateTime? PreviewDate { get; set; }
 

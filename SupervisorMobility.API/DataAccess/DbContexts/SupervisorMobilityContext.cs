@@ -47,6 +47,7 @@ namespace SupervisorMobility.API.Context
         
         public DbSet<SOSReviewProgram> SOSReviews { get; set; }
         public DbSet<SOSRegisterJobObservation> SOSRegisters { get; set; }
+        public DbSet<SOSRegUserOperation> SOSRegsUserOperation { get; set; }
         
         #endregion
 
