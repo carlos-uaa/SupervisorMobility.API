@@ -164,7 +164,7 @@ namespace SupervisorMobility.API.Controllers
             
         }//end post create 
 
-        [HttpPost("Registers/UserOp/{SOSid}/{SupervisorId}/{OperationId}")]
+        [HttpPost("Registers/UserOp/{SOSid}")]
         public async Task<ActionResult<SOSRegUserOperationDto>> CreateSOSRegUserOperation(int SOSid, int SupervisorId, int OperationId)
         {
 
