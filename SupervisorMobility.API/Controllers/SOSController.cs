@@ -282,10 +282,17 @@ namespace SupervisorMobility.API.Controllers
 
             if(SOS_Entity.SupervisorId != sosUpdateEntity.SupervisorId)
             {
-                //todas las jobs se cambia el supervisor
+                
+                var Jobs = await _supervisorMobilityRepository.GetAllSOSReviewsRegisters((int)sosUpdateEntity.SOSReviewProgramid);
 
-                var Jobs = await _supervisorMobilityRepository.GetAllJobObservationsAsync(false);
-           
+                Jobs = Jobs.Where(j => j.OperationId == sosUpdateEntity.OperationId).ToList();
+
+                foreach(var job in Jobs)
+                {
+                    job.JobObservation.SupervisorId = sosUpdateEntity.SupervisorId;
+                }
+
+                await _supervisorMobilityRepository.SaveChangesAsync();
             }
 
             var result = await _supervisorMobilityRepository.UpdateRegUserOperation(sosUpdateEntity, SOS_Entity);
@@ -297,11 +304,9 @@ namespace SupervisorMobility.API.Controllers
             }
             else
             {
-                //await _supervisorMobilityRepository.SaveChangesAsync();
-
-                return Ok();
-            }
             //await _supervisorMobilityRepository.SaveChangesAsync();
+                return Ok(SOS_Entity);
+            }
 
         }//end Update 
 

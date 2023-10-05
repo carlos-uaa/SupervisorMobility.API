@@ -1945,13 +1945,13 @@ namespace SupervisorMobility.API.Services
                     .OrderBy(c => c.SOSid).ToListAsync();
         }
 
-        public async Task<IEnumerable<SOSRegisterJobObservation>> GetAllSOSReviewsRegisters(int SosId)
+        public async Task<IEnumerable<SOSRegisterJobObservation>> GetAllSOSReviewsRegisters(int SOSReviewProgramId)
         {
             return await _context.SOSRegisters
                    .Include(j => j.JobObservation)
                    .Include(d => d.Operation)
                    .Include(s => s.SOSReviewProgram)
-                   .Where(u => u.SOSReviewProgramid == SosId)
+                   .Where(u => u.SOSReviewProgramid == SOSReviewProgramId)
                     .OrderBy(c => c.SOSRegisterJobid).ToListAsync();
 
         }

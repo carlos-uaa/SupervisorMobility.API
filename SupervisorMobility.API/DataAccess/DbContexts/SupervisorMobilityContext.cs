@@ -690,22 +690,7 @@ namespace SupervisorMobility.API.Context
                 }
                 ); ;
 
-            modelBuilder.Entity<Lup>()
-                 .HasData(
-                     new Lup()
-                     {
-                         LupId = 1,
-                         JobObservationId = 1,
-                         Oportunity = "Operator need a safety helmet",
-                         IsActive = true,
-                         Observer = "Pedro",
-                         Pillar = 1,
-                         Q3 = "contramedida inmediata",
-                         Q4 = "contramedida definitiva",
-                         Status = 1,
-                         CreatedDate = DateTime.Now,
-                         EndDate = DateTime.Now
-                     });
+         
 
             modelBuilder.Entity<Notification>()
                 .HasData(

@@ -312,7 +312,7 @@ namespace SupervisorMobility.API.Services
         #region SOS_RegOperationJobObservartion
         //startRegion
         Task<int> AddSOSReviewRegister(SOSRegisterJobObservation RegEntity);
-        Task<IEnumerable<SOSRegisterJobObservation>> GetAllSOSReviewsRegisters(int SosId);
+        Task<IEnumerable<SOSRegisterJobObservation>> GetAllSOSReviewsRegisters(int SOSReviewProgramId);
         Task<SOSRegisterJobObservation?> GetSOSReviewRegister(int SosId);
         Task<int> UpdateRegUserOperation(SOSRegUserOperationForUpdateDto SOSForUpdate, SOSRegUserOperation SOSEntity);
         //EndRegion
