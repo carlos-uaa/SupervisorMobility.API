@@ -290,6 +290,7 @@ namespace SupervisorMobility.API.Controllers
                 foreach(var job in Jobs)
                 {
                     job.JobObservation.SupervisorId = sosUpdateEntity.SupervisorId;
+                    //await _supervisorMobilityRepository.
                 }
 
                 await _supervisorMobilityRepository.SaveChangesAsync();
