@@ -311,13 +311,16 @@ namespace SupervisorMobility.API.Services
         #endregion 
         #region SOS_RegOperationJobObservartion
         //startRegion
-        Task<IEnumerable<SOSRegisterJobObservation>> GetAllSOSReviewsRegisters(int SosId);
         Task<int> AddSOSReviewRegister(SOSRegisterJobObservation RegEntity);
+        Task<IEnumerable<SOSRegisterJobObservation>> GetAllSOSReviewsRegisters(int SosId);
+        Task<SOSRegisterJobObservation?> GetSOSReviewRegister(int SosId);
+        Task<int> UpdateRegUserOperation(SOSRegUserOperationForUpdateDto SOSForUpdate, SOSRegUserOperation SOSEntity);
         //EndRegion
         #endregion
         #region SOS_RegUserOperation
         //startRegion
         Task<int> AddSOSRegUserOperation(SOSRegUserOperation RegEntity);
+        Task<SOSRegUserOperation?> GetSOSRegUserOperation(int SosId);
         Task<IEnumerable<SOSRegUserOperation>> GetAllSOSRegUserOperations(int SosId);
         //EndRegion
 

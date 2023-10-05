@@ -267,6 +267,44 @@ namespace SupervisorMobility.API.Controllers
 
         }//end post create register
 
+
+        [HttpPut("Registers/UserOp/Register/{SOSRegid}")]
+        public async Task<ActionResult> UpdateSosReview(int SOSRegid,
+           SOSRegUserOperationForUpdateDto sosUpdateEntity)
+        {
+
+            var SOS_Entity = await _supervisorMobilityRepository.GetSOSRegUserOperation(SOSRegid);
+
+            if (SOS_Entity == null)
+            {
+                return NotFound();
+            }
+
+            if(SOS_Entity.SupervisorId != sosUpdateEntity.SupervisorId)
+            {
+                //todas las jobs se cambia el supervisor
+
+                var Jobs = await _supervisorMobilityRepository.GetAllJobObservationsAsync(false);
+           
+            }
+
+            var result = await _supervisorMobilityRepository.UpdateRegUserOperation(sosUpdateEntity, SOS_Entity);
+
+            if (result == 0)
+            {
+                return NotFound();
+
+            }
+            else
+            {
+                //await _supervisorMobilityRepository.SaveChangesAsync();
+
+                return Ok();
+            }
+            //await _supervisorMobilityRepository.SaveChangesAsync();
+
+        }//end Update 
+
         [HttpPut("{SOSid}")]
         public async Task<ActionResult> UpdateSosReview(int SOSid,
             SOSReviewForUpdateDto sosUpdateEntity)

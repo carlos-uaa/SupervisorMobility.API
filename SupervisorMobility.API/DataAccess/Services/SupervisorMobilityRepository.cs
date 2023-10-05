@@ -1955,6 +1955,14 @@ namespace SupervisorMobility.API.Services
                     .OrderBy(c => c.SOSRegisterJobid).ToListAsync();
 
         }
+        public async Task<SOSRegisterJobObservation?> GetSOSReviewRegister(int SosId)
+        {
+            return await _context.SOSRegisters
+                   .Include(j => j.JobObservation)
+                   .Include(d => d.Operation)
+                   .Include(s => s.SOSReviewProgram)
+                   .Where(p => p.SOSRegisterJobid == SosId).FirstOrDefaultAsync();
+        }
         public async Task<IEnumerable<SOSRegUserOperation>> GetAllSOSRegUserOperations(int SosId)
         {
             return await _context.SOSRegsUserOperation
@@ -1963,6 +1971,16 @@ namespace SupervisorMobility.API.Services
                    .Include(s => s.SOSReviewProgram)
                    .Where(u => u.SOSReviewProgramid == SosId)
                     .OrderBy(c => c.SOSRegUserOperationId).ToListAsync();
+
+        }
+        
+        public async Task<SOSRegUserOperation?> GetSOSRegUserOperation(int SosId)
+        {
+            return await _context.SOSRegsUserOperation
+                   .Include(d => d.Operation)
+                   .Include(U => U.Supervisor)
+                   .Include(s => s.SOSReviewProgram)
+                   .Where(p => p.SOSRegUserOperationId == SosId).FirstOrDefaultAsync();
 
         }
 
@@ -1994,6 +2012,13 @@ namespace SupervisorMobility.API.Services
         public async Task<int> AddSOSRegUserOperation(SOSRegUserOperation RegEntity)
         {
             _context.SOSRegsUserOperation.Add(RegEntity);
+            return _context.SaveChanges();
+        }
+
+        public async Task<int> UpdateRegUserOperation(SOSRegUserOperationForUpdateDto SOSForUpdate, SOSRegUserOperation SOSEntity)
+        {
+            _mapper.Map(SOSForUpdate, SOSEntity);
+
             return _context.SaveChanges();
         }
         public async Task<int> DeleteSOSReview(SOSReviewProgram SOSEntity)

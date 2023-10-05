@@ -10,7 +10,8 @@ namespace SupervisorMobility.API.DataAccess.Entities.SOS_Review
         public int SOSid { get; set; }
         public int Status { get; set; }
 
-        public ICollection<User>? Supervisors { get; set; }
+        public virtual ICollection<User>? Supervisors { get; set; }
+            = new List<User>();
 
         public int? PlantId { get; set; }
         [ForeignKey("PlantId")]

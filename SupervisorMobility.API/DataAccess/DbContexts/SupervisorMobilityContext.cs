@@ -260,33 +260,7 @@ namespace SupervisorMobility.API.Context
                 Console.WriteLine("Unable to parse '{0}'", endDate);
 
             //seeding some data
-            modelBuilder.Entity<JobObservation>()
-                .HasData(
-                new JobObservation()
-                {
-                    JobObservationId = 1,
-                    IsActive = true,
-                    PlantId = 1,
-                    AreaId = 1,
-                    DistributionId = 1,
-                    OperationId = 1,
-                    Type = 2,
-                    StartDate = startDateFormat,
-                    EndDate = endDateFormat,
-                    PlannedStartDate = startDateFormat,
-                    PlannedEndDate = endDateFormat,
-                    FinishedDate = null,
-                    Status = 1,
-                    Option = 1,
-                    SupervisorId = 1,
-                    OperatorId = 2,
-                    HOEStandardTimes = "0.4|0.3|0.25|0.35|0.6",
-                    Models = "1|1|1|1|1",
-                    Cycles = "0.4|0.35|0.0.25|0.4|0.5",
-                    SsvCommentary = "Senior Supervisor Commentary",
-                    OperatorCommentary = "Operator Commentary",
-
-                });
+            
 
             modelBuilder.Entity<ChecklistCategory>()
                 .HasData(
@@ -470,44 +444,7 @@ namespace SupervisorMobility.API.Context
                     IsActive = true,
                     PlantId = 2
                 });
-            modelBuilder.Entity<Distribution>()
-                .HasData(
-                new Distribution("Dist1", "Distribution 1 Trim 1")
-                {
-                    DistributionId = 1,
-                    IsActive = true,
-                    AreaId = 1
-                }, new Distribution("Dist2", "Distribution 2 Trim 2")
-                {
-                    DistributionId = 2,
-                    IsActive = true,
-                    AreaId = 2
-                },
-                new Distribution("P1 Dist 3", "Distribution 1 Paint 1")
-                {
-                    DistributionId = 3,
-                    IsActive = true,
-                    AreaId = 3
-                },
-                new Distribution("P2 Dist 4", "Distribution 2 Pint 2")
-                {
-                    DistributionId = 4,
-                    IsActive = true,
-                    AreaId = 4
-                }
-                );
-
-
-
-            modelBuilder.Entity<Operation>()
-                .HasData(
-                new Operation("OP1", "Operacion Trim 1")
-                {
-                    OperationId = 1,
-                    IsActive = true,
-                    DistributionId = 1
-                });
-
+            
 
             modelBuilder.Entity<SupportDocumentType>()
                 .HasData(
@@ -534,27 +471,21 @@ namespace SupervisorMobility.API.Context
 
             modelBuilder.Entity<Product>()
                 .HasData(
+                new Product("N71A", "Infinity N71A")
+                {
+                    ProductId = 2,
+                    IsActive = true
+                });  
+            
+            modelBuilder.Entity<Product>()
+                .HasData(
                 new Product("X247", "Mercedes X247")
                 {
                     ProductId = 3,
                     IsActive = true
                 });
 
-            modelBuilder.Entity<AssyChart>()
-                .HasData(
-                new AssyChart()
-                {
-                    AssyChardId = 1,
-                    IsActive = true,
-                   
-                    CreationDate = DateTime.Parse("2023-02-25T12:55:58.303-06:00"),
-                    ModificationDate = new DateTime(),
-                  
-                    PlantId = 1,
-                    AreaId = 1,
-                    DistributionId = 1,
-                    OperationId = 1
-                });
+ 
 
             modelBuilder.Entity<Glosary>()
             .HasData(

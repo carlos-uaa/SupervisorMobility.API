@@ -1,5 +1,6 @@
 ﻿using DocumentFormat.OpenXml.Drawing.Charts;
 using SupervisorMobility.API.DataAccess.Entities.ILU;
+using SupervisorMobility.API.DataAccess.Entities.SOS_Review;
 using SupervisorMobility.API.Entities;
 using System.ComponentModel.DataAnnotations;
 using System.ComponentModel.DataAnnotations.Schema;
@@ -23,6 +24,10 @@ namespace SupervisorMobility.API.DataAccess.Entities
         public User? Superior { get; set; }
         [InverseProperty("Superior")]
         public ICollection<User>? Subordinates { get; set; }
+        
+        [JsonIgnore]
+        public virtual ICollection<SOSReviewProgram>? SOSReviewPrograms { get; set; }
+            = new List<SOSReviewProgram>();
 
         public ICollection<ILURegister>? ILURegisers { get; set; }
 
