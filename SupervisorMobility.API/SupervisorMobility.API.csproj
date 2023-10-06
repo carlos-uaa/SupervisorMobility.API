@@ -38,6 +38,7 @@
 		<Folder Include="uploads\guides\" />
 		<Folder Include="uploads\headcount\NewFolder\" />
 		<Folder Include="uploads\massive\" />
+		<Folder Include="uploads\users\" />
 	</ItemGroup>
 
 	<Target Name="PublishFrontend" AfterTargets="ComputeFilesToPublish">

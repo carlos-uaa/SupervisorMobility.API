@@ -2,6 +2,7 @@
 using DocumentFormat.OpenXml.Office2010.Drawing;
 using DocumentFormat.OpenXml.Spreadsheet;
 using Microsoft.AspNetCore.Mvc;
+using SupervisorMobility.API.Business;
 using SupervisorMobility.API.DataAccess.Entities;
 using SupervisorMobility.API.DataAccess.Entities.SOS_Review;
 using SupervisorMobility.API.Entities;
@@ -20,11 +21,14 @@ namespace SupervisorMobility.API.Controllers
     {
         private readonly IMapper _mapper;
         private readonly ISupervisorMobilityRepository _supervisorMobilityRepository;
+        private readonly IAssyChartService _assyChartService;
 
-        public SOSController(ISupervisorMobilityRepository supervisorMobilityRepository,
+        public SOSController(ISupervisorMobilityRepository supervisorMobilityRepository, IAssyChartService assyChartService,
             IMapper mapper)
         {
             _supervisorMobilityRepository = supervisorMobilityRepository ??
+                throw new ArgumentNullException(nameof(supervisorMobilityRepository));
+            _assyChartService = assyChartService??
                 throw new ArgumentNullException(nameof(supervisorMobilityRepository));
             _mapper = mapper ??
                 throw new ArgumentNullException(nameof(mapper));
@@ -223,7 +227,7 @@ namespace SupervisorMobility.API.Controllers
         public async Task<ActionResult<SOSReviewWithAllDto>> CreateSOSRegister(int SOSid, int month, int year, JobObservationForCreationDto JobEntity)
         {
            
-            var finalJob =  _mapper.Map<JobObservation>(JobEntity);
+            var finalJob = _mapper.Map<JobObservation>(JobEntity);
 
             if(finalJob.OperationId == 0)
             {
@@ -289,7 +293,37 @@ namespace SupervisorMobility.API.Controllers
 
                 foreach(var job in Jobs)
                 {
-                    job.JobObservation.SupervisorId = sosUpdateEntity.SupervisorId;
+                  
+
+                    var jobObservationEntity = await _supervisorMobilityRepository.GetJobObservationAsync((int)job.JobObservationId, false);
+                    var ForUpdate = _mapper.Map<JobObservationForUpdateDto>(jobObservationEntity);
+
+                    ForUpdate.SupervisorId = (int)sosUpdateEntity.SupervisorId;
+
+                    JobObservationVersion HistoryToAdd = await _assyChartService.CreateHistoryJobObservationAsync(jobObservationEntity);
+
+                    //Actualiza la jobobsevation
+                    _mapper.Map(ForUpdate, jobObservationEntity);
+
+                    //añadimos la version anterior a la jobOb actualizada
+                    if (HistoryToAdd != null)
+                    {
+                        //optenemos la nueva version
+                        var jobtoaddversion = await _supervisorMobilityRepository.GetJobObservationAsync((int)job.JobObservationId, true);
+                        HistoryToAdd.DateModification = DateTime.Now;
+                        HistoryToAdd.resumeVersion = "supervisor";
+                        HistoryToAdd.MadeBy = "SOS REView system";
+                        //añadimos
+                        bool added = await _supervisorMobilityRepository.AddHistoyToJobObservationAsync(HistoryToAdd, jobtoaddversion);
+                        //add to 
+
+                        if (!added)
+                        {
+                            return NotFound("Fail updating history");
+                        }
+
+                    }
+
                     //await _supervisorMobilityRepository.
                 }
 
