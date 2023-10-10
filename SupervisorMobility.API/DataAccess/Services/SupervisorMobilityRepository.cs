@@ -2018,7 +2018,7 @@ namespace SupervisorMobility.API.Services
         public async Task<int> UpdateRegUserOperation(SOSRegUserOperationForUpdateDto SOSForUpdate, SOSRegUserOperation SOSEntity)
         {
             _mapper.Map(SOSForUpdate, SOSEntity);
-
+            
             return _context.SaveChanges();
         }
         public async Task<int> DeleteSOSReview(SOSReviewProgram SOSEntity)

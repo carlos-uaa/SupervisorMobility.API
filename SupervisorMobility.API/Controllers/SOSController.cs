@@ -10,6 +10,7 @@ using SupervisorMobility.API.Models.AreaDtos;
 using SupervisorMobility.API.Models.JobObservationDtos;
 using SupervisorMobility.API.Models.SOSReviewDtos;
 using SupervisorMobility.API.Services;
+using System.Diagnostics;
 
 namespace SupervisorMobility.API.Controllers
 {
@@ -28,7 +29,7 @@ namespace SupervisorMobility.API.Controllers
         {
             _supervisorMobilityRepository = supervisorMobilityRepository ??
                 throw new ArgumentNullException(nameof(supervisorMobilityRepository));
-            _assyChartService = assyChartService??
+            _assyChartService = assyChartService ??
                 throw new ArgumentNullException(nameof(supervisorMobilityRepository));
             _mapper = mapper ??
                 throw new ArgumentNullException(nameof(mapper));
@@ -53,45 +54,8 @@ namespace SupervisorMobility.API.Controllers
             }
 
         }//end get all
-        
-        [HttpGet("Registers/{SOSid}")]
-        public async Task<ActionResult<IEnumerable<SOSReviewsRegisterDto>>> SOSReviewRegisters(int SOSid, bool includeCollections = false)
-        {
 
-            if (includeCollections)
-            {
-                var SOSRevierWhitDistributions = await _supervisorMobilityRepository.GetAllSOSReviewsRegisters(SOSid);
-                return Ok(_mapper.Map<IEnumerable<SOSReviewsRegisterDto>>(SOSRevierWhitDistributions));
-
-            }
-            else
-            {
-                var SOS_Reviews = await _supervisorMobilityRepository
-                                .GetAllSOSReviewsRegisters(SOSid);
-                return Ok(_mapper.Map<IEnumerable<SOSReviewsRegisterDto>>(SOS_Reviews));
-            }
-
-        }//end get all registers
-         //
-        
-        [HttpGet("Registers/UserOp/{SOSid}")]
-        public async Task<ActionResult<IEnumerable<SOSRegUserOperationDto>>> SOSReviewRegistersUserOperation(int SOSid, bool includeCollections = false)
-        {
-
-            if (includeCollections)
-            {
-                var SOSRevierWhitDistributions = await _supervisorMobilityRepository.GetAllSOSRegUserOperations(SOSid);
-                return Ok(_mapper.Map<IEnumerable<SOSRegUserOperationDto>>(SOSRevierWhitDistributions));
-            }
-            else
-            {
-                var SOS_Reviews = await _supervisorMobilityRepository
-                                .GetAllSOSRegUserOperations(SOSid);
-                return Ok(_mapper.Map<IEnumerable<SOSRegUserOperationDto>>(SOS_Reviews));
-            }
-
-        }//end get all registers
-
+       
         [HttpGet("{sosId}", Name = "GetSOS")]
         public async Task<ActionResult<SOSReviewWithAllDto>> GetSOS(int sosId, bool includeCollections = false)
         {
@@ -123,7 +87,7 @@ namespace SupervisorMobility.API.Controllers
                 foreach (var Sub in SOSentity.Supervisors)
                 {
                     var usr = await _supervisorMobilityRepository.GetUserAsync(Sub.UserId);
-                    if(usr != null)
+                    if (usr != null)
                     {
                         Users.Add(usr);
                     }
@@ -139,7 +103,7 @@ namespace SupervisorMobility.API.Controllers
 
             var result = await _supervisorMobilityRepository.AddSOSReview(finalSOSReview);
 
-           
+
 
 
             if (result > 0)
@@ -165,186 +129,9 @@ namespace SupervisorMobility.API.Controllers
                 return NotFound();
             }
 
-            
+
         }//end post create 
-
-        [HttpPost("Registers/UserOp/{SOSid}")]
-        public async Task<ActionResult<SOSRegUserOperationDto>> CreateSOSRegUserOperation(int SOSid, int SupervisorId, int OperationId)
-        {
-
-            SOSRegUserOperation SOSRegUserOp = new();
-
-            if (SOSid == 0)
-            {
-                return NotFound("Cant Not Createe Whit SOS Review Id 0"); 
-            }
-            else
-            {
-                SOSRegUserOp.SOSReviewProgramid = SOSid;
-
-            }
-            
-            if (OperationId == 0)
-            {
-                return NotFound("Cant Not Createe Whit Operation Id 0"); 
-            }
-            else
-            {
-                SOSRegUserOp.OperationId = OperationId;
-
-            }
-            
-            if (SupervisorId == 0)
-            {
-                return NotFound("Cant Not Createe Whit Supervisor Id 0"); 
-            }
-            else
-            {
-                SOSRegUserOp.SupervisorId = SupervisorId;
-            }
-
-
-
-            var result = await _supervisorMobilityRepository.AddSOSRegUserOperation(SOSRegUserOp);
-
-
-            if (result > 0)
-            {
-                await _supervisorMobilityRepository.SaveChangesAsync();
-        
-                return Ok(SOSRegUserOp);
-            }
-            else
-            {
-                return NotFound();
-            }
-
-
-        }//end post create register
-
-
-        [HttpPost("Registers/{SOSid}")]
-        public async Task<ActionResult<SOSReviewWithAllDto>> CreateSOSRegister(int SOSid, int month, int year, JobObservationForCreationDto JobEntity)
-        {
-           
-            var finalJob = _mapper.Map<JobObservation>(JobEntity);
-
-            if(finalJob.OperationId == 0)
-            {
-                finalJob.OperationId = null;
-            }
-
-            if(finalJob.OperatorId == 0)
-            {
-                finalJob.OperatorId = null;
-            }
-           
-            _supervisorMobilityRepository.AddJobObservation(finalJob);
-            await _supervisorMobilityRepository.SaveChangesAsync();
-
-            SOSRegisterJobObservation finalSOSReg = new();
-
-            finalSOSReg.SOSReviewProgramid = SOSid;
-            finalSOSReg.Month = month;
-            finalSOSReg.Year = year;
-            finalSOSReg.JobObservationId = finalJob.JobObservationId;
-            finalSOSReg.OperationId = finalJob.OperationId;
-            
-               
-            var result = await _supervisorMobilityRepository.AddSOSReviewRegister(finalSOSReg);
-
-
-            if (result > 0)
-            {
-                await _supervisorMobilityRepository.SaveChangesAsync();
-
-                var createdRegisterToReturn =
-                    _mapper.Map<SOSReviewsRegisterDto>(finalSOSReg);
-
-                return Ok(createdRegisterToReturn);
-            }
-            else
-            {
-                return NotFound();
-            }
-
-
-        }//end post create register
-
-
-        [HttpPut("Registers/UserOp/Register/{SOSRegid}")]
-        public async Task<ActionResult> UpdateSosReview(int SOSRegid,
-           SOSRegUserOperationForUpdateDto sosUpdateEntity)
-        {
-
-            var SOS_Entity = await _supervisorMobilityRepository.GetSOSRegUserOperation(SOSRegid);
-
-            if (SOS_Entity == null)
-            {
-                return NotFound();
-            }
-
-            if(SOS_Entity.SupervisorId != sosUpdateEntity.SupervisorId)
-            {
-                
-                var Jobs = await _supervisorMobilityRepository.GetAllSOSReviewsRegisters((int)sosUpdateEntity.SOSReviewProgramid);
-
-                Jobs = Jobs.Where(j => j.OperationId == sosUpdateEntity.OperationId).ToList();
-
-                foreach(var job in Jobs)
-                {
-                  
-
-                    var jobObservationEntity = await _supervisorMobilityRepository.GetJobObservationAsync((int)job.JobObservationId, false);
-                    var ForUpdate = _mapper.Map<JobObservationForUpdateDto>(jobObservationEntity);
-
-                    ForUpdate.SupervisorId = (int)sosUpdateEntity.SupervisorId;
-
-                    JobObservationVersion HistoryToAdd = await _assyChartService.CreateHistoryJobObservationAsync(jobObservationEntity);
-
-                    //Actualiza la jobobsevation
-                    _mapper.Map(ForUpdate, jobObservationEntity);
-
-                    //añadimos la version anterior a la jobOb actualizada
-                    if (HistoryToAdd != null)
-                    {
-                        //optenemos la nueva version
-                        var jobtoaddversion = await _supervisorMobilityRepository.GetJobObservationAsync((int)job.JobObservationId, true);
-                        HistoryToAdd.DateModification = DateTime.Now;
-                        HistoryToAdd.resumeVersion = "supervisor";
-                        HistoryToAdd.MadeBy = "SOS REView system";
-                        //añadimos
-                        bool added = await _supervisorMobilityRepository.AddHistoyToJobObservationAsync(HistoryToAdd, jobtoaddversion);
-                        //add to 
-
-                        if (!added)
-                        {
-                            return NotFound("Fail updating history");
-                        }
-
-                    }
-
-                    //await _supervisorMobilityRepository.
-                }
-
-                await _supervisorMobilityRepository.SaveChangesAsync();
-            }
-
-            var result = await _supervisorMobilityRepository.UpdateRegUserOperation(sosUpdateEntity, SOS_Entity);
-
-            if (result == 0)
-            {
-                return NotFound();
-
-            }
-            else
-            {
-            //await _supervisorMobilityRepository.SaveChangesAsync();
-                return Ok(SOS_Entity);
-            }
-
-        }//end Update 
-
+     
         [HttpPut("{SOSid}")]
         public async Task<ActionResult> UpdateSosReview(int SOSid,
             SOSReviewForUpdateDto sosUpdateEntity)
@@ -360,7 +147,7 @@ namespace SupervisorMobility.API.Controllers
 
             var result = await _supervisorMobilityRepository.UpdateSOSReview(sosUpdateEntity, SOS_Entity);
 
-            if(result == 0)
+            if (result == 0)
             {
                 return NotFound();
 
