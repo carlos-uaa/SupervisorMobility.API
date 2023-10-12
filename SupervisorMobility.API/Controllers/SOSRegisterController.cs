@@ -40,17 +40,14 @@ namespace SupervisorMobility.API.Controllers
         [HttpGet("Registers/{SOSid}")]
         public async Task<ActionResult<IEnumerable<SOSReviewsRegisterDto>>> SOSReviewRegisters(int SOSid, bool includeCollections = false)
         {
+            var SOS_Reviews = await _supervisorMobilityRepository.GetAllSOSReviewsRegisters(SOSid);
 
             if (includeCollections)
             {
-                var SOSRevierWhitDistributions = await _supervisorMobilityRepository.GetAllSOSReviewsRegisters(SOSid);
-                return Ok(_mapper.Map<IEnumerable<SOSReviewsRegisterDto>>(SOSRevierWhitDistributions));
-
+                return Ok(_mapper.Map<IEnumerable<SOSReviewsRegisterDto>>(SOS_Reviews));
             }
             else
             {
-                var SOS_Reviews = await _supervisorMobilityRepository
-                                .GetAllSOSReviewsRegisters(SOSid);
                 return Ok(_mapper.Map<IEnumerable<SOSReviewsRegisterDto>>(SOS_Reviews));
             }
 
@@ -73,6 +70,20 @@ namespace SupervisorMobility.API.Controllers
             {
                 finalJob.OperatorId = null;
             }
+
+            if (finalJob.StartDate.HasValue)
+            {
+                if (JobEntity.StartDate.Value.DayOfWeek == DayOfWeek.Saturday)
+                {
+                    finalJob.StartDate = finalJob.StartDate.Value.AddDays(2);
+                }
+                else if (JobEntity.StartDate.Value.DayOfWeek == DayOfWeek.Sunday)
+                {
+                    finalJob.StartDate = finalJob.StartDate.Value.AddDays(1);
+                }
+            }
+
+            finalJob.PlannedStartDate = finalJob.StartDate;
 
             _supervisorMobilityRepository.AddJobObservation(finalJob);
             await _supervisorMobilityRepository.SaveChangesAsync();

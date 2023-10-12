@@ -1948,7 +1948,7 @@ namespace SupervisorMobility.API.Services
         public async Task<IEnumerable<SOSRegisterJobObservation>> GetAllSOSReviewsRegisters(int SOSReviewProgramId)
         {
             return await _context.SOSRegisters
-                   .Include(j => j.JobObservation)
+                   .Include(j => j.JobObservation).ThenInclude(jj => jj.Distribution)
                    .Include(d => d.Operation)
                    .Include(s => s.SOSReviewProgram)
                    .Where(u => u.SOSReviewProgramid == SOSReviewProgramId)
