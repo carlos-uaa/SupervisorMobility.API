@@ -22,6 +22,7 @@ namespace SupervisorMobility.API.Context
         public DbSet<Lup> Lup { get; set; }
         public DbSet<Entities.Group> Groups { get; set; }
         public DbSet<Glosary> Glosary { get; set; }
+        public DbSet<Department> Departments { get; set; }
         public DbSet<Plant> Plants { get; set; }
         public DbSet<Area> Areas { get; set; }
         public DbSet<Distribution> Distributions { get; set; }
@@ -44,11 +45,11 @@ namespace SupervisorMobility.API.Context
         public DbSet<ILULevel> ILULevels { get; set; }
         public DbSet<ILURegister> ILURegisters { get; set; }
         public DbSet<PAT> PATs { get; set; }
-        
+
         public DbSet<SOSReviewProgram> SOSReviews { get; set; }
         public DbSet<SOSRegisterJobObservation> SOSRegisters { get; set; }
         public DbSet<SOSRegUserOperation> SOSRegsUserOperation { get; set; }
-        
+
         #endregion
 
 
@@ -69,7 +70,7 @@ namespace SupervisorMobility.API.Context
 
             modelBuilder.Entity<SOSReviewProgram>()
                .Property(p => p.IsActive)
-               .HasDefaultValue(true); 
+               .HasDefaultValue(true);
 
             modelBuilder.Entity<QuestionType>()
                 .Property(p => p.IsActive)
@@ -111,14 +112,18 @@ namespace SupervisorMobility.API.Context
                 .Property(p => p.IsActive)
                 .HasDefaultValue(true);
 
+            modelBuilder.Entity<Department>()
+                .Property(p => p.IsActive)
+                .HasDefaultValue(true);
+
             modelBuilder.Entity<Lup>()
                 .Property(p => p.IsActive)
                 .HasDefaultValue(true);
 
             modelBuilder.Entity<AssyChart>()
                 .Property(p => p.IsActive)
-                .HasDefaultValue(true); 
-            
+                .HasDefaultValue(true);
+
             modelBuilder.Entity<SOSCodePath>()
                 .Property(p => p.IsActive)
                 .HasDefaultValue(true);
@@ -260,7 +265,7 @@ namespace SupervisorMobility.API.Context
                 Console.WriteLine("Unable to parse '{0}'", endDate);
 
             //seeding some data
-            
+
 
             modelBuilder.Entity<ChecklistCategory>()
                 .HasData(
@@ -444,7 +449,7 @@ namespace SupervisorMobility.API.Context
                     IsActive = true,
                     PlantId = 2
                 });
-            
+
 
             modelBuilder.Entity<SupportDocumentType>()
                 .HasData(
@@ -475,8 +480,8 @@ namespace SupervisorMobility.API.Context
                 {
                     ProductId = 2,
                     IsActive = true
-                });  
-            
+                });
+
             modelBuilder.Entity<Product>()
                 .HasData(
                 new Product("X247", "Mercedes X247")
@@ -485,7 +490,7 @@ namespace SupervisorMobility.API.Context
                     IsActive = true
                 });
 
- 
+
 
             modelBuilder.Entity<Glosary>()
             .HasData(
@@ -589,6 +594,86 @@ namespace SupervisorMobility.API.Context
                 }
             );
 
+            modelBuilder.Entity<Department>()
+              .HasData(
+                  new Department()
+                  {
+                      DepartmentId = 1,
+                      Code = "MFG",
+                      Description = "Manufactura",
+                      IsActive = true
+                  },
+                  new Department()
+                  {
+                      DepartmentId = 2,
+                      Code = "IDE",
+                      Description = "Ingeniería de equipos",
+                      IsActive = true
+                  },
+                  new Department()
+                  {
+                      DepartmentId = 3,
+                      Code = "II",
+                      Description = "Ingenieria Industrial",
+                      IsActive = true
+                  },
+                  new Department()
+                  {
+                      DepartmentId = 4,
+                      Code = "PROD",
+                      Description = "Producción",
+                      IsActive = true
+                  },
+                  new Department()
+                  {
+                      DepartmentId = 5,
+                      Code = "LF",
+                      Description = "Linia Final",
+                      IsActive = true
+                  },
+                  new Department()
+                  {
+                      DepartmentId = 6,
+                      Code = "VQA",
+                      Description = "VQA",
+                      IsActive = true
+                  },
+                  new Department()
+                  {
+                      DepartmentId = 7,
+                      Code = "PQA",
+                      Description = "PQA",
+                      IsActive = true
+                  },
+                  new Department()
+                  {
+                      DepartmentId = 8,
+                      Code = "CDP",
+                      Description = "Control de producción",
+                      IsActive = true
+                  },
+                  new Department()
+                  {
+                      DepartmentId = 9,
+                      Code = "MANT",
+                      Description = "Mantenimiento",
+                      IsActive = true
+                  },
+                  new Department()
+                  {
+                      DepartmentId = 10,
+                      Code = "PRV",
+                      Description = "Procesivo",
+                      IsActive = true
+                  },
+                  new Department()
+                  {
+                      DepartmentId = 11,
+                      Code = "SG",
+                      Description = "Servicios generales",
+                      IsActive = true
+                  }
+              );
 
 
             modelBuilder.Entity<User>().HasData(
@@ -690,7 +775,7 @@ namespace SupervisorMobility.API.Context
                 }
                 ); ;
 
-         
+
 
             modelBuilder.Entity<Notification>()
                 .HasData(

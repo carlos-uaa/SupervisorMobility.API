@@ -1558,16 +1558,19 @@ namespace SupervisorMobility.API.Services
         {
             if (includeFile)
             {
-                return await _context.Lup.Include(l => l.Evidences)
+                return await _context.Lup
+                    .Include(l => l.Evidences)
+                    .Include(d => d.Department)
                     .Where(e => e.LupId == lupId).FirstOrDefaultAsync();
             }
             return await _context.Lup
-                 .Where(x => x.LupId == lupId).FirstOrDefaultAsync();
+                 .Where(x => x.LupId == lupId).Include(d => d.Department).FirstOrDefaultAsync();
         }
 
         public async Task<IEnumerable<Lup>> GetAllLupAsync()
         {
             return await _context.Lup.Where(u => u.IsActive == true)
+                .Include(d => d.Department)
                  .OrderBy(c => c.LupId).ToListAsync();
 
         }

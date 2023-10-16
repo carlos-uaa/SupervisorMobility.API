@@ -1,4 +1,5 @@
-﻿using SupervisorMobility.API.Models.FileUploadDto;
+﻿using SupervisorMobility.API.Entities;
+using SupervisorMobility.API.Models.FileUploadDto;
 
 namespace SupervisorMobility.API.Models.LupDtos
 {
@@ -21,6 +22,8 @@ namespace SupervisorMobility.API.Models.LupDtos
         public int? Status { get; set; }
         public DateTime? CreatedDate { get; set; }
         public DateTime? EndDate { get; set; }
+        public int? DepartmentId { get; set; }
+        public Department Department { get; set; }
 
     }
 }

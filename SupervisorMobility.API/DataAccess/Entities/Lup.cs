@@ -1,4 +1,5 @@
-﻿using SupervisorMobility.API.DataAccess.Entities;
+﻿using DocumentFormat.OpenXml.Bibliography;
+using SupervisorMobility.API.DataAccess.Entities;
 using System.ComponentModel.DataAnnotations;
 using System.ComponentModel.DataAnnotations.Schema;
 
@@ -24,5 +25,10 @@ namespace SupervisorMobility.API.Entities
         public DateTime? EndDate { get; set; }
         public ICollection<FileUpload>? Evidences { get; set; }
             = new List<FileUpload>();
+
+        public int? DepartmentId { get; set; }
+        public Department? Department { get; set; }
+
+
     }
 }

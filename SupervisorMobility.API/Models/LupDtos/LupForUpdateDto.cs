@@ -13,5 +13,6 @@
         public int? Status { get; set; }
         public DateTime? CreatedDate { get; set; }
         public DateTime? EndDate { get; set; }
+        public int? DepartmentId { get; set; }
     }
 }

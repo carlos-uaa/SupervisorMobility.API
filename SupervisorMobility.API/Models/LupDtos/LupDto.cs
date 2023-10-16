@@ -1,4 +1,7 @@
-﻿namespace SupervisorMobility.API.Models.LupDtos
+﻿
+using SupervisorMobility.API.Entities;
+
+namespace SupervisorMobility.API.Models.LupDtos
 {
     public class LupDto
     {
@@ -16,5 +19,7 @@
         public int? Status { get; set; }
         public DateTime? CreatedDate { get; set; }
         public DateTime? EndDate { get; set; }
+        public int? DepartmentId { get; set; }
+        public Department Department { get; set; }
     }
 }
