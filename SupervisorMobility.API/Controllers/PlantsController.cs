@@ -2,8 +2,6 @@
 using Microsoft.AspNetCore.JsonPatch;
 using Microsoft.AspNetCore.Mvc;
 using SupervisorMobility.API.Business;
-using SupervisorMobility.API.Entities;
-using SupervisorMobility.API.Models.GroupDtos;
 using SupervisorMobility.API.Models.PlantDtos;
 using SupervisorMobility.API.Services;
 
@@ -81,7 +79,7 @@ namespace SupervisorMobility.API.Controllers
 
             await _assyChartService.UpdatePlantAsync(plant, plantEntity);
 
-            return NoContent();
+            return Ok();
 
         }
 
@@ -112,7 +110,7 @@ namespace SupervisorMobility.API.Controllers
 
             await _assyChartService.UpdatePlantAsync(plantToPatch, plantEntity);
 
-            return NoContent();
+            return Ok();
         }
 
         [HttpDelete("{plantId}")]
@@ -126,7 +124,7 @@ namespace SupervisorMobility.API.Controllers
 
             await _assyChartService.RemovePlantAsync(plantEntity);
 
-            return NoContent();
+            return Ok();
         }
     }
 }

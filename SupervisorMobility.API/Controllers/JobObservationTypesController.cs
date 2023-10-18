@@ -2,9 +2,7 @@
 using Microsoft.AspNetCore.JsonPatch;
 using Microsoft.AspNetCore.Mvc;
 using SupervisorMobility.API.Business;
-using SupervisorMobility.API.Entities;
 using SupervisorMobility.API.Models.JobObservationTypeDtos;
-using SupervisorMobility.API.Services;
 
 // For more information on enabling Web API for empty projects, visit https://go.microsoft.com/fwlink/?LinkID=397860
 
@@ -27,7 +25,7 @@ namespace SupervisorMobility.API.Controllers
         public async Task<ActionResult<IEnumerable<JobObservationTypeWithoutConfigsDto>>> GetJobObservationTypes()
         {
             var jobObservationTypeEntities = await _jobObservationService.FetchJobObservationTypesAsync();
-            return Ok(_mapper.Map<IEnumerable<JobObservationTypeWithoutConfigsDto>>(jobObservationTypeEntities));  
+            return Ok(_mapper.Map<IEnumerable<JobObservationTypeWithoutConfigsDto>>(jobObservationTypeEntities));
         }
 
         [HttpGet("{id}", Name = "GetJobObservationType")]
@@ -78,7 +76,7 @@ namespace SupervisorMobility.API.Controllers
                 return NotFound();
             }
 
-            await _jobObservationService.UpdateJobObservationTypeAsync(jobObservationType, jobObservationTypeEntity);            
+            await _jobObservationService.UpdateJobObservationTypeAsync(jobObservationType, jobObservationTypeEntity);
 
             return NoContent();
 

@@ -1,5 +1,5 @@
-﻿using System.ComponentModel.DataAnnotations.Schema;
-using System.ComponentModel.DataAnnotations;
+﻿using System.ComponentModel.DataAnnotations;
+using System.ComponentModel.DataAnnotations.Schema;
 
 namespace SupervisorMobility.API.DataAccess.Entities
 {
@@ -14,6 +14,9 @@ namespace SupervisorMobility.API.DataAccess.Entities
         [MaxLength(200)]
         public string Description { get; set; }
         public bool? IsActive { get; set; }
+
+        public virtual ICollection<Distribution> Distributions { get; set; }
+            = new List<Distribution>();
 
         public Product(string code, string description)
         {

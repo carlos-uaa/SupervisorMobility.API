@@ -1,6 +1,6 @@
-﻿using System.ComponentModel.DataAnnotations.Schema;
+﻿using SupervisorMobility.API.Entities;
 using System.ComponentModel.DataAnnotations;
-using SupervisorMobility.API.Entities;
+using System.ComponentModel.DataAnnotations.Schema;
 
 namespace SupervisorMobility.API.DataAccess.Entities
 {
@@ -22,6 +22,8 @@ namespace SupervisorMobility.API.DataAccess.Entities
 
         public ICollection<Distribution> Distributions { get; set; }
             = new List<Distribution>();
+        [NotMapped]
+        public ICollection<User>? Users { get; set; }
 
         public Area(string code, string description)
         {

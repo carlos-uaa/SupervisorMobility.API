@@ -1,6 +1,6 @@
 ﻿using SupervisorMobility.API.Entities;
-using System.ComponentModel.DataAnnotations.Schema;
 using System.ComponentModel.DataAnnotations;
+using System.ComponentModel.DataAnnotations.Schema;
 
 namespace SupervisorMobility.API.DataAccess.Entities
 {
@@ -22,6 +22,10 @@ namespace SupervisorMobility.API.DataAccess.Entities
 
         public ICollection<Operation> Operations { get; set; }
             = new List<Operation>();
+
+        //Navigation Property
+        public virtual ICollection<Product> Products { get; set; }
+            = new List<Product>();
 
         public Distribution(string code, string description)
         {

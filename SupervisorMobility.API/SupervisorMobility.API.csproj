@@ -1,24 +1,64 @@
-<Project Sdk="Microsoft.NET.Sdk.Web">
+﻿<Project Sdk="Microsoft.NET.Sdk.Web">
 
-  <PropertyGroup>
-    <TargetFramework>net6.0</TargetFramework>
-    <Nullable>enable</Nullable>
-    <ImplicitUsings>enable</ImplicitUsings>
-  </PropertyGroup>
+	<PropertyGroup>
+		<TargetFramework>net6.0</TargetFramework>
+		<Nullable>enable</Nullable>
+		<ImplicitUsings>enable</ImplicitUsings>
+	</PropertyGroup>
 
-  <ItemGroup>
-    <PackageReference Include="AutoMapper.Extensions.Microsoft.DependencyInjection" Version="12.0.0" />
-    <PackageReference Include="Microsoft.AspNetCore.Mvc.NewtonsoftJson" Version="6.0.9" />
-    <PackageReference Include="Microsoft.EntityFrameworkCore" Version="7.0.1" />
-    <PackageReference Include="Microsoft.EntityFrameworkCore.SqlServer" Version="7.0.1" />
-    <PackageReference Include="Microsoft.EntityFrameworkCore.Tools" Version="7.0.1">
-      <PrivateAssets>all</PrivateAssets>
-      <IncludeAssets>runtime; build; native; contentfiles; analyzers; buildtransitive</IncludeAssets>
-    </PackageReference>
-    <PackageReference Include="Serilog.AspNetCore" Version="6.1.0" />
-    <PackageReference Include="Serilog.Sinks.Console" Version="4.1.0" />
-    <PackageReference Include="Serilog.Sinks.File" Version="5.0.0" />
-    <PackageReference Include="Swashbuckle.AspNetCore" Version="6.4.0" />
-  </ItemGroup>
+	<ItemGroup>
+		<PackageReference Include="AutoMapper.Extensions.Microsoft.DependencyInjection" Version="12.0.0" />
+		<PackageReference Include="Azure.Identity" Version="1.8.2" />
+		<PackageReference Include="ClosedXML" Version="0.100.3" />
+		<PackageReference Include="CsvHelper" Version="30.0.1" />
+		<PackageReference Include="MailKit" Version="3.6.0" />
+		<PackageReference Include="Microsoft.AspNetCore.Mvc.NewtonsoftJson" Version="6.0.16" />
+		<PackageReference Include="Microsoft.EntityFrameworkCore" Version="7.0.1" />
+		<PackageReference Include="Microsoft.EntityFrameworkCore.SqlServer" Version="7.0.1" />
+		<PackageReference Include="Microsoft.EntityFrameworkCore.Tools" Version="7.0.1">
+			<PrivateAssets>all</PrivateAssets>
+			<IncludeAssets>runtime; build; native; contentfiles; analyzers; buildtransitive</IncludeAssets>
+		</PackageReference>
+		<PackageReference Include="Microsoft.Graph.Core" Version="3.0.5" />
+		<PackageReference Include="Microsoft.Identity.Client" Version="4.52.0" />
+		<PackageReference Include="Serilog.AspNetCore" Version="6.1.0" />
+		<PackageReference Include="Serilog.Sinks.Console" Version="4.1.0" />
+		<PackageReference Include="Serilog.Sinks.File" Version="5.0.0" />
+		<PackageReference Include="SpreadsheetLight" Version="3.5.0" />
+		<PackageReference Include="Swashbuckle.AspNetCore" Version="6.4.0" />
+		<PackageReference Include="Newtonsoft.Json" Version="13.0.1" />
+	</ItemGroup>
 
+	<ItemGroup>
+		<Folder Include="Migrations\" />
+		<Folder Include="Documents\" />
+		<Folder Include="uploads\assycharts\" />
+		<Folder Include="uploads\attendance\" />
+		<Folder Include="uploads\evidence\NewFolder\" />
+		<Folder Include="uploads\guides\" />
+		<Folder Include="uploads\headcount\NewFolder\" />
+		<Folder Include="uploads\massive\" />
+		<Folder Include="uploads\users\" />
+	</ItemGroup>
+
+	<Target Name="PublishFrontend" AfterTargets="ComputeFilesToPublish">
+		<ItemGroup>
+			<DistFiles Include="Documents\**" />
+			<ResolvedFileToPublish Include="@(DistFiles->'%(FullPath)')" Exclude="@(ResolvedFileToPublish)">
+				<RelativePath>%(DistFiles.Identity)</RelativePath>
+				<CopyToPublishDirectory>PreserveNewest</CopyToPublishDirectory>
+				<ExcludeFromSingleFile>true</ExcludeFromSingleFile>
+			</ResolvedFileToPublish>
+		</ItemGroup>
+	</Target>
+	<Target Name="LogDirectoryOnPublish" BeforeTargets="Publish">
+		<RemoveDir Condition="Exists('$(PublishUrl)')" Directories="$(PublishUrl)" />
+		<MakeDir Directories="$(PublishUrl)\uploads\assycharts\" />
+		<MakeDir Directories="$(PublishUrl)\uploads\attendance\" />
+		<MakeDir Directories="$(PublishUrl)\uploads\evidence\" />
+		<MakeDir Directories="$(PublishUrl)\uploads\guides\" />
+		<MakeDir Directories="$(PublishUrl)\uploads\massive\" />
+		<MakeDir Directories="$(PublishUrl)\uploads\headcount\" />
+		<MakeDir Directories="$(PublishUrl)\logs\" />
+	</Target>
 </Project>

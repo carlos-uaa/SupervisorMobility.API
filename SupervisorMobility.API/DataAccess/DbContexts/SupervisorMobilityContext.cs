@@ -1,25 +1,58 @@
 ﻿using Microsoft.EntityFrameworkCore;
 using SupervisorMobility.API.DataAccess.Entities;
+using SupervisorMobility.API.DataAccess.Entities.ILU;
+using SupervisorMobility.API.DataAccess.Entities.Logger;
+using SupervisorMobility.API.DataAccess.Entities.LUP;
+using SupervisorMobility.API.DataAccess.Entities.SOS_Review;
 using SupervisorMobility.API.Entities;
+using System.Globalization;
 
 namespace SupervisorMobility.API.Context
 {
     public class SupervisorMobilityContext : DbContext
     {
         #region DbSets
+        public DbSet<HeadCount> headCounts { get; set; }
         public DbSet<ChecklistCategory> ChecklistCategories { get; set; }
         public DbSet<QuestionType> QuestionTypes { get; set; }
         public DbSet<ChecklistQuestion> ChecklistQuestions { get; set; }
         public DbSet<JobObservationConfig> JobObservationConfigs { get; set; }
         public DbSet<JobObservationType> JobObservationTypes { get; set; }
-        public DbSet<Group> Groups { get; set; }
+        public DbSet<JobObservation> JobObservations { get; set; }
+        public DbSet<Lup> Lup { get; set; }
+        public DbSet<Entities.Group> Groups { get; set; }
+        public DbSet<Glosary> Glosary { get; set; }
+        public DbSet<Department> Departments { get; set; }
         public DbSet<Plant> Plants { get; set; }
         public DbSet<Area> Areas { get; set; }
         public DbSet<Distribution> Distributions { get; set; }
         public DbSet<Operation> Operations { get; set; }
         public DbSet<SupportDocumentType> SupportDocumentTypes { get; set; }
         public DbSet<Product> Products { get; set; }
+        public DbSet<AssyChart> AssyCharts { get; set; }
+        public DbSet<SOSCodePath> CodePaths { get; set; }
+        public DbSet<User> Users { get; set; }
+        public DbSet<UserNotFound> UsersNotFound { get; set; }
+
+        public DbSet<FileUpload> Files { get; set; }
+        public DbSet<Guides> Guides { get; set; }
+        public DbSet<JobObservationVersion> JobObservationHistory { get; set; }
+        public DbSet<Notification> Notifications { get; set; }
+        public DbSet<Attendance> Attendances { get; set; }
+        public DbSet<Logger> DataLoggs { get; set; }
+        public DbSet<LogEvent> LogEvents { get; set; }
+        public DbSet<LogSpecificEvent> LogSepecificEvents { get; set; }
+        public DbSet<ILULevel> ILULevels { get; set; }
+        public DbSet<ILURegister> ILURegisters { get; set; }
+        public DbSet<PAT> PATs { get; set; }
+
+        public DbSet<SOSReviewProgram> SOSReviews { get; set; }
+        public DbSet<SOSRegisterJobObservation> SOSRegisters { get; set; }
+        public DbSet<SOSRegUserOperation> SOSRegsUserOperation { get; set; }
+
         #endregion
+
+
 
         public SupervisorMobilityContext(DbContextOptions<SupervisorMobilityContext> options)
             : base(options)
@@ -27,12 +60,17 @@ namespace SupervisorMobility.API.Context
 
         }
 
+
         protected override void OnModelCreating(ModelBuilder modelBuilder)
         {
             //Default values
             modelBuilder.Entity<ChecklistCategory>()
                 .Property(p => p.IsActive)
                 .HasDefaultValue(true);
+
+            modelBuilder.Entity<SOSReviewProgram>()
+               .Property(p => p.IsActive)
+               .HasDefaultValue(true);
 
             modelBuilder.Entity<QuestionType>()
                 .Property(p => p.IsActive)
@@ -46,11 +84,11 @@ namespace SupervisorMobility.API.Context
                 .Property(p => p.IsActive)
                 .HasDefaultValue(true);
 
-            modelBuilder.Entity<Plant>()
+            modelBuilder.Entity<JobObservation>()
                 .Property(p => p.IsActive)
                 .HasDefaultValue(true);
 
-            modelBuilder.Entity<Area>()
+            modelBuilder.Entity<Plant>()
                 .Property(p => p.IsActive)
                 .HasDefaultValue(true);
 
@@ -70,6 +108,133 @@ namespace SupervisorMobility.API.Context
                 .Property(p => p.IsActive)
                 .HasDefaultValue(true);
 
+            modelBuilder.Entity<Glosary>()
+                .Property(p => p.IsActive)
+                .HasDefaultValue(true);
+
+            modelBuilder.Entity<Department>()
+                .Property(p => p.IsActive)
+                .HasDefaultValue(true);
+
+            modelBuilder.Entity<Lup>()
+                .Property(p => p.IsActive)
+                .HasDefaultValue(true);
+
+            modelBuilder.Entity<AssyChart>()
+                .Property(p => p.IsActive)
+                .HasDefaultValue(true);
+
+            modelBuilder.Entity<SOSCodePath>()
+                .Property(p => p.IsActive)
+                .HasDefaultValue(true);
+
+            modelBuilder.Entity<Guides>()
+                .Property(p => p.IsActive)
+                .HasDefaultValue(true);
+
+            modelBuilder.Entity<UserNotFound>()
+                 .Property(p => p.IsActive)
+                 .HasDefaultValue(true);
+            //Users
+            modelBuilder.Entity<User>()
+             .Property(p => p.IsActive)
+             .HasDefaultValue(true);
+
+            modelBuilder.Entity<User>()
+                .Property(u => u.UserId)
+                .UseIdentityColumn();
+
+            modelBuilder.Entity<User>()
+                .HasMany(u => u.Areas)
+                .WithMany(a => a.Users)
+                .UsingEntity<Dictionary<string, object>>(
+                    "UserArea",
+                    r => r.HasOne<Area>().WithMany().HasForeignKey("AreaId"),
+                    l => l.HasOne<User>().WithMany().HasForeignKey("UserId"),
+                    e =>
+                    {
+                        e.ToTable("UserAreas");
+                        e.HasKey("UserId", "AreaId");
+                    }
+                );
+
+
+
+            //area
+
+            modelBuilder.Entity<Area>()
+                .Property(p => p.IsActive)
+                .HasDefaultValue(true);
+
+            modelBuilder.Entity<Logger>()
+               .Property(D => D.LogId)
+               .UseIdentityColumn();
+
+            modelBuilder.Entity<LogEvent>()
+              .Property(e => e.LogEventId)
+              .UseIdentityColumn();
+
+
+
+            modelBuilder.Entity<LogSpecificEvent>()
+              .Property(e => e.LogSpecificEventId)
+              .UseIdentityColumn();
+
+            modelBuilder.Entity<PAT>()
+              .Property(p => p.IsActive)
+              .HasDefaultValue(true);
+
+            modelBuilder.Entity<PAT>()
+               .HasOne(p => p.Area)
+               .WithMany()
+               .HasForeignKey(p => p.AreaId)
+               .OnDelete(DeleteBehavior.NoAction);
+
+            modelBuilder.Entity<PAT>()
+              .HasOne(p => p.Plant)
+              .WithMany()
+              .HasForeignKey(p => p.PlantId)
+              .OnDelete(DeleteBehavior.NoAction);
+
+            modelBuilder.Entity<PAT>()
+                .HasOne(p => p.SSVresponsible)
+                .WithMany()
+                .HasForeignKey(p => p.SSVresponsibleID)
+                .OnDelete(DeleteBehavior.NoAction);
+
+            modelBuilder.Entity<PAT>()
+                .HasOne(p => p.Supervisor)
+                .WithMany()
+                .HasForeignKey(p => p.SupervisorId)
+                .OnDelete(DeleteBehavior.NoAction);
+
+            modelBuilder.Entity<PAT>()
+                .HasOne(p => p.Distribution)
+                .WithMany()
+                .HasForeignKey(p => p.DistributionId)
+                .OnDelete(DeleteBehavior.NoAction);
+
+            modelBuilder.Entity<ILULevel>()
+           .Property(e => e.ILULevelId)
+           .UseIdentityColumn();
+
+            modelBuilder.Entity<ILURegister>()
+           .Property(e => e.ILURegisterid)
+           .UseIdentityColumn();
+
+            modelBuilder.Entity<ILURegister>()
+                .Property(p => p.isActive)
+                .HasDefaultValue(true);
+
+            modelBuilder.Entity<Notification>()
+                .Property(p => p.IsActive)
+                .HasDefaultValue(true);
+
+
+            modelBuilder.Entity<JobObservationVersion>()
+                .Property(p => p.IsActive)
+                .HasDefaultValue(true);
+
             //Constraints
             modelBuilder.Entity<ChecklistCategory>()
                 .HasCheckConstraint("ck_cc_seq", "[Sequence] > 0");
@@ -78,7 +243,30 @@ namespace SupervisorMobility.API.Context
                 .HasCheckConstraint("ck_cq_seq", "[CategorySequence] > 0");
 
 
+            DateTime startDateFormat;
+            DateTime endDateFormat;
+
+            var startDate = DateTime.Now.ToShortDateString() + " 12:00:00";
+            var endDate = DateTime.Now.ToShortDateString() + " 13:00:00";
+
+            if (DateTime.TryParseExact(startDate, $"d/M/yyyy HH:mm:ss", null, DateTimeStyles.None, out startDateFormat))
+            {
+                Console.WriteLine(startDateFormat);
+            }
+            else
+                Console.WriteLine("Unable to parse '{0}'", startDate);
+
+
+            if (DateTime.TryParseExact(endDate, $"d/M/yyyy HH:mm:ss", null, DateTimeStyles.None, out endDateFormat))
+            {
+                Console.WriteLine(endDateFormat);
+            }
+            else
+                Console.WriteLine("Unable to parse '{0}'", endDate);
+
             //seeding some data
+
+
             modelBuilder.Entity<ChecklistCategory>()
                 .HasData(
                 new ChecklistCategory("PO", "Preparación de la Observación")
@@ -213,14 +401,14 @@ namespace SupervisorMobility.API.Context
                     JobObservationTypeId = 1,
                     ChecklistCategoryId = 5
                 });
-            modelBuilder.Entity<Group>()
+            modelBuilder.Entity<Entities.Group>()
                 .HasData(
-                new Group("GA", "Grupo A")
+                new Entities.Group("GA", "Grupo A")
                 {
                     GroupId = 1,
                     IsActive = true
                 },
-                new Group("GB", "Grupo B")
+                new Entities.Group("GB", "Grupo B")
                 {
                     GroupId = 2,
                     IsActive = true
@@ -244,24 +432,24 @@ namespace SupervisorMobility.API.Context
                     AreaId = 1,
                     IsActive = true,
                     PlantId = 1
-                });
-            modelBuilder.Entity<Distribution>()
-                .HasData(
-                new Distribution("Dist1", "Distribution 1 Trim 1")
+                },
+                new Area("T2", "Trim 2")
                 {
-                    DistributionId = 1,
+                    AreaId = 2,
                     IsActive = true,
-                    AreaId = 1
+                    PlantId = 1
+                }, new Area("P1", "Paint 1")
+                {
+                    AreaId = 3,
+                    IsActive = true,
+                    PlantId = 2
+                }, new Area("P1", "Paint 2")
+                {
+                    AreaId = 4,
+                    IsActive = true,
+                    PlantId = 2
                 });
 
-            modelBuilder.Entity<Operation>()
-                .HasData(
-                new Operation("OP1", "Operacion Trim 1")
-                {
-                    OperationId = 1,
-                    IsActive = true,
-                    DistributionId = 1
-                });
 
             modelBuilder.Entity<SupportDocumentType>()
                 .HasData(
@@ -288,11 +476,432 @@ namespace SupervisorMobility.API.Context
 
             modelBuilder.Entity<Product>()
                 .HasData(
+                new Product("N71A", "Infinity N71A")
+                {
+                    ProductId = 2,
+                    IsActive = true
+                });
+
+            modelBuilder.Entity<Product>()
+                .HasData(
                 new Product("X247", "Mercedes X247")
                 {
                     ProductId = 3,
                     IsActive = true
                 });
+
+
+
+            modelBuilder.Entity<Glosary>()
+            .HasData(
+                new Glosary()
+                {
+                    GlosaryWordId = 1,
+                    Name = "S",
+                    Description = "Safety Pillar",
+                    IsActive = true
+                },
+                new Glosary()
+                {
+                    GlosaryWordId = 2,
+                    Name = "Q",
+                    Description = "Quality Pillar",
+                    IsActive = true
+                },
+                new Glosary()
+                {
+                    GlosaryWordId = 3,
+                    Name = "D",
+                    Description = "Delivery Pillar",
+                    IsActive = true
+                },
+                new Glosary()
+                {
+                    GlosaryWordId = 4,
+                    Name = "C",
+                    Description = "Cost Pillar",
+                    IsActive = true
+                },
+                new Glosary()
+                {
+                    GlosaryWordId = 5,
+                    Name = "Other",
+                    Description = "Other",
+                    IsActive = true
+                },
+                new Glosary()
+                {
+                    GlosaryWordId = 6,
+                    Name = "SSV",
+                    Description = "Senior Supervisor",
+                    IsActive = true
+                },
+                new Glosary()
+                {
+                    GlosaryWordId = 7,
+                    Name = "SV",
+                    Description = "Supervisor",
+                    IsActive = true
+                },
+                new Glosary()
+                {
+                    GlosaryWordId = 8,
+                    Name = "Lup",
+                    Description = "Unique list of problems",
+                    IsActive = true
+                },
+                new Glosary()
+                {
+                    GlosaryWordId = 9,
+                    Name = "Cycle time",
+                    Description = "Operation cycle time by model",
+                    IsActive = true
+                },
+                new Glosary()
+                {
+                    GlosaryWordId = 10,
+                    Name = "HOE Time",
+                    Description = "Operation cycle time by model",
+                    IsActive = true
+                },
+                new Glosary()
+                {
+                    GlosaryWordId = 11,
+                    Name = "Management of the anomaly",
+                    Description = "Anomaly tracking",
+                    IsActive = true
+                },
+                new Glosary()
+                {
+                    GlosaryWordId = 12,
+                    Name = "Eventual",
+                    Description = "Observation of the eventual operation",
+                    IsActive = true
+                },
+                new Glosary()
+                {
+                    GlosaryWordId = 13,
+                    Name = "Planeada",
+                    Description = "Observation of the planned operation",
+                    IsActive = true
+                },
+                new Glosary()
+                {
+                    GlosaryWordId = 14,
+                    Name = "Assy Chart",
+                    Description = "Distribution listing-Operation by stage and plant",
+                    IsActive = true
+                }
+            );
+
+            modelBuilder.Entity<Department>()
+              .HasData(
+                  new Department()
+                  {
+                      DepartmentId = 1,
+                      Code = "MFG",
+                      Description = "Manufactura",
+                      IsActive = true
+                  },
+                  new Department()
+                  {
+                      DepartmentId = 2,
+                      Code = "IDE",
+                      Description = "Ingeniería de equipos",
+                      IsActive = true
+                  },
+                  new Department()
+                  {
+                      DepartmentId = 3,
+                      Code = "II",
+                      Description = "Ingenieria Industrial",
+                      IsActive = true
+                  },
+                  new Department()
+                  {
+                      DepartmentId = 4,
+                      Code = "PROD",
+                      Description = "Producción",
+                      IsActive = true
+                  },
+                  new Department()
+                  {
+                      DepartmentId = 5,
+                      Code = "LF",
+                      Description = "Linia Final",
+                      IsActive = true
+                  },
+                  new Department()
+                  {
+                      DepartmentId = 6,
+                      Code = "VQA",
+                      Description = "VQA",
+                      IsActive = true
+                  },
+                  new Department()
+                  {
+                      DepartmentId = 7,
+                      Code = "PQA",
+                      Description = "PQA",
+                      IsActive = true
+                  },
+                  new Department()
+                  {
+                      DepartmentId = 8,
+                      Code = "CDP",
+                      Description = "Control de producción",
+                      IsActive = true
+                  },
+                  new Department()
+                  {
+                      DepartmentId = 9,
+                      Code = "MANT",
+                      Description = "Mantenimiento",
+                      IsActive = true
+                  },
+                  new Department()
+                  {
+                      DepartmentId = 10,
+                      Code = "PRV",
+                      Description = "Procesivo",
+                      IsActive = true
+                  },
+                  new Department()
+                  {
+                      DepartmentId = 11,
+                      Code = "SG",
+                      Description = "Servicios generales",
+                      IsActive = true
+                  }
+              );
+
+
+            modelBuilder.Entity<User>().HasData(
+                new User
+                {
+                    UserId = 1,
+                    ObjectId = "pmunozsinco@compasdcpcs.local",
+                    Name = "Pedro",
+                    Email = "pmunoz@gruposinco.com.mx",
+                    IsActive = true,
+                    UserType = 1
+                },
+                new User
+                {
+                    UserId = 2,
+                    ObjectId = "maguayosinco@compasdcpcs.local",
+                    Name = "Marco Aguayo",
+                    Email = "maguayo@gruposinco.com.mx",
+                    IsActive = true,
+                    UserType = 1,
+                }
+                , new User
+                {
+                    UserId = 3,
+                    ObjectId = "SSV@compasdcpcs.local",
+                    PlantId = 1,
+                    AreaId = 1,
+                    DistributionId = null,
+                    GroupId = 1,
+                    Name = "SeniorSupervisor",
+                    Payroll = 4,
+                    IsActive = true,
+                    UserType = 2,
+                }, new User
+                {
+                    UserId = 4,
+                    ObjectId = "SV@compasdcpcs.local",
+                    PlantId = 1,
+                    AreaId = 1,
+                    DistributionId = null,
+                    GroupId = 1,
+                    Name = "Supervisor",
+                    Payroll = 5,
+                    IsActive = true,
+                    UserType = 3,
+                    SuperiorId = 3,
+
+                }, new User
+                {
+                    UserId = 5,
+                    PlantId = 1,
+                    AreaId = 1,
+                    DistributionId = null,
+                    GroupId = 1,
+                    Name = "Operador 1",
+                    Payroll = 6,
+                    IsActive = true,
+                    UserType = 4,
+                    SuperiorId = 4,
+                },
+                new User
+                {
+                    UserId = 6,
+                    PlantId = 1,
+                    AreaId = 1,
+                    DistributionId = null,
+                    GroupId = 1,
+                    Name = "Operador 2",
+                    Payroll = 7,
+                    IsActive = true,
+                    UserType = 4,
+                    SuperiorId = 4,
+                },
+                new User
+                {
+                    UserId = 7,
+                    PlantId = 1,
+                    AreaId = 1,
+                    DistributionId = null,
+                    GroupId = 1,
+                    Name = "Operador 3",
+                    Payroll = 8,
+                    IsActive = true,
+                    UserType = 4,
+                    SuperiorId = 4,
+                },
+                new User
+                {
+                    UserId = 8,
+                    PlantId = 1,
+                    AreaId = 1,
+                    DistributionId = null,
+                    GroupId = 1,
+                    Name = "Operador 4",
+                    Payroll = 9,
+                    IsActive = true,
+                    UserType = 4,
+                    SuperiorId = 4,
+                }
+                ); ;
+
+
+
+            modelBuilder.Entity<Notification>()
+                .HasData(
+                    new Notification()
+                    {
+                        NotificationID = 1,
+                        EntryDate = DateTime.Parse("2023-02-25T12:55:58.303-06:00"),
+                        IsAccepted = true,
+                        IsActive = true,
+                        MadeBy = "Marco Aguayo",
+                        UserId = 2,
+                        NotificationType = "info",
+                        NotificationText = "Example of notify"
+                    },
+                    new Notification()
+                    {
+                        NotificationID = 2,
+                        EntryDate = DateTime.Now,
+                        IsAccepted = true,
+                        IsActive = true,
+                        MadeBy = "Marco Aguayo",
+                        UserId = 2,
+                        NotificationType = "Supervisor",
+                        NotificationText = "Example of notify Active and not read"
+                    },
+                    new Notification()
+                    {
+                        NotificationID = 3,
+                        EntryDate = DateTime.Now,
+                        IsAccepted = false,
+                        IsActive = true,
+                        MadeBy = "Marco Aguayo",
+                        UserId = 3,
+                        NotificationType = "Supervisor",
+                        NotificationText = "Example of notify Active and Read"
+                    },
+                    new Notification()
+                    {
+                        NotificationID = 4,
+                        EntryDate = DateTime.Now,
+                        IsAccepted = true,
+                        IsActive = false,
+                        MadeBy = "Marco Aguayo",
+                        UserId = 2,
+                        NotificationType = "Supervisor",
+                        NotificationText = "Example of notify Read and delete"
+                    },
+                    new Notification()
+                    {
+                        NotificationID = 5,
+                        EntryDate = DateTime.Now,
+                        IsAccepted = false,
+                        IsActive = false,
+                        MadeBy = "Marco Aguayo",
+                        UserId = 2,
+                        NotificationType = "Supervisor",
+                        NotificationText = "Example of notify Read and delete"
+                    },
+                    new Notification()
+                    {
+                        NotificationID = 6,
+                        EntryDate = DateTime.Now,
+                        IsAccepted = true,
+                        IsActive = true,
+                        MadeBy = "Marco Aguayo",
+                        UserId = 1,
+                        NotificationType = "Supervisor",
+                        NotificationText = "Example of notify Active and not read"
+                    },
+                    new Notification()
+                    {
+                        NotificationID = 7,
+                        EntryDate = DateTime.Now,
+                        IsAccepted = false,
+                        IsActive = true,
+                        MadeBy = "Marco Aguayo",
+                        UserId = 1,
+                        NotificationType = "Supervisor",
+                        NotificationText = "Example of notify Active and Read"
+                    },
+                    new Notification()
+                    {
+                        NotificationID = 8,
+                        EntryDate = DateTime.Now,
+                        IsAccepted = true,
+                        IsActive = false,
+                        MadeBy = "Marco Aguayo",
+                        UserId = 1,
+                        NotificationType = "Supervisor",
+                        NotificationText = "Example of notify Read and delete"
+                    },
+                    new Notification()
+                    {
+                        NotificationID = 9,
+                        EntryDate = DateTime.Now,
+                        IsAccepted = false,
+                        IsActive = false,
+                        MadeBy = "Marco Aguayo",
+                        UserId = 1,
+                        NotificationType = "Supervisor",
+                        NotificationText = "Example of notify Read and delete"
+                    });
+
+            modelBuilder.Entity<ILULevel>()
+                    .HasData(
+                            new ILULevel()
+                            {
+                                ILULevelId = 1,
+                                ILULevelCode = 'I',
+                                ILULevelDescription = "el operador necesita entrenamiento para realizar la operación",
+                                isActive = true
+                            },
+                            new ILULevel()
+                            {
+                                ILULevelId = 2,
+                                ILULevelCode = 'L',
+                                ILULevelDescription = "el operador ya la puede realizar por si mismo",
+                                isActive = true
+                            }, new ILULevel()
+                            {
+                                ILULevelId = 3,
+                                ILULevelCode = 'U',
+                                ILULevelDescription = "el operador domina la operación y puede enseñar",
+                                isActive = true
+                            }
+                    );
 
             base.OnModelCreating(modelBuilder);
         }

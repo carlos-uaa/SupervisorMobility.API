@@ -10,6 +10,8 @@ namespace SupervisorMobility.API.Models.OperationDtos
         [Required]
         [MaxLength(200)]
         public string Description { get; set; } = string.Empty;
+        public int CriticalType { get; set; }
+
         public bool IsActive { get; set; }
     }
 }

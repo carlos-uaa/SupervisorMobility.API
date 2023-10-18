@@ -107,7 +107,7 @@ namespace SupervisorMobility.API.Business
             return await _repository.GetChecklistQuestionForCategoryAsync(categoryId, questionId);
         }
 
-        public async Task<ChecklistQuestion> CreateChecklistQuestionForCategoryAsync(int categoryId, 
+        public async Task<ChecklistQuestion> CreateChecklistQuestionForCategoryAsync(int categoryId,
             ChecklistQuestionForCreationDto checklistQuestion)
         {
             var finalChecklistQuestion = _mapper.Map<Entities.ChecklistQuestion>(checklistQuestion);

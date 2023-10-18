@@ -1,5 +1,4 @@
 ﻿using AutoMapper;
-using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.JsonPatch;
 using Microsoft.AspNetCore.Mvc;
 using SupervisorMobility.API.Models.GroupDtos;
@@ -13,12 +12,12 @@ namespace SupervisorMobility.API.Controllers
     {
         readonly ISupervisorMobilityRepository _supervisorMobilityRepository;
         readonly IMapper _mapper;
-        public GroupsController(ISupervisorMobilityRepository supervisorMobilityRepository, 
+        public GroupsController(ISupervisorMobilityRepository supervisorMobilityRepository,
             IMapper mapper)
         {
             _supervisorMobilityRepository = supervisorMobilityRepository ??
                 throw new ArgumentNullException(nameof(supervisorMobilityRepository));
-            _mapper = mapper ?? 
+            _mapper = mapper ??
                 throw new ArgumentNullException(nameof(mapper));
         }
 
@@ -77,7 +76,7 @@ namespace SupervisorMobility.API.Controllers
             _mapper.Map(group, groupEntity);
             await _supervisorMobilityRepository.SaveChangesAsync();
 
-            return NoContent();
+            return Ok();
 
         }
 
@@ -110,7 +109,7 @@ namespace SupervisorMobility.API.Controllers
 
             await _supervisorMobilityRepository.SaveChangesAsync();
 
-            return NoContent();
+            return Ok();
         }
 
         [HttpDelete("{groupId}")]
@@ -125,7 +124,7 @@ namespace SupervisorMobility.API.Controllers
             _supervisorMobilityRepository.DeleteGroup(groupEntity);
             await _supervisorMobilityRepository.SaveChangesAsync();
 
-            return NoContent();
+            return Ok();
         }
     }
 }

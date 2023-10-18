@@ -1,11 +1,8 @@
 ﻿using AutoMapper;
-using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.JsonPatch;
 using Microsoft.AspNetCore.Mvc;
 using SupervisorMobility.API.Business;
-using SupervisorMobility.API.Entities;
 using SupervisorMobility.API.Models.ChecklistQuestionDtos;
-using SupervisorMobility.API.Services;
 
 namespace SupervisorMobility.API.Controllers
 {
@@ -195,7 +192,7 @@ namespace SupervisorMobility.API.Controllers
                 return NoContent();
             }
             if (checklistQuestion.CategorySequence < 1
-                || checklistQuestion.CategorySequence > 
+                || checklistQuestion.CategorySequence >
                 await _jobObservationService.FetchChecklistQuestionMaxSequenceAsync(categoryId))
             {
                 return BadRequest("Sequence must be greater than 1 and lower that the current max sequence.");

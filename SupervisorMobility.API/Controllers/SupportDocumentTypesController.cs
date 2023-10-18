@@ -2,9 +2,7 @@
 using Microsoft.AspNetCore.JsonPatch;
 using Microsoft.AspNetCore.Mvc;
 using SupervisorMobility.API.Business;
-using SupervisorMobility.API.Models.PlantDtos;
 using SupervisorMobility.API.Models.SupportDocumentTypeDtos;
-using SupervisorMobility.API.Services;
 
 namespace SupervisorMobility.API.Controllers
 {
@@ -74,7 +72,7 @@ namespace SupervisorMobility.API.Controllers
             await _assyChartService
                 .UpdateSupportDocumentTypeAsync(supportDocumentType, supportDocumentTypeEntity);
 
-            return NoContent();
+            return Ok();
 
         }
 
@@ -106,7 +104,7 @@ namespace SupervisorMobility.API.Controllers
             await _assyChartService
                 .UpdateSupportDocumentTypeAsync(supportDocumentTypeToPatch, supportDocumentTypeEntity);
 
-            return NoContent();
+            return Ok();
         }
 
         [HttpDelete("{supportDocumentTypeId}")]
@@ -120,7 +118,7 @@ namespace SupervisorMobility.API.Controllers
 
             await _assyChartService.RemoveSupportDocumentTypeAsync(supportDocumentTypeEntity);
 
-            return NoContent();
+            return Ok();
         }
     }
 }

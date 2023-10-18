@@ -15,9 +15,9 @@ namespace SupervisorMobility.API.Controllers
         public QuestionTypesController(ISupervisorMobilityRepository supervisorMobilityRepository,
             IMapper mapper)
         {
-            _supervisorMobilityRepository = supervisorMobilityRepository ?? 
+            _supervisorMobilityRepository = supervisorMobilityRepository ??
                 throw new ArgumentNullException(nameof(supervisorMobilityRepository));
-            _mapper = mapper ?? 
+            _mapper = mapper ??
                 throw new ArgumentNullException(nameof(mapper));
         }
 

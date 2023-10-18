@@ -1,7 +1,9 @@
-﻿using System.ComponentModel.DataAnnotations.Schema;
+﻿using SupervisorMobility.API.DataAccess.Entities;
 using System.ComponentModel.DataAnnotations;
+using System.ComponentModel.DataAnnotations.Schema;
 
-namespace SupervisorMobility.API.DataAccess.Entities
+
+namespace SupervisorMobility.API.Entities
 {
     public class Operation
     {
@@ -13,6 +15,8 @@ namespace SupervisorMobility.API.DataAccess.Entities
         [Required]
         [MaxLength(200)]
         public string Description { get; set; }
+        public int CriticalType { get; set; }
+
         public bool? IsActive { get; set; }
 
         //Navigation properties

@@ -1,4 +1,4 @@
-﻿using SupervisorMobility.API.Models.OperationDtos;
+﻿using SupervisorMobility.API.Models.DistributionDtos;
 
 namespace SupervisorMobility.API.Models.AreaDtos
 {
