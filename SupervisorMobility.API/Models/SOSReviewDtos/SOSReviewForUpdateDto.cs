@@ -14,25 +14,16 @@ namespace SupervisorMobility.API.Models.SOSReviewDtos
 
         public int? PlantId { get; set; }
 
-        public PlantDto? Plant { get; set; }
-
         public int? AreaId { get; set; }
 
-
-        public AreaWithoutNavigationPropertiesDto? Area { get; set; }
-
-
         public DateTime? CreationDate { get; set; }
-        public int? AplicationYear
-        {
-            get { return CreationDate?.Year; }
-            set { CreationDate = value != null ? new DateTime(value.Value, 1, 1) : null; }
-        }
+        public int? AplicationYear { get; set; }
 
 
         public DateTime? EditionDate { get; set; }
 
         public DateTime? ApprovalDate { get; set; }
+        public bool SuggestionApplied { get; set; }
 
         public bool IsActive { get; set; }
     }

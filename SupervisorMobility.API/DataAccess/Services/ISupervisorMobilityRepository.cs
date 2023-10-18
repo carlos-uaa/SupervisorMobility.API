@@ -307,6 +307,7 @@ namespace SupervisorMobility.API.Services
         
         // add Supervisor Responsable
         void SOSReviewAddUser(SOSReviewProgram Master, User Slave);
+        void SOSReviewRemoveUser(SOSReviewProgram Master, User Slave);
         //EndRegion
         #endregion 
         #region SOS_RegOperationJobObservartion

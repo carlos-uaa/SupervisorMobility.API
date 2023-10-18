@@ -2,6 +2,7 @@
 using DocumentFormat.OpenXml.Office2010.Drawing;
 using DocumentFormat.OpenXml.Spreadsheet;
 using Microsoft.AspNetCore.Mvc;
+using Microsoft.AspNetCore.SignalR;
 using SupervisorMobility.API.Business;
 using SupervisorMobility.API.DataAccess.Entities;
 using SupervisorMobility.API.DataAccess.Entities.SOS_Review;
@@ -90,8 +91,15 @@ namespace SupervisorMobility.API.Controllers
             }
 
 
-
             var result = await _supervisorMobilityRepository.AddSOSRegUserOperation(SOSRegUserOp);
+            
+            var SOS_Review = await _supervisorMobilityRepository.GetSOSasync((int)SOSRegUserOp.SOSReviewProgramid);
+
+            if(!SOS_Review.Supervisors.Any(u => u.UserId == SOSRegUserOp.SupervisorId))
+            {
+                var usr = await _supervisorMobilityRepository.GetUserAsync((int)SOSRegUserOp.SupervisorId);
+                _supervisorMobilityRepository.SOSReviewAddUser(SOS_Review, usr);
+            }
 
 
             if (result > 0)
@@ -111,7 +119,7 @@ namespace SupervisorMobility.API.Controllers
 
         [HttpPut("{sosId}/Registers/UserOp/{SOSRegid}/ByOption/{option}")]
         public async Task<ActionResult> UpdateAllSosReviewRegisterByOption(int sosId, int SOSRegid, int option,
-      SOSRegUserOperationForUpdateDto sosUpdateEntity)
+         SOSRegUserOperationForUpdateDto sosUpdateEntity)
         {
 
             var SOS_Entity = await _supervisorMobilityRepository.GetSOSRegUserOperation(SOSRegid);
@@ -123,6 +131,8 @@ namespace SupervisorMobility.API.Controllers
 
             var Jobs = await _supervisorMobilityRepository.GetAllSOSReviewsRegisters(sosId);
             var AllSosRegisters = await _supervisorMobilityRepository.GetAllSOSRegUserOperations(sosId);
+            var SOS_Review = await _supervisorMobilityRepository.GetSOSasync((int)SOS_Entity.SOSReviewProgramid);
+
 
             switch (option)
             {
@@ -144,6 +154,11 @@ namespace SupervisorMobility.API.Controllers
                     //Todas las Jobs en el mismo SosReview
                     Jobs = Jobs.Where(j => j.JobObservation.SupervisorId == SOS_Entity.SupervisorId).ToList();
 
+                    //aqui va la eliminacion de usuario pasado
+                    var Oldusr = await _supervisorMobilityRepository.GetUserAsync((int)SOS_Entity.SupervisorId);
+
+                    _supervisorMobilityRepository.SOSReviewRemoveUser(SOS_Review, Oldusr);
+
                     break;
 
                 case 3:
@@ -156,6 +171,12 @@ namespace SupervisorMobility.API.Controllers
                     break;
             }
 
+            //Añade el supervisor a los participantes si no existe
+            if (!SOS_Review.Supervisors.Any(u => u.UserId == sosUpdateEntity.SupervisorId))
+            {
+                var usr = await _supervisorMobilityRepository.GetUserAsync((int)sosUpdateEntity.SupervisorId);
+                _supervisorMobilityRepository.SOSReviewAddUser(SOS_Review, usr);
+            }
 
             foreach (var reg in AllSosRegisters)
             {
@@ -213,6 +234,7 @@ namespace SupervisorMobility.API.Controllers
 
             await _supervisorMobilityRepository.SaveChangesAsync();
 
+           
 
             return Ok(SOS_Entity);
 

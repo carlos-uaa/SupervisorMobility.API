@@ -1,6 +1,8 @@
 ﻿using AutoMapper;
+using DocumentFormat.OpenXml.Bibliography;
 using DocumentFormat.OpenXml.Office2010.Drawing;
 using DocumentFormat.OpenXml.Spreadsheet;
+using Microsoft.AspNetCore.Components.Web;
 using Microsoft.AspNetCore.Mvc;
 using SupervisorMobility.API.Business;
 using SupervisorMobility.API.DataAccess.Entities;
@@ -117,6 +119,179 @@ namespace SupervisorMobility.API.Controllers
 
         }//end post create register
 
+        [HttpPost("Registers/{sos_id}/ApplySuggest")]
+        public async Task<ActionResult> MassiveCreate(int sos_id, List<JobObservationForCreationDto> JobsSuggest)
+        {
+            var SOS_Review = await _supervisorMobilityRepository.GetSOSasync(sos_id);
+            var sosUpdateEntity = _mapper.Map<SOSReviewForUpdateDto>(SOS_Review);
+            var UserOpRegistersExist = await _supervisorMobilityRepository.GetAllSOSRegUserOperations(sos_id);
+            var JobRegisterExist = await _supervisorMobilityRepository.GetAllSOSReviewsRegisters(sos_id);
+
+            foreach (var job in JobsSuggest)
+            {
+                //validar si ya hay un registro para actualizarlo
+                Debug.WriteLine($"job {job.StartDate} {job.SupervisorId}");
+
+                int maxRetries = 5; // Número máximo de intentos
+                TimeSpan retryInterval = TimeSpan.FromSeconds(2); // Intervalo de tiempo entre intentos (5 segundos en este caso)
+                int retries = 0;
+
+                while (retries < maxRetries)
+                {
+                    try
+                    {
+                        if (JobRegisterExist.Any(j => j.OperationId == job.OperationId))
+                        {
+                            Debug.WriteLine($"Ya exite");
+
+                            var jobObservationEntity = JobRegisterExist.ToList().Find(j => j.OperationId == job.OperationId).JobObservation;
+                            var ForUpdate = _mapper.Map<JobObservationForUpdateDto>(jobObservationEntity);
+
+                            ForUpdate.SupervisorId = job.SupervisorId;
+
+                            JobObservationVersion HistoryToAdd = await _assyChartService.CreateHistoryJobObservationAsync(jobObservationEntity);
+
+                            //Actualiza la jobobsevation
+                            _mapper.Map(ForUpdate, jobObservationEntity);
+
+                            //añadimos la version anterior a la jobOb actualizada
+                            if (HistoryToAdd != null)
+                            {
+                                //optenemos la nueva version
+                                var jobtoaddversion = await _supervisorMobilityRepository.GetJobObservationAsync(jobObservationEntity.JobObservationId, true);
+                                HistoryToAdd.DateModification = DateTime.Now;
+                                HistoryToAdd.resumeVersion = "supervisor";
+                                HistoryToAdd.MadeBy = "SOS REView system";
+                                //añadimos
+                                bool added = await _supervisorMobilityRepository.AddHistoyToJobObservationAsync(HistoryToAdd, jobtoaddversion);
+
+                            }
+
+                            var RegEntity = UserOpRegistersExist.ToList().Find(r => r.OperationId == job.OperationId);
+
+                            if (RegEntity != null)
+                            {
+                                var RegForUpdate = _mapper.Map<SOSRegUserOperationForUpdateDto>(RegEntity);
+
+                                RegForUpdate.SupervisorId = job.SupervisorId;
+
+                                var resultUpdate = await _supervisorMobilityRepository.UpdateRegUserOperation(RegForUpdate, RegEntity);
+                            }
+                            else
+                            {
+                                SOSRegisterJobObservation finalSOSReg = new();
+
+                                finalSOSReg.SOSReviewProgramid = sos_id;
+                                finalSOSReg.Month = job.StartDate.Value.Month;
+                                finalSOSReg.Year = job.StartDate.Value.Year;
+                                finalSOSReg.JobObservationId = jobObservationEntity.JobObservationId;
+                                finalSOSReg.OperationId = jobObservationEntity.OperationId;
+
+                            }
+
+                        }
+                        else
+                        {
+                            Debug.WriteLine($"No Exite");
+
+                            var finalJob = _mapper.Map<JobObservation>(job);
+
+                            if (finalJob.OperationId == 0)
+                            {
+                                finalJob.OperationId = null;
+                            }
+
+                            if (finalJob.OperatorId == 0)
+                            {
+                                finalJob.OperatorId = null;
+                            }
+
+
+                            finalJob.PlannedStartDate = finalJob.StartDate;
+
+                            await _supervisorMobilityRepository.AddJobObservation(finalJob);
+                            await _supervisorMobilityRepository.SaveChangesAsync();
+
+                            SOSRegisterJobObservation finalSOSReg = new();
+
+                            finalSOSReg.SOSReviewProgramid = sos_id;
+                            finalSOSReg.Month = job.StartDate.Value.Month;
+                            finalSOSReg.Year = job.StartDate.Value.Year;
+                            finalSOSReg.JobObservationId = finalJob.JobObservationId;
+                            finalSOSReg.OperationId = finalJob.OperationId;
+
+
+                            var resultcreate = await _supervisorMobilityRepository.AddSOSReviewRegister(finalSOSReg);
+
+                        }
+
+                        retries = 0;
+
+                        Console.WriteLine($"Intento {retries + 1} ");
+
+                        // Si la operación tiene éxito, puedes salir del bucle
+                        break;
+                    }
+                    catch (Exception ex)
+                    {
+                        Console.WriteLine($"Intento {retries + 1} Linea Position falló: {ex.Message}");
+
+                        // Incrementa el número de intentos
+                        retries++;
+
+                        // Espera el intervalo de tiempo antes de volver a intentarlo
+                        await Task.Delay(retryInterval);
+                    }
+
+                }
+
+                       
+
+                if (!SOS_Review.Supervisors.Any(u => u.UserId == job.SupervisorId))
+                {
+                    var usr = await _supervisorMobilityRepository.GetUserAsync(job.SupervisorId);
+                    _supervisorMobilityRepository.SOSReviewAddUser(SOS_Review, usr);
+                }
+
+            }
+
+
+            sosUpdateEntity.SuggestionApplied = true;
+
+            List<User> Users = new List<User>();
+            bool haveUsers = false;
+
+            if (SOS_Review.Supervisors != null)
+            {
+                haveUsers = true;
+                foreach (var Sub in SOS_Review.Supervisors)
+                {
+                    var usr = await _supervisorMobilityRepository.GetUserAsync(Sub.UserId);
+                    if (usr != null)
+                    {
+                        Users.Add(usr);
+                    }
+                }
+
+                SOS_Review.Supervisors = null;
+                sosUpdateEntity.Supervisors = null;
+            }
+
+
+            var result = await _supervisorMobilityRepository.UpdateSOSReview(sosUpdateEntity, SOS_Review);
+
+            if (haveUsers)
+            {
+                foreach (var item in Users)
+                {
+                    _supervisorMobilityRepository.SOSReviewAddUser(SOS_Review, item);
+                }
+            }
+
+            await _supervisorMobilityRepository.SaveChangesAsync();
+
+            return Ok();
+        }
 
     }//end main clas
 }//end namespace
