@@ -1468,7 +1468,7 @@ namespace SupervisorMobility.API.Services
                     .Include(p => p.Plant)
                     .Include(d => d.Distribution)
                     .Include(o => o.Operation)
-                    .Include(l => l.Lup.Where(lup => lup.IsActive == true))
+                    .Include(l => l.Lup.Where(lup => lup.IsActive == true)).ThenInclude(d => d.Department)
                     .Include(s => s.Supervisor)
                     .Include(o => o.Operator).Where(u => u.IsActive == true)
                      .OrderBy(c => c.JobObservationId).ToListAsync();
@@ -2064,6 +2064,37 @@ namespace SupervisorMobility.API.Services
 
 
 
+        #endregion
+        #region DepartmentOperations
+        public async Task<IEnumerable<Entities.Department>> GetDepartmentsAsync()
+        {
+            return await _context.Departments.Where(d => d.IsActive == true)
+                .OrderBy(d => d.DepartmentId).ToListAsync();
+        }
+
+        public async Task<Entities.Department?> GetDepartmentAsync(int departmentId)
+        {
+            return await _context.Departments
+                .Where(c => c.DepartmentId == departmentId).FirstOrDefaultAsync();
+        }
+
+        public async Task<bool> DepartmentExistAsync(int departmentId)
+        {
+            return await _context.Departments.AnyAsync(p => p.DepartmentId == departmentId);
+        }
+
+
+        public void AddDepartment(Entities.Department department)
+        {
+            _context.Departments.Add(department);
+        }
+
+        public void DeleteDepartment(Entities.Department department)
+        {
+            //_context.Groups.Remove(group);
+            department.IsActive = false;
+            _context.SaveChanges();
+        }
         #endregion
         #region CommonOperations
         public async Task<bool> SaveChangesAsync()

@@ -331,6 +331,14 @@ namespace SupervisorMobility.API.Services
         Task<AsyncVoidMethodBuilder> RemoveAllHeadCountRegisters();
         Task AddHeadCoutAsync(HeadCount user);
         #endregion
+        #region DepartmentOperations
+        Task<IEnumerable<Department>> GetDepartmentsAsync();
+        Task<Department?> GetDepartmentAsync(int departmentId);
+        Task<bool> DepartmentExistAsync(int departmentId);
+
+        void AddDepartment(Department department);
+        void DeleteDepartment(Department department);
+        #endregion
         #region CommonOperations
 
         Task<bool> SaveChangesAsync();
