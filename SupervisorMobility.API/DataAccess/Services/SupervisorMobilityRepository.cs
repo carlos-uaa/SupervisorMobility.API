@@ -2010,12 +2010,18 @@ namespace SupervisorMobility.API.Services
                    .Include(s => s.SOSReviewProgram)
                    .Where(p => p.SOSRegisterJobid == SosId).FirstOrDefaultAsync();
         }
-        public async Task<int> UpdateRegUserOperation(SOSRegUserOperationForUpdateDto SOSForUpdate, SOSRegUserOperation SOSEntity)
+
+        public async Task<int> UpdateRegisterJobObservation(SOSReviewsRegisterForUpdateDto SOSForUpdate, SOSRegisterJobObservation SOSEntity)
         {
             _mapper.Map(SOSForUpdate, SOSEntity);
 
             return _context.SaveChanges();
         }
+        public Task<IEnumerable<SOSRegisterJobObservation>> GetAllSOSReviewsRegistersByDistribution(int SOSReviewProgramId, int distributionid)
+        {
+            throw new NotImplementedException();
+        }
+
         #endregion
         #region SOS_RegUserOperation
         public async Task<int> AddSOSRegUserOperation(SOSRegUserOperation RegEntity)
@@ -2044,6 +2050,12 @@ namespace SupervisorMobility.API.Services
                    .Where(u => u.SOSReviewProgramid == SosId)
                     .OrderBy(c => c.SOSRegUserOperationId).ToListAsync();
 
+        }
+        public async Task<int> UpdateRegUserOperation(SOSRegUserOperationForUpdateDto SOSForUpdate, SOSRegUserOperation SOSEntity)
+        {
+            _mapper.Map(SOSForUpdate, SOSEntity);
+
+            return _context.SaveChanges();
         }
         #endregion
         #region HeadCount
@@ -2111,6 +2123,8 @@ namespace SupervisorMobility.API.Services
         {
             return (await _context.SaveChangesAsync() >= 0);
         }
-        #endregion 
+
+        
+        #endregion
     }
 }

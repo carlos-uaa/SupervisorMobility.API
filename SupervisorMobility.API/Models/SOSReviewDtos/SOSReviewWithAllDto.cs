@@ -33,6 +33,7 @@ namespace SupervisorMobility.API.Models.SOSReviewDtos
 
         public DateTime? EditionDate { get; set; }
 
+        public bool SuggestionApplied { get; set; }
         public DateTime? ApprovalDate { get; set; }
 
         public bool IsActive { get; set; }
