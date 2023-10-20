@@ -12,14 +12,10 @@ namespace SupervisorMobility.API.Controllers
     {
         private readonly HttpClient _httpClient;
 
-        public LoginController()
+        public LoginController(CustomHttpClientService customHttp)
         {
             //Prod
-            _httpClient = new HttpClient { BaseAddress = new Uri("http://10.91.116.212:4251/") };
-
-
-            //Dev
-            //_httpClient = new HttpClient { BaseAddress = new Uri("http://10.91.49.9:4251/") };
+            _httpClient = customHttp.GetLoginHttpClient();
         }
 
         [HttpPost]

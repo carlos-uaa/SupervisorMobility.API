@@ -22,10 +22,9 @@ namespace SupervisorMobility.API.DataAccess.Services
         private readonly ILogger<MyScheduledTaskService> _logger;
         private readonly HttpClient _httpClient;
         
-        public MyScheduledTaskService(ILogger<MyScheduledTaskService> logger)
+        public MyScheduledTaskService(ILogger<MyScheduledTaskService> logger, CustomHttpClientService customHttp)
         {
-            _httpClient = new HttpClient { BaseAddress = new Uri("http://10.91.117.12:10201/") };
-            //_httpClient = new HttpClient { BaseAddress = new Uri("http://localhost:10201/") };
+            _httpClient = customHttp.GetApiHttpClient();
             _logger = logger;
         }
 

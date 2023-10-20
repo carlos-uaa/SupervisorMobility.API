@@ -35,7 +35,9 @@ else
 {
     builder.Configuration.AddJsonFile("appsettings.json", optional: false, reloadOnChange: true);
 }
+
 // Add services to the container.
+// Configure the HTTP request pipeline.
 
 builder.Host.UseSerilog();
 
@@ -49,8 +51,6 @@ builder.Services.AddControllers(options =>
 builder.Services.AddEndpointsApiExplorer();
 builder.Services.AddSwaggerGen();
 
-//Trea
-
 
 //Add other services
 builder.Services.RegisterBusinessServices();
@@ -58,11 +58,6 @@ builder.Services.RegisterDataServices(builder.Configuration);
 
 //Add automapper
 builder.Services.AddAutoMapper(AppDomain.CurrentDomain.GetAssemblies());
-
-//
-
-
-
 
 //Odmitir Referencias ciruclares
 builder.Services.AddControllers()
@@ -85,14 +80,16 @@ builder.Services.AddSingleton(emailConfig);
 
 
 //peticion api
-builder.Services.AddHostedService<MyScheduledTaskService>();
+//builder.Services.AddHostedService<MyScheduledTaskService>();
 //using namespaces
 //builder.Services.AddHostedService<MyScheduledTask>();
+
+builder.Services.AddScoped<CustomHttpClientService>();
+
 
 
 var app = builder.Build();
 
-// Configure the HTTP request pipeline.
 
 // Configure the HTTP request pipeline.
 if (app.Environment.IsDevelopment() || app.Environment.IsProduction())
