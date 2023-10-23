@@ -1,22 +1,28 @@
-# ASP.NET
-# Build and test ASP.NET projects.
-# Add steps that publish symbols, save build artifacts, deploy, and more:
-# https://docs.microsoft.com/azure/devops/pipelines/apps/aspnet/build-aspnet-4
-
 trigger:
-- master  # Set this to your preferred branch trigger
+- master
 
 pool:
-  vmImage: 'windows-latest'  # Use a Windows agent for Windows Server
+  vmImage: 'windows-latest'
 
 variables:
-  buildConfiguration: 'Release'  # You can change this to 'Debug' if needed
+  buildConfiguration: 'Release'
 
 steps:
 - script: |
     dotnet restore
     dotnet publish --configuration $(buildConfiguration) --output $(Build.ArtifactStagingDirectory)/app
   displayName: 'Build and Publish .NET Core Web API'
+
+- powershell: |
+    # Create directories based on .csproj file
+    New-Item -Path "$(Build.ArtifactStagingDirectory)/app/uploads/assycharts" -ItemType Directory -Force
+    New-Item -Path "$(Build.ArtifactStagingDirectory)/app/uploads/attendance" -ItemType Directory -Force
+    New-Item -Path "$(Build.ArtifactStagingDirectory)/app/uploads/evidence/NewFolder" -ItemType Directory -Force
+    New-Item -Path "$(Build.ArtifactStagingDirectory)/app/uploads/guides" -ItemType Directory -Force
+    New-Item -Path "$(Build.ArtifactStagingDirectory)/app/uploads/headcount/NewFolder" -ItemType Directory -Force
+    New-Item -Path "$(Build.ArtifactStagingDirectory)/app/uploads/massive" -ItemType Directory -Force
+    New-Item -Path "$(Build.ArtifactStagingDirectory)/app/uploads/users" -ItemType Directory -Force
+  displayName: 'Create Directories'
 
 - task: ArchiveFiles@2
   inputs:
