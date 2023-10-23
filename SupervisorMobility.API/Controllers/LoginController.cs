@@ -19,12 +19,12 @@ namespace SupervisorMobility.API.Controllers
         }
 
         [HttpPost]
-        public async Task<IActionResult> Login(string username, string password)
+        public async Task<IActionResult> Login(Dictionary<string, string> paremters)
         {
             var data = new
             {
-                username = username,
-                password = password
+                username = paremters["user"],
+                password = paremters["pass"]
             };
 
             var json = JsonSerializer.Serialize(data);

@@ -1,6 +1,7 @@
 ﻿using AutoMapper;
 using ClosedXML.Excel;
 using DocumentFormat.OpenXml.Spreadsheet;
+using Microsoft.AspNetCore.Cors;
 using Microsoft.AspNetCore.Mvc;
 using SpreadsheetLight;
 using SupervisorMobility.API.Business;
@@ -38,8 +39,8 @@ namespace SupervisorMobility.API.Controllers
                 throw new ArgumentNullException(nameof(mapper));
         }
 
-       
 
+        [EnableCors("Cors")]
         [HttpPost("Upload")]
         public async Task<ActionResult<FileUpload>> UploadFileFromMassiveUpload(IFormFile file, int UserIdUpload)
         {
@@ -435,8 +436,8 @@ namespace SupervisorMobility.API.Controllers
             return Ok();
         }
 
-        [HttpGet("Bulk/DownloadAllUsersFormat")]
-        public async Task<IActionResult> DownloadAllUsersFormat()
+        [HttpGet("Bulk/GetData")]
+        public async Task<IActionResult> DownloadAllHeadCountRegisters()
         {
             var data = await _supervisorMobilityRepository.GetAllHeadCountsDataAsync();
 
@@ -504,6 +505,35 @@ namespace SupervisorMobility.API.Controllers
             return res;
 
         }//end download file function 
+
+        [HttpPost("Process/")]
+        public async Task<ActionResult> CreateProcess(HeadCountProcessCreateUpdateDto HD_Process)
+        {
+
+            return Ok();
+        }
+
+        [HttpGet("Process/")]
+        public async Task<ActionResult> ReadAllProcess()
+        {
+
+            return Ok();
+        }
+
+        [HttpPut("Process/")]
+        public async Task<ActionResult> UpdateProcess(HeadCountProcessCreateUpdateDto HD_Process)
+        {
+
+            return Ok();
+        }
+
+        [HttpDelete("Process/{HD_Process_Id}")]
+        public async Task<ActionResult> DeleteProcess(int HD_Process_Id)
+        {
+
+            return Ok();
+        }
+
 
 
     }
