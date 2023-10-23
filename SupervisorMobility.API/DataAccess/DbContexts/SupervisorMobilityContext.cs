@@ -497,8 +497,8 @@ namespace SupervisorMobility.API.Context
                 new Glosary()
                 {
                     GlosaryWordId = 1,
-                    Name = "S",
-                    Description = "Safety Pillar",
+                    Name = "S & E",
+                    Description = "Safety & Environment Pillar",
                     IsActive = true
                 },
                 new Glosary()
