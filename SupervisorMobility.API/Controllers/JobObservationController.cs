@@ -312,6 +312,18 @@ namespace SupervisorMobility.API.Controllers
             {
                 resumeChanges += "ReleasedFeedback , ";
             }
+            if (jobObservationEntity.KpiId != jobObservationForUpdate.KpiId)
+            {
+                resumeChanges += "KPI, ";
+            }
+            if (jobObservationEntity.TaktTime != jobObservationForUpdate.TaktTime)
+            {
+                resumeChanges += "Takt Time, ";
+            }
+            if (jobObservationEntity.Questions != jobObservationForUpdate.Questions)
+            {
+                resumeChanges += "Questions , ";
+            }
 
             // Remove the trailing comma and space
             if (resumeChanges.EndsWith(", "))
