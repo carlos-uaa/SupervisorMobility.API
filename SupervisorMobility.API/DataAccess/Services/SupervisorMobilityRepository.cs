@@ -13,6 +13,7 @@ using SupervisorMobility.API.DataAccess.Entities.ILU;
 using SupervisorMobility.API.DataAccess.Entities.LUP;
 using SupervisorMobility.API.DataAccess.Entities.SOS_Review;
 using SupervisorMobility.API.Entities;
+using SupervisorMobility.API.Models.HeadCount;
 using SupervisorMobility.API.Models.PATDtos;
 using SupervisorMobility.API.Models.RouteProductAssyChartDtos;
 using SupervisorMobility.API.Models.SOSReviewDtos;
@@ -1123,7 +1124,7 @@ namespace SupervisorMobility.API.Services
         public async Task<bool> UserExistByEmailAsync(string email)
         {
             return await _context.Users.AnyAsync(p => p.Email == email);
-        } 
+        }
         public async Task<bool> UserExistByObjectIdAsync(string ObjectId)
         {
             return await _context.Users.AnyAsync(p => p.ObjectId == ObjectId);
@@ -1973,7 +1974,7 @@ namespace SupervisorMobility.API.Services
             Master.Supervisors?.Remove(Slave);
             _context.SaveChanges();
         }
-       
+
         public async Task<int> DeleteSOSReview(SOSReviewProgram SOSEntity)
         {
             SOSEntity.IsActive = false;
@@ -2083,7 +2084,32 @@ namespace SupervisorMobility.API.Services
             return await _context.headCounts.Where(a => a.HeadCountId == HeadId).FirstOrDefaultAsync();
         }
 
+        #endregion
+        #region HeadCountProcess
+        public async Task<int> AddHeadCountProcess(HeadCountProcess headCountProcess)
+        {
+            _context.headCountsProcess.Add(headCountProcess);
+            return await _context.SaveChangesAsync();
+        }
+        public async Task<HeadCountProcess?> GetHeadCountProcessById(int id)
+        {
+            return await _context.headCountsProcess.Where(a => a.HeadCountProcessId == id).FirstOrDefaultAsync();
+        }
 
+        public async Task<IEnumerable<HeadCountProcess>> GetAllHeadCountProcess()
+        {
+            return _context.headCountsProcess.ToList();
+        }
+        public async Task<int> UpdateHeadCountProcess(HeadCountProcessCreateUpdateDto headCountProcess, HeadCountProcess entity)
+        {
+            _mapper.Map(headCountProcess, entity);
+            return await _context.SaveChangesAsync();
+        }
+        public async Task<int> DeleteHeadCountProcess(HeadCountProcess headCountProcess)
+        {
+            _context.Remove(headCountProcess);
+            return await _context.SaveChangesAsync();
+        }
 
 
         #endregion
@@ -2124,7 +2150,7 @@ namespace SupervisorMobility.API.Services
             return (await _context.SaveChangesAsync() >= 0);
         }
 
-        
+
         #endregion
     }
 }
