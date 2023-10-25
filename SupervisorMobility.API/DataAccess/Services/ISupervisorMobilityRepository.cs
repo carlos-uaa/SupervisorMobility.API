@@ -3,6 +3,7 @@ using SupervisorMobility.API.DataAccess.Entities.ILU;
 using SupervisorMobility.API.DataAccess.Entities.LUP;
 using SupervisorMobility.API.DataAccess.Entities.SOS_Review;
 using SupervisorMobility.API.Entities;
+using SupervisorMobility.API.Models.HeadCount;
 using SupervisorMobility.API.Models.PATDtos;
 using SupervisorMobility.API.Models.SOSReviewDtos;
 using SupervisorMobility.API.Models.Users;
@@ -335,6 +336,13 @@ namespace SupervisorMobility.API.Services
         Task<HeadCount?> GetHeadCountByIdAsync(int HeadId);
         Task<AsyncVoidMethodBuilder> RemoveAllHeadCountRegisters();
         Task AddHeadCoutAsync(HeadCount user);
+
+
+        Task<int> AddHeadCountProcess(HeadCountProcess headCountProcess);
+        Task<HeadCountProcess?> GetHeadCountProcessById(int id);
+        Task<IEnumerable<HeadCountProcess>> GetAllHeadCountProcess();
+        Task<int> UpdateHeadCountProcess(HeadCountProcessCreateUpdateDto headCountProcess, HeadCountProcess entity);
+        Task<int> DeleteHeadCountProcess(HeadCountProcess headCountProcess);
         #endregion
         #region DepartmentOperations
         Task<IEnumerable<Department>> GetDepartmentsAsync();
@@ -344,6 +352,7 @@ namespace SupervisorMobility.API.Services
         void AddDepartment(Department department);
         void DeleteDepartment(Department department);
         #endregion
+       
         #region CommonOperations
 
         Task<bool> SaveChangesAsync();

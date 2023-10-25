@@ -53,5 +53,8 @@ namespace SupervisorMobility.API.Entities
 
         public string? ReleasedFeedback { get; set; }
         public ICollection<Lup> Lup { get; set; } = new List<Lup>();
+        public int? KpiId { get; set; }
+        public string? TaktTime { get; set; }
+        public string? Questions { get; set; }
     }
 }

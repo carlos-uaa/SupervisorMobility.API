@@ -31,7 +31,7 @@ namespace SupervisorMobility.API.Entities
 
         public int? OperationId { get; set; }
         public Operation? Operation { get; set; }
-
+        public int? ErgonomicsLevel { get; set; }
         public ICollection<SOSCodePath> RoutesProductsAssyChart { get; set; }
           = new List<SOSCodePath>();
 

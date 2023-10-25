@@ -20,6 +20,7 @@ namespace SupervisorMobility.API.Models.AssyChart
         public int AreaId { get; set; }
         public int DistributionId { get; set; }
         public int OperationId { get; set; }
+        public int? ErgonomicsLevel { get; set; }
 
     }
 }

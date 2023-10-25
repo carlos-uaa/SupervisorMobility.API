@@ -13,6 +13,7 @@ namespace SupervisorMobility.API.Context
     {
         #region DbSets
         public DbSet<HeadCount> headCounts { get; set; }
+        public DbSet<HeadCountProcess> headCountsProcess { get; set; }
         public DbSet<ChecklistCategory> ChecklistCategories { get; set; }
         public DbSet<QuestionType> QuestionTypes { get; set; }
         public DbSet<ChecklistQuestion> ChecklistQuestions { get; set; }

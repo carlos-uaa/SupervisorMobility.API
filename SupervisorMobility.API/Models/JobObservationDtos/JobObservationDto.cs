@@ -49,5 +49,8 @@ namespace SupervisorMobility.API.Models.JobObservationDtos
         public string? SsvSignature { get; set; }
         public string? OperatorSignature { get; set; }
         public string? ReleasedFeedback { get; set; }
+        public int? KpiId { get; set; }
+        public string? TaktTime { get; set; }
+        public string? Questions { get; set; }
     }
 }
