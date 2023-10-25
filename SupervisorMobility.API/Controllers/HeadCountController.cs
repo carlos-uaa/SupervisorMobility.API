@@ -506,7 +506,7 @@ namespace SupervisorMobility.API.Controllers
 
         }//end download file function 
 
-        [HttpPost("Process/")]
+        [HttpPost("Process")]
         public async Task<ActionResult> CreateProcess(HeadCountProcessCreateUpdateDto HD_Process)
         {
 
@@ -516,14 +516,14 @@ namespace SupervisorMobility.API.Controllers
 
             if (result == 1)
             {
-            return Ok();
+            return Ok(finalProcess);
             }
 
             return NotFound("No creado");
 
         }
 
-        [HttpGet("Process/")]
+        [HttpGet("Process")]
         public async Task<ActionResult> ReadAllProcess()
         {
 
