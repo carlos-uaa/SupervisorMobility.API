@@ -52,5 +52,10 @@ namespace SupervisorMobility.API.Entities
         public AssyChart? AssyChart { get; set; }
 
         public string? ReleasedFeedback { get; set; }
+
+        public int? KpiId { get; set; }
+        public string? TaktTime { get; set; }
+        public string? Questions { get; set; }
+
     }
 }
