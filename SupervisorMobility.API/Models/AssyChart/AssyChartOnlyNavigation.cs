@@ -28,5 +28,6 @@ namespace SupervisorMobility.API.Models.AssyChart
         public int OperationId { get; set; }
         public OperationWithoutNavigationPropertiesDto Operation { get; set; } = new OperationWithoutNavigationPropertiesDto();
 
+        public int? ErgonomicsLevel { get; set; }
     }
 }

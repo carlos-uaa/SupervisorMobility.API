@@ -32,6 +32,7 @@ namespace SupervisorMobility.API.Models.AssyChart
         public string? OperationCode { get; set; }
         public string? OperationDescription { get; set; }
         public bool? OperationIsActive { get; set; }
+        public int? ErgonomicsLevel { get; set; }
 
     }
 }
