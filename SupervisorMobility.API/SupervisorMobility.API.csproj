@@ -38,6 +38,7 @@
 		<Folder Include="uploads\guides\" />
 		<Folder Include="uploads\headcount\NewFolder\" />
 		<Folder Include="uploads\massive\" />
+		<Folder Include="uploads\headcount\" />
 		<Folder Include="uploads\users\" />
 	</ItemGroup>
 
