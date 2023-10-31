@@ -55,10 +55,16 @@ namespace SupervisorMobility.API.Controllers
             trustedFileNameForStorage = System.IO.Path.ChangeExtension(trustedFileNameForStorage, ".xlsx");
             var path = Path.Combine(_env.ContentRootPath, "uploads\\headcount", trustedFileNameForStorage);
 
-            await using (FileStream fs = new FileStream(path, FileMode.Create))
+            try
             {
-                // Utiliza "await" para asegurarte de que se complete la copia del archivo antes de continuar
-                await file.CopyToAsync(fs);
+                await using (FileStream fs = new FileStream(path, FileMode.Create))
+                {
+                    // Utiliza "await" para asegurarte de que se complete la copia del archivo antes de continuar
+                    await file.CopyToAsync(fs);
+                }
+            }catch(Exception ex)
+            {
+                return NotFound(ex.Message);
             }
 
             uploadResult.FileName = unstrustedFileName;
@@ -114,10 +120,10 @@ namespace SupervisorMobility.API.Controllers
                                         {
                                             _headCount.RTO = ws.Cell(i, 9).GetString() != "" ? ws.Cell(i, 9).GetValue<string>() : "";
 
-                                            if (_headCount.RTO.ToLower() == "no")
-                                            {
-                                                break;
-                                            }
+                                            //if (_headCount.RTO.ToLower() == "no")
+                                            //{
+                                            //    break;
+                                            //}
                                         }
                                         catch (Exception ex)
                                         {
@@ -134,7 +140,51 @@ namespace SupervisorMobility.API.Controllers
 
                                             if (result == -1)
                                             {
-                                                break;
+                                                bool contieneNumero = valueFunctionDescription.Any(char.IsDigit);
+
+                                                //la celda esta dentro de los preocesso
+                                                if (contieneNumero)
+                                                {
+                                                    //Tiene id de subarea,  extraemos numero
+                                                    string numeroString = new string(valueFunctionDescription.Where(char.IsDigit).ToArray());
+
+                                                    //convertimos
+                                                    if (int.TryParse(numeroString, out int numero))
+                                                    {
+                                                        //guaramos id
+                                                        _headCount.ID_subarea = numero;
+                                                    }
+                                                    else
+                                                    {
+                                                        //fallo el numero asignamos default
+                                                        _headCount.ID_subarea = 0;
+                                                    }
+                                                }
+                                                else
+                                                {
+                                                    //No tiene id de subarea
+                                                    _headCount.ID_subarea = 0;
+                                                }
+
+                                                try
+                                                {
+                                                    _headCount.nombre_subarea = "Otro";
+                                                }
+                                                catch (Exception ex)
+                                                {
+
+                                                }
+
+                                                try
+                                                {
+                                                    _headCount.Fuction_Type = valueFunctionDescription;
+                                                }
+                                                catch (Exception ex)
+                                                {
+
+                                                }
+
+                                                //break;
                                             }
                                             else
                                             {
@@ -165,7 +215,6 @@ namespace SupervisorMobility.API.Controllers
                                                     //No tiene id de subarea
                                                     _headCount.ID_subarea = 0;
                                                 }
-
                                                 try
                                                 {
                                                     _headCount.nombre_subarea = All_process.ToList().ElementAt(result).Process;
@@ -174,19 +223,9 @@ namespace SupervisorMobility.API.Controllers
                                                 {
 
                                                 }
-
                                                 try
                                                 {
-                                                    _headCount.nombre_subarea = All_process.ToList().ElementAt(result).Process;
-                                                }
-                                                catch (Exception ex)
-                                                {
-
-                                                }
-
-                                                try
-                                                {
-                                                    _headCount.Fuction_Type = All_process.ToList().ElementAt(result).Process;
+                                                    _headCount.Fuction_Type = valueFunctionDescription;
                                                 }
                                                 catch (Exception ex)
                                                 {

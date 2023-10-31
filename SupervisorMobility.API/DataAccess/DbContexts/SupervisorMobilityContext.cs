@@ -58,7 +58,7 @@ namespace SupervisorMobility.API.Context
         public SupervisorMobilityContext(DbContextOptions<SupervisorMobilityContext> options)
             : base(options)
         {
-
+            
         }
 
 
