@@ -335,7 +335,7 @@ namespace SupervisorMobility.API.Controllers
         }
 
         [HttpPut("{userId}")]
-        public async Task<ActionResult> UpdateUser(int userId, UsersForUpdateDto user)
+        public async Task<ActionResult> UpdateUser(int userId, UsersForUpdateDto user, int areaTypeUpdate)
         {
             return Ok();
 
@@ -420,14 +420,16 @@ namespace SupervisorMobility.API.Controllers
                 }
 
 
-                    foreach (var AreainList in user.Areas)
-                    {
-                        AreasInUser.Add(await _supervisorMobilityRepository.GetAreaForPlantAsync((int)user.PlantId, AreainList.AreaId));
-                    }
-                    user.Areas = null;
-                
-               
+                foreach (var AreainList in user.Areas)
+                {
+                    AreasInUser.Add(await _supervisorMobilityRepository.GetAreaForPlantAsync((int)user.PlantId, AreainList.AreaId));
+                }
+                user.Areas = null;
+
+
             }
+
+
 
             if (userUpdatePriority)
             {
@@ -438,34 +440,43 @@ namespace SupervisorMobility.API.Controllers
                     {
                         var userInDB = await _assyChartService.FetchUserAsync(Sub.UserId);
 
-                        if (user.UserType == 3)
+                        if (areaTypeUpdate != 4)
                         {
-                            if (user.AreaId != Sub.AreaId)
+                            //Tiene prioridad el area con la que venga, se actualiza
+                            if (user.UserType == 3)
                             {
-                                _mapper.Map(Sub, userInDB);
-                                UsersInUser.Add(userInDB);
+                                if (user.AreaId != Sub.AreaId)
+                                {
+                                    _mapper.Map(Sub, userInDB);
+                                    UsersInUser.Add(userInDB);
+                                }
+                                else
+                                {
+                                    UsersWithoutChanges.Add(userInDB);
+                                }
+                            }
+                            else if (user.UserType == 2)
+                            {
+                                if (!user.Areas.Any(a => a.AreaId == Sub.AreaId))
+                                {
+                                    _mapper.Map(Sub, userInDB);
+                                    UsersInUser.Add(userInDB);
+                                }
+                                else
+                                {
+                                    UsersWithoutChanges.Add(userInDB);
+                                }
                             }
                             else
                             {
                                 UsersWithoutChanges.Add(userInDB);
                             }
                         }
-                        else if (user.UserType == 2)
-                        {
-                            if (!user.Areas.Any(a => a.AreaId == Sub.AreaId))
-                            {
-                                _mapper.Map(Sub, userInDB);
-                                UsersInUser.Add(userInDB);
-                            }
-                            else
-                            {
-                                    UsersWithoutChanges.Add(userInDB);
-                            }
-                        }
                         else
                         {
-                            UsersWithoutChanges.Add(userInDB);
+                            UsersInUser.Add(userInDB);
                         }
+
                     }
 
                     user.Subordinates = null;
@@ -534,9 +545,9 @@ namespace SupervisorMobility.API.Controllers
                 }
             }
 
-            
 
-           
+
+
 
             var userToCompare = _mapper.Map<User>(user);
 
@@ -588,8 +599,11 @@ namespace SupervisorMobility.API.Controllers
                         case 2:
                             //itero sobre SV
                             elementAux.SuperiorId = UserToReturn.UserId;
-                            elementAux.GroupId = UserToReturn.GroupId;
-                            elementAux.PlantId = UserToReturn.PlantId;
+                            if (areaTypeUpdate != 4)
+                            {
+                                elementAux.GroupId = UserToReturn.GroupId;
+                                elementAux.PlantId = UserToReturn.PlantId;
+                            }
                             await _assyChartService.UpdateUserAsync(elementAux, elementUserInList.UserId);
 
                             await _supervisorMobilityRepository.UserUpdateAllSubordinated(elementUserInList);
@@ -598,16 +612,24 @@ namespace SupervisorMobility.API.Controllers
                         case 3:
                             //itero sobre OP
                             elementAux.SuperiorId = UserToReturn.UserId;
-                            elementAux.GroupId = UserToReturn.GroupId;
-                            elementAux.PlantId = UserToReturn.PlantId;
-                            elementAux.AreaId = UserToReturn.AreaId;
+                            if (areaTypeUpdate != 4)
+                            {
+                                elementAux.PlantId = UserToReturn.PlantId;
+                                elementAux.GroupId = UserToReturn.GroupId;
+                                elementAux.AreaId = UserToReturn.AreaId;
+                            }
+
                             await _assyChartService.UpdateUserAsync(elementAux, elementUserInList.UserId);
 
                             break;
                         case 5:
                             //itero sobre SsV
                             elementAux.SuperiorId = UserToReturn.UserId;
-                            elementAux.PlantId = UserToReturn?.PlantId;
+
+                            if (areaTypeUpdate != 4)
+                            {
+                                elementAux.PlantId = UserToReturn?.PlantId;
+                            }
                             await _assyChartService.UpdateUserAsync(elementAux, elementUserInList.UserId);
 
                             await _supervisorMobilityRepository.UserUpdateAllSubordinated(elementUserInList);
@@ -656,46 +678,46 @@ namespace SupervisorMobility.API.Controllers
 
 
 
-                foreach (var elemntUser in users)
+            foreach (var elemntUser in users)
+            {
+                var SuperiorNewData = await _assyChartService.FetchUserAsync((int)elemntUser.SuperiorId);
+                var EntityUser = await _supervisorMobilityRepository.GetUserAsync(elemntUser.UserId);
+
+                var elementAux = _mapper.Map<UsersForUpdateDto>(elemntUser);
+
+                switch (SuperiorNewData.UserType)
                 {
-                    var SuperiorNewData = await _assyChartService.FetchUserAsync((int)elemntUser.SuperiorId);
-                    var EntityUser = await _supervisorMobilityRepository.GetUserAsync(elemntUser.UserId);
-
-                    var elementAux = _mapper.Map<UsersForUpdateDto>(elemntUser);
-                
-                    switch (SuperiorNewData.UserType)
-                    {
-                        case 2:
+                    case 2:
                         //Si el jefe es un SSV, estoy manejando un SV
-                            elementAux.SuperiorId = SuperiorNewData.UserId;
-                            elementAux.GroupId = SuperiorNewData.GroupId;
-                            elementAux.PlantId = SuperiorNewData.PlantId;
-                            
-                            //Actualiza info de operadores
-                            foreach(var SubInuser in EntityUser.Subordinates)
-                            {
-                                var SubSubEntity = await _supervisorMobilityRepository.GetUserAsync(SubInuser.UserId);
-                                var SubSubUpdate = _mapper.Map<UsersForUpdateDto>(elemntUser);
-                                SubSubUpdate.AreaId = elemntUser.AreaId;
-                                
-                                await _assyChartService.UpdateUserAsync(SubSubUpdate, SubSubEntity.UserId);
-                            }
-                        break;
-                        case 3:
-                        //Si el jefe es un SV, estoy manejando un operador
-                            elementAux.SuperiorId = SuperiorNewData.UserId;
+                        elementAux.SuperiorId = SuperiorNewData.UserId;
                         elementAux.GroupId = SuperiorNewData.GroupId;
-                            elementAux.PlantId = SuperiorNewData.PlantId;
-                            elementAux.AreaId = SuperiorNewData.AreaId;
-                            break;
-                    }
+                        elementAux.PlantId = SuperiorNewData.PlantId;
 
-                    await _assyChartService.UpdateUserAsync(elementAux, EntityUser.UserId);
+                        //Actualiza info de operadores
+                        foreach (var SubInuser in EntityUser.Subordinates)
+                        {
+                            var SubSubEntity = await _supervisorMobilityRepository.GetUserAsync(SubInuser.UserId);
+                            var SubSubUpdate = _mapper.Map<UsersForUpdateDto>(elemntUser);
+                            SubSubUpdate.AreaId = elemntUser.AreaId;
 
-                    _supervisorMobilityRepository.UserAddSubordinated(SuperiorNewData, EntityUser);
+                            await _assyChartService.UpdateUserAsync(SubSubUpdate, SubSubEntity.UserId);
+                        }
+                        break;
+                    case 3:
+                        //Si el jefe es un SV, estoy manejando un operador
+                        elementAux.SuperiorId = SuperiorNewData.UserId;
+                        elementAux.GroupId = SuperiorNewData.GroupId;
+                        elementAux.PlantId = SuperiorNewData.PlantId;
+                        elementAux.AreaId = SuperiorNewData.AreaId;
+                        break;
                 }
 
-        
+                await _assyChartService.UpdateUserAsync(elementAux, EntityUser.UserId);
+
+                _supervisorMobilityRepository.UserAddSubordinated(SuperiorNewData, EntityUser);
+            }
+
+
             await _supervisorMobilityRepository.SaveChangesAsync();
 
 
@@ -736,7 +758,7 @@ namespace SupervisorMobility.API.Controllers
 
         //******* Upload users    **********//
         [EnableCors("Cors")]
-        
+
         [HttpPost("MasiveUpload")]
         public async Task<ActionResult<UploadUsersResult>> MassiveUpload(List<UsersWithPeopleWithoutNavigationDetails> UsersToCreate)
         {
@@ -1237,7 +1259,7 @@ namespace SupervisorMobility.API.Controllers
             return Ok(ResultToReturn);
 
         }
-        
+
         [EnableCors("Cors")]
         [HttpPost("MasiveUpload/Superior/{superiorId}")]
         public async Task<ActionResult<UploadUsersResult>> MassiveUsersToSuperior(List<UsersWithPeopleWithoutNavigationDetails> UsesToCreateInSuperior, int superiorId)
@@ -1534,7 +1556,7 @@ namespace SupervisorMobility.API.Controllers
 
             return Ok(ResultToReturn);
         }
-        
+
         [EnableCors("Cors")]
         [HttpPost("FileUpload/Data")]
         public async Task<ActionResult<UploadUsersResult>> ApplyUsersUpload(FileUploadGeneralDto FileToInsert)
