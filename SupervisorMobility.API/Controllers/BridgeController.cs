@@ -70,7 +70,7 @@ namespace SupervisorMobility.API.Controllers
             return Ok(response.Content.ReadAsStringAsync().Result);
         }
 
-        [HttpPost("SMHoe/PostArchivesDirectoryHO")]
+        [HttpPost("SMHoe/PostArchivesDirectoryHOE")]
         public async Task<ActionResult> PostArchivesDirectoryHOE(Dictionary<string, string> parameters)
         {
             var content = new FormUrlEncodedContent(parameters);

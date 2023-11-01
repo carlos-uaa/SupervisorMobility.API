@@ -1,5 +1,6 @@
 ﻿using Microsoft.AspNetCore.ResponseCompression;
 using Microsoft.EntityFrameworkCore;
+using Microsoft.Extensions.Options;
 using SupervisorMobility.API.Business;
 using SupervisorMobility.API.Context;
 using SupervisorMobility.API.DataAccess.Services;
@@ -43,8 +44,11 @@ namespace SupervisorMobility.API
         {
             // add the DbContext
             services.AddDbContext<SupervisorMobilityContext>(options =>
-                options.UseSqlServer(configuration.GetConnectionString("SupervisorMobilityDBConnectionString")),
-             ServiceLifetime.Transient);
+            {
+                options.UseSqlServer(configuration.GetConnectionString("SupervisorMobilityDBConnectionString"));
+                options.UseQueryTrackingBehavior(QueryTrackingBehavior.NoTracking);
+                options.EnableSensitiveDataLogging();
+            }, ServiceLifetime.Transient);
 
             // register the repository
             services.AddScoped<ISupervisorMobilityRepository, SupervisorMobilityRepository>();
