@@ -352,7 +352,15 @@ namespace SupervisorMobility.API.Services
         void AddDepartment(Department department);
         void DeleteDepartment(Department department);
         #endregion
-       
+        #region PillarOperations
+        Task<IEnumerable<Pillar>> GetPillarsAsync();
+        Task<Pillar?> GetPillarAsync(int pillarId);
+        Task<bool> PillarExistAsync(int pillarId);
+
+        void AddPillar(Pillar pillar);
+        void DeletePillar(Pillar pillar);
+        #endregion
+
         #region CommonOperations
 
         Task<bool> SaveChangesAsync();

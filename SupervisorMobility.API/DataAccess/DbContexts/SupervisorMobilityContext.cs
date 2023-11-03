@@ -22,6 +22,7 @@ namespace SupervisorMobility.API.Context
         public DbSet<JobObservation> JobObservations { get; set; }
         public DbSet<Lup> Lup { get; set; }
         public DbSet<Entities.Group> Groups { get; set; }
+        public DbSet<Pillar> Pillars { get; set; }
         public DbSet<Glosary> Glosary { get; set; }
         public DbSet<Department> Departments { get; set; }
         public DbSet<Plant> Plants { get; set; }
@@ -236,6 +237,10 @@ namespace SupervisorMobility.API.Context
                 .Property(p => p.IsActive)
                 .HasDefaultValue(true);
 
+            modelBuilder.Entity<Pillar>()
+                .Property(p => p.IsActive)
+                .HasDefaultValue(true);
+
             //Constraints
             modelBuilder.Entity<ChecklistCategory>()
                 .HasCheckConstraint("ck_cc_seq", "[Sequence] > 0");
@@ -338,26 +343,7 @@ namespace SupervisorMobility.API.Context
                     QuestionTypeId = 6,
                     IsActive = true
                 });
-            modelBuilder.Entity<ChecklistQuestion>()
-                .HasData(
-                new ChecklistQuestion("PO:ECA", "Estandares completos y actualizados", "Los estándares estan completos y actualizados (HOE, Estado de referencia de 5S, etc. Icluyendo la pasada observación de operación  (S/N)")
-                {
-                    QuestionID = 1,
-                    CategorySequence = 1,
-                    IsActive = true,
-                    ChecklistCategoryId = 1,
-                    QuestionTypeId = 6
 
-                },
-                new ChecklistQuestion("PO:NIO", "Nivel ILU del operador", "¿Cuál es nivel de ILU del operador?  ¿Está el entrenamiento alineado con el Cuadro de requisitos de Operaicón ? (S/N)")
-                {
-                    QuestionID = 2,
-                    CategorySequence = 2,
-                    IsActive = true,
-                    ChecklistCategoryId = 1,
-                    QuestionTypeId = 6
-
-                });
             modelBuilder.Entity<JobObservationType>()
                 .HasData(
                 new JobObservationType("JC", "Observación de Operación Cíclica")
@@ -881,28 +867,85 @@ namespace SupervisorMobility.API.Context
                     });
 
             modelBuilder.Entity<ILULevel>()
-                    .HasData(
-                            new ILULevel()
-                            {
-                                ILULevelId = 1,
-                                ILULevelCode = 'I',
-                                ILULevelDescription = "el operador necesita entrenamiento para realizar la operación",
-                                isActive = true
-                            },
-                            new ILULevel()
-                            {
-                                ILULevelId = 2,
-                                ILULevelCode = 'L',
-                                ILULevelDescription = "el operador ya la puede realizar por si mismo",
-                                isActive = true
-                            }, new ILULevel()
-                            {
-                                ILULevelId = 3,
-                                ILULevelCode = 'U',
-                                ILULevelDescription = "el operador domina la operación y puede enseñar",
-                                isActive = true
-                            }
-                    );
+                .HasData(
+                        new ILULevel()
+                        {
+                            ILULevelId = 1,
+                            ILULevelCode = 'I',
+                            ILULevelDescription = "el operador necesita entrenamiento para realizar la operación",
+                            isActive = true
+                        },
+                        new ILULevel()
+                        {
+                            ILULevelId = 2,
+                            ILULevelCode = 'L',
+                            ILULevelDescription = "el operador ya la puede realizar por si mismo",
+                            isActive = true
+                        }, new ILULevel()
+                        {
+                            ILULevelId = 3,
+                            ILULevelCode = 'U',
+                            ILULevelDescription = "el operador domina la operación y puede enseñar",
+                            isActive = true
+                        }
+                );
+
+            modelBuilder.Entity<Pillar>()
+                .HasData(
+                new Pillar("S & E", "Safety & Environment")
+                {
+                    PillarId = 1,
+                    IsActive = true
+                },
+                new Pillar("Q", "Quality")
+                {
+                    PillarId = 2,
+                    IsActive = true
+                },
+                new Pillar("D", "Delivery")
+                {
+                    PillarId = 3,
+                    IsActive = true
+                },
+                new Pillar("C", "Cost")
+                {
+                    PillarId = 4,
+                    IsActive = true
+                },
+                new Pillar("Other", "Other")
+                {
+                    PillarId = 5,
+                    IsActive = true
+                }
+            );
+
+            modelBuilder.Entity<ChecklistQuestion>()
+                .HasData(
+                new ChecklistQuestion()
+                {
+                    QuestionID = 1,
+                    PillarId = 2,
+                    Prompt = "Respeta pasos principales y puntos críticos",
+                    NotGood = "No Respeta pasos principales y puntos críticos",
+                    CategorySequence = 1,
+                    Sequence = 1,
+                    IsActive = true,
+                    ChecklistCategoryId = 1,
+
+                },
+                new ChecklistQuestion()
+                {
+                    QuestionID = 2,
+                    PillarId = 2,
+                    Prompt = "Empaque, herramientas, manipuladores están en buenas condiciones y no hay riesgos de calidad",
+                    NotGood = "El empaque, herramientas, manipuladores no están en buenas condiciones y hay riesgos de calidad",
+                    Sequence = 2,
+                    CategorySequence = 2,
+                    IsActive = true,
+                    ChecklistCategoryId = 1,
+
+                });
+
 
             base.OnModelCreating(modelBuilder);
         }

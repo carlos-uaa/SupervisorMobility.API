@@ -5,20 +5,20 @@ namespace SupervisorMobility.API.Models.ChecklistQuestionDtos
     public class ChecklistQuestionForUpdateDto
     {
         [Required]
-        [MaxLength(50)]
-        public string Code { get; set; } = string.Empty;
-        [Required]
-        [MaxLength(200)]
-        public string Description { get; set; } = string.Empty;
-        [Required]
         [MaxLength(200)]
         public string Prompt { get; set; } = string.Empty;
-        public int? AnswerSetID { get; set; }
+
+        [Required]
+        public int PillarId { get; set; }
+        [Required]
+        public int Sequence { get; set; }
+        [MaxLength(200)]
+        public string NotGood { get; set; } = string.Empty;
+        public int CategorySequence { get; set; }
         public bool? IsActive { get; set; }
         //FK
         [Required]
         public int ChecklistCategoryId { get; set; }
-        [Required]
-        public int QuestionTypeId { get; set; }
+
     }
 }
