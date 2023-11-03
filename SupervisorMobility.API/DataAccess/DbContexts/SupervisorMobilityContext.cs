@@ -142,8 +142,8 @@ namespace SupervisorMobility.API.Context
              .HasDefaultValue(true);
 
             modelBuilder.Entity<User>()
-                .Property(u => u.UserId)
-                .UseIdentityColumn();
+            .Property(u => u.AreaId)
+            .IsRequired(false);
 
             modelBuilder.Entity<User>()
                 .HasMany(u => u.Areas)

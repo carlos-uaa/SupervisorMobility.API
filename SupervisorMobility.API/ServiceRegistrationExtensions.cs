@@ -43,12 +43,7 @@ namespace SupervisorMobility.API
             this IServiceCollection services, IConfiguration configuration)
         {
             // add the DbContext
-            services.AddDbContext<SupervisorMobilityContext>(options =>
-            {
-                options.UseSqlServer(configuration.GetConnectionString("SupervisorMobilityDBConnectionString"));
-                options.UseQueryTrackingBehavior(QueryTrackingBehavior.NoTracking);
-                options.EnableSensitiveDataLogging();
-            }, ServiceLifetime.Transient);
+            services.AddDbContext<SupervisorMobilityContext>(options => options.UseSqlServer(configuration.GetConnectionString("SupervisorMobilityDBConnectionString")), ServiceLifetime.Transient);
 
             // register the repository
             services.AddScoped<ISupervisorMobilityRepository, SupervisorMobilityRepository>();

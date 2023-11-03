@@ -1141,9 +1141,9 @@ namespace SupervisorMobility.API.Services
 
             _mapper.Map(user, entityUser);
 
-            _context.SaveChanges();
+            await _context.SaveChangesAsync();
         }
-        public async void UserAddSubordinated(User Master, User Slave)
+        public async Task<AsyncVoidMethodBuilder> UserAddSubordinated(User Master, User Slave)
         {
 
             if (Master.Subordinates != null)
@@ -1157,14 +1157,15 @@ namespace SupervisorMobility.API.Services
                 Slave.SuperiorId = Master.UserId;
                 Master.Subordinates.Add(Slave);
             }
-            _context.SaveChanges();
-
+            await _context.SaveChangesAsync();
+            return new AsyncVoidMethodBuilder();
         }
 
-        public async void UserRemoveSubordinated(User Master, User Slave)
+        public async Task<AsyncVoidMethodBuilder> UserRemoveSubordinated(User Master, User Slave)
         {
             Master.Subordinates?.Remove(Slave);
-            _context.SaveChanges();
+            await _context.SaveChangesAsync();
+            return new AsyncVoidMethodBuilder();
         }
         public async Task<AsyncVoidMethodBuilder> UserRemoveAllSubordinated(User Master)
         {
@@ -1248,7 +1249,7 @@ namespace SupervisorMobility.API.Services
 
         }
 
-        public void UserAddArea(User Master, Area Slave)
+        public async Task<AsyncVoidMethodBuilder> UserAddArea(User Master, Area Slave)
         {
             if (Master.Areas != null)
             {
@@ -1259,7 +1260,10 @@ namespace SupervisorMobility.API.Services
                 Master.Areas = new List<Area>();
                 Master.Areas.Add(Slave);
             }
-            _context.SaveChanges();
+            await _context.SaveChangesAsync();
+
+            return new AsyncVoidMethodBuilder();
+
         }
 
 
