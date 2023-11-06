@@ -9,7 +9,10 @@ using Microsoft.VisualBasic.FileIO;
 using SpreadsheetLight;
 using SupervisorMobility.API.Business;
 using SupervisorMobility.API.DataAccess.Entities;
+using SupervisorMobility.API.DataAccess.Entities.TreeStruct;
+using SupervisorMobility.API.DataAccess.Services.TreeServices;
 using SupervisorMobility.API.Entities;
+using SupervisorMobility.API.Entities.CDMS;
 using SupervisorMobility.API.Models.AreaDtos;
 using SupervisorMobility.API.Models.AssyChart;
 using SupervisorMobility.API.Models.DistributionDtos;
@@ -24,6 +27,7 @@ using System.Diagnostics;
 using System.IO;
 using System.Net;
 using System.Text.RegularExpressions;
+using static System.Net.WebRequestMethods;
 
 namespace SupervisorMobility.API.Controllers
 {
@@ -37,11 +41,15 @@ namespace SupervisorMobility.API.Controllers
         private readonly IWebHostEnvironment _env;
         private readonly IMapper _mapper;
         private readonly IAssyChartService _assyChartService;
+        private readonly ITreeService _treeService; 
+        private readonly HttpClient _bridgeHttpClient;
         private readonly ISupervisorMobilityRepository _supervisorMobilityRepository;
 
         public FileController(IWebHostEnvironment env, IMapper mapper, ISupervisorMobilityRepository supervisorMobilityRepository,
-            IAssyChartService assyChartService)
+            IAssyChartService assyChartService, ITreeService treeService, CustomHttpClientService customHttp)
         {
+            _bridgeHttpClient = customHttp.GetBridgeHttpClient();
+            _treeService = treeService;
             _assyChartService = assyChartService;
             _supervisorMobilityRepository = supervisorMobilityRepository ??
                 throw new ArgumentNullException(nameof(supervisorMobilityRepository));
@@ -1854,16 +1862,141 @@ namespace SupervisorMobility.API.Controllers
             var fileToReturn = await _assyChartService.CreateFileAsync(uploadResult);
 
             await _supervisorMobilityRepository.SaveChangesAsync();
-            await _supervisorMobilityRepository.RemoveAllHeadCountRegisters();
 
+            //GET rutas CDMS
+            CDMS_GOS_Directory GOSFolders  = new CDMS_GOS_Directory();
+            TreeItemData rootNodeGOS  = new TreeItemData();
+            
+            CDMS_CCP_Directory CCPFolders = new CDMS_CCP_Directory();
+            TreeItemData rootNodeCCP = new TreeItemData();
+
+            CDMS_HOE_Directory HOEFolders  = new CDMS_HOE_Directory();
+            TreeItemData rootNodeHOE = new TreeItemData();
+
+            try
+            {
+               
+                //try
+                //{
+                  
+                //    try
+                //    {
+                //        var response = await _bridgeHttpClient.GetAsync("SMGos/GetDirectoryPathsGos");
+
+                //        if (response.IsSuccessStatusCode)
+                //        {
+                //            var result = await response.Content.ReadFromJsonAsync<CDMS_GOS_Directory>();
+                //            GOSFolders = result;
+                //        }
+                //        else
+                //        {
+                //            //await _js.InvokeVoidAsync("alert", $"Error get folders: {response.Content.ReadAsStringAsync().Result}");
+                //            Console.WriteLine($"GET FOLDERS GOS, Status Code {response.StatusCode} : {response.Content.ReadAsStringAsync().Result}");
+                //        }
+                //    }
+                //    catch (HttpRequestException ex)
+                //    {
+                //        Console.WriteLine($"Error al hacer la solicitud: {ex.Message}");
+                //    }
+                //    catch (TaskCanceledException ex)
+                //    {
+                //        Console.WriteLine($"La solicitud ha sido cancelada: {ex.Message}");
+                //    }
+
+                //}
+                //catch (Exception ex)
+                //{
+                //    Console.WriteLine("Error Get GOS Folder From CDMS");
+                //    Console.WriteLine(ex.Message);
+                //}
+
+                //if (GOSFolders != null)
+                //{
+                //    rootNodeGOS = _treeService.ConstruirArbolGOS(GOSFolders.operation);
+                //}
+
+                //try
+                //{
+                //    try
+                //    {
+                //        var response = await _bridgeHttpClient.GetAsync("SMCcp/GetDirectoryPathsCcp");
+
+                //        if (response.IsSuccessStatusCode)
+                //        {
+                //            var result = await response.Content.ReadFromJsonAsync<CDMS_CCP_Directory>();
+                //            CCPFolders = result;
+                //        }
+                //        else
+                //        {
+                //            //await _js.InvokeVoidAsync("alert", $"Error get folders: {response.Content.ReadAsStringAsync().Result}");
+                //            Console.WriteLine($"GET FOLDERS CCP, Status Code {response.StatusCode} : {response.Content.ReadAsStringAsync().Result}");
+                //        }
+                //    }
+                //    catch (HttpRequestException ex)
+                //    {
+                //        Console.WriteLine($"Error al hacer la solicitud: {ex.Message}");
+                //    }
+                //    catch (TaskCanceledException ex)
+                //    {
+                //        Console.WriteLine($"La solicitud ha sido cancelada: {ex.Message}");
+                //    }
+                //}
+                //catch (Exception ex)
+                //{
+                //    Console.WriteLine("Error Get CCP Folder From CCP");
+                //    Console.WriteLine(ex.Message);
+                //    Console.WriteLine(ex.Message);
+                //}
+
+                //if (CCPFolders != null)
+                //{
+                //    rootNodeCCP = _treeService.ConstruirArbolCCP(CCPFolders.operation);
+                //}
+
+                try
+                {
+                    try
+                    {
+                        var response = await _bridgeHttpClient.GetAsync("SMHoe/GetDirectoryPaths");
+
+                        if (response.IsSuccessStatusCode)
+                        {
+                            var result = await response.Content.ReadFromJsonAsync<CDMS_HOE_Directory>();
+                            HOEFolders = result;
+                        }
+                        else
+                        {
+                            //await _js.InvokeVoidAsync("alert", $"Error get folders: {response.Content.ReadAsStringAsync().Result}");
+                            Console.WriteLine($"GET FOLDERS HOE, Status Code {response.StatusCode} : {response.Content.ReadAsStringAsync().Result}");
+                        }
+                    }
+                    catch (HttpRequestException ex)
+                    {
+                        Console.WriteLine($"Error al hacer la solicitud: {ex.Message}");
+                    }
+                    catch (TaskCanceledException ex)
+                    {
+                        Console.WriteLine($"La solicitud ha sido cancelada: {ex.Message}");
+                    }
+                }
+                catch (Exception ex)
+                {
+                    Console.WriteLine("Error Get HOE Folder From CDMS");
+                    Console.WriteLine(ex.Message);
+                }
+                if (HOEFolders != null)
+                {
+                    rootNodeHOE = _treeService.ConstruirArbolHOE(HOEFolders.operation);
+                }
+
+            }
+            catch (Exception ex)
+            {
+
+            }
 
             //Start Massive Upload 
             string filepath = Directory.GetCurrentDirectory().ToString() + "\\uploads\\massive\\" + trustedFileNameForStorage;
-
-
-
-
-
             try
             {
                 using (var workBook = new XLWorkbook(filepath))
@@ -1895,43 +2028,72 @@ namespace SupervisorMobility.API.Controllers
                                 TimeSpan retryInterval = TimeSpan.FromSeconds(5); // Intervalo de tiempo entre intentos (5 segundos en este caso)
                                 int retries = 0;
 
-                                while (retries < maxRetries)
-                                {
-                                    try
-                                    {
+                                var Numerodeop = ws.Cell(i, 1).Value.ToString() != "" ? ws.Cell(i, 1).Value.ToString() : "";
+                                var Nombredeoperacion = ws.Cell(i, 4).Value.ToString() != "" ? ws.Cell(i, 4).Value.ToString() : "";
+                                var rutaUsuario = ws.Cell(i, 6).Value.ToString() != "" ? ws.Cell(i, 6).Value.ToString() : "";
 
-                                        //procedimiento
+
+                                if (rutaUsuario != "")
+                                {
+                                    string rutaSinSaltosDeLinea = rutaUsuario.Replace("\n", "");
+
+                                    Debug.WriteLine($"Numerodeop Value: {Numerodeop}");
+                                    Debug.WriteLine($"Nombredeoperacion Value: {Nombredeoperacion}");
+                                    Debug.WriteLine($"rutaUsuario Value: {rutaSinSaltosDeLinea}");
+
+
+                                    string rutaUsuarioNormalizada = _treeService.NormalizarRutaUsuario(rutaSinSaltosDeLinea);
+
+                                    TreeItemData mejorCoincidencia = _treeService.EncontrarMejorCoincidenciaDifusa(rootNodeHOE, rutaUsuarioNormalizada);
+
+                                    if (mejorCoincidencia != null)
+                                    {
+                                        Debug.WriteLine("Mejor coincidencia: " + mejorCoincidencia.Ruta);
+                                    }
+                                    else
+                                    {
+                                        Debug.WriteLine("No se encontró ninguna coincidencia.");
+                                    }
+
+                                }
+
+                                //while (retries < maxRetries)
+                                //{
+                                //    try
+                                //    {
+
+                                //        //procedimiento
                                       
-                                        SOSCodePath sOSCodePath = new SOSCodePath();
+                                //        SOSCodePath sOSCodePath = new SOSCodePath();
                                         
 
 
 
-                                        //aqui añadimos
+                                //        //aqui añadimos
 
 
-                                        retries = 0;
+                                //        retries = 0;
 
-                                        Debug.WriteLine($"Intento {retries + 1} Linea Position [{i}]");
+                                //        Debug.WriteLine($"Intento {retries + 1} Linea Position [{i}]");
 
-                                        // Si la operación tiene éxito, puedes salir del bucle
-                                        break;
-                                    }
-                                    catch (Exception ex)
-                                    {
-                                        // Maneja la excepción aquí, si es necesario
-                                        Console.WriteLine($"Intento {retries + 1} Linea Position [{i}] falló: {ex.Message}");
+                                //        // Si la operación tiene éxito, puedes salir del bucle
+                                //        break;
+                                //    }
+                                //    catch (Exception ex)
+                                //    {
+                                //        // Maneja la excepción aquí, si es necesario
+                                //        Console.WriteLine($"Intento {retries + 1} Linea Position [{i}] falló: {ex.Message}");
 
-                                        // Incrementa el número de intentos
-                                        retries++;
+                                //        // Incrementa el número de intentos
+                                //        retries++;
 
-                                        // Espera el intervalo de tiempo antes de volver a intentarlo
-                                        await Task.Delay(retryInterval);
-                                    }
+                                //        // Espera el intervalo de tiempo antes de volver a intentarlo
+                                //        await Task.Delay(retryInterval);
+                                //    }
 
 
 
-                                }//While
+                                //}//While
 
                             }//end is not empety row
                         }//end else first roe

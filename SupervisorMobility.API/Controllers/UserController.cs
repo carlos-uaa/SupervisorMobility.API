@@ -406,7 +406,7 @@ namespace SupervisorMobility.API.Controllers
                 {
                     var userInDB = await _assyChartService.FetchUserAsync(Sub.UserId);
 
-                    if (userInDB.AreaId != Sub.AreaId)
+                    if (userInDB.AreaId != Sub.AreaId || userInDB.SuperiorId != Sub.SuperiorId)
                     {
                         _mapper.Map(Sub, userInDB);
                         UsersInUser.Add(userInDB);
@@ -506,8 +506,8 @@ namespace SupervisorMobility.API.Controllers
                             if (areaTypeUpdate != 4)
                             { 
                                 elementAux.GroupId = UserToReturn.GroupId;
-                            elementAux.PlantId = UserToReturn.PlantId;
-                            elementAux.AreaId = UserToReturn.AreaId;
+                                elementAux.PlantId = UserToReturn.PlantId;
+                                elementAux.AreaId = UserToReturn.AreaId;
                             }
                             await _assyChartService.UpdateUserAsync(elementAux, elementUserInList.UserId);
 
@@ -583,14 +583,19 @@ namespace SupervisorMobility.API.Controllers
                        
 
                         //Actualiza info de operadores
-                        foreach (var SubInuser in EntityUser.Subordinates)
+                        if(EntityUser.Subordinates?.Count > 0)
                         {
-                            var SubSubEntity = await _supervisorMobilityRepository.GetUserAsync(SubInuser.UserId);
-                            var SubSubUpdate = _mapper.Map<UsersForUpdateDto>(elemntUser);
-                            SubSubUpdate.AreaId = elemntUser.AreaId;
+                            foreach (var SubInuser in EntityUser.Subordinates)
+                            {
+                                var SubSubEntity = await _supervisorMobilityRepository.GetUserAsync(SubInuser.UserId);
+                                var SubSubUpdate = _mapper.Map<UsersForUpdateDto>(elemntUser);
+                                SubSubUpdate.AreaId = elemntUser.AreaId;
 
-                            await _assyChartService.UpdateUserAsync(SubSubUpdate, SubSubEntity.UserId);
+                                await _assyChartService.UpdateUserAsync(SubSubUpdate, SubSubEntity.UserId);
+                            }
                         }
+
+                      
                         break;
                     case 3:
                         //Si el jefe es un SV, estoy manejando un operador
