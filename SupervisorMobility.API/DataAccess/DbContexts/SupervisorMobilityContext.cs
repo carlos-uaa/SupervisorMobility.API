@@ -928,7 +928,6 @@ namespace SupervisorMobility.API.Context
                     Prompt = "Respeta pasos principales y puntos críticos",
                     NotGood = "No Respeta pasos principales y puntos críticos",
                     CategorySequence = 1,
-                    Sequence = 1,
                     IsActive = true,
                     ChecklistCategoryId = 1,
 
@@ -939,7 +938,6 @@ namespace SupervisorMobility.API.Context
                     PillarId = 2,
                     Prompt = "Empaque, herramientas, manipuladores están en buenas condiciones y no hay riesgos de calidad",
                     NotGood = "El empaque, herramientas, manipuladores no están en buenas condiciones y hay riesgos de calidad",
-                    Sequence = 2,
                     CategorySequence = 2,
                     IsActive = true,
                     ChecklistCategoryId = 1,

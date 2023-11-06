@@ -64,7 +64,7 @@ namespace SupervisorMobility.API.Services
         {
             if (includeChecklistQuestion)
             {
-                return await _context.ChecklistCategories.Include(cq => cq.ChecklistQuestions)
+                return await _context.ChecklistCategories.Include(cq => cq.ChecklistQuestions.OrderBy(c => c.CategorySequence))
                     .Where(c => c.ChecklistCategoryId == categoryId).FirstOrDefaultAsync();
             }
 
