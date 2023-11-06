@@ -1,9 +1,9 @@
 ﻿using Microsoft.AspNetCore.ResponseCompression;
 using Microsoft.EntityFrameworkCore;
-using Microsoft.Extensions.Options;
 using SupervisorMobility.API.Business;
 using SupervisorMobility.API.Context;
 using SupervisorMobility.API.DataAccess.Services;
+using SupervisorMobility.API.DataAccess.Services.TreeServices;
 using SupervisorMobility.API.Services;
 
 namespace SupervisorMobility.API
@@ -16,6 +16,7 @@ namespace SupervisorMobility.API
             services.AddScoped<IJobObservationService, JobObservationService>();
             services.AddScoped<IAssyChartService, AssyChartService>();
             services.AddScoped<IEmailService, EmailService>();
+            services.AddScoped<ITreeService, TreeService>();
 
 
             services.Configure<IISServerOptions>(options =>
@@ -43,12 +44,7 @@ namespace SupervisorMobility.API
             this IServiceCollection services, IConfiguration configuration)
         {
             // add the DbContext
-            services.AddDbContext<SupervisorMobilityContext>(options =>
-            {
-                options.UseSqlServer(configuration.GetConnectionString("SupervisorMobilityDBConnectionString"));
-                options.UseQueryTrackingBehavior(QueryTrackingBehavior.NoTracking);
-                options.EnableSensitiveDataLogging();
-            }, ServiceLifetime.Transient);
+            services.AddDbContext<SupervisorMobilityContext>(options => options.UseSqlServer(configuration.GetConnectionString("SupervisorMobilityDBConnectionString")), ServiceLifetime.Transient);
 
             // register the repository
             services.AddScoped<ISupervisorMobilityRepository, SupervisorMobilityRepository>();

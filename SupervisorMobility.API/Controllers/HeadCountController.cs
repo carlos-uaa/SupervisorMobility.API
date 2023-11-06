@@ -45,8 +45,6 @@ namespace SupervisorMobility.API.Controllers
         [HttpPost("Upload")]
         public async Task<ActionResult<FileUpload>> UploadFileFromMassiveUpload(IFormFile file, int UserIdUpload)
         {
-            var All_process = await _supervisorMobilityRepository.GetAllHeadCountProcess();
-
             var uploadResult = new FileUploadForCreationDto();
             string trustedFileNameForStorage = string.Empty;
             var unstrustedFileName = file.FileName;
@@ -116,30 +114,13 @@ namespace SupervisorMobility.API.Controllers
                                     try
                                     {
 
-                                        try
-                                        {
-                                            _headCount.RTO = ws.Cell(i, 9).GetString() != "" ? ws.Cell(i, 9).GetValue<string>() : "";
-
-                                            //if (_headCount.RTO.ToLower() == "no")
-                                            //{
-                                            //    break;
-                                            //}
-                                        }
-                                        catch (Exception ex)
-                                        {
-
-                                        }
-
-
+                                     
                                         try
                                         {
                                             // id subarea nombre subarea
                                             var valueFunctionDescription = ws.Cell(i, 5).GetString() != "" ? ws.Cell(i, 5).GetValue<string>().Trim() : "";
 
-                                            var result = await IsValidFunctionInRow(valueFunctionDescription, All_process.ToList());
-
-                                            if (result == -1)
-                                            {
+                                           
                                                 bool contieneNumero = valueFunctionDescription.Any(char.IsDigit);
 
                                                 //la celda esta dentro de los preocesso
@@ -168,7 +149,7 @@ namespace SupervisorMobility.API.Controllers
 
                                                 try
                                                 {
-                                                    _headCount.nombre_subarea = "Otro";
+                                                    _headCount.nombre_subarea = valueFunctionDescription;
                                                 }
                                                 catch (Exception ex)
                                                 {
@@ -177,61 +158,15 @@ namespace SupervisorMobility.API.Controllers
 
                                                 try
                                                 {
-                                                    _headCount.Fuction_Type = valueFunctionDescription;
-                                                }
+                                                    _headCount.Fuction_Type = ws.Cell(i, 13).GetString() != "" ? ws.Cell(i, 13).GetValue<string>().Trim() : "";
+                                                 }
                                                 catch (Exception ex)
                                                 {
 
                                                 }
 
                                                 //break;
-                                            }
-                                            else
-                                            {
-                                                Debug.WriteLine($"i={i} res = {All_process.ElementAt(result).Process}");
-                                            
-                                                bool contieneNumero = valueFunctionDescription.Any(char.IsDigit);
 
-                                                //la celda esta dentro de los preocesso
-                                                if (contieneNumero)
-                                                {
-                                                    //Tiene id de subarea,  extraemos numero
-                                                    string numeroString = new string(valueFunctionDescription.Where(char.IsDigit).ToArray());
-
-                                                    //convertimos
-                                                    if (int.TryParse(numeroString, out int numero))
-                                                    {
-                                                        //guaramos id
-                                                        _headCount.ID_subarea = numero;
-                                                    }
-                                                    else
-                                                    {
-                                                        //fallo el numero asignamos default
-                                                        _headCount.ID_subarea = 0;
-                                                    }
-                                                }
-                                                else
-                                                {
-                                                    //No tiene id de subarea
-                                                    _headCount.ID_subarea = 0;
-                                                }
-                                                try
-                                                {
-                                                    _headCount.nombre_subarea = All_process.ToList().ElementAt(result).Process;
-                                                }
-                                                catch (Exception ex)
-                                                {
-
-                                                }
-                                                try
-                                                {
-                                                    _headCount.Fuction_Type = valueFunctionDescription;
-                                                }
-                                                catch (Exception ex)
-                                                {
-
-                                                }
-                                            }//else si existe
 
                                         }
                                         catch (Exception ex)
@@ -239,6 +174,15 @@ namespace SupervisorMobility.API.Controllers
 
                                         }
 
+                                        try
+                                        {
+                                            _headCount.RTO = ws.Cell(i, 9).GetString() != "" ? ws.Cell(i, 9).GetValue<string>() : "";
+
+                                        }
+                                        catch (Exception ex)
+                                        {
+
+                                        }
 
                                         //procedimiento
                                         try

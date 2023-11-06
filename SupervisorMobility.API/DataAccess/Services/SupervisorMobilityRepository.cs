@@ -1141,9 +1141,9 @@ namespace SupervisorMobility.API.Services
 
             _mapper.Map(user, entityUser);
 
-            _context.SaveChanges();
+            await _context.SaveChangesAsync();
         }
-        public async void UserAddSubordinated(User Master, User Slave)
+        public async Task<AsyncVoidMethodBuilder> UserAddSubordinated(User Master, User Slave)
         {
 
             if (Master.Subordinates != null)
@@ -1157,14 +1157,15 @@ namespace SupervisorMobility.API.Services
                 Slave.SuperiorId = Master.UserId;
                 Master.Subordinates.Add(Slave);
             }
-            _context.SaveChanges();
-
+            await _context.SaveChangesAsync();
+            return new AsyncVoidMethodBuilder();
         }
 
-        public async void UserRemoveSubordinated(User Master, User Slave)
+        public async Task<AsyncVoidMethodBuilder> UserRemoveSubordinated(User Master, User Slave)
         {
             Master.Subordinates?.Remove(Slave);
-            _context.SaveChanges();
+            await _context.SaveChangesAsync();
+            return new AsyncVoidMethodBuilder();
         }
         public async Task<AsyncVoidMethodBuilder> UserRemoveAllSubordinated(User Master)
         {
@@ -1248,7 +1249,7 @@ namespace SupervisorMobility.API.Services
 
         }
 
-        public void UserAddArea(User Master, Area Slave)
+        public async Task<AsyncVoidMethodBuilder> UserAddArea(User Master, Area Slave)
         {
             if (Master.Areas != null)
             {
@@ -1259,7 +1260,10 @@ namespace SupervisorMobility.API.Services
                 Master.Areas = new List<Area>();
                 Master.Areas.Add(Slave);
             }
-            _context.SaveChanges();
+            await _context.SaveChangesAsync();
+
+            return new AsyncVoidMethodBuilder();
+
         }
 
 
@@ -2144,6 +2148,38 @@ namespace SupervisorMobility.API.Services
             _context.SaveChanges();
         }
         #endregion
+        #region PillarOperations
+        public async Task<IEnumerable<Pillar>> GetPillarsAsync()
+        {
+            return await _context.Pillars.Where(u => u.IsActive == true)
+                .OrderBy(c => c.PillarId).ToListAsync();
+        }
+
+        public async Task<Pillar?> GetPillarAsync(int pillarId)
+        {
+            return await _context.Pillars
+                .Where(c => c.PillarId == pillarId).FirstOrDefaultAsync();
+        }
+
+        public async Task<bool> PillarExistAsync(int pillarId)
+        {
+            return await _context.Pillars.AnyAsync(p => p.PillarId == pillarId);
+        }
+
+
+        public void AddPillar(Pillar pillar)
+        {
+            _context.Pillars.Add(pillar);
+        }
+
+        public void DeletePillar(Entities.Pillar pillar)
+        {
+            //_context.Pillars.Remove(pillar);
+            pillar.IsActive = false;
+            _context.SaveChanges();
+        }
+        #endregion
+
         #region CommonOperations
         public async Task<bool> SaveChangesAsync()
         {
