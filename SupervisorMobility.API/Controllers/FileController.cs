@@ -1,6 +1,7 @@
 ﻿using AutoMapper;
 using ClosedXML.Excel;
 using DocumentFormat.OpenXml.Office2010.Excel;
+using DocumentFormat.OpenXml.Spreadsheet;
 using Microsoft.AspNetCore.Cors;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.AspNetCore.StaticFiles;
@@ -112,7 +113,7 @@ namespace SupervisorMobility.API.Controllers
 
         }
 
-        
+
         [HttpPost("UploadGuide")]
         public async Task<ActionResult<FileUpload>> UploadGuide(IFormFile file)
         {
@@ -1219,7 +1220,7 @@ namespace SupervisorMobility.API.Controllers
                     await stream.CopyToAsync(memory);
                 }
                 memory.Position = 0;
-               
+
 
                 var result = File(memory, FileInfo.ContentType, Path.GetFileName(path));
                 result.EnableRangeProcessing = true;
@@ -1255,7 +1256,7 @@ namespace SupervisorMobility.API.Controllers
                 await stream.CopyToAsync(memory);
             }
             memory.Position = 0;
-            
+
 
             var result = File(memory, "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet", Path.GetFileName(path));
             result.EnableRangeProcessing = true;
@@ -1276,7 +1277,7 @@ namespace SupervisorMobility.API.Controllers
                 await stream.CopyToAsync(memory);
             }
             memory.Position = 0;
-            
+
             var result = File(memory, "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet", Path.GetFileName(path));
             result.EnableRangeProcessing = true;
 
@@ -1316,7 +1317,7 @@ namespace SupervisorMobility.API.Controllers
                 await stream.CopyToAsync(memory);
             }
             memory.Position = 0;
-           
+
 
             var result = File(memory, "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet", Path.GetFileName(path));
             result.EnableRangeProcessing = true;
@@ -1357,7 +1358,7 @@ namespace SupervisorMobility.API.Controllers
         [HttpGet("Bulk/DownloadUsers")]
         public async Task<IActionResult> DownloadAllUsers()
         {
-            IEnumerable<User> allUsersList = await _supervisorMobilityRepository.GetAllUsersAsync(); 
+            IEnumerable<User> allUsersList = await _supervisorMobilityRepository.GetAllUsersAsync();
 
 
             if (allUsersList.ToList().Count == 0)
@@ -1406,26 +1407,26 @@ namespace SupervisorMobility.API.Controllers
                 ws.SetCellValue($"A{row}", itemUser.UserId.ToString() ?? "");
                 ws.SetCellValue($"B{row}", itemUser.ObjectId?.ToString() ?? "");
                 ws.SetCellValue($"C{row}", itemUser.Payroll.ToString() ?? "");
-                ws.SetCellValue($"D{row}", itemUser.Name.ToString() ?? ""); 
+                ws.SetCellValue($"D{row}", itemUser.Name.ToString() ?? "");
                 ws.SetCellValue($"E{row}", itemUser.Email?.ToString() ?? ""); ;
-                
+
                 ws.SetCellValue($"F{row}", itemUser.UserType.ToString() ?? "");
-                
+
                 ws.SetCellValue($"G{row}", itemUser.SuperiorId.ToString() ?? "");
                 var subs = "";
-                if(itemUser.Subordinates?.Count > 0)
+                if (itemUser.Subordinates?.Count > 0)
                 {
-                    foreach(var subitem in itemUser.Subordinates)
+                    foreach (var subitem in itemUser.Subordinates)
                     {
                         subs += $"{subitem.UserId},";
                     }
-                     ws.SetCellValue($"H{row}", subs ?? "");
+                    ws.SetCellValue($"H{row}", subs ?? "");
 
                 }
-                
+
                 ws.SetCellValue($"I{row}", itemUser.PlantId?.ToString() ?? "");
 
-                if(itemUser.UserType == 2)
+                if (itemUser.UserType == 2)
                 {
                     var areas = "";
                     if (itemUser.Areas?.Count > 0)
@@ -1655,13 +1656,13 @@ namespace SupervisorMobility.API.Controllers
             {
                 using (var workBook = new XLWorkbook(filepath))
                 {
-                    var pages = workBook.Worksheets.Count-1;
+                    var pages = workBook.Worksheets.Count - 1;
 
-                    for (int p=1; p<= pages; p++)
+                    for (int p = 1; p <= pages; p++)
                     {
                         IXLWorksheet ws = workBook.Worksheet(p);
 
-                        var productCode =  ws.Name;
+                        var productCode = ws.Name;
                         Debug.WriteLine($"Product Name: {productCode}");
 
                         bool firstRow = true;
@@ -1681,7 +1682,7 @@ namespace SupervisorMobility.API.Controllers
                                     Debug.WriteLine($"Int value: {i}");
 
                                     var CodeOperation = ws.Cell(i, 1).Value.ToString() != "" ? ws.Cell(i, 1).Value.ToString() : "";
-                                  
+
 
                                     var DescriptionOperation = ws.Cell(i, 4).Value.ToString() != "" ? ws.Cell(i, 4).Value.ToString() : "";
 
@@ -1693,7 +1694,7 @@ namespace SupervisorMobility.API.Controllers
 
                                     if (!string.IsNullOrWhiteSpace(idDistributionStr) && int.TryParse(idDistributionStr, out idDistribution))
                                     {
-                                       
+
                                     }
                                     else
                                     {
@@ -1704,7 +1705,7 @@ namespace SupervisorMobility.API.Controllers
                                     TimeSpan retryInterval = TimeSpan.FromSeconds(5); // Intervalo de tiempo entre intentos (5 segundos en este caso)
                                     int retries = 0;
 
-                                    
+
 
                                     while (retries < maxRetries)
                                     {
@@ -1712,16 +1713,16 @@ namespace SupervisorMobility.API.Controllers
                                         {
                                             // Intenta realizar la operación aquí
                                             var distribution = await _supervisorMobilityRepository.GetDistributionOnlyIdAsync(idDistribution);
-                                          
-                                       
+
+
 
                                             var area = await _supervisorMobilityRepository.GetAreaOnlyIdAsync(distribution.AreaId);
 
-                              
+
 
                                             var planta = await _supervisorMobilityRepository.GetPlantOnlyIdAsync(area.PlantId);
 
-                                        
+
                                             var operation = await _supervisorMobilityRepository.GetOperationForDistributionByCodeAndDescriptionAsync(distribution.DistributionId, CodeOperation, DescriptionOperation);
 
                                             if (operation is null)
@@ -1743,7 +1744,7 @@ namespace SupervisorMobility.API.Controllers
 
                                             var product = await _supervisorMobilityRepository.GetProductByCodeAsync(productCode);
 
-                                          
+
                                             var assychart = _supervisorMobilityRepository.GetAssyChartAdvanceByOperationAndProductAsync(planta.PlantId, area.AreaId, distribution.DistributionId, operation.OperationId, product.ProductId);
 
                                             if (assychart is null)
@@ -1782,14 +1783,14 @@ namespace SupervisorMobility.API.Controllers
                                             await Task.Delay(retryInterval);
                                         }
 
-                                        
+
 
                                     }
 
-                                    
 
 
-                                 
+
+
 
 
 
@@ -1820,8 +1821,144 @@ namespace SupervisorMobility.API.Controllers
 
         }
 
+        [EnableCors("Cors")]
+        [HttpPost("MassivePaths")]
+        public async Task<ActionResult<FileUpload>> UploadFileFromMassivePaths(IFormFile file, int UserIdUpload)
+        {
+            var uploadResult = new FileUploadForCreationDto();
+            string trustedFileNameForStorage = string.Empty;
+            var unstrustedFileName = file.FileName;
+
+            trustedFileNameForStorage = Path.GetRandomFileName();
+            trustedFileNameForStorage = System.IO.Path.ChangeExtension(trustedFileNameForStorage, ".xlsx");
+            var path = Path.Combine(_env.ContentRootPath, "uploads\\massive", trustedFileNameForStorage);
+
+            try
+            {
+                await using (FileStream fs = new FileStream(path, FileMode.Create))
+                {
+                    // Utiliza "await" para asegurarte de que se complete la copia del archivo antes de continuar
+                    await file.CopyToAsync(fs);
+                }
+            }
+            catch (Exception ex)
+            {
+                return NotFound(ex.Message);
+            }
+
+            uploadResult.FileName = unstrustedFileName;
+            uploadResult.StorageFileName = trustedFileNameForStorage;
+            uploadResult.ContentType = file.ContentType;
+            uploadResult.UploadDate = DateTime.Now;
+
+            var fileToReturn = await _assyChartService.CreateFileAsync(uploadResult);
+
+            await _supervisorMobilityRepository.SaveChangesAsync();
+            await _supervisorMobilityRepository.RemoveAllHeadCountRegisters();
+
+
+            //Start Massive Upload 
+            string filepath = Directory.GetCurrentDirectory().ToString() + "\\uploads\\massive\\" + trustedFileNameForStorage;
 
 
 
+
+
+            try
+            {
+                using (var workBook = new XLWorkbook(filepath))
+                {
+                    var pages = workBook.Worksheets.Count - 1;
+
+                    //for (int p = 1; p <= pages; p++)
+                    //{
+                    IXLWorksheet ws = workBook.Worksheet(1);
+
+                    User userEntity = await _supervisorMobilityRepository.GetUserAsync(UserIdUpload, false);
+
+                    bool firstRow = true;
+                    int i = 1;
+                    foreach (IXLRow row in ws.Rows())
+                    {
+                        //Use the first row to add columns to DataTable.
+                        HeadCount _headCount = new HeadCount();
+
+                        if (firstRow)
+                        {
+                            firstRow = false;
+                        }
+                        else
+                        {
+                            if (!row.IsEmpty())
+                            {
+                                int maxRetries = 5; // Número máximo de intentos
+                                TimeSpan retryInterval = TimeSpan.FromSeconds(5); // Intervalo de tiempo entre intentos (5 segundos en este caso)
+                                int retries = 0;
+
+                                while (retries < maxRetries)
+                                {
+                                    try
+                                    {
+
+                                        //procedimiento
+                                      
+                                        SOSCodePath sOSCodePath = new SOSCodePath();
+                                        
+
+
+
+                                        //aqui añadimos
+
+
+                                        retries = 0;
+
+                                        Debug.WriteLine($"Intento {retries + 1} Linea Position [{i}]");
+
+                                        // Si la operación tiene éxito, puedes salir del bucle
+                                        break;
+                                    }
+                                    catch (Exception ex)
+                                    {
+                                        // Maneja la excepción aquí, si es necesario
+                                        Console.WriteLine($"Intento {retries + 1} Linea Position [{i}] falló: {ex.Message}");
+
+                                        // Incrementa el número de intentos
+                                        retries++;
+
+                                        // Espera el intervalo de tiempo antes de volver a intentarlo
+                                        await Task.Delay(retryInterval);
+                                    }
+
+
+
+                                }//While
+
+                            }//end is not empety row
+                        }//end else first roe
+                        i++;
+                    }//end foreach
+                    await _supervisorMobilityRepository.SaveChangesAsync();
+
+                    //}//for de paginas
+
+                }//end using
+
+
+
+            }//end try
+            catch (Exception ex)
+            {
+                Debug.WriteLine(ex.ToString());
+            }//end trycatch to add excel to list
+
+
+
+
+            return Ok();
     }
+
+
+
+
+}
 }

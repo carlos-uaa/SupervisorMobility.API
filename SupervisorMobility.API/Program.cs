@@ -3,7 +3,6 @@ using Newtonsoft.Json;
 using Serilog;
 using SupervisorMobility.API;
 using SupervisorMobility.API.DataAccess.Entities;
-using SupervisorMobility.API.DataAccess.Services;
 
 //Configure Serilog
 Log.Logger = new LoggerConfiguration()

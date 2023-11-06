@@ -45,8 +45,6 @@ namespace SupervisorMobility.API.Controllers
         [HttpPost("Upload")]
         public async Task<ActionResult<FileUpload>> UploadFileFromMassiveUpload(IFormFile file, int UserIdUpload)
         {
-            var All_process = await _supervisorMobilityRepository.GetAllHeadCountProcess();
-
             var uploadResult = new FileUploadForCreationDto();
             string trustedFileNameForStorage = string.Empty;
             var unstrustedFileName = file.FileName;
