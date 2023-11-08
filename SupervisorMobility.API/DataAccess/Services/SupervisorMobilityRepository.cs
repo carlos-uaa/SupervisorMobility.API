@@ -1,6 +1,7 @@
 ﻿
 using AutoMapper;
 using DocumentFormat.OpenXml.Drawing;
+using DocumentFormat.OpenXml.Drawing.Diagrams;
 using DocumentFormat.OpenXml.Wordprocessing;
 using Irony.Parsing;
 using Microsoft.AspNetCore.Mvc;
@@ -54,8 +55,13 @@ namespace SupervisorMobility.API.Services
             //_context.ChecklistCategories.Remove(checklistCategory);
         }
 
-        public async Task<IEnumerable<ChecklistCategory>> GetChecklistCategoriesAsync()
+        public async Task<IEnumerable<ChecklistCategory>> GetChecklistCategoriesAsync(bool includeChecklistQuestion = false)
         {
+            if (includeChecklistQuestion)
+            {
+                return await _context.ChecklistCategories.Include(cq => cq.ChecklistQuestions.OrderBy(c => c.CategorySequence))
+                    .Where(u => u.IsActive == true).OrderBy(c => c.Sequence).ToListAsync();
+            }
             return await _context.ChecklistCategories.Where(u => u.IsActive == true)
                 .OrderBy(c => c.Sequence).ToListAsync();
         }

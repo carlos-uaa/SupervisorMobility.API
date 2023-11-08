@@ -15,7 +15,7 @@ namespace SupervisorMobility.API.Services
     {
         #region ChecklistCategoryOperations
 
-        Task<IEnumerable<ChecklistCategory>> GetChecklistCategoriesAsync();
+        Task<IEnumerable<ChecklistCategory>> GetChecklistCategoriesAsync(bool includeChecklistQuestion = false);
         Task<IEnumerable<ChecklistCategory>> GetChecklistCategoriesForUpdateSequenceAsync(
             int currentSequence, int oldSequence, int categoryId);
         Task<ChecklistCategory?> GetChecklistCategoryAsync(
