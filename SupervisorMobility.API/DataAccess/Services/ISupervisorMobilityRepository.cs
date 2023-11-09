@@ -342,11 +342,11 @@ namespace SupervisorMobility.API.Services
         Task AddHeadCoutAsync(HeadCount user);
 
 
-        Task<int> AddHeadCountProcess(HeadCountProcess headCountProcess);
-        Task<HeadCountProcess?> GetHeadCountProcessById(int id);
-        Task<IEnumerable<HeadCountProcess>> GetAllHeadCountProcess();
-        Task<int> UpdateHeadCountProcess(HeadCountProcessCreateUpdateDto headCountProcess, HeadCountProcess entity);
-        Task<int> DeleteHeadCountProcess(HeadCountProcess headCountProcess);
+        //Task<int> AddHeadCountProcess(HeadCountProcess headCountProcess);
+        //Task<HeadCountProcess?> GetHeadCountProcessById(int id);
+        //Task<IEnumerable<HeadCountProcess>> GetAllHeadCountProcess();
+        //Task<int> UpdateHeadCountProcess(HeadCountProcessCreateUpdateDto headCountProcess, HeadCountProcess entity);
+        //Task<int> DeleteHeadCountProcess(HeadCountProcess headCountProcess);
         #endregion
         #region DepartmentOperations
         Task<IEnumerable<Department>> GetDepartmentsAsync();
