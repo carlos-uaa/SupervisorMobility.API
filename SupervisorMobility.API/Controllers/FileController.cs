@@ -27,6 +27,7 @@ using FuzzyString;
 using Slugify;
 using DocumentFormat.OpenXml.Wordprocessing;
 using Microsoft.IdentityModel.Tokens;
+using DocumentFormat.OpenXml.Math;
 
 namespace SupervisorMobility.API.Controllers
 {
@@ -1827,7 +1828,6 @@ namespace SupervisorMobility.API.Controllers
 
                                                                 OperationsDictionary.Add(((int)PathResume.PlantId, (int)PathResume.AreaId, (int)PathResume.DistributionId, finalOperation.OperationId), finalOperation);
                                                                 CountCreateOperation++;
-                                                                Debug.WriteLine($"Create Operation CODE {finalOperation.Code} ");
                                                             }
 
 
@@ -1859,7 +1859,6 @@ namespace SupervisorMobility.API.Controllers
                                                             OperationsDictionary.Add(((int)PathResume.PlantId, (int)PathResume.AreaId, (int)PathResume.DistributionId, finalOperation.OperationId), finalOperation);
 
                                                             CountCreateOperation++;
-                                                            Debug.WriteLine($"Create Operation CODE {finalOperation.Code} ");
 
                                                         }//end else distribuccion no existe
                                                     }//end if area > 0
@@ -1902,7 +1901,6 @@ namespace SupervisorMobility.API.Controllers
 
                                                         OperationsDictionary.Add(((int)PathResume.PlantId, (int)PathResume.AreaId, (int)PathResume.DistributionId, finalOperation.OperationId), finalOperation);
                                                         CountCreateOperation++;
-                                                        Debug.WriteLine($"Create Operation CODE {finalOperation.Code} ");
 
                                                     }
 
@@ -1925,7 +1923,8 @@ namespace SupervisorMobility.API.Controllers
                                                 {
                                                     i++;
                                                     continue;
-                                                }else if (ExcelAreaCode.IsNullOrEmpty() && ExcelDistDescription.IsNullOrEmpty())
+                                                }
+                                                else if (ExcelAreaCode.IsNullOrEmpty() && ExcelDistDescription.IsNullOrEmpty())
                                                 {
                                                     i++;
                                                     continue;
@@ -2022,7 +2021,6 @@ namespace SupervisorMobility.API.Controllers
 
                                                                 OperationsDictionary.Add(((int)PathResume.PlantId, (int)PathResume.AreaId, (int)PathResume.DistributionId, finalOperation.OperationId), finalOperation);
                                                                 CountCreateOperation++;
-                                                                Debug.WriteLine($"Create Operation CODE {finalOperation.Code} ");
                                                             }
 
 
@@ -2053,7 +2051,6 @@ namespace SupervisorMobility.API.Controllers
 
                                                             OperationsDictionary.Add(((int)PathResume.PlantId, (int)PathResume.AreaId, (int)PathResume.DistributionId, finalOperation.OperationId), finalOperation);
                                                             CountCreateOperation++;
-                                                            Debug.WriteLine($"Create Operation CODE {finalOperation.Code} ");
                                                         }
                                                     }//end if area > 0
                                                     else
@@ -2096,7 +2093,6 @@ namespace SupervisorMobility.API.Controllers
 
                                                         OperationsDictionary.Add(((int)PathResume.PlantId, (int)PathResume.AreaId, (int)PathResume.DistributionId, finalOperation.OperationId), finalOperation);
                                                         CountCreateOperation++;
-                                                        Debug.WriteLine($"Create Operation CODE {finalOperation.Code} ");
                                                     }
 
                                                 }//end if plant >0
@@ -2120,10 +2116,10 @@ namespace SupervisorMobility.API.Controllers
                                                 };
 
                                                 var resultCreateAssy = await _assyChartService.CreateAssyChartAsync(assychartForCreate);
+                                                CountCreateAssycchart++;
                                                 if (resultCreateAssy != null)
                                                 {
                                                     //se crea assy chart cout
-                                                    CountCreateAssycchart++;
                                                     Debug.WriteLine($"Create assychart id {resultCreateAssy.AssyChardId} plantid {(int)PathResume.PlantId} areaid {(int)PathResume.AreaId} distributionid {(int)PathResume.DistributionId} ");
                                                 }
                                             }
@@ -2259,82 +2255,82 @@ namespace SupervisorMobility.API.Controllers
             try
             {
 
-                //try
-                //{
+                try
+                {
 
-                //    try
-                //    {
-                //        var response = await _bridgeHttpClient.GetAsync("SMGos/GetDirectoryPathsGos");
+                    try
+                    {
+                        var response = await _bridgeHttpClient.GetAsync("SMGos/GetDirectoryPathsGos");
 
-                //        if (response.IsSuccessStatusCode)
-                //        {
-                //            var result = await response.Content.ReadFromJsonAsync<CDMS_GOS_Directory>();
-                //            GOSFolders = result;
-                //        }
-                //        else
-                //        {
-                //            //await _js.InvokeVoidAsync("alert", $"Error get folders: {response.Content.ReadAsStringAsync().Result}");
-                //            Console.WriteLine($"GET FOLDERS GOS, Status Code {response.StatusCode} : {response.Content.ReadAsStringAsync().Result}");
-                //        }
-                //    }
-                //    catch (HttpRequestException ex)
-                //    {
-                //        Console.WriteLine($"Error al hacer la solicitud: {ex.Message}");
-                //    }
-                //    catch (TaskCanceledException ex)
-                //    {
-                //        Console.WriteLine($"La solicitud ha sido cancelada: {ex.Message}");
-                //    }
+                        if (response.IsSuccessStatusCode)
+                        {
+                            var result = await response.Content.ReadFromJsonAsync<CDMS_GOS_Directory>();
+                            GOSFolders = result;
+                        }
+                        else
+                        {
+                            //await _js.InvokeVoidAsync("alert", $"Error get folders: {response.Content.ReadAsStringAsync().Result}");
+                            Console.WriteLine($"GET FOLDERS GOS, Status Code {response.StatusCode} : {response.Content.ReadAsStringAsync().Result}");
+                        }
+                    }
+                    catch (HttpRequestException ex)
+                    {
+                        Console.WriteLine($"Error al hacer la solicitud: {ex.Message}");
+                    }
+                    catch (TaskCanceledException ex)
+                    {
+                        Console.WriteLine($"La solicitud ha sido cancelada: {ex.Message}");
+                    }
 
-                //}
-                //catch (Exception ex)
-                //{
-                //    Console.WriteLine("Error Get GOS Folder From CDMS");
-                //    Console.WriteLine(ex.Message);
-                //}
+                }
+                catch (Exception ex)
+                {
+                    Console.WriteLine("Error Get GOS Folder From CDMS");
+                    Console.WriteLine(ex.Message);
+                }
 
-                //if (GOSFolders != null)
-                //{
-                //    rootNodeGOS = _treeService.ConstruirArbolGOS(GOSFolders.operation);
-                //}
+                if (GOSFolders != null)
+                {
+                    rootNodeGOS = _treeService.ConstruirArbolGOS(GOSFolders.operation);
+                }
 
-                //try
-                //{
-                //    try
-                //    {
-                //        var response = await _bridgeHttpClient.GetAsync("SMCcp/GetDirectoryPathsCcp");
+                try
+                {
+                    try
+                    {
+                        var response = await _bridgeHttpClient.GetAsync("SMCcp/GetDirectoryPathsCcp");
 
-                //        if (response.IsSuccessStatusCode)
-                //        {
-                //            var result = await response.Content.ReadFromJsonAsync<CDMS_CCP_Directory>();
-                //            CCPFolders = result;
-                //        }
-                //        else
-                //        {
-                //            //await _js.InvokeVoidAsync("alert", $"Error get folders: {response.Content.ReadAsStringAsync().Result}");
-                //            Console.WriteLine($"GET FOLDERS CCP, Status Code {response.StatusCode} : {response.Content.ReadAsStringAsync().Result}");
-                //        }
-                //    }
-                //    catch (HttpRequestException ex)
-                //    {
-                //        Console.WriteLine($"Error al hacer la solicitud: {ex.Message}");
-                //    }
-                //    catch (TaskCanceledException ex)
-                //    {
-                //        Console.WriteLine($"La solicitud ha sido cancelada: {ex.Message}");
-                //    }
-                //}
-                //catch (Exception ex)
-                //{
-                //    Console.WriteLine("Error Get CCP Folder From CCP");
-                //    Console.WriteLine(ex.Message);
-                //    Console.WriteLine(ex.Message);
-                //}
+                        if (response.IsSuccessStatusCode)
+                        {
+                            var result = await response.Content.ReadFromJsonAsync<CDMS_CCP_Directory>();
+                            CCPFolders = result;
+                        }
+                        else
+                        {
+                            //await _js.InvokeVoidAsync("alert", $"Error get folders: {response.Content.ReadAsStringAsync().Result}");
+                            Console.WriteLine($"GET FOLDERS CCP, Status Code {response.StatusCode} : {response.Content.ReadAsStringAsync().Result}");
+                        }
+                    }
+                    catch (HttpRequestException ex)
+                    {
+                        Console.WriteLine($"Error al hacer la solicitud: {ex.Message}");
+                    }
+                    catch (TaskCanceledException ex)
+                    {
+                        Console.WriteLine($"La solicitud ha sido cancelada: {ex.Message}");
+                    }
+                }
+                catch (Exception ex)
+                {
+                    Console.WriteLine("Error Get CCP Folder From CCP");
+                    Console.WriteLine(ex.Message);
+                    Console.WriteLine(ex.Message);
+                }
 
-                //if (CCPFolders != null)
-                //{
-                //    rootNodeCCP = _treeService.ConstruirArbolCCP(CCPFolders.operation);
-                //}
+                if (CCPFolders != null)
+                {
+                    rootNodeCCP = _treeService.ConstruirArbolCCP(CCPFolders.operation);
+                }
 
                 try
                 {
@@ -2428,152 +2424,196 @@ namespace SupervisorMobility.API.Controllers
 
                                         if (InfoHOEPath != "")
                                         {
-                                            string rutaSinSaltosDeLinea = InfoHOEPath.Replace("\n", "");
-
-                                            Debug.WriteLine($"Code Value: {InfoCodePath}");
-                                            Debug.WriteLine($"Area Value: {InfoArea}");
-                                            Debug.WriteLine($"Distribution Value: {InfoDistribution}");
-                                            Debug.WriteLine($"HOE Value: {rutaSinSaltosDeLinea}");
-
-
-                                            string rutaHOENormalizada = _treeService.NormalizarRutaUsuario(rutaSinSaltosDeLinea);
-
-                                            TreeItemData mejorCoincidenciaHOE = _treeService.EncontrarMejorCoincidenciaDifusa(rootNodeHOE, rutaHOENormalizada, NamePage);
-
-                                            if (mejorCoincidenciaHOE != null)
-                                            {
-                                                Debug.WriteLine("Mejor coincidencia: " + mejorCoincidenciaHOE.Ruta);
-
-                                                // Buscar coincidencias en Plantas
-
-                                                string[] segmentos = rutaHOENormalizada.Split('/');
-                                                if (segmentos.Length > 0)
-                                                {
-                                                    string codigoPlanta = segmentos.FirstOrDefault();
-
-                                                    // Buscar el ID de planta en el diccionario de plantas
-                                                    var planta = PlantsDictionary.Values.FirstOrDefault(p => codigoPlanta.Contains(p.Code));
-                                                    if (planta != null)
-                                                    {
-                                                        PathResume.PlantId = planta.PlantId;
-                                                    }
-                                                }
-
-                                                if (PathResume.PlantId > 0)
-                                                {// Buscar coincidencia en area
-                                                    var coincidenciasAreas = AreasDictionary.Where(pair => pair.Key.Item1 == PathResume.PlantId) // Filtramos por ID de planta
-                                                    .Select(pair => new
-                                                    {
-                                                        Area = pair.Value,
-                                                        Similarity = 1 - pair.Value.Code.JaccardDistance(InfoArea)
-                                                    })
-                                                    .OrderByDescending(result => result.Similarity)
-                                                    .FirstOrDefault();
-
-                                                    if (coincidenciasAreas != null && coincidenciasAreas.Similarity > 0.5) // Ajusta este umbral según tus necesidades
-                                                    {
-                                                        PathResume.AreaId = coincidenciasAreas.Area.AreaId;
-                                                        PathResume.DescripcionArea = coincidenciasAreas.Area.Description;
-                                                    }
-
-
-                                                    if (PathResume.AreaId > 0)
-                                                    {
-                                                        // Buscar coincidencia en distribucion
-                                                        var coincidenciasDistributions = DistributionsDictionary
-                                                            .Where(pair => pair.Key.Item1 == PathResume.PlantId && pair.Key.Item2 == PathResume.AreaId)
-                                                            .Select(pair => new
-                                                            {
-                                                                Distribution = pair.Value,
-                                                                Similarity = 1 - pair.Value.Description.JaccardDistance(InfoDistribution)
-                                                            })
-                                                            .OrderByDescending(result => result.Similarity)
-                                                            .FirstOrDefault();
-
-                                                        if (coincidenciasDistributions != null && coincidenciasDistributions.Similarity > 0.5) // Ajusta este umbral según tus necesidades
-                                                        {
-                                                            PathResume.DistributionId = coincidenciasDistributions.Distribution.DistributionId;
-                                                            PathResume.DescripcionDistribucion = coincidenciasDistributions.Distribution.Description;
-                                                        }
-
-
-                                                        if (PathResume.DistributionId > 0)
-                                                        {
-
-                                                            Debug.WriteLine($"CODE PATH RESUME");
-                                                            Debug.WriteLine($"PLANT : {PathResume.PlantId}");
-                                                            Debug.WriteLine($"AREA : {PathResume.AreaId}");
-                                                            Debug.WriteLine($"DISTRIBUTION : {PathResume.DistributionId}");
-
-
-                                                        }//end if distribution >0
-                                                    }//end if area > 0
-
-                                                }//end if plant >0
-
-
-
-
-                                            }
-                                            else
-                                            {
-                                                Debug.WriteLine("No se encontró ninguna coincidencia.");
-                                            }
-
-
-
-
+                                            HoeAuxPath = ws.Cell(i, 6).Value.ToString() != "" ? ws.Cell(i, 6).Value.ToString() : "";
                                         }
-                                    }
+                                        else if (InfoHOEPath == "" && InfoHOEPath != "")
+                                        {
+                                            InfoHOEPath = HoeAuxPath;
+                                        }
 
-                                    //while (retries < maxRetries)
-                                    //{
-                                    //    try
-                                    //    {
+                                        if (InfoDistribution != "")
+                                        {
+                                            DistributionAux = ws.Cell(i, 5).Value.ToString() != "" ? ws.Cell(i, 5).Value.ToString() : "";
+                                        }
+                                        else if (InfoDistribution == "")
+                                        {
+                                            InfoDistribution = DistributionAux;
+                                        }
 
-                                    //        //procedimiento
+                                        //string HOESinSaltosDeLinea = InfoHOEPath.Replace("\n", "");
 
-                                    //        SOSCodePath sOSCodePath = new SOSCodePath();
+                                        //string rutaHOENormalizada = _treeService.NormalizarRutaUsuario(HOESinSaltosDeLinea);
 
-                                    //        //aqui añadimos
+                                        //TreeItemData mejorCoincidenciaHOE = _treeService.EncontrarMejorCoincidenciaDifusa(rootNodeHOE, rutaHOENormalizada, NamePage);
+
+                                        //if (mejorCoincidenciaHOE != null)
+                                        //{
+                                        //    PathResume.HOE = mejorCoincidenciaHOE.Ruta;
+                                        //    Debug.WriteLine("Mejor coincidencia: " + mejorCoincidenciaHOE.Ruta);
+
+                                        //    // Buscar coincidencias en Plantas
+
+                                        //    string[] segmentos = rutaHOENormalizada.Split('/');
+                                        //    if (segmentos.Length > 0)
+                                        //    {
+                                        //        string codigoPlanta = segmentos.FirstOrDefault();
+
+                                        //        // Buscar el ID de planta en el diccionario de plantas
+                                        //        var planta = PlantsDictionary.Values.FirstOrDefault(p => codigoPlanta.Contains(p.Code));
+                                        //        if (planta != null)
+                                        //        {
+                                        //            PathResume.PlantId = planta.PlantId;
+                                        //        }
+                                        //    }
+
+                                        //    if (PathResume.PlantId > 0)
+                                        //    {// Buscar coincidencia en area
+                                        //        var coincidenciasAreas = AreasDictionary.Where(pair => pair.Key.Item1 == PathResume.PlantId) // Filtramos por ID de planta
+                                        //        .Select(pair => new
+                                        //        {
+                                        //            Area = pair.Value,
+                                        //            Similarity = 1 - pair.Value.Code.JaccardDistance(InfoArea)
+                                        //        })
+                                        //        .OrderByDescending(result => result.Similarity)
+                                        //        .FirstOrDefault();
+
+                                        //        if (coincidenciasAreas != null && coincidenciasAreas.Similarity > 0.5) // Ajusta este umbral según tus necesidades
+                                        //        {
+                                        //            PathResume.AreaId = coincidenciasAreas.Area.AreaId;
+                                        //            PathResume.DescripcionArea = coincidenciasAreas.Area.Description;
+                                        //        }
 
 
-                                    //        retries = 0;
+                                        //        if (PathResume.AreaId > 0)
+                                        //        {
+                                        //            // Buscar coincidencia en distribucion
+                                        //            var coincidenciasDistributions = DistributionsDictionary
+                                        //                .Where(pair => pair.Key.Item1 == PathResume.PlantId && pair.Key.Item2 == PathResume.AreaId)
+                                        //                .Select(pair => new
+                                        //                {
+                                        //                    Distribution = pair.Value,
+                                        //                    Similarity = 1 - pair.Value.Description.JaccardDistance(InfoDistribution)
+                                        //                })
+                                        //                .OrderByDescending(result => result.Similarity)
+                                        //                .FirstOrDefault();
 
-                                    //        Debug.WriteLine($"Intento {retries + 1} Linea Position [{i}]");
-
-                                    //        // Si la operación tiene éxito, puedes salir del bucle
-                                    //        break;
-                                    //    }
-                                    //    catch (Exception ex)
-                                    //    {
-                                    //        // Maneja la excepción aquí, si es necesario
-                                    //        Console.WriteLine($"Intento {retries + 1} Linea Position [{i}] falló: {ex.Message}");
-
-                                    //        // Incrementa el número de intentos
-                                    //        retries++;
-
-                                    //        // Espera el intervalo de tiempo antes de volver a intentarlo
-                                    //        await Task.Delay(retryInterval);
-                                    //    }
-
-
-
-                                    //}//While
-
-                                }//end is not empety row
-                            }//end else first roe
-                            i++;
-                        }//end foreach
-                        await _supervisorMobilityRepository.SaveChangesAsync();
-
-                    }//for de paginas
-
-                }//end using
+                                        //            if (coincidenciasDistributions != null && coincidenciasDistributions.Similarity > 0.5) // Ajusta este umbral según tus necesidades
+                                        //            {
+                                        //                PathResume.DistributionId = coincidenciasDistributions.Distribution.DistributionId;
+                                        //                PathResume.DescripcionDistribucion = coincidenciasDistributions.Distribution.Description;
+                                        //            }
 
 
+                                        //            if (PathResume.DistributionId > 0)
+                                        //            {
 
-            }//end try
+                                        //                Debug.WriteLine($"CODE PATH RESUME");
+                                        //                Debug.WriteLine($"PLANT : {PathResume.PlantId}");
+                                        //                Debug.WriteLine($"AREA : {PathResume.AreaId}");
+                                        //                Debug.WriteLine($"DISTRIBUTION : {PathResume.DistributionId}");
+
+
+                                        //            }//end if distribution >0
+                                        //        }//end if area > 0
+
+                                        //    }//end if plant >0
+
+
+
+
+                                        //}
+                                        //else
+                                        //{
+                                        //    Debug.WriteLine("No se encontró ninguna coincidencia HOE.");
+                                        //}
+
+                                        //string GOSSinSaltoDeLinea = InfoGOSPath.Replace("\n", "");
+                                        
+                                        //GOSSinSaltoDeLinea = InfoGOSPath.Replace("GOS/HO/HP >", "");
+
+                                        //string rutaGOSNormalizada = _treeService.NormalizarRutaUsuario(GOSSinSaltoDeLinea);
+
+                                        //if (rutaGOSNormalizada.Contains(">") && rutaGOSNormalizada != "")
+                                        //{
+                                        //    TreeItemData mejorCoincidenciaGOS = _treeService.EncontrarMejorCoincidenciaDifusaInternal(rootNodeGOS, rutaGOSNormalizada, NamePage);
+
+                                        //    if (mejorCoincidenciaGOS != null)
+                                        //    {
+                                        //        Debug.WriteLine("Mejor coincidencia GOS: " + mejorCoincidenciaGOS.Ruta);
+                                        //    }
+                                        //}
+
+                                        string CCPSinSaltoDeLinea = InfoCCPPath.Replace("\n", "");
+
+                                        CCPSinSaltoDeLinea = CCPSinSaltoDeLinea.Replace("CCP >", "");
+
+                                        string rutaCCPNormalizada = _treeService.NormalizarRutaUsuario(CCPSinSaltoDeLinea);
+
+                                        if (rutaCCPNormalizada.Contains(">") && rutaCCPNormalizada != "")
+                                        {
+                                            TreeItemData mejorCoincidenciaCCP = _treeService.EncontrarMejorCoincidenciaDifusaInternal(rootNodeCCP, rutaCCPNormalizada, NamePage);
+
+                                            if (mejorCoincidenciaCCP != null)
+                                            {
+                                                Debug.WriteLine("Mejor coincidencia CCP: " + mejorCoincidenciaCCP.Ruta);
+                                            }
+                                        }
+
+
+                                    }//end page == 1
+                                    else
+                                    {
+                                        break;
+                                    }                                        
+
+                                        //while (retries < maxRetries)
+                                        //{
+                                        //    try
+                                        //    {
+
+                                        //        //procedimiento
+
+                                        //        SOSCodePath sOSCodePath = new SOSCodePath();
+
+                                        //        //aqui añadimos
+
+
+                                        //        retries = 0;
+
+                                        //        Debug.WriteLine($"Intento {retries + 1} Linea Position [{i}]");
+
+                                        //        // Si la operación tiene éxito, puedes salir del bucle
+                                        //        break;
+                                        //    }
+                                        //    catch (Exception ex)
+                                        //    {
+                                        //        // Maneja la excepción aquí, si es necesario
+                                        //        Console.WriteLine($"Intento {retries + 1} Linea Position [{i}] falló: {ex.Message}");
+
+                                        //        // Incrementa el número de intentos
+                                        //        retries++;
+
+                                        //        // Espera el intervalo de tiempo antes de volver a intentarlo
+                                        //        await Task.Delay(retryInterval);
+                                        //    }
+
+
+
+                                        //}//While
+
+                                    }//end is not empety row
+                                }//end else first roe
+                                i++;
+                            }//end foreach
+                            await _supervisorMobilityRepository.SaveChangesAsync();
+
+                        }//for de paginas
+
+                    }//end using
+
+
+
+                }//end try
             catch (Exception ex)
             {
                 Debug.WriteLine(ex.ToString());

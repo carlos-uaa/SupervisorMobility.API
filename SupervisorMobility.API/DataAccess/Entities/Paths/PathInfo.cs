@@ -9,6 +9,10 @@
         public string DescripcionDistribucion { get; set; }
         public int? OperationId { get; set; }
         public int? ProductID { get; set; }
-        
+        public string HOE {  get; set; }
+        public string CCP {  get; set; }
+        public string GOS {  get; set; }
+        public string CD {  get; set; }
+
     }
 }

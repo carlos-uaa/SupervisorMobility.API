@@ -1,6 +1,9 @@
 ﻿using SupervisorMobility.API.DataAccess.Entities.TreeStruct;
 using SupervisorMobility.API.Entities.CDMS.Directory;
 using DuoVia.FuzzyStrings;
+using DocumentFormat.OpenXml.Spreadsheet;
+using Serilog;
+using System.Drawing;
 
 namespace SupervisorMobility.API.DataAccess.Services.TreeServices
 {
@@ -167,6 +170,43 @@ namespace SupervisorMobility.API.DataAccess.Services.TreeServices
 
             return mejorCoincidencia;
         }
+
+        public TreeItemData EncontrarMejorCoincidenciaDifusaInternal(TreeItemData nodoActual, string rutaUsuario, string palabraClave)
+        {
+            TreeItemData mejorCoincidencia = null;
+            double puntuacionMaxima = 0;
+
+            double puntuacion = nodoActual.Ruta.DiceCoefficient(rutaUsuario);
+            bool contienePalabraClave = palabraClave != null && nodoActual.Nombre.Contains(palabraClave);
+
+            if ((contienePalabraClave && puntuacion > puntuacionMaxima) ||
+                (!contienePalabraClave && puntuacion > puntuacionMaxima))
+            {
+                puntuacionMaxima = puntuacion;
+                mejorCoincidencia = nodoActual;
+            }
+
+            foreach (var hijo in nodoActual.TreeItems)
+            {
+                TreeItemData mejorCoincidenciaHijo = EncontrarMejorCoincidenciaDifusaInternal(hijo, rutaUsuario, palabraClave);
+
+                if (mejorCoincidenciaHijo != null)
+                {
+                    double puntuacionHijo = mejorCoincidenciaHijo.Ruta.DiceCoefficient(rutaUsuario);
+                    bool contienePalabraClaveHijo = palabraClave != null && mejorCoincidenciaHijo.Nombre.Contains(palabraClave);
+
+                    if ((contienePalabraClaveHijo && puntuacionHijo > puntuacionMaxima) ||
+                        (!contienePalabraClaveHijo && puntuacionHijo > puntuacionMaxima))
+                    {
+                        puntuacionMaxima = puntuacionHijo;
+                        mejorCoincidencia = mejorCoincidenciaHijo;
+                    }
+                }
+            }
+
+            return mejorCoincidencia;
+        }
+
 
 
 
