@@ -2,7 +2,7 @@
 using System.ComponentModel.DataAnnotations;
 using SupervisorMobility.API.Entities;
 
-namespace SupervisorMobility.API.DataAccess.Entities
+namespace SupervisorMobility.API.DataAccess.Entities.Paths
 {
     public class SOSCodePath
     {

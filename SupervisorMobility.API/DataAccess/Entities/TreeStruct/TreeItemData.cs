@@ -1,4 +1,5 @@
-﻿namespace SupervisorMobility.Client.Data.Entities.TreeStruct
+﻿
+namespace SupervisorMobility.API.DataAccess.Entities.TreeStruct
 {
     public class TreeItemData
     {
