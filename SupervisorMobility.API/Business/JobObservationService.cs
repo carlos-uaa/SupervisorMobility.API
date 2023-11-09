@@ -19,9 +19,9 @@ namespace SupervisorMobility.API.Business
         }
 
         #region Category
-        public async Task<IEnumerable<ChecklistCategory>> FetchChecklistCategoriesAsync()
+        public async Task<IEnumerable<ChecklistCategory>> FetchChecklistCategoriesAsync(bool includeChecklistQuestions = false)
         {
-            return await _repository.GetChecklistCategoriesAsync();
+            return await _repository.GetChecklistCategoriesAsync(includeChecklistQuestions);
         }
 
         public async Task<ChecklistCategory> CreateChecklistCategoryAsync(ChecklistCategoryForCreationDto checklistCategory)

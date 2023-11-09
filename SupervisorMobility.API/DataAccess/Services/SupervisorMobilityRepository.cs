@@ -1,6 +1,7 @@
 ﻿
 using AutoMapper;
 using DocumentFormat.OpenXml.Drawing;
+using DocumentFormat.OpenXml.Drawing.Diagrams;
 using DocumentFormat.OpenXml.Wordprocessing;
 using Irony.Parsing;
 using Microsoft.AspNetCore.Mvc;
@@ -11,6 +12,7 @@ using SupervisorMobility.API.Context;
 using SupervisorMobility.API.DataAccess.Entities;
 using SupervisorMobility.API.DataAccess.Entities.ILU;
 using SupervisorMobility.API.DataAccess.Entities.LUP;
+using SupervisorMobility.API.DataAccess.Entities.Paths;
 using SupervisorMobility.API.DataAccess.Entities.SOS_Review;
 using SupervisorMobility.API.Entities;
 using SupervisorMobility.API.Models.HeadCount;
@@ -54,8 +56,13 @@ namespace SupervisorMobility.API.Services
             //_context.ChecklistCategories.Remove(checklistCategory);
         }
 
-        public async Task<IEnumerable<ChecklistCategory>> GetChecklistCategoriesAsync()
+        public async Task<IEnumerable<ChecklistCategory>> GetChecklistCategoriesAsync(bool includeChecklistQuestion = false)
         {
+            if (includeChecklistQuestion)
+            {
+                return await _context.ChecklistCategories.Include(cq => cq.ChecklistQuestions.OrderBy(c => c.CategorySequence))
+                    .Where(u => u.IsActive == true).OrderBy(c => c.Sequence).ToListAsync();
+            }
             return await _context.ChecklistCategories.Where(u => u.IsActive == true)
                 .OrderBy(c => c.Sequence).ToListAsync();
         }
@@ -64,7 +71,7 @@ namespace SupervisorMobility.API.Services
         {
             if (includeChecklistQuestion)
             {
-                return await _context.ChecklistCategories.Include(cq => cq.ChecklistQuestions)
+                return await _context.ChecklistCategories.Include(cq => cq.ChecklistQuestions.OrderBy(c => c.CategorySequence))
                     .Where(c => c.ChecklistCategoryId == categoryId).FirstOrDefaultAsync();
             }
 
@@ -401,6 +408,15 @@ namespace SupervisorMobility.API.Services
                 .Where(o => o.DistributionId == distributionId && o.Code == opcode && o.Description == opdescription)
                 .FirstOrDefaultAsync();
         }
+
+        public async Task<AsyncVoidMethodBuilder> RemoveAllOperations()
+        {
+            _context.Operations.RemoveRange(_context.Operations);
+            await _context.SaveChangesAsync();
+
+            return new AsyncVoidMethodBuilder();
+        }
+
         public async Task<bool> OperationExistsAsync(int operationId)
         {
             return await _context.Operations.AnyAsync(p => p.OperationId == operationId);

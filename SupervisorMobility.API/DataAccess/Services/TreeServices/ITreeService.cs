@@ -11,9 +11,8 @@ namespace SupervisorMobility.API.DataAccess.Services.TreeServices
 
         public TreeItemData ConstruirArbolGOS(List<FolderGOS> elementos);
 
-        public TreeItemData FindNodeByPath(TreeItemData rootNode, string path);
-
-        public TreeItemData EncontrarMejorCoincidenciaDifusa(TreeItemData nodoActual, string rutaUsuario);
+        public TreeItemData EncontrarMejorCoincidenciaDifusa(TreeItemData nodoActual, string rutaUsuario, string palabraClave);
+        public TreeItemData EncontrarMejorCoincidenciaDifusaInternal(TreeItemData nodoActual, string rutaUsuario, string palabraClave);
         public string NormalizarRutaUsuario(string rutaUsuario);
     }
 }

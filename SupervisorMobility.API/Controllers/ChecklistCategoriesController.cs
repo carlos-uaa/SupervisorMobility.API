@@ -2,6 +2,7 @@
 using Microsoft.AspNetCore.JsonPatch;
 using Microsoft.AspNetCore.Mvc;
 using SupervisorMobility.API.Business;
+using SupervisorMobility.API.Entities;
 using SupervisorMobility.API.Models.ChecklistCategoryDtos;
 
 namespace SupervisorMobility.API.Controllers
@@ -22,9 +23,19 @@ namespace SupervisorMobility.API.Controllers
         }
 
         [HttpGet]
-        public async Task<ActionResult<IEnumerable<ChecklistCategoryWithoutChecklistQuestionsDto>>> GetChecklistCategories()
+        public async Task<ActionResult<IEnumerable<ChecklistCategoryWithoutChecklistQuestionsDto>>> GetChecklistCategories(bool includeChecklistQuestions = false)
         {
-            var checklistCategoryEntities = await _checklistCategoryService.FetchChecklistCategoriesAsync();
+
+            var checklistCategoryEntities = await _checklistCategoryService.FetchChecklistCategoriesAsync(includeChecklistQuestions);
+            if (checklistCategoryEntities == null)
+            {
+                return NotFound("Checklist categories not found!");
+            }
+
+            if (includeChecklistQuestions)
+            {
+                return Ok(_mapper.Map<IEnumerable<ChecklistCategoryWithJustchecklistQuestionsDto>>(checklistCategoryEntities));
+            }
             return Ok(_mapper.Map<IEnumerable<ChecklistCategoryWithoutChecklistQuestionsDto>>(checklistCategoryEntities));
         }
 
