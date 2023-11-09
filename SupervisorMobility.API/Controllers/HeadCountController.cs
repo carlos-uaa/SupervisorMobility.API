@@ -514,62 +514,62 @@ namespace SupervisorMobility.API.Controllers
 
         }//end download file function 
 
-        [HttpPost("Process")]
-        public async Task<ActionResult> CreateProcess(HeadCountProcessCreateUpdateDto HD_Process)
-        {
+        //[HttpPost("Process")]
+        //public async Task<ActionResult> CreateProcess(HeadCountProcessCreateUpdateDto HD_Process)
+        //{
 
-            var finalProcess = _mapper.Map<HeadCountProcess>(HD_Process);
+        //    var finalProcess = _mapper.Map<HeadCountProcess>(HD_Process);
 
-            var result = await _supervisorMobilityRepository.AddHeadCountProcess(finalProcess);
+        //    var result = await _supervisorMobilityRepository.AddHeadCountProcess(finalProcess);
 
-            if (result == 1)
-            {
-                return Ok(finalProcess);
-            }
+        //    if (result == 1)
+        //    {
+        //        return Ok(finalProcess);
+        //    }
 
-            return NotFound("No creado");
+        //    return NotFound("No creado");
 
-        }
+        //}
 
-        [HttpGet("Process")]
-        public async Task<ActionResult> ReadAllProcess()
-        {
+        //[HttpGet("Process")]
+        //public async Task<ActionResult> ReadAllProcess()
+        //{
 
-            var allProcess = await _supervisorMobilityRepository.GetAllHeadCountProcess();
+        //    var allProcess = await _supervisorMobilityRepository.GetAllHeadCountProcess();
 
-            return Ok(allProcess);
-        }
+        //    return Ok(allProcess);
+        //}
 
-        [HttpPut("Process/{id_process}")]
-        public async Task<ActionResult> UpdateProcess(int id_process, HeadCountProcessCreateUpdateDto HD_Process)
-        {
-            var entity = await _supervisorMobilityRepository.GetHeadCountProcessById(id_process);
+        //[HttpPut("Process/{id_process}")]
+        //public async Task<ActionResult> UpdateProcess(int id_process, HeadCountProcessCreateUpdateDto HD_Process)
+        //{
+        //    var entity = await _supervisorMobilityRepository.GetHeadCountProcessById(id_process);
 
-            var resp = await _supervisorMobilityRepository.UpdateHeadCountProcess(HD_Process, entity);
+        //    var resp = await _supervisorMobilityRepository.UpdateHeadCountProcess(HD_Process, entity);
 
-            if (resp == 1)
-            {
-                return Ok();
-            }
+        //    if (resp == 1)
+        //    {
+        //        return Ok();
+        //    }
 
-            return NotFound("No actualizado");
+        //    return NotFound("No actualizado");
 
-        }
+        //}
 
-        [HttpDelete("Process/{HD_Process_Id}")]
-        public async Task<ActionResult> DeleteProcess(int HD_Process_Id)
-        {
-            var entity = await _supervisorMobilityRepository.GetHeadCountProcessById(HD_Process_Id);
+        //[HttpDelete("Process/{HD_Process_Id}")]
+        //public async Task<ActionResult> DeleteProcess(int HD_Process_Id)
+        //{
+        //    var entity = await _supervisorMobilityRepository.GetHeadCountProcessById(HD_Process_Id);
 
-            var resp = await _supervisorMobilityRepository.DeleteHeadCountProcess(entity);
+        //    var resp = await _supervisorMobilityRepository.DeleteHeadCountProcess(entity);
 
-            if (resp == 1)
-            {
-                return Ok();
-            }
+        //    if (resp == 1)
+        //    {
+        //        return Ok();
+        //    }
 
-            return NotFound("No removido");
-        }
+        //    return NotFound("No removido");
+        //}
 
 
 

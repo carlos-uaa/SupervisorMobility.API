@@ -2090,30 +2090,30 @@ namespace SupervisorMobility.API.Services
 
         #endregion
         #region HeadCountProcess
-        public async Task<int> AddHeadCountProcess(HeadCountProcess headCountProcess)
-        {
-            _context.headCountsProcess.Add(headCountProcess);
-            return await _context.SaveChangesAsync();
-        }
-        public async Task<HeadCountProcess?> GetHeadCountProcessById(int id)
-        {
-            return await _context.headCountsProcess.Where(a => a.HeadCountProcessId == id).FirstOrDefaultAsync();
-        }
+        //public async Task<int> AddHeadCountProcess(HeadCountProcess headCountProcess)
+        //{
+        //    _context.headCountsProcess.Add(headCountProcess);
+        //    return await _context.SaveChangesAsync();
+        //}
+        //public async Task<HeadCountProcess?> GetHeadCountProcessById(int id)
+        //{
+        //    return await _context.headCountsProcess.Where(a => a.HeadCountProcessId == id).FirstOrDefaultAsync();
+        //}
 
-        public async Task<IEnumerable<HeadCountProcess>> GetAllHeadCountProcess()
-        {
-            return _context.headCountsProcess.ToList();
-        }
-        public async Task<int> UpdateHeadCountProcess(HeadCountProcessCreateUpdateDto headCountProcess, HeadCountProcess entity)
-        {
-            _mapper.Map(headCountProcess, entity);
-            return await _context.SaveChangesAsync();
-        }
-        public async Task<int> DeleteHeadCountProcess(HeadCountProcess headCountProcess)
-        {
-            _context.Remove(headCountProcess);
-            return await _context.SaveChangesAsync();
-        }
+        //public async Task<IEnumerable<HeadCountProcess>> GetAllHeadCountProcess()
+        //{
+        //    return _context.headCountsProcess.ToList();
+        //}
+        //public async Task<int> UpdateHeadCountProcess(HeadCountProcessCreateUpdateDto headCountProcess, HeadCountProcess entity)
+        //{
+        //    _mapper.Map(headCountProcess, entity);
+        //    return await _context.SaveChangesAsync();
+        //}
+        //public async Task<int> DeleteHeadCountProcess(HeadCountProcess headCountProcess)
+        //{
+        //    _context.Remove(headCountProcess);
+        //    return await _context.SaveChangesAsync();
+        //}
 
 
         #endregion
