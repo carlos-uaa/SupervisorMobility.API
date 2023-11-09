@@ -1,5 +1,5 @@
 ﻿using AutoMapper;
-using SupervisorMobility.API.DataAccess.Entities;
+using SupervisorMobility.API.DataAccess.Entities.Paths;
 using SupervisorMobility.API.Models.RouteProductAssyChartDtos;
 
 namespace SupervisorMobility.API.MapperProfiles

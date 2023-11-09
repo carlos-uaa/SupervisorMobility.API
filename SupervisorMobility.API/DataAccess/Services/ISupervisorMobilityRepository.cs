@@ -1,6 +1,7 @@
 ﻿using SupervisorMobility.API.DataAccess.Entities;
 using SupervisorMobility.API.DataAccess.Entities.ILU;
 using SupervisorMobility.API.DataAccess.Entities.LUP;
+using SupervisorMobility.API.DataAccess.Entities.Paths;
 using SupervisorMobility.API.DataAccess.Entities.SOS_Review;
 using SupervisorMobility.API.Entities;
 using SupervisorMobility.API.Models.HeadCount;
@@ -90,6 +91,9 @@ namespace SupervisorMobility.API.Services
 
         Task AddOperationForDistributionAsync(int areaId, int distributionId, Operation operation);
         void DeleteOperation(Operation operation);
+
+        Task<AsyncVoidMethodBuilder> RemoveAllOperations();
+
         #endregion
         #region QuestionTypeOperations
         Task<IEnumerable<QuestionType>> GetQuestionTypesAsync();

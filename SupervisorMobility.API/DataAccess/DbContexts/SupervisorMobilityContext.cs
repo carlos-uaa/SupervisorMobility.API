@@ -3,6 +3,7 @@ using SupervisorMobility.API.DataAccess.Entities;
 using SupervisorMobility.API.DataAccess.Entities.ILU;
 using SupervisorMobility.API.DataAccess.Entities.Logger;
 using SupervisorMobility.API.DataAccess.Entities.LUP;
+using SupervisorMobility.API.DataAccess.Entities.Paths;
 using SupervisorMobility.API.DataAccess.Entities.SOS_Review;
 using SupervisorMobility.API.Entities;
 using System.Globalization;

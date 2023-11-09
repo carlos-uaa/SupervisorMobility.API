@@ -6,6 +6,7 @@ using Microsoft.AspNetCore.SignalR;
 using SpreadsheetLight;
 using SupervisorMobility.API.Business;
 using SupervisorMobility.API.DataAccess.Entities;
+using SupervisorMobility.API.DataAccess.Entities.Paths;
 using SupervisorMobility.API.Entities;
 using SupervisorMobility.API.Models.AssyChart;
 using SupervisorMobility.API.Models.OperationDtos;

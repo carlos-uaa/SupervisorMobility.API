@@ -126,57 +126,42 @@ namespace SupervisorMobility.API.DataAccess.Services.TreeServices
             return root;
         }
 
-        public TreeItemData FindNodeByPath(TreeItemData rootNode, string path)
+
+        public TreeItemData EncontrarMejorCoincidenciaDifusa(TreeItemData nodoActual, string rutaUsuario, string palabraClave)
         {
-            // Divide la ruta en partes
-            string[] pathParts = path.Split('/');
-
-            // Comienza desde la raíz del árbol
-            TreeItemData currentNode = rootNode;
-
-            foreach (string part in pathParts)
-            {
-                // Busca el nodo hijo con el nombre actual
-                currentNode = currentNode.TreeItems.FirstOrDefault(child => child.Nombre == part);
-
-                // Si no se encuentra un nodo hijo con ese nombre, devuelve null
-                if (currentNode == null)
-                {
-                    return null;
-                }
-            }
-
-            // Devuelve el nodo encontrado
-            return currentNode;
-        }
-
-
-        public TreeItemData EncontrarMejorCoincidenciaDifusa(TreeItemData nodoActual, string rutaUsuario)
-        {
-            // Itera sobre los nodos del árbol
             TreeItemData mejorCoincidencia = null;
             double puntuacionMaxima = 0;
 
-            // Calcula la puntuación de coincidencia difusa con el nodo actual
             double puntuacion = nodoActual.Ruta.DiceCoefficient(rutaUsuario);
 
-            // Actualiza la mejor coincidencia si la puntuación es mayor
-            if (puntuacion > puntuacionMaxima)
+            bool contienePalabraClave = nodoActual.Ruta.Contains(palabraClave);
+
+            if (contienePalabraClave && (mejorCoincidencia == null || puntuacion > puntuacionMaxima))
             {
                 puntuacionMaxima = puntuacion;
                 mejorCoincidencia = nodoActual;
             }
+            else if (!contienePalabraClave && puntuacion > puntuacionMaxima)
+            {
+                mejorCoincidencia = nodoActual;
+            }
 
-            // Itera sobre los hijos de forma recursiva
             foreach (var hijo in nodoActual.TreeItems)
             {
-                TreeItemData mejorCoincidenciaHijo = EncontrarMejorCoincidenciaDifusa(hijo, rutaUsuario);
-
-                // Actualiza la mejor coincidencia si la del hijo es mejor
-                if (mejorCoincidenciaHijo != null && mejorCoincidenciaHijo.Ruta.DiceCoefficient(rutaUsuario) > puntuacionMaxima)
+                TreeItemData mejorCoincidenciaHijo = EncontrarMejorCoincidenciaDifusa(hijo, rutaUsuario, palabraClave);
+                if (mejorCoincidenciaHijo != null)
                 {
-                    puntuacionMaxima = mejorCoincidenciaHijo.Ruta.DiceCoefficient(rutaUsuario);
-                    mejorCoincidencia = mejorCoincidenciaHijo;
+                    bool contienePalabraClaveHijo = mejorCoincidenciaHijo.Ruta.Contains(palabraClave);
+
+                    if (contienePalabraClaveHijo && mejorCoincidenciaHijo.Ruta.DiceCoefficient(rutaUsuario) > puntuacionMaxima)
+                    {
+                        puntuacionMaxima = mejorCoincidenciaHijo.Ruta.DiceCoefficient(rutaUsuario);
+                        mejorCoincidencia = mejorCoincidenciaHijo;
+                    }
+                    else if (!contienePalabraClaveHijo && mejorCoincidenciaHijo.Ruta.DiceCoefficient(rutaUsuario) > puntuacionMaxima)
+                    {
+                        mejorCoincidencia = mejorCoincidenciaHijo;
+                    }
                 }
             }
 
@@ -187,7 +172,6 @@ namespace SupervisorMobility.API.DataAccess.Services.TreeServices
 
         public string NormalizarRutaUsuario(string rutaUsuario)
         {
-            // Eliminar espacios adicionales y convertir números a su forma sin ceros a la izquierda
             string[] segmentos = rutaUsuario.Split(' ');
             for (int i = 0; i < segmentos.Length; i++)
             {
