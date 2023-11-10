@@ -130,9 +130,9 @@ namespace SupervisorMobility.API.DataAccess.Services.TreeServices
         }
 
 
-        public TreeItemData EncontrarMejorCoincidenciaDifusa(TreeItemData nodoActual, string rutaUsuario, string palabraClave)
+        public TreeItemData? EncontrarMejorCoincidenciaDifusa(TreeItemData nodoActual, string rutaUsuario, string palabraClave)
         {
-            TreeItemData mejorCoincidencia = null;
+            TreeItemData? mejorCoincidencia = null;
             double puntuacionMaxima = 0;
 
             double puntuacion = nodoActual.Ruta.DiceCoefficient(rutaUsuario);
@@ -171,9 +171,9 @@ namespace SupervisorMobility.API.DataAccess.Services.TreeServices
             return mejorCoincidencia;
         }
 
-        public TreeItemData EncontrarMejorCoincidenciaDifusaInternal(TreeItemData nodoActual, string rutaUsuario, string palabraClave)
+        public TreeItemData? EncontrarMejorCoincidenciaDifusaInternal(TreeItemData nodoActual, string rutaUsuario, string palabraClave)
         {
-            TreeItemData mejorCoincidencia = null;
+            TreeItemData? mejorCoincidencia = null;
             double puntuacionMaxima = 0;
 
             double puntuacion = nodoActual.Ruta.DiceCoefficient(rutaUsuario);

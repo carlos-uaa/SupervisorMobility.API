@@ -19,7 +19,7 @@ namespace SupervisorMobility.API.DataAccess.Entities.Paths
         public string? HOE { get; set; } = string.Empty;
         public string? CommonDirectionHOE { get; set; } = string.Empty;
 
-        public int DistributionId { get; set; }
+        public int? DistributionId { get; set; }
         public Distribution? Distribution { get; set; }
 
         public int? ProductId { get; set; }
