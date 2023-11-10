@@ -234,33 +234,101 @@ namespace SupervisorMobility.API.Controllers
 
                                         try
                                         {
+
                                             var valueDepartament = ws.Cell(i, 4).GetString() != "" ? ws.Cell(i, 4).GetValue<string>() : "";
-                                            var CostDepartament = valueDepartament.Split("_");
-                                            var splitedDepartament = CostDepartament[0].Split("-");
-                                            try
+
+                                            if(valueDepartament.Contains("_") && valueDepartament.Contains("-"))
                                             {
-                                                _headCount.Cost_center = int.Parse(splitedDepartament[0]);
+                                                var CostDepartament = valueDepartament.Split("_");
+                                                var splitedDepartament = CostDepartament[0].Split("-");
+                                                try
+                                                {
+                                                    _headCount.Cost_center = int.Parse(splitedDepartament[0]);
+                                                }
+                                                catch (Exception ex)
+                                                {
+
+                                                }
+                                                try
+                                                {
+                                                    _headCount.ID_Departamento = splitedDepartament[1];
+                                                }
+                                                catch (Exception ex)
+                                                {
+
+                                                }
+                                                try
+                                                {
+                                                    _headCount.Nombre_Departamento = CostDepartament[1];
+                                                }
+                                                catch (Exception ex)
+                                                {
+
+                                                }
+                                            }else if(!valueDepartament.Contains("_") && valueDepartament.Contains("-"))
+                                            {
+                                                var firstSplit = valueDepartament.Split("-");
+                                                try
+                                                {
+                                                    _headCount.Cost_center = int.Parse(firstSplit[0]);
+                                                }
+                                                catch (Exception ex)
+                                                {
+
+                                                }
+                                                try
+                                                {
+                                                    _headCount.ID_Departamento = firstSplit[1];
+                                                }
+                                                catch (Exception ex)
+                                                {
+
+                                                }
+                                                try
+                                                {
+                                                    _headCount.Nombre_Departamento = firstSplit[1];
+                                                }
+                                                catch (Exception ex)
+                                                {
+
+                                                }
                                             }
-                                            catch (Exception ex)
+                                            else if (valueDepartament.Contains("_") && !valueDepartament.Contains("-"))
                                             {
+                                                var firstSplit2 = valueDepartament.Split("_");
+
+                                                if (int.TryParse(firstSplit2[0], out int numero))
+                                                {
+                                                    //guaramos id
+                                                    _headCount.Cost_center = numero;
+                                                }
+                                                else
+                                                {
+                                                    //fallo el numero asignamos default
+                                                    _headCount.Cost_center = 0;
+                                                }
+
+                                                try
+                                                {
+                                                    _headCount.ID_Departamento = firstSplit2[1];
+                                                }
+                                                catch (Exception ex)
+                                                {
+
+                                                }
+                                                try
+                                                {
+                                                    _headCount.Nombre_Departamento = firstSplit2[1];
+                                                }
+                                                catch (Exception ex)
+                                                {
+
+                                                }
 
                                             }
-                                            try
-                                            {
-                                                _headCount.ID_Departamento = splitedDepartament[1];
-                                            }
-                                            catch (Exception ex)
-                                            {
 
-                                            }
-                                            try
-                                            {
-                                                _headCount.Nombre_Departamento = CostDepartament[1];
-                                            }
-                                            catch (Exception ex)
-                                            {
 
-                                            }
+
                                         }
                                         catch (Exception ex)
                                         {
