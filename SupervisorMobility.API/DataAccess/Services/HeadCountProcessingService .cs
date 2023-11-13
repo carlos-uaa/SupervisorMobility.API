@@ -1,9 +1,11 @@
 ﻿using AutoMapper;
+using ClosedXML;
 using ClosedXML.Excel;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Hosting;
 using SupervisorMobility.API.Business;
 using SupervisorMobility.API.DataAccess.Entities;
+using SupervisorMobility.API.Entities;
 using SupervisorMobility.API.Services;
 using System;
 using System.Diagnostics;
@@ -408,11 +410,29 @@ namespace SupervisorMobility.API.DataAccess.Services
                                         }
                                         catch (Exception ex)
                                         {
+
                                             // Maneja la excepción aquí, si es necesario
-                                            Console.WriteLine($"Intento {retries + 1} Linea Position [{i}] falló: {ex.Message}");
+                                            Debug.WriteLine($"Intento {retries + 1} Linea Position [{i}] falló: {ex.Message}");
 
                                             // Incrementa el número de intentos
                                             retries++;
+
+
+                                            if (retries == 5)
+                                            {
+                                                //añade notificacion de error
+                                                Notification NotyError = new Notification();
+                                                NotyError.NotificationType = $"HeadCount Row Error {DateTime.Now}";
+                                                NotyError.NotificationText = $"Error in data ROW [{i}], please check document and solve this issue";
+
+                                                NotyError.MadeBy = "HeadCount System";
+                                                NotyError.UserId = userEntity.UserId;
+                                                NotyError.IsAccepted = true;
+                                                NotyError.IsActive = true;
+                                                NotyError.EntryDate = DateTime.Now;
+
+                                                _supervisorMobilityRepository.AddNotificationAsync(NotyError); 
+                                            }
 
                                             // Espera el intervalo de tiempo antes de volver a intentarlo
                                             await Task.Delay(retryInterval);
@@ -426,23 +446,103 @@ namespace SupervisorMobility.API.DataAccess.Services
                             }//end else first roe
                             i++;
                         }//end foreach
-                        await _supervisorMobilityRepository.SaveChangesAsync();
 
                         //}//for de paginas
 
-                    }//end using
+                    }//end using woorkbook
 
 
 
                 }//end try
                 catch (Exception ex)
                 {
-                    Debug.WriteLine(ex.ToString());
+                    Debug.WriteLine($"Error en Using Woorkbook {ex.ToString()}");
                 }//end trycatch to add excel to list
 
-                var emailMessage = _email.CreateEmailMessage(userEntity.Email, "Este es un mensaje de prueba enviado desde job observation");
-                _email.Send(emailMessage);
+                int maxRetriesMail = 5; // Número máximo de intentos
+                TimeSpan retryIntervalMail = TimeSpan.FromSeconds(5); // Intervalo de tiempo entre intentos (5 segundos en este caso)
+                int retriesMail = 0;
 
+                while (retriesMail < maxRetriesMail)
+                {
+                    try
+                    {
+                        //var emailMessage = _email.CreateEmailMessage(userEntity.Email, "Este es un mensaje de prueba enviado desde job observation");
+                        //_email.Send(emailMessage);
+                        
+                        break;
+                    }
+                    catch (Exception ex)
+                    {
+
+                        // Maneja la excepción aquí, si es necesario
+                        Debug.WriteLine($"Fallo crear Succes Notification: {ex.Message}");
+
+                        // Incrementa el número de intentos
+                        retriesMail++;
+                       
+                        // Espera el intervalo de tiempo antes de volver a intentarlo
+                        await Task.Delay(retryIntervalMail);
+                    }
+
+                }
+
+                // notificacion
+                //añade notificacion de error
+
+                int maxIntentos = 5; // Número máximo de intentos
+                TimeSpan newintentTime = TimeSpan.FromSeconds(5); // Intervalo de tiempo entre intentos (5 segundos en este caso)
+                int intentos = 0;
+
+                while (intentos < maxIntentos)
+                {
+                    try
+                    {
+
+                        Notification NotyFinish = new Notification();
+                        NotyFinish.NotificationType = $"HeadCount Succes Procces {DateTime.Now}";
+                        NotyFinish.NotificationText = $"Headcount document has been processed, you can now review its contents on the details page.";
+
+                        NotyFinish.MadeBy = "HeadCount Process System ";
+                        NotyFinish.UserId = userEntity.UserId;
+                        NotyFinish.IsAccepted = true;
+                        NotyFinish.IsActive = true;
+                        NotyFinish.EntryDate = DateTime.Now;
+
+                        _supervisorMobilityRepository.AddNotificationAsync(NotyFinish);
+                        await _supervisorMobilityRepository.SaveChangesAsync();
+                        break;
+                    }
+                    catch (Exception ex)
+                    {
+
+                        // Maneja la excepción aquí, si es necesario
+                        Debug.WriteLine($"Fallo crear Succes Notification: {ex.Message}");
+
+                        // Incrementa el número de intentos
+                        intentos++;
+                        if (intentos == 5)
+                        {
+                            //añade notificacion de error
+                            Notification NotyError = new Notification();
+                            NotyError.NotificationType = $"HeadCount Finish: {DateTime.Now}";
+                            NotyError.NotificationText = $"Finish procces document";
+
+                            NotyError.MadeBy = "HeadCount System";
+                            NotyError.UserId = userEntity.UserId;
+                            NotyError.IsAccepted = true;
+                            NotyError.IsActive = true;
+                            NotyError.EntryDate = DateTime.Now;
+                            _supervisorMobilityRepository.AddNotificationAsync(NotyError);
+                        }
+
+
+                        // Espera el intervalo de tiempo antes de volver a intentarlo
+                        await Task.Delay(newintentTime);
+                    }
+
+                }
+                await _supervisorMobilityRepository.SaveChangesAsync();
 
 
             }//end ussing scope
