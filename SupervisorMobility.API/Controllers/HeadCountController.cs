@@ -1,11 +1,15 @@
 ﻿using AutoMapper;
 using ClosedXML.Excel;
 using DocumentFormat.OpenXml.Spreadsheet;
+using Microsoft.AspNetCore.Connections;
 using Microsoft.AspNetCore.Cors;
 using Microsoft.AspNetCore.Mvc;
+using Newtonsoft.Json;
+using RabbitMQ.Client;
 using SpreadsheetLight;
 using SupervisorMobility.API.Business;
 using SupervisorMobility.API.DataAccess.Entities;
+using SupervisorMobility.API.DataAccess.Services;
 using SupervisorMobility.API.Models.AreaDtos;
 using SupervisorMobility.API.Models.AssyChart;
 using SupervisorMobility.API.Models.FileUploadDto;
@@ -15,6 +19,7 @@ using SupervisorMobility.API.Models.Users;
 using SupervisorMobility.API.Services;
 using System.Diagnostics;
 using System.Linq;
+using System.Text;
 
 namespace SupervisorMobility.API.Controllers
 {
@@ -27,11 +32,13 @@ namespace SupervisorMobility.API.Controllers
         private readonly IMapper _mapper;
         private readonly IAssyChartService _assyChartService;
         private readonly ISupervisorMobilityRepository _supervisorMobilityRepository;
-
+        private readonly IServiceProvider _serviceProvider;
 
         public HeadCountController(IWebHostEnvironment env, IMapper mapper, ISupervisorMobilityRepository supervisorMobilityRepository,
-        IAssyChartService assyChartService)
-        {
+        IAssyChartService assyChartService, IServiceProvider serviceProvider)
+{
+            _serviceProvider = serviceProvider ?? throw new ArgumentNullException(nameof(serviceProvider));
+
             _assyChartService = assyChartService;
             _supervisorMobilityRepository = supervisorMobilityRepository ??
                 throw new ArgumentNullException(nameof(supervisorMobilityRepository));
@@ -73,403 +80,22 @@ namespace SupervisorMobility.API.Controllers
             var fileToReturn = await _assyChartService.CreateFileAsync(uploadResult);
 
             await _supervisorMobilityRepository.SaveChangesAsync();
-            await _supervisorMobilityRepository.RemoveAllHeadCountRegisters();
 
+        
+            /////procesamiento backgrpun
 
-            //Start Massive Upload 
-            string filepath = Directory.GetCurrentDirectory().ToString() + "\\uploads\\headcount\\" + trustedFileNameForStorage;
-            try
-            {
-                using (var workBook = new XLWorkbook(filepath))
-                {
-                    var pages = workBook.Worksheets.Count - 1;
+            var headCountProcessingService = new HeadCountProcessingService(_serviceProvider, trustedFileNameForStorage, UserIdUpload);
 
-                    //for (int p = 1; p <= pages; p++)
-                    //{
-                    IXLWorksheet ws = workBook.Worksheet(1);
+            // Iniciar el servicio en segundo plano
+            await headCountProcessingService.StartAsync(CancellationToken.None);
 
-                    User userEntity = await _supervisorMobilityRepository.GetUserAsync(UserIdUpload, false);
 
-                    bool firstRow = true;
-                    int i = 1;
-                    foreach (IXLRow row in ws.Rows())
-                    {
-                        //Use the first row to add columns to DataTable.
-                        HeadCount _headCount = new HeadCount();
-
-                        if (firstRow)
-                        {
-                            firstRow = false;
-                        }
-                        else
-                        {
-                            if (!row.IsEmpty())
-                            {
-                                int maxRetries = 5; // Número máximo de intentos
-                                TimeSpan retryInterval = TimeSpan.FromSeconds(5); // Intervalo de tiempo entre intentos (5 segundos en este caso)
-                                int retries = 0;
-
-                                while (retries < maxRetries)
-                                {
-                                    try
-                                    {
-
-                                     
-                                        try
-                                        {
-                                            // id subarea nombre subarea
-                                            var valueFunctionDescription = ws.Cell(i, 5).GetString() != "" ? ws.Cell(i, 5).GetValue<string>().Trim() : "";
-
-                                           
-                                                bool contieneNumero = valueFunctionDescription.Any(char.IsDigit);
-
-                                                //la celda esta dentro de los preocesso
-                                                if (contieneNumero)
-                                                {
-                                                    //Tiene id de subarea,  extraemos numero
-                                                    string numeroString = new string(valueFunctionDescription.Where(char.IsDigit).ToArray());
-
-                                                    //convertimos
-                                                    if (int.TryParse(numeroString, out int numero))
-                                                    {
-                                                        //guaramos id
-                                                        _headCount.ID_subarea = numero;
-                                                    }
-                                                    else
-                                                    {
-                                                        //fallo el numero asignamos default
-                                                        _headCount.ID_subarea = 0;
-                                                    }
-                                                }
-                                                else
-                                                {
-                                                    //No tiene id de subarea
-                                                    _headCount.ID_subarea = 0;
-                                                }
-
-                                                try
-                                                {
-                                                    _headCount.nombre_subarea = valueFunctionDescription;
-                                                }
-                                                catch (Exception ex)
-                                                {
-
-                                                }
-
-                                                try
-                                                {
-                                                    _headCount.Fuction_Type = ws.Cell(i, 13).GetString() != "" ? ws.Cell(i, 13).GetValue<string>().Trim() : "";
-                                                 }
-                                                catch (Exception ex)
-                                                {
-
-                                                }
-
-                                                //break;
-
-
-                                        }
-                                        catch (Exception ex)
-                                        {
-
-                                        }
-
-                                        try
-                                        {
-                                            _headCount.RTO = ws.Cell(i, 9).GetString() != "" ? ws.Cell(i, 9).GetValue<string>() : "";
-
-                                        }
-                                        catch (Exception ex)
-                                        {
-
-                                        }
-
-                                        //procedimiento
-                                        try
-                                        {
-                                            _headCount.Codigo = ws.Cell(i, 1).GetString() != "" ? (int)ws.Cell(i, 1).Value : -1;
-                                        }
-                                        catch (Exception ex)
-                                        {
-
-                                        }
-                                        try
-                                        {
-                                            _headCount.CO = ws.Cell(i, 2).GetString() != "" ? ws.Cell(i, 2).GetValue<string>() : "";
-                                            //                                  ToInsertIntoList.GOS = ws.Cell(i, 3).GetString() != "" ? ws.Cell(i, 3).GetValue<string>() : "";
-                                        }
-                                        catch (Exception ex)
-                                        {
-
-                                        }
-                                        try
-                                        {
-                                            var valuesArea = ws.Cell(i, 3).GetString() != "" ? ws.Cell(i, 3).GetValue<string>() : "";
-                                            var splitedArea = valuesArea.Split("-");
-
-                                            try
-                                            {
-                                                _headCount.ID_Area = int.Parse(splitedArea[0]);
-                                            }
-                                            catch (Exception ex)
-                                            {
-
-                                            }
-
-                                            try
-                                            {
-                                                _headCount.Nombre_Area = splitedArea[1];
-                                            }
-                                            catch (Exception ex)
-                                            {
-
-                                            }
-
-
-                                        }
-                                        catch (Exception ex)
-                                        {
-
-                                        }
-
-                                        try
-                                        {
-
-                                            var valueDepartament = ws.Cell(i, 4).GetString() != "" ? ws.Cell(i, 4).GetValue<string>() : "";
-
-                                            if(valueDepartament.Contains("_") && valueDepartament.Contains("-"))
-                                            {
-                                                var CostDepartament = valueDepartament.Split("_");
-                                                var splitedDepartament = CostDepartament[0].Split("-");
-                                                try
-                                                {
-                                                    _headCount.Cost_center = int.Parse(splitedDepartament[0]);
-                                                }
-                                                catch (Exception ex)
-                                                {
-
-                                                }
-                                                try
-                                                {
-                                                    _headCount.ID_Departamento = splitedDepartament[1];
-                                                }
-                                                catch (Exception ex)
-                                                {
-
-                                                }
-                                                try
-                                                {
-                                                    _headCount.Nombre_Departamento = CostDepartament[1];
-                                                }
-                                                catch (Exception ex)
-                                                {
-
-                                                }
-                                            }else if(!valueDepartament.Contains("_") && valueDepartament.Contains("-"))
-                                            {
-                                                var firstSplit = valueDepartament.Split("-");
-                                                try
-                                                {
-                                                    _headCount.Cost_center = int.Parse(firstSplit[0]);
-                                                }
-                                                catch (Exception ex)
-                                                {
-
-                                                }
-                                                try
-                                                {
-                                                    _headCount.ID_Departamento = firstSplit[1];
-                                                }
-                                                catch (Exception ex)
-                                                {
-
-                                                }
-                                                try
-                                                {
-                                                    _headCount.Nombre_Departamento = firstSplit[1];
-                                                }
-                                                catch (Exception ex)
-                                                {
-
-                                                }
-                                            }
-                                            else if (valueDepartament.Contains("_") && !valueDepartament.Contains("-"))
-                                            {
-                                                var firstSplit2 = valueDepartament.Split("_");
-
-                                                if (int.TryParse(firstSplit2[0], out int numero))
-                                                {
-                                                    //guaramos id
-                                                    _headCount.Cost_center = numero;
-                                                }
-                                                else
-                                                {
-                                                    //fallo el numero asignamos default
-                                                    _headCount.Cost_center = 0;
-                                                }
-
-                                                try
-                                                {
-                                                    _headCount.ID_Departamento = firstSplit2[1];
-                                                }
-                                                catch (Exception ex)
-                                                {
-
-                                                }
-                                                try
-                                                {
-                                                    _headCount.Nombre_Departamento = firstSplit2[1];
-                                                }
-                                                catch (Exception ex)
-                                                {
-
-                                                }
-
-                                            }
-
-
-
-                                        }
-                                        catch (Exception ex)
-                                        {
-
-                                        }
-
-
-                                        try
-                                        {
-                                            _headCount.Nivel = ws.Cell(i, 6).GetString() != "" ? ws.Cell(i, 6).GetValue<string>() : "";
-
-                                        }
-                                        catch (Exception ex)
-                                        {
-
-                                        }
-                                        try
-                                        {
-                                            _headCount.Group = ws.Cell(i, 7).GetString() != "" ? ws.Cell(i, 7).GetValue<string>() : "";
-                                        }
-                                        catch (Exception ex)
-                                        {
-
-                                        }
-                                        try
-                                        {
-                                            _headCount.BUDGET = ws.Cell(i, 8).GetString() != "" ? ws.Cell(i, 8).GetValue<string>() : "";
-                                        }
-                                        catch (Exception ex)
-                                        {
-
-                                        }
-
-                                        try
-                                        {
-                                            var valueHC = ws.Cell(i, 1).GetString() != "" ? ws.Cell(i, 1).Value.ToString() : "";
-                                            try
-                                            {
-                                                _headCount.HC = int.Parse(valueHC);
-                                            }
-                                            catch (Exception ex)
-                                            {
-
-                                            }
-                                        }
-                                        catch (Exception ex)
-                                        {
-
-                                        }
-                                        try
-                                        {
-                                            _headCount.Comentarios = ws.Cell(i, 11).GetString() != "" ? ws.Cell(i, 11).GetValue<string>() : "";
-                                        }
-                                        catch (Exception ex)
-                                        {
-
-                                        }
-                                        try
-                                        {
-                                            _headCount.LABOR_TYPE = ws.Cell(i, 12).GetString() != "" ? ws.Cell(i, 12).GetValue<string>() : "";
-                                        }
-                                        catch (Exception ex)
-                                        {
-
-                                        }
-                                        try
-                                        {
-                                            _headCount.Fecha_de_alta = DateTime.Now;
-                                        }
-                                        catch (Exception ex)
-                                        {
-
-                                        }
-                                        try
-                                        {
-                                            _headCount.UserUploadId = UserIdUpload;
-                                        }
-                                        catch (Exception ex)
-                                        {
-                                        }
-                                        try
-                                        {
-                                            _headCount.Usuario_de_alta = userEntity.Name;
-                                        }
-                                        catch (Exception ex)
-                                        {
-
-                                        }
-
-                                        await _supervisorMobilityRepository.AddHeadCoutAsync(_headCount);
-
-
-                                        retries = 0;
-
-                                        Debug.WriteLine($"Intento {retries + 1} Linea Position [{i}]");
-
-                                        // Si la operación tiene éxito, puedes salir del bucle
-                                        break;
-                                    }
-                                    catch (Exception ex)
-                                    {
-                                        // Maneja la excepción aquí, si es necesario
-                                        Console.WriteLine($"Intento {retries + 1} Linea Position [{i}] falló: {ex.Message}");
-
-                                        // Incrementa el número de intentos
-                                        retries++;
-
-                                        // Espera el intervalo de tiempo antes de volver a intentarlo
-                                        await Task.Delay(retryInterval);
-                                    }
-
-
-
-                                }//While
-
-                            }//end is not empety row
-                        }//end else first roe
-                        i++;
-                    }//end foreach
-                    await _supervisorMobilityRepository.SaveChangesAsync();
-
-                    //}//for de paginas
-
-                }//end using
-
-
-
-            }//end try
-            catch (Exception ex)
-            {
-                Debug.WriteLine(ex.ToString());
-            }//end trycatch to add excel to list
-
-
-
-
-
-
-            return Ok();
+            ///end background
+            return Ok(fileToReturn);
 
         }
+
+      
 
         private async Task<int> IsValidFunctionInRow(string process, List<HeadCountProcess> reglas)
         {

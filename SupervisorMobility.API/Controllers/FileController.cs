@@ -2192,38 +2192,37 @@ namespace SupervisorMobility.API.Controllers
 
         [EnableCors("Cors")]
         [HttpPost("MassivePaths")]
-        //public async Task<ActionResult<FileUpload>> UploadFileFromMassivePaths(IFormFile file, int UserIdUpload)
-        public async Task<ActionResult<FileUpload>> UploadFileFromMassivePaths(string trustedFileNameForStorage)
+        public async Task<ActionResult<FileUpload>> UploadFileFromMassivePaths(IFormFile file, int UserIdUpload)
+        //public async Task<ActionResult<FileUpload>> UploadFileFromMassivePaths(string trustedFileNameForStorage)
         {
 
+            var uploadResult = new FileUploadForCreationDto();
+            string trustedFileNameForStorage = string.Empty;
+            var unstrustedFileName = file.FileName;
 
-            //var uploadResult = new FileUploadForCreationDto();
-            //string trustedFileNameForStorage = string.Empty;
-            //var unstrustedFileName = file.FileName;
+            trustedFileNameForStorage = Path.GetRandomFileName();
+            trustedFileNameForStorage = System.IO.Path.ChangeExtension(trustedFileNameForStorage, ".xlsx");
+            var path = Path.Combine(_env.ContentRootPath, "uploads\\massive", trustedFileNameForStorage);
 
-            //trustedFileNameForStorage = Path.GetRandomFileName();
-            //trustedFileNameForStorage = System.IO.Path.ChangeExtension(trustedFileNameForStorage, ".xlsx");
-            //var path = Path.Combine(_env.ContentRootPath, "uploads\\massive", trustedFileNameForStorage);
+            try
+            {
+                await using (FileStream fs = new FileStream(path, FileMode.Create))
+                {
+                    // Utiliza "await" para asegurarte de que se complete la copia del archivo antes de continuar
+                    await file.CopyToAsync(fs);
+                }
+            }
+            catch (Exception ex)
+            {
+                return NotFound(ex.Message);
+            }
 
-            //try
-            //{
-            //    await using (FileStream fs = new FileStream(path, FileMode.Create))
-            //    {
-            //        // Utiliza "await" para asegurarte de que se complete la copia del archivo antes de continuar
-            //        await file.CopyToAsync(fs);
-            //    }
-            //}
-            //catch (Exception ex)
-            //{
-            //    return NotFound(ex.Message);
-            //}
+            uploadResult.FileName = unstrustedFileName;
+            uploadResult.StorageFileName = trustedFileNameForStorage;
+            uploadResult.ContentType = file.ContentType;
+            uploadResult.UploadDate = DateTime.Now;
 
-            //uploadResult.FileName = unstrustedFileName;
-            //uploadResult.StorageFileName = trustedFileNameForStorage;
-            //uploadResult.ContentType = file.ContentType;
-            //uploadResult.UploadDate = DateTime.Now;
-
-            //var fileToReturn = await _assyChartService.CreateFileAsync(uploadResult);
+            var fileToReturn = await _assyChartService.CreateFileAsync(uploadResult);
 
             await _supervisorMobilityRepository.SaveChangesAsync();
 
