@@ -3,6 +3,7 @@ using Newtonsoft.Json;
 using Serilog;
 using SupervisorMobility.API;
 using SupervisorMobility.API.DataAccess.Entities;
+using SupervisorMobility.API.DataAccess.Services;
 
 //Configure Serilog
 Log.Logger = new LoggerConfiguration()
@@ -55,6 +56,9 @@ builder.Services.AddSwaggerGen();
 builder.Services.RegisterBusinessServices();
 builder.Services.RegisterDataServices(builder.Configuration);
 
+//
+
+
 //Add automapper
 builder.Services.AddAutoMapper(AppDomain.CurrentDomain.GetAssemblies());
 
@@ -80,8 +84,15 @@ builder.Services.AddSingleton(emailConfig);
 
 //peticion api
 //builder.Services.AddHostedService<MyScheduledTaskService>();
-//using namespaces
+
+
+//using namespaces este funciona mejor 
 //builder.Services.AddHostedService<MyScheduledTask>();
+
+
+// Crear una instancia del servicio en segundo plano
+//builder.Services.AddHostedService<HeadCountProcessingService>();
+
 
 builder.Services.AddScoped<CustomHttpClientService>();
 

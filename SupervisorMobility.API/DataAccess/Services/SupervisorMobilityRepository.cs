@@ -1738,14 +1738,14 @@ namespace SupervisorMobility.API.Services
         {
             return await _context.Notifications.Include(n => n.User)
                 .Where(n => n.IsActive == true)
-                 .OrderBy(c => c.NotificationID).ToListAsync();
+                 .OrderByDescending(c => c.NotificationID).ToListAsync();
         }
 
         public async Task<IEnumerable<Notification>> GetAllNotificationsFromUserAsync(int id)
         {
             return await _context.Notifications.Include(n => n.User)
                 .Where(n => n.UserId == id && EF.Functions.DateDiffDay(DateTime.Now, n.EntryDate) <= 3 && EF.Functions.DateDiffMonth(DateTime.Now, n.EntryDate) == 0)
-                 .OrderBy(c => c.NotificationID).ToListAsync();
+                 .OrderByDescending(c => c.NotificationID).ToListAsync();
         }
 
 
