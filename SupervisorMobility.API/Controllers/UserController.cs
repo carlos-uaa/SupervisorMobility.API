@@ -2432,6 +2432,8 @@ namespace SupervisorMobility.API.Controllers
 
         }
 
+        //******* Download Formaters    **********//
+
         [EnableCors("Cors")]
         [HttpGet("Bulk/DownloadAllUsersFormat")]
         public async Task<IActionResult> DownloadAllUsersFormat()

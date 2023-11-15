@@ -84,7 +84,7 @@ namespace SupervisorMobility.API.Controllers
         
             /////procesamiento backgrpun
 
-            var headCountProcessingService = new HeadCountProcessingService(_serviceProvider, trustedFileNameForStorage, UserIdUpload);
+            var headCountProcessingService = new BackgroundProcessingService(_serviceProvider, trustedFileNameForStorage, UserIdUpload);
 
             // Iniciar el servicio en segundo plano
             await headCountProcessingService.StartAsync(CancellationToken.None);

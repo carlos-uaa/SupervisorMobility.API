@@ -1363,7 +1363,7 @@ namespace SupervisorMobility.API.Controllers
         }
 
 
-        //[EnableCors("CorsPolicy")]
+        [EnableCors("CorsPolicy")]
         [HttpGet("Bulk/DownloadUsers")]
         public async Task<IActionResult> DownloadAllUsers()
         {
@@ -1601,7 +1601,7 @@ namespace SupervisorMobility.API.Controllers
 
         [EnableCors("Cors")]
         [HttpPost("MassiveUploadTreeData")]
-        public async Task<ActionResult<FileUpload>> MassiveUploadTreeData(IFormFile file, int plantnameid)
+        public async Task<ActionResult<FileUpload>> MassiveUploadTreeData(IFormFile file, int plantnameid, int userId)
         {
 
             var uploadResult = new FileUploadForCreationDto();
@@ -2190,10 +2190,30 @@ namespace SupervisorMobility.API.Controllers
 
         }
 
+        //[EnableCors("CorsPolicy")]
+        [HttpGet("MassiveUploadTreeDataExample")]
+        public async Task<IActionResult> MassiveUploadTreeDataExample()
+        {
+            var path = Path.Combine(_env.ContentRootPath, "Documents\\TreeDataExample.xlsx");
+
+            var memory = new MemoryStream();
+            using (var stream = new FileStream(path, FileMode.Open))
+            {
+                await stream.CopyToAsync(memory);
+            }
+            memory.Position = 0;
+
+            var result = File(memory, "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet", Path.GetFileName(path));
+            result.EnableRangeProcessing = true;
+
+            return result;
+
+        }//end download file function 
+
+
         [EnableCors("Cors")]
         [HttpPost("MassivePaths")]
-        public async Task<ActionResult<FileUpload>> UploadFileFromMassivePaths(IFormFile file, int UserIdUpload)
-        //public async Task<ActionResult<FileUpload>> UploadFileFromMassivePaths(string trustedFileNameForStorage)
+        public async Task<ActionResult<FileUpload>> UploadFileFromMassivePaths(IFormFile file, int userId)
         {
 
             var uploadResult = new FileUploadForCreationDto();
@@ -2927,6 +2947,27 @@ namespace SupervisorMobility.API.Controllers
 
             return Ok();
         }
+
+       // [EnableCors("CorsPolicy")]
+        [HttpGet("MassivePathsExample")]
+        public async Task<IActionResult> MassivePathsExample()
+        {
+            var path = Path.Combine(_env.ContentRootPath, "Documents\\PathsExample.xlsx");
+
+            var memory = new MemoryStream();
+            using (var stream = new FileStream(path, FileMode.Open))
+            {
+                await stream.CopyToAsync(memory);
+            }
+            memory.Position = 0;
+
+            var result = File(memory, "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet", Path.GetFileName(path));
+            result.EnableRangeProcessing = true;
+
+            return result;
+
+        }//end download file function 
+
 
 
 

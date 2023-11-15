@@ -14,17 +14,17 @@ using System.Threading.Tasks;
 
 namespace SupervisorMobility.API.DataAccess.Services
 {
-    public class HeadCountProcessingService : BackgroundService
+    public class BackgroundProcessingService : BackgroundService
     {
         private readonly IServiceProvider _serviceProvider;
 
         private string _fileName;
         private int _userId;
 
-        public HeadCountProcessingService(IServiceProvider serviceProvider, string fileName, int userId)
+        public BackgroundProcessingService(IServiceProvider serviceProvider, string fileName, int userId)
         {
             _serviceProvider = serviceProvider ?? throw new ArgumentNullException(nameof(serviceProvider));
-            _fileName = fileName;
+            _fileName = fileName ?? "";
             _userId = userId;
         }
 
