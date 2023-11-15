@@ -247,7 +247,7 @@ namespace SupervisorMobility.API.Services
         #endregion
         #region LupOperations
         Task<IEnumerable<Lup>> GetAllLupAsync();
-        Task<Lup?> GetLupAsync(int guideId, bool includeFile = false);
+        Task<Lup?> GetLupAsync(int lupId, bool includeFile = false);
         Task<IEnumerable<Lup>> GetLupsByFiltersAsync(DateTime startDate, DateTime endDate, int plantId, int areaId, int distributionId, int operationId, int supervisorId, int status);
         void AddLup(Lup lup);
         void DeleteLup(Lup lup);
@@ -364,7 +364,15 @@ namespace SupervisorMobility.API.Services
         void AddPillar(Pillar pillar);
         void DeletePillar(Pillar pillar);
         #endregion
+        #region ChecklistAnswersOperations
+        Task<IEnumerable<ChecklistAnswer>> GetAllChecklistAnswerAsync();
+        Task<IEnumerable<ChecklistAnswer>> GetAllChecklistAnswersByJobObservationIdAsync(int jobObservationId);
+        Task<ChecklistAnswer?> GetChecklistAnswerAsync(int guideId);
+        void AddChecklistAnswer(ChecklistAnswer checklistAnswer);
+        void DeleteChecklistAnswer(ChecklistAnswer checklistAnswer);
+        Task<bool> ChecklistAnswerExistAsync(int checklistAnswerId);
 
+        #endregion
         #region CommonOperations
 
         Task<bool> SaveChangesAsync();

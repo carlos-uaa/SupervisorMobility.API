@@ -2195,7 +2195,43 @@ namespace SupervisorMobility.API.Services
             _context.SaveChanges();
         }
         #endregion
+        #region ChecklistAnswersOperations
+        public async Task<ChecklistAnswer?> GetChecklistAnswerAsync(int checklistAnswerId)
+        {
+            return await _context.ChecklistAnswers
+                 .Where(x => x.AnswerId == checklistAnswerId).FirstOrDefaultAsync();
+        }
 
+        public async Task<IEnumerable<ChecklistAnswer>> GetAllChecklistAnswerAsync()
+        {
+            return await _context.ChecklistAnswers
+                 .OrderBy(c => c.AnswerId).ToListAsync();
+
+        }
+        public async Task<IEnumerable<ChecklistAnswer>> GetAllChecklistAnswersByJobObservationIdAsync(int jobObservationId)
+        {
+            return await _context.ChecklistAnswers
+                .Where(c => c.JobObservationId == jobObservationId)
+                 .OrderBy(c => c.AnswerId).ToListAsync();
+
+        }
+        public void AddChecklistAnswer(ChecklistAnswer checklistAnswer)
+        {
+            _context.ChecklistAnswers.Add(checklistAnswer);
+        }
+
+        public void DeleteChecklistAnswer(ChecklistAnswer checklistAnswer)
+        {
+            checklistAnswer.Answer = null;
+            _context.SaveChanges();
+        }
+
+        public async Task<bool> ChecklistAnswerExistAsync(int checklistAnswerId)
+        {
+            return await _context.ChecklistAnswers.AnyAsync(l => l.AnswerId == checklistAnswerId);
+        }
+
+        #endregion
         #region CommonOperations
         public async Task<bool> SaveChangesAsync()
         {
