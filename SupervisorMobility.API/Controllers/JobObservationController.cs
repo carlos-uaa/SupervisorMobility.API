@@ -90,15 +90,18 @@ namespace SupervisorMobility.API.Controllers
         }
 
         [HttpGet]
-        public async Task<ActionResult<IEnumerable<JobObservationDto>>> GetAllJobObservationsAsync(bool includeLup = false)
+        public async Task<ActionResult<IEnumerable<JobObservationDto>>> GetAllJobObservationsAsync(bool includeTree = false, bool includePeople = false, bool includeLup = false, bool includeHistory = false, bool includeCkAnswers = false)
         {
 
-            var allJobObservations = await _supervisorMobilityRepository.GetAllJobObservationsAsync(includeLup);
-            if (includeLup)
+            var allJobObservations = await _supervisorMobilityRepository.GetAllJobObservationsAsync(includeTree, includePeople, includeLup, includeHistory, includeCkAnswers);
+
+            if (allJobObservations == null)
             {
-                return Ok(_mapper.Map<IEnumerable<JobObservationWithJustLupDto>>(allJobObservations));
+                return NotFound();
             }
+
             return Ok(_mapper.Map<IEnumerable<JobObservationDto>>(allJobObservations));
+
         }
 
         [HttpGet("{jobObservationId}/history")]
@@ -141,23 +144,25 @@ namespace SupervisorMobility.API.Controllers
 
             return NotFound("Job Observation Version not remove");
         }
+
+       
         [EnableCors("Cors")]
         [HttpGet("{jobObservationId}", Name = "GetJobObservation")]
-        public async Task<IActionResult> GetJobObservation(int jobObservationId, bool includeLup = false)
+        public async Task<IActionResult> GetJobObservation(int jobObservationId, bool includeTree = false, bool includePeople = false, bool includeLup = false, bool includeHistory = false, bool includeCkAnswers = false)
         {
+
             //Find Job Observation type
-            var jobObservation = await _supervisorMobilityRepository.GetJobObservationAsync(jobObservationId, includeLup);
+            var jobObservation = await _supervisorMobilityRepository.GetJobObservationAsync(jobObservationId, includeTree, includePeople, includeLup, includeHistory, includeCkAnswers);
             if (jobObservation == null)
             {
                 return NotFound();
             }
-            if (includeLup)
-            {
-                return Ok(_mapper.Map<JobObservationWithJustLupDto>(jobObservation));
-            }
+
 
             return Ok(_mapper.Map<JobObservationDto>(jobObservation));
         }
+
+
 
         [EnableCors("Cors")]
         [HttpPut("{jobObservationId}")]

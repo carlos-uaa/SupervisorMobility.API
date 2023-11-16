@@ -10,6 +10,7 @@ namespace SupervisorMobility.API.Entities
         [Key, DatabaseGenerated(DatabaseGeneratedOption.Identity)]
         public int AnswerId { get; set; }
         public int JobObservationId { get; set; }
+        public int? LupId { get; set; }
         public int QuestionID { get; set; }
         public string Prompt { get; set; } = string.Empty;
         public string? Answer { get; set; } = string.Empty;

@@ -230,9 +230,9 @@ namespace SupervisorMobility.API.Services
         #endregion
         #region JobObservationOperations
 
-        Task<IEnumerable<JobObservation>> GetAllJobObservationsAsync(bool includeLup);
+        Task<IEnumerable<JobObservation>> GetAllJobObservationsAsync(bool includeTree = false, bool includePeople = false, bool includeLup = false, bool includeHistory = false, bool includeCkAnswers = false);
         Task<IEnumerable<JobObservation>> GetJobObservationsByFiltersAsync(DateTime startDate, DateTime endDate, int plantId, int areaId, int distributionId, int operationId, int supervisorId, int status);
-        Task<JobObservation?> GetJobObservationAsync(int jobObservationId, bool includeLup);
+        Task<JobObservation?> GetJobObservationAsync(int jobObservationId, bool includeTree = false, bool includePeople = false, bool includeLup = false, bool includeHistory = false, bool includeCkAnswers = false);
         Task<int> AddJobObservation(JobObservation jobObservation);
         void DeleteJobObservation(JobObservation jobObservation);
         Task<bool> JobObservationExistAsync(int jobObservationId);

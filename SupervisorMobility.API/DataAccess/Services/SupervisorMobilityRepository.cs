@@ -1479,55 +1479,82 @@ namespace SupervisorMobility.API.Services
 
         }
 
-        public async Task<IEnumerable<JobObservation>> GetAllJobObservationsAsync(bool includeLup)
+        public async Task<IEnumerable<JobObservation>> GetAllJobObservationsAsync(bool includeTree = false, bool includePeople = false, bool includeLup = false, bool includeHistory = false, bool includeCkAnswers = false)
         {
+
+            var query = _context.JobObservations.Where(j => j.IsActive == true);
+
+            if (includeTree)
+            {
+                query = query.Include(a => a.Area)
+                             .Include(p => p.Plant)
+                             .Include(d => d.Distribution)
+                             .Include(o => o.Operation);
+            }
+
+            if (includePeople)
+            {
+                query = query.Include(s => s.Supervisor)
+                             .Include(o => o.Operator);
+            }
 
             if (includeLup)
             {
-                return await _context.JobObservations
-                    .Include(a => a.Area)
-                    .Include(p => p.Plant)
-                    .Include(d => d.Distribution)
-                    .Include(o => o.Operation)
-                    .Include(l => l.Lup.Where(lup => lup.IsActive == true)).ThenInclude(d => d.Department)
-                    .Include(s => s.Supervisor)
-                    .Include(o => o.Operator).Where(u => u.IsActive == true)
-                     .OrderBy(c => c.JobObservationId).ToListAsync();
+                query = query.Include(l => l.Lup.Where(lup => lup.IsActive == true));
             }
 
-            return await _context.JobObservations
-                .Include(a => a.Area)
-                .Include(p => p.Plant)
-                .Include(d => d.Distribution)
-                .Include(o => o.Operation)
-                .Include(s => s.Supervisor)
-                .Include(o => o.Operator).Where(u => u.IsActive == true)
-                 .OrderBy(c => c.JobObservationId).ToListAsync();
+            if (includeHistory)
+            {
+                query = query.Include(h => h.History);
+            }
+
+            if (includeCkAnswers)
+            {
+                query = query.Include(c => c.checklistAnswers);
+            }
+
+
+            return await query.OrderBy(c => c.JobObservationId).ToListAsync();
 
         }
 
 
 
-        public async Task<JobObservation?> GetJobObservationAsync(int jobObservationId, bool includeLup)
+        public async Task<JobObservation?> GetJobObservationAsync(int jobObservationId, bool includeTree = false, bool includePeople = false, bool includeLup = false, bool includeHistory = false, bool includeCkAnswers = false)
         {
+            var query = _context.JobObservations.Where(p => p.JobObservationId == jobObservationId);
+
+            if (includeTree)
+            {
+                query = query.Include(a => a.Area)
+                             .Include(p => p.Plant)
+                             .Include(d => d.Distribution)
+                             .Include(o => o.Operation);
+            }
+
+            if (includePeople)
+            {
+                query = query.Include(s => s.Supervisor)
+                             .Include(o => o.Operator);
+            }
+
             if (includeLup)
             {
-                return await _context.JobObservations
-                    .Include(l => l.Lup.Where(lup => lup.IsActive == true))
-                    .Include(s => s.Supervisor)
-                    .Include(o => o.Operator)
-                    .Include(h => h.History)
-                     .Where(p => p.JobObservationId == jobObservationId).FirstOrDefaultAsync();
+                query = query.Include(l => l.Lup.Where(lup => lup.IsActive == true));
             }
-            //return whit info
-            return await _context.JobObservations
-                .Include(a => a.Area)
-                .Include(p => p.Plant)
-                .Include(d => d.Distribution)
-                .Include(o => o.Operation)
-                .Include(s => s.Supervisor)
-                .Include(o => o.Operator)
-                 .Where(p => p.JobObservationId == jobObservationId).FirstOrDefaultAsync();
+
+            if (includeHistory)
+            {
+                query = query.Include(h => h.History);
+            }
+
+            if (includeCkAnswers)
+            {
+                query = query.Include(c => c.checklistAnswers);
+            }
+
+            return await query.FirstOrDefaultAsync();
+
         }
 
         public async Task<int> AddJobObservation(JobObservation jobObservation)

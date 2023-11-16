@@ -1,5 +1,8 @@
-﻿using SupervisorMobility.API.Models.AreaDtos;
+﻿using SupervisorMobility.API.Entities;
+using SupervisorMobility.API.Models.AreaDtos;
+using SupervisorMobility.API.Models.ChecklistAnswerDtos;
 using SupervisorMobility.API.Models.DistributionDtos;
+using SupervisorMobility.API.Models.LupDtos;
 using SupervisorMobility.API.Models.OperationDtos;
 using SupervisorMobility.API.Models.PlantDtos;
 using SupervisorMobility.API.Models.Users;
@@ -8,14 +11,20 @@ namespace SupervisorMobility.API.Models.JobObservationDtos
 {
     public class JobObservationDto
     {
-
+        //info
         public PlantDto Plant { get; set; } = new PlantDto();
         public AreaWithoutNavigationPropertiesDto? Area { get; set; } = new AreaWithoutNavigationPropertiesDto();
         public DistributionWithoutNavigationPropertiesDto Distribution { get; set; } = new DistributionWithoutNavigationPropertiesDto();
         public OperationWithoutNavigationPropertiesDto Operation { get; set; } = new OperationWithoutNavigationPropertiesDto();
-
+        //whit people
         public UsersWithoutNavigationWithoutPeopleDetails Supervisor { get; set; } = new UsersWithoutNavigationWithoutPeopleDetails();
         public UsersWithoutNavigationWithoutPeopleDetails? Operator { get; set; } = new UsersWithoutNavigationWithoutPeopleDetails();
+        //whitLup
+        public ICollection<LupDto> Lup { get; set; } = new List<LupDto>();
+        //Whit History
+        public ICollection<JobObservationHistoryDto> History { get; set; } = new List<JobObservationHistoryDto>();
+        //Whit  answers to questions
+        public ICollection<ChecklistAnswerDto>? checklistAnswers { get; set; } = new List<ChecklistAnswerDto>();
 
 
         public int JobObservationId { get; set; }
