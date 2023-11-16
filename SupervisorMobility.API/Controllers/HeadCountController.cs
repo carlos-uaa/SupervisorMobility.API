@@ -20,6 +20,7 @@ using SupervisorMobility.API.Services;
 using System.Diagnostics;
 using System.Linq;
 using System.Text;
+using System.Threading;
 
 namespace SupervisorMobility.API.Controllers
 {
@@ -33,10 +34,12 @@ namespace SupervisorMobility.API.Controllers
         private readonly IAssyChartService _assyChartService;
         private readonly ISupervisorMobilityRepository _supervisorMobilityRepository;
         private readonly IServiceProvider _serviceProvider;
+        private readonly BackgroundProcessingService _backgroundProcessingService;
 
         public HeadCountController(IWebHostEnvironment env, IMapper mapper, ISupervisorMobilityRepository supervisorMobilityRepository,
-        IAssyChartService assyChartService, IServiceProvider serviceProvider)
-{
+        IAssyChartService assyChartService, IServiceProvider serviceProvider, BackgroundProcessingService backgroundProcessingService)
+        {
+            _backgroundProcessingService = backgroundProcessingService;
             _serviceProvider = serviceProvider ?? throw new ArgumentNullException(nameof(serviceProvider));
 
             _assyChartService = assyChartService;
@@ -80,15 +83,8 @@ namespace SupervisorMobility.API.Controllers
             var fileToReturn = await _assyChartService.CreateFileAsync(uploadResult);
 
             await _supervisorMobilityRepository.SaveChangesAsync();
-
-        
-            /////procesamiento backgrpun
-
-            var headCountProcessingService = new BackgroundProcessingService(_serviceProvider, trustedFileNameForStorage, UserIdUpload);
-
-            // Iniciar el servicio en segundo plano
-            await headCountProcessingService.StartAsync(CancellationToken.None);
-
+         
+            await _backgroundProcessingService.StartAsync(trustedFileNameForStorage, UserIdUpload, 1 , CancellationToken.None);
 
             ///end background
             return Ok(fileToReturn);
