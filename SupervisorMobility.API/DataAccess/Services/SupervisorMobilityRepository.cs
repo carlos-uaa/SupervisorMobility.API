@@ -1500,7 +1500,7 @@ namespace SupervisorMobility.API.Services
 
             if (includeLup)
             {
-                query = query.Include(l => l.Lup.Where(lup => lup.IsActive == true));
+                query = query.Include(l => l.Lup.Where(lup => lup.IsActive == true)).ThenInclude(d => d.Department).Where(d => d.IsActive == true);
             }
 
             if (includeHistory)
@@ -1540,7 +1540,7 @@ namespace SupervisorMobility.API.Services
 
             if (includeLup)
             {
-                query = query.Include(l => l.Lup.Where(lup => lup.IsActive == true));
+                query = query.Include(l => l.Lup.Where(lup => lup.IsActive == true)).ThenInclude(d => d.Department).Where(d => d.IsActive == true);
             }
 
             if (includeHistory)

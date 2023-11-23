@@ -73,6 +73,49 @@ namespace SupervisorMobility.API.Controllers
             return Ok(finalJobObservation);
         }
 
+        [HttpPost("WithLup")]
+        public async Task<ActionResult<JobObservationWithoutNavigationPropertiesDto>> CreateJobObservationWithLup(
+            JobObservationWithLupForCreationDto jobObservationAndLup)
+        {
+            if (!await _supervisorMobilityRepository.PlantExistAsync(jobObservationAndLup.PlantId))
+            {
+                return NotFound();
+            }
+
+            if (!await _supervisorMobilityRepository.AreaExistAsync(jobObservationAndLup.AreaId))
+            {
+                return NotFound("No Area");
+            }
+
+            if (!await _supervisorMobilityRepository.DistributionExistsAsync(jobObservationAndLup.DistributionId))
+            {
+                return NotFound("No Distribution");
+            }
+
+            if (!await _supervisorMobilityRepository.OperationExistsAsync(jobObservationAndLup.OperationId))
+            {
+                return NotFound("No Operation");
+            }
+
+            var finalJobObservation = _mapper.Map<JobObservation>(jobObservationAndLup);
+            if (finalJobObservation.OperationId == 0)
+            {
+                finalJobObservation.OperationId = null;
+            }
+
+            if (finalJobObservation.OperatorId == 0)
+            {
+                finalJobObservation.OperatorId = null;
+            }
+            _supervisorMobilityRepository.AddJobObservation(finalJobObservation);
+            await _supervisorMobilityRepository.SaveChangesAsync();
+
+            return Ok(finalJobObservation);
+        }
+
+
+
+
         [HttpGet("filters")]
         public async Task<ActionResult<IEnumerable<JobObservationDto>>> GetJobObservationsByFilters(
             DateTime startDate,
