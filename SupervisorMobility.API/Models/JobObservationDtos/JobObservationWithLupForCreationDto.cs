@@ -1,15 +1,17 @@
 ﻿using SupervisorMobility.API.Models.ChecklistAnswerDtos;
+using SupervisorMobility.API.Models.LupDtos;
 
 namespace SupervisorMobility.API.Models.JobObservationDtos
 {
-    public class JobObservationForUpdateDto
+    public class JobObservationWithLupForCreationDto
     {
-        public bool? IsActive { get; set; }
+        public bool IsActive { get; set; }
 
         public int PlantId { get; set; }
         public int AreaId { get; set; }
         public int DistributionId { get; set; }
         public int OperationId { get; set; }
+
         public int SupervisorId { get; set; }
         public int? OperatorId { get; set; }
 
@@ -21,9 +23,12 @@ namespace SupervisorMobility.API.Models.JobObservationDtos
         public DateTime? FinishedDate { get; set; }
 
         public string? Justification { get; set; }
+
         public int? Status { get; set; }
+
         public int? Option { get; set; }
         public string? Anomaly { get; set; }
+
         public string? HOEStandardTimes { get; set; }
         public string? Models { get; set; }
         public string? Cycles { get; set; }
@@ -36,8 +41,7 @@ namespace SupervisorMobility.API.Models.JobObservationDtos
         public int? KpiId { get; set; }
         public string? TaktTime { get; set; }
         public string? Questions { get; set; }
-
-        public ICollection<ChecklistAnswerDto>? checklistAnswers { get; set; } = new List<ChecklistAnswerDto>();
-
+        public ICollection<LupForCreationDto>? Lup { get; set; }
+        public ICollection<ChecklistAnswerForCreationDto>? ChecklistAnswers { get; set; }
     }
 }

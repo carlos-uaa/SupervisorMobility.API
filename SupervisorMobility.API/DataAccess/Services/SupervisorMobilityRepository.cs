@@ -60,7 +60,7 @@ namespace SupervisorMobility.API.Services
         {
             if (includeChecklistQuestion)
             {
-                return await _context.ChecklistCategories.Include(cq => cq.ChecklistQuestions.OrderBy(c => c.CategorySequence))
+                return await _context.ChecklistCategories.Include(cq => cq.ChecklistQuestions.Where(cq => cq.IsActive == true).OrderBy(c => c.CategorySequence))
                     .Where(u => u.IsActive == true).OrderBy(c => c.Sequence).ToListAsync();
             }
             return await _context.ChecklistCategories.Where(u => u.IsActive == true)
@@ -71,7 +71,7 @@ namespace SupervisorMobility.API.Services
         {
             if (includeChecklistQuestion)
             {
-                return await _context.ChecklistCategories.Include(cq => cq.ChecklistQuestions.OrderBy(c => c.CategorySequence))
+                return await _context.ChecklistCategories.Include(cq => cq.ChecklistQuestions.Where(cq => cq.IsActive == true).OrderBy(c => c.CategorySequence))
                     .Where(c => c.ChecklistCategoryId == categoryId).FirstOrDefaultAsync();
             }
 
@@ -1157,7 +1157,7 @@ namespace SupervisorMobility.API.Services
 
             _mapper.Map(user, entityUser);
 
-            await _context.SaveChangesAsync();
+            _context.SaveChanges();
         }
         public async Task<AsyncVoidMethodBuilder> UserAddSubordinated(User Master, User Slave)
         {
@@ -1173,14 +1173,14 @@ namespace SupervisorMobility.API.Services
                 Slave.SuperiorId = Master.UserId;
                 Master.Subordinates.Add(Slave);
             }
-            await _context.SaveChangesAsync();
+            _context.SaveChanges();
             return new AsyncVoidMethodBuilder();
         }
 
         public async Task<AsyncVoidMethodBuilder> UserRemoveSubordinated(User Master, User Slave)
         {
             Master.Subordinates?.Remove(Slave);
-            await _context.SaveChangesAsync();
+            _context.SaveChanges();
             return new AsyncVoidMethodBuilder();
         }
         public async Task<AsyncVoidMethodBuilder> UserRemoveAllSubordinated(User Master)
@@ -1211,7 +1211,7 @@ namespace SupervisorMobility.API.Services
             {
                 userWithAreas.Areas?.Clear();
 
-                await _context.SaveChangesAsync();
+                _context.SaveChanges();
             }
         }
         public async Task<AsyncVoidMethodBuilder> UserUpdateAllSubordinated(User Master)
@@ -1276,7 +1276,7 @@ namespace SupervisorMobility.API.Services
                 Master.Areas = new List<Area>();
                 Master.Areas.Add(Slave);
             }
-            await _context.SaveChangesAsync();
+            _context.SaveChanges();
 
             return new AsyncVoidMethodBuilder();
 
@@ -1479,55 +1479,82 @@ namespace SupervisorMobility.API.Services
 
         }
 
-        public async Task<IEnumerable<JobObservation>> GetAllJobObservationsAsync(bool includeLup)
+        public async Task<IEnumerable<JobObservation>> GetAllJobObservationsAsync(bool includeTree = false, bool includePeople = false, bool includeLup = false, bool includeHistory = false, bool includeCkAnswers = false)
         {
+
+            var query = _context.JobObservations.Where(j => j.IsActive == true);
+
+            if (includeTree)
+            {
+                query = query.Include(a => a.Area)
+                             .Include(p => p.Plant)
+                             .Include(d => d.Distribution)
+                             .Include(o => o.Operation);
+            }
+
+            if (includePeople)
+            {
+                query = query.Include(s => s.Supervisor)
+                             .Include(o => o.Operator);
+            }
 
             if (includeLup)
             {
-                return await _context.JobObservations
-                    .Include(a => a.Area)
-                    .Include(p => p.Plant)
-                    .Include(d => d.Distribution)
-                    .Include(o => o.Operation)
-                    .Include(l => l.Lup.Where(lup => lup.IsActive == true)).ThenInclude(d => d.Department)
-                    .Include(s => s.Supervisor)
-                    .Include(o => o.Operator).Where(u => u.IsActive == true)
-                     .OrderBy(c => c.JobObservationId).ToListAsync();
+                query = query.Include(l => l.Lup.Where(lup => lup.IsActive == true)).ThenInclude(d => d.Department).Where(d => d.IsActive == true);
             }
 
-            return await _context.JobObservations
-                .Include(a => a.Area)
-                .Include(p => p.Plant)
-                .Include(d => d.Distribution)
-                .Include(o => o.Operation)
-                .Include(s => s.Supervisor)
-                .Include(o => o.Operator).Where(u => u.IsActive == true)
-                 .OrderBy(c => c.JobObservationId).ToListAsync();
+            if (includeHistory)
+            {
+                query = query.Include(h => h.History);
+            }
+
+            if (includeCkAnswers)
+            {
+                query = query.Include(c => c.checklistAnswers);
+            }
+
+
+            return await query.OrderBy(c => c.JobObservationId).ToListAsync();
 
         }
 
 
 
-        public async Task<JobObservation?> GetJobObservationAsync(int jobObservationId, bool includeLup)
+        public async Task<JobObservation?> GetJobObservationAsync(int jobObservationId, bool includeTree = false, bool includePeople = false, bool includeLup = false, bool includeHistory = false, bool includeCkAnswers = false)
         {
+            var query = _context.JobObservations.Where(p => p.JobObservationId == jobObservationId);
+
+            if (includeTree)
+            {
+                query = query.Include(a => a.Area)
+                             .Include(p => p.Plant)
+                             .Include(d => d.Distribution)
+                             .Include(o => o.Operation);
+            }
+
+            if (includePeople)
+            {
+                query = query.Include(s => s.Supervisor)
+                             .Include(o => o.Operator);
+            }
+
             if (includeLup)
             {
-                return await _context.JobObservations
-                    .Include(l => l.Lup.Where(lup => lup.IsActive == true))
-                    .Include(s => s.Supervisor)
-                    .Include(o => o.Operator)
-                    .Include(h => h.History)
-                     .Where(p => p.JobObservationId == jobObservationId).FirstOrDefaultAsync();
+                query = query.Include(l => l.Lup.Where(lup => lup.IsActive == true)).ThenInclude(d => d.Department).Where(d => d.IsActive == true);
             }
-            //return whit info
-            return await _context.JobObservations
-                .Include(a => a.Area)
-                .Include(p => p.Plant)
-                .Include(d => d.Distribution)
-                .Include(o => o.Operation)
-                .Include(s => s.Supervisor)
-                .Include(o => o.Operator)
-                 .Where(p => p.JobObservationId == jobObservationId).FirstOrDefaultAsync();
+
+            if (includeHistory)
+            {
+                query = query.Include(h => h.History);
+            }
+
+            if (includeCkAnswers)
+            {
+                query = query.Include(c => c.checklistAnswers);
+            }
+
+            return await query.FirstOrDefaultAsync();
+
         }
 
         public async Task<int> AddJobObservation(JobObservation jobObservation)
@@ -2195,7 +2222,43 @@ namespace SupervisorMobility.API.Services
             _context.SaveChanges();
         }
         #endregion
+        #region ChecklistAnswersOperations
+        public async Task<ChecklistAnswer?> GetChecklistAnswerAsync(int checklistAnswerId)
+        {
+            return await _context.ChecklistAnswers
+                 .Where(x => x.AnswerId == checklistAnswerId).FirstOrDefaultAsync();
+        }
 
+        public async Task<IEnumerable<ChecklistAnswer>> GetAllChecklistAnswerAsync()
+        {
+            return await _context.ChecklistAnswers
+                 .OrderBy(c => c.AnswerId).ToListAsync();
+
+        }
+        public async Task<IEnumerable<ChecklistAnswer>> GetAllChecklistAnswersByJobObservationIdAsync(int jobObservationId)
+        {
+            return await _context.ChecklistAnswers
+                .Where(c => c.JobObservationId == jobObservationId)
+                 .OrderBy(c => c.AnswerId).ToListAsync();
+
+        }
+        public void AddChecklistAnswer(ChecklistAnswer checklistAnswer)
+        {
+            _context.ChecklistAnswers.Add(checklistAnswer);
+        }
+
+        public void DeleteChecklistAnswer(ChecklistAnswer checklistAnswer)
+        {
+            checklistAnswer.Answer = null;
+            _context.SaveChanges();
+        }
+
+        public async Task<bool> ChecklistAnswerExistAsync(int checklistAnswerId)
+        {
+            return await _context.ChecklistAnswers.AnyAsync(l => l.AnswerId == checklistAnswerId);
+        }
+
+        #endregion
         #region CommonOperations
         public async Task<bool> SaveChangesAsync()
         {

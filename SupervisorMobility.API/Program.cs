@@ -91,7 +91,7 @@ builder.Services.AddSingleton(emailConfig);
 
 
 // Crear una instancia del servicio en segundo plano
-//builder.Services.AddHostedService<HeadCountProcessingService>();
+builder.Services.AddSingleton<BackgroundProcessingService>();
 
 
 builder.Services.AddScoped<CustomHttpClientService>();

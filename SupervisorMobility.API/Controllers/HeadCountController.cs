@@ -1,25 +1,14 @@
 ﻿using AutoMapper;
-using ClosedXML.Excel;
-using DocumentFormat.OpenXml.Spreadsheet;
-using Microsoft.AspNetCore.Connections;
 using Microsoft.AspNetCore.Cors;
 using Microsoft.AspNetCore.Mvc;
-using Newtonsoft.Json;
-using RabbitMQ.Client;
 using SpreadsheetLight;
 using SupervisorMobility.API.Business;
 using SupervisorMobility.API.DataAccess.Entities;
 using SupervisorMobility.API.DataAccess.Services;
-using SupervisorMobility.API.Models.AreaDtos;
-using SupervisorMobility.API.Models.AssyChart;
 using SupervisorMobility.API.Models.FileUploadDto;
 using SupervisorMobility.API.Models.HeadCount;
-using SupervisorMobility.API.Models.OperationDtos;
-using SupervisorMobility.API.Models.Users;
 using SupervisorMobility.API.Services;
-using System.Diagnostics;
-using System.Linq;
-using System.Text;
+
 
 namespace SupervisorMobility.API.Controllers
 {
@@ -33,10 +22,12 @@ namespace SupervisorMobility.API.Controllers
         private readonly IAssyChartService _assyChartService;
         private readonly ISupervisorMobilityRepository _supervisorMobilityRepository;
         private readonly IServiceProvider _serviceProvider;
+        private readonly BackgroundProcessingService _backgroundProcessingService;
 
         public HeadCountController(IWebHostEnvironment env, IMapper mapper, ISupervisorMobilityRepository supervisorMobilityRepository,
-        IAssyChartService assyChartService, IServiceProvider serviceProvider)
-{
+        IAssyChartService assyChartService, IServiceProvider serviceProvider, BackgroundProcessingService backgroundProcessingService)
+        {
+            _backgroundProcessingService = backgroundProcessingService;
             _serviceProvider = serviceProvider ?? throw new ArgumentNullException(nameof(serviceProvider));
 
             _assyChartService = assyChartService;
@@ -80,15 +71,8 @@ namespace SupervisorMobility.API.Controllers
             var fileToReturn = await _assyChartService.CreateFileAsync(uploadResult);
 
             await _supervisorMobilityRepository.SaveChangesAsync();
-
-        
-            /////procesamiento backgrpun
-
-            var headCountProcessingService = new HeadCountProcessingService(_serviceProvider, trustedFileNameForStorage, UserIdUpload);
-
-            // Iniciar el servicio en segundo plano
-            await headCountProcessingService.StartAsync(CancellationToken.None);
-
+         
+            await _backgroundProcessingService.StartAsync(trustedFileNameForStorage, UserIdUpload, 1 , CancellationToken.None);
 
             ///end background
             return Ok(fileToReturn);

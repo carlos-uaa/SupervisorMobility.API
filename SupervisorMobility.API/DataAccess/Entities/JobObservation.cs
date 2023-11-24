@@ -1,4 +1,5 @@
 ﻿using SupervisorMobility.API.DataAccess.Entities;
+using SupervisorMobility.API.DataAccess.Entities.ILU;
 using System.ComponentModel.DataAnnotations;
 using System.ComponentModel.DataAnnotations.Schema;
 
@@ -10,6 +11,7 @@ namespace SupervisorMobility.API.Entities
         public int JobObservationId { get; set; }
         public bool? IsActive { get; set; }
 
+        //whit Info
         public Plant? Plant { get; set; }
         public int? PlantId { get; set; }
         public Area? Area { get; set; }
@@ -18,10 +20,17 @@ namespace SupervisorMobility.API.Entities
         public int? DistributionId { get; set; }
         public Operation? Operation { get; set; }
         public int? OperationId { get; set; }
+        //whit people
         public User? Supervisor { get; set; }
         public User? Operator { get; set; }
         public int? SupervisorId { get; set; }
         public int? OperatorId { get; set; }
+        //whitLup
+        public ICollection<Lup> Lup { get; set; } = new List<Lup>();
+        //Whit History
+        public ICollection<JobObservationVersion> History { get; set; } = new List<JobObservationVersion>();
+        //Whit  answers to questions
+        public ICollection<ChecklistAnswer>? checklistAnswers { get; set; } = new List<ChecklistAnswer>();
 
         public int? Type { get; set; }
 
@@ -45,8 +54,7 @@ namespace SupervisorMobility.API.Entities
         public string? SsvSignature { get; set; }
         public string? OperatorSignature { get; set; }
 
-        public ICollection<Lup> Lup { get; set; } = new List<Lup>();
-        public ICollection<JobObservationVersion> History { get; set; } = new List<JobObservationVersion>();
+        
 
         public int? AssychartId { get; set; }
         public AssyChart? AssyChart { get; set; }

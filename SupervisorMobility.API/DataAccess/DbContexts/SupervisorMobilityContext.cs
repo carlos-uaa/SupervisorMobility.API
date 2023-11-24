@@ -21,6 +21,7 @@ namespace SupervisorMobility.API.Context
         public DbSet<JobObservationType> JobObservationTypes { get; set; }
         public DbSet<JobObservation> JobObservations { get; set; }
         public DbSet<Lup> Lup { get; set; }
+        public DbSet<ChecklistAnswer> ChecklistAnswers { get; set; }
         public DbSet<Entities.Group> Groups { get; set; }
         public DbSet<Pillar> Pillars { get; set; }
         public DbSet<Glosary> Glosary { get; set; }
@@ -59,7 +60,7 @@ namespace SupervisorMobility.API.Context
         public SupervisorMobilityContext(DbContextOptions<SupervisorMobilityContext> options)
             : base(options)
         {
-            
+
         }
 
 
@@ -944,6 +945,17 @@ namespace SupervisorMobility.API.Context
 
                 });
 
+            //modelBuilder.Entity<ChecklistAnswer>()
+            //    .HasData(
+            //    new ChecklistAnswer()
+            //    {
+            //        AnswerId = 1,
+            //        JobObservationId = 1,
+            //        QuestionID = 1,
+            //        Prompt = "Respeta pasos principales y puntos críticos",
+            //        Answer = "YES",
+
+            //    });
 
             base.OnModelCreating(modelBuilder);
         }

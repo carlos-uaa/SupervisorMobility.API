@@ -73,6 +73,49 @@ namespace SupervisorMobility.API.Controllers
             return Ok(finalJobObservation);
         }
 
+        [HttpPost("WithLup")]
+        public async Task<ActionResult<JobObservationWithoutNavigationPropertiesDto>> CreateJobObservationWithLup(
+            JobObservationWithLupForCreationDto jobObservationAndLup)
+        {
+            if (!await _supervisorMobilityRepository.PlantExistAsync(jobObservationAndLup.PlantId))
+            {
+                return NotFound();
+            }
+
+            if (!await _supervisorMobilityRepository.AreaExistAsync(jobObservationAndLup.AreaId))
+            {
+                return NotFound("No Area");
+            }
+
+            if (!await _supervisorMobilityRepository.DistributionExistsAsync(jobObservationAndLup.DistributionId))
+            {
+                return NotFound("No Distribution");
+            }
+
+            if (!await _supervisorMobilityRepository.OperationExistsAsync(jobObservationAndLup.OperationId))
+            {
+                return NotFound("No Operation");
+            }
+
+            var finalJobObservation = _mapper.Map<JobObservation>(jobObservationAndLup);
+            if (finalJobObservation.OperationId == 0)
+            {
+                finalJobObservation.OperationId = null;
+            }
+
+            if (finalJobObservation.OperatorId == 0)
+            {
+                finalJobObservation.OperatorId = null;
+            }
+            _supervisorMobilityRepository.AddJobObservation(finalJobObservation);
+            await _supervisorMobilityRepository.SaveChangesAsync();
+
+            return Ok(finalJobObservation);
+        }
+
+
+
+
         [HttpGet("filters")]
         public async Task<ActionResult<IEnumerable<JobObservationDto>>> GetJobObservationsByFilters(
             DateTime startDate,
@@ -90,15 +133,18 @@ namespace SupervisorMobility.API.Controllers
         }
 
         [HttpGet]
-        public async Task<ActionResult<IEnumerable<JobObservationDto>>> GetAllJobObservationsAsync(bool includeLup = false)
+        public async Task<ActionResult<IEnumerable<JobObservationDto>>> GetAllJobObservationsAsync(bool includeTree = false, bool includePeople = false, bool includeLup = false, bool includeHistory = false, bool includeCkAnswers = false)
         {
 
-            var allJobObservations = await _supervisorMobilityRepository.GetAllJobObservationsAsync(includeLup);
-            if (includeLup)
+            var allJobObservations = await _supervisorMobilityRepository.GetAllJobObservationsAsync(includeTree, includePeople, includeLup, includeHistory, includeCkAnswers);
+
+            if (allJobObservations == null)
             {
-                return Ok(_mapper.Map<IEnumerable<JobObservationWithJustLupDto>>(allJobObservations));
+                return NotFound();
             }
+
             return Ok(_mapper.Map<IEnumerable<JobObservationDto>>(allJobObservations));
+
         }
 
         [HttpGet("{jobObservationId}/history")]
@@ -141,23 +187,25 @@ namespace SupervisorMobility.API.Controllers
 
             return NotFound("Job Observation Version not remove");
         }
+
+       
         [EnableCors("Cors")]
         [HttpGet("{jobObservationId}", Name = "GetJobObservation")]
-        public async Task<IActionResult> GetJobObservation(int jobObservationId, bool includeLup = false)
+        public async Task<IActionResult> GetJobObservation(int jobObservationId, bool includeTree = false, bool includePeople = false, bool includeLup = false, bool includeHistory = false, bool includeCkAnswers = false)
         {
+
             //Find Job Observation type
-            var jobObservation = await _supervisorMobilityRepository.GetJobObservationAsync(jobObservationId, includeLup);
+            var jobObservation = await _supervisorMobilityRepository.GetJobObservationAsync(jobObservationId, includeTree, includePeople, includeLup, includeHistory, includeCkAnswers);
             if (jobObservation == null)
             {
                 return NotFound();
             }
-            if (includeLup)
-            {
-                return Ok(_mapper.Map<JobObservationWithJustLupDto>(jobObservation));
-            }
+
 
             return Ok(_mapper.Map<JobObservationDto>(jobObservation));
         }
+
+
 
         [EnableCors("Cors")]
         [HttpPut("{jobObservationId}")]
