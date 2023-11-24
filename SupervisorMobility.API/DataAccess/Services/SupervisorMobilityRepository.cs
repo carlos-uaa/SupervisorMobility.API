@@ -60,7 +60,7 @@ namespace SupervisorMobility.API.Services
         {
             if (includeChecklistQuestion)
             {
-                return await _context.ChecklistCategories.Include(cq => cq.ChecklistQuestions.OrderBy(c => c.CategorySequence))
+                return await _context.ChecklistCategories.Include(cq => cq.ChecklistQuestions.Where(cq => cq.IsActive == true).OrderBy(c => c.CategorySequence))
                     .Where(u => u.IsActive == true).OrderBy(c => c.Sequence).ToListAsync();
             }
             return await _context.ChecklistCategories.Where(u => u.IsActive == true)
@@ -71,7 +71,7 @@ namespace SupervisorMobility.API.Services
         {
             if (includeChecklistQuestion)
             {
-                return await _context.ChecklistCategories.Include(cq => cq.ChecklistQuestions.OrderBy(c => c.CategorySequence))
+                return await _context.ChecklistCategories.Include(cq => cq.ChecklistQuestions.Where(cq => cq.IsActive == true).OrderBy(c => c.CategorySequence))
                     .Where(c => c.ChecklistCategoryId == categoryId).FirstOrDefaultAsync();
             }
 
@@ -1500,7 +1500,7 @@ namespace SupervisorMobility.API.Services
 
             if (includeLup)
             {
-                query = query.Include(l => l.Lup.Where(lup => lup.IsActive == true));
+                query = query.Include(l => l.Lup.Where(lup => lup.IsActive == true)).ThenInclude(d => d.Department).Where(d => d.IsActive == true);
             }
 
             if (includeHistory)
@@ -1540,7 +1540,7 @@ namespace SupervisorMobility.API.Services
 
             if (includeLup)
             {
-                query = query.Include(l => l.Lup.Where(lup => lup.IsActive == true));
+                query = query.Include(l => l.Lup.Where(lup => lup.IsActive == true)).ThenInclude(d => d.Department).Where(d => d.IsActive == true);
             }
 
             if (includeHistory)
