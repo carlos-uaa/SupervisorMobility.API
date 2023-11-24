@@ -1,4 +1,5 @@
-﻿using Microsoft.AspNetCore.Mvc;
+﻿using Microsoft.AspNetCore.Cors;
+using Microsoft.AspNetCore.Mvc;
 using SupervisorMobility.API.Models.ADUser;
 using System.Net;
 using System.Text;
@@ -18,6 +19,7 @@ namespace SupervisorMobility.API.Controllers
             _httpClient = customHttp.GetLoginHttpClient();
         }
 
+        [EnableCors("Cors")]
         [HttpPost]
         public async Task<IActionResult> Login(Dictionary<string, string> paremters)
         {

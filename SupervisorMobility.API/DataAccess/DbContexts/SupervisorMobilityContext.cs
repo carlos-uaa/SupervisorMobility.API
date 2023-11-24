@@ -668,9 +668,9 @@ namespace SupervisorMobility.API.Context
                 new User
                 {
                     UserId = 1,
-                    ObjectId = "pmunozsinco@compasdcpcs.local",
-                    Name = "Pedro",
-                    Email = "pmunoz@gruposinco.com.mx",
+                    ObjectId = "marco.aguayo@compasdcpcs.local",
+                    Name = "Marco Aguayo",
+                    Email = "maguayo@gruposinco.com.mx",
                     IsActive = true,
                     UserType = 1
                 },
@@ -678,14 +678,23 @@ namespace SupervisorMobility.API.Context
                 {
                     UserId = 2,
                     ObjectId = "maguayosinco@compasdcpcs.local",
-                    Name = "Marco Aguayo",
+                    Name = "M. Aguayo Sinco",
                     Email = "maguayo@gruposinco.com.mx",
                     IsActive = true,
                     UserType = 1,
+                },
+                new User
+                {
+                    UserId = 3,
+                    ObjectId = "pmunozsinco@compasdcpcs.local",
+                    Name = "Pedro",
+                    Email = "pmunoz@gruposinco.com.mx",
+                    IsActive = true,
+                    UserType = 1
                 }
                 , new User
                 {
-                    UserId = 3,
+                    UserId = 4,
                     ObjectId = "SSV@compasdcpcs.local",
                     PlantId = 1,
                     AreaId = 1,
@@ -697,7 +706,7 @@ namespace SupervisorMobility.API.Context
                     UserType = 2,
                 }, new User
                 {
-                    UserId = 4,
+                    UserId = 5,
                     ObjectId = "SV@compasdcpcs.local",
                     PlantId = 1,
                     AreaId = 1,
@@ -711,7 +720,7 @@ namespace SupervisorMobility.API.Context
 
                 }, new User
                 {
-                    UserId = 5,
+                    UserId = 6,
                     PlantId = 1,
                     AreaId = 1,
                     DistributionId = null,
@@ -724,7 +733,7 @@ namespace SupervisorMobility.API.Context
                 },
                 new User
                 {
-                    UserId = 6,
+                    UserId = 7,
                     PlantId = 1,
                     AreaId = 1,
                     DistributionId = null,
@@ -737,7 +746,7 @@ namespace SupervisorMobility.API.Context
                 },
                 new User
                 {
-                    UserId = 7,
+                    UserId = 8,
                     PlantId = 1,
                     AreaId = 1,
                     DistributionId = null,
@@ -750,7 +759,7 @@ namespace SupervisorMobility.API.Context
                 },
                 new User
                 {
-                    UserId = 8,
+                    UserId = 9,
                     PlantId = 1,
                     AreaId = 1,
                     DistributionId = null,
