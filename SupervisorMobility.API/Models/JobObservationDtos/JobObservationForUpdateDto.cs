@@ -1,4 +1,6 @@
-﻿namespace SupervisorMobility.API.Models.JobObservationDtos
+﻿using SupervisorMobility.API.Models.ChecklistAnswerDtos;
+
+namespace SupervisorMobility.API.Models.JobObservationDtos
 {
     public class JobObservationForUpdateDto
     {
@@ -34,5 +36,8 @@
         public int? KpiId { get; set; }
         public string? TaktTime { get; set; }
         public string? Questions { get; set; }
+
+        public ICollection<ChecklistAnswerDto>? checklistAnswers { get; set; } = new List<ChecklistAnswerDto>();
+
     }
 }

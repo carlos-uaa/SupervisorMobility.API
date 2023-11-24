@@ -945,17 +945,17 @@ namespace SupervisorMobility.API.Context
 
                 });
 
-            modelBuilder.Entity<ChecklistAnswer>()
-                .HasData(
-                new ChecklistAnswer()
-                {
-                    AnswerId = 1,
-                    JobObservationId = 1,
-                    QuestionID = 1,
-                    Prompt = "Respeta pasos principales y puntos críticos",
-                    Answer = "YES",
+            //modelBuilder.Entity<ChecklistAnswer>()
+            //    .HasData(
+            //    new ChecklistAnswer()
+            //    {
+            //        AnswerId = 1,
+            //        JobObservationId = 1,
+            //        QuestionID = 1,
+            //        Prompt = "Respeta pasos principales y puntos críticos",
+            //        Answer = "YES",
 
-                });
+            //    });
 
             base.OnModelCreating(modelBuilder);
         }

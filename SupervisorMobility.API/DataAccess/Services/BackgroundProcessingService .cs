@@ -1,9 +1,6 @@
 ﻿using AutoMapper;
-using ClosedXML;
 using ClosedXML.Excel;
 using FuzzyString;
-using Microsoft.Extensions.DependencyInjection;
-using Microsoft.Extensions.Hosting;
 using Microsoft.IdentityModel.Tokens;
 using Slugify;
 using SupervisorMobility.API.Business;
@@ -18,10 +15,7 @@ using SupervisorMobility.API.Models.AssyChart;
 using SupervisorMobility.API.Models.DistributionDtos;
 using SupervisorMobility.API.Models.OperationDtos;
 using SupervisorMobility.API.Services;
-using System;
 using System.Diagnostics;
-using System.Threading;
-using System.Threading.Tasks;
 
 namespace SupervisorMobility.API.DataAccess.Services
 {

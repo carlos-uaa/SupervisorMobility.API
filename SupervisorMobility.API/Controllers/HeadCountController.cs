@@ -1,26 +1,14 @@
 ﻿using AutoMapper;
-using ClosedXML.Excel;
-using DocumentFormat.OpenXml.Spreadsheet;
-using Microsoft.AspNetCore.Connections;
 using Microsoft.AspNetCore.Cors;
 using Microsoft.AspNetCore.Mvc;
-using Newtonsoft.Json;
-using RabbitMQ.Client;
 using SpreadsheetLight;
 using SupervisorMobility.API.Business;
 using SupervisorMobility.API.DataAccess.Entities;
 using SupervisorMobility.API.DataAccess.Services;
-using SupervisorMobility.API.Models.AreaDtos;
-using SupervisorMobility.API.Models.AssyChart;
 using SupervisorMobility.API.Models.FileUploadDto;
 using SupervisorMobility.API.Models.HeadCount;
-using SupervisorMobility.API.Models.OperationDtos;
-using SupervisorMobility.API.Models.Users;
 using SupervisorMobility.API.Services;
-using System.Diagnostics;
-using System.Linq;
-using System.Text;
-using System.Threading;
+
 
 namespace SupervisorMobility.API.Controllers
 {
