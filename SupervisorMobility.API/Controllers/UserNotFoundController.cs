@@ -51,7 +51,7 @@ namespace SupervisorMobility.API.Controllers
             var finalUser = await _assyChartService.CreateUserNotFoundAsync(newUserNotFound);
 
             var UserToReturn = _mapper.Map<UserNotFound>(finalUser);
-            await _supervisorMobilityRepository.SaveChangesAsync();
+            //await _supervisorMobilityRepository.SaveChangesAsync();
 
             var emailMessage = _email.CreateEmailMessage("juan.herreraespinoza@compas-mx.com", $"This user tried to login: {finalUser.ObjectId} with this Name: {finalUser.Name}");
             _email.Send(emailMessage);
