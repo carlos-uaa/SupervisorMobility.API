@@ -49,7 +49,7 @@ namespace SupervisorMobility.API.Controllers
             catch (Exception ex)
             {
 
-                return StatusCode(500);
+                return NotFound($"Error:  {ex.Message}");
             }
         }
     }
