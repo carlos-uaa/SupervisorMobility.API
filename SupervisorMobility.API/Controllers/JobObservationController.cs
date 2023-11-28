@@ -133,10 +133,10 @@ namespace SupervisorMobility.API.Controllers
         }
 
         [HttpGet]
-        public async Task<ActionResult<IEnumerable<JobObservationDto>>> GetAllJobObservationsAsync(bool includeTree = false, bool includePeople = false, bool includeLup = false, bool includeHistory = false, bool includeCkAnswers = false)
+        public async Task<ActionResult<IEnumerable<JobObservationDto>>> GetAllJobObservationsAsync(bool includeTree = false, bool includePeople = false, bool includeLup = false, bool includeHistory = false, bool includeCkAnswers = false, bool ForSosProgram = false, int year = 0)
         {
 
-            var allJobObservations = await _supervisorMobilityRepository.GetAllJobObservationsAsync(includeTree, includePeople, includeLup, includeHistory, includeCkAnswers);
+            var allJobObservations = await _supervisorMobilityRepository.GetAllJobObservationsAsync(includeTree, includePeople, includeLup, includeHistory, includeCkAnswers, ForSosProgram, year);
 
             if (allJobObservations == null)
             {
@@ -144,7 +144,6 @@ namespace SupervisorMobility.API.Controllers
             }
 
             return Ok(_mapper.Map<IEnumerable<JobObservationDto>>(allJobObservations));
-
         }
 
         [HttpGet("{jobObservationId}/history")]

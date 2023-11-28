@@ -1479,7 +1479,7 @@ namespace SupervisorMobility.API.Services
 
         }
 
-        public async Task<IEnumerable<JobObservation>> GetAllJobObservationsAsync(bool includeTree = false, bool includePeople = false, bool includeLup = false, bool includeHistory = false, bool includeCkAnswers = false)
+        public async Task<IEnumerable<JobObservation>> GetAllJobObservationsAsync(bool includeTree = false, bool includePeople = false, bool includeLup = false, bool includeHistory = false, bool includeCkAnswers = false, bool ForSosProgram = false, int year = 0)
         {
 
             var query = _context.JobObservations.Where(j => j.IsActive == true);
@@ -1513,6 +1513,15 @@ namespace SupervisorMobility.API.Services
                 query = query.Include(c => c.checklistAnswers);
             }
 
+            if (ForSosProgram)
+            {
+                query = query.Where(d => d.Type == 3 );
+            }
+
+            if (year != 0)
+            {
+                query = query.Where(d => d.StartDate.Value.Year == year || d.PlannedStartDate.Value.Year == year);
+            }
 
             return await query.OrderBy(c => c.JobObservationId).ToListAsync();
 
