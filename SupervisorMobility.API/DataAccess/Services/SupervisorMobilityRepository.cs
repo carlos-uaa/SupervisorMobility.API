@@ -2,6 +2,7 @@
 using AutoMapper;
 using DocumentFormat.OpenXml.Drawing;
 using DocumentFormat.OpenXml.Drawing.Diagrams;
+using DocumentFormat.OpenXml.Spreadsheet;
 using DocumentFormat.OpenXml.Wordprocessing;
 using Irony.Parsing;
 using Microsoft.AspNetCore.Mvc;
@@ -1479,7 +1480,7 @@ namespace SupervisorMobility.API.Services
 
         }
 
-        public async Task<IEnumerable<JobObservation>> GetAllJobObservationsAsync(bool includeTree = false, bool includePeople = false, bool includeLup = false, bool includeHistory = false, bool includeCkAnswers = false, bool ForSosProgram = false, int year = 0)
+        public async Task<IEnumerable<JobObservation>> GetAllJobObservationsAsync(bool includeTree = false, bool includePeople = false, bool includeLup = false, bool includeHistory = false, bool includeCkAnswers = false, bool ForSosProgram = false, int year = 0, int userId = 0)
         {
 
             var query = _context.JobObservations.Where(j => j.IsActive == true);
@@ -1521,6 +1522,11 @@ namespace SupervisorMobility.API.Services
             if (year != 0)
             {
                 query = query.Where(d => d.StartDate.Value.Year == year || d.PlannedStartDate.Value.Year == year);
+            }
+
+            if(userId != 0)
+            {
+                query = query.Where(j => j.SupervisorId == userId);
             }
 
             return await query.OrderBy(c => c.JobObservationId).ToListAsync();

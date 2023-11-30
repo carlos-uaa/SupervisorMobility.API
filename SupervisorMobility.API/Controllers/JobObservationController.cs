@@ -133,10 +133,10 @@ namespace SupervisorMobility.API.Controllers
         }
 
         [HttpGet]
-        public async Task<ActionResult<IEnumerable<JobObservationDto>>> GetAllJobObservationsAsync(bool includeTree = false, bool includePeople = false, bool includeLup = false, bool includeHistory = false, bool includeCkAnswers = false, bool ForSosProgram = false, int year = 0)
+        public async Task<ActionResult<IEnumerable<JobObservationDto>>> GetAllJobObservationsAsync(bool includeTree = false, bool includePeople = false, bool includeLup = false, bool includeHistory = false, bool includeCkAnswers = false, bool ForSosProgram = false, int year = 0, int userId = 0)
         {
 
-            var allJobObservations = await _supervisorMobilityRepository.GetAllJobObservationsAsync(includeTree, includePeople, includeLup, includeHistory, includeCkAnswers, ForSosProgram, year);
+            var allJobObservations = await _supervisorMobilityRepository.GetAllJobObservationsAsync(includeTree, includePeople, includeLup, includeHistory, includeCkAnswers, ForSosProgram, year, userId);
 
             if (allJobObservations == null)
             {
