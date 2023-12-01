@@ -4,7 +4,6 @@ using SupervisorMobility.API.DataAccess.Entities.LUP;
 using SupervisorMobility.API.DataAccess.Entities.Paths;
 using SupervisorMobility.API.DataAccess.Entities.SOS_Review;
 using SupervisorMobility.API.Entities;
-using SupervisorMobility.API.Models.HeadCount;
 using SupervisorMobility.API.Models.PATDtos;
 using SupervisorMobility.API.Models.SOSReviewDtos;
 using SupervisorMobility.API.Models.Users;
@@ -55,8 +54,8 @@ namespace SupervisorMobility.API.Services
         #region AreaOperations
         Task<IEnumerable<Area>> GetAreasForPlantAsync(int plantId, bool includeCollections = false);
         Task<Area?> GetAreaForPlantAsync(int plantId,
-            int areaId, bool includeOperations = false); 
-        
+            int areaId, bool includeOperations = false);
+
         Task<Area?> GetAreaOnlyIdAsync(int areaId);
         Task<Area?> GetAreaForPlantByCodeAndDescriptionAsync(int plantId,
             string code, string description);
@@ -140,7 +139,7 @@ namespace SupervisorMobility.API.Services
         #region AssyChart
         Task<IEnumerable<AssyChart>> GetAllAssyChartsAsync();
         Task<AssyChart?> GetAssyChartAsync(int asssychartId);
-        Task<AssyChart?> GetAssyChartAdvanceAsync( int PlantId, int AreaId, int DistributionId, int OperationId);
+        Task<AssyChart?> GetAssyChartAdvanceAsync(int PlantId, int AreaId, int DistributionId, int OperationId);
         Task<AssyChart?> GetAssyChartForJobObservationAsync(int PlantId, int AreaId, int DistributionId);
         Task<AssyChart?> GetAssyChartAdvanceByProductAsync(int plantId, int areaId, int distributionId, int ProductId);
         Task<AssyChart?> GetAssyChartAdvanceByOperationAndProductAsync(int plantId, int areaId, int distributionId, int operationId, int ProductId);
@@ -188,12 +187,12 @@ namespace SupervisorMobility.API.Services
         Task RemoveAllAreasFromUser(User user);
         Task<AsyncVoidMethodBuilder> UserRemoveAllAreas(User Master);
         Task<AsyncVoidMethodBuilder> UserAddArea(User Master, Area Slave);
-       
+
 
         Task UpdateUser(UsersForUpdateDto user, int userId);
 
         Task AddUserAsync(User user);
-     
+
         void DeleteUserAsync(User user);
         #endregion
         #region HistoyJobObservation
@@ -230,7 +229,9 @@ namespace SupervisorMobility.API.Services
         #endregion
         #region JobObservationOperations
 
-        Task<IEnumerable<JobObservation>> GetAllJobObservationsAsync(bool includeTree = false, bool includePeople = false, bool includeLup = false, bool includeHistory = false, bool includeCkAnswers = false, bool ForSosProgram = false, int year = 0);
+        Task<IEnumerable<JobObservation>> GetAllJobObservationsAsync(bool includeTree = false, bool includePeople = false, bool includeLup = false,
+            bool includeHistory = false, bool includeCkAnswers = false, int idPlant = 0, int idArea = 0, bool ForSosProgram = false, int year = 0, 
+            int SOSAnualId = 0, int idUser = 0);
         Task<IEnumerable<JobObservation>> GetJobObservationsByFiltersAsync(DateTime startDate, DateTime endDate, int plantId, int areaId, int distributionId, int operationId, int supervisorId, int status);
         Task<JobObservation?> GetJobObservationAsync(int jobObservationId, bool includeTree = false, bool includePeople = false, bool includeLup = false, bool includeHistory = false, bool includeCkAnswers = false);
         Task<int> AddJobObservation(JobObservation jobObservation);
@@ -309,7 +310,7 @@ namespace SupervisorMobility.API.Services
         Task<SOSReviewProgram?> GetSOSasync(int sosId);
         Task<int> UpdateSOSReview(SOSReviewForUpdateDto SOSForUpdate, SOSReviewProgram SOSEntity);
         Task<int> DeleteSOSReview(SOSReviewProgram SOSEntity);
-        
+
         // add Supervisor Responsable
         void SOSReviewAddUser(SOSReviewProgram Master, User Slave);
         void SOSReviewRemoveUser(SOSReviewProgram Master, User Slave);

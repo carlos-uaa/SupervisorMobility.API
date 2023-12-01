@@ -6,7 +6,6 @@ using SupervisorMobility.API.DataAccess.Services;
 using SupervisorMobility.API.Entities;
 using SupervisorMobility.API.Models.ADUser;
 using SupervisorMobility.API.Models.JobObservationDtos;
-using SupervisorMobility.API.Models.LupDtos;
 using SupervisorMobility.API.Models.NotificationDtos;
 using SupervisorMobility.API.Services;
 
@@ -122,7 +121,7 @@ namespace SupervisorMobility.API.Controllers
             DateTime endDate,
             int plantId,
             int areaId,
-            int distributionId, 
+            int distributionId,
             int operationId,
             int supervisorId,
             int status)
@@ -133,10 +132,12 @@ namespace SupervisorMobility.API.Controllers
         }
 
         [HttpGet]
-        public async Task<ActionResult<IEnumerable<JobObservationDto>>> GetAllJobObservationsAsync(bool includeTree = false, bool includePeople = false, bool includeLup = false, bool includeHistory = false, bool includeCkAnswers = false, bool ForSosProgram = false, int year = 0)
+        public async Task<ActionResult<IEnumerable<JobObservationDto>>> GetAllJobObservationsAsync(bool includeTree = false, bool includePeople = false,
+            bool includeLup = false, bool includeHistory = false, bool includeCkAnswers = false, int idPlant = 0, int idArea = 0, bool ForSosProgram = false,
+            int year = 0, int SOSAnualId = 0, int idUser = 0)
         {
 
-            var allJobObservations = await _supervisorMobilityRepository.GetAllJobObservationsAsync(includeTree, includePeople, includeLup, includeHistory, includeCkAnswers, ForSosProgram, year);
+            var allJobObservations = await _supervisorMobilityRepository.GetAllJobObservationsAsync(includeTree, includePeople, includeLup, includeHistory, includeCkAnswers, idPlant, idArea, ForSosProgram, year, SOSAnualId, idUser);
 
             if (allJobObservations == null)
             {
@@ -187,7 +188,7 @@ namespace SupervisorMobility.API.Controllers
             return NotFound("Job Observation Version not remove");
         }
 
-       
+
         [EnableCors("Cors")]
         [HttpGet("{jobObservationId}", Name = "GetJobObservation")]
         public async Task<IActionResult> GetJobObservation(int jobObservationId, bool includeTree = false, bool includePeople = false, bool includeLup = false, bool includeHistory = false, bool includeCkAnswers = false)
