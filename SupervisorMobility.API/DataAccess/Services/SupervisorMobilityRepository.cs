@@ -1,13 +1,8 @@
 ﻿
 using AutoMapper;
-using DocumentFormat.OpenXml.Drawing;
-using DocumentFormat.OpenXml.Drawing.Diagrams;
-using DocumentFormat.OpenXml.Wordprocessing;
-using Irony.Parsing;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.Data.SqlClient;
 using Microsoft.EntityFrameworkCore;
-using Microsoft.EntityFrameworkCore.Storage;
 using SupervisorMobility.API.Context;
 using SupervisorMobility.API.DataAccess.Entities;
 using SupervisorMobility.API.DataAccess.Entities.ILU;
@@ -15,9 +10,7 @@ using SupervisorMobility.API.DataAccess.Entities.LUP;
 using SupervisorMobility.API.DataAccess.Entities.Paths;
 using SupervisorMobility.API.DataAccess.Entities.SOS_Review;
 using SupervisorMobility.API.Entities;
-using SupervisorMobility.API.Models.HeadCount;
 using SupervisorMobility.API.Models.PATDtos;
-using SupervisorMobility.API.Models.RouteProductAssyChartDtos;
 using SupervisorMobility.API.Models.SOSReviewDtos;
 using SupervisorMobility.API.Models.Users;
 using System.Diagnostics;
@@ -1479,7 +1472,7 @@ namespace SupervisorMobility.API.Services
 
         }
 
-        public async Task<IEnumerable<JobObservation>> GetAllJobObservationsAsync(bool includeTree = false, bool includePeople = false, bool includeLup = false, bool includeHistory = false, bool includeCkAnswers = false)
+        public async Task<IEnumerable<JobObservation>> GetAllJobObservationsAsync(bool includeTree = false, bool includePeople = false, bool includeLup = false, bool includeHistory = false, bool includeCkAnswers = false, int idPlant = 0, int idArea = 0, bool ForSosProgram = false, int year = 0, int SOSAnualId = 0, int idUser = 0)
         {
 
             var query = _context.JobObservations.Where(j => j.IsActive == true);
@@ -1513,6 +1506,44 @@ namespace SupervisorMobility.API.Services
                 query = query.Include(c => c.checklistAnswers);
             }
 
+            if (idPlant != 0)
+            {
+                query = query.Where(p => p.PlantId == idPlant);
+            }
+
+            if (idArea != 0)
+            {
+                query = query.Where(p => p.AreaId == idArea);
+            }
+
+            if (ForSosProgram)
+            {
+                query = query.Where(d => d.Type == 3);
+            }
+
+            if (year != 0)
+            {
+                query = query.Where(d => d.StartDate.Value.Year == year || d.PlannedStartDate.Value.Year == year);
+            }
+
+            if (SOSAnualId != 0)
+            {
+                query = query.Where(d => d.Type != 3);
+                SOSReviewProgram? sos = _context.SOSReviews.Include(s => s.Supervisors).Where(u => u.SOSid == SOSAnualId).FirstOrDefault();
+                if (sos != null && sos.Supervisors?.Count > 0)
+                {
+                    List<int> supervisorIds = sos.Supervisors.Select(s => s.UserId).ToList();
+
+                    query = query.Where(j => supervisorIds.Contains((int)j.SupervisorId));
+
+
+                }
+            }
+
+            if(idUser != 0)
+            {
+                query = query.Where(j => j.SupervisorId == idUser);
+            }
 
             return await query.OrderBy(c => c.JobObservationId).ToListAsync();
 

@@ -76,6 +76,7 @@ namespace SupervisorMobility.API.DataAccess.Services
 
                 //Start Massive Upload 
                 string filepath = Directory.GetCurrentDirectory().ToString() + "\\uploads\\headcount\\" + trustedFileNameForStorage;
+                    string messageError = "";
                 try
                 {
                     using (var workBook = new XLWorkbook(filepath))
@@ -439,17 +440,8 @@ namespace SupervisorMobility.API.DataAccess.Services
                                             if (retries == 5)
                                             {
                                                 //añade notificacion de error
-                                                Notification NotyError = new Notification();
-                                                NotyError.NotificationType = $"HeadCount Row Error {DateTime.Now}";
-                                                NotyError.NotificationText = $"Error in data ROW [{i}], please check document and solve this issue";
-
-                                                NotyError.MadeBy = "HeadCount System";
-                                                NotyError.UserId = userEntity.UserId;
-                                                NotyError.IsAccepted = true;
-                                                NotyError.IsActive = true;
-                                                NotyError.EntryDate = DateTime.Now;
-
-                                                _supervisorMobilityRepository.AddNotificationAsync(NotyError); 
+                                                messageError += $"Error in data ROW [{i}], please check document and solve this issue \n, ";
+                                               
                                             }
 
                                             // Espera el intervalo de tiempo antes de volver a intentarlo
@@ -477,38 +469,50 @@ namespace SupervisorMobility.API.DataAccess.Services
                     Debug.WriteLine($"Error en Using Woorkbook {ex.ToString()}");
                 }//end trycatch to add excel to list
 
-                int maxRetriesMail = 5; // Número máximo de intentos
+                int maxRetriesMail = 2; // Número máximo de intentos
                 TimeSpan retryIntervalMail = TimeSpan.FromSeconds(5); // Intervalo de tiempo entre intentos (5 segundos en este caso)
                 int retriesMail = 0;
 
-                while (retriesMail < maxRetriesMail)
-                {
+                //while (retriesMail < maxRetriesMail)
+                //{
                     try
                     {
                         var emailMessage = _email.CreateEmailMessage(userEntity.Email, "Este es un mensaje de prueba enviado desde job observation");
                         _email.Send(emailMessage);
                         
-                        break;
+                        //break;
                     }
                     catch (Exception ex)
                     {
 
                         // Maneja la excepción aquí, si es necesario
-                        Debug.WriteLine($"Fallo crear Succes Notification: {ex.Message}");
+                        Debug.WriteLine($"Fallo send Succes e-mail: {ex.Message}");
 
                         // Incrementa el número de intentos
                         retriesMail++;
                        
                         // Espera el intervalo de tiempo antes de volver a intentarlo
                         await Task.Delay(retryIntervalMail);
-                    }
 
+                        Notification NotyError = new Notification();
+                        NotyError.NotificationType = $"HeadCount Error Succes e-mail {DateTime.Now}";
+                        NotyError.NotificationText = messageError;
+
+                        NotyError.MadeBy = "HeadCount System";
+                        NotyError.UserId = userEntity.UserId;
+                        NotyError.IsAccepted = true;
+                        NotyError.IsActive = true;
+                        NotyError.EntryDate = DateTime.Now;
+
+                        _supervisorMobilityRepository.AddNotificationAsync(NotyError);
                 }
+
+                //}
 
                 // notificacion
                 //añade notificacion de error
 
-                int maxIntentos = 5; // Número máximo de intentos
+                int maxIntentos = 3; // Número máximo de intentos
                 TimeSpan newintentTime = TimeSpan.FromSeconds(5); // Intervalo de tiempo entre intentos (5 segundos en este caso)
                 int intentos = 0;
 
@@ -516,18 +520,39 @@ namespace SupervisorMobility.API.DataAccess.Services
                 {
                     try
                     {
+                        if(! messageError.IsNullOrEmpty())
+                        {
+                           
 
-                        Notification NotyFinish = new Notification();
-                        NotyFinish.NotificationType = $"HeadCount Succes Procces {DateTime.Now}";
-                        NotyFinish.NotificationText = $"Headcount document has been processed, you can now review its contents on the details page.";
+                            Notification NotyFinish = new Notification();
+                            NotyFinish.NotificationType = $"HeadCount Procces - Succes With Errors  {DateTime.Now}";
+                            NotyFinish.NotificationText = $"Headcount document has been processed, you can now review its contents on the details page. \n LIST ERRORS:  \n" + messageError;
 
-                        NotyFinish.MadeBy = "HeadCount Process System ";
-                        NotyFinish.UserId = userEntity.UserId;
-                        NotyFinish.IsAccepted = true;
-                        NotyFinish.IsActive = true;
-                        NotyFinish.EntryDate = DateTime.Now;
+                            NotyFinish.MadeBy = "HeadCount Process System ";
+                            NotyFinish.UserId = userEntity.UserId;
+                            NotyFinish.IsAccepted = true;
+                            NotyFinish.IsActive = true;
+                            NotyFinish.EntryDate = DateTime.Now;
 
-                        _supervisorMobilityRepository.AddNotificationAsync(NotyFinish);
+                            _supervisorMobilityRepository.AddNotificationAsync(NotyFinish);
+                        }
+                        else
+                        {
+                            Notification NotyFinish = new Notification();
+                            NotyFinish.NotificationType = $"HeadCount Procces - Succes  {DateTime.Now}";
+                            NotyFinish.NotificationText = $"Headcount document has been processed, you can now review its contents on the details page.";
+
+                            NotyFinish.MadeBy = "HeadCount Process System ";
+                            NotyFinish.UserId = userEntity.UserId;
+                            NotyFinish.IsAccepted = true;
+                            NotyFinish.IsActive = true;
+                            NotyFinish.EntryDate = DateTime.Now;
+
+                            _supervisorMobilityRepository.AddNotificationAsync(NotyFinish);
+                        }
+
+
+                       
                         break;
                     }
                     catch (Exception ex)
