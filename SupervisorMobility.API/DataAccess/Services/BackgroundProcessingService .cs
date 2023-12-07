@@ -156,7 +156,7 @@ namespace SupervisorMobility.API.DataAccess.Services
 
                                                 try
                                                 {
-                                                    _headCount.Fuction_Type = ws.Cell(row.RangeAddress.FirstAddress.RowNumber, 13).GetString() != "" ? ws.Cell(row.RangeAddress.FirstAddress.RowNumber, 13).GetValue<string>().Trim() : "";
+                                                    _headCount.Fuction_Type = ws.Cell(row.RangeAddress.FirstAddress.RowNumber, 15).GetString() != "" ? ws.Cell(row.RangeAddress.FirstAddress.RowNumber, 15).GetValue<string>().Trim() : "";
                                                 }
                                                 catch (Exception ex)
                                                 {

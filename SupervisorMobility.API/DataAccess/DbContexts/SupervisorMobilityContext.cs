@@ -756,19 +756,6 @@ namespace SupervisorMobility.API.Context
                     IsActive = true,
                     UserType = 4,
                     SuperiorId = 4,
-                },
-                new User
-                {
-                    UserId = 9,
-                    PlantId = 1,
-                    AreaId = 1,
-                    DistributionId = null,
-                    GroupId = 1,
-                    Name = "Operador 4",
-                    Payroll = 9,
-                    IsActive = true,
-                    UserType = 4,
-                    SuperiorId = 4,
                 }
                 ); ;
 
