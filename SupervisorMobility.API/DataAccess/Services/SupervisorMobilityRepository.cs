@@ -1536,7 +1536,10 @@ namespace SupervisorMobility.API.Services
 
                     query = query.Where(j => supervisorIds.Contains((int)j.SupervisorId));
 
-
+                }
+                else
+                {
+                    return new List<JobObservation>();
                 }
             }
 
@@ -1581,7 +1584,7 @@ namespace SupervisorMobility.API.Services
 
             if (includeCkAnswers)
             {
-                query = query.Include(c => c.checklistAnswers);
+                query = query.Include(c => c.checklistAnswers).ThenInclude(ck => ck.Evidences);
             }
 
             return await query.FirstOrDefaultAsync();
@@ -1771,7 +1774,9 @@ namespace SupervisorMobility.API.Services
 
             }
 
-        }
+        }  
+        
+       
         public async Task RemoveEvidenceForLupAsync(int lupId, int fileUploadId)
         {
             var lup = await GetLupAsync(lupId, true);
@@ -2256,19 +2261,19 @@ namespace SupervisorMobility.API.Services
         #region ChecklistAnswersOperations
         public async Task<ChecklistAnswer?> GetChecklistAnswerAsync(int checklistAnswerId)
         {
-            return await _context.ChecklistAnswers
+            return await _context.ChecklistAnswers.Include(a => a.Evidences)
                  .Where(x => x.AnswerId == checklistAnswerId).FirstOrDefaultAsync();
         }
 
         public async Task<IEnumerable<ChecklistAnswer>> GetAllChecklistAnswerAsync()
         {
-            return await _context.ChecklistAnswers
+            return await _context.ChecklistAnswers.Include(a => a.Evidences)
                  .OrderBy(c => c.AnswerId).ToListAsync();
 
         }
         public async Task<IEnumerable<ChecklistAnswer>> GetAllChecklistAnswersByJobObservationIdAsync(int jobObservationId)
         {
-            return await _context.ChecklistAnswers
+            return await _context.ChecklistAnswers.Include(a => a.Evidences)
                 .Where(c => c.JobObservationId == jobObservationId)
                  .OrderBy(c => c.AnswerId).ToListAsync();
 
@@ -2276,6 +2281,25 @@ namespace SupervisorMobility.API.Services
         public void AddChecklistAnswer(ChecklistAnswer checklistAnswer)
         {
             _context.ChecklistAnswers.Add(checklistAnswer);
+        }
+        public async Task AddEvidenceForCkAnswerAsync(int answerId, FileUpload evidence)
+        {
+            var answer = await GetChecklistAnswerAsync(answerId);
+
+            if (answer != null)
+            {
+                if (answer.Evidences != null)
+                {
+                    answer.Evidences.Add(evidence);
+                }
+                else
+                {
+                    answer.Evidences = new List<FileUpload>
+                    {
+                        evidence
+                    };
+                }
+            }
         }
 
         public void DeleteChecklistAnswer(ChecklistAnswer checklistAnswer)

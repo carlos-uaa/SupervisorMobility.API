@@ -14,5 +14,11 @@ namespace SupervisorMobility.API.Entities
         public int QuestionID { get; set; }
         public string Prompt { get; set; } = string.Empty;
         public string? Answer { get; set; } = string.Empty;
+
+        public ICollection<FileUpload>? Evidences { get; set; }
+            = new List<FileUpload>();
+
+        public string? CommentarySV { get; set; } = string.Empty;
+        public string? CommentarySSV { get; set; } = string.Empty;
     }
 }

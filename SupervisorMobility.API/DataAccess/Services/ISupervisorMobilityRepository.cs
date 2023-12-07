@@ -370,6 +370,7 @@ namespace SupervisorMobility.API.Services
         Task<IEnumerable<ChecklistAnswer>> GetAllChecklistAnswersByJobObservationIdAsync(int jobObservationId);
         Task<ChecklistAnswer?> GetChecklistAnswerAsync(int guideId);
         void AddChecklistAnswer(ChecklistAnswer checklistAnswer);
+        Task AddEvidenceForCkAnswerAsync(int answerId, FileUpload evidence);
         void DeleteChecklistAnswer(ChecklistAnswer checklistAnswer);
         Task<bool> ChecklistAnswerExistAsync(int checklistAnswerId);
 
