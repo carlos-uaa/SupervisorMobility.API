@@ -1,10 +1,13 @@
 ﻿using AutoMapper;
+using Microsoft.AspNetCore.Cors;
 using Microsoft.AspNetCore.Mvc;
 using SupervisorMobility.API.Business;
+using SupervisorMobility.API.DataAccess.Entities;
 using SupervisorMobility.API.Entities;
 using SupervisorMobility.API.Models.ChecklistAnswerDtos;
 using SupervisorMobility.API.Models.FileUploadDto;
 using SupervisorMobility.API.Services;
+using System.Linq;
 
 namespace SupervisorMobility.API.Controllers
 {
@@ -63,9 +66,11 @@ namespace SupervisorMobility.API.Controllers
         public class ChecklistContent 
         {
             public List<IFormFile>? Files { get; set; }
-            public ChecklistAnswerDto checklistAnswer { get; set; }
+            public ChecklistAnswerDto? checklistAnswer { get; set; }
+            public List<FileUpload>? Evidences { get; set; }
         }
 
+        [EnableCors]
         [HttpPost]
         public async Task<ActionResult<ChecklistAnswerDto>> CreateChecklistAnswer([FromForm] ChecklistContent CkContent)
         {
@@ -119,7 +124,20 @@ namespace SupervisorMobility.API.Controllers
 
             //Upload Images in foreach
 
-            foreach(var file in CkContent.Files)
+            //var RecivedEvidences = CkContent.Evidences;
+
+            //var mappedRecivedEvidences = _mapper.Map<List<FileUpload>>(RecivedEvidences);
+
+            //var elementosRemovidos = finalChecklistAnswer.Evidences.Except(mappedRecivedEvidences).ToList();
+
+            //// Remover los elementos de la lista original
+            //foreach (var elemento in elementosRemovidos)
+            //{
+            //    finalChecklistAnswer.Evidences.Remove(elemento);
+            //}
+
+
+            foreach (var file in CkContent.Files)
             {
                 var uploadResult = new FileUploadForCreationDto();
                 string trustedFileNameForStorage = string.Empty;
