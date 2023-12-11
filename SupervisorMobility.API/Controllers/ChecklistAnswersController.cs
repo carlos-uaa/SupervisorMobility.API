@@ -122,20 +122,9 @@ namespace SupervisorMobility.API.Controllers
            
             var finalChecklistAnswer = await _supervisorMobilityRepository.GetChecklistAnswerAsync(checklistAnswer.AnswerId);
 
-            //Upload Images in foreach
 
-            //var RecivedEvidences = CkContent.Evidences;
-
-            //var mappedRecivedEvidences = _mapper.Map<List<FileUpload>>(RecivedEvidences);
-
-            //var elementosRemovidos = finalChecklistAnswer.Evidences.Except(mappedRecivedEvidences).ToList();
-
-            //// Remover los elementos de la lista original
-            //foreach (var elemento in elementosRemovidos)
-            //{
-            //    finalChecklistAnswer.Evidences.Remove(elemento);
-            //}
-
+            if(CkContent.Files?.Count > 0)
+            {
 
             foreach (var file in CkContent.Files)
             {
@@ -157,13 +146,33 @@ namespace SupervisorMobility.API.Controllers
                 var fileToReturn = await _assyChartService.CreateFileAsync(uploadResult);
                 await _supervisorMobilityRepository.AddEvidenceForCkAnswerAsync(finalChecklistAnswer.AnswerId, fileToReturn);
             }
-
-
             await _supervisorMobilityRepository.SaveChangesAsync();
+            }
+
             return Ok(finalChecklistAnswer);
         }
 
+        [HttpPost("RemoveEvidences/{idAnswer}")]
+        public async Task<ActionResult<ChecklistAnswerDto>> RemoveEvidencesChecklistAnswer(int idAnswer, List<int> EvidencesToRemove)
+        {
 
+            var finalChecklistAnswer = await _supervisorMobilityRepository.GetChecklistAnswerAsync(idAnswer);
+
+
+            if (EvidencesToRemove.Count > 0)
+            {
+
+                foreach (var file in EvidencesToRemove)
+                {
+                    FileUpload ToRemove = finalChecklistAnswer.Evidences.ToList().Find(e => e.FileUploadId == file);
+
+                    finalChecklistAnswer.Evidences.Remove(ToRemove);
+                }
+                await _supervisorMobilityRepository.SaveChangesAsync();
+            }
+
+            return Ok(finalChecklistAnswer);
+        }
 
 
         [HttpPut("{checklistAnswerId}")]
@@ -187,7 +196,7 @@ namespace SupervisorMobility.API.Controllers
 
             await _supervisorMobilityRepository.SaveChangesAsync();
 
-            return Ok();
+            return Ok(checklistAnswerEntity);
 
         }
 
