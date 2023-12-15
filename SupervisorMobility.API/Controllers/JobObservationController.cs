@@ -189,7 +189,7 @@ namespace SupervisorMobility.API.Controllers
         }
 
 
-        [EnableCors("Cors")]
+        //[EnableCors("Cors")]
         [HttpGet("{jobObservationId}", Name = "GetJobObservation")]
         public async Task<IActionResult> GetJobObservation(int jobObservationId, bool includeTree = false, bool includePeople = false, bool includeLup = false, bool includeHistory = false, bool includeCkAnswers = false)
         {
@@ -207,7 +207,7 @@ namespace SupervisorMobility.API.Controllers
 
 
 
-        [EnableCors("Cors")]
+        //[EnableCors("Cors")]
         [HttpPut("{jobObservationId}")]
         public async Task<ActionResult> UpdateJobObservation(int jobObservationId, RequestJobObservationADuser request)
         {
