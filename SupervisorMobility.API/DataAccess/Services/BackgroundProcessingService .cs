@@ -61,7 +61,7 @@ namespace SupervisorMobility.API.DataAccess.Services
         }
 
 
-        private async Task ProcessDocumentHeadCountAsync(string trustedFileNameForStorage,  int UserIdUpload, CancellationToken stoppingToken)
+        private async Task ProcessDocumentHeadCountAsync(string trustedFileNameForStorage, int UserIdUpload, CancellationToken stoppingToken)
         {
             using (var scope = _serviceProvider.CreateScope())
             {
@@ -76,7 +76,7 @@ namespace SupervisorMobility.API.DataAccess.Services
 
                 //Start Massive Upload 
                 string filepath = Directory.GetCurrentDirectory().ToString() + "\\uploads\\headcount\\" + trustedFileNameForStorage;
-                    string messageError = "";
+                string messageError = "";
                 try
                 {
                     using (var workBook = new XLWorkbook(filepath))
@@ -441,7 +441,7 @@ namespace SupervisorMobility.API.DataAccess.Services
                                             {
                                                 //añade notificacion de error
                                                 messageError += $"Error in data ROW [{i}], please check document and solve this issue \n, ";
-                                               
+
                                             }
 
                                             // Espera el intervalo de tiempo antes de volver a intentarlo
@@ -475,36 +475,45 @@ namespace SupervisorMobility.API.DataAccess.Services
 
                 //while (retriesMail < maxRetriesMail)
                 //{
-                    try
+                try
+                {
+
+
+                    if (!messageError.IsNullOrEmpty())
                     {
-                        var emailMessage = _email.CreateEmailMessage(userEntity.Email, "Este es un mensaje de prueba enviado desde job observation");
-                        _email.Send(emailMessage);
-                        
-                        //break;
+                        var emailMessageError = _email.CreateEmailMessage(userEntity.Email, $"Headcount document has been processed, you can now review its contents on the details page. \n LIST ERRORS:  \n" + messageError);
+                        _email.Send(emailMessageError);
                     }
-                    catch (Exception ex)
+                    else
                     {
+                        var emailMessage = _email.CreateEmailMessage(userEntity.Email, $"Headcount document has been processed, you can now review its contents on the details page.");
+                        _email.Send(emailMessage);
+                    }
+                    //break;
+                }
+                catch (Exception ex)
+                {
 
-                        // Maneja la excepción aquí, si es necesario
-                        Debug.WriteLine($"Fallo send Succes e-mail: {ex.Message}");
+                    // Maneja la excepción aquí, si es necesario
+                    Debug.WriteLine($"Fallo send Succes e-mail: {ex.Message}");
 
-                        // Incrementa el número de intentos
-                        retriesMail++;
-                       
-                        // Espera el intervalo de tiempo antes de volver a intentarlo
-                        await Task.Delay(retryIntervalMail);
+                    // Incrementa el número de intentos
+                    retriesMail++;
 
-                        Notification NotyError = new Notification();
-                        NotyError.NotificationType = $"HeadCount Error Succes e-mail {DateTime.Now}";
-                        NotyError.NotificationText = messageError;
+                    // Espera el intervalo de tiempo antes de volver a intentarlo
+                    await Task.Delay(retryIntervalMail);
 
-                        NotyError.MadeBy = "HeadCount System";
-                        NotyError.UserId = userEntity.UserId;
-                        NotyError.IsAccepted = true;
-                        NotyError.IsActive = true;
-                        NotyError.EntryDate = DateTime.Now;
+                    Notification NotyError = new Notification();
+                    NotyError.NotificationType = $"HeadCount Error Succes e-mail {DateTime.Now}";
+                    NotyError.NotificationText = messageError;
 
-                        _supervisorMobilityRepository.AddNotificationAsync(NotyError);
+                    NotyError.MadeBy = "HeadCount System";
+                    NotyError.UserId = userEntity.UserId;
+                    NotyError.IsAccepted = true;
+                    NotyError.IsActive = true;
+                    NotyError.EntryDate = DateTime.Now;
+
+                    _supervisorMobilityRepository.AddNotificationAsync(NotyError);
                 }
 
                 //}
@@ -520,9 +529,9 @@ namespace SupervisorMobility.API.DataAccess.Services
                 {
                     try
                     {
-                        if(! messageError.IsNullOrEmpty())
+                        if (!messageError.IsNullOrEmpty())
                         {
-                           
+
 
                             Notification NotyFinish = new Notification();
                             NotyFinish.NotificationType = $"HeadCount Procces - Succes With Errors  {DateTime.Now}";
@@ -552,7 +561,7 @@ namespace SupervisorMobility.API.DataAccess.Services
                         }
 
 
-                       
+
                         break;
                     }
                     catch (Exception ex)
@@ -696,177 +705,135 @@ namespace SupervisorMobility.API.DataAccess.Services
 
                                                 //if (p == 1)
                                                 //{
-                                                    var ExcelOpCode = ws.Cell(row.RangeAddress.FirstAddress.RowNumber, 1).Value.ToString() != "" ? ws.Cell(row.RangeAddress.FirstAddress.RowNumber, 1).Value.ToString() : "";
-                                                    var ExcelOpDescription = ws.Cell(row.RangeAddress.FirstAddress.RowNumber, 5).Value.ToString() != "" ? ws.Cell(row.RangeAddress.FirstAddress.RowNumber, 5).Value.ToString() : "";
+                                                var ExcelOpCode = ws.Cell(row.RangeAddress.FirstAddress.RowNumber, 1).Value.ToString() != "" ? ws.Cell(row.RangeAddress.FirstAddress.RowNumber, 1).Value.ToString() : "";
+                                                var ExcelOpDescription = ws.Cell(row.RangeAddress.FirstAddress.RowNumber, 5).Value.ToString() != "" ? ws.Cell(row.RangeAddress.FirstAddress.RowNumber, 5).Value.ToString() : "";
 
-                                                    var ExcelAreaCode = ws.Cell(row.RangeAddress.FirstAddress.RowNumber, 3).Value.ToString() != "" ? ws.Cell(row.RangeAddress.FirstAddress.RowNumber, 3).Value.ToString() : "";
-                                                    var ExcelAreaDescription = ws.Cell(row.RangeAddress.FirstAddress.RowNumber, 4).Value.ToString() != "" ? ws.Cell(row.RangeAddress.FirstAddress.RowNumber, 4).Value.ToString() : "";
+                                                var ExcelAreaCode = ws.Cell(row.RangeAddress.FirstAddress.RowNumber, 3).Value.ToString() != "" ? ws.Cell(row.RangeAddress.FirstAddress.RowNumber, 3).Value.ToString() : "";
+                                                var ExcelAreaDescription = ws.Cell(row.RangeAddress.FirstAddress.RowNumber, 4).Value.ToString() != "" ? ws.Cell(row.RangeAddress.FirstAddress.RowNumber, 4).Value.ToString() : "";
 
-                                                    var ExcelDistDescription = ws.Cell(row.RangeAddress.FirstAddress.RowNumber, 6).Value.ToString() != "" ? ws.Cell(row.RangeAddress.FirstAddress.RowNumber, 6).Value.ToString() : "";
+                                                var ExcelDistDescription = ws.Cell(row.RangeAddress.FirstAddress.RowNumber, 6).Value.ToString() != "" ? ws.Cell(row.RangeAddress.FirstAddress.RowNumber, 6).Value.ToString() : "";
 
-                                                    if (ExcelOpCode.IsNullOrEmpty() && ExcelOpDescription.IsNullOrEmpty() &&
-                                                        ExcelAreaCode.IsNullOrEmpty() && ExcelAreaDescription.IsNullOrEmpty() && ExcelDistDescription.IsNullOrEmpty())
-                                                    {
-                                                        break ;
-                                                    }
-                                                    else if (ExcelAreaCode.IsNullOrEmpty() && ExcelAreaDescription.IsNullOrEmpty())
-                                                    {
-                                                        break;
-                                                    }else if (ExcelAreaCode.IsNullOrEmpty() && ExcelDistDescription.IsNullOrEmpty())
-                                                    {
-                                                        break;
-                                                    }
+                                                if (ExcelOpCode.IsNullOrEmpty() && ExcelOpDescription.IsNullOrEmpty() &&
+                                                    ExcelAreaCode.IsNullOrEmpty() && ExcelAreaDescription.IsNullOrEmpty() && ExcelDistDescription.IsNullOrEmpty())
+                                                {
+                                                    break;
+                                                }
+                                                else if (ExcelAreaCode.IsNullOrEmpty() && ExcelAreaDescription.IsNullOrEmpty())
+                                                {
+                                                    break;
+                                                }
+                                                else if (ExcelAreaCode.IsNullOrEmpty() && ExcelDistDescription.IsNullOrEmpty())
+                                                {
+                                                    break;
+                                                }
 
-                                                    if (! ExcelDistDescription.IsNullOrEmpty() )
-                                                    {
-                                                        auxDistribution = ws.Cell(row.RangeAddress.FirstAddress.RowNumber, 6).Value.ToString() != "" ? ws.Cell(row.RangeAddress.FirstAddress.RowNumber, 6).Value.ToString() : "";
-                                                    }
-                                                    else if (ExcelDistDescription == "")
-                                                    {
-                                                        ExcelDistDescription = auxDistribution;
-                                                    }
+                                                if (!ExcelDistDescription.IsNullOrEmpty())
+                                                {
+                                                    auxDistribution = ws.Cell(row.RangeAddress.FirstAddress.RowNumber, 6).Value.ToString() != "" ? ws.Cell(row.RangeAddress.FirstAddress.RowNumber, 6).Value.ToString() : "";
+                                                }
+                                                else if (ExcelDistDescription == "")
+                                                {
+                                                    ExcelDistDescription = auxDistribution;
+                                                }
 
 
-                                                    if (ProductExist != null && ProductExist.Similarity > 0.5) // Ajusta este umbral según tus necesidades
-                                                    {
-                                                        PathResume.ProductID = ProductExist.Product.ProductId;
-                                                    }
+                                                if (ProductExist != null && ProductExist.Similarity > 0.5) // Ajusta este umbral según tus necesidades
+                                                {
+                                                    PathResume.ProductID = ProductExist.Product.ProductId;
+                                                }
 
-                                                    // Buscar el ID de planta en el diccionario de plantas
-                                                    var planta = PlantsDictionary.Values.FirstOrDefault(p => p.PlantId == plantnameid);
-                                                    if (planta != null)
-                                                    {
-                                                        PathResume.PlantId = planta.PlantId;
-                                                    }
-                                                    else
-                                                    {
+                                                // Buscar el ID de planta en el diccionario de plantas
+                                                var planta = PlantsDictionary.Values.FirstOrDefault(p => p.PlantId == plantnameid);
+                                                if (planta != null)
+                                                {
+                                                    PathResume.PlantId = planta.PlantId;
+                                                }
+                                                else
+                                                {
                                                     //mensaje de error
-                                                        return;
+                                                    return;
+                                                }
+
+
+                                                if (PathResume.PlantId > 0)
+                                                {// Buscar coincidencia en area
+                                                    var coincidenciasAreas = AreasDictionary
+                                                           .Where(pair => pair.Key.Item1 == PathResume.PlantId) // Filtramos por ID de planta
+                                                           .Select(pair => new
+                                                           {
+                                                               Area = pair.Value,
+                                                               Similarity = pair.Value.Code.Equals(ExcelAreaCode)
+                                                                   ? 1.0 // Si los códigos coinciden exactamente, la similitud es máxima
+                                                                   : 1 - pair.Value.Code.JaccardDistance(ExcelAreaCode)
+                                                           })
+                                                           .OrderByDescending(result => result.Similarity)
+                                                           .FirstOrDefault();
+
+                                                    if (coincidenciasAreas != null && coincidenciasAreas.Similarity >= 0.70) // Ajusta este umbral según tus necesidades
+                                                    {
+                                                        PathResume.AreaId = coincidenciasAreas.Area.AreaId;
+                                                        PathResume.DescripcionArea = coincidenciasAreas.Area.Description;
                                                     }
 
 
-                                                    if (PathResume.PlantId > 0)
-                                                    {// Buscar coincidencia en area
-                                                        var coincidenciasAreas = AreasDictionary
-                                                               .Where(pair => pair.Key.Item1 == PathResume.PlantId) // Filtramos por ID de planta
-                                                               .Select(pair => new
-                                                               {
-                                                                   Area = pair.Value,
-                                                                   Similarity = pair.Value.Code.Equals(ExcelAreaCode)
-                                                                       ? 1.0 // Si los códigos coinciden exactamente, la similitud es máxima
-                                                                       : 1 - pair.Value.Code.JaccardDistance(ExcelAreaCode)
-                                                               })
-                                                               .OrderByDescending(result => result.Similarity)
-                                                               .FirstOrDefault();
+                                                    if (PathResume.AreaId > 0)
+                                                    {
+                                                        // Buscar coincidencia en distribucion
+                                                        var coincidenciasDistributions = DistributionsDictionary
+                                                            .Where(pair => pair.Key.Item1 == PathResume.PlantId && pair.Key.Item2 == PathResume.AreaId)
+                                                            .Select(pair => new
+                                                            {
+                                                                Distribution = pair.Value,
+                                                                Similarity = 1 - pair.Value.Description.JaccardDistance(ExcelDistDescription)
+                                                            })
+                                                            .OrderByDescending(result => result.Similarity)
+                                                            .FirstOrDefault();
 
-                                                        if (coincidenciasAreas != null && coincidenciasAreas.Similarity >= 0.70) // Ajusta este umbral según tus necesidades
+                                                        if (coincidenciasDistributions != null && coincidenciasDistributions.Similarity > 0.5)
                                                         {
-                                                            PathResume.AreaId = coincidenciasAreas.Area.AreaId;
-                                                            PathResume.DescripcionArea = coincidenciasAreas.Area.Description;
+                                                            PathResume.DistributionId = coincidenciasDistributions.Distribution.DistributionId;
+                                                            PathResume.DescripcionDistribucion = coincidenciasDistributions.Distribution.Description;
                                                         }
 
 
-                                                        if (PathResume.AreaId > 0)
+                                                        if (PathResume.DistributionId > 0)
                                                         {
-                                                            // Buscar coincidencia en distribucion
-                                                            var coincidenciasDistributions = DistributionsDictionary
-                                                                .Where(pair => pair.Key.Item1 == PathResume.PlantId && pair.Key.Item2 == PathResume.AreaId)
-                                                                .Select(pair => new
-                                                                {
-                                                                    Distribution = pair.Value,
-                                                                    Similarity = 1 - pair.Value.Description.JaccardDistance(ExcelDistDescription)
-                                                                })
-                                                                .OrderByDescending(result => result.Similarity)
-                                                                .FirstOrDefault();
 
-                                                            if (coincidenciasDistributions != null && coincidenciasDistributions.Similarity > 0.5)
+                                                            var coincidenciasOperaciones = OperationsDictionary
+                                                           .Where(pair => pair.Key.Item1 == PathResume.PlantId && pair.Key.Item2 == PathResume.AreaId && pair.Key.Item3 == PathResume.DistributionId)
+                                                           .Select(pair => new
+                                                           {
+                                                               Operation = pair.Value,
+                                                               Similarity = (pair.Value.Code == ExcelOpCode && pair.Value.Description == ExcelOpDescription ? 1 : 0)
+                                                           })
+                                                           .OrderByDescending(result => result.Similarity)
+                                                           .FirstOrDefault();
+
+                                                            if (coincidenciasOperaciones != null && coincidenciasOperaciones.Similarity > 0.5)
                                                             {
-                                                                PathResume.DistributionId = coincidenciasDistributions.Distribution.DistributionId;
-                                                                PathResume.DescripcionDistribucion = coincidenciasDistributions.Distribution.Description;
+                                                                PathResume.OperationId = coincidenciasOperaciones.Operation.OperationId;
                                                             }
 
-
-                                                            if (PathResume.DistributionId > 0)
+                                                            if (PathResume.OperationId > 0)
                                                             {
-
-                                                                var coincidenciasOperaciones = OperationsDictionary
-                                                               .Where(pair => pair.Key.Item1 == PathResume.PlantId && pair.Key.Item2 == PathResume.AreaId && pair.Key.Item3 == PathResume.DistributionId)
-                                                               .Select(pair => new
-                                                               {
-                                                                   Operation = pair.Value,
-                                                                   Similarity = (pair.Value.Code == ExcelOpCode && pair.Value.Description == ExcelOpDescription ? 1 : 0)
-                                                               })
-                                                               .OrderByDescending(result => result.Similarity)
-                                                               .FirstOrDefault();
-
-                                                                if (coincidenciasOperaciones != null && coincidenciasOperaciones.Similarity > 0.5)
-                                                                {
-                                                                    PathResume.OperationId = coincidenciasOperaciones.Operation.OperationId;
-                                                                }
-
-                                                                if (PathResume.OperationId > 0)
-                                                                {
-                                                                    //existe no se hace nada
-                                                                }
-                                                                else
-                                                                {//No existe hay que crearla
-                                                                    var operationForCreate = _mapper.Map<OperationForCreationDto>(new OperationForCreationDto() { Code = ExcelOpCode, Description = ExcelOpDescription, IsActive = true });
-                                                                    var finalOperation = _mapper.Map<Operation>(operationForCreate);
-                                                                    await _supervisorMobilityRepository.AddOperationForDistributionAsync((int)PathResume.AreaId, (int)PathResume.DistributionId, finalOperation);
-                                                                    await _supervisorMobilityRepository.SaveChangesAsync();
-
-                                                                    OperationsDictionary.Add(((int)PathResume.PlantId, (int)PathResume.AreaId, (int)PathResume.DistributionId, finalOperation.OperationId), finalOperation);
-                                                                    CountCreateOperation++;
-                                                                }
-
-
-                                                            }//end if distribution >0
+                                                                //existe no se hace nada
+                                                            }
                                                             else
-                                                            {
-                                                                //distribution no existe- se crea todo
-                                                                string codeGen = ExcelDistDescription;
-
-                                                                SlugHelper slugHelper = new SlugHelper();
-                                                                string slug = slugHelper.GenerateSlug(codeGen);
-
-                                                                var distributionForCreate = _mapper.Map<DistributionForCreationDto>(new DistributionForCreationDto() { Code = slug, Description = ExcelDistDescription, IsActive = true });
-                                                                var finalDistribution = _mapper.Map<Distribution>(distributionForCreate);
-                                                                await _supervisorMobilityRepository.AddDistributionForPlantAsync((int)PathResume.PlantId, (int)PathResume.AreaId, finalDistribution);
-                                                                await _supervisorMobilityRepository.SaveChangesAsync();
-                                                                PathResume.DistributionId = finalDistribution.DistributionId;
-                                                                DistributionsDictionary.Add(((int)PathResume.PlantId, (int)PathResume.AreaId, (int)PathResume.DistributionId), finalDistribution);
-
-                                                                await _supervisorMobilityRepository.AddDistributionForProductAsync((int)PathResume.ProductID, finalDistribution);
-
-                                                                //la operacion no existira
-
+                                                            {//No existe hay que crearla
                                                                 var operationForCreate = _mapper.Map<OperationForCreationDto>(new OperationForCreationDto() { Code = ExcelOpCode, Description = ExcelOpDescription, IsActive = true });
                                                                 var finalOperation = _mapper.Map<Operation>(operationForCreate);
                                                                 await _supervisorMobilityRepository.AddOperationForDistributionAsync((int)PathResume.AreaId, (int)PathResume.DistributionId, finalOperation);
                                                                 await _supervisorMobilityRepository.SaveChangesAsync();
 
                                                                 OperationsDictionary.Add(((int)PathResume.PlantId, (int)PathResume.AreaId, (int)PathResume.DistributionId, finalOperation.OperationId), finalOperation);
-
                                                                 CountCreateOperation++;
+                                                            }
 
-                                                            }//end else distribuccion no existe
-                                                        }//end if area > 0
+
+                                                        }//end if distribution >0
                                                         else
                                                         {
-                                                            //area no existe- se crea todo
-                                                            var areaForCreate = _mapper.Map<AreaForCreationDto>(new AreaForCreationDto() { Code = ExcelAreaCode, Description = ExcelAreaDescription, IsActive = true });
-
-                                                            var finalArea = _mapper.Map<Area>(areaForCreate);
-                                                            finalArea.PlantId = (int)PathResume.PlantId;
-
-                                                            await _supervisorMobilityRepository.AddArea(finalArea);
-                                                            await _supervisorMobilityRepository.AddAreaForPlantAsync((int)PathResume.PlantId, finalArea);
-                                                            await _supervisorMobilityRepository.SaveChangesAsync();
-                                                            PathResume.AreaId = finalArea.AreaId;
-
-                                                            AreasDictionary.Add(((int)PathResume.PlantId, (int)PathResume.AreaId), finalArea);
-
-                                                            //la distribuccion no existira
+                                                            //distribution no existe- se crea todo
                                                             string codeGen = ExcelDistDescription;
 
                                                             SlugHelper slugHelper = new SlugHelper();
@@ -877,8 +844,8 @@ namespace SupervisorMobility.API.DataAccess.Services
                                                             await _supervisorMobilityRepository.AddDistributionForPlantAsync((int)PathResume.PlantId, (int)PathResume.AreaId, finalDistribution);
                                                             await _supervisorMobilityRepository.SaveChangesAsync();
                                                             PathResume.DistributionId = finalDistribution.DistributionId;
-
                                                             DistributionsDictionary.Add(((int)PathResume.PlantId, (int)PathResume.AreaId, (int)PathResume.DistributionId), finalDistribution);
+
                                                             await _supervisorMobilityRepository.AddDistributionForProductAsync((int)PathResume.ProductID, finalDistribution);
 
                                                             //la operacion no existira
@@ -889,12 +856,55 @@ namespace SupervisorMobility.API.DataAccess.Services
                                                             await _supervisorMobilityRepository.SaveChangesAsync();
 
                                                             OperationsDictionary.Add(((int)PathResume.PlantId, (int)PathResume.AreaId, (int)PathResume.DistributionId, finalOperation.OperationId), finalOperation);
+
                                                             CountCreateOperation++;
 
-                                                        }
+                                                        }//end else distribuccion no existe
+                                                    }//end if area > 0
+                                                    else
+                                                    {
+                                                        //area no existe- se crea todo
+                                                        var areaForCreate = _mapper.Map<AreaForCreationDto>(new AreaForCreationDto() { Code = ExcelAreaCode, Description = ExcelAreaDescription, IsActive = true });
 
-                                                    }//end if plant >0
-                                                     // no hay chance de que la planta no exista
+                                                        var finalArea = _mapper.Map<Area>(areaForCreate);
+                                                        finalArea.PlantId = (int)PathResume.PlantId;
+
+                                                        await _supervisorMobilityRepository.AddArea(finalArea);
+                                                        await _supervisorMobilityRepository.AddAreaForPlantAsync((int)PathResume.PlantId, finalArea);
+                                                        await _supervisorMobilityRepository.SaveChangesAsync();
+                                                        PathResume.AreaId = finalArea.AreaId;
+
+                                                        AreasDictionary.Add(((int)PathResume.PlantId, (int)PathResume.AreaId), finalArea);
+
+                                                        //la distribuccion no existira
+                                                        string codeGen = ExcelDistDescription;
+
+                                                        SlugHelper slugHelper = new SlugHelper();
+                                                        string slug = slugHelper.GenerateSlug(codeGen);
+
+                                                        var distributionForCreate = _mapper.Map<DistributionForCreationDto>(new DistributionForCreationDto() { Code = slug, Description = ExcelDistDescription, IsActive = true });
+                                                        var finalDistribution = _mapper.Map<Distribution>(distributionForCreate);
+                                                        await _supervisorMobilityRepository.AddDistributionForPlantAsync((int)PathResume.PlantId, (int)PathResume.AreaId, finalDistribution);
+                                                        await _supervisorMobilityRepository.SaveChangesAsync();
+                                                        PathResume.DistributionId = finalDistribution.DistributionId;
+
+                                                        DistributionsDictionary.Add(((int)PathResume.PlantId, (int)PathResume.AreaId, (int)PathResume.DistributionId), finalDistribution);
+                                                        await _supervisorMobilityRepository.AddDistributionForProductAsync((int)PathResume.ProductID, finalDistribution);
+
+                                                        //la operacion no existira
+
+                                                        var operationForCreate = _mapper.Map<OperationForCreationDto>(new OperationForCreationDto() { Code = ExcelOpCode, Description = ExcelOpDescription, IsActive = true });
+                                                        var finalOperation = _mapper.Map<Operation>(operationForCreate);
+                                                        await _supervisorMobilityRepository.AddOperationForDistributionAsync((int)PathResume.AreaId, (int)PathResume.DistributionId, finalOperation);
+                                                        await _supervisorMobilityRepository.SaveChangesAsync();
+
+                                                        OperationsDictionary.Add(((int)PathResume.PlantId, (int)PathResume.AreaId, (int)PathResume.DistributionId, finalOperation.OperationId), finalOperation);
+                                                        CountCreateOperation++;
+
+                                                    }
+
+                                                }//end if plant >0
+                                                 // no hay chance de que la planta no exista
 
 
                                                 //}
@@ -1470,7 +1480,7 @@ namespace SupervisorMobility.API.DataAccess.Services
                             int i = 1;
                             foreach (IXLRow row in ws.Rows())
                             {
-                             
+
 
                                 if (firstRow)
                                 {
@@ -1507,7 +1517,7 @@ namespace SupervisorMobility.API.DataAccess.Services
 
                                         if (string.IsNullOrWhiteSpace(InfoCodePath) && string.IsNullOrWhiteSpace(InfoArea) && string.IsNullOrWhiteSpace(InfoDistribution) && string.IsNullOrWhiteSpace(InfoHOEPath) && string.IsNullOrWhiteSpace(InfoGOSPath) && string.IsNullOrWhiteSpace(InfoCCPPath))
                                         {
-                                            i ++;
+                                            i++;
                                             continue;
                                         }
 
@@ -1834,128 +1844,128 @@ namespace SupervisorMobility.API.DataAccess.Services
 
 
 
-                                        if((int)PathResume.PlantId != null && (int)PathResume.AreaId != null && (int)PathResume.DistributionId != null)
-                                        while (retries < maxRetries)
-                                        {
-                                            try
+                                        if ((int)PathResume.PlantId != null && (int)PathResume.AreaId != null && (int)PathResume.DistributionId != null)
+                                            while (retries < maxRetries)
                                             {
-                                                //Search assychart Exist
-                                                var AssyChartExist = await _supervisorMobilityRepository.GetAssyChartForJobObservationAsync((int)PathResume.PlantId, (int)PathResume.AreaId, (int)PathResume.DistributionId);
-
-
-                                                if (AssyChartExist != null)
+                                                try
                                                 {
-                                                    var CodePathExist = await _supervisorMobilityRepository.TryFindCodePathItemAsync(AssyChartExist.AssyChardId, InfoCodePath);
+                                                    //Search assychart Exist
+                                                    var AssyChartExist = await _supervisorMobilityRepository.GetAssyChartForJobObservationAsync((int)PathResume.PlantId, (int)PathResume.AreaId, (int)PathResume.DistributionId);
 
-                                                    if (CodePathExist == null)
+
+                                                    if (AssyChartExist != null)
                                                     {
+                                                        var CodePathExist = await _supervisorMobilityRepository.TryFindCodePathItemAsync(AssyChartExist.AssyChardId, InfoCodePath);
 
-                                                        //procedimiento de path
-                                                        SOSCodePath CodePath = new SOSCodePath();
-
-                                                        CodePath.Code = InfoCodePath;
-                                                        //TreeItemData? mejorCoincidenciaHOE = null;
-                                                        //TreeItemData? mejorCoincidenciaGOS = null;
-                                                        //TreeItemData? mejorCoincidenciaCCP = null;
-
-                                                        if (mejorCoincidenciaHOE != null)
+                                                        if (CodePathExist == null)
                                                         {
-                                                            CodePath.HOE = mejorCoincidenciaHOE.Ruta;
-                                                        }
 
-                                                        if (mejorCoincidenciaGOS != null)
-                                                        {
-                                                            CodePath.GOS = mejorCoincidenciaGOS.Ruta;
-                                                        }
+                                                            //procedimiento de path
+                                                            SOSCodePath CodePath = new SOSCodePath();
 
-                                                        if (mejorCoincidenciaCCP != null)
-                                                        {
-                                                            CodePath.CCP = mejorCoincidenciaCCP.Ruta;
-                                                        }
+                                                            CodePath.Code = InfoCodePath;
+                                                            //TreeItemData? mejorCoincidenciaHOE = null;
+                                                            //TreeItemData? mejorCoincidenciaGOS = null;
+                                                            //TreeItemData? mejorCoincidenciaCCP = null;
 
-                                                        //Añadir el common direction
-
-                                                        //Añadimso distribucion y Producto
-
-                                                        CodePath.DistributionId = (int)PathResume.DistributionId;
-                                                        CodePath.ProductId = PathResume.ProductID;
-
-
-
-
-                                                        //creamos assychart si no existe
-                                                        if (AssyChartExist is null)
-                                                        {
-                                                            AssyChartForCreation assychartForCreate = new AssyChartForCreation()
+                                                            if (mejorCoincidenciaHOE != null)
                                                             {
-                                                                PlantId = (int)PathResume.PlantId,
-                                                                AreaId = (int)PathResume.AreaId,
-                                                                DistributionId = (int)PathResume.DistributionId,
-                                                                CreationDate = DateTime.Now,
-                                                                ModificationDate = DateTime.Now,
-                                                                IsActive = true
-                                                            };
+                                                                CodePath.HOE = mejorCoincidenciaHOE.Ruta;
+                                                            }
 
-                                                            var resultCreateAssy = await _assyChartService.CreateAssyChartAsync(assychartForCreate);
-
-                                                            if (resultCreateAssy != null)
+                                                            if (mejorCoincidenciaGOS != null)
                                                             {
-                                                                //se crea assy chart cout
-                                                                Debug.WriteLine($"Create assychart id {resultCreateAssy.AssyChardId} plantid {(int)PathResume.PlantId} areaid {(int)PathResume.AreaId} distributionid {(int)PathResume.DistributionId} ");
+                                                                CodePath.GOS = mejorCoincidenciaGOS.Ruta;
+                                                            }
+
+                                                            if (mejorCoincidenciaCCP != null)
+                                                            {
+                                                                CodePath.CCP = mejorCoincidenciaCCP.Ruta;
+                                                            }
+
+                                                            //Añadir el common direction
+
+                                                            //Añadimso distribucion y Producto
+
+                                                            CodePath.DistributionId = (int)PathResume.DistributionId;
+                                                            CodePath.ProductId = PathResume.ProductID;
 
 
+
+
+                                                            //creamos assychart si no existe
+                                                            if (AssyChartExist is null)
+                                                            {
+                                                                AssyChartForCreation assychartForCreate = new AssyChartForCreation()
+                                                                {
+                                                                    PlantId = (int)PathResume.PlantId,
+                                                                    AreaId = (int)PathResume.AreaId,
+                                                                    DistributionId = (int)PathResume.DistributionId,
+                                                                    CreationDate = DateTime.Now,
+                                                                    ModificationDate = DateTime.Now,
+                                                                    IsActive = true
+                                                                };
+
+                                                                var resultCreateAssy = await _assyChartService.CreateAssyChartAsync(assychartForCreate);
+
+                                                                if (resultCreateAssy != null)
+                                                                {
+                                                                    //se crea assy chart cout
+                                                                    Debug.WriteLine($"Create assychart id {resultCreateAssy.AssyChardId} plantid {(int)PathResume.PlantId} areaid {(int)PathResume.AreaId} distributionid {(int)PathResume.DistributionId} ");
+
+
+                                                                    //Completamos codePath
+                                                                    CodePath.AssyChardId = AssyChartExist.AssyChardId;
+
+                                                                    //Crear Code Path
+                                                                    await _supervisorMobilityRepository.AssychartCreateCodePath(CodePath);
+
+                                                                    //aqui se añade el path creado
+
+                                                                    _supervisorMobilityRepository.AssychartAddCodePath(resultCreateAssy, CodePath);
+                                                                    await _supervisorMobilityRepository.SaveChangesAsync();
+                                                                }
+
+                                                            }
+                                                            else
+                                                            {
                                                                 //Completamos codePath
                                                                 CodePath.AssyChardId = AssyChartExist.AssyChardId;
 
                                                                 //Crear Code Path
                                                                 await _supervisorMobilityRepository.AssychartCreateCodePath(CodePath);
 
-                                                                //aqui se añade el path creado
-
-                                                                _supervisorMobilityRepository.AssychartAddCodePath(resultCreateAssy, CodePath);
+                                                                //aqui añadimos el path a assy chart
+                                                                _supervisorMobilityRepository.AssychartAddCodePath(AssyChartExist, CodePath);
                                                                 await _supervisorMobilityRepository.SaveChangesAsync();
                                                             }
-
                                                         }
-                                                        else
-                                                        {
-                                                            //Completamos codePath
-                                                            CodePath.AssyChardId = AssyChartExist.AssyChardId;
 
-                                                            //Crear Code Path
-                                                            await _supervisorMobilityRepository.AssychartCreateCodePath(CodePath);
-
-                                                            //aqui añadimos el path a assy chart
-                                                            _supervisorMobilityRepository.AssychartAddCodePath(AssyChartExist, CodePath);
-                                                            await _supervisorMobilityRepository.SaveChangesAsync();
-                                                        }
                                                     }
 
+
+                                                    retries = 0;
+
+                                                    Debug.WriteLine($"Intento {retries} Linea Position [{i}]");
+
+                                                    // Si la operación tiene éxito, puedes salir del bucle
+                                                    break;
+                                                }
+                                                catch (Exception ex)
+                                                {
+                                                    // Maneja la excepción aquí, si es necesario
+                                                    Console.WriteLine($"Intento {retries + 1} Linea Position [{i}] falló: {ex.Message}");
+
+                                                    // Incrementa el número de intentos
+                                                    retries++;
+
+                                                    // Espera el intervalo de tiempo antes de volver a intentarlo
+                                                    await Task.Delay(retryInterval);
                                                 }
 
 
-                                                retries = 0;
 
-                                                Debug.WriteLine($"Intento {retries} Linea Position [{i}]");
-
-                                                // Si la operación tiene éxito, puedes salir del bucle
-                                                break;
-                                            }
-                                            catch (Exception ex)
-                                            {
-                                                // Maneja la excepción aquí, si es necesario
-                                                Console.WriteLine($"Intento {retries + 1} Linea Position [{i}] falló: {ex.Message}");
-
-                                                // Incrementa el número de intentos
-                                                retries++;
-
-                                                // Espera el intervalo de tiempo antes de volver a intentarlo
-                                                await Task.Delay(retryInterval);
-                                            }
-
-
-
-                                        }//While
+                                            }//While
 
                                     }//end is not empety row
                                 }//end else first roe
