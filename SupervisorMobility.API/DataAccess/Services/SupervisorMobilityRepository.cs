@@ -1,5 +1,6 @@
 ﻿
 using AutoMapper;
+using DocumentFormat.OpenXml.Spreadsheet;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.Data.SqlClient;
 using Microsoft.EntityFrameworkCore;
@@ -14,6 +15,7 @@ using SupervisorMobility.API.Models.PATDtos;
 using SupervisorMobility.API.Models.SOSReviewDtos;
 using SupervisorMobility.API.Models.Users;
 using System.Diagnostics;
+using System.Linq;
 using System.Runtime.CompilerServices;
 
 namespace SupervisorMobility.API.Services
@@ -1545,7 +1547,24 @@ namespace SupervisorMobility.API.Services
 
             if(idUser != 0)
             {
-                query = query.Where(j => j.SupervisorId == idUser);
+                //aqui traemos al user para verificar el tipo
+                User? _user = await _context.Users.Include(u => u.Subordinates).Where(p => p.UserId == idUser).FirstOrDefaultAsync();
+
+                if (_user.UserType == 2)
+                {
+                    //List<int> subordinateIds = _user.Subordinates?.Select(subordinate => subordinate.UserId).ToList();
+
+                    //if(subordinateIds.Count > 0)
+                    //    query = query.Where(j => subordinateIds.Contains((int)j.SupervisorId));
+
+
+                    query = query.Where(j => _user.Subordinates.Any() && _user.Subordinates.Select(subordinate => subordinate.UserId).Contains((int)j.SupervisorId));
+                }
+                else if(_user.UserType == 3)
+                {
+                    query = query.Where(j => j.SupervisorId == idUser);
+                }
+
             }
 
             return await query.OrderBy(c => c.JobObservationId).ToListAsync();
