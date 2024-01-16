@@ -1,5 +1,6 @@
 ﻿using AutoMapper;
 using ClosedXML.Excel;
+using DocumentFormat.OpenXml.Spreadsheet;
 using FuzzyString;
 using Microsoft.IdentityModel.Tokens;
 using Slugify;
@@ -651,6 +652,16 @@ namespace SupervisorMobility.API.DataAccess.Services
                             }
                         }
                 }
+                //Fin recoleccinon de datos en bd
+
+
+                //Verificar que el archivo a cargar, el area corresponde con la del supervisor si es admin hay que realizar la carga sin exepcion
+
+
+                string MailSubject = "";
+                string MailBody = "";
+
+
 
                 //Start Massive Upload 
                 string filepath = Directory.GetCurrentDirectory().ToString() + "\\uploads\\massive\\" + trustedFileNameForStorage;
@@ -666,510 +677,555 @@ namespace SupervisorMobility.API.DataAccess.Services
                             int CountCreateOperation = 0;
                             IXLWorksheet ws = workBook.Worksheet(p);
 
-                            var productCode = ws.Name;
-                            Debug.WriteLine($"Product Name: {productCode}");
 
-                            var ProductExist = Products.Select(pair => new
+                            //La optencion del producto ira dada por los tiempos
+
+                            //var productCode = ws.Name;
+                            //Debug.WriteLine($"Product Name: {productCode}");
+
+                            //var ProductExist = Products.Select(pair => new
+                            //{
+                            //    Product = pair,
+                            //    Similarity = 1 - pair.Code.JaccardDistance(productCode)
+                            //}).OrderByDescending(result => result.Similarity).FirstOrDefault();
+
+                            string pageName = ws.Name;
+
+                            var cellAddress = "B6";
+                            IXLCell targetCell = ws.Cell(cellAddress);
+
+                            if (targetCell.IsMerged())
                             {
-                                Product = pair,
-                                Similarity = 1 - pair.Code.JaccardDistance(productCode)
-                            }).OrderByDescending(result => result.Similarity).FirstOrDefault();
-
-                            string auxDistribution = "";
-
-                            bool firstRow = true;
-                            int i = 2;
-                            foreach (IXLRow row in ws.Rows())
-                            {
-                                //Use the first row to add columns to DataTable.
-
-                                if (firstRow)
+                                // La celda está combinada, puedes obtener su contenido
+                                var mergedRange = ws.MergedRanges.FirstOrDefault(r => r.Contains(targetCell.Address.ToString()));
+                                if (mergedRange != null)
                                 {
-                                    firstRow = false;
+                                    Console.WriteLine($"La celda {cellAddress} está combinada. Contenido: {mergedRange.FirstCell().Value}");
+
+                                    // También puedes obtener todas las celdas combinadas
+                                    var combinedCells = mergedRange.CellsUsed().Select(c => c.Address.ToString());
+                                    Console.WriteLine($"Celdas combinadas: {string.Join(", ", combinedCells)}");
                                 }
-                                else
+                            }
+                            else
+                            {
+                                // La celda no está combinada
+                                Console.WriteLine($"La celda {cellAddress} no está combinada. Contenido: {targetCell.Value}");
+                            }
+
+
+                            if (userEntity.UserType == 2)
+                            {
+                                //Comprobacion de que la carga esta pertenece a alguna de las areas
+                                bool noAreaAssigned = true;
+
+
+
+
+                                if(p == 1 && !noAreaAssigned)
                                 {
-                                    if (!row.IsEmpty())
-                                    {
-
-                                        PathInfo PathResume = new PathInfo();
-
-                                        int maxRetries = 5; // Número máximo de intentos
-                                        TimeSpan retryInterval = TimeSpan.FromSeconds(5); // Intervalo de tiempo entre intentos (5 segundos en este caso)
-                                        int retries = 0;
-
-                                        while (retries < maxRetries)
-                                        {
-                                            try
-                                            {
-
-                                                //if (p == 1)
-                                                //{
-                                                var ExcelOpCode = ws.Cell(row.RangeAddress.FirstAddress.RowNumber, 1).Value.ToString() != "" ? ws.Cell(row.RangeAddress.FirstAddress.RowNumber, 1).Value.ToString() : "";
-                                                var ExcelOpDescription = ws.Cell(row.RangeAddress.FirstAddress.RowNumber, 5).Value.ToString() != "" ? ws.Cell(row.RangeAddress.FirstAddress.RowNumber, 5).Value.ToString() : "";
-
-                                                var ExcelAreaCode = ws.Cell(row.RangeAddress.FirstAddress.RowNumber, 3).Value.ToString() != "" ? ws.Cell(row.RangeAddress.FirstAddress.RowNumber, 3).Value.ToString() : "";
-                                                var ExcelAreaDescription = ws.Cell(row.RangeAddress.FirstAddress.RowNumber, 4).Value.ToString() != "" ? ws.Cell(row.RangeAddress.FirstAddress.RowNumber, 4).Value.ToString() : "";
-
-                                                var ExcelDistDescription = ws.Cell(row.RangeAddress.FirstAddress.RowNumber, 6).Value.ToString() != "" ? ws.Cell(row.RangeAddress.FirstAddress.RowNumber, 6).Value.ToString() : "";
-
-                                                if (ExcelOpCode.IsNullOrEmpty() && ExcelOpDescription.IsNullOrEmpty() &&
-                                                    ExcelAreaCode.IsNullOrEmpty() && ExcelAreaDescription.IsNullOrEmpty() && ExcelDistDescription.IsNullOrEmpty())
-                                                {
-                                                    break;
-                                                }
-                                                else if (ExcelAreaCode.IsNullOrEmpty() && ExcelAreaDescription.IsNullOrEmpty())
-                                                {
-                                                    break;
-                                                }
-                                                else if (ExcelAreaCode.IsNullOrEmpty() && ExcelDistDescription.IsNullOrEmpty())
-                                                {
-                                                    break;
-                                                }
-
-                                                if (!ExcelDistDescription.IsNullOrEmpty())
-                                                {
-                                                    auxDistribution = ws.Cell(row.RangeAddress.FirstAddress.RowNumber, 6).Value.ToString() != "" ? ws.Cell(row.RangeAddress.FirstAddress.RowNumber, 6).Value.ToString() : "";
-                                                }
-                                                else if (ExcelDistDescription == "")
-                                                {
-                                                    ExcelDistDescription = auxDistribution;
-                                                }
-
-
-                                                if (ProductExist != null && ProductExist.Similarity > 0.5) // Ajusta este umbral según tus necesidades
-                                                {
-                                                    PathResume.ProductID = ProductExist.Product.ProductId;
-                                                }
-
-                                                // Buscar el ID de planta en el diccionario de plantas
-                                                var planta = PlantsDictionary.Values.FirstOrDefault(p => p.PlantId == plantnameid);
-                                                if (planta != null)
-                                                {
-                                                    PathResume.PlantId = planta.PlantId;
-                                                }
-                                                else
-                                                {
-                                                    //mensaje de error
-                                                    return;
-                                                }
-
-
-                                                if (PathResume.PlantId > 0)
-                                                {// Buscar coincidencia en area
-                                                    var coincidenciasAreas = AreasDictionary
-                                                           .Where(pair => pair.Key.Item1 == PathResume.PlantId) // Filtramos por ID de planta
-                                                           .Select(pair => new
-                                                           {
-                                                               Area = pair.Value,
-                                                               Similarity = pair.Value.Code.Equals(ExcelAreaCode)
-                                                                   ? 1.0 // Si los códigos coinciden exactamente, la similitud es máxima
-                                                                   : 1 - pair.Value.Code.JaccardDistance(ExcelAreaCode)
-                                                           })
-                                                           .OrderByDescending(result => result.Similarity)
-                                                           .FirstOrDefault();
-
-                                                    if (coincidenciasAreas != null && coincidenciasAreas.Similarity >= 0.70) // Ajusta este umbral según tus necesidades
-                                                    {
-                                                        PathResume.AreaId = coincidenciasAreas.Area.AreaId;
-                                                        PathResume.DescripcionArea = coincidenciasAreas.Area.Description;
-                                                    }
-
-
-                                                    if (PathResume.AreaId > 0)
-                                                    {
-                                                        // Buscar coincidencia en distribucion
-                                                        var coincidenciasDistributions = DistributionsDictionary
-                                                            .Where(pair => pair.Key.Item1 == PathResume.PlantId && pair.Key.Item2 == PathResume.AreaId)
-                                                            .Select(pair => new
-                                                            {
-                                                                Distribution = pair.Value,
-                                                                Similarity = 1 - pair.Value.Description.JaccardDistance(ExcelDistDescription)
-                                                            })
-                                                            .OrderByDescending(result => result.Similarity)
-                                                            .FirstOrDefault();
-
-                                                        if (coincidenciasDistributions != null && coincidenciasDistributions.Similarity > 0.5)
-                                                        {
-                                                            PathResume.DistributionId = coincidenciasDistributions.Distribution.DistributionId;
-                                                            PathResume.DescripcionDistribucion = coincidenciasDistributions.Distribution.Description;
-                                                        }
-
-
-                                                        if (PathResume.DistributionId > 0)
-                                                        {
-
-                                                            var coincidenciasOperaciones = OperationsDictionary
-                                                           .Where(pair => pair.Key.Item1 == PathResume.PlantId && pair.Key.Item2 == PathResume.AreaId && pair.Key.Item3 == PathResume.DistributionId)
-                                                           .Select(pair => new
-                                                           {
-                                                               Operation = pair.Value,
-                                                               Similarity = (pair.Value.Code == ExcelOpCode && pair.Value.Description == ExcelOpDescription ? 1 : 0)
-                                                           })
-                                                           .OrderByDescending(result => result.Similarity)
-                                                           .FirstOrDefault();
-
-                                                            if (coincidenciasOperaciones != null && coincidenciasOperaciones.Similarity > 0.5)
-                                                            {
-                                                                PathResume.OperationId = coincidenciasOperaciones.Operation.OperationId;
-                                                            }
-
-                                                            if (PathResume.OperationId > 0)
-                                                            {
-                                                                //existe no se hace nada
-                                                            }
-                                                            else
-                                                            {//No existe hay que crearla
-                                                                var operationForCreate = _mapper.Map<OperationForCreationDto>(new OperationForCreationDto() { Code = ExcelOpCode, Description = ExcelOpDescription, IsActive = true });
-                                                                var finalOperation = _mapper.Map<Operation>(operationForCreate);
-                                                                await _supervisorMobilityRepository.AddOperationForDistributionAsync((int)PathResume.AreaId, (int)PathResume.DistributionId, finalOperation);
-                                                                await _supervisorMobilityRepository.SaveChangesAsync();
-
-                                                                OperationsDictionary.Add(((int)PathResume.PlantId, (int)PathResume.AreaId, (int)PathResume.DistributionId, finalOperation.OperationId), finalOperation);
-                                                                CountCreateOperation++;
-                                                            }
-
-
-                                                        }//end if distribution >0
-                                                        else
-                                                        {
-                                                            //distribution no existe- se crea todo
-                                                            string codeGen = ExcelDistDescription;
-
-                                                            SlugHelper slugHelper = new SlugHelper();
-                                                            string slug = slugHelper.GenerateSlug(codeGen);
-
-                                                            var distributionForCreate = _mapper.Map<DistributionForCreationDto>(new DistributionForCreationDto() { Code = slug, Description = ExcelDistDescription, IsActive = true });
-                                                            var finalDistribution = _mapper.Map<Distribution>(distributionForCreate);
-                                                            await _supervisorMobilityRepository.AddDistributionForPlantAsync((int)PathResume.PlantId, (int)PathResume.AreaId, finalDistribution);
-                                                            await _supervisorMobilityRepository.SaveChangesAsync();
-                                                            PathResume.DistributionId = finalDistribution.DistributionId;
-                                                            DistributionsDictionary.Add(((int)PathResume.PlantId, (int)PathResume.AreaId, (int)PathResume.DistributionId), finalDistribution);
-
-                                                            await _supervisorMobilityRepository.AddDistributionForProductAsync((int)PathResume.ProductID, finalDistribution);
-
-                                                            //la operacion no existira
-
-                                                            var operationForCreate = _mapper.Map<OperationForCreationDto>(new OperationForCreationDto() { Code = ExcelOpCode, Description = ExcelOpDescription, IsActive = true });
-                                                            var finalOperation = _mapper.Map<Operation>(operationForCreate);
-                                                            await _supervisorMobilityRepository.AddOperationForDistributionAsync((int)PathResume.AreaId, (int)PathResume.DistributionId, finalOperation);
-                                                            await _supervisorMobilityRepository.SaveChangesAsync();
-
-                                                            OperationsDictionary.Add(((int)PathResume.PlantId, (int)PathResume.AreaId, (int)PathResume.DistributionId, finalOperation.OperationId), finalOperation);
-
-                                                            CountCreateOperation++;
-
-                                                        }//end else distribuccion no existe
-                                                    }//end if area > 0
-                                                    else
-                                                    {
-                                                        //area no existe- se crea todo
-                                                        var areaForCreate = _mapper.Map<AreaForCreationDto>(new AreaForCreationDto() { Code = ExcelAreaCode, Description = ExcelAreaDescription, IsActive = true });
-
-                                                        var finalArea = _mapper.Map<Area>(areaForCreate);
-                                                        finalArea.PlantId = (int)PathResume.PlantId;
-
-                                                        await _supervisorMobilityRepository.AddArea(finalArea);
-                                                        await _supervisorMobilityRepository.AddAreaForPlantAsync((int)PathResume.PlantId, finalArea);
-                                                        await _supervisorMobilityRepository.SaveChangesAsync();
-                                                        PathResume.AreaId = finalArea.AreaId;
-
-                                                        AreasDictionary.Add(((int)PathResume.PlantId, (int)PathResume.AreaId), finalArea);
-
-                                                        //la distribuccion no existira
-                                                        string codeGen = ExcelDistDescription;
-
-                                                        SlugHelper slugHelper = new SlugHelper();
-                                                        string slug = slugHelper.GenerateSlug(codeGen);
-
-                                                        var distributionForCreate = _mapper.Map<DistributionForCreationDto>(new DistributionForCreationDto() { Code = slug, Description = ExcelDistDescription, IsActive = true });
-                                                        var finalDistribution = _mapper.Map<Distribution>(distributionForCreate);
-                                                        await _supervisorMobilityRepository.AddDistributionForPlantAsync((int)PathResume.PlantId, (int)PathResume.AreaId, finalDistribution);
-                                                        await _supervisorMobilityRepository.SaveChangesAsync();
-                                                        PathResume.DistributionId = finalDistribution.DistributionId;
-
-                                                        DistributionsDictionary.Add(((int)PathResume.PlantId, (int)PathResume.AreaId, (int)PathResume.DistributionId), finalDistribution);
-                                                        await _supervisorMobilityRepository.AddDistributionForProductAsync((int)PathResume.ProductID, finalDistribution);
-
-                                                        //la operacion no existira
-
-                                                        var operationForCreate = _mapper.Map<OperationForCreationDto>(new OperationForCreationDto() { Code = ExcelOpCode, Description = ExcelOpDescription, IsActive = true });
-                                                        var finalOperation = _mapper.Map<Operation>(operationForCreate);
-                                                        await _supervisorMobilityRepository.AddOperationForDistributionAsync((int)PathResume.AreaId, (int)PathResume.DistributionId, finalOperation);
-                                                        await _supervisorMobilityRepository.SaveChangesAsync();
-
-                                                        OperationsDictionary.Add(((int)PathResume.PlantId, (int)PathResume.AreaId, (int)PathResume.DistributionId, finalOperation.OperationId), finalOperation);
-                                                        CountCreateOperation++;
-
-                                                    }
-
-                                                }//end if plant >0
-                                                 // no hay chance de que la planta no exista
-
-
-                                                //}
-                                                //else
-                                                //{
-                                                //    //paginas siguientes
-                                                //    var ExcelOpCode = ws.Cell(row.RangeAddress.FirstAddress.RowNumber, 1).Value.ToString() != "" ? ws.Cell(row.RangeAddress.FirstAddress.RowNumber, 1).Value.ToString() : "";
-                                                //    var ExcelOpDescription = ws.Cell(row.RangeAddress.FirstAddress.RowNumber, 4).Value.ToString() != "" ? ws.Cell(row.RangeAddress.FirstAddress.RowNumber, 4).Value.ToString() : "";
-
-                                                //    var ExcelAreaCode = ws.Cell(row.RangeAddress.FirstAddress.RowNumber, 3).Value.ToString() != "" ? ws.Cell(row.RangeAddress.FirstAddress.RowNumber, 3).Value.ToString() : "";
-                                                //    var ExcelDistDescription = ws.Cell(row.RangeAddress.FirstAddress.RowNumber, 5).Value.ToString() != "" ? ws.Cell(row.RangeAddress.FirstAddress.RowNumber, 5).Value.ToString() : "";
-
-                                                //    if (ExcelOpCode.IsNullOrEmpty() && ExcelOpDescription.IsNullOrEmpty() &&
-                                                //       ExcelAreaCode.IsNullOrEmpty() && ExcelDistDescription.IsNullOrEmpty())
-                                                //    {
-                                                //        break;
-                                                //    }
-                                                //    else if (ExcelAreaCode.IsNullOrEmpty() && ExcelDistDescription.IsNullOrEmpty())
-                                                //    {
-                                                //        break;
-                                                //    }
-
-                                                //    if (ExcelOpCode == "" && ExcelOpDescription == "" && ExcelAreaCode == "" && ExcelDistDescription == "")
-                                                //    {
-                                                //        break;
-                                                //    }
-
-                                                //    if (ExcelDistDescription != "")
-                                                //    {
-                                                //        auxDistribution = ws.Cell(row.RangeAddress.FirstAddress.RowNumber, 5).Value.ToString() != "" ? ws.Cell(row.RangeAddress.FirstAddress.RowNumber, 5).Value.ToString() : "";
-                                                //    }
-                                                //    else if (ExcelDistDescription == "")
-                                                //    {
-                                                //        ExcelDistDescription = auxDistribution;
-                                                //    }
-
-
-
-                                                //    if (ProductExist != null && ProductExist.Similarity > 0.5) // Ajusta este umbral según tus necesidades
-                                                //    {
-                                                //        PathResume.ProductID = ProductExist.Product.ProductId;
-                                                //    }
-
-                                                //    // Buscar el ID de planta en el diccionario de plantas
-                                                //    var planta = PlantsDictionary.Values.FirstOrDefault(p => p.PlantId == plantnameid);
-                                                //    if (planta != null)
-                                                //    {
-                                                //        PathResume.PlantId = planta.PlantId;
-                                                //    }
-
-
-                                                //    if (PathResume.PlantId > 0)
-                                                //    {// Buscar coincidencia en area
-                                                //     //var coincidenciasAreas = AreasDictionary.Where(pair => pair.Key.Item1 == PathResume.PlantId) // Filtramos por ID de planta
-                                                //     //.Select(pair => new
-                                                //     //{
-                                                //     //    Area = pair.Value,
-                                                //     //    Similarity = (pair.Value.Code == ExcelAreaCode ? 1 : 0)
-                                                //     //})
-                                                //     //.OrderByDescending(result => result.Similarity)
-                                                //     //.FirstOrDefault();
-
-
-                                                //        var coincidenciasAreas = AreasDictionary
-                                                //                .Where(pair => pair.Key.Item1 == PathResume.PlantId) // Filtramos por ID de planta
-                                                //                .Select(pair => new
-                                                //                {
-                                                //                    Area = pair.Value,
-                                                //                    Similarity = pair.Value.Code.Equals(ExcelAreaCode)
-                                                //                        ? 1.0 // Si los códigos coinciden exactamente, la similitud es máxima
-                                                //                        : 1 - pair.Value.Code.JaccardDistance(ExcelAreaCode)
-                                                //                })
-                                                //                .OrderByDescending(result => result.Similarity)
-                                                //                .FirstOrDefault();
-
-
-                                                //        if (coincidenciasAreas != null && coincidenciasAreas.Similarity >= 0.70) // Ajusta este umbral según tus necesidades
-                                                //        {
-                                                //            PathResume.AreaId = coincidenciasAreas.Area.AreaId;
-                                                //            PathResume.DescripcionArea = coincidenciasAreas.Area.Description;
-                                                //        }
-
-
-                                                //        if (PathResume.AreaId > 0)
-                                                //        {
-                                                //            // Buscar coincidencia en distribucion
-                                                //            var coincidenciasDistributions = DistributionsDictionary
-                                                //                .Where(pair => pair.Key.Item1 == PathResume.PlantId && pair.Key.Item2 == PathResume.AreaId)
-                                                //                .Select(pair => new
-                                                //                {
-                                                //                    Distribution = pair.Value,
-                                                //                    Similarity = 1 - pair.Value.Description.JaccardDistance(ExcelDistDescription)
-                                                //                })
-                                                //                .OrderByDescending(result => result.Similarity)
-                                                //                .FirstOrDefault();
-
-                                                //            if (coincidenciasDistributions != null && coincidenciasDistributions.Similarity > 0.5)
-                                                //            {
-                                                //                PathResume.DistributionId = coincidenciasDistributions.Distribution.DistributionId;
-                                                //                PathResume.DescripcionDistribucion = coincidenciasDistributions.Distribution.Description;
-                                                //            }
-
-
-                                                //            if (PathResume.DistributionId > 0)
-                                                //            {
-
-                                                //                var coincidenciasOperaciones = OperationsDictionary
-                                                //               .Where(pair => pair.Key.Item1 == PathResume.PlantId && pair.Key.Item2 == PathResume.AreaId && pair.Key.Item3 == PathResume.DistributionId)
-                                                //               .Select(pair => new
-                                                //               {
-                                                //                   Operation = pair.Value,
-                                                //                   Similarity = (pair.Value.Code == ExcelOpCode && pair.Value.Description == ExcelOpDescription ? 1 : 0)
-                                                //               })
-                                                //               .OrderByDescending(result => result.Similarity)
-                                                //               .FirstOrDefault();
-
-                                                //                if (coincidenciasOperaciones != null && coincidenciasOperaciones.Similarity > 0.5)
-                                                //                {
-                                                //                    PathResume.OperationId = coincidenciasOperaciones.Operation.OperationId;
-                                                //                }
-
-                                                //                if (PathResume.OperationId > 0)
-                                                //                {
-                                                //                    //existe no se hace nada
-                                                //                }
-                                                //                else
-                                                //                {//No existe hay que crearla
-                                                //                    var operationForCreate = _mapper.Map<OperationForCreationDto>(new OperationForCreationDto() { Code = ExcelOpCode, Description = ExcelOpDescription, IsActive = true });
-                                                //                    var finalOperation = _mapper.Map<Operation>(operationForCreate);
-                                                //                    await _supervisorMobilityRepository.AddOperationForDistributionAsync((int)PathResume.AreaId, (int)PathResume.DistributionId, finalOperation);
-                                                //                    await _supervisorMobilityRepository.SaveChangesAsync();
-
-                                                //                    OperationsDictionary.Add(((int)PathResume.PlantId, (int)PathResume.AreaId, (int)PathResume.DistributionId, finalOperation.OperationId), finalOperation);
-                                                //                    CountCreateOperation++;
-                                                //                }
-
-
-                                                //            }//end if distribution >0
-                                                //            else
-                                                //            {
-                                                //                //distribution no existe- se crea todo
-                                                //                string codeGen = ExcelDistDescription;
-
-                                                //                SlugHelper slugHelper = new SlugHelper();
-                                                //                string slug = slugHelper.GenerateSlug(codeGen);
-
-                                                //                var distributionForCreate = _mapper.Map<DistributionForCreationDto>(new DistributionForCreationDto() { Code = slug, Description = ExcelDistDescription, IsActive = true });
-                                                //                var finalDistribution = _mapper.Map<Distribution>(distributionForCreate);
-                                                //                await _supervisorMobilityRepository.AddDistributionForPlantAsync((int)PathResume.PlantId, (int)PathResume.AreaId, finalDistribution);
-                                                //                await _supervisorMobilityRepository.SaveChangesAsync();
-                                                //                PathResume.DistributionId = finalDistribution.DistributionId;
-                                                //                DistributionsDictionary.Add(((int)PathResume.PlantId, (int)PathResume.AreaId, (int)PathResume.DistributionId), finalDistribution);
-
-                                                //                await _supervisorMobilityRepository.AddDistributionForProductAsync((int)PathResume.ProductID, finalDistribution);
-
-                                                //                //la operacion no existira
-
-                                                //                var operationForCreate = _mapper.Map<OperationForCreationDto>(new OperationForCreationDto() { Code = ExcelOpCode, Description = ExcelOpDescription, IsActive = true });
-                                                //                var finalOperation = _mapper.Map<Operation>(operationForCreate);
-                                                //                await _supervisorMobilityRepository.AddOperationForDistributionAsync((int)PathResume.AreaId, (int)PathResume.DistributionId, finalOperation);
-                                                //                await _supervisorMobilityRepository.SaveChangesAsync();
-
-                                                //                OperationsDictionary.Add(((int)PathResume.PlantId, (int)PathResume.AreaId, (int)PathResume.DistributionId, finalOperation.OperationId), finalOperation);
-                                                //                CountCreateOperation++;
-                                                //            }
-                                                //        }//end if area > 0
-                                                //        else
-                                                //        {
-                                                //            //area no existe- se crea todo
-                                                //            var areaForCreate = _mapper.Map<AreaForCreationDto>(new AreaForCreationDto() { Code = ExcelAreaCode, Description = ExcelAreaCode, IsActive = true });
-
-                                                //            var finalArea = _mapper.Map<Area>(areaForCreate);
-                                                //            finalArea.PlantId = (int)PathResume.PlantId;
-
-                                                //            await _supervisorMobilityRepository.AddArea(finalArea);
-                                                //            await _supervisorMobilityRepository.AddAreaForPlantAsync((int)PathResume.PlantId, finalArea);
-                                                //            await _supervisorMobilityRepository.SaveChangesAsync();
-                                                //            PathResume.AreaId = finalArea.AreaId;
-
-                                                //            AreasDictionary.Add(((int)PathResume.PlantId, (int)PathResume.AreaId), finalArea);
-
-                                                //            ////
-                                                //            //la distribuccion no existira
-                                                //            string codeGen = ExcelDistDescription;
-
-                                                //            SlugHelper slugHelper = new SlugHelper();
-                                                //            string slug = slugHelper.GenerateSlug(codeGen);
-
-                                                //            var distributionForCreate = _mapper.Map<DistributionForCreationDto>(new DistributionForCreationDto() { Code = slug, Description = ExcelDistDescription, IsActive = true });
-                                                //            var finalDistribution = _mapper.Map<Distribution>(distributionForCreate);
-                                                //            await _supervisorMobilityRepository.AddDistributionForPlantAsync((int)PathResume.PlantId, (int)PathResume.AreaId, finalDistribution);
-                                                //            await _supervisorMobilityRepository.SaveChangesAsync();
-                                                //            PathResume.DistributionId = finalDistribution.DistributionId;
-
-                                                //            DistributionsDictionary.Add(((int)PathResume.PlantId, (int)PathResume.AreaId, (int)PathResume.DistributionId), finalDistribution);
-                                                //            await _supervisorMobilityRepository.AddDistributionForProductAsync((int)PathResume.ProductID, finalDistribution);
-
-                                                //            //la operacion no existira
-
-                                                //            var operationForCreate = _mapper.Map<OperationForCreationDto>(new OperationForCreationDto() { Code = ExcelOpCode, Description = ExcelOpDescription, IsActive = true });
-                                                //            var finalOperation = _mapper.Map<Operation>(operationForCreate);
-                                                //            await _supervisorMobilityRepository.AddOperationForDistributionAsync((int)PathResume.AreaId, (int)PathResume.DistributionId, finalOperation);
-                                                //            await _supervisorMobilityRepository.SaveChangesAsync();
-
-                                                //            OperationsDictionary.Add(((int)PathResume.PlantId, (int)PathResume.AreaId, (int)PathResume.DistributionId, finalOperation.OperationId), finalOperation);
-                                                //            CountCreateOperation++;
-                                                //        }
-
-                                                //    }//end if plant >0
-                                                //     // no hay chance de que la planta no exista
-
-
-                                                //}//else paginas siguientes
-
-                                                var AssyChartExist = await _supervisorMobilityRepository.GetAssyChartForJobObservationAsync((int)PathResume.PlantId, (int)PathResume.AreaId, (int)PathResume.DistributionId);
-
-                                                if (AssyChartExist is null)
-                                                {
-                                                    AssyChartForCreation assychartForCreate = new AssyChartForCreation()
-                                                    {
-                                                        PlantId = (int)PathResume.PlantId,
-                                                        AreaId = (int)PathResume.AreaId,
-                                                        DistributionId = (int)PathResume.DistributionId,
-                                                        CreationDate = DateTime.Now,
-                                                        ModificationDate = DateTime.Now,
-                                                        IsActive = true
-                                                    };
-
-                                                    var resultCreateAssy = await _assyChartService.CreateAssyChartAsync(assychartForCreate);
-                                                    CountCreateAssycchart++;
-                                                    if (resultCreateAssy != null)
-                                                    {
-                                                        //se crea assy chart cout
-                                                        Debug.WriteLine($"Create assychart id {resultCreateAssy.AssyChardId} plantid {(int)PathResume.PlantId} areaid {(int)PathResume.AreaId} distributionid {(int)PathResume.DistributionId} ");
-                                                    }
-                                                }
-
-                                                retries = 0;
-                                                // Si la operación tiene éxito, puedes salir del bucle
-                                                break;
-                                            }
-                                            catch (Exception ex)
-                                            {
-                                                // Maneja la excepción aquí, si es necesario
-                                                Debug.WriteLine($"I Value:{i}");
-                                                Debug.WriteLine($"Intento {retries + 1} falló: {ex.Message}");
-
-                                                // Incrementa el número de intentos
-                                                retries++;
-
-                                                // Espera el intervalo de tiempo antes de volver a intentarlo
-                                                await Task.Delay(retryInterval);
-                                            }
-
-
-
-                                        }//end While 
-                                        Debug.WriteLine($"{productCode} :{i}");
-                                        i++;
-                                    }//end is not empety row
-                                }//end else first roe
-
-                            }//end foreach de renglones en pagina
-
-                            Debug.WriteLine($"Pagina {p} : {productCode} -> New Operaciones {CountCreateOperation}");
+                                    //incluimos asunto del correo 
+
+                                }
+                            }
+                            else if(userEntity.UserType == 3) {
+                                //Comprobacion, la carga no pertenece a su area
+                            }
+
+
+                            //bool firstRow = true;
+                            //int i = 2;
+                            //foreach (IXLRow row in ws.Rows())
+                            //{
+                            //    //Use the first row to add columns to DataTable.
+
+                            //    if (firstRow)
+                            //    {
+                            //        firstRow = false;
+                            //    }
+                            //    else
+                            //    {
+                            //        if (!row.IsEmpty())
+                            //        {
+
+                            //            PathInfo PathResume = new PathInfo();
+
+                            //            int maxRetries = 5; // Número máximo de intentos
+                            //            TimeSpan retryInterval = TimeSpan.FromSeconds(5); // Intervalo de tiempo entre intentos (5 segundos en este caso)
+                            //            int retries = 0;
+
+                            //            while (retries < maxRetries)
+                            //            {
+                            //                try
+                            //                {
+
+                            //                    //if (p == 1)
+                            //                    //{
+                            //                    var ExcelOpCode = ws.Cell(row.RangeAddress.FirstAddress.RowNumber, 1).Value.ToString() != "" ? ws.Cell(row.RangeAddress.FirstAddress.RowNumber, 1).Value.ToString() : "";
+                            //                    var ExcelOpDescription = ws.Cell(row.RangeAddress.FirstAddress.RowNumber, 5).Value.ToString() != "" ? ws.Cell(row.RangeAddress.FirstAddress.RowNumber, 5).Value.ToString() : "";
+
+                            //                    var ExcelAreaCode = ws.Cell(row.RangeAddress.FirstAddress.RowNumber, 3).Value.ToString() != "" ? ws.Cell(row.RangeAddress.FirstAddress.RowNumber, 3).Value.ToString() : "";
+                            //                    var ExcelAreaDescription = ws.Cell(row.RangeAddress.FirstAddress.RowNumber, 4).Value.ToString() != "" ? ws.Cell(row.RangeAddress.FirstAddress.RowNumber, 4).Value.ToString() : "";
+
+                            //                    var ExcelDistDescription = ws.Cell(row.RangeAddress.FirstAddress.RowNumber, 6).Value.ToString() != "" ? ws.Cell(row.RangeAddress.FirstAddress.RowNumber, 6).Value.ToString() : "";
+
+                            //                    if (ExcelOpCode.IsNullOrEmpty() && ExcelOpDescription.IsNullOrEmpty() &&
+                            //                        ExcelAreaCode.IsNullOrEmpty() && ExcelAreaDescription.IsNullOrEmpty() && ExcelDistDescription.IsNullOrEmpty())
+                            //                    {
+                            //                        break;
+                            //                    }
+                            //                    else if (ExcelAreaCode.IsNullOrEmpty() && ExcelAreaDescription.IsNullOrEmpty())
+                            //                    {
+                            //                        break;
+                            //                    }
+                            //                    else if (ExcelAreaCode.IsNullOrEmpty() && ExcelDistDescription.IsNullOrEmpty())
+                            //                    {
+                            //                        break;
+                            //                    }
+
+                            //                    if (!ExcelDistDescription.IsNullOrEmpty())
+                            //                    {
+                            //                        auxDistribution = ws.Cell(row.RangeAddress.FirstAddress.RowNumber, 6).Value.ToString() != "" ? ws.Cell(row.RangeAddress.FirstAddress.RowNumber, 6).Value.ToString() : "";
+                            //                    }
+                            //                    else if (ExcelDistDescription == "")
+                            //                    {
+                            //                        ExcelDistDescription = auxDistribution;
+                            //                    }
+
+
+                            //                    if (ProductExist != null && ProductExist.Similarity > 0.5) // Ajusta este umbral según tus necesidades
+                            //                    {
+                            //                        PathResume.ProductID = ProductExist.Product.ProductId;
+                            //                    }
+
+                            //                    // Buscar el ID de planta en el diccionario de plantas
+                            //                    var planta = PlantsDictionary.Values.FirstOrDefault(p => p.PlantId == plantnameid);
+                            //                    if (planta != null)
+                            //                    {
+                            //                        PathResume.PlantId = planta.PlantId;
+                            //                    }
+                            //                    else
+                            //                    {
+                            //                        //mensaje de error
+                            //                        return;
+                            //                    }
+
+
+                            //                    if (PathResume.PlantId > 0)
+                            //                    {// Buscar coincidencia en area
+                            //                        var coincidenciasAreas = AreasDictionary
+                            //                               .Where(pair => pair.Key.Item1 == PathResume.PlantId) // Filtramos por ID de planta
+                            //                               .Select(pair => new
+                            //                               {
+                            //                                   Area = pair.Value,
+                            //                                   Similarity = pair.Value.Code.Equals(ExcelAreaCode)
+                            //                                       ? 1.0 // Si los códigos coinciden exactamente, la similitud es máxima
+                            //                                       : 1 - pair.Value.Code.JaccardDistance(ExcelAreaCode)
+                            //                               })
+                            //                               .OrderByDescending(result => result.Similarity)
+                            //                               .FirstOrDefault();
+
+                            //                        if (coincidenciasAreas != null && coincidenciasAreas.Similarity >= 0.70) // Ajusta este umbral según tus necesidades
+                            //                        {
+                            //                            PathResume.AreaId = coincidenciasAreas.Area.AreaId;
+                            //                            PathResume.DescripcionArea = coincidenciasAreas.Area.Description;
+                            //                        }
+
+
+                            //                        if (PathResume.AreaId > 0)
+                            //                        {
+                            //                            // Buscar coincidencia en distribucion
+                            //                            var coincidenciasDistributions = DistributionsDictionary
+                            //                                .Where(pair => pair.Key.Item1 == PathResume.PlantId && pair.Key.Item2 == PathResume.AreaId)
+                            //                                .Select(pair => new
+                            //                                {
+                            //                                    Distribution = pair.Value,
+                            //                                    Similarity = 1 - pair.Value.Description.JaccardDistance(ExcelDistDescription)
+                            //                                })
+                            //                                .OrderByDescending(result => result.Similarity)
+                            //                                .FirstOrDefault();
+
+                            //                            if (coincidenciasDistributions != null && coincidenciasDistributions.Similarity > 0.5)
+                            //                            {
+                            //                                PathResume.DistributionId = coincidenciasDistributions.Distribution.DistributionId;
+                            //                                PathResume.DescripcionDistribucion = coincidenciasDistributions.Distribution.Description;
+                            //                            }
+
+
+                            //                            if (PathResume.DistributionId > 0)
+                            //                            {
+
+                            //                                var coincidenciasOperaciones = OperationsDictionary
+                            //                               .Where(pair => pair.Key.Item1 == PathResume.PlantId && pair.Key.Item2 == PathResume.AreaId && pair.Key.Item3 == PathResume.DistributionId)
+                            //                               .Select(pair => new
+                            //                               {
+                            //                                   Operation = pair.Value,
+                            //                                   Similarity = (pair.Value.Code == ExcelOpCode && pair.Value.Description == ExcelOpDescription ? 1 : 0)
+                            //                               })
+                            //                               .OrderByDescending(result => result.Similarity)
+                            //                               .FirstOrDefault();
+
+                            //                                if (coincidenciasOperaciones != null && coincidenciasOperaciones.Similarity > 0.5)
+                            //                                {
+                            //                                    PathResume.OperationId = coincidenciasOperaciones.Operation.OperationId;
+                            //                                }
+
+                            //                                if (PathResume.OperationId > 0)
+                            //                                {
+                            //                                    //existe no se hace nada
+                            //                                }
+                            //                                else
+                            //                                {//No existe hay que crearla
+                            //                                    var operationForCreate = _mapper.Map<OperationForCreationDto>(new OperationForCreationDto() { Code = ExcelOpCode, Description = ExcelOpDescription, IsActive = true });
+                            //                                    var finalOperation = _mapper.Map<Operation>(operationForCreate);
+                            //                                    await _supervisorMobilityRepository.AddOperationForDistributionAsync((int)PathResume.AreaId, (int)PathResume.DistributionId, finalOperation);
+                            //                                    await _supervisorMobilityRepository.SaveChangesAsync();
+
+                            //                                    OperationsDictionary.Add(((int)PathResume.PlantId, (int)PathResume.AreaId, (int)PathResume.DistributionId, finalOperation.OperationId), finalOperation);
+                            //                                    CountCreateOperation++;
+                            //                                }
+
+
+                            //                            }//end if distribution >0
+                            //                            else
+                            //                            {
+                            //                                //distribution no existe- se crea todo
+                            //                                string codeGen = ExcelDistDescription;
+
+                            //                                SlugHelper slugHelper = new SlugHelper();
+                            //                                string slug = slugHelper.GenerateSlug(codeGen);
+
+                            //                                var distributionForCreate = _mapper.Map<DistributionForCreationDto>(new DistributionForCreationDto() { Code = slug, Description = ExcelDistDescription, IsActive = true });
+                            //                                var finalDistribution = _mapper.Map<Distribution>(distributionForCreate);
+                            //                                await _supervisorMobilityRepository.AddDistributionForPlantAsync((int)PathResume.PlantId, (int)PathResume.AreaId, finalDistribution);
+                            //                                await _supervisorMobilityRepository.SaveChangesAsync();
+                            //                                PathResume.DistributionId = finalDistribution.DistributionId;
+                            //                                DistributionsDictionary.Add(((int)PathResume.PlantId, (int)PathResume.AreaId, (int)PathResume.DistributionId), finalDistribution);
+
+                            //                                await _supervisorMobilityRepository.AddDistributionForProductAsync((int)PathResume.ProductID, finalDistribution);
+
+                            //                                //la operacion no existira
+
+                            //                                var operationForCreate = _mapper.Map<OperationForCreationDto>(new OperationForCreationDto() { Code = ExcelOpCode, Description = ExcelOpDescription, IsActive = true });
+                            //                                var finalOperation = _mapper.Map<Operation>(operationForCreate);
+                            //                                await _supervisorMobilityRepository.AddOperationForDistributionAsync((int)PathResume.AreaId, (int)PathResume.DistributionId, finalOperation);
+                            //                                await _supervisorMobilityRepository.SaveChangesAsync();
+
+                            //                                OperationsDictionary.Add(((int)PathResume.PlantId, (int)PathResume.AreaId, (int)PathResume.DistributionId, finalOperation.OperationId), finalOperation);
+
+                            //                                CountCreateOperation++;
+
+                            //                            }//end else distribuccion no existe
+                            //                        }//end if area > 0
+                            //                        else
+                            //                        {
+                            //                            //area no existe- se crea todo
+                            //                            var areaForCreate = _mapper.Map<AreaForCreationDto>(new AreaForCreationDto() { Code = ExcelAreaCode, Description = ExcelAreaDescription, IsActive = true });
+
+                            //                            var finalArea = _mapper.Map<Area>(areaForCreate);
+                            //                            finalArea.PlantId = (int)PathResume.PlantId;
+
+                            //                            await _supervisorMobilityRepository.AddArea(finalArea);
+                            //                            await _supervisorMobilityRepository.AddAreaForPlantAsync((int)PathResume.PlantId, finalArea);
+                            //                            await _supervisorMobilityRepository.SaveChangesAsync();
+                            //                            PathResume.AreaId = finalArea.AreaId;
+
+                            //                            AreasDictionary.Add(((int)PathResume.PlantId, (int)PathResume.AreaId), finalArea);
+
+                            //                            //la distribuccion no existira
+                            //                            string codeGen = ExcelDistDescription;
+
+                            //                            SlugHelper slugHelper = new SlugHelper();
+                            //                            string slug = slugHelper.GenerateSlug(codeGen);
+
+                            //                            var distributionForCreate = _mapper.Map<DistributionForCreationDto>(new DistributionForCreationDto() { Code = slug, Description = ExcelDistDescription, IsActive = true });
+                            //                            var finalDistribution = _mapper.Map<Distribution>(distributionForCreate);
+                            //                            await _supervisorMobilityRepository.AddDistributionForPlantAsync((int)PathResume.PlantId, (int)PathResume.AreaId, finalDistribution);
+                            //                            await _supervisorMobilityRepository.SaveChangesAsync();
+                            //                            PathResume.DistributionId = finalDistribution.DistributionId;
+
+                            //                            DistributionsDictionary.Add(((int)PathResume.PlantId, (int)PathResume.AreaId, (int)PathResume.DistributionId), finalDistribution);
+                            //                            await _supervisorMobilityRepository.AddDistributionForProductAsync((int)PathResume.ProductID, finalDistribution);
+
+                            //                            //la operacion no existira
+
+                            //                            var operationForCreate = _mapper.Map<OperationForCreationDto>(new OperationForCreationDto() { Code = ExcelOpCode, Description = ExcelOpDescription, IsActive = true });
+                            //                            var finalOperation = _mapper.Map<Operation>(operationForCreate);
+                            //                            await _supervisorMobilityRepository.AddOperationForDistributionAsync((int)PathResume.AreaId, (int)PathResume.DistributionId, finalOperation);
+                            //                            await _supervisorMobilityRepository.SaveChangesAsync();
+
+                            //                            OperationsDictionary.Add(((int)PathResume.PlantId, (int)PathResume.AreaId, (int)PathResume.DistributionId, finalOperation.OperationId), finalOperation);
+                            //                            CountCreateOperation++;
+
+                            //                        }
+
+                            //                    }//end if plant >0
+                            //                     // no hay chance de que la planta no exista
+
+
+                            //                    //}
+                            //                    //else
+                            //                    //{
+                            //                    //    //paginas siguientes
+                            //                    //    var ExcelOpCode = ws.Cell(row.RangeAddress.FirstAddress.RowNumber, 1).Value.ToString() != "" ? ws.Cell(row.RangeAddress.FirstAddress.RowNumber, 1).Value.ToString() : "";
+                            //                    //    var ExcelOpDescription = ws.Cell(row.RangeAddress.FirstAddress.RowNumber, 4).Value.ToString() != "" ? ws.Cell(row.RangeAddress.FirstAddress.RowNumber, 4).Value.ToString() : "";
+
+                            //                    //    var ExcelAreaCode = ws.Cell(row.RangeAddress.FirstAddress.RowNumber, 3).Value.ToString() != "" ? ws.Cell(row.RangeAddress.FirstAddress.RowNumber, 3).Value.ToString() : "";
+                            //                    //    var ExcelDistDescription = ws.Cell(row.RangeAddress.FirstAddress.RowNumber, 5).Value.ToString() != "" ? ws.Cell(row.RangeAddress.FirstAddress.RowNumber, 5).Value.ToString() : "";
+
+                            //                    //    if (ExcelOpCode.IsNullOrEmpty() && ExcelOpDescription.IsNullOrEmpty() &&
+                            //                    //       ExcelAreaCode.IsNullOrEmpty() && ExcelDistDescription.IsNullOrEmpty())
+                            //                    //    {
+                            //                    //        break;
+                            //                    //    }
+                            //                    //    else if (ExcelAreaCode.IsNullOrEmpty() && ExcelDistDescription.IsNullOrEmpty())
+                            //                    //    {
+                            //                    //        break;
+                            //                    //    }
+
+                            //                    //    if (ExcelOpCode == "" && ExcelOpDescription == "" && ExcelAreaCode == "" && ExcelDistDescription == "")
+                            //                    //    {
+                            //                    //        break;
+                            //                    //    }
+
+                            //                    //    if (ExcelDistDescription != "")
+                            //                    //    {
+                            //                    //        auxDistribution = ws.Cell(row.RangeAddress.FirstAddress.RowNumber, 5).Value.ToString() != "" ? ws.Cell(row.RangeAddress.FirstAddress.RowNumber, 5).Value.ToString() : "";
+                            //                    //    }
+                            //                    //    else if (ExcelDistDescription == "")
+                            //                    //    {
+                            //                    //        ExcelDistDescription = auxDistribution;
+                            //                    //    }
+
+
+
+                            //                    //    if (ProductExist != null && ProductExist.Similarity > 0.5) // Ajusta este umbral según tus necesidades
+                            //                    //    {
+                            //                    //        PathResume.ProductID = ProductExist.Product.ProductId;
+                            //                    //    }
+
+                            //                    //    // Buscar el ID de planta en el diccionario de plantas
+                            //                    //    var planta = PlantsDictionary.Values.FirstOrDefault(p => p.PlantId == plantnameid);
+                            //                    //    if (planta != null)
+                            //                    //    {
+                            //                    //        PathResume.PlantId = planta.PlantId;
+                            //                    //    }
+
+
+                            //                    //    if (PathResume.PlantId > 0)
+                            //                    //    {// Buscar coincidencia en area
+                            //                    //     //var coincidenciasAreas = AreasDictionary.Where(pair => pair.Key.Item1 == PathResume.PlantId) // Filtramos por ID de planta
+                            //                    //     //.Select(pair => new
+                            //                    //     //{
+                            //                    //     //    Area = pair.Value,
+                            //                    //     //    Similarity = (pair.Value.Code == ExcelAreaCode ? 1 : 0)
+                            //                    //     //})
+                            //                    //     //.OrderByDescending(result => result.Similarity)
+                            //                    //     //.FirstOrDefault();
+
+
+                            //                    //        var coincidenciasAreas = AreasDictionary
+                            //                    //                .Where(pair => pair.Key.Item1 == PathResume.PlantId) // Filtramos por ID de planta
+                            //                    //                .Select(pair => new
+                            //                    //                {
+                            //                    //                    Area = pair.Value,
+                            //                    //                    Similarity = pair.Value.Code.Equals(ExcelAreaCode)
+                            //                    //                        ? 1.0 // Si los códigos coinciden exactamente, la similitud es máxima
+                            //                    //                        : 1 - pair.Value.Code.JaccardDistance(ExcelAreaCode)
+                            //                    //                })
+                            //                    //                .OrderByDescending(result => result.Similarity)
+                            //                    //                .FirstOrDefault();
+
+
+                            //                    //        if (coincidenciasAreas != null && coincidenciasAreas.Similarity >= 0.70) // Ajusta este umbral según tus necesidades
+                            //                    //        {
+                            //                    //            PathResume.AreaId = coincidenciasAreas.Area.AreaId;
+                            //                    //            PathResume.DescripcionArea = coincidenciasAreas.Area.Description;
+                            //                    //        }
+
+
+                            //                    //        if (PathResume.AreaId > 0)
+                            //                    //        {
+                            //                    //            // Buscar coincidencia en distribucion
+                            //                    //            var coincidenciasDistributions = DistributionsDictionary
+                            //                    //                .Where(pair => pair.Key.Item1 == PathResume.PlantId && pair.Key.Item2 == PathResume.AreaId)
+                            //                    //                .Select(pair => new
+                            //                    //                {
+                            //                    //                    Distribution = pair.Value,
+                            //                    //                    Similarity = 1 - pair.Value.Description.JaccardDistance(ExcelDistDescription)
+                            //                    //                })
+                            //                    //                .OrderByDescending(result => result.Similarity)
+                            //                    //                .FirstOrDefault();
+
+                            //                    //            if (coincidenciasDistributions != null && coincidenciasDistributions.Similarity > 0.5)
+                            //                    //            {
+                            //                    //                PathResume.DistributionId = coincidenciasDistributions.Distribution.DistributionId;
+                            //                    //                PathResume.DescripcionDistribucion = coincidenciasDistributions.Distribution.Description;
+                            //                    //            }
+
+
+                            //                    //            if (PathResume.DistributionId > 0)
+                            //                    //            {
+
+                            //                    //                var coincidenciasOperaciones = OperationsDictionary
+                            //                    //               .Where(pair => pair.Key.Item1 == PathResume.PlantId && pair.Key.Item2 == PathResume.AreaId && pair.Key.Item3 == PathResume.DistributionId)
+                            //                    //               .Select(pair => new
+                            //                    //               {
+                            //                    //                   Operation = pair.Value,
+                            //                    //                   Similarity = (pair.Value.Code == ExcelOpCode && pair.Value.Description == ExcelOpDescription ? 1 : 0)
+                            //                    //               })
+                            //                    //               .OrderByDescending(result => result.Similarity)
+                            //                    //               .FirstOrDefault();
+
+                            //                    //                if (coincidenciasOperaciones != null && coincidenciasOperaciones.Similarity > 0.5)
+                            //                    //                {
+                            //                    //                    PathResume.OperationId = coincidenciasOperaciones.Operation.OperationId;
+                            //                    //                }
+
+                            //                    //                if (PathResume.OperationId > 0)
+                            //                    //                {
+                            //                    //                    //existe no se hace nada
+                            //                    //                }
+                            //                    //                else
+                            //                    //                {//No existe hay que crearla
+                            //                    //                    var operationForCreate = _mapper.Map<OperationForCreationDto>(new OperationForCreationDto() { Code = ExcelOpCode, Description = ExcelOpDescription, IsActive = true });
+                            //                    //                    var finalOperation = _mapper.Map<Operation>(operationForCreate);
+                            //                    //                    await _supervisorMobilityRepository.AddOperationForDistributionAsync((int)PathResume.AreaId, (int)PathResume.DistributionId, finalOperation);
+                            //                    //                    await _supervisorMobilityRepository.SaveChangesAsync();
+
+                            //                    //                    OperationsDictionary.Add(((int)PathResume.PlantId, (int)PathResume.AreaId, (int)PathResume.DistributionId, finalOperation.OperationId), finalOperation);
+                            //                    //                    CountCreateOperation++;
+                            //                    //                }
+
+
+                            //                    //            }//end if distribution >0
+                            //                    //            else
+                            //                    //            {
+                            //                    //                //distribution no existe- se crea todo
+                            //                    //                string codeGen = ExcelDistDescription;
+
+                            //                    //                SlugHelper slugHelper = new SlugHelper();
+                            //                    //                string slug = slugHelper.GenerateSlug(codeGen);
+
+                            //                    //                var distributionForCreate = _mapper.Map<DistributionForCreationDto>(new DistributionForCreationDto() { Code = slug, Description = ExcelDistDescription, IsActive = true });
+                            //                    //                var finalDistribution = _mapper.Map<Distribution>(distributionForCreate);
+                            //                    //                await _supervisorMobilityRepository.AddDistributionForPlantAsync((int)PathResume.PlantId, (int)PathResume.AreaId, finalDistribution);
+                            //                    //                await _supervisorMobilityRepository.SaveChangesAsync();
+                            //                    //                PathResume.DistributionId = finalDistribution.DistributionId;
+                            //                    //                DistributionsDictionary.Add(((int)PathResume.PlantId, (int)PathResume.AreaId, (int)PathResume.DistributionId), finalDistribution);
+
+                            //                    //                await _supervisorMobilityRepository.AddDistributionForProductAsync((int)PathResume.ProductID, finalDistribution);
+
+                            //                    //                //la operacion no existira
+
+                            //                    //                var operationForCreate = _mapper.Map<OperationForCreationDto>(new OperationForCreationDto() { Code = ExcelOpCode, Description = ExcelOpDescription, IsActive = true });
+                            //                    //                var finalOperation = _mapper.Map<Operation>(operationForCreate);
+                            //                    //                await _supervisorMobilityRepository.AddOperationForDistributionAsync((int)PathResume.AreaId, (int)PathResume.DistributionId, finalOperation);
+                            //                    //                await _supervisorMobilityRepository.SaveChangesAsync();
+
+                            //                    //                OperationsDictionary.Add(((int)PathResume.PlantId, (int)PathResume.AreaId, (int)PathResume.DistributionId, finalOperation.OperationId), finalOperation);
+                            //                    //                CountCreateOperation++;
+                            //                    //            }
+                            //                    //        }//end if area > 0
+                            //                    //        else
+                            //                    //        {
+                            //                    //            //area no existe- se crea todo
+                            //                    //            var areaForCreate = _mapper.Map<AreaForCreationDto>(new AreaForCreationDto() { Code = ExcelAreaCode, Description = ExcelAreaCode, IsActive = true });
+
+                            //                    //            var finalArea = _mapper.Map<Area>(areaForCreate);
+                            //                    //            finalArea.PlantId = (int)PathResume.PlantId;
+
+                            //                    //            await _supervisorMobilityRepository.AddArea(finalArea);
+                            //                    //            await _supervisorMobilityRepository.AddAreaForPlantAsync((int)PathResume.PlantId, finalArea);
+                            //                    //            await _supervisorMobilityRepository.SaveChangesAsync();
+                            //                    //            PathResume.AreaId = finalArea.AreaId;
+
+                            //                    //            AreasDictionary.Add(((int)PathResume.PlantId, (int)PathResume.AreaId), finalArea);
+
+                            //                    //            ////
+                            //                    //            //la distribuccion no existira
+                            //                    //            string codeGen = ExcelDistDescription;
+
+                            //                    //            SlugHelper slugHelper = new SlugHelper();
+                            //                    //            string slug = slugHelper.GenerateSlug(codeGen);
+
+                            //                    //            var distributionForCreate = _mapper.Map<DistributionForCreationDto>(new DistributionForCreationDto() { Code = slug, Description = ExcelDistDescription, IsActive = true });
+                            //                    //            var finalDistribution = _mapper.Map<Distribution>(distributionForCreate);
+                            //                    //            await _supervisorMobilityRepository.AddDistributionForPlantAsync((int)PathResume.PlantId, (int)PathResume.AreaId, finalDistribution);
+                            //                    //            await _supervisorMobilityRepository.SaveChangesAsync();
+                            //                    //            PathResume.DistributionId = finalDistribution.DistributionId;
+
+                            //                    //            DistributionsDictionary.Add(((int)PathResume.PlantId, (int)PathResume.AreaId, (int)PathResume.DistributionId), finalDistribution);
+                            //                    //            await _supervisorMobilityRepository.AddDistributionForProductAsync((int)PathResume.ProductID, finalDistribution);
+
+                            //                    //            //la operacion no existira
+
+                            //                    //            var operationForCreate = _mapper.Map<OperationForCreationDto>(new OperationForCreationDto() { Code = ExcelOpCode, Description = ExcelOpDescription, IsActive = true });
+                            //                    //            var finalOperation = _mapper.Map<Operation>(operationForCreate);
+                            //                    //            await _supervisorMobilityRepository.AddOperationForDistributionAsync((int)PathResume.AreaId, (int)PathResume.DistributionId, finalOperation);
+                            //                    //            await _supervisorMobilityRepository.SaveChangesAsync();
+
+                            //                    //            OperationsDictionary.Add(((int)PathResume.PlantId, (int)PathResume.AreaId, (int)PathResume.DistributionId, finalOperation.OperationId), finalOperation);
+                            //                    //            CountCreateOperation++;
+                            //                    //        }
+
+                            //                    //    }//end if plant >0
+                            //                    //     // no hay chance de que la planta no exista
+
+
+                            //                    //}//else paginas siguientes
+
+                            //                    var AssyChartExist = await _supervisorMobilityRepository.GetAssyChartForJobObservationAsync((int)PathResume.PlantId, (int)PathResume.AreaId, (int)PathResume.DistributionId);
+
+                            //                    if (AssyChartExist is null)
+                            //                    {
+                            //                        AssyChartForCreation assychartForCreate = new AssyChartForCreation()
+                            //                        {
+                            //                            PlantId = (int)PathResume.PlantId,
+                            //                            AreaId = (int)PathResume.AreaId,
+                            //                            DistributionId = (int)PathResume.DistributionId,
+                            //                            CreationDate = DateTime.Now,
+                            //                            ModificationDate = DateTime.Now,
+                            //                            IsActive = true
+                            //                        };
+
+                            //                        var resultCreateAssy = await _assyChartService.CreateAssyChartAsync(assychartForCreate);
+                            //                        CountCreateAssycchart++;
+                            //                        if (resultCreateAssy != null)
+                            //                        {
+                            //                            //se crea assy chart cout
+                            //                            Debug.WriteLine($"Create assychart id {resultCreateAssy.AssyChardId} plantid {(int)PathResume.PlantId} areaid {(int)PathResume.AreaId} distributionid {(int)PathResume.DistributionId} ");
+                            //                        }
+                            //                    }
+
+                            //                    retries = 0;
+                            //                    // Si la operación tiene éxito, puedes salir del bucle
+                            //                    break;
+                            //                }
+                            //                catch (Exception ex)
+                            //                {
+                            //                    // Maneja la excepción aquí, si es necesario
+                            //                    Debug.WriteLine($"I Value:{i}");
+                            //                    Debug.WriteLine($"Intento {retries + 1} falló: {ex.Message}");
+
+                            //                    // Incrementa el número de intentos
+                            //                    retries++;
+
+                            //                    // Espera el intervalo de tiempo antes de volver a intentarlo
+                            //                    await Task.Delay(retryInterval);
+                            //                }
+
+
+
+                            //            }//end While 
+                            //            Debug.WriteLine($"{productCode} :{i}");
+                            //            i++;
+                            //        }//end is not empety row
+                            //    }//end else first roe
+
+                            //}//end foreach de renglones en pagina
+
+                            Debug.WriteLine($"Pagina {p} : {pageName} ");
                         }//for de paginas
 
                         Debug.WriteLine($"AssyTotal {CountCreateAssycchart} ");

@@ -15,6 +15,12 @@ namespace SupervisorMobility.API.Entities
         [Required]
         [MaxLength(200)]
         public string Description { get; set; }
+
+
+        public string? restrictionorcomment { get; set; }
+        public string? jsonTimeProduct { get; set; }
+
+
         public int CriticalType { get; set; }
 
         public bool? IsActive { get; set; }

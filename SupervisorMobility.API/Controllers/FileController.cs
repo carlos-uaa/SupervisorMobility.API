@@ -1,5 +1,4 @@
 ﻿using AutoMapper;
-using ClosedXML.Excel;
 using Microsoft.AspNetCore.Cors;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.AspNetCore.StaticFiles;
@@ -1602,7 +1601,6 @@ namespace SupervisorMobility.API.Controllers
         //[EnableCors("CorsPolicy")]
 
 
-        [EnableCors("Cors")]
         [HttpPost("MassiveUploadTreeData")]
         public async Task<ActionResult<FileUpload>> MassiveUploadTreeData(IFormFile file, int plantnameid, int userId)
         {
