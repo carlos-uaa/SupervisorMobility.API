@@ -20,6 +20,8 @@ using DocumentFormat.OpenXml.Packaging;
 using SupervisorMobility.API.Models.OperationDtos;
 using Slugify;
 using SupervisorMobility.API.Models.DistributionDtos;
+using SupervisorMobility.API.DataAccess.Entities.TreeStruct;
+using SupervisorMobility.API.Entities.CDMS;
 
 namespace SupervisorMobility.API.Controllers
 {
@@ -94,7 +96,140 @@ namespace SupervisorMobility.API.Controllers
             }
             //Fin recoleccinon de datos en bd
 
+            //Get Rutas CDMS
+            CDMS_GOS_Directory GOSFolders = new CDMS_GOS_Directory();
+            TreeItemData rootNodeGOS = new TreeItemData();
 
+            CDMS_CCP_Directory CCPFolders = new CDMS_CCP_Directory();
+            TreeItemData rootNodeCCP = new TreeItemData();
+
+            CDMS_HOE_Directory HOEFolders = new CDMS_HOE_Directory();
+            TreeItemData rootNodeHOE = new TreeItemData();
+
+            try
+            {
+
+                try
+                {
+                    try
+                    {
+                        var response = await _bridgeHttpClient.GetAsync("SMGos/GetDirectoryPathsGos");
+
+                        if (response.IsSuccessStatusCode)
+                        {
+                            var result = await response.Content.ReadFromJsonAsync<CDMS_GOS_Directory>();
+                            GOSFolders = result;
+                        }
+                        else
+                        {
+                            //await _js.InvokeVoidAsync("alert", $"Error get folders: {response.Content.ReadAsStringAsync().Result}");
+                            Console.WriteLine($"GET FOLDERS GOS, Status Code {response.StatusCode} : {response.Content.ReadAsStringAsync().Result}");
+                        }
+                    }
+                    catch (HttpRequestException ex)
+                    {
+                        Console.WriteLine($"Error al hacer la solicitud: {ex.Message}");
+                    }
+                    catch (TaskCanceledException ex)
+                    {
+                        Console.WriteLine($"La solicitud ha sido cancelada: {ex.Message}");
+                    }
+
+                }
+                catch (Exception ex)
+                {
+                    Console.WriteLine("Error Get GOS Folder From CDMS");
+                    Console.WriteLine(ex.Message);
+                }
+
+                if (GOSFolders != null)
+                {
+                    rootNodeGOS = _treeService.ConstruirArbolGOS(GOSFolders.operation);
+                }
+
+                try
+                {
+                    try
+                    {
+                        var response = await _bridgeHttpClient.GetAsync("SMCcp/GetDirectoryPathsCcp");
+
+                        if (response.IsSuccessStatusCode)
+                        {
+                            var result = await response.Content.ReadFromJsonAsync<CDMS_CCP_Directory>();
+                            CCPFolders = result;
+                        }
+                        else
+                        {
+                            //await _js.InvokeVoidAsync("alert", $"Error get folders: {response.Content.ReadAsStringAsync().Result}");
+                            Console.WriteLine($"GET FOLDERS CCP, Status Code {response.StatusCode} : {response.Content.ReadAsStringAsync().Result}");
+                        }
+                    }
+                    catch (HttpRequestException ex)
+                    {
+                        Console.WriteLine($"Error al hacer la solicitud: {ex.Message}");
+                    }
+                    catch (TaskCanceledException ex)
+                    {
+                        Console.WriteLine($"La solicitud ha sido cancelada: {ex.Message}");
+                    }
+                }
+                catch (Exception ex)
+                {
+                    Console.WriteLine("Error Get CCP Folder From CCP");
+                    Console.WriteLine(ex.Message);
+                    Console.WriteLine(ex.Message);
+                }
+
+                if (CCPFolders != null)
+                {
+                    rootNodeCCP = _treeService.ConstruirArbolCCP(CCPFolders.operation);
+                }
+
+                try
+                {
+                    try
+                    {
+                        var response = await _bridgeHttpClient.GetAsync("SMHoe/GetDirectoryPaths");
+
+                        if (response.IsSuccessStatusCode)
+                        {
+                            var result = await response.Content.ReadFromJsonAsync<CDMS_HOE_Directory>();
+                            HOEFolders = result;
+                        }
+                        else
+                        {
+                            //await _js.InvokeVoidAsync("alert", $"Error get folders: {response.Content.ReadAsStringAsync().Result}");
+                            Console.WriteLine($"GET FOLDERS HOE, Status Code {response.StatusCode} : {response.Content.ReadAsStringAsync().Result}");
+                        }
+                    }
+                    catch (HttpRequestException ex)
+                    {
+                        Console.WriteLine($"Error al hacer la solicitud: {ex.Message}");
+                    }
+                    catch (TaskCanceledException ex)
+                    {
+                        Console.WriteLine($"La solicitud ha sido cancelada: {ex.Message}");
+                    }
+                }
+                catch (Exception ex)
+                {
+                    Console.WriteLine("Error Get HOE Folder From CDMS");
+                    Console.WriteLine(ex.Message);
+                }
+                if (HOEFolders != null)
+                {
+                    rootNodeHOE = _treeService.ConstruirArbolHOE(HOEFolders.operation);
+                }
+
+            }
+            catch (Exception ex)
+            {
+                //Log de error en alguna carga general
+            }
+
+
+
+            //Propuesta no hacer
             //Verificar que el archivo a cargar, el area corresponde con la del supervisor si es admin hay que realizar la carga sin exepcion
 
 
@@ -114,27 +249,11 @@ namespace SupervisorMobility.API.Controllers
 
                     for (int p = 1; p <= pages; p++)
                     {
-
-                        //if (p == 2)
-                        //{
-                        //    break;
-                        //}
-
                         PathInfo PathResume = new PathInfo();
 
                         int CountCreateOperation = 0;
                         IXLWorksheet worksheet = workBook.Worksheet(p);
 
-                        //La optencion del producto ira dada por los tiempos
-
-                        //var productCode = ws.Name;
-                        //Debug.WriteLine($"Product Name: {productCode}");
-
-                        //var ProductExist = Products.Select(pair => new
-                        //{
-                        //    Product = pair,
-                        //    Similarity = 1 - pair.Code.JaccardDistance(productCode)
-                        //}).OrderByDescending(result => result.Similarity).FirstOrDefault();
 
                         string pageName = worksheet.Name;
 
@@ -147,12 +266,12 @@ namespace SupervisorMobility.API.Controllers
                         var CellStarOperationCode = "B12";
 
 
-                      
+
                         var ExcelAreaCode = AreaCell.Value.ToString() != "" ? AreaCell.Value.ToString() : "";
+                        var ExcelDistDescription = DistributionCell.Value.ToString() != "" ? DistributionCell.Value.ToString() : "";
 
                         //var ExcelAreaDescription = ws.Cell(row.RangeAddress.FirstAddress.RowNumber, 4).Value.ToString() != "" ? ws.Cell(row.RangeAddress.FirstAddress.RowNumber, 4).Value.ToString() : "";
 
-                        var ExcelDistDescription = DistributionCell.Value.ToString() != "" ? DistributionCell.Value.ToString() : "";
 
                         if (ExcelAreaCode.IsNullOrEmpty() && ExcelDistDescription.IsNullOrEmpty())
                         {
@@ -171,7 +290,46 @@ namespace SupervisorMobility.API.Controllers
                             //mensaje de error
                             return;
                         }
+                        //buscar Area coincidencia en Planta
+                        var coincidenciasAreas = AreasDictionary
+                                          .Where(pair => pair.Key.Item1 == PathResume.PlantId) // Filtramos por ID de planta
+                                          .Select(pair => new
+                                          {
+                                              Area = pair.Value,
+                                              Similarity = pair.Value.Code.Equals(ExcelAreaCode)
+                                                  ? 1.0 // Si los códigos coinciden exactamente, la similitud es máxima
+                                                  : 1 - pair.Value.Code.JaccardDistance(ExcelAreaCode)
+                                          })
+                                          .OrderByDescending(result => result.Similarity)
+                                          .FirstOrDefault();
 
+                        if (coincidenciasAreas != null && coincidenciasAreas.Similarity >= 0.70)
+                        {
+                            PathResume.AreaId = coincidenciasAreas.Area.AreaId;
+                            PathResume.DescripcionArea = coincidenciasAreas.Area.Description;
+                        }
+
+                        // Buscar distribucion coincidencia en Area
+                        var coincidenciasDistributions = DistributionsDictionary
+                            .Where(pair => pair.Key.Item1 == PathResume.PlantId && pair.Key.Item2 == PathResume.AreaId)
+                            .Select(pair => new
+                            {
+                                Distribution = pair.Value,
+                                Similarity = 1 - pair.Value.Description.JaccardDistance(ExcelDistDescription)
+                            })
+                            .OrderByDescending(result => result.Similarity)
+                            .FirstOrDefault();
+
+                        if (coincidenciasDistributions != null && coincidenciasDistributions.Similarity > 0.5)
+                        {
+                            PathResume.DistributionId = coincidenciasDistributions.Distribution.DistributionId;
+                            PathResume.DescripcionDistribucion = coincidenciasDistributions.Distribution.Description;
+                        }
+
+
+                        //Optenemos AssyChart para rutas
+                        var AssyChartExist = await _supervisorMobilityRepository.GetAssyChartForJobObservationAsync((int)PathResume.PlantId, (int)PathResume.AreaId, (int)PathResume.DistributionId);
+                        //si existe no deberia haber problema seria un caso donde la planta existe, el area existe, la distribuccion existe
 
 
                         int maxRetries = 5; // Número máximo de intentos
@@ -185,26 +343,8 @@ namespace SupervisorMobility.API.Controllers
                             {
 
                                 if (PathResume.PlantId > 0)
-                                {// Buscar coincidencia en area
-                                    var coincidenciasAreas = AreasDictionary
-                                           .Where(pair => pair.Key.Item1 == PathResume.PlantId) // Filtramos por ID de planta
-                                           .Select(pair => new
-                                           {
-                                               Area = pair.Value,
-                                               Similarity = pair.Value.Code.Equals(ExcelAreaCode)
-                                                   ? 1.0 // Si los códigos coinciden exactamente, la similitud es máxima
-                                                   : 1 - pair.Value.Code.JaccardDistance(ExcelAreaCode)
-                                           })
-                                           .OrderByDescending(result => result.Similarity)
-                                           .FirstOrDefault();
-
-                                    if (coincidenciasAreas != null && coincidenciasAreas.Similarity >= 0.70)
-                                    {
-                                        PathResume.AreaId = coincidenciasAreas.Area.AreaId;
-                                        PathResume.DescripcionArea = coincidenciasAreas.Area.Description;
-                                    }
-
-
+                                {
+                                    //La planta existe
                                     //Renglones de la pagina
                                     var rows = worksheet.Rows();
 
@@ -218,7 +358,7 @@ namespace SupervisorMobility.API.Controllers
 
                                     //Lista de productos que usare en el json
                                     var products = new List<Dictionary<string, Dictionary<string, string>>>();
-                                    //Creacion de los 3 productos, con inicializacion
+                                    //Creacion de los productos dentro de los rangs previstos
                                     foreach (var range in ranges)
                                     {
                                         var productName = range.FirstRow().FirstCell().Value.ToString();
@@ -246,9 +386,9 @@ namespace SupervisorMobility.API.Controllers
 
                                     //Renglon de inicio 
                                     var startingRow = worksheet.Row(12);
-                                    //Ciclo para optener las pociones de tiempo estandar y tiempo adicional
                                     int StartAditionalTime = 0;
 
+                                    //Ciclo para optener las pociones de tiempo estandar y tiempo adicional
                                     foreach (var row in rows.SkipWhile(r => r.RowNumber() < startingRow.RowNumber()))
                                     {
                                         // Obtener la celda en la columna B para cada renglón
@@ -303,31 +443,13 @@ namespace SupervisorMobility.API.Controllers
 
                                     if (PathResume.AreaId > 0)
                                     {
-                                        // Buscar coincidencia en distribucion
-                                        var coincidenciasDistributions = DistributionsDictionary
-                                            .Where(pair => pair.Key.Item1 == PathResume.PlantId && pair.Key.Item2 == PathResume.AreaId)
-                                            .Select(pair => new
-                                            {
-                                                Distribution = pair.Value,
-                                                Similarity = 1 - pair.Value.Description.JaccardDistance(ExcelDistDescription)
-                                            })
-                                            .OrderByDescending(result => result.Similarity)
-                                            .FirstOrDefault();
-
-                                        if (coincidenciasDistributions != null && coincidenciasDistributions.Similarity > 0.5)
-                                        {
-                                            PathResume.DistributionId = coincidenciasDistributions.Distribution.DistributionId;
-                                            PathResume.DescripcionDistribucion = coincidenciasDistributions.Distribution.Description;
-                                        }
-
 
                                         if (PathResume.DistributionId > 0)
                                         {
-
-
                                             //Optencion de los tiempos por renglon en base a operacion
                                             foreach (var row in rows.SkipWhile(r => r.RowNumber() < startingRow.RowNumber()))
                                             {
+
                                                 // Obtener la celda en la columna B para cada renglón
                                                 var cellB = row.Cell("B");
 
@@ -389,33 +511,47 @@ namespace SupervisorMobility.API.Controllers
                                                     // Eliminar productos sin tiempo de la copia
                                                     productsCopy = productsCopy.Where(product => product.Values.First()["Time"] != "§§§§").ToList();
 
-                                                    // Convertir la copia a JSON string
-                                                    var jsonStringCopy = Newtonsoft.Json.JsonConvert.SerializeObject(productsCopy, Newtonsoft.Json.Formatting.Indented);
-
-                                                    //Verificacion de datos....
-                                                    //foreach (var product in productsCopy)
-                                                    //{
-                                                    //    foreach (var entry in product)
-                                                    //    {
-                                                    //        var productName = entry.Key;
-                                                    //        var productData = entry.Value;
-
-                                                    //        var nameTime = productData["NameTime"];
-                                                    //        var time = productData["Time"];
-
-                                                    //        Debug.WriteLine($"Nombre del Producto: {productName}");
-                                                    //        Debug.WriteLine($"NameTime: {nameTime}");
-                                                    //        Debug.WriteLine($"Time: {time}");
-                                                    //        Debug.WriteLine("");
-                                                    //    }
-                                                    //}
 
 
                                                     if (PathResume.OperationId > 0)
                                                     {
-                                                        Debug.WriteLine($"La Operacion {ExcelOpCode} - {ExcelDistDescription} Existe :) !!! ");
+                                                        Debug.WriteLine($"La Operacion {ExcelOpCode} - {ExcelOpDescription} Existe :) !!! ");
                                                         //Aqui una verificacion de informacion, si algun dato en los tiempos cambia, hay que actualizar el json//
                                                         // Update a la base de datos
+
+                                                            // Convertir la copia a JSON string
+                                                        var jsonStringCopy = Newtonsoft.Json.JsonConvert.SerializeObject(productsCopy, Newtonsoft.Json.Formatting.Indented);
+
+                                                        if (productsCopy.Count > 0)
+                                                        {
+                                                            //Coincidencia de producto
+                                                            string productCode = productsCopy[0].Keys.First();
+
+                                                            var ProductExist = Products.Select(pair => new
+                                                            {
+                                                                Product = pair,
+                                                                Similarity = 1 - pair.Code.JaccardDistance(productCode)
+                                                            }).OrderByDescending(result => result.Similarity).FirstOrDefault();
+
+                                                            // Ajusta este umbral según la necesidad
+                                                            if (ProductExist != null && ProductExist.Similarity > 0.5)
+                                                            {
+                                                                PathResume.ProductID = ProductExist.Product.ProductId;
+                                                            }
+
+                                                        }
+                                                        else
+                                                        {
+                                                            for (int j = 0; j < products.Count; j++)
+                                                            {
+                                                                var product = products[j];
+                                                                var productName = product.Keys.First();
+                                                                product[productName]["Time"] = "§§§§";
+                                                            }
+
+                                                            jsonStringCopy = Newtonsoft.Json.JsonConvert.SerializeObject(products, Newtonsoft.Json.Formatting.Indented);
+                                                        }
+
 
                                                         bool isUpdate = false;
                                                         OperationForUpdateDto OperationforUpdate = _mapper.Map<OperationForUpdateDto>(coincidenciasOperaciones.Operation);
@@ -428,7 +564,7 @@ namespace SupervisorMobility.API.Controllers
 
                                                         if (OperationforUpdate.restrictionorcomment != ExcelCommentaryOrRestriction)
                                                         {
-                                                            OperationforUpdate.jsonTimeProduct = ExcelCommentaryOrRestriction;
+                                                            OperationforUpdate.restrictionorcomment = ExcelCommentaryOrRestriction;
                                                             isUpdate = true;
 
                                                         }
@@ -444,18 +580,47 @@ namespace SupervisorMobility.API.Controllers
                                                             await _assyChartService.UpdateOperationAsync(OperationforUpdate, operationEntity);
                                                         }
 
-                                                    
-
                                                     }
                                                     else
                                                     {//No existe hay que crearla
-                                                        Debug.WriteLine($"La Operacion {ExcelOpCode} - {ExcelDistDescription} No Existe :c ");
+                                                        Debug.WriteLine($"La Operacion  NO EXISTE {ExcelOpCode} - {ExcelOpDescription} Existe :) !!! ");
 
+                                                        //creacion de json del producto con tiempos
+                                                        var jsonStringCopy = Newtonsoft.Json.JsonConvert.SerializeObject(productsCopy, Newtonsoft.Json.Formatting.Indented);
 
+                                                        if (productsCopy.Count > 0)
+                                                        {
+                                                            //Coincidencia de producto
+                                                            string productCode = productsCopy[0].Keys.First();
 
+                                                            var ProductExist = Products.Select(pair => new
+                                                            {
+                                                                Product = pair,
+                                                                Similarity = 1 - pair.Code.JaccardDistance(productCode)
+                                                            }).OrderByDescending(result => result.Similarity).FirstOrDefault();
+
+                                                            // Ajusta este umbral según la necesidad
+                                                            if (ProductExist != null && ProductExist.Similarity > 0.5)
+                                                            {
+                                                                PathResume.ProductID = ProductExist.Product.ProductId;
+                                                            }
+
+                                                        }
+                                                        else
+                                                        {
+                                                            for (int j = 0; j < products.Count; j++)
+                                                            {
+                                                                var product = products[j];
+                                                                var productName = product.Keys.First();
+                                                                product[productName]["Time"] = "§§§§";
+                                                            }
+
+                                                            jsonStringCopy = Newtonsoft.Json.JsonConvert.SerializeObject(products, Newtonsoft.Json.Formatting.Indented);
+                                                        }
+                                                        //fin validacion de json, si no hay tiempos se añaden todos en 0
                                                         var operationForCreate = _mapper.Map<OperationForCreationDto>(new OperationForCreationDto() { Code = ExcelOpCode, Description = ExcelOpDescription, IsActive = true });
-                                                        operationForCreate.jsonTimeProduct = ExcelCommentaryOrRestriction;
                                                         operationForCreate.jsonTimeProduct = jsonStringCopy;
+                                                        operationForCreate.restrictionorcomment = ExcelCommentaryOrRestriction;
 
                                                         var finalOperation = _mapper.Map<Operation>(operationForCreate);
                                                         await _supervisorMobilityRepository.AddOperationForDistributionAsync((int)PathResume.AreaId, (int)PathResume.DistributionId, finalOperation);
@@ -465,6 +630,7 @@ namespace SupervisorMobility.API.Controllers
                                                         CountCreateOperation++;
                                                     }
 
+
                                                 }
                                                 else if (cellB.IsMerged() && row.RowNumber() >= 12)
                                                 {
@@ -472,9 +638,6 @@ namespace SupervisorMobility.API.Controllers
                                                     break;
                                                 }
                                             }
-
-
-
 
                                         }//end if distribution >0
                                         else
@@ -494,17 +657,143 @@ namespace SupervisorMobility.API.Controllers
 
                                             await _supervisorMobilityRepository.AddDistributionForProductAsync((int)PathResume.ProductID, finalDistribution);
 
+                                            if (AssyChartExist is null)
+                                            {
+                                                AssyChartForCreation assychartForCreate = new AssyChartForCreation()
+                                                {
+                                                    PlantId = (int)PathResume.PlantId,
+                                                    AreaId = (int)PathResume.AreaId,
+                                                    DistributionId = (int)PathResume.DistributionId,
+                                                    CreationDate = DateTime.Now,
+                                                    ModificationDate = DateTime.Now,
+                                                    IsActive = true
+                                                };
+
+                                                var resultCreateAssy = await _assyChartService.CreateAssyChartAsync(assychartForCreate);
+                                                CountCreateAssycchart++;
+
+                                                if (resultCreateAssy != null)
+                                                {
+                                                    //se crea assy chart cout
+                                                    Debug.WriteLine($"Create assychart id {resultCreateAssy.AssyChardId} plantid {(int)PathResume.PlantId} areaid {(int)PathResume.AreaId} distributionid {(int)PathResume.DistributionId} ");
+                                                    AssyChartExist = resultCreateAssy;
+                                                }
+                                            }
+
+
+
                                             // aqui va el ciclo de operacion
                                             //Optencion de los tiempos por renglon en base a operacion
-                                           
+                                            foreach (var row in rows.SkipWhile(r => r.RowNumber() < startingRow.RowNumber()))
+                                            {
+                                                // Obtener la celda en la columna B para cada renglón
+                                                var cellB = row.Cell("B");
+
+                                                // Verificar si la celda no está combinada y es mayor o igual a la fila 12
+                                                if (!cellB.IsMerged() && row.RowNumber() >= 12)
+                                                {
+                                                    var CellOpCode = row.Cell("C");
+                                                    var CellOpDesc = row.Cell("D");
+                                                    var CellCommentaryOrRestriction = row.Cell("E");
+
+                                                    var ExcelOpCode = CellOpCode.Value.ToString() != "" ? CellOpCode.Value.ToString() : "";
+                                                    var ExcelOpDescription = CellOpDesc.Value.ToString() != "" ? CellOpDesc.Value.ToString() : "";
+
+                                                    var ExcelCommentaryOrRestriction = CellCommentaryOrRestriction.Value.ToString() != "" ? CellCommentaryOrRestriction.Value.ToString() : "";
+
+                                                    if (ExcelOpCode.IsNullOrEmpty() && ExcelOpDescription.IsNullOrEmpty())
+                                                    {
+                                                        //si es renglon vacio brincamos al siguiente
+                                                        continue;
+                                                    }
+
+                                                    var range = worksheet.Range(row.Cell("F"), row.Cell("Y"));
+
+                                                    var cells = range.Cells().ToList();
+                                                    var timeGroups = new List<string>();
+
+                                                    for (int j = 0; j < cells.Count; j += 5)
+                                                    {
+                                                        var group = cells.Skip(j).Take(5).Select(c => c.Value.ToString());
+                                                        var timeGroup = string.Join("§", group);
+                                                        timeGroups.Add(timeGroup);
+                                                    }
+
+                                                    for (int j = 0; j < products.Count; j++)
+                                                    {
+                                                        var product = products[j];
+                                                        var productName = product.Keys.First();
+                                                        product[productName]["Time"] = timeGroups[j];
+                                                    }
+
+                                                    var productsCopy = products.ToList();
+
+                                                    // Eliminar productos sin tiempo de la copia
+                                                    productsCopy = productsCopy.Where(product => product.Values.First()["Time"] != "§§§§").ToList();
+
+                                                    // Convertir la copia a JSON string
+                                                    var jsonStringCopy = Newtonsoft.Json.JsonConvert.SerializeObject(productsCopy, Newtonsoft.Json.Formatting.Indented);
+
+                                                   
+
+                                                    //No existe hay que crearla
+                                                    Debug.WriteLine($"La Operacion NO EXISTE{ExcelOpCode} - {ExcelOpDescription} NO Existe :c !!! ");
+
+                                                    //Si la copia de productos contiene 1 contiuna
+                                                    if (productsCopy.Count > 0)
+                                                    {
+                                                        //Coincidencia de producto
+                                                        string productCode = productsCopy[0].Keys.First();
+
+                                                        var ProductExist = Products.Select(pair => new
+                                                        {
+                                                            Product = pair,
+                                                            Similarity = 1 - pair.Code.JaccardDistance(productCode)
+                                                        }).OrderByDescending(result => result.Similarity).FirstOrDefault();
+
+                                                        // Ajusta este umbral según la necesidad
+                                                        if (ProductExist != null && ProductExist.Similarity > 0.5)
+                                                        {
+                                                            PathResume.ProductID = ProductExist.Product.ProductId;
+                                                        }
+
+                                                    }
+                                                    else
+                                                    {
+                                                        //si la copia no tiene nada se añaden todos sin tiempos
+                                                        for (int j = 0; j < products.Count; j++)
+                                                        {
+                                                            var product = products[j];
+                                                            var productName = product.Keys.First();
+                                                            product[productName]["Time"] = "§§§§";
+                                                        }
+
+                                                        jsonStringCopy = Newtonsoft.Json.JsonConvert.SerializeObject(products, Newtonsoft.Json.Formatting.Indented);
+                                                    }
+                                                    //fin validacion de json, si no hay tiempos se añaden todos en 0
+
+                                                    var operationForCreate = _mapper.Map<OperationForCreationDto>(new OperationForCreationDto() { Code = ExcelOpCode, Description = ExcelOpDescription, IsActive = true });
+                                                    operationForCreate.restrictionorcomment = ExcelCommentaryOrRestriction;
+                                                    operationForCreate.jsonTimeProduct = jsonStringCopy;
+
+                                                    var finalOperation = _mapper.Map<Operation>(operationForCreate);
+                                                    await _supervisorMobilityRepository.AddOperationForDistributionAsync((int)PathResume.AreaId, (int)PathResume.DistributionId, finalOperation);
+                                                    await _supervisorMobilityRepository.SaveChangesAsync();
+
+                                                    OperationsDictionary.Add(((int)PathResume.PlantId, (int)PathResume.AreaId, (int)PathResume.DistributionId, finalOperation.OperationId), finalOperation);
+                                                    CountCreateOperation++;
+
+                                                }
+
+                                            }
                                         }//end else distribuccion no existe
 
                                     }//end if area > 0
                                     else
                                     {
-                                        SlugHelper slugHelper = new SlugHelper(); 
+                                        ////El area no existe, por lo que la distribuccion tampoco existe, se creab ambas
+                                        SlugHelper slugHelper = new SlugHelper();
 
-                                        ////area no existe- se crea todo
                                         var areaForCreate = _mapper.Map<AreaForCreationDto>(new AreaForCreationDto() { Code = ExcelAreaCode, Description = ExcelAreaCode, IsActive = true });
 
                                         var finalArea = _mapper.Map<Area>(areaForCreate);
@@ -527,11 +816,36 @@ namespace SupervisorMobility.API.Controllers
                                         PathResume.DistributionId = finalDistribution.DistributionId;
 
                                         DistributionsDictionary.Add(((int)PathResume.PlantId, (int)PathResume.AreaId, (int)PathResume.DistributionId), finalDistribution);
+
+                                        if (AssyChartExist is null)
+                                        {
+                                            AssyChartForCreation assychartForCreate = new AssyChartForCreation()
+                                            {
+                                                PlantId = (int)PathResume.PlantId,
+                                                AreaId = (int)PathResume.AreaId,
+                                                DistributionId = (int)PathResume.DistributionId,
+                                                CreationDate = DateTime.Now,
+                                                ModificationDate = DateTime.Now,
+                                                IsActive = true
+                                            };
+
+                                            var resultCreateAssy = await _assyChartService.CreateAssyChartAsync(assychartForCreate);
+                                            CountCreateAssycchart++;
+
+                                            if (resultCreateAssy != null)
+                                            {
+                                                //se crea assy chart cout
+                                                Debug.WriteLine($"Create assychart id {resultCreateAssy.AssyChardId} plantid {(int)PathResume.PlantId} areaid {(int)PathResume.AreaId} distributionid {(int)PathResume.DistributionId} ");
+                                                AssyChartExist = resultCreateAssy;
+                                            }
+                                        }
+
+                                        //Añadimos la distribucion al producto (necesito una validacion ya que podra repetirce varias veces)
                                         await _supervisorMobilityRepository.AddDistributionForProductAsync((int)PathResume.ProductID, finalDistribution);
 
+
+
                                         ////la operacion no existira
-
-
                                         foreach (var row in rows.SkipWhile(r => r.RowNumber() < startingRow.RowNumber()))
                                         {
                                             // Obtener la celda en la columna B para cada renglón
@@ -582,32 +896,45 @@ namespace SupervisorMobility.API.Controllers
                                                 // Convertir la copia a JSON string
                                                 var jsonStringCopy = Newtonsoft.Json.JsonConvert.SerializeObject(productsCopy, Newtonsoft.Json.Formatting.Indented);
 
-                                                //Verificacion de datos....
-                                                //foreach (var product in productsCopy)
-                                                //{
-                                                //    foreach (var entry in product)
-                                                //    {
-                                                //        var productName = entry.Key;
-                                                //        var productData = entry.Value;
-
-                                                //        var nameTime = productData["NameTime"];
-                                                //        var time = productData["Time"];
-
-                                                //        Debug.WriteLine($"Nombre del Producto: {productName}");
-                                                //        Debug.WriteLine($"NameTime: {nameTime}");
-                                                //        Debug.WriteLine($"Time: {time}");
-                                                //        Debug.WriteLine("");
-                                                //    }
-                                                //}
-
-
                                                 //No existe hay que crearla
-                                                Debug.WriteLine($"La Operacion {ExcelOpCode} - {ExcelDistDescription} No Existe :c ");
+                                                Debug.WriteLine($"La Operacion NO EXISTE {ExcelOpCode} - {ExcelOpDescription} NO Existe :C !!! ");
 
+                                                //Si la copia de productos contiene 1 contiuna
+                                                if (productsCopy.Count > 0)
+                                                {
+                                                    //Coincidencia de producto
+                                                    string productCode = productsCopy[0].Keys.First();
+
+                                                    var ProductExist = Products.Select(pair => new
+                                                    {
+                                                        Product = pair,
+                                                        Similarity = 1 - pair.Code.JaccardDistance(productCode)
+                                                    }).OrderByDescending(result => result.Similarity).FirstOrDefault();
+
+                                                    // Ajusta este umbral según la necesidad
+                                                    if (ProductExist != null && ProductExist.Similarity > 0.5)
+                                                    {
+                                                        PathResume.ProductID = ProductExist.Product.ProductId;
+                                                    }
+
+                                                }
+                                                else
+                                                {
+                                                    //si la copia no tiene nada se añaden todos sin tiempos
+                                                    for (int j = 0; j < products.Count; j++)
+                                                    {
+                                                        var product = products[j];
+                                                        var productName = product.Keys.First();
+                                                        product[productName]["Time"] = "§§§§";
+                                                    }
+
+                                                    jsonStringCopy = Newtonsoft.Json.JsonConvert.SerializeObject(products, Newtonsoft.Json.Formatting.Indented);
+                                                }
+                                                //fin validacion de json, si no hay tiempos se añaden todos en 0
 
 
                                                 var operationForCreate = _mapper.Map<OperationForCreationDto>(new OperationForCreationDto() { Code = ExcelOpCode, Description = ExcelOpDescription, IsActive = true });
-                                                operationForCreate.jsonTimeProduct = ExcelCommentaryOrRestriction;
+                                                operationForCreate.restrictionorcomment = ExcelCommentaryOrRestriction;
                                                 operationForCreate.jsonTimeProduct = jsonStringCopy;
 
                                                 var finalOperation = _mapper.Map<Operation>(operationForCreate);
@@ -620,35 +947,11 @@ namespace SupervisorMobility.API.Controllers
                                             }
 
                                         }
-
                                     }
 
                                 }//end if plant >0
                                  // no hay chance de que la planta no exista
 
-
-                                var AssyChartExist = await _supervisorMobilityRepository.GetAssyChartForJobObservationAsync((int)PathResume.PlantId, (int)PathResume.AreaId, (int)PathResume.DistributionId);
-
-                                if (AssyChartExist is null)
-                                {
-                                    AssyChartForCreation assychartForCreate = new AssyChartForCreation()
-                                    {
-                                        PlantId = (int)PathResume.PlantId,
-                                        AreaId = (int)PathResume.AreaId,
-                                        DistributionId = (int)PathResume.DistributionId,
-                                        CreationDate = DateTime.Now,
-                                        ModificationDate = DateTime.Now,
-                                        IsActive = true
-                                    };
-
-                                    var resultCreateAssy = await _assyChartService.CreateAssyChartAsync(assychartForCreate);
-                                    CountCreateAssycchart++;
-                                    if (resultCreateAssy != null)
-                                    {
-                                        //se crea assy chart cout
-                                        Debug.WriteLine($"Create assychart id {resultCreateAssy.AssyChardId} plantid {(int)PathResume.PlantId} areaid {(int)PathResume.AreaId} distributionid {(int)PathResume.DistributionId} ");
-                                    }
-                                }
 
                                 retries = 0;
                                 // Si la operación tiene éxito, puedes salir del bucle

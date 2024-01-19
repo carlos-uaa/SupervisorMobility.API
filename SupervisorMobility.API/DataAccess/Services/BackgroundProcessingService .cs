@@ -1391,7 +1391,6 @@ namespace SupervisorMobility.API.DataAccess.Services
 
                     try
                     {
-
                         try
                         {
                             var response = await _bridgeHttpClient.GetAsync("SMGos/GetDirectoryPathsGos");
@@ -1528,6 +1527,7 @@ namespace SupervisorMobility.API.DataAccess.Services
                                 Product = pair,
                                 Similarity = 1 - pair.Code.JaccardDistance(productCode)
                             }).OrderByDescending(result => result.Similarity).FirstOrDefault();
+
 
                             string HoeAuxPath = "";
                             string DistributionAux = "";

@@ -18,7 +18,6 @@
 
             if (env.IsDevelopment())
             {
-              
                 //development
                 _apiLoginClient = new HttpClient { BaseAddress = new Uri("http://10.91.49.9:4251/") };
                 _bridgeHttpClient = new HttpClient(handler) { BaseAddress = new Uri("https://10.91.49.2:3000/") };
