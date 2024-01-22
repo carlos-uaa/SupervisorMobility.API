@@ -1,4 +1,5 @@
 ﻿using SupervisorMobility.API.DataAccess.Entities;
+using System;
 using System.ComponentModel.DataAnnotations;
 using System.ComponentModel.DataAnnotations.Schema;
 
@@ -19,6 +20,12 @@ namespace SupervisorMobility.API.Entities
 
         public string? restrictionorcomment { get; set; }
         public string? jsonTimeProduct { get; set; }
+
+        public string? ProductName { get; set; }
+        public string? NameTime { get; set; }
+        public string? Time { get; set; } = "§§§§";
+        public string? AdditionalTime { get; set; } = "§§§§";
+        public string? StandardTime { get; set; } = "§§§§";
 
 
         public int CriticalType { get; set; }

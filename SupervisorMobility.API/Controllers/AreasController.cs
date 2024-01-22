@@ -329,7 +329,30 @@ namespace SupervisorMobility.API.Controllers
 
                         //Optenemos AssyChart para rutas
                         var AssyChartExist = await _supervisorMobilityRepository.GetAssyChartForJobObservationAsync((int)PathResume.PlantId, (int)PathResume.AreaId, (int)PathResume.DistributionId);
+
                         //si existe no deberia haber problema seria un caso donde la planta existe, el area existe, la distribuccion existe
+                        if (AssyChartExist is null && PathResume.PlantId != 0 && PathResume.AreaId != 0 && PathResume.DistributionId != 0)
+                        {
+                            AssyChartForCreation assychartForCreate = new AssyChartForCreation()
+                            {
+                                PlantId = (int)PathResume.PlantId,
+                                AreaId = (int)PathResume.AreaId,
+                                DistributionId = (int)PathResume.DistributionId,
+                                CreationDate = DateTime.Now,
+                                ModificationDate = DateTime.Now,
+                                IsActive = true
+                            };
+
+                            var resultCreateAssy = await _assyChartService.CreateAssyChartAsync(assychartForCreate);
+                            CountCreateAssycchart++;
+
+                            if (resultCreateAssy != null)
+                            {
+                                //se crea assy chart cout
+                                Debug.WriteLine($"Create assychart id {resultCreateAssy.AssyChardId} plantid {(int)PathResume.PlantId} areaid {(int)PathResume.AreaId} distributionid {(int)PathResume.DistributionId} ");
+                                AssyChartExist = resultCreateAssy;
+                            }
+                        }
 
 
                         int maxRetries = 5; // Número máximo de intentos
@@ -519,7 +542,7 @@ namespace SupervisorMobility.API.Controllers
                                                         //Aqui una verificacion de informacion, si algun dato en los tiempos cambia, hay que actualizar el json//
                                                         // Update a la base de datos
 
-                                                            // Convertir la copia a JSON string
+                                                        // Convertir la copia a JSON string
                                                         var jsonStringCopy = Newtonsoft.Json.JsonConvert.SerializeObject(productsCopy, Newtonsoft.Json.Formatting.Indented);
 
                                                         if (productsCopy.Count > 0)
@@ -539,17 +562,92 @@ namespace SupervisorMobility.API.Controllers
                                                                 PathResume.ProductID = ProductExist.Product.ProductId;
                                                             }
 
+
+                                                            //aqui va la creacion de rutas
+                                                            TreeItemData? mejorCoincidenciaHOE = null;
+                                                            TreeItemData? mejorCoincidenciaGOS = null;
+                                                            TreeItemData? mejorCoincidenciaCCP = null;
+
+                                                            //"4§04. T&C/15§02. PRODUCCION/57§01. TRIM/242§03. T3/659§01. P71A/1018§12. SET SHIFT CONT",
+                                                            string HoeAuxPath = $"{planta.Code} PRODUCCION {coincidenciasAreas.Area.Description} {coincidenciasAreas.Area.Code} {productCode} {coincidenciasDistributions.Distribution.Description}";
+                                                            string GosAuxPath = $"{planta.Code} {productCode}";
+                                                            string CcpAuxPath = $"{planta.Code} {productCode}";
+
+
+                                                            string rutaHOENormalizada = _treeService.NormalizarRutaUsuario(HoeAuxPath);
+
+                                                            mejorCoincidenciaHOE = _treeService.EncontrarMejorCoincidenciaDifusa(rootNodeHOE, rutaHOENormalizada, productCode);
+
+                                                            if (mejorCoincidenciaHOE != null)
+                                                            {
+                                                                PathResume.HOE = mejorCoincidenciaHOE.Ruta;
+                                                                Debug.WriteLine("HOE: " + mejorCoincidenciaHOE.Ruta);
+                                                            }
+
+                                                            string rutaGOSNormalizada = _treeService.NormalizarRutaUsuario(GosAuxPath);
+
+                                                            mejorCoincidenciaGOS = _treeService.EncontrarMejorCoincidenciaDifusaInternal(rootNodeGOS, rutaGOSNormalizada, productCode);
+
+                                                            if (mejorCoincidenciaGOS != null)
+                                                            {
+                                                                PathResume.GOS = mejorCoincidenciaGOS.Ruta;
+                                                                Debug.WriteLine("GOS: " + mejorCoincidenciaGOS.Ruta);
+                                                            }
+
+
+                                                            string rutaCCPNormalizada = _treeService.NormalizarRutaUsuario(CcpAuxPath);
+
+                                                            mejorCoincidenciaCCP = _treeService.EncontrarMejorCoincidenciaDifusaInternal(rootNodeCCP, rutaCCPNormalizada, productCode);
+
+                                                            if (mejorCoincidenciaCCP != null)
+                                                            {
+                                                                PathResume.CCP = mejorCoincidenciaCCP.Ruta;
+                                                                Debug.WriteLine("CCP: " + mejorCoincidenciaCCP.Ruta);
+                                                            }
+
+                                                            //procedimiento de path
+                                                            SOSCodePath CodePath = new SOSCodePath();
+
+                                                            CodePath.Code = coincidenciasOperaciones.Operation.Code;
+                                                            //TreeItemData? mejorCoincidenciaHOE = null;
+                                                            //TreeItemData? mejorCoincidenciaGOS = null;
+                                                            //TreeItemData? mejorCoincidenciaCCP = null;
+
+                                                            if (mejorCoincidenciaHOE != null)
+                                                            {
+                                                                CodePath.HOE = mejorCoincidenciaHOE.Ruta;
+                                                            }
+
+                                                            if (mejorCoincidenciaGOS != null)
+                                                            {
+                                                                CodePath.GOS = mejorCoincidenciaGOS.Ruta;
+                                                            }
+
+                                                            if (mejorCoincidenciaCCP != null)
+                                                            {
+                                                                CodePath.CCP = mejorCoincidenciaCCP.Ruta;
+                                                            }
+
+
+                                                            //Añadimso distribucion y Producto
+
+                                                            CodePath.DistributionId = (int)PathResume.DistributionId;
+                                                            CodePath.ProductId = PathResume.ProductID;
+
+                                                            CodePath.AssyChardId = AssyChartExist.AssyChardId;
+
+                                                            //Crear Code Path
+                                                            await _supervisorMobilityRepository.AssychartCreateCodePath(CodePath);
+
+                                                            //aqui se añade el path creado
+                                                            _supervisorMobilityRepository.AssychartAddCodePath(AssyChartExist, CodePath);
+                                                            await _supervisorMobilityRepository.SaveChangesAsync();
+
                                                         }
                                                         else
                                                         {
-                                                            for (int j = 0; j < products.Count; j++)
-                                                            {
-                                                                var product = products[j];
-                                                                var productName = product.Keys.First();
-                                                                product[productName]["Time"] = "§§§§";
-                                                            }
-
-                                                            jsonStringCopy = Newtonsoft.Json.JsonConvert.SerializeObject(products, Newtonsoft.Json.Formatting.Indented);
+                                                            //aqui se menciona que no hay datos
+                                                            //Notificamos que faltaron tiempos
                                                         }
 
 
@@ -583,7 +681,7 @@ namespace SupervisorMobility.API.Controllers
                                                     }
                                                     else
                                                     {//No existe hay que crearla
-                                                        Debug.WriteLine($"La Operacion  NO EXISTE {ExcelOpCode} - {ExcelOpDescription} Existe :) !!! ");
+                                                        Debug.WriteLine($"La Operacion  NO EXISTE {ExcelOpCode} - {ExcelOpDescription} NO EXISTE :c  ");
 
                                                         //creacion de json del producto con tiempos
                                                         var jsonStringCopy = Newtonsoft.Json.JsonConvert.SerializeObject(productsCopy, Newtonsoft.Json.Formatting.Indented);
@@ -604,6 +702,7 @@ namespace SupervisorMobility.API.Controllers
                                                             {
                                                                 PathResume.ProductID = ProductExist.Product.ProductId;
                                                             }
+
 
                                                         }
                                                         else
@@ -629,6 +728,7 @@ namespace SupervisorMobility.API.Controllers
                                                         OperationsDictionary.Add(((int)PathResume.PlantId, (int)PathResume.AreaId, (int)PathResume.DistributionId, finalOperation.OperationId), finalOperation);
                                                         CountCreateOperation++;
                                                     }
+
 
 
                                                 }
@@ -734,7 +834,7 @@ namespace SupervisorMobility.API.Controllers
                                                     // Convertir la copia a JSON string
                                                     var jsonStringCopy = Newtonsoft.Json.JsonConvert.SerializeObject(productsCopy, Newtonsoft.Json.Formatting.Indented);
 
-                                                   
+
 
                                                     //No existe hay que crearla
                                                     Debug.WriteLine($"La Operacion NO EXISTE{ExcelOpCode} - {ExcelOpDescription} NO Existe :c !!! ");
