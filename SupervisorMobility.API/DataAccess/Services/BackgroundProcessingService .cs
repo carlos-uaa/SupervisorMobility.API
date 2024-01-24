@@ -482,12 +482,12 @@ namespace SupervisorMobility.API.DataAccess.Services
 
                     if (!messageError.IsNullOrEmpty())
                     {
-                        var emailMessageError = _email.CreateEmailMessage(userEntity.Email, $"Headcount document has been processed, you can now review its contents on the details page. \n LIST ERRORS:  \n" + messageError);
+                        var emailMessageError = _email.CreateEmailMessage(userEntity.Email, "Headcount processed", $"Headcount document has been processed, you can now review its contents on the details page. \n LIST ERRORS:  \n" + messageError);
                         _email.Send(emailMessageError);
                     }
                     else
                     {
-                        var emailMessage = _email.CreateEmailMessage(userEntity.Email, $"Headcount document has been processed, you can now review its contents on the details page.");
+                        var emailMessage = _email.CreateEmailMessage(userEntity.Email, "Headcount processed", $"Headcount document has been processed, you can now review its contents on the details page.");
                         _email.Send(emailMessage);
                     }
                     //break;

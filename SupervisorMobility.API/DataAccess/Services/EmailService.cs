@@ -15,12 +15,12 @@ namespace SupervisorMobility.API.DataAccess.Services
             _emailConfig = emailConfig;
         }
 
-        public MimeMessage CreateEmailMessage(string email, string message)
+        public MimeMessage CreateEmailMessage(string email, string subject,  string message)
         {
             var emailMessage = new MimeMessage();
             emailMessage.From.Add(MailboxAddress.Parse(_emailConfig.UserName));
             emailMessage.To.Add(MailboxAddress.Parse(email));
-            emailMessage.Subject = $"{_emailConfig.UserName}";
+            emailMessage.Subject = $"{subject}";
             emailMessage.Body = new TextPart(MimeKit.Text.TextFormat.Text) { Text = message };
             return emailMessage;
         }

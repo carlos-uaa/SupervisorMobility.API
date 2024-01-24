@@ -68,9 +68,7 @@ namespace SupervisorMobility.API.Business
             _repository.DeleteOperation(operation);
             await _repository.SaveChangesAsync();
         }
-        public async Task UpdateOperationAsync(
-            OperationForUpdateDto operationForUpdate,
-            Operation operation)
+        public async Task UpdateOperationAsync(OperationForUpdateDto operationForUpdate, Operation operation)
         {
             _mapper.Map(operationForUpdate, operation);
             await _repository.SaveChangesAsync();

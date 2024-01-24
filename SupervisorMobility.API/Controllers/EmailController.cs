@@ -14,9 +14,9 @@ namespace SupervisorMobility.API.Controllers
         }
 
         [HttpPost]
-        public void sendemail(string email, string body)
+        public void sendemail(string email, string subject, string body)
         {
-            var emailMessage = _email.CreateEmailMessage(email, body);
+            var emailMessage = _email.CreateEmailMessage(email, subject, body);
             _email.Send(emailMessage);
         }
 
