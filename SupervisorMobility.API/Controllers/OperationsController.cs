@@ -116,7 +116,7 @@ namespace SupervisorMobility.API.Controllers
                 createdOperationToReturn);
         }
 
-        [HttpPut("{operationid}")]
+        [HttpPut("{operationId:int}")]
         public async Task<ActionResult> UpdateOperation(int plantId, int areaId, int distributionId,
             int operationId,
             OperationForUpdateDto operation)

@@ -50,7 +50,7 @@ namespace SupervisorMobility.API.Models.JobObservationDtos
         public int? Option { get; set; }
         public string? Anomaly { get; set; }
         public string? HOEStandardTimes { get; set; }
-        public string? Models { get; set; }
+        public string? ModelsSpecification { get; set; }
         public string? Cycles { get; set; }
 
         public string? SsvCommentary { get; set; }
@@ -61,5 +61,6 @@ namespace SupervisorMobility.API.Models.JobObservationDtos
         public int? KpiId { get; set; }
         public string? TaktTime { get; set; }
         public string? Questions { get; set; }
+        public int? ProductId { get; set; }
     }
 }

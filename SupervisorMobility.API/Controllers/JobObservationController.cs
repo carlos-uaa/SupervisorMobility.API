@@ -332,7 +332,7 @@ namespace SupervisorMobility.API.Controllers
             {
                 resumeChanges += "HOEStandardTimes, ";
             }
-            if (jobObservationEntity.Models != jobObservationForUpdate.Models)
+            if (jobObservationEntity.ModelsSpecification != jobObservationForUpdate.ModelsSpecification)
             {
                 resumeChanges += "Models, ";
             }
