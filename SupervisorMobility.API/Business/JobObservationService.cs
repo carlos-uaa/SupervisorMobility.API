@@ -2,7 +2,6 @@
 using SupervisorMobility.API.Entities;
 using SupervisorMobility.API.Models.ChecklistCategoryDtos;
 using SupervisorMobility.API.Models.ChecklistQuestionDtos;
-using SupervisorMobility.API.Models.JobObservationTypeDtos;
 using SupervisorMobility.API.Services;
 
 namespace SupervisorMobility.API.Business
@@ -18,15 +17,15 @@ namespace SupervisorMobility.API.Business
             _mapper = mapper;
         }
 
-        #region Category
-        public async Task<IEnumerable<ChecklistCategory>> FetchChecklistCategoriesAsync(bool includeChecklistQuestions = false)
+        #region JobCategoryStructure
+        public async Task<IEnumerable<JobCategoryStructure>> FetchChecklistCategoriesAsync(bool includeChecklistQuestions = false)
         {
             return await _repository.GetChecklistCategoriesAsync(includeChecklistQuestions);
         }
 
-        public async Task<ChecklistCategory> CreateChecklistCategoryAsync(ChecklistCategoryForCreationDto checklistCategory)
+        public async Task<JobCategoryStructure> CreateChecklistCategoryAsync(JobCategoryStructureForCreationDto checklistCategory)
         {
-            var finalChecklistCategory = _mapper.Map<ChecklistCategory>(checklistCategory);
+            var finalChecklistCategory = _mapper.Map<JobCategoryStructure>(checklistCategory);
             finalChecklistCategory.Sequence = await _repository.GetChecklistCategoriesMaxSequenceAsync();
             _repository.AddChecklistCategory(finalChecklistCategory);
             await _repository.SaveChangesAsync();
@@ -34,13 +33,13 @@ namespace SupervisorMobility.API.Business
             return finalChecklistCategory;
         }
 
-        public async Task UpdateChecklistCategoryAsync(ChecklistCategoryForUpdateDto checklistCategoryUpdate, ChecklistCategory checklistCategory)
+        public async Task UpdateChecklistCategoryAsync(JobCategoryStructureForUpdateDto checklistCategoryUpdate, JobCategoryStructure checklistCategory)
         {
             _mapper.Map(checklistCategoryUpdate, checklistCategory);
             await _repository.SaveChangesAsync();
         }
 
-        public async Task DeleteChecklistCategoryAsync(ChecklistCategory checklistCategory)
+        public async Task DeleteChecklistCategoryAsync(JobCategoryStructure checklistCategory)
         {
             _repository.DeleteChecklistCategory(checklistCategory);
             await _repository.SaveChangesAsync();
@@ -51,12 +50,12 @@ namespace SupervisorMobility.API.Business
             return await _repository.GetChecklistCategoriesMaxSequenceAsync();
         }
 
-        public async Task<ChecklistCategory?> FetchChecklistCategoryAsync(int categoryId, bool includeChecklistQuestions = false)
+        public async Task<JobCategoryStructure?> FetchChecklistCategoryAsync(int categoryId, bool includeChecklistQuestions = false)
         {
             return await _repository.GetChecklistCategoryAsync(categoryId, includeChecklistQuestions);
         }
 
-        public async Task UpdateChecklistCategoriesSequenceAsync(ChecklistCategorySequenceForUpdateDto newChecklistCategorySequence, ChecklistCategory checklistCategoryEntity)
+        public async Task UpdateChecklistCategoriesSequenceAsync(JobCategoryStructureSequenceForUpdateDto newChecklistCategorySequence, JobCategoryStructure checklistCategoryEntity)
         {
             //So we need to update the checklist categories sequence between desiered and old one.
             var currentSequence =
@@ -68,7 +67,7 @@ namespace SupervisorMobility.API.Business
                 await _repository.GetChecklistCategoriesForUpdateSequenceAsync(
                        newChecklistCategorySequence.Sequence,
                        checklistCategoryEntity.Sequence,
-                       checklistCategoryEntity.ChecklistCategoryId);
+                       checklistCategoryEntity.JobCategoryStructureId);
 
             foreach (var checklistCategoryEntityForUpdate in checklistCategoryEntities)
             {
@@ -123,15 +122,15 @@ namespace SupervisorMobility.API.Business
         public async Task UpdateChecklistQuestionForCategoryAsync(ChecklistQuestionForUpdateDto checklistQuestionForUpdate, ChecklistQuestion checklistQuestion)
         {
             //Check if the category is different, if it is the checklist category will be send to the buttom.
-            if (checklistQuestionForUpdate.ChecklistCategoryId != checklistQuestion.ChecklistCategoryId)
+            if (checklistQuestionForUpdate.JobCategoryStructureId != checklistQuestion.JobCategoryStructureId)
             {
                 //Send this question to the end
                 var checklistQuestionSequence = new ChecklistQuestionSequenceForUpdateDto();
-                checklistQuestionSequence.CategorySequence = await FetchChecklistQuestionMaxSequenceAsync(checklistQuestion.ChecklistCategoryId) - 1;
-                await UpdateChecklistQuestionsSequenceAsync(checklistQuestionSequence, checklistQuestion, checklistQuestion.ChecklistCategoryId);
+                checklistQuestionSequence.CategorySequence = await FetchChecklistQuestionMaxSequenceAsync(checklistQuestion.JobCategoryStructureId) - 1;
+                await UpdateChecklistQuestionsSequenceAsync(checklistQuestionSequence, checklistQuestion, checklistQuestion.JobCategoryStructureId);
 
                 checklistQuestion.CategorySequence =
-                    await FetchChecklistQuestionMaxSequenceAsync(checklistQuestionForUpdate.ChecklistCategoryId);
+                    await FetchChecklistQuestionMaxSequenceAsync(checklistQuestionForUpdate.JobCategoryStructureId);
             }
 
             _mapper.Map(checklistQuestionForUpdate, checklistQuestion);
@@ -162,34 +161,6 @@ namespace SupervisorMobility.API.Business
             await _repository.SaveChangesAsync();
         }
         #endregion
-        #region JobObservationType
-        public async Task<IEnumerable<JobObservationType>> FetchJobObservationTypesAsync()
-        {
-            return await _repository.GetJobObservationTypesAsync();
-        }
-        public async Task<JobObservationType?> FetchJobObservationTypeAsync(int jobObservationTypeId, bool includeConfigs = false)
-        {
-            return await _repository
-                .GetJobObservationTypeAsync(jobObservationTypeId, includeConfigs);
-        }
-        public async Task<JobObservationType> CreateJobObservationTypeAsync(JobObservationTypeForCreationDto jobObservationType)
-        {
-            var finalJobObservationType = _mapper.Map<JobObservationType>(jobObservationType);
-            _repository.AddJobObservationType(finalJobObservationType);
-            await _repository.SaveChangesAsync();
-
-            return finalJobObservationType;
-        }
-        public async Task UpdateJobObservationTypeAsync(JobObservationTypeForUpdateDto jobObservationTypeUpdate, JobObservationType jobObservationType)
-        {
-            _mapper.Map(jobObservationTypeUpdate, jobObservationType);
-            await _repository.SaveChangesAsync();
-        }
-        public async Task DeleteJobObservationTypeAsync(JobObservationType jobObservationType)
-        {
-            _repository.DeleteJobObservationType(jobObservationType);
-            await _repository.SaveChangesAsync();
-        }
-        #endregion
+      
     }
 }

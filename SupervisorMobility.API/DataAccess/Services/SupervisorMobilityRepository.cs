@@ -32,103 +32,68 @@ namespace SupervisorMobility.API.Services
             _context = context ?? throw new ArgumentNullException(nameof(context));
         }
 
-        #region ChecklistCategoryOperations
+        #region JobCategoryStructureOperations
 
-        public void AddChecklistCategory(ChecklistCategory checklistCategory)
+        public void AddChecklistCategory(JobCategoryStructure checklistCategory)
         {
-            _context.ChecklistCategories.Add(checklistCategory);
+            _context.JobCategoryStructures.Add(checklistCategory);
         }
 
         public async Task<bool> ChecklistCategoryExistAsync(int checklistCategoryId)
         {
-            return await _context.ChecklistCategories.AnyAsync(c => c.ChecklistCategoryId == checklistCategoryId);
+            return await _context.JobCategoryStructures.AnyAsync(c => c.JobCategoryStructureId == checklistCategoryId);
         }
 
-        public void DeleteChecklistCategory(ChecklistCategory checklistCategory)
+        public void DeleteChecklistCategory(JobCategoryStructure checklistCategory)
         {
             checklistCategory.IsActive = false;
             _context.SaveChanges();
-            //_context.ChecklistCategories.Remove(checklistCategory);
+            //_context.JobCategoryStructures.Remove(checklistCategory);
         }
 
-        public async Task<IEnumerable<ChecklistCategory>> GetChecklistCategoriesAsync(bool includeChecklistQuestion = false)
+        public async Task<IEnumerable<JobCategoryStructure>> GetChecklistCategoriesAsync(bool includeChecklistQuestion = false)
         {
             if (includeChecklistQuestion)
             {
-                return await _context.ChecklistCategories.Include(cq => cq.ChecklistQuestions.Where(cq => cq.IsActive == true).OrderBy(c => c.CategorySequence))
+                return await _context.JobCategoryStructures.Include(cq => cq.ChecklistQuestions.Where(cq => cq.IsActive == true).OrderBy(c => c.CategorySequence))
                     .Where(u => u.IsActive == true).OrderBy(c => c.Sequence).ToListAsync();
             }
-            return await _context.ChecklistCategories.Where(u => u.IsActive == true)
+            return await _context.JobCategoryStructures.Where(u => u.IsActive == true)
                 .OrderBy(c => c.Sequence).ToListAsync();
         }
 
-        public async Task<ChecklistCategory?> GetChecklistCategoryAsync(int categoryId, bool includeChecklistQuestion = false)
+        public async Task<JobCategoryStructure?> GetChecklistCategoryAsync(int categoryId, bool includeChecklistQuestion = false)
         {
             if (includeChecklistQuestion)
             {
-                return await _context.ChecklistCategories.Include(cq => cq.ChecklistQuestions.Where(cq => cq.IsActive == true).OrderBy(c => c.CategorySequence))
-                    .Where(c => c.ChecklistCategoryId == categoryId).FirstOrDefaultAsync();
+                return await _context.JobCategoryStructures.Include(cq => cq.ChecklistQuestions.Where(cq => cq.IsActive == true).OrderBy(c => c.CategorySequence))
+                    .Where(c => c.JobCategoryStructureId == categoryId).FirstOrDefaultAsync();
             }
 
-            return await _context.ChecklistCategories
-                .Where(c => c.ChecklistCategoryId == categoryId).FirstOrDefaultAsync();
+            return await _context.JobCategoryStructures
+                .Where(c => c.JobCategoryStructureId == categoryId).FirstOrDefaultAsync();
         }
 
         public async Task<int> GetChecklistCategoriesMaxSequenceAsync()
         {
-            return await _context.ChecklistCategories.MaxAsync(cc => cc.Sequence) + 1;
+            return await _context.JobCategoryStructures.MaxAsync(cc => cc.Sequence) + 1;
         }
 
-        public async Task<IEnumerable<ChecklistCategory>> GetChecklistCategoriesForUpdateSequenceAsync(
+        public async Task<IEnumerable<JobCategoryStructure>> GetChecklistCategoriesForUpdateSequenceAsync(
             int currentSequence, int oldSequence, int categoryId)
         {
             int lowerValue = currentSequence < oldSequence ? currentSequence : oldSequence;
             int upperValue = currentSequence > oldSequence ? currentSequence : oldSequence;
 
-            return await _context.ChecklistCategories
+            return await _context.JobCategoryStructures
                         .Where(c => c.Sequence >= lowerValue
                             && c.Sequence <= upperValue
-                            && c.ChecklistCategoryId != categoryId
+                            && c.JobCategoryStructureId != categoryId
                             && c.IsActive == true)
                         .OrderBy(c => c.Sequence).ToListAsync();
         }
         #endregion
-        #region JobObservationTypesOperations
-        public async Task<IEnumerable<JobObservationType>> GetJobObservationTypesAsync()
-        {
-            return await _context.JobObservationTypes.Where(u => u.IsActive == true)
-                .OrderBy(c => c.JobObservationTypeId).ToListAsync();
-        }
-
-        public async Task<JobObservationType?> GetJobObservationTypeAsync(int id, bool includeConfigs = false)
-        {
-            if (includeConfigs)
-            {
-                return await _context.JobObservationTypes.Include(jot => jot.JobObservationConfigs)
-                    .Where(c => c.JobObservationTypeId == id).FirstOrDefaultAsync();
-            }
-
-            return await _context.JobObservationTypes
-                .Where(c => c.JobObservationTypeId == id).FirstOrDefaultAsync();
-        }
-
-        public void AddJobObservationType(JobObservationType jobObservationType)
-        {
-            _context.JobObservationTypes.Add(jobObservationType);
-        }
-
-        public void DeleteJobObservationType(JobObservationType jobObservationType)
-        {
-            //_context.JobObservationTypes.Remove(jobObservationType);
-            jobObservationType.IsActive = false;
-            _context.SaveChanges();
-        }
-
-        public async Task<bool> JobObservationTypeExistAsync(int jobObservationTypeId)
-        {
-            return await _context.JobObservationTypes.AnyAsync(c => c.JobObservationTypeId == jobObservationTypeId);
-        }
-        #endregion
+      
         #region GroupOperations
         public async Task<IEnumerable<Entities.Group>> GetGroupsAsync()
         {
@@ -461,14 +426,14 @@ namespace SupervisorMobility.API.Services
         public async Task<IEnumerable<ChecklistQuestion>> GetChecklistQuestionsForCategoryAsync(int categoryId)
         {
             return await _context.ChecklistQuestions
-                .Where(cq => cq.ChecklistCategoryId == categoryId && cq.IsActive == true)
+                .Where(cq => cq.JobCategoryStructureId == categoryId && cq.IsActive == true)
                 .OrderBy(cq => cq.CategorySequence).ToListAsync();
         }
         public async Task<ChecklistQuestion?> GetChecklistQuestionForCategoryAsync(int categoryId,
             int questionId)
         {
             return await _context.ChecklistQuestions
-                .Where(cq => cq.ChecklistCategoryId == categoryId && cq.QuestionID == questionId)
+                .Where(cq => cq.JobCategoryStructureId == categoryId && cq.QuestionID == questionId)
                 .FirstOrDefaultAsync();
         }
         public async Task AddChecklistQuestionForCategoryAsync(int categoryId, ChecklistQuestion checklistQuestion)
@@ -483,7 +448,7 @@ namespace SupervisorMobility.API.Services
         public async Task<int> GetChecklistQuestionMaxCategorySequenceAsync(int categoryId)
         {
             var sequence = await _context.ChecklistQuestions
-                .Where(cq => cq.ChecklistCategoryId == categoryId)
+                .Where(cq => cq.JobCategoryStructureId == categoryId)
                 .MaxAsync(cq => (int?)cq.CategorySequence) ?? 0;
             return sequence + 1;
         }
@@ -502,43 +467,14 @@ namespace SupervisorMobility.API.Services
             int upperValue = currentSequence > oldSequence ? currentSequence : oldSequence;
 
             return await _context.ChecklistQuestions
-                        .Where(c => c.ChecklistCategoryId == categoryId
+                        .Where(c => c.JobCategoryStructureId == categoryId
                             && c.CategorySequence >= lowerValue
                             && c.CategorySequence <= upperValue
                             && c.QuestionID != checklistQuestionId && c.IsActive == true)
                         .OrderBy(c => c.CategorySequence).ToListAsync();
         }
         #endregion
-        #region JobObservationConfigOperations
-        public async Task<IEnumerable<JobObservationConfig>> GetJobOperationConfigsForJobOperationTypeAsync(int jobObservationTypeId)
-        {
-            return await _context.JobObservationConfigs
-                .Where(joc => joc.JobObservationTypeId == jobObservationTypeId).ToListAsync();
-        }
-        public async Task<JobObservationConfig?> GetJobOperationConfigForJobOperationTypeAsync(int jobObservationTypeId,
-            int jobObservationConfigId)
-        {
-            return await _context.JobObservationConfigs
-                .Where(joc => joc.JobObservationTypeId == jobObservationTypeId
-                           && joc.JobObservationConfigId == jobObservationConfigId)
-                .FirstOrDefaultAsync();
-        }
-        public async Task AddJobOperationConfigForJobOperationTypeAsync(int jobObservationTypeId, JobObservationConfig jobObservationConfig)
-        {
-            var jobOperationType = await GetJobObservationTypeAsync(jobObservationTypeId);
-            if (jobOperationType != null)
-            {
-                jobOperationType.JobObservationConfigs.Add(jobObservationConfig);
-            }
-        }
-        public void DeleteJobOperationConfig(JobObservationConfig jobObservationConfig)
-        {
-            _context.JobObservationConfigs.Remove(jobObservationConfig);
-
-        }
-
-
-        #endregion
+     
         #region SupportDocumentTypeOperations
         public async Task<IEnumerable<SupportDocumentType>> GetSupportDocumentTypesAsync()
         {

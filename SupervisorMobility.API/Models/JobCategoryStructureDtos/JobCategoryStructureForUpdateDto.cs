@@ -2,7 +2,7 @@
 
 namespace SupervisorMobility.API.Models.ChecklistCategoryDtos
 {
-    public class ChecklistCategoryForUpdateDto
+    public class JobCategoryStructureForUpdateDto
     {
         [Required]
         [MaxLength(50)]
@@ -10,6 +10,8 @@ namespace SupervisorMobility.API.Models.ChecklistCategoryDtos
         [Required]
         [MaxLength(200)]
         public string Description { get; set; } = string.Empty;
+        public StructureType Type { get; set; }
+
         public bool IsActive { get; set; }
     }
 }

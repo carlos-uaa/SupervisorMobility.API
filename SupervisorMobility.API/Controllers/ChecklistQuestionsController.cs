@@ -88,7 +88,7 @@ namespace SupervisorMobility.API.Controllers
                 return NotFound("No checklist category Found!");
             }
 
-            if (!await _jobObservationService.CheckChecklistCategoryExistAsync(checklistQuestion.ChecklistCategoryId))
+            if (!await _jobObservationService.CheckChecklistCategoryExistAsync(checklistQuestion.JobCategoryStructureId))
             {
                 return NotFound("Destination checklist category not Found!");
             }

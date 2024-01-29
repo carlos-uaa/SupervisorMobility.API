@@ -14,9 +14,9 @@ namespace SupervisorMobility.API.Models.ChecklistQuestionDtos
 
         public bool? IsActive { get; set; }
         //Navigation properties
-        public int ChecklistCategoryId { get; set; }
-        public ChecklistCategoryDto ChecklistCategoriesDto { get; set; }
-            = new ChecklistCategoryDto();
+        public int JobCategoryStructureId { get; set; }
+        public JobCategoryStructureDto JobCategoryStructureDto { get; set; }
+            = new JobCategoryStructureDto();
 
     }
 }

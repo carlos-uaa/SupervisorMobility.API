@@ -2,7 +2,7 @@
 
 namespace SupervisorMobility.API.Models.ChecklistCategoryDtos
 {
-    public class ChecklistCategorySequenceForUpdateDto
+    public class JobCategoryStructureSequenceForUpdateDto
     {
         [Required]
         public int Sequence { get; set; }

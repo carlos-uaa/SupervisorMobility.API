@@ -14,11 +14,10 @@ namespace SupervisorMobility.API.Context
     {
         #region DbSets
         public DbSet<HeadCount> headCounts { get; set; }
-        public DbSet<ChecklistCategory> ChecklistCategories { get; set; }
+        public DbSet<JobCategoryStructure> JobCategoryStructures { get; set; }
         public DbSet<QuestionType> QuestionTypes { get; set; }
         public DbSet<ChecklistQuestion> ChecklistQuestions { get; set; }
-        public DbSet<JobObservationConfig> JobObservationConfigs { get; set; }
-        public DbSet<JobObservationType> JobObservationTypes { get; set; }
+   
         public DbSet<JobObservation> JobObservations { get; set; }
         public DbSet<Lup> Lup { get; set; }
         public DbSet<ChecklistAnswer> ChecklistAnswers { get; set; }
@@ -67,7 +66,7 @@ namespace SupervisorMobility.API.Context
         protected override void OnModelCreating(ModelBuilder modelBuilder)
         {
             //Default values
-            modelBuilder.Entity<ChecklistCategory>()
+            modelBuilder.Entity<JobCategoryStructure>()
                 .Property(p => p.IsActive)
                 .HasDefaultValue(true);
 
@@ -80,10 +79,6 @@ namespace SupervisorMobility.API.Context
                 .HasDefaultValue(true);
 
             modelBuilder.Entity<ChecklistQuestion>()
-                .Property(p => p.IsActive)
-                .HasDefaultValue(true);
-
-            modelBuilder.Entity<JobObservationType>()
                 .Property(p => p.IsActive)
                 .HasDefaultValue(true);
 
@@ -243,7 +238,7 @@ namespace SupervisorMobility.API.Context
                 .HasDefaultValue(true);
 
             //Constraints
-            modelBuilder.Entity<ChecklistCategory>()
+            modelBuilder.Entity<JobCategoryStructure>()
                 .HasCheckConstraint("ck_cc_seq", "[Sequence] > 0");
 
             modelBuilder.Entity<ChecklistQuestion>()
@@ -274,44 +269,51 @@ namespace SupervisorMobility.API.Context
             //seeding some data
 
 
-            modelBuilder.Entity<ChecklistCategory>()
+            modelBuilder.Entity<JobCategoryStructure>()
                 .HasData(
-                new ChecklistCategory("PO", "Preparación de la Observación")
+                new JobCategoryStructure("Title", "Job Observation Title Card")
                 {
-                    ChecklistCategoryId = 1,
+                    JobCategoryStructureId = 1,
                     Sequence = 1,
-                    IsActive = true
+                    IsActive = true,
+                    Type = StructureType.Titular
                 },
-                new ChecklistCategory("OPCE", "Observación para el cumplimiento del estándar - Observación de lejos")
+                new JobCategoryStructure("OPCE", "Observación para el cumplimiento del estándar - Observación de lejos")
                 {
-                    ChecklistCategoryId = 2,
+                    JobCategoryStructureId = 2,
                     Sequence = 2,
-                    IsActive = true
+                    IsActive = true,
+                    Type = StructureType.Checklist
                 },
-                new ChecklistCategory("ATO", "Análisis de tiempo de operación")
+                new JobCategoryStructure("ATO", "Análisis de tiempo de operación")
                 {
-                    ChecklistCategoryId = 3,
+                    JobCategoryStructureId = 3,
                     Sequence = 3,
-                    IsActive = true
+                    IsActive = true,
+                    Type = StructureType.Timer
                 },
-                new ChecklistCategory("OCE", "Observación para cumplimiento del estándar - Observación de cerca")
+                new JobCategoryStructure("OCE", "Observación para cumplimiento del estándar - Observación de cerca")
                 {
-                    ChecklistCategoryId = 4,
+                    JobCategoryStructureId = 4,
                     Sequence = 4,
-                    IsActive = true
+                    IsActive = true,
+                    Type = StructureType.Checklist
                 },
-                new ChecklistCategory("OMEFE", "Observación para mejora del estándar de acuerdo al filtro elegido")
+                new JobCategoryStructure("TOSF", "Trabajo de Observación  - Sumario / Finalización")
                 {
-                    ChecklistCategoryId = 5,
+                    JobCategoryStructureId = 5,
                     Sequence = 5,
-                    IsActive = true
+                    IsActive = true,
+                    Type = StructureType.Checklist
                 },
-                new ChecklistCategory("TOSF", "Trabajo de Observación  - Sumario / Finalización")
-                {
-                    ChecklistCategoryId = 6,
+                 new JobCategoryStructure("OMEFE", "Observación para mejora del estándar de acuerdo al filtro elegido")
+                 {
+                    JobCategoryStructureId = 6,
                     Sequence = 6,
-                    IsActive = true
-                });
+                    IsActive = true,
+                     Type = StructureType.Signature
+                 });
+
             modelBuilder.Entity<QuestionType>()
                 .HasData(
                 new QuestionType("TXT", "Free text")
@@ -345,50 +347,8 @@ namespace SupervisorMobility.API.Context
                     IsActive = true
                 });
 
-            modelBuilder.Entity<JobObservationType>()
-                .HasData(
-                new JobObservationType("JC", "Observación de Operación Cíclica")
-                {
-                    JobObservationTypeId = 1,
-                    IsActive = true
-                },
-                new JobObservationType("JNC", "Observación de Operación No Cíclica")
-                {
-                    JobObservationTypeId = 2,
-                    IsActive = true
-                });
-            modelBuilder.Entity<JobObservationConfig>()
-                .HasData(
-                new JobObservationConfig()
-                {
-                    JobObservationConfigId = 1,
-                    JobObservationTypeId = 1,
-                    ChecklistCategoryId = 1
-                },
-                new JobObservationConfig()
-                {
-                    JobObservationConfigId = 2,
-                    JobObservationTypeId = 1,
-                    ChecklistCategoryId = 2
-                },
-                new JobObservationConfig()
-                {
-                    JobObservationConfigId = 3,
-                    JobObservationTypeId = 1,
-                    ChecklistCategoryId = 3
-                },
-                new JobObservationConfig()
-                {
-                    JobObservationConfigId = 4,
-                    JobObservationTypeId = 1,
-                    ChecklistCategoryId = 4
-                },
-                new JobObservationConfig()
-                {
-                    JobObservationConfigId = 5,
-                    JobObservationTypeId = 1,
-                    ChecklistCategoryId = 5
-                });
+           
+
             modelBuilder.Entity<Entities.Group>()
                 .HasData(
                 new Entities.Group("GA", "Grupo A")
@@ -926,7 +886,7 @@ namespace SupervisorMobility.API.Context
                     NotGood = "No Respeta pasos principales y puntos críticos",
                     CategorySequence = 1,
                     IsActive = true,
-                    ChecklistCategoryId = 1,
+                    JobCategoryStructureId = 1,
 
                 },
                 new ChecklistQuestion()
@@ -937,7 +897,7 @@ namespace SupervisorMobility.API.Context
                     NotGood = "El empaque, herramientas, manipuladores no están en buenas condiciones y hay riesgos de calidad",
                     CategorySequence = 2,
                     IsActive = true,
-                    ChecklistCategoryId = 1,
+                    JobCategoryStructureId = 1,
 
                 });
 
