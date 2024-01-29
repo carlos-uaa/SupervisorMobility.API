@@ -22,8 +22,8 @@ namespace SupervisorMobility.API.Services
             int categoryId, bool includeChecklistQuestion = false);
         Task<bool> ChecklistCategoryExistAsync(int categoryId);
         Task<int> GetChecklistCategoriesMaxSequenceAsync();
-        void AddChecklistCategory(ChecklistCategory checklistCategory);
-        void DeleteChecklistCategory(ChecklistCategory checklistCategory);
+        void AddChecklistCategory(JobCategoryStructure checklistCategory);
+        void DeleteChecklistCategory(JobCategoryStructure checklistCategory);
         #endregion
         #region JobObservationTypesOperations
         Task<IEnumerable<JobObservationType>> GetJobObservationTypesAsync();
