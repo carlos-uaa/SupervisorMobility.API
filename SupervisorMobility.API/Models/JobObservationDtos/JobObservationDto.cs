@@ -62,5 +62,10 @@ namespace SupervisorMobility.API.Models.JobObservationDtos
         public string? TaktTime { get; set; }
         public string? Questions { get; set; }
         public int? ProductId { get; set; }
+
+        public string? OperationTimesJson { get; set; }
+        public string? StepsNumber { get; set; }
+        public string? DoubleManagment { get; set; }
+        public string? Waiting { get; set; }
     }
 }
