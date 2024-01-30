@@ -13,8 +13,7 @@ public enum StructureType
 
 namespace SupervisorMobility.API.Entities
 {
-    [Index(nameof(Code), IsUnique = true, Name = "ix_cc_cod")]
-    public class JobCategoryStructure
+        public class JobCategoryStructure
     {
         [Key]
         [DatabaseGenerated(DatabaseGeneratedOption.Identity)]
