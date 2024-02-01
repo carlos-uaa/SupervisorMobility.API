@@ -45,7 +45,7 @@ namespace SupervisorMobility.API.Models.JobObservationDtos
         public DateTime? FinishedDate { get; set; }
 
         public string? Justification { get; set; }
-
+        public string? SectionIds { get; set; }
         public int? Status { get; set; }
         public int? Option { get; set; }
         public string? Anomaly { get; set; }

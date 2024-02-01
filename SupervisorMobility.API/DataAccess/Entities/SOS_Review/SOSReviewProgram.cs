@@ -52,6 +52,9 @@ namespace SupervisorMobility.API.DataAccess.Entities.SOS_Review
         public DateTime? ApprovalDate { get; set; }
         public bool SuggestionApplied { get; set; }
 
+        public virtual ICollection<SOSReviewDistSuggestion>? Suggestions { get; set; }
+            = new List<SOSReviewDistSuggestion>();
+
         public bool IsActive { get; set; }
     }
 }

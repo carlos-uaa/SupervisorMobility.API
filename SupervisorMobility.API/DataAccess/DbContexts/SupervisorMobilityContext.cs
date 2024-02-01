@@ -49,6 +49,7 @@ namespace SupervisorMobility.API.Context
         public DbSet<PAT> PATs { get; set; }
 
         public DbSet<SOSReviewProgram> SOSReviews { get; set; }
+        public DbSet<SOSReviewDistSuggestion> SOSSuggestionsDistribution { get; set; }
         public DbSet<SOSRegisterJobObservation> SOSRegisters { get; set; }
         public DbSet<SOSRegUserOperation> SOSRegsUserOperation { get; set; }
 
@@ -73,6 +74,10 @@ namespace SupervisorMobility.API.Context
             modelBuilder.Entity<SOSReviewProgram>()
                .Property(p => p.IsActive)
                .HasDefaultValue(true);
+            
+            modelBuilder.Entity<SOSReviewDistSuggestion>()
+               .Property(p => p.SuggestionApplied)
+               .HasDefaultValue(false);
 
             modelBuilder.Entity<QuestionType>()
                 .Property(p => p.IsActive)

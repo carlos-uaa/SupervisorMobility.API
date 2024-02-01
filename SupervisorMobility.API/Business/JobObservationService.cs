@@ -22,6 +22,10 @@ namespace SupervisorMobility.API.Business
         {
             return await _repository.GetChecklistCategoriesAsync(includeChecklistQuestions);
         }
+        public async Task<IEnumerable<JobCategoryStructure>> FetchAllChecklistCategoriesAsync(bool includeChecklistQuestions = false)
+        {
+            return await _repository.GetChecklistCategoriesAsync(includeChecklistQuestions);
+        }
 
         public async Task<JobCategoryStructure> CreateChecklistCategoryAsync(JobCategoryStructureForCreationDto checklistCategory)
         {

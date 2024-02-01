@@ -10,15 +10,14 @@ namespace SupervisorMobility.API.Models.SOSReviewDtos
     {
         public int Status { get; set; }
 
-
+        public  ICollection<SOSReviewDistSuggestionDto>? Suggestions { get; set; }
+           = new List<SOSReviewDistSuggestionDto>();
         public ICollection<UsersWithoutNavigationWithoutPeopleDetails>? Supervisors { get; set; }
 
         public int? PlantId { get; set; }
 
 
         public int? AreaId { get; set; }
-
-
 
 
         public DateTime? CreationDate { get; set; }

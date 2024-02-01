@@ -96,19 +96,12 @@ namespace SupervisorMobility.API.Controllers
                 SOSentity.Supervisors = null;
             }
 
-
             var finalSOSReview = _mapper.Map<SOSReviewProgram>(SOSentity);
-
-
-
             var result = await _supervisorMobilityRepository.AddSOSReview(finalSOSReview);
-
-
-
 
             if (result > 0)
             {
-
+                //añade a SV si el lo creo
                 if (haveUsers)
                 {
                     foreach (var item in Users)
@@ -118,6 +111,24 @@ namespace SupervisorMobility.API.Controllers
                 }
 
                 await _supervisorMobilityRepository.SaveChangesAsync();
+
+                //Creamos listado de sugerencias de distribucion
+                var _alldistributions = await _supervisorMobilityRepository.GetDistributionsForAreaAsync((int)SOSentity.AreaId);
+
+                foreach (var dist in _alldistributions)
+                {
+                    SOSReviewDistSuggestionForCreateDto distSuggestion = new SOSReviewDistSuggestionForCreateDto();
+                    distSuggestion.SOSReviewProgramid = finalSOSReview.SOSid;
+                    distSuggestion.DistributionId = dist.DistributionId;
+
+                    SOSReviewDistSuggestion finalDistSugges = _mapper.Map<SOSReviewDistSuggestion>(distSuggestion);
+
+                    _ = await _supervisorMobilityRepository.CreateSOSReviewDistSuggestion(finalDistSugges);
+
+                }
+
+
+
 
                 var createdSOSToReturn =
                     _mapper.Map<SOSReviewWithAllDto>(finalSOSReview);

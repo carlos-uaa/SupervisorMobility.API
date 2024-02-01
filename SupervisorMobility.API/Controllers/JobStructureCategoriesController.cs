@@ -9,12 +9,12 @@ namespace SupervisorMobility.API.Controllers
 {
     [ApiController]
     [Route("api/checklistcategories")]
-    public class ChecklistCategoriesController : ControllerBase
+    public class JobStructureCategoriesController : ControllerBase
     {
         private readonly IJobObservationService _checklistCategoryService;
         private readonly IMapper _mapper;
 
-        public ChecklistCategoriesController(
+        public JobStructureCategoriesController(
             IMapper mapper,
             IJobObservationService checklistCategoryService)
         {
@@ -24,6 +24,23 @@ namespace SupervisorMobility.API.Controllers
 
         [HttpGet]
         public async Task<ActionResult<IEnumerable<JobCategoryStructureWithoutChecklistQuestionsDto>>> GetChecklistCategories(bool includeChecklistQuestions = false)
+        {
+
+            var checklistCategoryEntities = await _checklistCategoryService.FetchChecklistCategoriesAsync(includeChecklistQuestions);
+            if (checklistCategoryEntities == null)
+            {
+                return NotFound("Checklist categories not found!");
+            }
+
+            if (includeChecklistQuestions)
+            {
+                return Ok(_mapper.Map<IEnumerable<JobCategoryStructureWithJustchecklistQuestionsDto>>(checklistCategoryEntities));
+            }
+            return Ok(_mapper.Map<IEnumerable<JobCategoryStructureWithoutChecklistQuestionsDto>>(checklistCategoryEntities));
+        }
+
+        [HttpGet("all")]
+        public async Task<ActionResult<IEnumerable<JobCategoryStructureWithoutChecklistQuestionsDto>>> GetAllChecklistCategories(bool includeChecklistQuestions = false)
         {
 
             var checklistCategoryEntities = await _checklistCategoryService.FetchChecklistCategoriesAsync(includeChecklistQuestions);

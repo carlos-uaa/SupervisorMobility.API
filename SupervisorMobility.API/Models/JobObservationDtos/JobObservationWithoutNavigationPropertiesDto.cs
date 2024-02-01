@@ -19,6 +19,7 @@
         public DateTime? FinishedDate { get; set; }
 
         public string? Justification { get; set; }
+        public string? SectionIds { get; set; }
 
         public int? Status { get; set; }
 

@@ -9,6 +9,7 @@ using SupervisorMobility.API.Models.SOSReviewDtos;
 using SupervisorMobility.API.Models.Users;
 using System.Runtime.CompilerServices;
 
+
 namespace SupervisorMobility.API.Services
 {
     public interface ISupervisorMobilityRepository
@@ -16,6 +17,7 @@ namespace SupervisorMobility.API.Services
         #region ChecklistCategoryOperations
 
         Task<IEnumerable<JobCategoryStructure>> GetChecklistCategoriesAsync(bool includeChecklistQuestion = false);
+        Task<IEnumerable<JobCategoryStructure>> GetAllChecklistCategoriesAsync(bool includeChecklistQuestion = false);
         Task<IEnumerable<JobCategoryStructure>> GetChecklistCategoriesForUpdateSequenceAsync(
             int currentSequence, int oldSequence, int categoryId);
         Task<JobCategoryStructure?> GetChecklistCategoryAsync(
@@ -311,6 +313,11 @@ namespace SupervisorMobility.API.Services
         Task<IEnumerable<SOSRegisterJobObservation>> GetAllSOSReviewsRegistersByDistribution(int SOSReviewProgramId, int distributionid);
         Task<SOSRegisterJobObservation?> GetSOSReviewRegister(int SosId);
         Task<int> UpdateRegisterJobObservation(SOSReviewsRegisterForUpdateDto SOSForUpdate, SOSRegisterJobObservation SOSEntity);
+
+        Task<int> CreateSOSReviewDistSuggestion(SOSReviewDistSuggestion RegEntity);
+
+        void SOSReviewAddDistSuggestion(SOSReviewProgram Master, SOSReviewDistSuggestion Slave);
+
 
         //EndRegion
         #endregion

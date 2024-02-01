@@ -60,6 +60,16 @@ namespace SupervisorMobility.API.Services
             }
             return await _context.JobCategoryStructures.Where(u => u.IsActive == true)
                 .OrderBy(c => c.Sequence).ToListAsync();
+        }  
+        public async Task<IEnumerable<JobCategoryStructure>> GetAllChecklistCategoriesAsync(bool includeChecklistQuestion = false)
+        {
+            if (includeChecklistQuestion)
+            {
+                return await _context.JobCategoryStructures.Include(cq => cq.ChecklistQuestions.Where(cq => cq.IsActive == true).OrderBy(c => c.CategorySequence))
+                    .OrderBy(c => c.Sequence).ToListAsync();
+            }
+            return await _context.JobCategoryStructures
+                .OrderBy(c => c.Sequence).ToListAsync();
         }
 
         public async Task<JobCategoryStructure?> GetChecklistCategoryAsync(int categoryId, bool includeChecklistQuestion = false)
@@ -1467,7 +1477,7 @@ namespace SupervisorMobility.API.Services
             if (SOSAnualId != 0)
             {
                 query = query.Where(d => d.Type != 3);
-                SOSReviewProgram? sos = _context.SOSReviews.Include(s => s.Supervisors).Where(u => u.SOSid == SOSAnualId).FirstOrDefault();
+                SOSReviewProgram? sos = _context.SOSReviews.Include(r => r.Suggestions).Include(s => s.Supervisors).Where(u => u.SOSid == SOSAnualId).FirstOrDefault();
                 if (sos != null && sos.Supervisors?.Count > 0)
                 {
                     List<int> supervisorIds = sos.Supervisors.Select(s => s.UserId).ToList();
@@ -1979,7 +1989,7 @@ namespace SupervisorMobility.API.Services
 
         public async Task<IEnumerable<SOSReviewProgram>> GetAllSOSReviews()
         {
-            return await _context.SOSReviews
+            return await _context.SOSReviews.Include(r => r.Suggestions)
                    .Include(p => p.Plant)
                    .Include(a => a.Area)
                    .Include(s => s.Supervisors)
@@ -1990,6 +2000,7 @@ namespace SupervisorMobility.API.Services
         public async Task<SOSReviewProgram?> GetSOSasync(int sosId)
         {
             return await _context.SOSReviews
+                .Include(r => r.Suggestions)
                    .Include(p => p.Plant)
                    .Include(a => a.Area)
                    .Include(s => s.Supervisors)
@@ -2013,6 +2024,18 @@ namespace SupervisorMobility.API.Services
             _context.SaveChanges();
         }
 
+        public async void SOSReviewAddDistSuggestion(SOSReviewProgram Master, SOSReviewDistSuggestion Slave)
+        {
+            Master.Suggestions?.Add(Slave);
+            _context.SaveChanges();
+        }
+
+        public async Task<int> CreateSOSReviewDistSuggestion(SOSReviewDistSuggestion RegEntity)
+        {
+            await _context.SOSSuggestionsDistribution.AddAsync(RegEntity);
+            return _context.SaveChanges();
+        } 
+        
         public async Task<int> DeleteSOSReview(SOSReviewProgram SOSEntity)
         {
             SOSEntity.IsActive = false;

@@ -9,7 +9,8 @@ namespace SupervisorMobility.API.Models.SOSReviewDtos
     public class SOSReviewForUpdateDto
     {
         public int Status { get; set; }
-
+        public  ICollection<SOSReviewDistSuggestionDto>? Suggestions { get; set; }
+           = new List<SOSReviewDistSuggestionDto>();
         public ICollection<UsersWithoutNavigationWithoutPeopleDetails>? Supervisors { get; set; }
 
         public int? PlantId { get; set; }

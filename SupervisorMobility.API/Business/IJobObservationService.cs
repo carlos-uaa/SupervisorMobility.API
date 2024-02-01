@@ -8,6 +8,7 @@ namespace SupervisorMobility.API.Business
     {
         #region Category
         Task<IEnumerable<JobCategoryStructure>> FetchChecklistCategoriesAsync(bool includeChecklistQuestions = false);
+        Task<IEnumerable<JobCategoryStructure>> FetchAllChecklistCategoriesAsync(bool includeChecklistQuestions = false);
         Task<JobCategoryStructure?> FetchChecklistCategoryAsync(int categoryId, bool includeChecklistQuestions = false);
         Task<JobCategoryStructure> CreateChecklistCategoryAsync(JobCategoryStructureForCreationDto checklistCategory);
         Task<int> FetchChecklistCategoriesMaxSequenceAsync();
