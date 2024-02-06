@@ -315,7 +315,7 @@ namespace SupervisorMobility.API.Services
         Task<int> UpdateRegisterJobObservation(SOSReviewsRegisterForUpdateDto SOSForUpdate, SOSRegisterJobObservation SOSEntity);
 
         Task<int> CreateSOSReviewDistSuggestion(SOSReviewDistSuggestion RegEntity);
-
+        Task<SOSReviewDistSuggestion?> GetDistSuggestion(int sosId, int dist_id);
         void SOSReviewAddDistSuggestion(SOSReviewProgram Master, SOSReviewDistSuggestion Slave);
 
 

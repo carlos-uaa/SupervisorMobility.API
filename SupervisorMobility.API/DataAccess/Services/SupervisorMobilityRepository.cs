@@ -2006,6 +2006,10 @@ namespace SupervisorMobility.API.Services
                    .Include(s => s.Supervisors)
                    .Where(p => p.SOSid == sosId).FirstOrDefaultAsync();
         }
+        
+       
+
+
         public async Task<int> AddSOSReview(SOSReviewProgram SOSEntity)
         {
             _context.SOSReviews.Add(SOSEntity);
@@ -2034,8 +2038,13 @@ namespace SupervisorMobility.API.Services
         {
             await _context.SOSSuggestionsDistribution.AddAsync(RegEntity);
             return _context.SaveChanges();
-        } 
-        
+        }
+
+        public async Task<SOSReviewDistSuggestion?> GetDistSuggestion(int sosId, int dist_id)
+        {
+            return await _context.SOSSuggestionsDistribution
+                            .Where(p => p.SOSReviewProgramid == sosId && p.DistributionId == dist_id).FirstOrDefaultAsync();
+        }
         public async Task<int> DeleteSOSReview(SOSReviewProgram SOSEntity)
         {
             SOSEntity.IsActive = false;
