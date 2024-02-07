@@ -119,13 +119,15 @@ namespace SupervisorMobility.API.Controllers
 
         }//end post create register
 
-        [HttpPost("Registers/{sos_id}/ApplySuggest")]
-        public async Task<ActionResult> MassiveCreate(int sos_id, List<JobObservationForCreationDto> JobsSuggest)
+        [HttpPost("Registers/{sos_id}/ApplySuggest/{dist_id}")]
+        public async Task<ActionResult> MassiveCreate(int sos_id, int dist_id, List<JobObservationForCreationDto> JobsSuggest)
         {
             var SOS_Review = await _supervisorMobilityRepository.GetSOSasync(sos_id);
-            var sosUpdateEntity = _mapper.Map<SOSReviewForUpdateDto>(SOS_Review);
+            //var sosUpdateEntity = _mapper.Map<SOSReviewForUpdateDto>(SOS_Review);
             var JobRegisterExist = await _supervisorMobilityRepository.GetAllSOSReviewsRegisters(sos_id);
             var UserOpRegistersExist = await _supervisorMobilityRepository.GetAllSOSRegUserOperations(sos_id);
+
+            var SuggestDistribution = await _supervisorMobilityRepository.GetDistSuggestion(sos_id, dist_id);
 
             foreach (var job in JobsSuggest)
             {
@@ -282,37 +284,39 @@ namespace SupervisorMobility.API.Controllers
             }
 
 
-            sosUpdateEntity.SuggestionApplied = true;
+            SuggestDistribution.SuggestionApplied = true;
 
-            List<User> Users = new List<User>();
-            bool haveUsers = false;
+            //sosUpdateEntity.SuggestionApplied = true;
 
-            if (SOS_Review.Supervisors != null)
-            {
-                haveUsers = true;
-                foreach (var Sub in SOS_Review.Supervisors)
-                {
-                    var usr = await _supervisorMobilityRepository.GetUserAsync(Sub.UserId);
-                    if (usr != null)
-                    {
-                        Users.Add(usr);
-                    }
-                }
+            //List<User> Users = new List<User>();
+            //bool haveUsers = false;
 
-                SOS_Review.Supervisors = null;
-                sosUpdateEntity.Supervisors = null;
-            }
+            //if (SOS_Review.Supervisors != null)
+            //{
+            //    haveUsers = true;
+            //    foreach (var Sub in SOS_Review.Supervisors)
+            //    {
+            //        var usr = await _supervisorMobilityRepository.GetUserAsync(Sub.UserId);
+            //        if (usr != null)
+            //        {
+            //            Users.Add(usr);
+            //        }
+            //    }
+
+            //    SOS_Review.Supervisors = null;
+            //    sosUpdateEntity.Supervisors = null;
+            //}
 
 
-            var result = await _supervisorMobilityRepository.UpdateSOSReview(sosUpdateEntity, SOS_Review);
+            //var result = await _supervisorMobilityRepository.UpdateSOSReview(sosUpdateEntity, SOS_Review);
 
-            if (haveUsers)
-            {
-                foreach (var item in Users)
-                {
-                    _supervisorMobilityRepository.SOSReviewAddUser(SOS_Review, item);
-                }
-            }
+            //if (haveUsers)
+            //{
+            //    foreach (var item in Users)
+            //    {
+            //        _supervisorMobilityRepository.SOSReviewAddUser(SOS_Review, item);
+            //    }
+            //}
 
             await _supervisorMobilityRepository.SaveChangesAsync();
 

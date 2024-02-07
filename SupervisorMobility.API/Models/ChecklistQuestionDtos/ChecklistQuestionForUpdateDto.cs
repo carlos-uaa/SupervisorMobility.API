@@ -16,7 +16,7 @@ namespace SupervisorMobility.API.Models.ChecklistQuestionDtos
         public bool? IsActive { get; set; }
         //FK
         [Required]
-        public int ChecklistCategoryId { get; set; }
+        public int JobCategoryStructureId { get; set; }
 
     }
 }

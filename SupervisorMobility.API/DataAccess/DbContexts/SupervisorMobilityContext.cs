@@ -14,11 +14,10 @@ namespace SupervisorMobility.API.Context
     {
         #region DbSets
         public DbSet<HeadCount> headCounts { get; set; }
-        public DbSet<ChecklistCategory> ChecklistCategories { get; set; }
+        public DbSet<JobCategoryStructure> JobCategoryStructures { get; set; }
         public DbSet<QuestionType> QuestionTypes { get; set; }
         public DbSet<ChecklistQuestion> ChecklistQuestions { get; set; }
-        public DbSet<JobObservationConfig> JobObservationConfigs { get; set; }
-        public DbSet<JobObservationType> JobObservationTypes { get; set; }
+   
         public DbSet<JobObservation> JobObservations { get; set; }
         public DbSet<Lup> Lup { get; set; }
         public DbSet<ChecklistAnswer> ChecklistAnswers { get; set; }
@@ -50,6 +49,7 @@ namespace SupervisorMobility.API.Context
         public DbSet<PAT> PATs { get; set; }
 
         public DbSet<SOSReviewProgram> SOSReviews { get; set; }
+        public DbSet<SOSReviewDistSuggestion> SOSSuggestionsDistribution { get; set; }
         public DbSet<SOSRegisterJobObservation> SOSRegisters { get; set; }
         public DbSet<SOSRegUserOperation> SOSRegsUserOperation { get; set; }
 
@@ -67,23 +67,23 @@ namespace SupervisorMobility.API.Context
         protected override void OnModelCreating(ModelBuilder modelBuilder)
         {
             //Default values
-            modelBuilder.Entity<ChecklistCategory>()
+            modelBuilder.Entity<JobCategoryStructure>()
                 .Property(p => p.IsActive)
                 .HasDefaultValue(true);
 
             modelBuilder.Entity<SOSReviewProgram>()
                .Property(p => p.IsActive)
                .HasDefaultValue(true);
+            
+            modelBuilder.Entity<SOSReviewDistSuggestion>()
+               .Property(p => p.SuggestionApplied)
+               .HasDefaultValue(false);
 
             modelBuilder.Entity<QuestionType>()
                 .Property(p => p.IsActive)
                 .HasDefaultValue(true);
 
             modelBuilder.Entity<ChecklistQuestion>()
-                .Property(p => p.IsActive)
-                .HasDefaultValue(true);
-
-            modelBuilder.Entity<JobObservationType>()
                 .Property(p => p.IsActive)
                 .HasDefaultValue(true);
 
@@ -243,7 +243,7 @@ namespace SupervisorMobility.API.Context
                 .HasDefaultValue(true);
 
             //Constraints
-            modelBuilder.Entity<ChecklistCategory>()
+            modelBuilder.Entity<JobCategoryStructure>()
                 .HasCheckConstraint("ck_cc_seq", "[Sequence] > 0");
 
             modelBuilder.Entity<ChecklistQuestion>()
@@ -274,44 +274,65 @@ namespace SupervisorMobility.API.Context
             //seeding some data
 
 
-            modelBuilder.Entity<ChecklistCategory>()
+            modelBuilder.Entity<JobCategoryStructure>()
                 .HasData(
-                new ChecklistCategory("PO", "Preparación de la Observación")
+                new JobCategoryStructure("Title", "Job Observation Title Card")
                 {
-                    ChecklistCategoryId = 1,
+                    JobCategoryStructureId = 1,
                     Sequence = 1,
-                    IsActive = true
+                    IsActive = true,
+                    Type = StructureType.Titular
                 },
-                new ChecklistCategory("OPCE", "Observación para el cumplimiento del estándar - Observación de lejos")
+                new JobCategoryStructure("PO", "Preparacion de la Observacion")
                 {
-                    ChecklistCategoryId = 2,
+                    JobCategoryStructureId = 2,
                     Sequence = 2,
-                    IsActive = true
+                    IsActive = true,
+                    Type = StructureType.Checklist
                 },
-                new ChecklistCategory("ATO", "Análisis de tiempo de operación")
+                new JobCategoryStructure("OPCE", "Observación para el cumplimiento del estándar - Observación de lejos")
                 {
-                    ChecklistCategoryId = 3,
+                    JobCategoryStructureId = 3,
                     Sequence = 3,
-                    IsActive = true
+                    IsActive = true,
+                    Type = StructureType.Checklist
                 },
-                new ChecklistCategory("OCE", "Observación para cumplimiento del estándar - Observación de cerca")
+                new JobCategoryStructure("ATO", "Análisis de tiempo de operación")
                 {
-                    ChecklistCategoryId = 4,
+                    JobCategoryStructureId = 4,
                     Sequence = 4,
-                    IsActive = true
+                    IsActive = true,
+                    Type = StructureType.Timer
                 },
-                new ChecklistCategory("OMEFE", "Observación para mejora del estándar de acuerdo al filtro elegido")
+                new JobCategoryStructure("OCE", "Observación para cumplimiento del estándar - Observación de cerca")
                 {
-                    ChecklistCategoryId = 5,
+                    JobCategoryStructureId = 5,
                     Sequence = 5,
-                    IsActive = true
+                    IsActive = true,
+                    Type = StructureType.Checklist
                 },
-                new ChecklistCategory("TOSF", "Trabajo de Observación  - Sumario / Finalización")
+                new JobCategoryStructure("TOSF", "Trabajo de Observación  - Sumario / Finalización")
                 {
-                    ChecklistCategoryId = 6,
+                    JobCategoryStructureId = 6,
                     Sequence = 6,
-                    IsActive = true
-                });
+                    IsActive = true,
+                    Type = StructureType.Checklist
+                },
+                 new JobCategoryStructure("OMEFE", "Observación para mejora del estándar de acuerdo al filtro elegido")
+                 {
+                    JobCategoryStructureId = 7,
+                    Sequence = 7,
+                    IsActive = true,
+                    Type = StructureType.LUP
+                 },
+                 new JobCategoryStructure("CMT", "Comentarios")
+                 {
+                     JobCategoryStructureId = 8,
+                     Sequence = 8,
+                     IsActive = true,
+                     Type = StructureType.Signature
+                 });
+
             modelBuilder.Entity<QuestionType>()
                 .HasData(
                 new QuestionType("TXT", "Free text")
@@ -345,50 +366,8 @@ namespace SupervisorMobility.API.Context
                     IsActive = true
                 });
 
-            modelBuilder.Entity<JobObservationType>()
-                .HasData(
-                new JobObservationType("JC", "Observación de Operación Cíclica")
-                {
-                    JobObservationTypeId = 1,
-                    IsActive = true
-                },
-                new JobObservationType("JNC", "Observación de Operación No Cíclica")
-                {
-                    JobObservationTypeId = 2,
-                    IsActive = true
-                });
-            modelBuilder.Entity<JobObservationConfig>()
-                .HasData(
-                new JobObservationConfig()
-                {
-                    JobObservationConfigId = 1,
-                    JobObservationTypeId = 1,
-                    ChecklistCategoryId = 1
-                },
-                new JobObservationConfig()
-                {
-                    JobObservationConfigId = 2,
-                    JobObservationTypeId = 1,
-                    ChecklistCategoryId = 2
-                },
-                new JobObservationConfig()
-                {
-                    JobObservationConfigId = 3,
-                    JobObservationTypeId = 1,
-                    ChecklistCategoryId = 3
-                },
-                new JobObservationConfig()
-                {
-                    JobObservationConfigId = 4,
-                    JobObservationTypeId = 1,
-                    ChecklistCategoryId = 4
-                },
-                new JobObservationConfig()
-                {
-                    JobObservationConfigId = 5,
-                    JobObservationTypeId = 1,
-                    ChecklistCategoryId = 5
-                });
+           
+
             modelBuilder.Entity<Entities.Group>()
                 .HasData(
                 new Entities.Group("GA", "Grupo A")
@@ -918,28 +897,237 @@ namespace SupervisorMobility.API.Context
 
             modelBuilder.Entity<ChecklistQuestion>()
                 .HasData(
+                //Preparacion de la observacion
                 new ChecklistQuestion()
                 {
                     QuestionID = 1,
                     PillarId = 2,
-                    Prompt = "Respeta pasos principales y puntos críticos",
-                    NotGood = "No Respeta pasos principales y puntos críticos",
+                    Prompt = "Los estándares estan completos y actualizados (HOE, Estado de referencia de 5S, etc. Icluyendo la pasada observación de operación  (S/N)",
+                    NotGood = "",
                     CategorySequence = 1,
                     IsActive = true,
-                    ChecklistCategoryId = 1,
-
+                    JobCategoryStructureId = 2,
                 },
                 new ChecklistQuestion()
                 {
                     QuestionID = 2,
                     PillarId = 2,
-                    Prompt = "Empaque, herramientas, manipuladores están en buenas condiciones y no hay riesgos de calidad",
-                    NotGood = "El empaque, herramientas, manipuladores no están en buenas condiciones y hay riesgos de calidad",
+                    Prompt = "¿Cuál es nivel de ILU del operador?  ¿Está el entrenamiento alineado con el Cuadro de requisitos de Operaicón ? (S/N)",
+                    NotGood = "",
                     CategorySequence = 2,
                     IsActive = true,
-                    ChecklistCategoryId = 1,
+                    JobCategoryStructureId = 2,
+                }, new ChecklistQuestion()
+                {
+                    QuestionID = 3,
+                    PillarId = 2,
+                    Prompt = "Verificar  \"Documentación de Seguridad y Ergonomía\" están actualizados (S/N) ?",
+                    NotGood = "",
+                    CategorySequence = 3,
+                    IsActive = true,
+                    JobCategoryStructureId = 2,
+                },
+                new ChecklistQuestion()
+                {
+                    QuestionID = 4,
+                    PillarId = 2,
+                    Prompt = "¿Hay algún problema de seguridad y ergonomía identificado? ¿Si existe indicar, cuál?",
+                    NotGood = "",
+                    CategorySequence = 4,
+                    IsActive = true,
+                    JobCategoryStructureId = 2,
+                }, new ChecklistQuestion()
+                {
+                    QuestionID = 5,
+                    PillarId = 2,
+                    Prompt = "¿Hay algún problema de Calidad en la estación de trabajo recientemente? Si existe , ¿Cuál?",
+                    NotGood = "",
+                    CategorySequence = 5,
+                    IsActive = true,
+                    JobCategoryStructureId = 2,
+                },
+                new ChecklistQuestion()
+                {
+                    QuestionID = 6,
+                    PillarId = 2,
+                    Prompt = "¿Cuál es la prioridad KPI a mejorarse para el la estación de trabajo o Zona de trabajo?",
+                    NotGood = "",
+                    CategorySequence = 6,
+                    IsActive = true,
+                    JobCategoryStructureId = 2,
+                }
+                //Seccion 2 Observacion para el cumlimiento del estandar
+                ,new ChecklistQuestion()
+                {
+                    QuestionID = 7,
+                    PillarId = 2,
+                    Prompt = "El operador usa el EPP como se establece en la HOE y Hoja de asignación de equipo de protección personal (S / N) explicar (N)",
+                    NotGood = "",
+                    CategorySequence = 1,
+                    IsActive = true,
+                    JobCategoryStructureId = 3,
+                },
+                new ChecklistQuestion()
+                {
+                    QuestionID = 8,
+                    PillarId = 2,
+                    Prompt = "La estación de trabajo cumple con el estado de referencia de 5S requerido incluyendo ayudas visuales ( sistema importante A, B, etc..)  (S/N) explicar (N)",
+                    NotGood = "",
+                    CategorySequence = 2,
+                    IsActive = true,
+                    JobCategoryStructureId = 3,
+                }, new ChecklistQuestion()
+                {
+                    QuestionID = 9,
+                    PillarId = 2,
+                    Prompt = "El operador trabaja de acuerdo a la HOE de distribución de operación  (orden de los pasos principales)? (S/N) explicar (N)",
+                    NotGood = "",
+                    CategorySequence = 3,
+                    IsActive = true,
+                    JobCategoryStructureId = 3,
+                },
+                new ChecklistQuestion()
+                {
+                    QuestionID = 10,
+                    PillarId = 2,
+                    Prompt = "Actividad no cíclica (Ejemplo : Control de Lote, Cambio de Caja, Plan de Mantenimiento autónomo,…) se realizan en cumplimiento al estándar, si procede (S/N) explicar (N)",
+                    NotGood = "",
+                    CategorySequence = 4,
+                    IsActive = true,
+                    JobCategoryStructureId = 3,
+                }, new ChecklistQuestion()
+                {
+                    QuestionID =11,
+                    PillarId = 2,
+                    Prompt = "Actividad regular de Calidad  (plan de inspección,chequeo  Poka Yoke ,…) se hacen en cumplimiento al estándar,  incluyendo registro, si procede (S/N) explicar (N)",
+                    NotGood = "",
+                    CategorySequence = 5,
+                    IsActive = true,
+                    JobCategoryStructureId = 3,
+                }
+                //Seccion 4 observacion para cumplimiento del estandar
 
-                });
+                , new ChecklistQuestion()
+                {
+                    QuestionID = 12,
+                    PillarId = 2,
+                    Prompt = "Verificar que el operador cumpla con los pasos de HOE, que están relacionados al enfoque del problema / defecto? (S/N) explicar (N)",
+                    NotGood = "",
+                    CategorySequence = 1,
+                    IsActive = true,
+                    JobCategoryStructureId = 5,
+                },
+                new ChecklistQuestion()
+                {
+                    QuestionID = 13,
+                    PillarId = 2,
+                    Prompt = "Puntos clave son respetados. Verificar que los puntos clave son apropiados a los problemas de calidad / seguridad en la estación de trabajo (S/N) explicar (N)",
+                    NotGood = "",
+                    CategorySequence = 2,
+                    IsActive = true,
+                    JobCategoryStructureId = 5,
+                }
+                , new ChecklistQuestion()
+                {
+                    QuestionID = 14,
+                    PillarId = 2,
+                    Prompt = "El producto / parte cumple con las especificaciones : (In & Out, incluyendo PEPS) (S/N) explicar (N)",
+                    NotGood = "",
+                    CategorySequence = 3,
+                    IsActive = true,
+                    JobCategoryStructureId = 5,
+                },
+                new ChecklistQuestion()
+                {
+                    QuestionID = 15,
+                    PillarId = 2,
+                    Prompt = "Empaque, herramientas, manipuladores estan en buenas condiciones y no hay riezgo de afectar la calidad. (S/N) explicar (N)",
+                    NotGood = "",
+                    CategorySequence = 4,
+                    IsActive = true,
+                    JobCategoryStructureId = 5,
+                }, new ChecklistQuestion()
+                {
+                    QuestionID = 16,
+                    PillarId = 2,
+                    Prompt = "Partes están correctamente identificadas y para que las que sean necesario ser rastreadas, verificar que el registro sea hecho correctamente (S/N) explicar (N)",
+                    NotGood = "",
+                    CategorySequence = 5,
+                    IsActive = true,
+                    JobCategoryStructureId = 5,
+                },
+                new ChecklistQuestion()
+                {
+                    QuestionID = 17,
+                    PillarId = 2,
+                    Prompt = "Procedimiento para disposición de residuos y reglas de seguridad (incluyendo químicos) son respetados (S/N) explicar (N)",
+                    NotGood = "",
+                    CategorySequence = 6,
+                    IsActive = true,
+                    JobCategoryStructureId = 5,
+                }, new ChecklistQuestion()
+                {
+                    QuestionID = 18,
+                    PillarId = 2,
+                    Prompt = "Adicion en Comentarios",
+                    NotGood = "",
+                    CategorySequence = 7,
+                    IsActive = true,
+                    JobCategoryStructureId = 5,
+
+                }
+                //seccion 5 trabajo de observacion 
+                , new ChecklistQuestion()
+                {
+                    QuestionID = 19,
+                    PillarId = 2,
+                    Prompt = "Concensar con el operador respecto a su cumplimiento al estándar",
+                    NotGood = "",
+                    CategorySequence = 1,
+                    IsActive = true,
+                    JobCategoryStructureId = 6,
+                },
+                new ChecklistQuestion()
+                {
+                    QuestionID = 20,
+                    PillarId = 2,
+                    Prompt = "Mientras el líder realiza la operación, verificar si el operador es capáz de nombrar: Muchotexto",
+                    NotGood = "",
+                    CategorySequence = 2,
+                    IsActive = true,
+                    JobCategoryStructureId = 6,
+                }
+                , new ChecklistQuestion()
+                {
+                    QuestionID = 21,
+                    PillarId = 2,
+                    Prompt = "Hay algún elemento que deba ser agregado a la lista de control de items? (S/N) explicar",
+                    NotGood = "",
+                    CategorySequence = 3,
+                    IsActive = true,
+                    JobCategoryStructureId = 6,
+                }, new ChecklistQuestion()
+                {
+                    QuestionID = 22,
+                    PillarId = 2,
+                    Prompt = "Discusión sobre la mejora : - Desde operador (Sistema de Reconocimiento de la planta) - Desde observador",
+                    NotGood = "",
+                    CategorySequence = 4,
+                    IsActive = true,
+                    JobCategoryStructureId = 6,
+                },
+                new ChecklistQuestion()
+                {
+                    QuestionID = 23,
+                    PillarId = 2,
+                    Prompt = "¿Pueden las mejoras identificadas desplegarse horizontalmente?",
+                    NotGood = "",
+                    CategorySequence = 5,
+                    IsActive = true,
+                    JobCategoryStructureId = 6,
+                }
+
+                );
 
             //modelBuilder.Entity<ChecklistAnswer>()
             //    .HasData(

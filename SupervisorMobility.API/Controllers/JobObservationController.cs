@@ -91,10 +91,10 @@ namespace SupervisorMobility.API.Controllers
                 return NotFound("No Distribution");
             }
 
-            if (!await _supervisorMobilityRepository.OperationExistsAsync(jobObservationAndLup.OperationId))
-            {
-                return NotFound("No Operation");
-            }
+            //if (!await _supervisorMobilityRepository.OperationExistsAsync(jobObservationAndLup.OperationId))
+            //{
+            //    return NotFound("No Operation");
+            //}
 
             var finalJobObservation = _mapper.Map<JobObservation>(jobObservationAndLup);
             if (finalJobObservation.OperationId == 0)

@@ -40,6 +40,7 @@ namespace SupervisorMobility.API.Models.JobObservationDtos
         public DateTime? FinishedDate { get; set; }
 
         public string? Justification { get; set; }
+        public string? SectionIds { get; set; }
 
         public int? Status { get; set; }
         public int? Option { get; set; }
@@ -57,6 +58,11 @@ namespace SupervisorMobility.API.Models.JobObservationDtos
         public string? TaktTime { get; set; }
         public string? Questions { get; set; }
         public int? ProductId { get; set; }
+
+        public string? OperationTimesJson { get; set; }
+        public string? StepsNumber { get; set; }
+        public string? DoubleManagment { get; set; }
+        public string? Waiting { get; set; }
 
     }
 }

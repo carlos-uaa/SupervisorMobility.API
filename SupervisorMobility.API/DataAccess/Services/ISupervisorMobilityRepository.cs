@@ -9,29 +9,25 @@ using SupervisorMobility.API.Models.SOSReviewDtos;
 using SupervisorMobility.API.Models.Users;
 using System.Runtime.CompilerServices;
 
+
 namespace SupervisorMobility.API.Services
 {
     public interface ISupervisorMobilityRepository
     {
         #region ChecklistCategoryOperations
 
-        Task<IEnumerable<ChecklistCategory>> GetChecklistCategoriesAsync(bool includeChecklistQuestion = false);
-        Task<IEnumerable<ChecklistCategory>> GetChecklistCategoriesForUpdateSequenceAsync(
+        Task<IEnumerable<JobCategoryStructure>> GetChecklistCategoriesAsync(bool includeChecklistQuestion = false);
+        Task<IEnumerable<JobCategoryStructure>> GetAllChecklistCategoriesAsync(bool includeChecklistQuestion = false);
+        Task<IEnumerable<JobCategoryStructure>> GetChecklistCategoriesForUpdateSequenceAsync(
             int currentSequence, int oldSequence, int categoryId);
-        Task<ChecklistCategory?> GetChecklistCategoryAsync(
+        Task<JobCategoryStructure?> GetChecklistCategoryAsync(
             int categoryId, bool includeChecklistQuestion = false);
         Task<bool> ChecklistCategoryExistAsync(int categoryId);
         Task<int> GetChecklistCategoriesMaxSequenceAsync();
-        void AddChecklistCategory(ChecklistCategory checklistCategory);
-        void DeleteChecklistCategory(ChecklistCategory checklistCategory);
+        void AddChecklistCategory(JobCategoryStructure checklistCategory);
+        void DeleteChecklistCategory(JobCategoryStructure checklistCategory);
         #endregion
-        #region JobObservationTypesOperations
-        Task<IEnumerable<JobObservationType>> GetJobObservationTypesAsync();
-        Task<JobObservationType?> GetJobObservationTypeAsync(int id, bool includeConfigs = false);
-        void AddJobObservationType(JobObservationType jobObservationType);
-        void DeleteJobObservationType(JobObservationType jobObservationType);
-        Task<bool> JobObservationTypeExistAsync(int jobObservationTypeId);
-        #endregion
+        
         #region GroupOperations
         Task<IEnumerable<Group>> GetGroupsAsync();
         Task<Group?> GetGroupAsync(int groupId);
@@ -109,13 +105,7 @@ namespace SupervisorMobility.API.Services
                 int currentSequence, int oldSequence, int categoryId, int checklistQuestionId);
         void DeleteChecklistQuestions(ChecklistQuestion checklistQuestion);
         #endregion
-        #region JobObservationConfigOperations
-        Task<IEnumerable<JobObservationConfig>> GetJobOperationConfigsForJobOperationTypeAsync(int jobObservationTypeId);
-        Task<JobObservationConfig?> GetJobOperationConfigForJobOperationTypeAsync(int jobObservationTypeId,
-            int jobObservationConfigId);
-        Task AddJobOperationConfigForJobOperationTypeAsync(int jobObservationTypeId, JobObservationConfig jobObservationConfig);
-        void DeleteJobOperationConfig(JobObservationConfig jobObservationConfig);
-        #endregion
+        
         #region SupportDocumentTypeOperations
         Task<IEnumerable<SupportDocumentType>> GetSupportDocumentTypesAsync();
         Task<SupportDocumentType?> GetSupportDocumentTypeAsync(int supportDocumentTypeId);
@@ -323,6 +313,11 @@ namespace SupervisorMobility.API.Services
         Task<IEnumerable<SOSRegisterJobObservation>> GetAllSOSReviewsRegistersByDistribution(int SOSReviewProgramId, int distributionid);
         Task<SOSRegisterJobObservation?> GetSOSReviewRegister(int SosId);
         Task<int> UpdateRegisterJobObservation(SOSReviewsRegisterForUpdateDto SOSForUpdate, SOSRegisterJobObservation SOSEntity);
+
+        Task<int> CreateSOSReviewDistSuggestion(SOSReviewDistSuggestion RegEntity);
+        Task<SOSReviewDistSuggestion?> GetDistSuggestion(int sosId, int dist_id);
+        void SOSReviewAddDistSuggestion(SOSReviewProgram Master, SOSReviewDistSuggestion Slave);
+
 
         //EndRegion
         #endregion

@@ -24,8 +24,8 @@ namespace SupervisorMobility.API.Entities
 
 
         //Navigation properties
-        public int ChecklistCategoryId { get; set; }
-        public ChecklistCategory? ChecklistCategory { get; set; }
+        public int JobCategoryStructureId { get; set; }
+        public JobCategoryStructure? JobCategoryStructure { get; set; }
 
     }
 }
