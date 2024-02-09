@@ -123,6 +123,9 @@ namespace SupervisorMobility.API.Context
                 .Property(p => p.IsActive)
                 .HasDefaultValue(true);
 
+            modelBuilder.Entity<Lup>()
+            .Ignore(p => p.Findings);
+
             modelBuilder.Entity<AssyChart>()
                 .Property(p => p.IsActive)
                 .HasDefaultValue(true);
@@ -903,7 +906,9 @@ namespace SupervisorMobility.API.Context
                     QuestionID = 1,
                     PillarId = 2,
                     Prompt = "Los estándares estan completos y actualizados (HOE, Estado de referencia de 5S, etc. Icluyendo la pasada observación de operación  (S/N)",
-                    NotGood = "",
+                    PromptEN = "Standards are complete and up to date (HOE, 5S Benchmark Status, etc.). Including past observation of operation (Y/N).",
+                    NotGood = "Actualización en proceso; cambios recientes en procedimientos.",
+                    NotGoodEN = "Updating in process; recent changes in procedures.",
                     CategorySequence = 1,
                     IsActive = true,
                     JobCategoryStructureId = 2,
@@ -913,7 +918,9 @@ namespace SupervisorMobility.API.Context
                     QuestionID = 2,
                     PillarId = 2,
                     Prompt = "¿Cuál es nivel de ILU del operador?  ¿Está el entrenamiento alineado con el Cuadro de requisitos de Operaicón ? (S/N)",
-                    NotGood = "",
+                    PromptEN = "What is the operator's ILU level? Is the training aligned with the Operational Requirements Chart (Y/N)?",
+                    NotGood = "Nivel ILU del operador no alineado. Entrenamiento no conforme con el Gráfico de Requisitos Operativos",
+                    NotGoodEN = "Operator ILU level not aligned. Training not in accordance with the Operational Requirements Chart.",
                     CategorySequence = 2,
                     IsActive = true,
                     JobCategoryStructureId = 2,

@@ -1,11 +1,13 @@
-﻿namespace SupervisorMobility.API.Models.LupDtos
+﻿using SupervisorMobility.API.Models.JobObservationDtos;
+
+namespace SupervisorMobility.API.Models.LupDtos
 {
     public class LupForCreationDto
     {
         public int JobObservationId { get; set; }
         public string? Oportunity { get; set; }
         public bool? IsActive { get; set; }
-
+        public List<string> Findings { get; set; }
         public string? Observer { get; set; }
         public int Pillar { get; set; }
         public string? Q3 { get; set; }

@@ -9,7 +9,8 @@ namespace SupervisorMobility.API.Models.ChecklistQuestionDtos
         public int PillarId { get; set; }
         public string NotGood { get; set; } = string.Empty;
         public int CategorySequence { get; set; }
-
+        public string PromptEN { get; set; }
+        public string NotGoodEN { get; set; }
         public bool? IsActive { get; set; }
 
         //Navigation properties

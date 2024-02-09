@@ -1607,6 +1607,8 @@ namespace SupervisorMobility.API.Services
             {
                 return await _context.Lup
                     .Include(l => l.Evidences)
+                    .Include(j => j.JobObservation)
+                .Include(f => f.Findings)
                     .Include(d => d.Department)
                     .Where(e => e.LupId == lupId).FirstOrDefaultAsync();
             }
@@ -1617,6 +1619,8 @@ namespace SupervisorMobility.API.Services
         public async Task<IEnumerable<Lup>> GetAllLupAsync()
         {
             return await _context.Lup.Where(u => u.IsActive == true)
+                .Include(j => j.JobObservation)
+                .Include(f => f.Findings)
                 .Include(d => d.Department)
                  .OrderBy(c => c.LupId).ToListAsync();
 

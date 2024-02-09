@@ -24,6 +24,8 @@ namespace SupervisorMobility.API.Models.LupDtos
         public DateTime? EndDate { get; set; }
         public int? DepartmentId { get; set; }
         public Department Department { get; set; }
+        public List<string> Findings { get; set; }
+
 
     }
 }

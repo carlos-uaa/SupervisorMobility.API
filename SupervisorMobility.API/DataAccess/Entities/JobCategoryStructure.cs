@@ -8,6 +8,7 @@ public enum StructureType
     Checklist,
     Timer,
     LUP,
+    LUP_SSV,
     Signature
 }
 
