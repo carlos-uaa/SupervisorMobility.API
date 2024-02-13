@@ -1,5 +1,6 @@
 ﻿using DocumentFormat.OpenXml.Bibliography;
 using SupervisorMobility.API.DataAccess.Entities;
+using System;
 using System.ComponentModel.DataAnnotations;
 using System.ComponentModel.DataAnnotations.Schema;
 
@@ -11,7 +12,7 @@ namespace SupervisorMobility.API.Entities
         public int LupId { get; set; }
         public int JobObservationId { get; set; }
         public JobObservation JobObservation {  get; set; }
-        public List<string> Findings { get; set; }
+        public List<Findings> Findings { get; set; } = new List<Findings>();
 
         public string? Oportunity { get; set; }
 
@@ -32,5 +33,13 @@ namespace SupervisorMobility.API.Entities
         public Department? Department { get; set; }
 
 
+    }
+
+    public class Findings
+    {
+        [Key, DatabaseGenerated(DatabaseGeneratedOption.Identity)]
+        public int FindingId { get; set; }
+        public string Valor { get; set; }
+        public int LupId { get; set; } // Clave foránea
     }
 }

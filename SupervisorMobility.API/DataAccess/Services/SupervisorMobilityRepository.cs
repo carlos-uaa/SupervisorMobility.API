@@ -1441,7 +1441,12 @@ namespace SupervisorMobility.API.Services
 
             if (includeLup)
             {
-                query = query.Include(l => l.Lup.Where(lup => lup.IsActive == true)).ThenInclude(d => d.Department).Where(d => d.IsActive == true);
+                query = query.Include(l => l.Lup.Where(lup => lup.IsActive == true))
+                    .ThenInclude(lup => lup.Findings)
+                    .Include(l => l.Lup.Where(lup => lup.IsActive == true))
+                    .ThenInclude(lup => lup.Department)
+                    .Where(d => d.IsActive == true);
+
             }
 
             if (includeHistory)

@@ -14,7 +14,7 @@
         public DateTime? CreatedDate { get; set; }
         public DateTime? EndDate { get; set; }
         public int? DepartmentId { get; set; }
-        public List<string> Findings { get; set; }
+        public List<FindingsDto> Findings { get; set; }
 
     }
 }

@@ -107,6 +107,7 @@ namespace SupervisorMobility.API.Controllers
                 finalJobObservation.OperatorId = null;
             }
             _supervisorMobilityRepository.AddJobObservation(finalJobObservation);
+
             await _supervisorMobilityRepository.SaveChangesAsync();
 
             return Ok(finalJobObservation);

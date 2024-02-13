@@ -2253,10 +2253,10 @@ namespace SupervisorMobility.API.DataAccess.Services
                                 // Algo salió mal en el ciclo, realiza un rollback de la transacción
                                 Debug.WriteLine($"No se aplicaron cambios : transaction.Rollback()");
 
-                                //transaction.Rollback();
+                                transaction.Rollback();
 
                                 //comited para provar funcionalidad
-                                transaction.Commit();
+                                //transaction.Commit();
 
 
 

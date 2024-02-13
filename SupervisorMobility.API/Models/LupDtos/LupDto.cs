@@ -9,7 +9,7 @@ namespace SupervisorMobility.API.Models.LupDtos
         public int LupId { get; set; }
         public int? JobObservationId { get; set; }
         public JobObservationDto JobObservation { get; set; }
-        public List<string> Findings { get; set; }
+        public List<FindingsDto> Findings { get; set; }
 
         public string? Oportunity { get; set; }
         public bool? IsActive { get; set; }

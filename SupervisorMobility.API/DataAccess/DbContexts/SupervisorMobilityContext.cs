@@ -21,6 +21,7 @@ namespace SupervisorMobility.API.Context
         public DbSet<JobObservation> JobObservations { get; set; }
         public DbSet<Lup> Lup { get; set; }
         public DbSet<ChecklistAnswer> ChecklistAnswers { get; set; }
+        public DbSet<Findings> Findings { get; set; }
         public DbSet<Entities.Group> Groups { get; set; }
         public DbSet<Pillar> Pillars { get; set; }
         public DbSet<Glosary> Glosary { get; set; }
@@ -121,10 +122,8 @@ namespace SupervisorMobility.API.Context
 
             modelBuilder.Entity<Lup>()
                 .Property(p => p.IsActive)
-                .HasDefaultValue(true);
-
-            modelBuilder.Entity<Lup>()
-            .Ignore(p => p.Findings);
+                .HasDefaultValue(true); 
+            
 
             modelBuilder.Entity<AssyChart>()
                 .Property(p => p.IsActive)
