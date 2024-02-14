@@ -4,6 +4,17 @@ using System;
 using System.ComponentModel.DataAnnotations;
 using System.ComponentModel.DataAnnotations.Schema;
 
+
+public enum LUPStatus
+{
+    Titular,
+    Checklist,
+    Timer,
+    LUP,
+    LUP_SSV,
+    Signature
+}
+
 namespace SupervisorMobility.API.Entities
 {
     public class Lup
@@ -12,34 +23,28 @@ namespace SupervisorMobility.API.Entities
         public int LupId { get; set; }
         public int JobObservationId { get; set; }
         public JobObservation JobObservation {  get; set; }
-        public List<Findings> Findings { get; set; } = new List<Findings>();
 
         public string? Oportunity { get; set; }
-
-        public bool? IsActive { get; set; }
-
         public string? Observer { get; set; }
         public int Pillar { get; set; }
         public string? Q3 { get; set; }
         public string? Q4 { get; set; }
         public string? Justification { get; set; }
         public int? Status { get; set; }
+        public LUPStatus? StatusOKNG { get; set; }
         public DateTime? CreatedDate { get; set; }
         public DateTime? EndDate { get; set; }
         public ICollection<FileUpload>? Evidences { get; set; }
-            = new List<FileUpload>();
+           = new List<FileUpload>();
 
         public int? DepartmentId { get; set; }
         public Department? Department { get; set; }
 
+        public int? StdChange { get; set; }
+        public int? StdUpdate { get; set; }
 
+
+        public bool? IsActive { get; set; }
     }
 
-    public class Findings
-    {
-        [Key, DatabaseGenerated(DatabaseGeneratedOption.Identity)]
-        public int FindingId { get; set; }
-        public string Valor { get; set; }
-        public int LupId { get; set; } // Clave foránea
-    }
 }
