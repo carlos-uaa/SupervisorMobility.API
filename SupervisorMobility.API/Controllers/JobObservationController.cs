@@ -231,10 +231,10 @@ namespace SupervisorMobility.API.Controllers
                 return NotFound("No Distribution");
             }
 
-            if (!await _supervisorMobilityRepository.OperationExistsAsync(jobObservationForUpdate.OperationId))
-            {
-                return NotFound("No Operation");
-            }
+            //if (!await _supervisorMobilityRepository.OperationExistsAsync(jobObservationForUpdate.OperationId))
+            //{
+            //    return NotFound("No Operation");
+            //}
 
 
             var jobObservationEntity = await _supervisorMobilityRepository.GetJobObservationAsync(jobObservationId, false);
@@ -380,6 +380,10 @@ namespace SupervisorMobility.API.Controllers
                 resumeChanges = resumeChanges.Substring(0, resumeChanges.Length - 2);
             }
 
+            if (jobObservationForUpdate.OperationId == 0)
+            {
+                jobObservationForUpdate.OperationId = null;
+            }
             if (jobObservationForUpdate.OperatorId == 0)
             {
                 jobObservationForUpdate.OperatorId = null;
