@@ -1,4 +1,6 @@
-﻿namespace SupervisorMobility.API.Models.JobObservationDtos
+﻿using SupervisorMobility.API.DataAccess.Entities;
+
+namespace SupervisorMobility.API.Models.JobObservationDtos
 {
     public class JobObservationForCreationDto
     {
@@ -44,5 +46,6 @@
         public string? StepsNumber { get; set; }
         public string? DoubleManagment { get; set; }
         public string? Waiting { get; set; }
+
     }
 }
