@@ -71,5 +71,8 @@ namespace SupervisorMobility.API.Entities
         public string? StepsNumber { get; set; }
         public string? DoubleManagment { get; set; }
         public string? Waiting { get; set; }
+
+        public FileUpload? SignatureImage { get; set; } =  new();
+
     }
 }

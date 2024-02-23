@@ -1533,7 +1533,8 @@ namespace SupervisorMobility.API.Services
                 query = query.Include(a => a.Area)
                              .Include(p => p.Plant)
                              .Include(d => d.Distribution)
-                             .Include(o => o.Operation);
+                             .Include(o => o.Operation)
+                             .Include(s => s.SignatureImage);
             }
 
             if (includePeople)
@@ -1578,6 +1579,17 @@ namespace SupervisorMobility.API.Services
             return await _context.JobObservations.AnyAsync(j => j.JobObservationId == jobObservationId);
         }
 
+        public async Task AddOperatorSignatureForJobObservationAsync(int jobObservationId, FileUpload evidence)
+        {
+            var jobObservation = await GetJobObservationAsync(jobObservationId, true);
+
+            if (jobObservation != null)
+            {
+                jobObservation.SignatureImage = evidence;
+
+            }
+
+        }
         #endregion
         #region GlosaryOperations
 

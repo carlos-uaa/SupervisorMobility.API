@@ -379,3 +379,4 @@ SupervisorMobility.API/Migrations/SupervisorMobilityContextModelSnapshot.cs
 *.xlsx
 *.csv
 /SupervisorMobility.API/uploads/evidence
+/SupervisorMobility.API/uploads/operatorSignature

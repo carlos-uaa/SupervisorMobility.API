@@ -178,6 +178,34 @@ namespace SupervisorMobility.API.Controllers
 
         }
 
+        //[EnableCors("CorsPolicy")]
+        [HttpPost("UploadOperatorSignature")]
+        public async Task<ActionResult<FileUpload>> UploadOperatorSignature(int jobObservationId, IFormFile file)
+        {
+
+            var uploadResult = new FileUploadForCreationDto();
+            string trustedFileNameForStorage = string.Empty;
+            var unstrustedFileName = file.FileName;
+
+            trustedFileNameForStorage = Path.GetRandomFileName();
+            var path = Path.Combine(_env.ContentRootPath, "uploads\\operatorSignature", trustedFileNameForStorage);
+
+            await using FileStream fs = new(path, FileMode.Create);
+            await file.CopyToAsync(fs);
+
+            uploadResult.FileName = unstrustedFileName;
+            uploadResult.StorageFileName = trustedFileNameForStorage;
+            uploadResult.ContentType = file.ContentType;
+            uploadResult.UploadDate = DateTime.Now;
+
+
+            var fileToReturn = await _assyChartService.CreateFileAsync(uploadResult);
+            await _supervisorMobilityRepository.AddOperatorSignatureForJobObservationAsync(jobObservationId, fileToReturn);
+            await _supervisorMobilityRepository.SaveChangesAsync();
+
+            return Ok(fileToReturn);
+
+        }
 
         [HttpPost("Data")]
         public async Task<ActionResult<FileUploadGeneralDto>> UpdateDataInServer(FileUploadGeneralDto FileInfo)
@@ -1363,6 +1391,32 @@ namespace SupervisorMobility.API.Controllers
             return NotFound("Error File download");
 
         }
+
+        [HttpGet("Signatures/{fileid}")]
+        public async Task<IActionResult> DownloadOperatorSignature(int fileid)
+        {
+            var FileInfo = await _assyChartService.FetchFileAsync(fileid);
+
+            if (FileInfo is not null)
+            {
+                var path = Path.Combine(_env.ContentRootPath, "uploads\\operatorSignature", FileInfo.StorageFileName);
+
+                var memory = new MemoryStream();
+                using (var stream = new FileStream(path, FileMode.Open))
+                {
+                    await stream.CopyToAsync(memory);
+                }
+                memory.Position = 0;
+
+                var result = File(memory, FileInfo.ContentType, Path.GetFileName(path));
+                result.EnableRangeProcessing = true;
+
+                return result;
+            }
+            return NotFound("Error File download");
+
+        }
+
 
 
         [EnableCors("CorsPolicy")]
