@@ -9,6 +9,9 @@
         public int CategorySequence { get; set; }
         public bool? IsActive { get; set; }
         //FK
+        public string PromptEN { get; set; }
+        public string NotGoodEN { get; set; }
+
         public int ChecklistCategoryId { get; set; }
     }
 }

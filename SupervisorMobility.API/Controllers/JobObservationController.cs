@@ -2,12 +2,16 @@
 using Microsoft.AspNetCore.Cors;
 using Microsoft.AspNetCore.Mvc;
 using SupervisorMobility.API.Business;
+using SupervisorMobility.API.DataAccess.Entities;
 using SupervisorMobility.API.DataAccess.Services;
 using SupervisorMobility.API.Entities;
 using SupervisorMobility.API.Models.ADUser;
+using SupervisorMobility.API.Models.ChecklistAnswerDtos;
+using SupervisorMobility.API.Models.FileUploadDto;
 using SupervisorMobility.API.Models.JobObservationDtos;
 using SupervisorMobility.API.Models.NotificationDtos;
 using SupervisorMobility.API.Services;
+using static SupervisorMobility.API.Controllers.ChecklistAnswersController;
 
 namespace SupervisorMobility.API.Controllers
 {
@@ -20,8 +24,9 @@ namespace SupervisorMobility.API.Controllers
         readonly IAssyChartService _assyChartService;
         private readonly IMapper _mapper;
         private readonly IEmailService _email;
+        private readonly IWebHostEnvironment _env;
 
-        public JobObservationController(ISupervisorMobilityRepository supervisorMobilityRepository, IMapper mapper,
+        public JobObservationController(ISupervisorMobilityRepository supervisorMobilityRepository, IMapper mapper, IWebHostEnvironment env,
             IAssyChartService assyChartService, IEmailService emailService)
         {
             _email = emailService;
@@ -30,6 +35,7 @@ namespace SupervisorMobility.API.Controllers
             _mapper = mapper ??
                 throw new ArgumentNullException(nameof(mapper));
             _assyChartService = assyChartService;
+            _env = env;
 
         }
 
@@ -52,10 +58,10 @@ namespace SupervisorMobility.API.Controllers
                 return NotFound("No Distribution");
             }
 
-            if (!await _supervisorMobilityRepository.OperationExistsAsync(jobObservation.OperationId))
-            {
-                return NotFound("No Operation");
-            }
+            //if (!await _supervisorMobilityRepository.OperationExistsAsync(jobObservation.OperationId))
+            //{
+            //    return NotFound("No Operation");
+            //}
 
             var finalJobObservation = _mapper.Map<JobObservation>(jobObservation);
             if (finalJobObservation.OperationId == 0)
@@ -71,6 +77,7 @@ namespace SupervisorMobility.API.Controllers
             await _supervisorMobilityRepository.SaveChangesAsync();
             return Ok(finalJobObservation);
         }
+
 
         [HttpPost("WithLup")]
         public async Task<ActionResult<JobObservationWithoutNavigationPropertiesDto>> CreateJobObservationWithLup(
@@ -107,12 +114,54 @@ namespace SupervisorMobility.API.Controllers
                 finalJobObservation.OperatorId = null;
             }
             _supervisorMobilityRepository.AddJobObservation(finalJobObservation);
+
             await _supervisorMobilityRepository.SaveChangesAsync();
 
             return Ok(finalJobObservation);
         }
 
 
+        public class OperatorSignatureContent
+        {
+            public IFormFile? File { get; set; }
+            public string? JobObservationId { get; set; }
+            public FileUpload? Evidence { get; set; }
+        }
+
+        [HttpPost("operatorSignature")]
+        public async Task<ActionResult<JobObservationWithoutNavigationPropertiesDto>> CreateOperatorSignature([FromForm] OperatorSignatureContent OperatorSignatureContent)
+        {
+
+            int jobObservationId = int.Parse(OperatorSignatureContent.JobObservationId);
+            var finalJobObservation = await _supervisorMobilityRepository.GetJobObservationAsync(jobObservationId);
+
+            if (OperatorSignatureContent.File != null)
+            {
+                var file = OperatorSignatureContent.File;
+                var uploadResult = new FileUploadForCreationDto();
+                string trustedFileNameForStorage = string.Empty;
+                var unstrustedFileName = file.FileName;
+
+                trustedFileNameForStorage = Path.GetRandomFileName();
+                var path = Path.Combine(_env.ContentRootPath, "uploads\\operatorSignature", trustedFileNameForStorage);
+
+                await using FileStream fs = new(path, FileMode.Create);
+                await file.CopyToAsync(fs);
+
+                uploadResult.FileName = unstrustedFileName;
+                uploadResult.StorageFileName = trustedFileNameForStorage;
+                uploadResult.ContentType = file.ContentType;
+                uploadResult.UploadDate = DateTime.Now;
+
+                var fileToReturn = await _assyChartService.CreateFileAsync(uploadResult);
+                await _supervisorMobilityRepository.AddOperatorSignatureForJobObservationAsync(finalJobObservation.JobObservationId, fileToReturn);
+
+
+                await _supervisorMobilityRepository.SaveChangesAsync();
+            }
+
+            return Ok(finalJobObservation);
+        }
 
 
         [HttpGet("filters")]
@@ -230,10 +279,10 @@ namespace SupervisorMobility.API.Controllers
                 return NotFound("No Distribution");
             }
 
-            if (!await _supervisorMobilityRepository.OperationExistsAsync(jobObservationForUpdate.OperationId))
-            {
-                return NotFound("No Operation");
-            }
+            //if (!await _supervisorMobilityRepository.OperationExistsAsync(jobObservationForUpdate.OperationId))
+            //{
+            //    return NotFound("No Operation");
+            //}
 
 
             var jobObservationEntity = await _supervisorMobilityRepository.GetJobObservationAsync(jobObservationId, false);
@@ -379,6 +428,10 @@ namespace SupervisorMobility.API.Controllers
                 resumeChanges = resumeChanges.Substring(0, resumeChanges.Length - 2);
             }
 
+            if (jobObservationForUpdate.OperationId == 0)
+            {
+                jobObservationForUpdate.OperationId = null;
+            }
             if (jobObservationForUpdate.OperatorId == 0)
             {
                 jobObservationForUpdate.OperatorId = null;

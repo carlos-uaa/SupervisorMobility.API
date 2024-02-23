@@ -50,6 +50,7 @@
 		<Folder Include="uploads\headcount\" />
 		<Folder Include="uploads\massive\" />
 		<Folder Include="uploads\headcount\" />
+		<Folder Include="uploads\operatorSignature\" />
 		<Folder Include="uploads\users\" />
 	</ItemGroup>
 

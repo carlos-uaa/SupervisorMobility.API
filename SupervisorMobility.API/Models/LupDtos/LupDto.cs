@@ -1,5 +1,6 @@
 ﻿
 using SupervisorMobility.API.Entities;
+using SupervisorMobility.API.Models.JobObservationDtos;
 
 namespace SupervisorMobility.API.Models.LupDtos
 {
@@ -7,6 +8,7 @@ namespace SupervisorMobility.API.Models.LupDtos
     {
         public int LupId { get; set; }
         public int? JobObservationId { get; set; }
+        public JobObservationDto JobObservation { get; set; }
 
         public string? Oportunity { get; set; }
         public bool? IsActive { get; set; }
@@ -17,9 +19,13 @@ namespace SupervisorMobility.API.Models.LupDtos
         public string? Q4 { get; set; }
         public string? Justification { get; set; }
         public int? Status { get; set; }
+        public LUPStatus? StatusOKNG { get; set; }
+
         public DateTime? CreatedDate { get; set; }
         public DateTime? EndDate { get; set; }
         public int? DepartmentId { get; set; }
         public Department Department { get; set; }
+        public int? StdChange { get; set; }
+        public int? StdUpdate { get; set; }
     }
 }

@@ -16,5 +16,8 @@ namespace SupervisorMobility.API.Models.ChecklistQuestionDtos
 
         public bool? IsActive { get; set; }
 
+        public string PromptEN { get; set; }
+        public string NotGoodEN { get; set; }
+
     }
 }

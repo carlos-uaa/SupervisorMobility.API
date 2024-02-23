@@ -88,7 +88,7 @@ namespace SupervisorMobility.API.Controllers
 
 
             //Upload Images in foreach
-
+            if(CkContent.Files != null )
             foreach(var file in CkContent.Files)
             {
                 var uploadResult = new FileUploadForCreationDto();

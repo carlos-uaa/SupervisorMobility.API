@@ -1441,7 +1441,12 @@ namespace SupervisorMobility.API.Services
 
             if (includeLup)
             {
-                query = query.Include(l => l.Lup.Where(lup => lup.IsActive == true)).ThenInclude(d => d.Department).Where(d => d.IsActive == true);
+                query = query.Include(l => l.Lup.Where(lup => lup.IsActive == true))
+                        .ThenInclude(lup => lup.Evidences)
+                    .Include(l => l.Lup.Where(lup => lup.IsActive == true))
+                        .ThenInclude(lup => lup.Department)
+                    .Where(d => d.IsActive == true);
+
             }
 
             if (includeHistory)
@@ -1528,7 +1533,8 @@ namespace SupervisorMobility.API.Services
                 query = query.Include(a => a.Area)
                              .Include(p => p.Plant)
                              .Include(d => d.Distribution)
-                             .Include(o => o.Operation);
+                             .Include(o => o.Operation)
+                             .Include(s => s.SignatureImage);
             }
 
             if (includePeople)
@@ -1573,6 +1579,17 @@ namespace SupervisorMobility.API.Services
             return await _context.JobObservations.AnyAsync(j => j.JobObservationId == jobObservationId);
         }
 
+        public async Task AddOperatorSignatureForJobObservationAsync(int jobObservationId, FileUpload evidence)
+        {
+            var jobObservation = await GetJobObservationAsync(jobObservationId, true);
+
+            if (jobObservation != null)
+            {
+                jobObservation.SignatureImage = evidence;
+
+            }
+
+        }
         #endregion
         #region GlosaryOperations
 
@@ -1607,6 +1624,7 @@ namespace SupervisorMobility.API.Services
             {
                 return await _context.Lup
                     .Include(l => l.Evidences)
+                    .Include(j => j.JobObservation)
                     .Include(d => d.Department)
                     .Where(e => e.LupId == lupId).FirstOrDefaultAsync();
             }
@@ -1617,6 +1635,8 @@ namespace SupervisorMobility.API.Services
         public async Task<IEnumerable<Lup>> GetAllLupAsync()
         {
             return await _context.Lup.Where(u => u.IsActive == true)
+                .Include(j => j.JobObservation)
+                .Include(f => f.Evidences)
                 .Include(d => d.Department)
                  .OrderBy(c => c.LupId).ToListAsync();
 

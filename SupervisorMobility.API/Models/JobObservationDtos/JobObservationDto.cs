@@ -1,4 +1,5 @@
-﻿using SupervisorMobility.API.Entities;
+﻿using SupervisorMobility.API.DataAccess.Entities;
+using SupervisorMobility.API.Entities;
 using SupervisorMobility.API.Models.AreaDtos;
 using SupervisorMobility.API.Models.ChecklistAnswerDtos;
 using SupervisorMobility.API.Models.DistributionDtos;
@@ -26,6 +27,7 @@ namespace SupervisorMobility.API.Models.JobObservationDtos
         //Whit  answers to questions
         public ICollection<ChecklistAnswerDto>? checklistAnswers { get; set; } = new List<ChecklistAnswerDto>();
 
+        public FileUpload? SignatureImage { get; set; } = new();
 
         public int JobObservationId { get; set; }
         public bool? IsActive { get; set; }
@@ -67,5 +69,6 @@ namespace SupervisorMobility.API.Models.JobObservationDtos
         public string? StepsNumber { get; set; }
         public string? DoubleManagment { get; set; }
         public string? Waiting { get; set; }
+
     }
 }
