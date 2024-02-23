@@ -22,6 +22,7 @@ steps:
     New-Item -Path "$(Build.ArtifactStagingDirectory)/app/uploads/headcount/NewFolder" -ItemType Directory -Force
     New-Item -Path "$(Build.ArtifactStagingDirectory)/app/uploads/massive" -ItemType Directory -Force
     New-Item -Path "$(Build.ArtifactStagingDirectory)/app/uploads/users" -ItemType Directory -Force
+    New-Item -Path "$(Build.ArtifactStagingDirectory)/app/uploads/operatorSignature" -ItemType Directory -Force
   displayName: 'Create Directories'
 
 - task: ArchiveFiles@2
