@@ -517,7 +517,7 @@ namespace SupervisorMobility.API.Services
         #region ProductOperations
         public async Task<IEnumerable<Product>> GetProductsAsync()
         {
-            return await _context.Products
+            return await _context.Products.Where(p => p.IsActive == true)
                 .OrderBy(c => c.ProductId).ToListAsync();
         }
 

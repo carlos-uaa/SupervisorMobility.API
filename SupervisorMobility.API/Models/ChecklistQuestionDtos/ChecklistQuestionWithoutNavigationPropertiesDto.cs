@@ -12,6 +12,6 @@
         public string PromptEN { get; set; }
         public string NotGoodEN { get; set; }
 
-        public int ChecklistCategoryId { get; set; }
+        public int JobCategoryStructureId { get; set; }
     }
 }

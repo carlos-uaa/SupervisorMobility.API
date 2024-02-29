@@ -88,11 +88,6 @@ namespace SupervisorMobility.API.Controllers
                 return NotFound("No checklist category Found!");
             }
 
-            if (!await _jobObservationService.CheckChecklistCategoryExistAsync(checklistQuestion.JobCategoryStructureId))
-            {
-                return NotFound("Destination checklist category not Found!");
-            }
-
             var checklistQuestionEntity = await _jobObservationService
                 .FetchChecklistQuestionForCategoryAsync(categoryId, checklistquestionid);
 
@@ -104,7 +99,7 @@ namespace SupervisorMobility.API.Controllers
             await _jobObservationService
                 .UpdateChecklistQuestionForCategoryAsync(checklistQuestion, checklistQuestionEntity);
 
-            return NoContent();
+            return Ok(checklistQuestionEntity);
         }
 
         [HttpPatch("{checklistquestionid}")]
