@@ -12,6 +12,7 @@ namespace SupervisorMobility.API.Models.ChecklistQuestionDtos
         public string PromptEN { get; set; }
         public string NotGoodEN { get; set; }
         public bool? IsActive { get; set; }
+        public int JobCategoryStructureId { get; set; }
 
         //Navigation properties
         public int ChecklistCategoryId { get; set; }
