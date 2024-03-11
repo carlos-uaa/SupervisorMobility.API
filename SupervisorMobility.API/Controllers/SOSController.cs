@@ -9,6 +9,7 @@ using SupervisorMobility.API.Entities;
 using SupervisorMobility.API.Models.AreaDtos;
 using SupervisorMobility.API.Models.JobObservationDtos;
 using SupervisorMobility.API.Models.SOSReviewDtos;
+using SupervisorMobility.API.Profiles;
 using SupervisorMobility.API.Services;
 using System.Diagnostics;
 
@@ -181,10 +182,22 @@ namespace SupervisorMobility.API.Controllers
             var SOS_Entity = await _supervisorMobilityRepository
               .GetSOSasync(SOSid);
 
+            var SOS_RegJobs = await _supervisorMobilityRepository.GetAllSOSReviewsRegisters(SOSid);
+
             if (SOS_Entity == null)
             {
                 return NotFound();
             }
+
+            if(SOS_RegJobs?.Count() > 0)
+            {
+                //Eliminamos todas las jobs 
+                foreach(var item in SOS_RegJobs)
+                {
+                    _supervisorMobilityRepository.DeleteJobObservation(item.JobObservation);
+                }
+            }
+            await _supervisorMobilityRepository.SaveChangesAsync();
 
             var result = await _supervisorMobilityRepository.DeleteSOSReview(SOS_Entity);
 

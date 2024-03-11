@@ -9,6 +9,7 @@ using SupervisorMobility.API.DataAccess.Entities;
 using SupervisorMobility.API.DataAccess.Entities.SOS_Review;
 using SupervisorMobility.API.Entities;
 using SupervisorMobility.API.Models.AreaDtos;
+using SupervisorMobility.API.Models.DistributionDtos;
 using SupervisorMobility.API.Models.JobObservationDtos;
 using SupervisorMobility.API.Models.SOSReviewDtos;
 using SupervisorMobility.API.Services;
@@ -38,7 +39,6 @@ namespace SupervisorMobility.API.Controllers
         }
 
       
-
         [HttpGet("Registers/{SOSid}")]
         public async Task<ActionResult<IEnumerable<SOSReviewsRegisterDto>>> SOSReviewRegisters(int SOSid, bool includeCollections = false)
         {
@@ -119,15 +119,30 @@ namespace SupervisorMobility.API.Controllers
 
         }//end post create register
 
-        [HttpPost("Registers/{sos_id}/ApplySuggest/{dist_id}")]
-        public async Task<ActionResult> MassiveCreate(int sos_id, int dist_id, List<JobObservationForCreationDto> JobsSuggest)
+        public class DistSelect
         {
+            public DistributionWithNavigationPropertiesDto distribution { get; set; }
+            public bool isSelected { get; set; } = false;
+        }
+        public class RequestMassiveDistributionSos
+        {
+            public List<DistSelect> distributions { get; set; } = new List<DistSelect>();
+            public List<JobObservationForCreationDto> Jobs { get; set; } = new List<JobObservationForCreationDto> { };
+        }
+
+
+        [HttpPost("Registers/{sos_id}/ApplySuggest")]
+        public async Task<ActionResult> MassiveCreate(int sos_id, RequestMassiveDistributionSos JobsSuggestData)
+        {
+            List<JobObservationForCreationDto> JobsSuggest = JobsSuggestData.Jobs;
+            List<DistSelect> DistSuggest = JobsSuggestData.distributions;
+
+
             var SOS_Review = await _supervisorMobilityRepository.GetSOSasync(sos_id);
             //var sosUpdateEntity = _mapper.Map<SOSReviewForUpdateDto>(SOS_Review);
             var JobRegisterExist = await _supervisorMobilityRepository.GetAllSOSReviewsRegisters(sos_id);
             var UserOpRegistersExist = await _supervisorMobilityRepository.GetAllSOSRegUserOperations(sos_id);
 
-            var SuggestDistribution = await _supervisorMobilityRepository.GetDistSuggestion(sos_id, dist_id);
 
             foreach (var job in JobsSuggest)
             {
@@ -283,8 +298,14 @@ namespace SupervisorMobility.API.Controllers
 
             }
 
-
-            SuggestDistribution.SuggestionApplied = true;
+            foreach(var sugg in DistSuggest)
+            {
+                if (sugg.isSelected)
+                {
+                    var SuggestDistribution = await _supervisorMobilityRepository.GetDistSuggestion(sos_id, sugg.distribution.DistributionId);
+                    SuggestDistribution.SuggestionApplied = true;
+                }
+            }
 
             //sosUpdateEntity.SuggestionApplied = true;
 
