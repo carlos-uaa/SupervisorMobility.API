@@ -435,14 +435,14 @@ namespace SupervisorMobility.API.Services
 
         public async Task<IEnumerable<ChecklistQuestion>> GetChecklistQuestionsForCategoryAsync(int categoryId)
         {
-            return await _context.ChecklistQuestions
+            return await _context.ChecklistQuestions.Include(p=>p.Pillars)
                 .Where(cq => cq.JobCategoryStructureId == categoryId && cq.IsActive == true)
                 .OrderBy(cq => cq.CategorySequence).ToListAsync();
         }
         public async Task<ChecklistQuestion?> GetChecklistQuestionForCategoryAsync(int categoryId,
             int questionId)
         {
-            return await _context.ChecklistQuestions
+            return await _context.ChecklistQuestions.Include(p=>p.Pillars)
                 .Where(cq => cq.JobCategoryStructureId == categoryId && cq.QuestionID == questionId)
                 .FirstOrDefaultAsync();
         }
@@ -476,7 +476,7 @@ namespace SupervisorMobility.API.Services
             int lowerValue = currentSequence < oldSequence ? currentSequence : oldSequence;
             int upperValue = currentSequence > oldSequence ? currentSequence : oldSequence;
 
-            return await _context.ChecklistQuestions
+            return await _context.ChecklistQuestions.Include(p=>p.Pillars)
                         .Where(c => c.JobCategoryStructureId == categoryId
                             && c.CategorySequence >= lowerValue
                             && c.CategorySequence <= upperValue
@@ -2245,6 +2245,12 @@ namespace SupervisorMobility.API.Services
         {
             return await _context.Pillars
                 .Where(c => c.PillarId == pillarId).FirstOrDefaultAsync();
+        }
+
+        public async Task<List<Pillar>?> GetPillarsFromList(List<int>? pillarIds)
+        {
+            return pillarIds != null && pillarIds.Any() ? await _context.Pillars
+                .Where(p => pillarIds.Contains(p.PillarId)).ToListAsync() : null; 
         }
 
         public async Task<bool> PillarExistAsync(int pillarId)

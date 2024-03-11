@@ -355,6 +355,7 @@ namespace SupervisorMobility.API.Services
         #endregion
         #region PillarOperations
         Task<IEnumerable<Pillar>> GetPillarsAsync();
+        Task<List<Pillar>?> GetPillarsFromList(List<int>? pillarIds);
         Task<Pillar?> GetPillarAsync(int pillarId);
         Task<bool> PillarExistAsync(int pillarId);
 

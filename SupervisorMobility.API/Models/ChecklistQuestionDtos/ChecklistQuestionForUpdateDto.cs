@@ -8,8 +8,7 @@ namespace SupervisorMobility.API.Models.ChecklistQuestionDtos
         [MaxLength(200)]
         public string Prompt { get; set; } = string.Empty;
 
-        [Required]
-        public int PillarId { get; set; }
+        public List<int>? Pillars { get; set; }
         [MaxLength(200)]
         public string NotGood { get; set; } = string.Empty;
         public int CategorySequence { get; set; }

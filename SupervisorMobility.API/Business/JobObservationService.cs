@@ -113,7 +113,9 @@ namespace SupervisorMobility.API.Business
         public async Task<ChecklistQuestion> CreateChecklistQuestionForCategoryAsync(int categoryId,
             ChecklistQuestionForCreationDto checklistQuestion)
         {
+            var pillarList = await _repository.GetPillarsFromList(checklistQuestion.Pillars);
             var finalChecklistQuestion = _mapper.Map<Entities.ChecklistQuestion>(checklistQuestion);
+            finalChecklistQuestion.Pillars = pillarList;
             finalChecklistQuestion.CategorySequence = await
                 _repository.GetChecklistQuestionMaxCategorySequenceAsync(categoryId);
             await _repository.AddChecklistQuestionForCategoryAsync(
@@ -137,7 +139,10 @@ namespace SupervisorMobility.API.Business
                     await FetchChecklistQuestionMaxSequenceAsync(checklistQuestionForUpdate.JobCategoryStructureId);
             }
 
+            var pillarList = await _repository.GetPillarsFromList(checklistQuestionForUpdate.Pillars);
             _mapper.Map(checklistQuestionForUpdate, checklistQuestion);
+            checklistQuestion.Pillars = pillarList;
+
             await _repository.SaveChangesAsync();
         }
 

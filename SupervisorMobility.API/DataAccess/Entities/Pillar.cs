@@ -16,8 +16,7 @@ namespace SupervisorMobility.API.Entities
         public string Description { get; set; }
         public bool? IsActive { get; set; }
 
-        [NotMapped]
-        public ICollection<ChecklistQuestion> ChecklistQuestions { get; set; } = new List<ChecklistQuestion>();
+        public ICollection<ChecklistQuestion>? ChecklistQuestions { get; set; } = new List<ChecklistQuestion>();
 
 
         public Pillar(string code, string description)

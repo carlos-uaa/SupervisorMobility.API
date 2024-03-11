@@ -9,13 +9,14 @@ namespace SupervisorMobility.API.Entities
         [Key, DatabaseGenerated(DatabaseGeneratedOption.Identity)]
         public int QuestionID { get; set; }
         [Required]
-       
+
         public string Prompt { get; set; }
         public string? PromptEN { get; set; } = string.Empty;
 
-        [Required]
-        public int PillarId { get; set; }
+        //[Required]
+        //public int PillarId { get; set; }
 
+        public ICollection<Pillar>? Pillars { get; set; } = new List<Pillar>();
      
         public string NotGood { get; set; }
         public string? NotGoodEN { get; set; } = string.Empty;
