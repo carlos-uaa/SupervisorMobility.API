@@ -55,7 +55,7 @@ namespace SupervisorMobility.API.Services
         {
             if (includeChecklistQuestion)
             {
-                return await _context.JobCategoryStructures.Include(cq => cq.ChecklistQuestions.Where(cq => cq.IsActive == true).OrderBy(c => c.CategorySequence))
+                return await _context.JobCategoryStructures.Include(cq => cq.ChecklistQuestions.Where(cq => cq.IsActive == true).OrderBy(c => c.CategorySequence)).ThenInclude(p => p.Pillars)
                     .Where(u => u.IsActive == true).OrderBy(c => c.Sequence).ToListAsync();
             }
             return await _context.JobCategoryStructures.Where(u => u.IsActive == true)
@@ -65,7 +65,7 @@ namespace SupervisorMobility.API.Services
         {
             if (includeChecklistQuestion)
             {
-                return await _context.JobCategoryStructures.Include(cq => cq.ChecklistQuestions.Where(cq => cq.IsActive == true).OrderBy(c => c.CategorySequence))
+                return await _context.JobCategoryStructures.Include(cq => cq.ChecklistQuestions.Where(cq => cq.IsActive == true).OrderBy(c => c.CategorySequence)).ThenInclude(p => p.Pillars)
                     .OrderBy(c => c.Sequence).ToListAsync();
             }
             return await _context.JobCategoryStructures
@@ -76,7 +76,7 @@ namespace SupervisorMobility.API.Services
         {
             if (includeChecklistQuestion)
             {
-                return await _context.JobCategoryStructures.Include(cq => cq.ChecklistQuestions.Where(cq => cq.IsActive == true).OrderBy(c => c.CategorySequence))
+                return await _context.JobCategoryStructures.Include(cq => cq.ChecklistQuestions.Where(cq => cq.IsActive == true).OrderBy(c => c.CategorySequence)).ThenInclude(p => p.Pillars)
                     .Where(c => c.JobCategoryStructureId == categoryId).FirstOrDefaultAsync();
             }
 
