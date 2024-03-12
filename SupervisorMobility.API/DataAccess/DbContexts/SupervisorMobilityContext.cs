@@ -162,8 +162,6 @@ namespace SupervisorMobility.API.Context
                     }
                 );
 
-
-
             //area
 
             modelBuilder.Entity<Area>()
@@ -867,6 +865,7 @@ namespace SupervisorMobility.API.Context
                         }
                 );
 
+
             modelBuilder.Entity<Pillar>()
                 .HasData(
                 new Pillar("S & E", "Safety & Environment")
@@ -896,13 +895,13 @@ namespace SupervisorMobility.API.Context
                 }
             );
 
+
             modelBuilder.Entity<ChecklistQuestion>()
                 .HasData(
                 //Preparacion de la observacion
                 new ChecklistQuestion()
                 {
                     QuestionID = 1,
-                    PillarId = 2,
                     Prompt = "Los estándares estan completos y actualizados (HOE, Estado de referencia de 5S, etc. Icluyendo la pasada observación de operación  (S/N)",
                     PromptEN = "Standards are complete and up to date (HOE, 5S Benchmark Status, etc.). Including past observation of operation (Y/N).",
                     NotGood = "Actualización en proceso; cambios recientes en procedimientos.",
@@ -914,7 +913,6 @@ namespace SupervisorMobility.API.Context
                 new ChecklistQuestion()
                 {
                     QuestionID = 2,
-                    PillarId = 2,
                     Prompt = "¿Cuál es nivel de ILU del operador?  ¿Está el entrenamiento alineado con el Cuadro de requisitos de Operaicón ? (S/N)",
                     PromptEN = "What is the operator's ILU level? Is the training aligned with the Operational Requirements Chart (Y/N)?",
                     NotGood = "Nivel ILU del operador no alineado. Entrenamiento no conforme con el Gráfico de Requisitos Operativos",
@@ -925,7 +923,6 @@ namespace SupervisorMobility.API.Context
                 }, new ChecklistQuestion()
                 {
                     QuestionID = 3,
-                    PillarId = 2,
                     Prompt = "Verificar  \"Documentación de Seguridad y Ergonomía\" están actualizados (S/N) ?",
                     NotGood = "",
                     CategorySequence = 3,
@@ -935,7 +932,6 @@ namespace SupervisorMobility.API.Context
                 new ChecklistQuestion()
                 {
                     QuestionID = 4,
-                    PillarId = 2,
                     Prompt = "¿Hay algún problema de seguridad y ergonomía identificado? ¿Si existe indicar, cuál?",
                     NotGood = "",
                     CategorySequence = 4,
@@ -944,7 +940,6 @@ namespace SupervisorMobility.API.Context
                 }, new ChecklistQuestion()
                 {
                     QuestionID = 5,
-                    PillarId = 2,
                     Prompt = "¿Hay algún problema de Calidad en la estación de trabajo recientemente? Si existe , ¿Cuál?",
                     NotGood = "",
                     CategorySequence = 5,
@@ -954,7 +949,6 @@ namespace SupervisorMobility.API.Context
                 new ChecklistQuestion()
                 {
                     QuestionID = 6,
-                    PillarId = 2,
                     Prompt = "¿Cuál es la prioridad KPI a mejorarse para el la estación de trabajo o Zona de trabajo?",
                     NotGood = "",
                     CategorySequence = 6,
@@ -965,7 +959,6 @@ namespace SupervisorMobility.API.Context
                 ,new ChecklistQuestion()
                 {
                     QuestionID = 7,
-                    PillarId = 2,
                     Prompt = "El operador usa el EPP como se establece en la HOE y Hoja de asignación de equipo de protección personal (S / N) explicar (N)",
                     NotGood = "",
                     CategorySequence = 1,
@@ -975,7 +968,6 @@ namespace SupervisorMobility.API.Context
                 new ChecklistQuestion()
                 {
                     QuestionID = 8,
-                    PillarId = 2,
                     Prompt = "La estación de trabajo cumple con el estado de referencia de 5S requerido incluyendo ayudas visuales ( sistema importante A, B, etc..)  (S/N) explicar (N)",
                     NotGood = "",
                     CategorySequence = 2,
@@ -984,7 +976,6 @@ namespace SupervisorMobility.API.Context
                 }, new ChecklistQuestion()
                 {
                     QuestionID = 9,
-                    PillarId = 2,
                     Prompt = "El operador trabaja de acuerdo a la HOE de distribución de operación  (orden de los pasos principales)? (S/N) explicar (N)",
                     NotGood = "",
                     CategorySequence = 3,
@@ -994,7 +985,6 @@ namespace SupervisorMobility.API.Context
                 new ChecklistQuestion()
                 {
                     QuestionID = 10,
-                    PillarId = 2,
                     Prompt = "Actividad no cíclica (Ejemplo : Control de Lote, Cambio de Caja, Plan de Mantenimiento autónomo,…) se realizan en cumplimiento al estándar, si procede (S/N) explicar (N)",
                     NotGood = "",
                     CategorySequence = 4,
@@ -1003,7 +993,6 @@ namespace SupervisorMobility.API.Context
                 }, new ChecklistQuestion()
                 {
                     QuestionID =11,
-                    PillarId = 2,
                     Prompt = "Actividad regular de Calidad  (plan de inspección,chequeo  Poka Yoke ,…) se hacen en cumplimiento al estándar,  incluyendo registro, si procede (S/N) explicar (N)",
                     NotGood = "",
                     CategorySequence = 5,
@@ -1015,7 +1004,6 @@ namespace SupervisorMobility.API.Context
                 , new ChecklistQuestion()
                 {
                     QuestionID = 12,
-                    PillarId = 2,
                     Prompt = "Verificar que el operador cumpla con los pasos de HOE, que están relacionados al enfoque del problema / defecto? (S/N) explicar (N)",
                     NotGood = "",
                     CategorySequence = 1,
@@ -1025,7 +1013,6 @@ namespace SupervisorMobility.API.Context
                 new ChecklistQuestion()
                 {
                     QuestionID = 13,
-                    PillarId = 2,
                     Prompt = "Puntos clave son respetados. Verificar que los puntos clave son apropiados a los problemas de calidad / seguridad en la estación de trabajo (S/N) explicar (N)",
                     NotGood = "",
                     CategorySequence = 2,
@@ -1035,7 +1022,6 @@ namespace SupervisorMobility.API.Context
                 , new ChecklistQuestion()
                 {
                     QuestionID = 14,
-                    PillarId = 2,
                     Prompt = "El producto / parte cumple con las especificaciones : (In & Out, incluyendo PEPS) (S/N) explicar (N)",
                     NotGood = "",
                     CategorySequence = 3,
@@ -1045,7 +1031,6 @@ namespace SupervisorMobility.API.Context
                 new ChecklistQuestion()
                 {
                     QuestionID = 15,
-                    PillarId = 2,
                     Prompt = "Empaque, herramientas, manipuladores estan en buenas condiciones y no hay riezgo de afectar la calidad. (S/N) explicar (N)",
                     NotGood = "",
                     CategorySequence = 4,
@@ -1054,7 +1039,6 @@ namespace SupervisorMobility.API.Context
                 }, new ChecklistQuestion()
                 {
                     QuestionID = 16,
-                    PillarId = 2,
                     Prompt = "Partes están correctamente identificadas y para que las que sean necesario ser rastreadas, verificar que el registro sea hecho correctamente (S/N) explicar (N)",
                     NotGood = "",
                     CategorySequence = 5,
@@ -1064,7 +1048,6 @@ namespace SupervisorMobility.API.Context
                 new ChecklistQuestion()
                 {
                     QuestionID = 17,
-                    PillarId = 2,
                     Prompt = "Procedimiento para disposición de residuos y reglas de seguridad (incluyendo químicos) son respetados (S/N) explicar (N)",
                     NotGood = "",
                     CategorySequence = 6,
@@ -1073,7 +1056,6 @@ namespace SupervisorMobility.API.Context
                 }, new ChecklistQuestion()
                 {
                     QuestionID = 18,
-                    PillarId = 2,
                     Prompt = "Adicion en Comentarios",
                     NotGood = "",
                     CategorySequence = 7,
@@ -1085,7 +1067,6 @@ namespace SupervisorMobility.API.Context
                 , new ChecklistQuestion()
                 {
                     QuestionID = 19,
-                    PillarId = 2,
                     Prompt = "Concensar con el operador respecto a su cumplimiento al estándar",
                     NotGood = "",
                     CategorySequence = 1,
@@ -1095,7 +1076,6 @@ namespace SupervisorMobility.API.Context
                 new ChecklistQuestion()
                 {
                     QuestionID = 20,
-                    PillarId = 2,
                     Prompt = "Mientras el líder realiza la operación, verificar si el operador es capáz de nombrar: Muchotexto",
                     NotGood = "",
                     CategorySequence = 2,
@@ -1105,7 +1085,6 @@ namespace SupervisorMobility.API.Context
                 , new ChecklistQuestion()
                 {
                     QuestionID = 21,
-                    PillarId = 2,
                     Prompt = "Hay algún elemento que deba ser agregado a la lista de control de items? (S/N) explicar",
                     NotGood = "",
                     CategorySequence = 3,
@@ -1114,7 +1093,6 @@ namespace SupervisorMobility.API.Context
                 }, new ChecklistQuestion()
                 {
                     QuestionID = 22,
-                    PillarId = 2,
                     Prompt = "Discusión sobre la mejora : - Desde operador (Sistema de Reconocimiento de la planta) - Desde observador",
                     NotGood = "",
                     CategorySequence = 4,
@@ -1124,7 +1102,6 @@ namespace SupervisorMobility.API.Context
                 new ChecklistQuestion()
                 {
                     QuestionID = 23,
-                    PillarId = 2,
                     Prompt = "¿Pueden las mejoras identificadas desplegarse horizontalmente?",
                     NotGood = "",
                     CategorySequence = 5,
@@ -1133,6 +1110,7 @@ namespace SupervisorMobility.API.Context
                 }
 
                 );
+
 
             //modelBuilder.Entity<ChecklistAnswer>()
             //    .HasData(
