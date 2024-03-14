@@ -150,7 +150,7 @@ namespace SupervisorMobility.API.Controllers
                 Debug.WriteLine($"job {job.StartDate} {job.SupervisorId}");
 
                 int maxRetries = 5; // Número máximo de intentos
-                TimeSpan retryInterval = TimeSpan.FromSeconds(2); // Intervalo de tiempo entre intentos (5 segundos en este caso)
+                TimeSpan retryInterval = TimeSpan.FromSeconds(1); // Intervalo de tiempo entre intentos (5 segundos en este caso)
                 int retries = 0;
 
                 while (retries < maxRetries)
@@ -167,7 +167,7 @@ namespace SupervisorMobility.API.Controllers
                             ForUpdate.SupervisorId = job.SupervisorId;
 
                             JobObservationVersion HistoryToAdd = await _assyChartService.CreateHistoryJobObservationAsync(jobObservationEntity);
-                            
+
                             //Actualiza la jobobsevation
                             _mapper.Map(ForUpdate, jobObservationEntity);
 
@@ -189,7 +189,7 @@ namespace SupervisorMobility.API.Controllers
                             if (RegUserOpEntity != null)
                             {
                                 var RegForUpdate = _mapper.Map<SOSRegUserOperationForUpdateDto>(RegUserOpEntity);
-                                if(RegForUpdate.SupervisorId != job.SupervisorId)
+                                if (RegForUpdate.SupervisorId != job.SupervisorId)
                                 {
                                     RegForUpdate.SupervisorId = job.SupervisorId;
                                     var resultUpdate = await _supervisorMobilityRepository.UpdateRegUserOperation(RegForUpdate, RegUserOpEntity);
@@ -211,7 +211,7 @@ namespace SupervisorMobility.API.Controllers
                             {
                                 //Update jobregister
                                 var RegForUpdate = _mapper.Map<SOSReviewsRegisterForUpdateDto>(RegJobEntity);
-                                
+
                                 var resultUpdate = await _supervisorMobilityRepository.UpdateRegisterJobObservation(RegForUpdate, RegJobEntity);
                             }
                             else
@@ -239,12 +239,6 @@ namespace SupervisorMobility.API.Controllers
                             {
                                 finalJob.OperationId = null;
                             }
-
-                            if (finalJob.OperatorId == 0)
-                            {
-                                finalJob.OperatorId = null;
-                            }
-                            
                             finalJob.PlannedStartDate = finalJob.StartDate;
 
                             await _supervisorMobilityRepository.AddJobObservation(finalJob);
@@ -268,7 +262,6 @@ namespace SupervisorMobility.API.Controllers
 
                         }
 
-                        retries = 0;
 
                         Console.WriteLine($"Intento {retries + 1} ");
 
@@ -277,10 +270,9 @@ namespace SupervisorMobility.API.Controllers
                     }
                     catch (Exception ex)
                     {
-                        Console.WriteLine($"Intento {retries + 1} Linea Position falló: {ex.Message}");
+                        Console.WriteLine($"falló job {job.OperationId}: {ex.Message}");
 
                         // Incrementa el número de intentos
-                        retries++;
 
                         // Espera el intervalo de tiempo antes de volver a intentarlo
                         await Task.Delay(retryInterval);
