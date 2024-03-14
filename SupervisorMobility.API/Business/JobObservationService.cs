@@ -139,7 +139,12 @@ namespace SupervisorMobility.API.Business
                     await FetchChecklistQuestionMaxSequenceAsync(checklistQuestionForUpdate.JobCategoryStructureId);
             }
 
-            var pillarList = await _repository.GetPillarsFromList(checklistQuestionForUpdate.Pillars);
+            List<Pillar>? pillarList = null;
+
+            if (checklistQuestionForUpdate.Pillars != null || !checklistQuestionForUpdate.Pillars.Any())
+            {
+                pillarList = await _repository.GetPillarsFromList(checklistQuestionForUpdate.Pillars);
+            }
             _mapper.Map(checklistQuestionForUpdate, checklistQuestion);
             checklistQuestion.Pillars = pillarList;
 

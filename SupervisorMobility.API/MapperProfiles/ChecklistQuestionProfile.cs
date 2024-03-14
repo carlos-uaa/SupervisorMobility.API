@@ -14,8 +14,8 @@ namespace SupervisorMobility.API.Profiles
             CreateMap<Entities.ChecklistQuestion, ChecklistQuestionWithoutNavigationPropertiesDto>()
                 .ForMember(dest=>dest.Pillars, opts => opts.MapFrom(src=>src.Pillars.Select(p=>p.PillarId)))
                 .ReverseMap();
-            CreateMap<Entities.ChecklistQuestion, ChecklistQuestionForCreationDto>().ReverseMap();
-            CreateMap<Entities.ChecklistQuestion, ChecklistQuestionForUpdateDto>().ReverseMap();
+            CreateMap<Entities.ChecklistQuestion, ChecklistQuestionForCreationDto>().ForMember(p=>p.Pillars, opt=> opt.Ignore()).ReverseMap().ForMember(p=>p.Pillars, opt=>opt.Ignore());
+            CreateMap<Entities.ChecklistQuestion, ChecklistQuestionForUpdateDto>().ForMember(p => p.Pillars, opt => opt.Ignore()).ReverseMap().ForMember(p => p.Pillars, opt => opt.Ignore());
         }
     }
 }
