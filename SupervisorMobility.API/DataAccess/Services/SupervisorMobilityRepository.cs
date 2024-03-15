@@ -1420,7 +1420,7 @@ namespace SupervisorMobility.API.Services
 
         }
 
-        public async Task<IEnumerable<JobObservation>> GetAllJobObservationsAsync(bool includeTree = false, bool includePeople = false, bool includeLup = false, bool includeHistory = false, bool includeCkAnswers = false, int idPlant = 0, int idArea = 0, bool ForSosProgram = false, int year = 0, int SOSAnualId = 0, int idUser = 0)
+        public async Task<IEnumerable<JobObservation>> GetAllJobObservationsAsync(bool includeTree = false, bool includePeople = false, bool includeLup = false, bool includeHistory = false, bool includeCkAnswers = false, int idPlant = 0, int idArea = 0, bool ForSosProgram = false, int year = 0, int month = 0, int SOSAnualId = 0, int idUser = 0)
         {
 
             var query = _context.JobObservations.Where(j => j.IsActive == true);
@@ -1476,8 +1476,14 @@ namespace SupervisorMobility.API.Services
 
             if (year != 0)
             {
-                query = query.Where(d => d.StartDate.Value.Year == year || d.PlannedStartDate.Value.Year == year);
+                query = query.Where(d => d.StartDate.Value.Year == year || d.EndDate.Value.Year == year);
             }
+
+            if (month != 0)
+            {
+                query = query.Where(d => d.StartDate.Value.Month == month || d.EndDate.Value.Month == month);
+            }
+
 
             if (SOSAnualId != 0)
             {
