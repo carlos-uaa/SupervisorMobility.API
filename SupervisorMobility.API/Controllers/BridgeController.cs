@@ -98,7 +98,7 @@ namespace SupervisorMobility.API.Controllers
         {
             var content = new FormUrlEncodedContent(parameters);
 
-            var response = await _bridgeHttpClient.PostAsync("SMCcp/PostArchivesDirectoryCcp", content);
+            var response = await _bridgeHttpClient.PostAsync("SMGos/PostArchivesDirectoryGos", content);
 
             return Ok(response.Content.ReadAsStringAsync().Result);
         }
