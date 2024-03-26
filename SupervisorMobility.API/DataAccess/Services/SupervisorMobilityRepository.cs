@@ -1546,7 +1546,7 @@ namespace SupervisorMobility.API.Services
             if (includePeople)
             {
                 query = query.Include(s => s.Supervisor)
-                             .Include(o => o.Operator);
+                             .Include(o => o.Operator).ThenInclude(o => o.ILURegisers);
             }
 
             if (includeLup)

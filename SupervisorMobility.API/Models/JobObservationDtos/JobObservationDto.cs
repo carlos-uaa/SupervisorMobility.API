@@ -19,7 +19,7 @@ namespace SupervisorMobility.API.Models.JobObservationDtos
         public OperationWithoutNavigationPropertiesDto Operation { get; set; } = new OperationWithoutNavigationPropertiesDto();
         //whit people
         public UsersWithoutNavigationWithoutPeopleDetails Supervisor { get; set; } = new UsersWithoutNavigationWithoutPeopleDetails();
-        public UsersWithoutNavigationWithoutPeopleDetails? Operator { get; set; } = new UsersWithoutNavigationWithoutPeopleDetails();
+        public UsersWithoutPeopleWithNavigation? Operator { get; set; } = new UsersWithoutPeopleWithNavigation();
         //whitLup
         public ICollection<LupDto> Lup { get; set; } = new List<LupDto>();
         //Whit History
