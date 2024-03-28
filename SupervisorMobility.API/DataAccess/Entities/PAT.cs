@@ -46,10 +46,10 @@ namespace SupervisorMobility.API.DataAccess.Entities
 
         public Area? Area { get; set; }
 
-        public int? DistributionId { get; set; }
-        [ForeignKey("DistributionId")]
-        [NotMapped]
-        public Distribution? Distribution { get; set; }
+        //public int? DistributionId { get; set; }
+        //[ForeignKey("DistributionId")]
+        //[NotMapped]
+        //public Distribution? Distribution { get; set; }
 
 
 

@@ -10,7 +10,7 @@
         public int PlantId { get; set; }
         public int AreaId { get; set; }
 
-        public int DistributionId { get; set; }
+        //public int DistributionId { get; set; }
 
 
         public DateTime? AplicationDate { get; set; }

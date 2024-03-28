@@ -1937,7 +1937,6 @@ namespace SupervisorMobility.API.Services
             return await _context.PATs
                    .Include(p => p.Plant)
                    .Include(a => a.Area)
-                   .Include(d => d.Distribution)
                    .Include(sv => sv.Supervisor)
                    .Include(ssv => ssv.SSVresponsible)
                    .Where(p => p.PATid == patId).FirstOrDefaultAsync();
@@ -1958,7 +1957,6 @@ namespace SupervisorMobility.API.Services
             return await _context.PATs
                    .Include(p => p.Plant)
                    .Include(a => a.Area)
-                   .Include(d => d.Distribution)
                    .Include(sv => sv.Supervisor)
                    .Include(ssv => ssv.SSVresponsible).Where(u => u.IsActive == true)
                     .OrderBy(c => c.PATid).ToListAsync();
@@ -1968,7 +1966,6 @@ namespace SupervisorMobility.API.Services
             return await _context.PATs
                     .Include(p => p.Plant)
                     .Include(a => a.Area)
-                    .Include(d => d.Distribution)
                     .Include(sv => sv.Supervisor)
                     .Include(ssv => ssv.SSVresponsible)
                     .Where(p => p.SupervisorId == svId && p.IsActive == true)
@@ -1979,7 +1976,6 @@ namespace SupervisorMobility.API.Services
             return await _context.PATs
                            .Include(p => p.Plant)
                    .Include(a => a.Area)
-                   .Include(d => d.Distribution)
                    .Include(sv => sv.Supervisor)
                    .Include(ssv => ssv.SSVresponsible)
                            .Where(p => p.SSVresponsibleID == ssvID && p.IsActive == true)

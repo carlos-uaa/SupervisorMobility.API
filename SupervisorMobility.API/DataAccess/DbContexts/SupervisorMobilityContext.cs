@@ -210,11 +210,11 @@ namespace SupervisorMobility.API.Context
                 .HasForeignKey(p => p.SupervisorId)
                 .OnDelete(DeleteBehavior.NoAction);
 
-            modelBuilder.Entity<PAT>()
-                .HasOne(p => p.Distribution)
-                .WithMany()
-                .HasForeignKey(p => p.DistributionId)
-                .OnDelete(DeleteBehavior.NoAction);
+            //modelBuilder.Entity<PAT>()
+            //    .HasOne(p => p.Distribution)
+            //    .WithMany()
+            //    .HasForeignKey(p => p.DistributionId)
+            //    .OnDelete(DeleteBehavior.NoAction);
 
             modelBuilder.Entity<ILULevel>()
            .Property(e => e.ILULevelId)
