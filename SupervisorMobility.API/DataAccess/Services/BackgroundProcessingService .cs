@@ -2403,7 +2403,16 @@ namespace SupervisorMobility.API.DataAccess.Services
                         {
                             Console.WriteLine($"Error: {ex.Message}");
                             // Algo salió mal en el ciclo, realiza un rollback de la transacción
+                            if (_env.IsDevelopment())
+                            {
+                                Debug.WriteLine($"Simulate Transaction.Rollback: _env.IsDevelopment() -> transaction.Commit()");
+                                transaction.Commit();
+
+                            }
+                            else
+                            {
                             transaction.Rollback();
+                            }
 
                             // Puedes registrar el error o realizar otras acciones necesarias
                             //e-mail de errores 

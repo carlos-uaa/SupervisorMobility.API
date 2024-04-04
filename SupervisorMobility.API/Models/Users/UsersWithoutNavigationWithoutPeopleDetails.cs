@@ -1,4 +1,5 @@
-﻿using System.ComponentModel.DataAnnotations.Schema;
+﻿using SupervisorMobility.API.Models.ILURegisterDtos;
+using System.ComponentModel.DataAnnotations.Schema;
 
 namespace SupervisorMobility.API.Models.Users
 {
@@ -26,6 +27,8 @@ namespace SupervisorMobility.API.Models.Users
         public int? AreaId { get; set; }
         public int? GroupId { get; set; }
         public int? DistributionId { get; set; }
+        public ICollection<ILURegisterWithoutNavigationDto>? ILURegisers { get; set; }
+
     }
 }
 
