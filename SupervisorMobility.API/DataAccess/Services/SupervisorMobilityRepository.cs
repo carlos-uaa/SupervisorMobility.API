@@ -11,6 +11,7 @@ using SupervisorMobility.API.DataAccess.Entities.LUP;
 using SupervisorMobility.API.DataAccess.Entities.Paths;
 using SupervisorMobility.API.DataAccess.Entities.SOS_Review;
 using SupervisorMobility.API.Entities;
+using SupervisorMobility.API.Models.KaizenDtos;
 using SupervisorMobility.API.Models.PATDtos;
 using SupervisorMobility.API.Models.SOSReviewDtos;
 using SupervisorMobility.API.Models.Users;
@@ -2336,6 +2337,101 @@ namespace SupervisorMobility.API.Services
         }
 
 
+        #endregion
+        #region Kaizen
+       public async Task<Kaizen?> GetKaizen(int KaizenId, bool includeNavigation = false, bool includePeople = false, bool includeEvidences = false, bool includeTransactions = false)
+            {
+            var query = _context.Kaizens.Where(k => k.IsActive == true && k.KaizenId == KaizenId);
+
+            if (includeNavigation)
+            {
+                query = query
+                 .Include(p => p.Plant)
+                 .Include(p => p.Pillar)
+                 .Include(a => a.Area);
+            }
+
+            if (includePeople)
+            {
+                query = query
+                 .Include(s => s.Supervisor)
+                 .Include(ssv => ssv.SeniorSupervisor)
+                 .Include(up => up.Proposed);
+            }
+
+            if (includeEvidences)
+            {
+                query = query
+                 .Include(ae => ae.PreviousEvidences)
+                 .Include(be => be.ThenEvidences);
+
+            }
+
+            if (includeTransactions)
+            {
+                query = query
+                 .Include(t => t.Transactions);
+}
+
+            return await query.FirstOrDefaultAsync();
+
+        }
+        public async Task<IEnumerable<Kaizen>> GetAllKaizens( bool includeNavigation = false, bool includePeople = false, bool includeEvidences = false, bool includeTransactions = false)
+        {
+            var query = _context.Kaizens.Where(u => u.IsActive == true);
+
+            if (includeNavigation)
+            {
+                query = query
+                 .Include(p => p.Plant)
+                 .Include(p => p.Pillar)
+                 .Include(a => a.Area);
+            }
+
+            if (includePeople)
+            {
+                query = query
+                 .Include(s => s.Supervisor)
+                 .Include(ssv => ssv.SeniorSupervisor)
+                 .Include(up => up.Proposed);
+            }
+
+            if (includeEvidences)
+            {
+                query = query
+                 .Include(ae => ae.PreviousEvidences)
+                 .Include(be => be.ThenEvidences);
+
+            }
+
+            if (includeTransactions)
+            {
+                query = query
+                 .Include(t => t.Transactions);
+            }
+
+            query = query.OrderBy(c => c.KaizenId);
+
+            return query.ToList();
+        }
+        public async Task<int> AddKaizen(Kaizen KaizenForAdd)
+            {
+            _context.Kaizens.Add(KaizenForAdd);
+            return _context.SaveChanges();
+        }
+       public async Task<int> UpdateKaizen(UpdateKaizenDto KaizenForUpdate, Kaizen KaizenEntity)
+            {
+
+            _mapper.Map(KaizenForUpdate, KaizenEntity);
+
+            return _context.SaveChanges();
+        }
+        
+        public async Task<int> RemoveKaizen(Kaizen KaizenForAdd)
+        {
+            KaizenForAdd.IsActive = false;
+            return _context.SaveChanges();
+        }
         #endregion
     }
 }

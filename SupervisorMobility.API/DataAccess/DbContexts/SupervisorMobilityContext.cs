@@ -14,6 +14,8 @@ namespace SupervisorMobility.API.Context
     {
         #region DbSets
         public DbSet<HeadCount> headCounts { get; set; }
+        public DbSet<Kaizen> Kaizens { get; set; }
+        public DbSet<KaizenTransaction> KaizenTransactions { get; set; }
         public DbSet<JobCategoryStructure> JobCategoryStructures { get; set; }
         public DbSet<QuestionType> QuestionTypes { get; set; }
         public DbSet<ChecklistQuestion> ChecklistQuestions { get; set; }
@@ -73,6 +75,13 @@ namespace SupervisorMobility.API.Context
 
             modelBuilder.Entity<SOSReviewProgram>()
                .Property(p => p.IsActive)
+               .HasDefaultValue(true); 
+            
+            modelBuilder.Entity<KaizenTransaction>()
+               .Property(p => p.IsActive)
+               .HasDefaultValue(true); 
+            modelBuilder.Entity<Kaizen>()
+               .Property(p => p.IsActive)
                .HasDefaultValue(true);
             
             modelBuilder.Entity<SOSReviewDistSuggestion>()
@@ -90,6 +99,7 @@ namespace SupervisorMobility.API.Context
             modelBuilder.Entity<JobObservation>()
                 .Property(p => p.IsActive)
                 .HasDefaultValue(true);
+         
 
             modelBuilder.Entity<Plant>()
                 .Property(p => p.IsActive)
@@ -1111,6 +1121,7 @@ namespace SupervisorMobility.API.Context
 
                 );
 
+           
 
             //modelBuilder.Entity<ChecklistAnswer>()
             //    .HasData(
