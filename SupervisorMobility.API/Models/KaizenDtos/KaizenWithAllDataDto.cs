@@ -49,7 +49,8 @@ namespace SupervisorMobility.API.Models.KaizenDtos
         public DateTime? CreateDate { get; set; }
 
         public DateTime? FinishedDate { get; set; }
-
+        public int Status { get; set; }
+        public string kpiName { get; set; }
 
     }
 }
