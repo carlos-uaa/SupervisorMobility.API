@@ -43,6 +43,7 @@
 	<ItemGroup>
 		<Folder Include="Migrations\" />
 		<Folder Include="Documents\" />
+		<Folder Include="Models\HCI\" />
 		<Folder Include="uploads\assycharts\" />
 		<Folder Include="uploads\attendance\" />
 		<Folder Include="uploads\evidence\" />

@@ -5,6 +5,7 @@ namespace SupervisorMobility.API.Models.KaizenDtos
     public class KaizenDto
     {
         public int KaizenId { get; set; }
+        public string KaizenName { get; set; }
 
         public bool? IsActive { get; set; }
 
