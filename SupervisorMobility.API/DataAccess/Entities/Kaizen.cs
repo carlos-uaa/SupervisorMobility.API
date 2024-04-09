@@ -41,7 +41,7 @@ namespace SupervisorMobility.API.DataAccess.Entities
 
         public string? PreviousJustification { get; set; }
         public string? ThenJustification { get; set; }
-        public string? StandarModification { get; set; }
+        public string? StandardModification { get; set; }
 
         public string? Calculationformula { get; set; }
         public double? Total { get; set; }

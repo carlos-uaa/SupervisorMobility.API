@@ -27,7 +27,7 @@ namespace SupervisorMobility.API.Models.KaizenDtos
 
         public string ThenJustification { get; set; }
 
-        public string StandarModification { get; set; }
+        public string StandardModification { get; set; }
 
         public string CalculationFormula { get; set; }
 
