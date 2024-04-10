@@ -11,6 +11,7 @@ using SupervisorMobility.API.DataAccess.Entities.LUP;
 using SupervisorMobility.API.DataAccess.Entities.Paths;
 using SupervisorMobility.API.DataAccess.Entities.SOS_Review;
 using SupervisorMobility.API.Entities;
+using SupervisorMobility.API.Models.HCIDtos;
 using SupervisorMobility.API.Models.KaizenDtos;
 using SupervisorMobility.API.Models.PATDtos;
 using SupervisorMobility.API.Models.SOSReviewDtos;
@@ -2433,5 +2434,72 @@ namespace SupervisorMobility.API.Services
             return _context.SaveChanges();
         }
         #endregion
+
+
+        #region HCI
+        public async Task<HCI?> GetHCI(int HCIId, bool includeNavigation = false, bool includePeople = false, bool includeEvidences = false, bool includeTransactions = false)
+        {
+            var query = _context.HCIs.Where(k => k.IsActive == true && k.HCIId == HCIId);
+
+         
+            if (includeNavigation)
+            {
+                query = query
+                 .Include(t => t.User);
+            }
+            
+            if (includeTransactions)
+            {
+                query = query
+                 .Include(t => t.Transactions);
+            }
+
+            return await query.FirstOrDefaultAsync();
+
+        }
+        public async Task<IEnumerable<HCI>> GetAllHCIs(bool includeNavigation = false, bool includePeople = false, bool includeEvidences = false, bool includeTransactions = false)
+{
+    var query = _context.HCIs.Where(u => u.IsActive == true);
+
+            if (includeNavigation)
+            {
+                query = query
+                 .Include(t => t.User);
+            }
+
+            if (includeTransactions)
+            {
+                query = query
+                 .Include(t => t.Transactions);
+            }
+
+            query = query.OrderBy(c => c.HCIId);
+
+            return query.ToList();
+        }
+        public async Task<int> AddHCI(HCI HCIForAdd)
+
+        {
+            _context.HCIs.Add(HCIForAdd);
+            return _context.SaveChanges();
+        }
+        public async Task<int> UpdateHCI(UpdateHCIDto HCIForUpdate, HCI HCIEntity)
+        {
+
+            _mapper.Map(HCIForUpdate, HCIEntity);
+
+            return _context.SaveChanges();
+        }
+
+        public async Task<int> RemoveHCI(HCI HCIForAdd)
+        {
+            HCIForAdd.IsActive = false;
+            return _context.SaveChanges();
+        }
+        #endregion
+        
+        
+      
+
     }
 }

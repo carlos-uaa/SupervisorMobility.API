@@ -1,4 +1,4 @@
-﻿namespace SupervisorMobility.API.Models.KaizenDtos
+﻿namespace SupervisorMobility.API.Models.KaizenTransactionDtos
 {
     public class UpdateKaizenTransactionDto
     {
@@ -6,7 +6,7 @@
 
         public string Title { get; set; }
 
-        public string Description { get; set; }
+        public string? Description { get; set; }
 
         public int Type { get; set; }
 

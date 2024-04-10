@@ -14,6 +14,8 @@ namespace SupervisorMobility.API.Context
     {
         #region DbSets
         public DbSet<HeadCount> headCounts { get; set; }
+        public DbSet<HCI> HCIs { get; set; }
+        public DbSet<HCITransaction> HCITransactions { get; set; }
         public DbSet<Kaizen> Kaizens { get; set; }
         public DbSet<KaizenTransaction> KaizenTransactions { get; set; }
         public DbSet<JobCategoryStructure> JobCategoryStructures { get; set; }
@@ -71,7 +73,9 @@ namespace SupervisorMobility.API.Context
             //Default values
             modelBuilder.Entity<JobCategoryStructure>()
                 .Property(p => p.IsActive)
-                .HasDefaultValue(true);
+                .HasDefaultValue(true);   
+            
+           
 
             modelBuilder.Entity<SOSReviewProgram>()
                .Property(p => p.IsActive)
@@ -251,6 +255,13 @@ namespace SupervisorMobility.API.Context
                 .Property(p => p.IsActive)
                 .HasDefaultValue(true);
 
+            modelBuilder.Entity<HCI>()
+               .Property(p => p.IsActive)
+               .HasDefaultValue(true);
+
+            modelBuilder.Entity<HCITransaction>()
+                .Property(p => p.IsActive)
+                .HasDefaultValue(true);
             //Constraints
             modelBuilder.Entity<JobCategoryStructure>()
                 .HasCheckConstraint("ck_cc_seq", "[Sequence] > 0");

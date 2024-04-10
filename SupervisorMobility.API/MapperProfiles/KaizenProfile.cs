@@ -1,4 +1,5 @@
 ﻿using AutoMapper;
+using SupervisorMobility.API.Models.KaizenTransactionDtos;
 
 namespace SupervisorMobility.API.MapperProfiles
 {
@@ -10,9 +11,9 @@ namespace SupervisorMobility.API.MapperProfiles
             CreateMap<DataAccess.Entities.Kaizen, Models.KaizenDtos.CreateKaizenDto>().ReverseMap();
             CreateMap<DataAccess.Entities.Kaizen, Models.KaizenDtos.KaizenWithAllDataDto>().ReverseMap();
             CreateMap<DataAccess.Entities.Kaizen, Models.KaizenDtos.UpdateKaizenDto>().ReverseMap();
-            CreateMap<DataAccess.Entities.KaizenTransaction, Models.KaizenDtos.KaizenTransactionDto>().ReverseMap();
-            CreateMap<DataAccess.Entities.KaizenTransaction, Models.KaizenDtos.CreateKaizenTransactionDto>().ReverseMap();
-            CreateMap<DataAccess.Entities.KaizenTransaction, Models.KaizenDtos.UpdateKaizenTransactionDto>().ReverseMap();
+            CreateMap<DataAccess.Entities.KaizenTransaction, KaizenTransactionDto>().ReverseMap();
+            CreateMap<DataAccess.Entities.KaizenTransaction, CreateKaizenTransactionDto>().ReverseMap();
+            CreateMap<DataAccess.Entities.KaizenTransaction, UpdateKaizenTransactionDto>().ReverseMap();
         }
     }
 }

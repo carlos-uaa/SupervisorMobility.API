@@ -1,4 +1,5 @@
 ﻿using SupervisorMobility.API.Models.FileUploadDto;
+using SupervisorMobility.API.Models.KaizenTransactionDtos;
 
 namespace SupervisorMobility.API.Models.KaizenDtos
 {

@@ -38,6 +38,11 @@ namespace SupervisorMobility.API.DataAccess.Entities
         [Column(TypeName = "Date")]
         public DateTime? DisabledDate { get; set; }
 
+        public DateTime? IncomesDate { get; set; }
+        public DateTime? BirthDate { get; set; }
+        public FileUpload? ProfilePicture { get; set; } = new FileUpload();
+        public ICollection<UserCareerPath>? UserCareerPaths { get; set; }
+
         public bool? IsActive { get; set; }
 
         public int? PlantId { get; set; }
