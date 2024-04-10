@@ -8,6 +8,7 @@ namespace SupervisorMobility.API.DataAccess.Entities
     {
         [Key, DatabaseGenerated(DatabaseGeneratedOption.Identity)]
         public int KaizenId { get; set; }
+        public string KaizenName { get; set; }
         public bool? IsActive { get; set; }
 
 
@@ -40,12 +41,15 @@ namespace SupervisorMobility.API.DataAccess.Entities
 
         public string? PreviousJustification { get; set; }
         public string? ThenJustification { get; set; }
-        public string? StandarModification { get; set; }
+        public string? StandardModification { get; set; }
 
         public string? Calculationformula { get; set; }
         public double? Total { get; set; }
 
         public DateTime? CreateDate { get; set; }
         public DateTime? FinishedDate { get; set; }
+
+        public int Status { get; set; }
+        public string kpiName { get; set; }
     }
 }

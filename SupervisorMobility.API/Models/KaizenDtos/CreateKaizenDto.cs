@@ -30,7 +30,7 @@ namespace SupervisorMobility.API.Models.KaizenDtos
 
         public string ThenJustification { get; set; }
 
-        public string StandarModification { get; set; }
+        public string StandardModification { get; set; }
 
         public string CalculationFormula { get; set; }
 
@@ -39,6 +39,9 @@ namespace SupervisorMobility.API.Models.KaizenDtos
         public DateTime? CreateDate { get; set; }
 
         public DateTime? FinishedDate { get; set; }
+
+        public int Status { get; set; }
+        public string kpiName { get; set; }
     }
 
 }
