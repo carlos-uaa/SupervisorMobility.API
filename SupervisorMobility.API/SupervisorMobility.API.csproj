@@ -43,6 +43,8 @@
 		<Folder Include="uploads\headcount\" />
 		<Folder Include="uploads\massive\" />
 		<Folder Include="uploads\headcount\" />
+		<Folder Include="uploads\thenEvidence\" />
+		<Folder Include="uploads\previousEvidence\" />
 		<Folder Include="uploads\operatorSignature\" />
 		<Folder Include="uploads\users\" />
 	</ItemGroup>
