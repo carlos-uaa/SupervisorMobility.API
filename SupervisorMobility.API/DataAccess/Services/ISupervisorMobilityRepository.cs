@@ -6,6 +6,7 @@ using SupervisorMobility.API.DataAccess.Entities.SOS_Review;
 using SupervisorMobility.API.Entities;
 using SupervisorMobility.API.Models.KaizenDtos;
 using SupervisorMobility.API.Models.PATDtos;
+using SupervisorMobility.API.Models.HCIDtos;
 using SupervisorMobility.API.Models.SOSReviewDtos;
 using SupervisorMobility.API.Models.Users;
 using System.Runtime.CompilerServices;
@@ -385,11 +386,11 @@ namespace SupervisorMobility.API.Services
         Task<IEnumerable<Kaizen>> GetAllKaizens(bool includeNavigation = false, bool includePeople = false, bool includeEvidences = false, bool includeTransactions = false);
         #endregion
         #region HCI
-        //Task<HCI?> GetHCI(int HCIId, bool includeNavigation = false, bool includePeople = false, bool includeEvidences = false, bool includeTransactions = false);
-        //Task<int> AddHCI(HCI HCIForAdd);
-        //Task<int> RemoveHCI(HCI HCIForAdd);
-        //Task<int> UpdateHCI(UpdateHCIDto HCIForUpdate, HCI HCIEntity);
-        //Task<IEnumerable<HCI>> GetAllHCIs(bool includeNavigation = false, bool includePeople = false, bool includeEvidences = false, bool includeTransactions = false);
+        Task<HCI?> GetHCI(int HCIId, bool includeNavigation = false, bool includePeople = false, bool includeEvidences = false, bool includeTransactions = false);
+        Task<int> AddHCI(HCI HCIForAdd);
+        Task<int> RemoveHCI(HCI HCIForAdd);
+        Task<int> UpdateHCI(UpdateHCIDto HCIForUpdate, HCI HCIEntity);
+        Task<IEnumerable<HCI>> GetAllHCIs(bool includeNavigation = false, bool includePeople = false, bool includeEvidences = false, bool includeTransactions = false);
         #endregion
     }
 }

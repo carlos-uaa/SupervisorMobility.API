@@ -1,5 +1,6 @@
 ﻿using System.ComponentModel.DataAnnotations.Schema;
 using System.ComponentModel.DataAnnotations;
+using SupervisorMobility.API.Entities;
 
 namespace SupervisorMobility.API.DataAccess.Entities
 {
@@ -16,10 +17,8 @@ namespace SupervisorMobility.API.DataAccess.Entities
         public User? User { get; set; }
 
         public ICollection<HCITransaction>? Transactions { get; set; }
-          = new List<HCITransaction>();
 
         public ICollection<Commentary>? Comments { get; set; }
-          = new List<Commentary>();
         public bool? IsActive { get; set; }
     }
 }

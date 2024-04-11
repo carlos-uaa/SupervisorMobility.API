@@ -1,19 +1,11 @@
-﻿using System.ComponentModel.DataAnnotations.Schema;
-using System.ComponentModel.DataAnnotations;
-
-namespace SupervisorMobility.API.DataAccess.Entities
+﻿namespace SupervisorMobility.API.Models.HCITransactionDtos
 {
-    public class HCITransaction
+    public class HCITransactionDto
     {
-        [Key, DatabaseGenerated(DatabaseGeneratedOption.Identity)]
-
         public int HCITransactionId { get; set; }
-
         public string? Name { get; set; }
         public string? Description { get; set; }
-        [Column(TypeName = "Date")]
         public DateTime? DateStart { get; set; }
-        [Column(TypeName = "Date")]
         public DateTime? DateEnd { get; set; }
         public int Type { get; set; }
         public bool? IsActive { get; set; }

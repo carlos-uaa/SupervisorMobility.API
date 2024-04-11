@@ -30,6 +30,7 @@ using DocumentFormat.OpenXml.Wordprocessing;
 using DocumentFormat.OpenXml.EMMA;
 using Irony.Parsing;
 using DuoVia.FuzzyStrings;
+using SupervisorMobility.API.Models.HCIDtos;
 
 namespace SupervisorMobility.API.Controllers
 {
@@ -61,7 +62,7 @@ namespace SupervisorMobility.API.Controllers
             _env = env ?? throw new ArgumentNullException(nameof(env));
         }
 
-    
+       
         [HttpGet]
         public async Task<ActionResult<IEnumerable<AreaWithJustOperationsDto>>> GetAreas(
                     int plantId, bool includeCollections = false)
@@ -111,7 +112,7 @@ namespace SupervisorMobility.API.Controllers
             }
             return Ok(_mapper.Map<AreaWithoutNavigationPropertiesDto>(area));
         }
-
+        
         [HttpPost]
         public async Task<ActionResult<AreaWithoutNavigationPropertiesDto>> CreateArea(
             int plantId,
