@@ -14,10 +14,6 @@ namespace SupervisorMobility.API.Context
     {
         #region DbSets
         public DbSet<HeadCount> headCounts { get; set; }
-        public DbSet<HCI> HCIs { get; set; }
-        public DbSet<HCITransaction> HCITransactions { get; set; }
-        public DbSet<Kaizen> Kaizens { get; set; }
-        public DbSet<KaizenTransaction> KaizenTransactions { get; set; }
         public DbSet<JobCategoryStructure> JobCategoryStructures { get; set; }
         public DbSet<QuestionType> QuestionTypes { get; set; }
         public DbSet<ChecklistQuestion> ChecklistQuestions { get; set; }
@@ -32,7 +28,7 @@ namespace SupervisorMobility.API.Context
         public DbSet<Plant> Plants { get; set; }
         public DbSet<Area> Areas { get; set; }
         public DbSet<Distribution> Distributions { get; set; }
-        public DbSet<Operation> Operations { get; set; }
+        public DbSet<Entities.Operation> Operations { get; set; }
         public DbSet<SupportDocumentType> SupportDocumentTypes { get; set; }
         public DbSet<Product> Products { get; set; }
         public DbSet<AssyChart> AssyCharts { get; set; }
@@ -51,12 +47,17 @@ namespace SupervisorMobility.API.Context
         public DbSet<ILULevel> ILULevels { get; set; }
         public DbSet<ILURegister> ILURegisters { get; set; }
         public DbSet<PAT> PATs { get; set; }
+        public DbSet<UserCareerPath> UserCareerPaths { get; set; }
 
         public DbSet<SOSReviewProgram> SOSReviews { get; set; }
         public DbSet<SOSReviewDistSuggestion> SOSSuggestionsDistribution { get; set; }
         public DbSet<SOSRegisterJobObservation> SOSRegisters { get; set; }
         public DbSet<SOSRegUserOperation> SOSRegsUserOperation { get; set; }
-
+        public DbSet<HCI> HCIs { get; set; }
+        public DbSet<Commentary> Comments { get; set; }
+        public DbSet<HCITransaction> HCITransactions { get; set; }
+        public DbSet<Kaizen> Kaizens { get; set; }
+        public DbSet<KaizenTransaction> KaizenTransactions { get; set; }
         #endregion
 
 
@@ -81,12 +82,6 @@ namespace SupervisorMobility.API.Context
                .Property(p => p.IsActive)
                .HasDefaultValue(true); 
             
-            modelBuilder.Entity<KaizenTransaction>()
-               .Property(p => p.IsActive)
-               .HasDefaultValue(true); 
-            modelBuilder.Entity<Kaizen>()
-               .Property(p => p.IsActive)
-               .HasDefaultValue(true);
             
             modelBuilder.Entity<SOSReviewDistSuggestion>()
                .Property(p => p.SuggestionApplied)
@@ -155,6 +150,10 @@ namespace SupervisorMobility.API.Context
                  .HasDefaultValue(true);
             //Users
             modelBuilder.Entity<User>()
+             .Property(p => p.IsActive)
+             .HasDefaultValue(true); 
+
+            modelBuilder.Entity<UserCareerPath>()
              .Property(p => p.IsActive)
              .HasDefaultValue(true);
 
@@ -255,9 +254,24 @@ namespace SupervisorMobility.API.Context
                 .Property(p => p.IsActive)
                 .HasDefaultValue(true);
 
-            modelBuilder.Entity<HCI>()
+         
+            modelBuilder.Entity<KaizenTransaction>()
+   .Property(p => p.IsActive)
+   .HasDefaultValue(true);
+            modelBuilder.Entity<Kaizen>()
                .Property(p => p.IsActive)
                .HasDefaultValue(true);
+            modelBuilder.Entity<FileUpload>()
+               .Property(p => p.IsActive)
+               .HasDefaultValue(true);
+
+            modelBuilder.Entity<HCI>()
+            .Property(p => p.IsActive)
+            .HasDefaultValue(true);
+            
+            modelBuilder.Entity<Commentary>()
+            .Property(p => p.IsActive)
+            .HasDefaultValue(true);
 
             modelBuilder.Entity<HCITransaction>()
                 .Property(p => p.IsActive)

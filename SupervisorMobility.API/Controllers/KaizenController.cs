@@ -16,7 +16,7 @@ namespace SupervisorMobility.API.Controllers
 {
     [ApiController]
     [Route("api/Kaizen")]
-    public class KaizenController : Controller
+    public class KaizenController : ControllerBase
     {
         private readonly IMapper _mapper;
         private readonly ISupervisorMobilityRepository _supervisorMobilityRepository;

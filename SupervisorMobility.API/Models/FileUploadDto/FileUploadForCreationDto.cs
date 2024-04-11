@@ -11,6 +11,7 @@ namespace SupervisorMobility.API.Models.FileUploadDto
         [Required]
         public string? ContentType { get; set; }
         public DateTime UploadDate { get; set; }
+        public bool? IsActive { get; set; }
 
     }
 }

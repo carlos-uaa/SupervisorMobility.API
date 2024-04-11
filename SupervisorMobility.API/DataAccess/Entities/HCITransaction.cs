@@ -1,5 +1,4 @@
-﻿using SupervisorMobility.API.Models.FileUploadDto;
-using System.ComponentModel.DataAnnotations.Schema;
+﻿using System.ComponentModel.DataAnnotations.Schema;
 using System.ComponentModel.DataAnnotations;
 
 namespace SupervisorMobility.API.DataAccess.Entities
@@ -16,6 +15,5 @@ namespace SupervisorMobility.API.DataAccess.Entities
         public DateTime? DateEnd { get; set; }
         public int Type { get; set; }
         public bool? IsActive { get; set; }
-
     }
 }

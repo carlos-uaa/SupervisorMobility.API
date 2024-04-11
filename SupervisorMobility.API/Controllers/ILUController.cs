@@ -11,12 +11,12 @@ namespace SupervisorMobility.API.Controllers
     [Route("api/ILU")]
     [ApiController]
 
-    public class ILU_Controller : ControllerBase
+    public class ILUController : ControllerBase
     {
         private readonly IMapper _mapper;
         private readonly ISupervisorMobilityRepository _supervisorMobilityRepository;
 
-        public ILU_Controller(ISupervisorMobilityRepository supervisorMobilityRepository,
+        public ILUController(ISupervisorMobilityRepository supervisorMobilityRepository,
             IMapper mapper)
         {
             _supervisorMobilityRepository = supervisorMobilityRepository ??
