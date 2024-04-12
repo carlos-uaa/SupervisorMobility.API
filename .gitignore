@@ -36,7 +36,10 @@ SupervisorMobility.API/[Uu]ploads/[Ee]vidence/*
 SupervisorMobility.API/[Uu]ploads/[Ee]vidence/*.*
 SupervisorMobility.API/[Uu]ploads/[Gg]uides/*
 SupervisorMobility.API/[Uu]ploads/[Mm]assive/*
-SupervisorMobility.API/[Uu]ploads/[Hh]eadcount/*
+SupervisorMobility.API/[Uu]ploads/[Tt]henEvidence/*
+SupervisorMobility.API/[Uu]ploads/[Pp]reviousEvidence/*
+SupervisorMobility.API/[Uu]ploads/[Oo]peratorSignature/*
+SupervisorMobility.API/[Uu]ploads/[Uu]sers/*
 SupervisorMobility.API/[Mm]igrations/
 [Oo]bj/
 [Oo]ut/
@@ -378,5 +381,3 @@ appsettings.json
 SupervisorMobility.API/Migrations/SupervisorMobilityContextModelSnapshot.cs
 *.xlsx
 *.csv
-/SupervisorMobility.API/uploads/evidence
-/SupervisorMobility.API/uploads/operatorSignature
