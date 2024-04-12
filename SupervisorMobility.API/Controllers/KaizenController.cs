@@ -15,8 +15,8 @@ using System.Linq.Expressions;
 namespace SupervisorMobility.API.Controllers
 {
     [ApiController]
-    [Route("api/Kaizen")]
-    public class KaizenController : ControllerBase
+    [Route("api/kaizen")]
+    public class KaizenController : Controller
     {
         private readonly IMapper _mapper;
         private readonly ISupervisorMobilityRepository _supervisorMobilityRepository;

@@ -2433,6 +2433,57 @@ namespace SupervisorMobility.API.Services
             KaizenForAdd.IsActive = false;
             return _context.SaveChanges();
         }
+
+        public async Task AddPreviousEvidenceForKaizen(int kaizenId, FileUpload evidence)
+        {
+            var kaizen = await GetKaizen(kaizenId, true);
+
+            if (kaizen != null)
+            {
+
+                if (kaizen.PreviousEvidences != null)
+                {
+                    kaizen.PreviousEvidences.Add(evidence);
+                }
+                else
+                {
+                    kaizen.PreviousEvidences = new List<FileUpload>
+                    {
+                        evidence
+                    };
+
+                }
+
+
+            }
+
+        }
+
+        public async Task AddThenEvidenceForKaizen(int kaizenId, FileUpload evidence)
+        {
+            var kaizen = await GetKaizen(kaizenId, true);
+
+            if (kaizen != null)
+            {
+
+                if (kaizen.ThenEvidences != null)
+                {
+                    kaizen.ThenEvidences.Add(evidence);
+                }
+                else
+                {
+                    kaizen.ThenEvidences = new List<FileUpload>
+                    {
+                        evidence
+                    };
+
+                }
+
+
+            }
+
+        }
+
         #endregion
         #region HCI
         public async Task<HCI?> GetHCI(int HCIId, bool includeNavigation = false, bool includePeople = false, bool includeEvidences = false, bool includeTransactions = false)
