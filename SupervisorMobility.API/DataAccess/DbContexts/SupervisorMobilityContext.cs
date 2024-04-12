@@ -56,6 +56,7 @@ namespace SupervisorMobility.API.Context
         public DbSet<HCI> HCIs { get; set; }
         public DbSet<Commentary> Comments { get; set; }
         public DbSet<HCITransaction> HCITransactions { get; set; }
+        public DbSet<HCICategory> HCICategories { get; set; }
         public DbSet<Kaizen> Kaizens { get; set; }
         public DbSet<KaizenTransaction> KaizenTransactions { get; set; }
         #endregion
@@ -274,6 +275,9 @@ namespace SupervisorMobility.API.Context
             .HasDefaultValue(true);
 
             modelBuilder.Entity<HCITransaction>()
+                .Property(p => p.IsActive)
+                .HasDefaultValue(true);
+            modelBuilder.Entity<HCICategory>()
                 .Property(p => p.IsActive)
                 .HasDefaultValue(true);
             //Constraints

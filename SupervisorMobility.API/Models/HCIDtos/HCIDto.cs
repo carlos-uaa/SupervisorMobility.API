@@ -1,5 +1,6 @@
 ﻿using SupervisorMobility.API.DataAccess.Entities;
 using SupervisorMobility.API.Models.CommentaryDtos;
+using SupervisorMobility.API.Models.HCICategoryDtos;
 using SupervisorMobility.API.Models.HCITransactionDtos;
 
 namespace SupervisorMobility.API.Models.HCIDtos
@@ -16,7 +17,8 @@ namespace SupervisorMobility.API.Models.HCIDtos
 
         public ICollection<HCITransactionDto>? Transactions { get; set; }
           = new List<HCITransactionDto>();
-
+        public ICollection<HCICategoryDto>? Categories { get; set; }
+          = new List<HCICategoryDto>();
         public ICollection<CommentaryDto>? Comments { get; set; }
           = new List<CommentaryDto>();
         public bool? IsActive { get; set; }

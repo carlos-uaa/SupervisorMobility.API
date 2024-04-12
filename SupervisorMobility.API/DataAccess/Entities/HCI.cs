@@ -17,6 +17,8 @@ namespace SupervisorMobility.API.DataAccess.Entities
         public User? User { get; set; }
 
         public ICollection<HCITransaction>? Transactions { get; set; }
+        public ICollection<HCICategory>? Categories { get; set; }
+
 
         public ICollection<Commentary>? Comments { get; set; }
         public bool? IsActive { get; set; }
