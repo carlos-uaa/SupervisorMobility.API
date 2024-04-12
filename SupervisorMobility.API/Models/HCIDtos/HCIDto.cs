@@ -2,6 +2,7 @@
 using SupervisorMobility.API.Models.CommentaryDtos;
 using SupervisorMobility.API.Models.HCICategoryDtos;
 using SupervisorMobility.API.Models.HCITransactionDtos;
+using SupervisorMobility.API.Models.Users;
 
 namespace SupervisorMobility.API.Models.HCIDtos
 {
@@ -13,7 +14,7 @@ namespace SupervisorMobility.API.Models.HCIDtos
         public int? HCINo { get; set; }
 
         public int? UserId { get; set; }
-        public User? User { get; set; }
+        public UsersWithNavigationAndPeopleDetails? User { get; set; }
 
         public ICollection<HCITransactionDto>? Transactions { get; set; }
           = new List<HCITransactionDto>();
