@@ -7,13 +7,6 @@
 	</PropertyGroup>
 
 	<ItemGroup>
-	  <Compile Remove="uploads\headcount\NewFolder\**" />
-	  <Content Remove="uploads\headcount\NewFolder\**" />
-	  <EmbeddedResource Remove="uploads\headcount\NewFolder\**" />
-	  <None Remove="uploads\headcount\NewFolder\**" />
-	</ItemGroup>
-
-	<ItemGroup>
 		<PackageReference Include="AutoMapper.Extensions.Microsoft.DependencyInjection" Version="12.0.0" />
 		<PackageReference Include="ClosedXML" Version="0.102.2" />
 		<PackageReference Include="CsvHelper" Version="30.0.1" />
@@ -49,7 +42,8 @@
 		<Folder Include="uploads\guides\" />
 		<Folder Include="uploads\headcount\" />
 		<Folder Include="uploads\massive\" />
-		<Folder Include="uploads\headcount\" />
+		<Folder Include="uploads\thenEvidence\" />
+		<Folder Include="uploads\previousEvidence\" />
 		<Folder Include="uploads\operatorSignature\" />
 		<Folder Include="uploads\users\" />
 	</ItemGroup>
@@ -70,8 +64,12 @@
 		<MakeDir Directories="$(PublishUrl)\uploads\attendance\" />
 		<MakeDir Directories="$(PublishUrl)\uploads\evidence\" />
 		<MakeDir Directories="$(PublishUrl)\uploads\guides\" />
-		<MakeDir Directories="$(PublishUrl)\uploads\massive\" />
 		<MakeDir Directories="$(PublishUrl)\uploads\headcount\" />
+		<MakeDir Directories="$(PublishUrl)\uploads\massive\" />
+		<MakeDir Directories="$(PublishUrl)\uploads\thenEvidence\" />
+		<MakeDir Directories="$(PublishUrl)\uploads\previousEvidence\" />
+		<MakeDir Directories="$(PublishUrl)\uploads\operatorSignature\" />
+		<MakeDir Directories="$(PublishUrl)\uploads\users\" />
 		<MakeDir Directories="$(PublishUrl)\logs\" />
 	</Target>
 </Project>

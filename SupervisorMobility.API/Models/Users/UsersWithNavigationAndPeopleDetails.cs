@@ -1,5 +1,6 @@
 ﻿using SupervisorMobility.API.Models.AreaDtos;
 using SupervisorMobility.API.Models.DistributionDtos;
+using SupervisorMobility.API.Models.FileUploadDto;
 using SupervisorMobility.API.Models.GroupDtos;
 using SupervisorMobility.API.Models.ILURegisterDtos;
 using SupervisorMobility.API.Models.PlantDtos;
@@ -38,7 +39,10 @@ namespace SupervisorMobility.API.Models.Users
         public UsersWithoutPeopleWithNavigation? Superior { get; set; }
         public ICollection<UsersWithoutPeopleWithNavigation>? Subordinates { get; set; }
         public ICollection<AreaDtos.AreaWithoutNavigationPropertiesDto>? Areas { get; set; }
-        public ICollection<ILURegisterWithoutNavigationDto>? ILURegisers { get; set; }
-
+        public ICollection<ILURegisterDto>? ILURegisers { get; set; }
+        public DateTime? IncomesDate { get; set; }
+        public DateTime? BirthDate { get; set; }
+        public FileUploadGeneralDto? ProfilePicture { get; set; }
+           = new FileUploadGeneralDto();
     }
 }

@@ -13,9 +13,13 @@ namespace SupervisorMobility.API.DataAccess.Entities.ILU
         [Column(TypeName = "DateTime")]
         public DateTime? AcquisitionDate { get; set; } = DateTime.Now;
 
-        public int? OperationId { get; set; }
-        [ForeignKey("OperationId")]
-        public Operation? Operation { get; set; }
+        //public int? OperationId { get; set; }
+        //[ForeignKey("OperationId")]
+        //public Operation? Operation { get; set; }
+        
+        public int? DistributionId { get; set; }
+        [ForeignKey("DistributionId")]
+        public Distribution? Distribution { get; set; }
 
 
         public int? OperatorId { get; set; }

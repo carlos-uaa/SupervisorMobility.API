@@ -48,7 +48,11 @@ namespace SupervisorMobility.API
 
             // register the repository
             services.AddScoped<ISupervisorMobilityRepository, SupervisorMobilityRepository>();
+
+            
             return services;
         }
+
+      
     }
 }

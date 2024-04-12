@@ -1,4 +1,6 @@
-﻿using SupervisorMobility.API.Models.ILURegisterDtos;
+﻿using SupervisorMobility.API.DataAccess.Entities;
+using SupervisorMobility.API.Models.FileUploadDto;
+using SupervisorMobility.API.Models.ILURegisterDtos;
 
 namespace SupervisorMobility.API.Models.Users
 {
@@ -28,6 +30,9 @@ namespace SupervisorMobility.API.Models.Users
 
         public ICollection<AreaDtos.AreaWithoutNavigationPropertiesDto>? Areas { get; set; }
 
-
+        public DateTime? IncomesDate { get; set; }
+        public DateTime? BirthDate { get; set; }
+        public FileUploadGeneralDto? ProfilePicture { get; set; }
+           = new FileUploadGeneralDto();
     }
 }

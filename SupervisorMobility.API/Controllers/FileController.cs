@@ -207,6 +207,63 @@ namespace SupervisorMobility.API.Controllers
 
         }
 
+        //[EnableCors("CorsPolicy")]
+        [HttpPost("UploadPreviousEvidence")]
+        public async Task<ActionResult<FileUpload>> UploadPreviousEvidence(int kaizenId, IFormFile file)
+        {
+
+            var uploadResult = new FileUploadForCreationDto();
+            string trustedFileNameForStorage = string.Empty;
+            var unstrustedFileName = file.FileName;
+
+            trustedFileNameForStorage = Path.GetRandomFileName();
+            var path = Path.Combine(_env.ContentRootPath, "uploads\\previousEvidence", trustedFileNameForStorage);
+
+            await using FileStream fs = new(path, FileMode.Create);
+            await file.CopyToAsync(fs);
+
+            uploadResult.FileName = unstrustedFileName;
+            uploadResult.StorageFileName = trustedFileNameForStorage;
+            uploadResult.ContentType = file.ContentType;
+            uploadResult.UploadDate = DateTime.Now;
+
+
+            var fileToReturn = await _assyChartService.CreateFileAsync(uploadResult);
+            await _supervisorMobilityRepository.AddPreviousEvidenceForKaizen(kaizenId, fileToReturn);
+            await _supervisorMobilityRepository.SaveChangesAsync();
+
+            return Ok(fileToReturn);
+
+        }
+
+        [HttpPost("UploadThenEvidence")]
+        public async Task<ActionResult<FileUpload>> UploadThenEvidence(int kaizenId, IFormFile file)
+        {
+
+            var uploadResult = new FileUploadForCreationDto();
+            string trustedFileNameForStorage = string.Empty;
+            var unstrustedFileName = file.FileName;
+
+            trustedFileNameForStorage = Path.GetRandomFileName();
+            var path = Path.Combine(_env.ContentRootPath, "uploads\\thenEvidence", trustedFileNameForStorage);
+
+            await using FileStream fs = new(path, FileMode.Create);
+            await file.CopyToAsync(fs);
+
+            uploadResult.FileName = unstrustedFileName;
+            uploadResult.StorageFileName = trustedFileNameForStorage;
+            uploadResult.ContentType = file.ContentType;
+            uploadResult.UploadDate = DateTime.Now;
+
+
+            var fileToReturn = await _assyChartService.CreateFileAsync(uploadResult);
+            await _supervisorMobilityRepository.AddThenEvidenceForKaizen(kaizenId, fileToReturn);
+            await _supervisorMobilityRepository.SaveChangesAsync();
+
+            return Ok(fileToReturn);
+
+        }
+
         [HttpPost("Data")]
         public async Task<ActionResult<FileUploadGeneralDto>> UpdateDataInServer(FileUploadGeneralDto FileInfo)
         {

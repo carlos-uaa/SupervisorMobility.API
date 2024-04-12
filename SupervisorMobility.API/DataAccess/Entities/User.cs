@@ -30,6 +30,7 @@ namespace SupervisorMobility.API.DataAccess.Entities
             = new List<SOSReviewProgram>();
 
         public ICollection<ILURegister>? ILURegisers { get; set; }
+        public ICollection<UserCareerPath>? UserCareerPaths { get; set; }
 
         [Column(TypeName = "Date")]
         public DateTime? CreatedDate { get; set; } = DateTime.Now;
@@ -37,6 +38,14 @@ namespace SupervisorMobility.API.DataAccess.Entities
         public DateTime LastUpdated { get; set; }
         [Column(TypeName = "Date")]
         public DateTime? DisabledDate { get; set; }
+        [Column(TypeName = "Date")]
+
+        public DateTime? IncomesDate { get; set; }
+        [Column(TypeName = "Date")]
+        public DateTime? BirthDate { get; set; }
+        public int? ProfilePictureId { get; set; }
+        [ForeignKey("ProfilePictureId")]
+        public FileUpload? ProfilePicture { get; set; } 
 
         public bool? IsActive { get; set; }
 

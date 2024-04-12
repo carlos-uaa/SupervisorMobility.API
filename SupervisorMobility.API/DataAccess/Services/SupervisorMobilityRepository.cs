@@ -11,6 +11,8 @@ using SupervisorMobility.API.DataAccess.Entities.LUP;
 using SupervisorMobility.API.DataAccess.Entities.Paths;
 using SupervisorMobility.API.DataAccess.Entities.SOS_Review;
 using SupervisorMobility.API.Entities;
+using SupervisorMobility.API.Models.HCIDtos;
+using SupervisorMobility.API.Models.KaizenDtos;
 using SupervisorMobility.API.Models.PATDtos;
 using SupervisorMobility.API.Models.SOSReviewDtos;
 using SupervisorMobility.API.Models.Users;
@@ -60,7 +62,7 @@ namespace SupervisorMobility.API.Services
             }
             return await _context.JobCategoryStructures.Where(u => u.IsActive == true)
                 .OrderBy(c => c.Sequence).ToListAsync();
-        }  
+        }
         public async Task<IEnumerable<JobCategoryStructure>> GetAllChecklistCategoriesAsync(bool includeChecklistQuestion = false)
         {
             if (includeChecklistQuestion)
@@ -103,7 +105,7 @@ namespace SupervisorMobility.API.Services
                         .OrderBy(c => c.Sequence).ToListAsync();
         }
         #endregion
-      
+
         #region GroupOperations
         public async Task<IEnumerable<Entities.Group>> GetGroupsAsync()
         {
@@ -435,14 +437,14 @@ namespace SupervisorMobility.API.Services
 
         public async Task<IEnumerable<ChecklistQuestion>> GetChecklistQuestionsForCategoryAsync(int categoryId)
         {
-            return await _context.ChecklistQuestions.Include(p=>p.Pillars)
+            return await _context.ChecklistQuestions.Include(p => p.Pillars)
                 .Where(cq => cq.JobCategoryStructureId == categoryId && cq.IsActive == true)
                 .OrderBy(cq => cq.CategorySequence).ToListAsync();
         }
         public async Task<ChecklistQuestion?> GetChecklistQuestionForCategoryAsync(int categoryId,
             int questionId)
         {
-            return await _context.ChecklistQuestions.Include(p=>p.Pillars)
+            return await _context.ChecklistQuestions.Include(p => p.Pillars)
                 .Where(cq => cq.JobCategoryStructureId == categoryId && cq.QuestionID == questionId)
                 .FirstOrDefaultAsync();
         }
@@ -476,7 +478,7 @@ namespace SupervisorMobility.API.Services
             int lowerValue = currentSequence < oldSequence ? currentSequence : oldSequence;
             int upperValue = currentSequence > oldSequence ? currentSequence : oldSequence;
 
-            return await _context.ChecklistQuestions.Include(p=>p.Pillars)
+            return await _context.ChecklistQuestions.Include(p => p.Pillars)
                         .Where(c => c.JobCategoryStructureId == categoryId
                             && c.CategorySequence >= lowerValue
                             && c.CategorySequence <= upperValue
@@ -484,7 +486,7 @@ namespace SupervisorMobility.API.Services
                         .OrderBy(c => c.CategorySequence).ToListAsync();
         }
         #endregion
-     
+
         #region SupportDocumentTypeOperations
         public async Task<IEnumerable<SupportDocumentType>> GetSupportDocumentTypesAsync()
         {
@@ -1502,7 +1504,7 @@ namespace SupervisorMobility.API.Services
                 }
             }
 
-            if(idUser != 0)
+            if (idUser != 0)
             {
                 //aqui traemos al user para verificar el tipo
                 User? _user = await _context.Users.Include(u => u.Subordinates).Where(p => p.UserId == idUser).FirstOrDefaultAsync();
@@ -1517,7 +1519,7 @@ namespace SupervisorMobility.API.Services
 
                     query = query.Where(j => _user.Subordinates.Any() && _user.Subordinates.Select(subordinate => subordinate.UserId).Contains((int)j.SupervisorId));
                 }
-                else if(_user.UserType == 3)
+                else if (_user.UserType == 3)
                 {
                     query = query.Where(j => j.SupervisorId == idUser);
                 }
@@ -1765,9 +1767,9 @@ namespace SupervisorMobility.API.Services
 
             }
 
-        }  
-        
-       
+        }
+
+
         public async Task RemoveEvidenceForLupAsync(int lupId, int fileUploadId)
         {
             var lup = await GetLupAsync(lupId, true);
@@ -1937,7 +1939,6 @@ namespace SupervisorMobility.API.Services
             return await _context.PATs
                    .Include(p => p.Plant)
                    .Include(a => a.Area)
-                   .Include(d => d.Distribution)
                    .Include(sv => sv.Supervisor)
                    .Include(ssv => ssv.SSVresponsible)
                    .Where(p => p.PATid == patId).FirstOrDefaultAsync();
@@ -1958,7 +1959,6 @@ namespace SupervisorMobility.API.Services
             return await _context.PATs
                    .Include(p => p.Plant)
                    .Include(a => a.Area)
-                   .Include(d => d.Distribution)
                    .Include(sv => sv.Supervisor)
                    .Include(ssv => ssv.SSVresponsible).Where(u => u.IsActive == true)
                     .OrderBy(c => c.PATid).ToListAsync();
@@ -1968,7 +1968,6 @@ namespace SupervisorMobility.API.Services
             return await _context.PATs
                     .Include(p => p.Plant)
                     .Include(a => a.Area)
-                    .Include(d => d.Distribution)
                     .Include(sv => sv.Supervisor)
                     .Include(ssv => ssv.SSVresponsible)
                     .Where(p => p.SupervisorId == svId && p.IsActive == true)
@@ -1979,7 +1978,6 @@ namespace SupervisorMobility.API.Services
             return await _context.PATs
                            .Include(p => p.Plant)
                    .Include(a => a.Area)
-                   .Include(d => d.Distribution)
                    .Include(sv => sv.Supervisor)
                    .Include(ssv => ssv.SSVresponsible)
                            .Where(p => p.SSVresponsibleID == ssvID && p.IsActive == true)
@@ -2032,8 +2030,8 @@ namespace SupervisorMobility.API.Services
                    .Include(s => s.Supervisors)
                    .Where(p => p.SOSid == sosId).FirstOrDefaultAsync();
         }
-        
-       
+
+
 
 
         public async Task<int> AddSOSReview(SOSReviewProgram SOSEntity)
@@ -2256,7 +2254,7 @@ namespace SupervisorMobility.API.Services
         public async Task<List<Pillar>?> GetPillarsFromList(List<int>? pillarIds)
         {
             return pillarIds != null && pillarIds.Any() ? await _context.Pillars
-                .Where(p => pillarIds.Contains(p.PillarId)).ToListAsync() : null; 
+                .Where(p => pillarIds.Contains(p.PillarId)).ToListAsync() : null;
         }
 
         public async Task<bool> PillarExistAsync(int pillarId)
@@ -2341,5 +2339,216 @@ namespace SupervisorMobility.API.Services
 
 
         #endregion
+        #region Kaizen
+        public async Task<Kaizen?> GetKaizen(int KaizenId, bool includeNavigation = false, bool includePeople = false, bool includeEvidences = false, bool includeTransactions = false)
+        {
+            var query = _context.Kaizens.Where(k => k.IsActive == true && k.KaizenId == KaizenId);
+
+            if (includeNavigation)
+            {
+                query = query
+                 .Include(p => p.Plant)
+                 .Include(p => p.Pillar)
+                 .Include(a => a.Area);
+            }
+
+            if (includePeople)
+            {
+                query = query
+                 .Include(s => s.Supervisor)
+                 .Include(ssv => ssv.SeniorSupervisor)
+                 .Include(up => up.Proposed);
+            }
+
+            if (includeEvidences)
+            {
+                query = query
+                 .Include(ae => ae.PreviousEvidences)
+                 .Include(be => be.ThenEvidences);
+
+            }
+
+            if (includeTransactions)
+            {
+                query = query
+                 .Include(t => t.Transactions);
+            }
+
+            return await query.FirstOrDefaultAsync();
+
+        }
+        public async Task<IEnumerable<Kaizen>> GetAllKaizens(bool includeNavigation = false, bool includePeople = false, bool includeEvidences = false, bool includeTransactions = false)
+        {
+            var query = _context.Kaizens.Where(u => u.IsActive == true);
+
+            if (includeNavigation)
+            {
+                query = query
+                 .Include(p => p.Plant)
+                 .Include(p => p.Pillar)
+                 .Include(a => a.Area);
+            }
+
+            if (includePeople)
+            {
+                query = query
+                 .Include(s => s.Supervisor)
+                 .Include(ssv => ssv.SeniorSupervisor)
+                 .Include(up => up.Proposed);
+            }
+
+            if (includeEvidences)
+            {
+                query = query
+                 .Include(ae => ae.PreviousEvidences)
+                 .Include(be => be.ThenEvidences);
+
+            }
+
+            if (includeTransactions)
+            {
+                query = query
+                 .Include(t => t.Transactions);
+            }
+
+            query = query.OrderBy(c => c.KaizenId);
+
+            return query.ToList();
+        }
+        public async Task<int> AddKaizen(Kaizen KaizenForAdd)
+        {
+            _context.Kaizens.Add(KaizenForAdd);
+            return _context.SaveChanges();
+        }
+        public async Task<int> UpdateKaizen(UpdateKaizenDto KaizenForUpdate, Kaizen KaizenEntity)
+        {
+
+            _mapper.Map(KaizenForUpdate, KaizenEntity);
+
+            return _context.SaveChanges();
+        }
+
+        public async Task<int> RemoveKaizen(Kaizen KaizenForAdd)
+        {
+            KaizenForAdd.IsActive = false;
+            return _context.SaveChanges();
+        }
+
+        public async Task AddPreviousEvidenceForKaizen(int kaizenId, FileUpload evidence)
+        {
+            var kaizen = await GetKaizen(kaizenId, true);
+
+            if (kaizen != null)
+            {
+
+                if (kaizen.PreviousEvidences != null)
+                {
+                    kaizen.PreviousEvidences.Add(evidence);
+                }
+                else
+                {
+                    kaizen.PreviousEvidences = new List<FileUpload>
+                    {
+                        evidence
+                    };
+
+                }
+
+
+            }
+
+        }
+
+        public async Task AddThenEvidenceForKaizen(int kaizenId, FileUpload evidence)
+        {
+            var kaizen = await GetKaizen(kaizenId, true);
+
+            if (kaizen != null)
+            {
+
+                if (kaizen.ThenEvidences != null)
+                {
+                    kaizen.ThenEvidences.Add(evidence);
+                }
+                else
+                {
+                    kaizen.ThenEvidences = new List<FileUpload>
+                    {
+                        evidence
+                    };
+
+                }
+
+
+            }
+
+        }
+
+        #endregion
+        #region HCI
+        public async Task<HCI?> GetHCI(int HCIId, bool includeNavigation = false, bool includePeople = false, bool includeEvidences = false, bool includeTransactions = false)
+        {
+            var query = _context.HCIs.Where(k => k.IsActive == true && k.HCIId == HCIId);
+
+
+            if (includeNavigation)
+            {
+                query = query
+                 .Include(t => t.User);
+            }
+
+            if (includeTransactions)
+            {
+                query = query
+                 .Include(t => t.Transactions);
+            }
+
+            return await query.FirstOrDefaultAsync();
+
+        }
+        public async Task<IEnumerable<HCI>> GetAllHCIs(bool includeNavigation = false, bool includePeople = false, bool includeEvidences = false, bool includeTransactions = false)
+        {
+            var query = _context.HCIs.Where(u => u.IsActive == true);
+
+            if (includeNavigation)
+            {
+                query = query
+                 .Include(t => t.User);
+            }
+
+            if (includeTransactions)
+            {
+                query = query
+                 .Include(t => t.Transactions);
+            }
+
+            query = query.OrderBy(c => c.HCIId);
+
+            return await query.ToListAsync();
+        }
+        public async Task<int> AddHCI(HCI HCIForAdd)
+
+        {
+            _context.HCIs.Add(HCIForAdd);
+            return _context.SaveChanges();
+        }
+        public async Task<int> UpdateHCI(UpdateHCIDto HCIForUpdate, HCI HCIEntity)
+        {
+
+            _mapper.Map(HCIForUpdate, HCIEntity);
+
+            return _context.SaveChanges();
+        }
+
+        public async Task<int> RemoveHCI(HCI HCIForAdd)
+        {
+            HCIForAdd.IsActive = false;
+            return _context.SaveChanges();
+        }
+        #endregion
+
+
+
+
     }
 }

@@ -28,7 +28,7 @@ builder.Services.AddCors(policy => {
 var env = builder.Environment;
 if (env.IsDevelopment())
 {
-    builder.Configuration.AddJsonFile("appsettings.Development.json", optional: false, reloadOnChange: true);
+    builder.Configuration.AddJsonFile("appsettings.Development.json", optional: false, reloadOnChange: false);
 }
 else
 {
@@ -49,7 +49,14 @@ builder.Services.AddControllers(options =>
 // Learn more about configuring Swagger/OpenAPI at https://aka.ms/aspnetcore/swashbuckle
 builder.Services.AddEndpointsApiExplorer();
 builder.Services.AddSwaggerGen();
-
+builder.Services.AddSwaggerGen(options =>
+{
+    options.CustomSchemaIds(type =>
+    {
+        
+        return type.FullName;
+    });
+});
 
 //Add other services
 builder.Services.RegisterBusinessServices();

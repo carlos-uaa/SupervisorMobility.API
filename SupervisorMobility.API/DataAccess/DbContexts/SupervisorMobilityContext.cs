@@ -28,7 +28,7 @@ namespace SupervisorMobility.API.Context
         public DbSet<Plant> Plants { get; set; }
         public DbSet<Area> Areas { get; set; }
         public DbSet<Distribution> Distributions { get; set; }
-        public DbSet<Operation> Operations { get; set; }
+        public DbSet<Entities.Operation> Operations { get; set; }
         public DbSet<SupportDocumentType> SupportDocumentTypes { get; set; }
         public DbSet<Product> Products { get; set; }
         public DbSet<AssyChart> AssyCharts { get; set; }
@@ -47,12 +47,18 @@ namespace SupervisorMobility.API.Context
         public DbSet<ILULevel> ILULevels { get; set; }
         public DbSet<ILURegister> ILURegisters { get; set; }
         public DbSet<PAT> PATs { get; set; }
+        public DbSet<UserCareerPath> UserCareerPaths { get; set; }
 
         public DbSet<SOSReviewProgram> SOSReviews { get; set; }
         public DbSet<SOSReviewDistSuggestion> SOSSuggestionsDistribution { get; set; }
         public DbSet<SOSRegisterJobObservation> SOSRegisters { get; set; }
         public DbSet<SOSRegUserOperation> SOSRegsUserOperation { get; set; }
-
+        public DbSet<HCI> HCIs { get; set; }
+        public DbSet<Commentary> Comments { get; set; }
+        public DbSet<HCITransaction> HCITransactions { get; set; }
+        public DbSet<HCICategory> HCICategories { get; set; }
+        public DbSet<Kaizen> Kaizens { get; set; }
+        public DbSet<KaizenTransaction> KaizenTransactions { get; set; }
         #endregion
 
 
@@ -69,11 +75,14 @@ namespace SupervisorMobility.API.Context
             //Default values
             modelBuilder.Entity<JobCategoryStructure>()
                 .Property(p => p.IsActive)
-                .HasDefaultValue(true);
+                .HasDefaultValue(true);   
+            
+           
 
             modelBuilder.Entity<SOSReviewProgram>()
                .Property(p => p.IsActive)
-               .HasDefaultValue(true);
+               .HasDefaultValue(true); 
+            
             
             modelBuilder.Entity<SOSReviewDistSuggestion>()
                .Property(p => p.SuggestionApplied)
@@ -90,6 +99,7 @@ namespace SupervisorMobility.API.Context
             modelBuilder.Entity<JobObservation>()
                 .Property(p => p.IsActive)
                 .HasDefaultValue(true);
+         
 
             modelBuilder.Entity<Plant>()
                 .Property(p => p.IsActive)
@@ -141,6 +151,10 @@ namespace SupervisorMobility.API.Context
                  .HasDefaultValue(true);
             //Users
             modelBuilder.Entity<User>()
+             .Property(p => p.IsActive)
+             .HasDefaultValue(true); 
+
+            modelBuilder.Entity<UserCareerPath>()
              .Property(p => p.IsActive)
              .HasDefaultValue(true);
 
@@ -210,11 +224,11 @@ namespace SupervisorMobility.API.Context
                 .HasForeignKey(p => p.SupervisorId)
                 .OnDelete(DeleteBehavior.NoAction);
 
-            modelBuilder.Entity<PAT>()
-                .HasOne(p => p.Distribution)
-                .WithMany()
-                .HasForeignKey(p => p.DistributionId)
-                .OnDelete(DeleteBehavior.NoAction);
+            //modelBuilder.Entity<PAT>()
+            //    .HasOne(p => p.Distribution)
+            //    .WithMany()
+            //    .HasForeignKey(p => p.DistributionId)
+            //    .OnDelete(DeleteBehavior.NoAction);
 
             modelBuilder.Entity<ILULevel>()
            .Property(e => e.ILULevelId)
@@ -241,6 +255,31 @@ namespace SupervisorMobility.API.Context
                 .Property(p => p.IsActive)
                 .HasDefaultValue(true);
 
+         
+            modelBuilder.Entity<KaizenTransaction>()
+   .Property(p => p.IsActive)
+   .HasDefaultValue(true);
+            modelBuilder.Entity<Kaizen>()
+               .Property(p => p.IsActive)
+               .HasDefaultValue(true);
+            modelBuilder.Entity<FileUpload>()
+               .Property(p => p.IsActive)
+               .HasDefaultValue(true);
+
+            modelBuilder.Entity<HCI>()
+            .Property(p => p.IsActive)
+            .HasDefaultValue(true);
+            
+            modelBuilder.Entity<Commentary>()
+            .Property(p => p.IsActive)
+            .HasDefaultValue(true);
+
+            modelBuilder.Entity<HCITransaction>()
+                .Property(p => p.IsActive)
+                .HasDefaultValue(true);
+            modelBuilder.Entity<HCICategory>()
+                .Property(p => p.IsActive)
+                .HasDefaultValue(true);
             //Constraints
             modelBuilder.Entity<JobCategoryStructure>()
                 .HasCheckConstraint("ck_cc_seq", "[Sequence] > 0");
@@ -1111,6 +1150,7 @@ namespace SupervisorMobility.API.Context
 
                 );
 
+           
 
             //modelBuilder.Entity<ChecklistAnswer>()
             //    .HasData(

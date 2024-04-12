@@ -1,0 +1,47 @@
+﻿using SupervisorMobility.API.Models.FileUploadDto;
+using SupervisorMobility.API.Models.KaizenTransactionDtos;
+
+namespace SupervisorMobility.API.Models.KaizenDtos
+{
+    public class CreateKaizenDto
+    {
+        public string KaizenName { get; set; }
+        public bool? IsActive { get; set; }
+
+        public int? PlantId { get; set; }
+
+        public int? AreaId { get; set; }
+
+        public int PillarId { get; set; }
+
+        public int? SupervisorId { get; set; }
+
+        public int? SeniorSupervisorId { get; set; }
+
+        public int? ProposedId { get; set; }
+
+        public ICollection<FileUploadForCreationDto>? PreviousEvidences { get; set; }
+
+        public ICollection<FileUploadForCreationDto>? ThenEvidences { get; set; }
+
+        public ICollection<CreateKaizenTransactionDto>? Transactions { get; set; }
+
+        public string PreviousJustification { get; set; }
+
+        public string ThenJustification { get; set; }
+
+        public string StandardModification { get; set; }
+
+        public string CalculationFormula { get; set; }
+
+        public double? Total { get; set; }
+
+        public DateTime? CreateDate { get; set; }
+
+        public DateTime? FinishedDate { get; set; }
+
+        public int Status { get; set; }
+        public string kpiName { get; set; }
+    }
+
+}
