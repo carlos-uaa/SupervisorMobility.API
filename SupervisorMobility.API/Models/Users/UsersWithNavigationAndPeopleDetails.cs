@@ -42,7 +42,7 @@ namespace SupervisorMobility.API.Models.Users
         public ICollection<ILURegisterDto>? ILURegisers { get; set; }
         public DateTime? IncomesDate { get; set; }
         public DateTime? BirthDate { get; set; }
-        public FileUploadGeneralDto? ProfilePicture { get; set; }
-           = new FileUploadGeneralDto();
+        public int? ProfilePictureId { get; set; }
+                public FileUploadGeneralDto? ProfilePicture { get; set; }
     }
 }
