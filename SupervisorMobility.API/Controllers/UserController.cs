@@ -652,7 +652,7 @@ namespace SupervisorMobility.API.Controllers
 
 
         //******* Upload users    **********//
-        [EnableCors("Cors")]
+        //[EnableCors("Cors")]
 
         [HttpPost("MasiveUpload")]
         public async Task<ActionResult<UploadUsersResult>> MassiveUpload(List<UsersWithPeopleWithoutNavigationDetails> UsersToCreate)
@@ -1155,7 +1155,7 @@ namespace SupervisorMobility.API.Controllers
 
         }
 
-        [EnableCors("Cors")]
+        //[EnableCors("Cors")]
         [HttpPost("MasiveUpload/Superior/{superiorId}")]
         public async Task<ActionResult<UploadUsersResult>> MassiveUsersToSuperior(List<UsersWithPeopleWithoutNavigationDetails> UsesToCreateInSuperior, int superiorId)
         {
@@ -1452,7 +1452,7 @@ namespace SupervisorMobility.API.Controllers
             return Ok(ResultToReturn);
         }
 
-        [EnableCors("Cors")]
+        //[EnableCors("Cors")]
         [HttpPost("FileUpload/Data")]
         public async Task<ActionResult<UploadUsersResult>> ApplyUsersUpload(FileUploadGeneralDto FileToInsert)
         {

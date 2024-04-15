@@ -32,7 +32,8 @@ namespace SupervisorMobility.API.Models.Users
 
         public DateTime? IncomesDate { get; set; }
         public DateTime? BirthDate { get; set; }
+        public int? ProfilePictureId { get; set; }
+
         public FileUploadGeneralDto? ProfilePicture { get; set; }
-           = new FileUploadGeneralDto();
     }
 }

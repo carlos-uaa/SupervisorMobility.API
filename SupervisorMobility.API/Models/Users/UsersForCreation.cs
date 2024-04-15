@@ -30,7 +30,8 @@ namespace SupervisorMobility.API.Models.Users
         public ICollection<AreaDtos.AreaWithoutNavigationPropertiesDto>? Areas { get; set; }
         public DateTime? IncomesDate { get; set; }
         public DateTime? BirthDate { get; set; }
+        public int? ProfilePictureId { get; set; }
+
         public FileUploadForCreationDto? ProfilePicture { get; set; }
-           = new FileUploadForCreationDto();
     }
 }
