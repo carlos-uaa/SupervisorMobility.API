@@ -1449,6 +1449,56 @@ namespace SupervisorMobility.API.Controllers
 
         }
 
+        [HttpGet("PreviousEvidence/{fileid}")]
+        public async Task<IActionResult> DownloadPreviousEvidence(int fileid)
+        {
+            var FileInfo = await _assyChartService.FetchFileAsync(fileid);
+
+            if (FileInfo is not null)
+            {
+                var path = Path.Combine(_env.ContentRootPath, "uploads\\previousEvidence", FileInfo.StorageFileName);
+
+                var memory = new MemoryStream();
+                using (var stream = new FileStream(path, FileMode.Open))
+                {
+                    await stream.CopyToAsync(memory);
+                }
+                memory.Position = 0;
+
+                var result = File(memory, FileInfo.ContentType, Path.GetFileName(path));
+                result.EnableRangeProcessing = true;
+
+                return result;
+            }
+            return NotFound("Error File download");
+
+        }
+
+        [HttpGet("ThenEvidence/{fileid}")]
+        public async Task<IActionResult> DownloadThenEvidence(int fileid)
+        {
+            var FileInfo = await _assyChartService.FetchFileAsync(fileid);
+
+            if (FileInfo is not null)
+            {
+                var path = Path.Combine(_env.ContentRootPath, "uploads\\thenEvidence", FileInfo.StorageFileName);
+
+                var memory = new MemoryStream();
+                using (var stream = new FileStream(path, FileMode.Open))
+                {
+                    await stream.CopyToAsync(memory);
+                }
+                memory.Position = 0;
+
+                var result = File(memory, FileInfo.ContentType, Path.GetFileName(path));
+                result.EnableRangeProcessing = true;
+
+                return result;
+            }
+            return NotFound("Error File download");
+
+        }
+
         [HttpGet("Signatures/{fileid}")]
         public async Task<IActionResult> DownloadOperatorSignature(int fileid)
         {
