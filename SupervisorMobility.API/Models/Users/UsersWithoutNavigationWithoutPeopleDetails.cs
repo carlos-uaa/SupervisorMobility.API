@@ -15,6 +15,10 @@ namespace SupervisorMobility.API.Models.Users
 
         public int? SuperiorId { get; set; }
 
+        public string? Management { get; set; }
+        public string? Department { get; set; }
+        public string? Process { get; set; }
+
         [Column(TypeName = "Date")]
         public DateTime? CreatedDate { get; set; } = DateTime.Now;
         [Column(TypeName = "Date")]

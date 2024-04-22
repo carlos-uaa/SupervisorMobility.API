@@ -18,6 +18,10 @@ namespace SupervisorMobility.API.Models.Users
 
         public int? SuperiorId { get; set; }
 
+        public string? Management { get; set; }
+        public string? Department { get; set; }
+        public string? Process { get; set; }
+
         public DateTime? CreatedDate { get; set; } = DateTime.Now;
         public DateTime LastUpdated { get; set; }
         public DateTime? DisabledDate { get; set; }

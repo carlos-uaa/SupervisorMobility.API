@@ -7,9 +7,6 @@ namespace SupervisorMobility.API.Models.HCIDtos
 {
     public class CreateHCIDto
     {
-        public string? HCIName { get; set; }
-        public string? HCISectionName { get; set; }
-        public int? HCINo { get; set; }
 
         public int? UserId { get; set; }
         public User? User { get; set; }
@@ -19,6 +16,9 @@ namespace SupervisorMobility.API.Models.HCIDtos
      
         public ICollection<HCICategoryDto>? Categories { get; set; }
           = new List<HCICategoryDto>();
+
+        public ICollection<HCIILU>? ILUs { get; set; } = new List<HCIILU>();
+        public ICollection<UserCareerPath>? CareerPaths { get; set; } = new List<UserCareerPath>();
         public ICollection<CreateCommentaryDto>? Comments { get; set; }
           = new List<CreateCommentaryDto>();
         public bool? IsActive { get; set; }

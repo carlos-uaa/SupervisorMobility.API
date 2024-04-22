@@ -58,8 +58,7 @@ namespace SupervisorMobility.API.Controllers
         public async Task<ActionResult<HCIDto>> CreateNewHCI(CreateHCIDto hciForCreate)
         {
             HCI hciEntity = new();
-
-                _mapper.Map(hciEntity,hciForCreate);
+            _mapper.Map(hciForCreate, hciEntity);
 
             var entityhci = await _supervisorMobilityRepository.AddHCI(hciEntity);
 
@@ -86,7 +85,7 @@ namespace SupervisorMobility.API.Controllers
 
             var entityhci = await _supervisorMobilityRepository.GetHCI(hciId, includeNavigation, includePeople, includeEvidences, includeTransactions);
             if (entityhci != null)
-                return Ok();
+                return Ok(entityhci);
             else
                 return BadRequest();
         }

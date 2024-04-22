@@ -43,6 +43,22 @@ namespace SupervisorMobility.API.Controllers
                     var AddToUserResult = await _supervisorMobilityRepository.AddILURegToUser(finalILURegister, MasterUser);
                 }
 
+                try
+                {
+                    var temp = await _supervisorMobilityRepository.GetDistributionOnlyIdAsync(finalILURegister.DistributionId.Value);
+                    var temp2 = await _supervisorMobilityRepository.GetILULevel(finalILURegister.ILULevelId.Value);
+                    HCIILU toAdd = new HCIILU { 
+                        Description = temp.Description, 
+                        level = temp2.ILULevelCode.ToString(),
+                        Register = finalILURegister,
+                    };
+                    await _supervisorMobilityRepository.AddHciIluReg(toAdd);
+                }
+                catch (Exception ex)
+                {
+                    Console.WriteLine(ex.ToString());
+                }
+
 
                 return Ok(finalILURegister);
             }

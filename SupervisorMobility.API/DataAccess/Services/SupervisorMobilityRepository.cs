@@ -2490,6 +2490,7 @@ namespace SupervisorMobility.API.Services
         {
             var query = _context.HCIs.Where(k => k.IsActive == true && k.HCIId == HCIId);
 
+            query = query.Include(p => p.CareerPaths).Include(p => p.Categories).Include(p => p.Comments).Include(p => p.ILUs).Include(p => p.Transactions);
 
             if (includeNavigation)
             {
@@ -2497,11 +2498,11 @@ namespace SupervisorMobility.API.Services
                  .Include(t => t.User);
             }
 
-            if (includeTransactions)
-            {
-                query = query
-                 .Include(t => t.Transactions);
-            }
+            //if (includeTransactions)
+            //{
+            //    query = query
+            //     .Include(t => t.Transactions);
+            //}
 
             return await query.FirstOrDefaultAsync();
 
@@ -2527,8 +2528,8 @@ namespace SupervisorMobility.API.Services
             return await query.ToListAsync();
         }
         public async Task<int> AddHCI(HCI HCIForAdd)
-
         {
+            HCIForAdd.User = _context.Users.FirstOrDefault(p=>p.UserId == HCIForAdd.UserId);
             _context.HCIs.Add(HCIForAdd);
             return _context.SaveChanges();
         }
@@ -2547,6 +2548,13 @@ namespace SupervisorMobility.API.Services
         }
         #endregion
 
+        #region HCI ILU
+        public async Task<int> AddHciIluReg(HCIILU registry)
+        {
+            _context.HCIILUs.Add(registry);
+            return _context.SaveChanges();
+        }
+        #endregion
 
 
 
