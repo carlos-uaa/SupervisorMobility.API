@@ -2490,9 +2490,12 @@ namespace SupervisorMobility.API.Services
         {
             var query = _context.HCIs.Where(k => k.IsActive == true && k.HCIId == HCIId);
 
-            query = query.Include(p => p.CareerPaths).Include(p => p.Categories).Include(p => p.Comments).Include(p => p.ILUs).Include(p => p.Transactions);
-
             if (includeNavigation)
+            {
+                query = query.Include(p => p.CareerPaths).Include(p => p.Categories).Include(p => p.Comments).Include(p => p.ILUs).Include(p => p.Transactions);
+            }
+
+            if (includePeople)
             {
                 query = query
                  .Include(t => t.User);
