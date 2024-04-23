@@ -2486,7 +2486,7 @@ namespace SupervisorMobility.API.Services
 
         #endregion
         #region HCI
-        public async Task<HCI?> GetHCI(int HCIId, bool includeNavigation = false, bool includePeople = false, bool includeEvidences = false, bool includeTransactions = false)
+        public async Task<HCI?> GetHCI(int HCIId, bool includeNavigation = false, bool includePeople = false, bool includeComments = false, bool includeTransactions = false)
         {
             var query = _context.HCIs.Where(k => k.IsActive == true && k.HCIId == HCIId);
 
@@ -2498,7 +2498,10 @@ namespace SupervisorMobility.API.Services
             if (includePeople)
             {
                 query = query
-                 .Include(t => t.User);
+                 .Include(t => t.User).ThenInclude(u => u.Plant);
+
+                query = query
+                 .Include(t => t.User).ThenInclude(u => u.Area);
             }
 
             //if (includeTransactions)
@@ -2510,15 +2513,32 @@ namespace SupervisorMobility.API.Services
             return await query.FirstOrDefaultAsync();
 
         }
-        public async Task<IEnumerable<HCI>> GetAllHCIs(bool includeNavigation = false, bool includePeople = false, bool includeEvidences = false, bool includeTransactions = false)
+        public async Task<IEnumerable<HCI>> GetAllHCIs(bool includeNavigation = false, bool includePeople = false, bool includeComments = false, bool includeTransactions = false)
         {
             var query = _context.HCIs.Where(u => u.IsActive == true);
+
+            if (includePeople)
+            {
+                query = query.Include(t => t.User);
+            }
+
+            if (includeComments)
+            {
+                query = query.Include(c => c.Comments);
+            }
 
             if (includeNavigation)
             {
                 query = query
-                 .Include(t => t.User);
+                 .Include(t => t.User).ThenInclude(u => u.Plant);
+
+                query = query
+                 .Include(t => t.User).ThenInclude(u => u.Area);
+                
+                query = query
+                 .Include(t => t.User).ThenInclude(u => u.ILURegisers);
             }
+
 
             if (includeTransactions)
             {
@@ -2532,7 +2552,7 @@ namespace SupervisorMobility.API.Services
         }
         public async Task<int> AddHCI(HCI HCIForAdd)
         {
-            HCIForAdd.User = _context.Users.FirstOrDefault(p=>p.UserId == HCIForAdd.UserId);
+            //HCIForAdd.User = _context.Users.FirstOrDefault(p=>p.UserId == HCIForAdd.UserId);
             _context.HCIs.Add(HCIForAdd);
             return _context.SaveChanges();
         }
