@@ -2577,6 +2577,13 @@ namespace SupervisorMobility.API.Services
             HCIForAdd.IsActive = false;
             return _context.SaveChanges();
         }
+
+
+        public async  Task<IEnumerable<User>> GetUsersWithoutHci()
+        {
+            var usuariosSinHCI = _context.Users.Where(u => !_context.HCIs.Any(hci => hci.UserId == u.UserId));
+            return await usuariosSinHCI.ToListAsync();
+        }
         #endregion
 
         #region HCI ILU
