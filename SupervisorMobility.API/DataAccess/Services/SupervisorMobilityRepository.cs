@@ -2490,9 +2490,12 @@ namespace SupervisorMobility.API.Services
         {
             var query = _context.HCIs.Where(k => k.IsActive == true && k.HCIId == HCIId);
 
-            query = query.Include(p => p.CareerPaths).Include(p => p.ILUs);
-
             if (includeNavigation)
+            {
+                query = query.Include(p => p.CareerPaths).Include(p => p.Categories).Include(p => p.Comments).Include(p => p.ILUs).Include(p => p.Transactions);
+            }
+
+            if (includePeople)
             {
                 query = query
                  .Include(t => t.User).ThenInclude(u => u.Plant);
@@ -2501,22 +2504,11 @@ namespace SupervisorMobility.API.Services
                  .Include(t => t.User).ThenInclude(u => u.Area);
             }
 
-            if (includeComments)
-            {
-                query = query.Include(p => p.Comments);
-            }
-
-             if (includePeople)
-            {
-                query = query.Include(t => t.User);
-            }
-
-
-            if (includeTransactions)
-            {
-                query = query
-                 .Include(t => t.Transactions);
-            }
+            //if (includeTransactions)
+            //{
+            //    query = query
+            //     .Include(t => t.Transactions);
+            //}
 
             return await query.FirstOrDefaultAsync();
 
