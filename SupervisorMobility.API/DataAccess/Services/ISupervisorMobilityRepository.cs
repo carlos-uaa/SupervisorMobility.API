@@ -386,6 +386,7 @@ namespace SupervisorMobility.API.Services
         Task<IEnumerable<Kaizen>> GetAllKaizens(bool includeNavigation = false, bool includePeople = false, bool includeEvidences = false, bool includeTransactions = false);
         Task AddPreviousEvidenceForKaizen(int kaizenId, FileUpload evidence);
         Task AddThenEvidenceForKaizen(int kaizenId, FileUpload evidence);
+        Task RemoveEvidenceForKaizenAsync(int lupId, int fileUploadId, bool isPreviousEvidence);
         #endregion
         #region HCI
         Task<HCI?> GetHCI(int HCIId, bool includeNavigation = false, bool includePeople = false, bool includeEvidences = false, bool includeTransactions = false);

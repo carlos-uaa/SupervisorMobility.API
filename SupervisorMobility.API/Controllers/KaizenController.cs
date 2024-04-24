@@ -93,5 +93,17 @@ namespace SupervisorMobility.API.Controllers
             else
                 return BadRequest();
         }
+
+
+        [HttpPost("{kaizenId}/evidence/remove/{isPreviousEvidence}")]
+        public async Task<ActionResult<int>> RemoveEvidence(int kaizenId, int isPreviousEvidence, [FromBody] int fileUploadId)
+        {
+            await _supervisorMobilityRepository.RemoveEvidenceForKaizenAsync(kaizenId, fileUploadId, isPreviousEvidence == 1);
+            await _supervisorMobilityRepository.SaveChangesAsync();
+
+            return Ok();
+        }
+
+
     }
 }

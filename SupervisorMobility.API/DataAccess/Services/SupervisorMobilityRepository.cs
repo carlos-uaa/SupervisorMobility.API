@@ -2484,6 +2484,28 @@ namespace SupervisorMobility.API.Services
 
         }
 
+        public async Task RemoveEvidenceForKaizenAsync(int kaizenId, int fileUploadId, bool isPreviousEvidence)
+        {
+            var kaizen = await GetKaizen(kaizenId, true, true, true, false);
+            if (kaizen != null)
+            {
+                if (isPreviousEvidence)
+                {
+                    if (kaizen.PreviousEvidences != null)
+                    {
+                        kaizen.PreviousEvidences.Remove(item: kaizen.PreviousEvidences.ToList().Find(e => e.FileUploadId == fileUploadId));
+                    }
+
+                }
+                else
+                {
+                    if (kaizen.ThenEvidences != null)
+                    {
+                        kaizen.ThenEvidences.Remove(item: kaizen.ThenEvidences.ToList().Find(e => e.FileUploadId == fileUploadId));
+                    }
+                }
+            }
+        }
         #endregion
         #region HCI
         public async Task<HCI?> GetHCI(int HCIId, bool includeNavigation = false, bool includePeople = false, bool includeComments = false, bool includeTransactions = false)
