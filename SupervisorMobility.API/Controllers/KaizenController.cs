@@ -74,19 +74,39 @@ namespace SupervisorMobility.API.Controllers
             
             var entityKaizen = await _supervisorMobilityRepository.GetKaizen(kaizenId);
 
-            //List<KaizenTransaction> transactionList = new List<KaizenTransaction>();
-            //foreach(UpdateKaizenTransactionDto kt in KaizenForUpdate.Transactions)
-            //{
-            //    if(kt.KaizenTransactionId == 0)
-            //    {
-            //        var kt2 = _mapper.Map<KaizenTransaction>(kt);
-            //        kt = _mapper.Map<UpdateKaizenTransactionDto>(kt);
-            //    }
-            //}
+            List<UpdateKaizenTransactionDto> filteredList = KaizenForUpdate.Transactions.Where(t => t.KaizenTransactionId == null || t.KaizenTransactionId <= 0).ToList();
+
+            if (filteredList.Any())
+            {
+                var transactionsList = KaizenForUpdate.Transactions.ToList();
+                transactionsList.RemoveAll(t => t.KaizenTransactionId == null || t.KaizenTransactionId <= 0);
+
+                // Asignar la lista actualizada de nuevo a la propiedad Transactions
+                KaizenForUpdate.Transactions = transactionsList;
+
+                List<KaizenTransaction> newTransactions = _mapper.Map<List<KaizenTransaction>>(filteredList);
+
+                foreach (var item in newTransactions)
+                {
+                    item.KaizenTransactionId = null;
+                }
+
+                _context.KaizenTransactions.AddRange(newTransactions);
+                _context.SaveChanges();
+
+                List<UpdateKaizenTransactionDto> NewKaizenCreated = _mapper.Map<List<UpdateKaizenTransactionDto>>(newTransactions);
+
+                foreach (UpdateKaizenTransactionDto item in NewKaizenCreated)
+                {
+                    KaizenForUpdate.Transactions.Add(item);
+                }
+            }
 
             var result = await _supervisorMobilityRepository.UpdateKaizen(KaizenForUpdate, entityKaizen);
 
-            if(result > 0)
+
+
+            if (result > 0)
                 return Ok(entityKaizen);
             else 
                 return BadRequest();

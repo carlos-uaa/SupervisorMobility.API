@@ -2423,23 +2423,10 @@ namespace SupervisorMobility.API.Services
         }
         public async Task<int> UpdateKaizen(UpdateKaizenDto KaizenForUpdate, Kaizen KaizenEntity)
         {
-            List<UpdateKaizenTransactionDto> filteredList = KaizenForUpdate.Transactions.Where(t => t.KaizenTransactionId == null || t.KaizenTransactionId <= 0).ToList();
-
-            if(filteredList.Count > 0 && filteredList != null)
-            {
-                KaizenForUpdate.Transactions.ToList().RemoveAll(t => t.KaizenTransactionId == null || t.KaizenTransactionId <= 0);
-                List<KaizenTransaction> NewTransactions = _mapper.Map<List<KaizenTransaction>>(filteredList);
-                await _context.KaizenTransactions.AddRangeAsync(NewTransactions);
-                _context.SaveChanges();
-                KaizenForUpdate.Transactions.ToList().AddRange(_mapper.Map<List<UpdateKaizenTransactionDto>>(NewTransactions));
-                
-            }
-
-
-
+            
             _mapper.Map(KaizenForUpdate, KaizenEntity);
 
-            return _context.SaveChanges();
+            return await _context.SaveChangesAsync();
         }
 
         public async Task<int> RemoveKaizen(Kaizen KaizenForAdd)
