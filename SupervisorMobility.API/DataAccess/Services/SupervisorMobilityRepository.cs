@@ -13,6 +13,7 @@ using SupervisorMobility.API.DataAccess.Entities.SOS_Review;
 using SupervisorMobility.API.Entities;
 using SupervisorMobility.API.Models.HCIDtos;
 using SupervisorMobility.API.Models.KaizenDtos;
+using SupervisorMobility.API.Models.KaizenTransactionDtos;
 using SupervisorMobility.API.Models.PATDtos;
 using SupervisorMobility.API.Models.SOSReviewDtos;
 using SupervisorMobility.API.Models.Users;
@@ -2422,6 +2423,19 @@ namespace SupervisorMobility.API.Services
         }
         public async Task<int> UpdateKaizen(UpdateKaizenDto KaizenForUpdate, Kaizen KaizenEntity)
         {
+            List<UpdateKaizenTransactionDto> filteredList = KaizenForUpdate.Transactions.Where(t => t.KaizenTransactionId == null || t.KaizenTransactionId <= 0).ToList();
+
+            if(filteredList.Count > 0 && filteredList != null)
+            {
+                KaizenForUpdate.Transactions.ToList().RemoveAll(t => t.KaizenTransactionId == null || t.KaizenTransactionId <= 0);
+                List<KaizenTransaction> NewTransactions = _mapper.Map<List<KaizenTransaction>>(filteredList);
+                await _context.KaizenTransactions.AddRangeAsync(NewTransactions);
+                _context.SaveChanges();
+                KaizenForUpdate.Transactions.ToList().AddRange(_mapper.Map<List<UpdateKaizenTransactionDto>>(NewTransactions));
+                
+            }
+
+
 
             _mapper.Map(KaizenForUpdate, KaizenEntity);
 
