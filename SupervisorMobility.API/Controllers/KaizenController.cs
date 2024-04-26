@@ -11,6 +11,7 @@ using Microsoft.AspNetCore.JsonPatch.Adapters;
 using SupervisorMobility.API.DataAccess.Entities;
 using SupervisorMobility.API.DataAccess.Entities.Paths;
 using System.Linq.Expressions;
+using SupervisorMobility.API.Models.KaizenTransactionDtos;
 
 namespace SupervisorMobility.API.Controllers
 {
@@ -70,8 +71,18 @@ namespace SupervisorMobility.API.Controllers
         [HttpPut("{kaizenId}")]
         public async Task<ActionResult<KaizenWithAllDataDto>> UpdateKaizen(int kaizenId, UpdateKaizenDto KaizenForUpdate)
         {
-
+            
             var entityKaizen = await _supervisorMobilityRepository.GetKaizen(kaizenId);
+
+            //List<KaizenTransaction> transactionList = new List<KaizenTransaction>();
+            //foreach(UpdateKaizenTransactionDto kt in KaizenForUpdate.Transactions)
+            //{
+            //    if(kt.KaizenTransactionId == 0)
+            //    {
+            //        var kt2 = _mapper.Map<KaizenTransaction>(kt);
+            //        kt = _mapper.Map<UpdateKaizenTransactionDto>(kt);
+            //    }
+            //}
 
             var result = await _supervisorMobilityRepository.UpdateKaizen(KaizenForUpdate, entityKaizen);
 
