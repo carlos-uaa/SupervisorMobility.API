@@ -13,6 +13,7 @@ using SupervisorMobility.API.DataAccess.Entities.SOS_Review;
 using SupervisorMobility.API.Entities;
 using SupervisorMobility.API.Models.HCIDtos;
 using SupervisorMobility.API.Models.KaizenDtos;
+using SupervisorMobility.API.Models.KaizenTransactionDtos;
 using SupervisorMobility.API.Models.PATDtos;
 using SupervisorMobility.API.Models.SOSReviewDtos;
 using SupervisorMobility.API.Models.Users;
@@ -2422,10 +2423,10 @@ namespace SupervisorMobility.API.Services
         }
         public async Task<int> UpdateKaizen(UpdateKaizenDto KaizenForUpdate, Kaizen KaizenEntity)
         {
-
+            
             _mapper.Map(KaizenForUpdate, KaizenEntity);
 
-            return _context.SaveChanges();
+            return await _context.SaveChangesAsync();
         }
 
         public async Task<int> RemoveKaizen(Kaizen KaizenForAdd)
@@ -2484,6 +2485,28 @@ namespace SupervisorMobility.API.Services
 
         }
 
+        public async Task RemoveEvidenceForKaizenAsync(int kaizenId, int fileUploadId, bool isPreviousEvidence)
+        {
+            var kaizen = await GetKaizen(kaizenId, true, true, true, false);
+            if (kaizen != null)
+            {
+                if (isPreviousEvidence)
+                {
+                    if (kaizen.PreviousEvidences != null)
+                    {
+                        kaizen.PreviousEvidences.Remove(item: kaizen.PreviousEvidences.ToList().Find(e => e.FileUploadId == fileUploadId));
+                    }
+
+                }
+                else
+                {
+                    if (kaizen.ThenEvidences != null)
+                    {
+                        kaizen.ThenEvidences.Remove(item: kaizen.ThenEvidences.ToList().Find(e => e.FileUploadId == fileUploadId));
+                    }
+                }
+            }
+        }
         #endregion
         #region HCI
         public async Task<HCI?> GetHCI(int HCIId, bool includeNavigation = false, bool includePeople = false, bool includeComments = false, bool includeTransactions = false)
@@ -2568,6 +2591,13 @@ namespace SupervisorMobility.API.Services
         {
             HCIForAdd.IsActive = false;
             return _context.SaveChanges();
+        }
+
+
+        public async  Task<IEnumerable<User>> GetUsersWithoutHci()
+        {
+            var usuariosSinHCI = _context.Users.Where(u => !_context.HCIs.Any(hci => hci.UserId == u.UserId));
+            return await usuariosSinHCI.ToListAsync();
         }
 
         public async Task<IEnumerable<HCICategory>> GetHCICategories()

@@ -34,6 +34,7 @@ using DocumentFormat.OpenXml.Wordprocessing;
 using DocumentFormat.OpenXml.EMMA;
 using Irony.Parsing;
 using DuoVia.FuzzyStrings;
+using SupervisorMobility.API.Models.Users;
 using SupervisorMobility.API.Models.HCICategoryDtos;
 
 namespace SupervisorMobility.API.Controllers
@@ -114,6 +115,17 @@ namespace SupervisorMobility.API.Controllers
 
             if (result > 0)
                 return Ok();
+            else
+                return BadRequest();
+        }
+
+        [HttpGet("NoHciUsers")]
+        public async Task<ActionResult<UsersWithoutNavigationWithoutPeopleDetails>> GetUsersWithoutHCI()
+        {
+
+            var entityhci = await _supervisorMobilityRepository.GetUsersWithoutHci();
+            if (entityhci != null)
+                return Ok(_mapper.Map<List<UsersWithoutNavigationWithoutPeopleDetails>>(entityhci));
             else
                 return BadRequest();
         }

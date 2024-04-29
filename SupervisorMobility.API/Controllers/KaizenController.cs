@@ -11,6 +11,7 @@ using Microsoft.AspNetCore.JsonPatch.Adapters;
 using SupervisorMobility.API.DataAccess.Entities;
 using SupervisorMobility.API.DataAccess.Entities.Paths;
 using System.Linq.Expressions;
+using SupervisorMobility.API.Models.KaizenTransactionDtos;
 
 namespace SupervisorMobility.API.Controllers
 {
@@ -70,12 +71,42 @@ namespace SupervisorMobility.API.Controllers
         [HttpPut("{kaizenId}")]
         public async Task<ActionResult<KaizenWithAllDataDto>> UpdateKaizen(int kaizenId, UpdateKaizenDto KaizenForUpdate)
         {
-
+            
             var entityKaizen = await _supervisorMobilityRepository.GetKaizen(kaizenId);
+
+            List<UpdateKaizenTransactionDto> filteredList = KaizenForUpdate.Transactions.Where(t => t.KaizenTransactionId == null || t.KaizenTransactionId <= 0).ToList();
+
+            if (filteredList.Any())
+            {
+                var transactionsList = KaizenForUpdate.Transactions.ToList();
+                transactionsList.RemoveAll(t => t.KaizenTransactionId == null || t.KaizenTransactionId <= 0);
+
+                // Asignar la lista actualizada de nuevo a la propiedad Transactions
+                KaizenForUpdate.Transactions = transactionsList;
+
+                List<KaizenTransaction> newTransactions = _mapper.Map<List<KaizenTransaction>>(filteredList);
+
+                foreach (var item in newTransactions)
+                {
+                    item.KaizenTransactionId = null;
+                }
+
+                _context.KaizenTransactions.AddRange(newTransactions);
+                _context.SaveChanges();
+
+                List<UpdateKaizenTransactionDto> NewKaizenCreated = _mapper.Map<List<UpdateKaizenTransactionDto>>(newTransactions);
+
+                foreach (UpdateKaizenTransactionDto item in NewKaizenCreated)
+                {
+                    KaizenForUpdate.Transactions.Add(item);
+                }
+            }
 
             var result = await _supervisorMobilityRepository.UpdateKaizen(KaizenForUpdate, entityKaizen);
 
-            if(result > 0)
+
+
+            if (result > 0)
                 return Ok(entityKaizen);
             else 
                 return BadRequest();
@@ -93,5 +124,17 @@ namespace SupervisorMobility.API.Controllers
             else
                 return BadRequest();
         }
+
+
+        [HttpPost("{kaizenId}/evidence/remove/{isPreviousEvidence}")]
+        public async Task<ActionResult<int>> RemoveEvidence(int kaizenId, int isPreviousEvidence, [FromBody] int fileUploadId)
+        {
+            await _supervisorMobilityRepository.RemoveEvidenceForKaizenAsync(kaizenId, fileUploadId, isPreviousEvidence == 1);
+            await _supervisorMobilityRepository.SaveChangesAsync();
+
+            return Ok();
+        }
+
+
     }
 }
