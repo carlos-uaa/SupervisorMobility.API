@@ -34,6 +34,7 @@ using DocumentFormat.OpenXml.Wordprocessing;
 using DocumentFormat.OpenXml.EMMA;
 using Irony.Parsing;
 using DuoVia.FuzzyStrings;
+using SupervisorMobility.API.Models.HCICategoryDtos;
 
 namespace SupervisorMobility.API.Controllers
 {
@@ -117,5 +118,14 @@ namespace SupervisorMobility.API.Controllers
                 return BadRequest();
         }
 
+        [HttpGet("Categories")]
+        public async Task<ActionResult<IEnumerable<HCICategoryDto>>> GetHCICategories()
+        {
+            var resultlist = await _supervisorMobilityRepository.GetHCICategories();
+            if(resultlist != null)
+                return Ok(resultlist);
+            else
+                return BadRequest();
+        }
     }
 }

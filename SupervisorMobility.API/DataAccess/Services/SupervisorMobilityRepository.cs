@@ -2569,6 +2569,11 @@ namespace SupervisorMobility.API.Services
             HCIForAdd.IsActive = false;
             return _context.SaveChanges();
         }
+
+        public async Task<IEnumerable<HCICategory>> GetHCICategories()
+        {
+            return _context.HCICategories.OrderBy(p => p.Name).ToList();
+        }
         #endregion
 
         #region HCI ILU
