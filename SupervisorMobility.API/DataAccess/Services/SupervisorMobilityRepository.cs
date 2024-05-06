@@ -2627,6 +2627,11 @@ namespace SupervisorMobility.API.Services
             var usuariosSinHCI = _context.Users.Where(u => !_context.HCIs.Any(hci => hci.UserId == u.UserId));
             return await usuariosSinHCI.ToListAsync();
         }
+
+        public async Task<IEnumerable<HCICategory>> GetHCICategories()
+        {
+            return _context.HCICategories.OrderBy(p => p.Name).ToList();
+        }
         #endregion
 
         #region HCI ILU

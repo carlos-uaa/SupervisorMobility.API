@@ -35,6 +35,7 @@ using DocumentFormat.OpenXml.EMMA;
 using Irony.Parsing;
 using DuoVia.FuzzyStrings;
 using SupervisorMobility.API.Models.Users;
+using SupervisorMobility.API.Models.HCICategoryDtos;
 
 namespace SupervisorMobility.API.Controllers
 {
@@ -125,6 +126,16 @@ namespace SupervisorMobility.API.Controllers
             var entityhci = await _supervisorMobilityRepository.GetUsersWithoutHci();
             if (entityhci != null)
                 return Ok(_mapper.Map<List<UsersWithoutNavigationWithoutPeopleDetails>>(entityhci));
+            else
+                return BadRequest();
+        }
+
+        [HttpGet("Categories")]
+        public async Task<ActionResult<IEnumerable<HCICategoryDto>>> GetHCICategories()
+        {
+            var resultlist = await _supervisorMobilityRepository.GetHCICategories();
+            if(resultlist != null)
+                return Ok(resultlist);
             else
                 return BadRequest();
         }

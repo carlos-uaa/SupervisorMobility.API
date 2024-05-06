@@ -395,6 +395,7 @@ namespace SupervisorMobility.API.Services
         Task<int> UpdateHCI(UpdateHCIDto HCIForUpdate, HCI HCIEntity);
         Task<IEnumerable<HCI>> GetAllHCIs(bool includeNavigation = false, bool includePeople = false, bool includeEvidences = false, bool includeTransactions = false);
         Task<IEnumerable<User>> GetUsersWithoutHci();
+        Task<IEnumerable<HCICategory>> GetHCICategories();
         #endregion
         #region HCI ILU
         Task<int> AddHciIluReg(HCIILU registry); 
