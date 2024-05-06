@@ -1,5 +1,6 @@
 ﻿
 using AutoMapper;
+using DocumentFormat.OpenXml.InkML;
 using DocumentFormat.OpenXml.Spreadsheet;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.Data.SqlClient;
@@ -1490,8 +1491,10 @@ namespace SupervisorMobility.API.Services
 
             if (SOSAnualId != 0)
             {
+                //Jobs que sean regulares (Externas al SOS ID)
                 query = query.Where(d => d.Type != 3);
                 SOSReviewProgram? sos = _context.SOSReviews.Include(r => r.Suggestions).Include(s => s.Supervisors).Where(u => u.SOSid == SOSAnualId).FirstOrDefault();
+                //Jobs que pertenezcan a los SV que partician en la SOS 
                 if (sos != null && sos.Supervisors?.Count > 0)
                 {
                     List<int> supervisorIds = sos.Supervisors.Select(s => s.UserId).ToList();
@@ -2012,24 +2015,49 @@ namespace SupervisorMobility.API.Services
         #endregion
         #region SOS_Reviews
 
-        public async Task<IEnumerable<SOSReviewProgram>> GetAllSOSReviews()
+        public async Task<IEnumerable<SOSReviewProgram>> GetAllSOSReviews(bool includeNavigation = false, bool includeUsers = false, bool includeSuggestions = false)
         {
-            return await _context.SOSReviews.Include(r => r.Suggestions)
-                   .Include(p => p.Plant)
-                   .Include(a => a.Area)
-                   .Include(s => s.Supervisors)
-                   .Where(u => u.IsActive == true)
-                    .OrderBy(c => c.SOSid).ToListAsync();
+            var query = _context.SOSReviews.Where(u => u.IsActive == true);
+
+            if (includeNavigation)
+            {
+                query = query.Include(p => p.Plant)
+                    .Include(a => a.Area);
+            }
+
+            if (includeSuggestions) {
+                query = query.Include(r => r.Suggestions);
+            }
+
+            if (includeUsers) {
+                query = query.Include(s => s.Supervisors);
+            }
+
+            return await query.OrderBy(c => c.SOSid).ToListAsync();
         }
 
-        public async Task<SOSReviewProgram?> GetSOSasync(int sosId)
+        public async Task<SOSReviewProgram?> GetSOSasync(int sosId, bool includeNavigation = false, bool includeUsers = false, bool includeSuggestions = false)
         {
-            return await _context.SOSReviews
-                .Include(r => r.Suggestions)
-                   .Include(p => p.Plant)
-                   .Include(a => a.Area)
-                   .Include(s => s.Supervisors)
-                   .Where(p => p.SOSid == sosId).FirstOrDefaultAsync();
+            var query = _context.SOSReviews.Where(p => p.SOSid == sosId);
+
+            if (includeNavigation)
+            {
+                query = query.Include(p => p.Plant)
+                    .Include(a => a.Area);
+            }
+
+            if (includeSuggestions)
+            {
+                query = query.Include(r => r.Suggestions);
+            }
+
+            if (includeUsers)
+            {
+                query = query.Include(s => s.Supervisors);
+            }
+
+
+            return await query.FirstOrDefaultAsync();
         }
 
 

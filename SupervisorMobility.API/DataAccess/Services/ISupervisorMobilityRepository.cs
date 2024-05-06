@@ -299,8 +299,8 @@ namespace SupervisorMobility.API.Services
         #region SOS_Reviews
         //startRegion
         Task<int> AddSOSReview(SOSReviewProgram SOSEntity);
-        Task<IEnumerable<SOSReviewProgram>> GetAllSOSReviews();
-        Task<SOSReviewProgram?> GetSOSasync(int sosId);
+        Task<IEnumerable<SOSReviewProgram>> GetAllSOSReviews(bool includeNavigation = false, bool includeUsers = false, bool includeSuggestions = false);
+        Task<SOSReviewProgram?> GetSOSasync(int sosId, bool includeNavigation = false, bool includeUsers = false, bool includeSuggestions = false);
         Task<int> UpdateSOSReview(SOSReviewForUpdateDto SOSForUpdate, SOSReviewProgram SOSEntity);
         Task<int> DeleteSOSReview(SOSReviewProgram SOSEntity);
 
