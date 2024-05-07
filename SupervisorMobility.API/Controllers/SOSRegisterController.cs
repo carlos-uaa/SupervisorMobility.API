@@ -138,7 +138,7 @@ namespace SupervisorMobility.API.Controllers
             List<DistSelect> DistSuggest = JobsSuggestData.distributions;
 
 
-            var SOS_Review = await _supervisorMobilityRepository.GetSOSasync(sos_id);
+            var SOS_Review = await _supervisorMobilityRepository.GetSOSasync(sos_id, true, true, true);
             //var sosUpdateEntity = _mapper.Map<SOSReviewForUpdateDto>(SOS_Review);
             var JobRegisterExist = await _supervisorMobilityRepository.GetAllSOSReviewsRegisters(sos_id);
             var UserOpRegistersExist = await _supervisorMobilityRepository.GetAllSOSRegUserOperations(sos_id);
@@ -281,7 +281,7 @@ namespace SupervisorMobility.API.Controllers
                 }
 
                        
-
+                //busca si el supervisor existe dentro de los usuarios con acceso a la sos review
                 if (!SOS_Review.Supervisors.Any(u => u.UserId == job.SupervisorId))
                 {
                     var usr = await _supervisorMobilityRepository.GetUserAsync(job.SupervisorId);

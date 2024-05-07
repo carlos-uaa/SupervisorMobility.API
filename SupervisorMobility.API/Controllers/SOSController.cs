@@ -148,7 +148,7 @@ namespace SupervisorMobility.API.Controllers
         {
 
             var SOS_Entity = await _supervisorMobilityRepository
-                .GetSOSasync(SOSid);
+                .GetSOSasync(SOSid, true, true, true);
 
             if (SOS_Entity == null)
             {
@@ -178,7 +178,7 @@ namespace SupervisorMobility.API.Controllers
         {
 
             var SOS_Entity = await _supervisorMobilityRepository
-              .GetSOSasync(SOSid);
+              .GetSOSasync(SOSid, true, true, true);
 
             var SOS_RegJobs = await _supervisorMobilityRepository.GetAllSOSReviewsRegisters(SOSid);
 
