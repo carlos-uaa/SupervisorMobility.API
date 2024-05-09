@@ -229,7 +229,6 @@ namespace SupervisorMobility.API.Controllers
 
                 }
 
-                //await _supervisorMobilityRepository.
             }
 
             await _supervisorMobilityRepository.SaveChangesAsync();

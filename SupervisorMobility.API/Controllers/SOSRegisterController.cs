@@ -109,6 +109,8 @@ namespace SupervisorMobility.API.Controllers
                 var createdRegisterToReturn =
                     _mapper.Map<SOSReviewsRegisterDto>(finalSOSReg);
 
+                createdRegisterToReturn.JobObservation = _mapper.Map<JobObservationDto>(finalJob);
+
                 return Ok(createdRegisterToReturn);
             }
             else
@@ -284,12 +286,15 @@ namespace SupervisorMobility.API.Controllers
                 //busca si el supervisor existe dentro de los usuarios con acceso a la sos review
                 if (!SOS_Review.Supervisors.Any(u => u.UserId == job.SupervisorId))
                 {
+                    //si no existe lo añade, para que el usuario pueda ver la sos desde el client side
                     var usr = await _supervisorMobilityRepository.GetUserAsync(job.SupervisorId);
                     _supervisorMobilityRepository.SOSReviewAddUser(SOS_Review, usr);
                 }
 
             }
 
+            //Actualiza las distribuciones a las cuales ya se les aplico la sugerencia, para evitar que vuelvan a
+            //crear una repetida
             foreach(var sugg in DistSuggest)
             {
                 if (sugg.isSelected)
@@ -299,39 +304,9 @@ namespace SupervisorMobility.API.Controllers
                 }
             }
 
-            //sosUpdateEntity.SuggestionApplied = true;
-
-            //List<User> Users = new List<User>();
-            //bool haveUsers = false;
-
-            //if (SOS_Review.Supervisors != null)
-            //{
-            //    haveUsers = true;
-            //    foreach (var Sub in SOS_Review.Supervisors)
-            //    {
-            //        var usr = await _supervisorMobilityRepository.GetUserAsync(Sub.UserId);
-            //        if (usr != null)
-            //        {
-            //            Users.Add(usr);
-            //        }
-            //    }
-
-            //    SOS_Review.Supervisors = null;
-            //    sosUpdateEntity.Supervisors = null;
-            //}
-
-
-            //var result = await _supervisorMobilityRepository.UpdateSOSReview(sosUpdateEntity, SOS_Review);
-
-            //if (haveUsers)
-            //{
-            //    foreach (var item in Users)
-            //    {
-            //        _supervisorMobilityRepository.SOSReviewAddUser(SOS_Review, item);
-            //    }
-            //}
-
+           
             await _supervisorMobilityRepository.SaveChangesAsync();
+
 
             return Ok();
         }//end masive Suggest
