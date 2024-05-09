@@ -2630,7 +2630,7 @@ namespace SupervisorMobility.API.Services
 
         public async Task<IEnumerable<HCICategory>> GetHCICategories()
         {
-            return _context.HCICategories.OrderBy(p => p.Name).ToList();
+            return _context.HCICategories.OrderBy(p => p.ChosenCategoryDepartmentId).ToList();
         }
         #endregion
 
