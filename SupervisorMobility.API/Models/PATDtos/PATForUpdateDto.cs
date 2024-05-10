@@ -1,4 +1,7 @@
-﻿namespace SupervisorMobility.API.Models.PATDtos
+﻿using SupervisorMobility.API.DataAccess.Entities;
+using SupervisorMobility.API.Models.ILURegisterDtos;
+
+namespace SupervisorMobility.API.Models.PATDtos
 {
     public class PATForUpdateDto
     {
@@ -11,6 +14,7 @@
         public int AreaId { get; set; }
 
         //public int DistributionId { get; set; }
+        public ICollection<LeadershipRecordsWithoutNavigationDto>? LeadershipRecords { get; set; }
 
 
         public DateTime? AplicationDate { get; set; }

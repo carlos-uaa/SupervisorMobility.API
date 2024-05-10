@@ -2,6 +2,7 @@
 using Microsoft.AspNetCore.Mvc;
 using SupervisorMobility.API.Business;
 using SupervisorMobility.API.DataAccess.Entities;
+using SupervisorMobility.API.Models.ILURegisterDtos;
 using SupervisorMobility.API.Models.PATDtos;
 using SupervisorMobility.API.Models.PlantDtos;
 using SupervisorMobility.API.Services;
@@ -129,5 +130,58 @@ namespace SupervisorMobility.API.Controllers
             return Ok();
 
         }
+
+        //LeaderRecords
+
+        [HttpPost("{patId}/LeadershipRecords")]
+        public async Task<ActionResult> CreateLeadershipRecord(int patId,
+          LeadershipRecordsForCreationDto leadershipRecordsForCreation)
+        {
+            var patEntity = await _assyChartService.FetchPatAsync(patId);
+            if (patEntity == null)
+            {
+                return NotFound();
+            }
+
+            LeadershipRecord recordEntity = new LeadershipRecord();
+
+            _mapper.Map(leadershipRecordsForCreation, recordEntity);
+
+           var result = await _supervisorMobilityRepository.AddLeadershipRecordToPAT(patEntity, recordEntity);
+
+            if(result > 0)
+            {
+                return Ok(recordEntity);
+            }
+            else
+            {
+                return NotFound($"Error: on create or save changes ");
+            }
+
+        }
+
+        [HttpPut("{patId}/LeadershipRecords/")]
+        public async Task<ActionResult> CreateLeadershipRecord(int patId,
+         LeadershipRecordsForUpdateDto leadershipRecordForUpdate)
+        {
+            var patEntity = await _assyChartService.FetchPatAsync(patId);
+            if (patEntity == null)
+            {
+                return NotFound($"Error: Pat by id {patId} Not Exist");
+            }
+
+           var result =  await _supervisorMobilityRepository.UpdateLeadershipRecordToPAT(patEntity, leadershipRecordForUpdate);
+
+            if(result > 0 ) { 
+            return Ok();
+            }
+            else
+            {
+                return NotFound($"Error: on update or save changes ");
+            }
+
+        }
+
+
     }
 }

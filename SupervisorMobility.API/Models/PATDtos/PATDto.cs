@@ -1,4 +1,5 @@
-﻿using SupervisorMobility.API.Models.PlantDtos;
+﻿using SupervisorMobility.API.Models.ILURegisterDtos;
+using SupervisorMobility.API.Models.PlantDtos;
 using SupervisorMobility.API.Models.Users;
 
 namespace SupervisorMobility.API.Models.PATDtos
@@ -19,6 +20,7 @@ namespace SupervisorMobility.API.Models.PATDtos
         public AreaDtos.AreaWithoutNavigationPropertiesDto? Area { get; set; }
         //public int DistributionId { get; set; }
         //public DistributionDtos.DistributionWithoutNavigationPropertiesDto? Distribution { get; set; }
+        public ICollection<LeadershipRecordsDto>? LeadershipRecords { get; set; }
 
         public DateTime? AplicationDate { get; set; }
         public int? AplicationYear { get; set; }

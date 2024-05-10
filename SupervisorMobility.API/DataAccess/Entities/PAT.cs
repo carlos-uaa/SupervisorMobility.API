@@ -1,4 +1,5 @@
 ﻿using SupervisorMobility.API.Entities;
+using SupervisorMobility.API.Models.ILURegisterDtos;
 using System.ComponentModel.DataAnnotations;
 using System.ComponentModel.DataAnnotations.Schema;
 
@@ -50,6 +51,7 @@ namespace SupervisorMobility.API.DataAccess.Entities
         //[ForeignKey("DistributionId")]
         //[NotMapped]
         //public Distribution? Distribution { get; set; }
+        public ICollection<LeadershipRecord>? LeadershipRecords { get; set; }
 
 
 

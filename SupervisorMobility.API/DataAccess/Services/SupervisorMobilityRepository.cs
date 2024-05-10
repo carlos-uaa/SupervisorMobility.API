@@ -13,6 +13,7 @@ using SupervisorMobility.API.DataAccess.Entities.Paths;
 using SupervisorMobility.API.DataAccess.Entities.SOS_Review;
 using SupervisorMobility.API.Entities;
 using SupervisorMobility.API.Models.HCIDtos;
+using SupervisorMobility.API.Models.ILURegisterDtos;
 using SupervisorMobility.API.Models.KaizenDtos;
 using SupervisorMobility.API.Models.KaizenTransactionDtos;
 using SupervisorMobility.API.Models.PATDtos;
@@ -807,177 +808,276 @@ namespace SupervisorMobility.API.Services
         }
         #endregion
         #region Users
-        public async Task<IEnumerable<User>> GetAllUsersAsync(bool includeCollections = false, bool includeSubordinates = false)
+        public async Task<IEnumerable<User>> GetAllUsersAsync(bool includeCollections = false, bool includeSubordinates = false, bool includeLeadershipRecord = false)
         {
+            var query = _context.Users.Where(u => u.IsActive == true);
+
             if (includeCollections)
             {
-                if (includeSubordinates)
-                    return await _context.Users
+                query = query
                     .Include(p => p.Plant)
                     .Include(a => a.Area)
                     .Include(d => d.Distribution)
                     .Include(g => g.Group)
                     .Include(s => s.Superior)
-                    .Include(ss => ss.Subordinates)
                     .Include(aa => aa.Areas)
-                    .Include(ILU => ILU.ILURegisers).Where(u => u.IsActive == true)
-                     .OrderBy(c => c.UserId).ToListAsync();
-                else
-                    return await _context.Users
-                .Include(p => p.Plant)
-                .Include(a => a.Area)
-                .Include(d => d.Distribution)
-                .Include(g => g.Group)
-                .Include(s => s.Superior)
-                .Include(aa => aa.Areas)
-                .Include(ILU => ILU.ILURegisers).Where(u => u.IsActive == true)
-                 .OrderBy(c => c.UserId).ToListAsync();
+                    .Include(ILU => ILU.ILURegisers);
             }
-            else
+
+            if (includeSubordinates)
             {
-                if (includeSubordinates)
-                    return await _context.Users
-                    .Include(s => s.Superior)
-                    .Include(ss => ss.Subordinates)
-                     .OrderBy(c => c.UserId).ToListAsync();
-                else
-                    return await _context.Users
-                     .OrderBy(c => c.UserId).ToListAsync();
+                query = query.Include(s => s.Subordinates);
             }
+
+            if (includeLeadershipRecord)
+            {
+                query = query.Include(s => s.LeadershipRecords);
+            }
+
+            return await query.OrderBy(c => c.UserId).ToListAsync();
+
+
+            //if (includeCollections)
+            //{
+
+            //    if (includeSubordinates)
+            //        return await _context.Users
+            //        .Include(p => p.Plant)
+            //        .Include(a => a.Area)
+            //        .Include(d => d.Distribution)
+            //        .Include(g => g.Group)
+            //        .Include(s => s.Superior)
+            //        .Include(ss => ss.Subordinates)
+            //        .Include(aa => aa.Areas)
+            //        .Include(ILU => ILU.ILURegisers).Where(u => u.IsActive == true)
+            //         .OrderBy(c => c.UserId).ToListAsync();
+            //    else
+            //        return await _context.Users
+            //    .Include(p => p.Plant)
+            //    .Include(a => a.Area)
+            //    .Include(d => d.Distribution)
+            //    .Include(g => g.Group)
+            //    .Include(s => s.Superior)
+            //    .Include(aa => aa.Areas)
+            //    .Include(ILU => ILU.ILURegisers).Where(u => u.IsActive == true)
+            //     .OrderBy(c => c.UserId).ToListAsync();
+            //}
+            //else
+            //{
+            //    if (includeSubordinates)
+            //        return await _context.Users
+            //        .Include(s => s.Superior)
+            //        .Include(ss => ss.Subordinates)
+            //         .OrderBy(c => c.UserId).ToListAsync();
+            //    else
+            //        return await _context.Users
+            //         .OrderBy(c => c.UserId).ToListAsync();
+            //}
 
         }
 
-        public async Task<IEnumerable<User>> GetAllUserByTypeAsync(int typeUser, bool includeCollections = false, bool includeSubordinates = false)
+        public async Task<IEnumerable<User>> GetAllUserByTypeAsync(int typeUser, bool includeCollections = false, bool includeSubordinates = false,bool includeLeadershipRecord = false)
         {
+            var query = _context.Users.Where(u => u.UserType == typeUser).Where(u => u.IsActive == true);
+
             if (includeCollections)
             {
-                if (includeSubordinates)
-                    return await _context.Users
-                    .Include(p => p.Plant)
-                    .Include(a => a.Area)
-                    .Include(d => d.Distribution)
-                    .Include(g => g.Group)
-                    .Include(s => s.Superior)
-                    .Include(ss => ss.Subordinates)
-                    .Include(aa => aa.Areas)
-                    .Include(ILU => ILU.ILURegisers).Where(u => u.IsActive == true)
-                    .Where(u => u.UserType == typeUser).Where(u => u.IsActive == true)
-                 .OrderBy(c => c.UserId).ToListAsync();
-                else
-                    return await _context.Users
-                .Include(p => p.Plant)
+                query = query.Include(p => p.Plant)
                 .Include(a => a.Area)
                 .Include(d => d.Distribution)
                 .Include(g => g.Group)
                 .Include(s => s.Superior)
                 .Include(aa => aa.Areas)
-                .Include(ILU => ILU.ILURegisers).Where(u => u.UserType == typeUser).Where(u => u.IsActive == true)
-                 .OrderBy(c => c.UserId).ToListAsync();
+                .Include(ILU => ILU.ILURegisers);
             }
-            else
+
+            if (includeSubordinates)
             {
-                if (includeSubordinates)
-                    return await _context.Users
-                    .Include(s => s.Superior)
-                    .Include(ss => ss.Subordinates)
-                   .Where(u => u.UserType == typeUser).Where(u => u.IsActive == true)
-                 .OrderBy(c => c.UserId).ToListAsync();
-                else
-                    return await _context.Users
-                     .Where(u => u.UserType == typeUser).Where(u => u.IsActive == true)
-                 .OrderBy(c => c.UserId).ToListAsync();
+                query = query.Include(ss => ss.Subordinates);
             }
+
+            if (includeLeadershipRecord)
+            {
+                query = query.Include(ss => ss.LeadershipRecords);
+            }
+
+    return await query.OrderBy(c => c.UserId).ToListAsync();
+
+            //if (includeCollections)
+            //{
+            //    if (includeSubordinates)
+            //        return await _context.Users
+            //        .Include(p => p.Plant)
+            //        .Include(a => a.Area)
+            //        .Include(d => d.Distribution)
+            //        .Include(g => g.Group)
+            //        .Include(s => s.Superior)
+            //        .Include(ss => ss.Subordinates)
+            //        .Include(aa => aa.Areas)
+            //        .Include(ILU => ILU.ILURegisers).Where(u => u.IsActive == true)
+            //        .Where(u => u.UserType == typeUser).Where(u => u.IsActive == true)
+            //     .OrderBy(c => c.UserId).ToListAsync();
+            //    else
+            //        return await _context.Users
+            //    .Include(p => p.Plant)
+            //    .Include(a => a.Area)
+            //    .Include(d => d.Distribution)
+            //    .Include(g => g.Group)
+            //    .Include(s => s.Superior)
+            //    .Include(aa => aa.Areas)
+            //    .Include(ILU => ILU.ILURegisers).Where(u => u.UserType == typeUser).Where(u => u.IsActive == true)
+            //     .OrderBy(c => c.UserId).ToListAsync();
+            //}
+            //else
+            //{
+            //    if (includeSubordinates)
+            //        return await _context.Users
+            //        .Include(s => s.Superior)
+            //        .Include(ss => ss.Subordinates)
+            //       .Where(u => u.UserType == typeUser).Where(u => u.IsActive == true)
+            //     .OrderBy(c => c.UserId).ToListAsync();
+            //    else
+            //        return await _context.Users
+            //         .Where(u => u.UserType == typeUser).Where(u => u.IsActive == true)
+            //     .OrderBy(c => c.UserId).ToListAsync();
+            //}
 
 
         }
 
-        public async Task<IEnumerable<User>> GetAllUserByTypeInPlantAreaAsync(int plantId, int areaId, int typeUser, bool includeCollections = false, bool includeSubordinates = false)
+        public async Task<IEnumerable<User>> GetAllUserByTypeInPlantAreaAsync(int plantId, int areaId, int typeUser, bool includeCollections = false, bool includeSubordinates = false, bool includeLeadershipRecord = false)
         {
-            if (includeCollections)
+            var query = _context.Users.Where(u => u.IsActive == true && u.UserType == typeUser && u.PlantId == plantId && u.AreaId == areaId);
+
+            if(includeCollections)
             {
-                if (includeSubordinates)
-                    return await _context.Users
-                    .Include(p => p.Plant)
+                query = query.Include(p => p.Plant)
                     .Include(a => a.Area)
                     .Include(d => d.Distribution)
                     .Include(g => g.Group)
                     .Include(s => s.Superior)
-                    .Include(ss => ss.Subordinates)
                     .Include(aa => aa.Areas)
-                    .Include(ILU => ILU.ILURegisers).Where(u => u.IsActive == true)
-
-                .Where(u => u.UserType == typeUser && u.PlantId == plantId && u.AreaId == areaId).Where(u => u.IsActive == true)
-                 .OrderBy(c => c.UserId).ToListAsync();
-                else
-                    return await _context.Users
-                .Include(p => p.Plant)
-                .Include(a => a.Area)
-                .Include(d => d.Distribution)
-                .Include(g => g.Group)
-                .Include(s => s.Superior)
-                .Include(aa => aa.Areas)
-                .Include(ILU => ILU.ILURegisers)
-                .Where(u => u.UserType == typeUser && u.PlantId == plantId && u.AreaId == areaId).Where(u => u.IsActive == true)
-                 .OrderBy(c => c.UserId).ToListAsync();
+                    .Include(ILU => ILU.ILURegisers);
             }
-            else
+            if (includeSubordinates)
             {
-                if (includeSubordinates)
-                    return await _context.Users
-                    .Include(s => s.Superior)
-                    .Include(ss => ss.Subordinates)
-
-                .Where(u => u.UserType == typeUser && u.PlantId == plantId && u.AreaId == areaId).Where(u => u.IsActive == true)
-                 .OrderBy(c => c.UserId).ToListAsync();
-                else
-                    return await _context.Users
-
-                .Where(u => u.UserType == typeUser && u.PlantId == plantId && u.AreaId == areaId).Where(u => u.IsActive == true)
-                 .OrderBy(c => c.UserId).ToListAsync();
+                query = query.Include(ss => ss.Subordinates);
             }
+            if(includeLeadershipRecord)
+            {
+                query = query.Include(ss => ss.LeadershipRecords);
+            }
+            return await query.OrderBy(c => c.UserId).ToListAsync();
+
+
+            //if (includeCollections)
+            //{
+            //    if (includeSubordinates)
+            //        return await _context.Users
+            //        .Include(p => p.Plant)
+            //        .Include(a => a.Area)
+            //        .Include(d => d.Distribution)
+            //        .Include(g => g.Group)
+            //        .Include(s => s.Superior)
+            //        .Include(ss => ss.Subordinates)
+            //        .Include(aa => aa.Areas)
+            //        .Include(ILU => ILU.ILURegisers).Where(u => u.IsActive == true)
+
+            //    .Where(u => u.UserType == typeUser && u.PlantId == plantId && u.AreaId == areaId).Where(u => u.IsActive == true)
+            //     .OrderBy(c => c.UserId).ToListAsync();
+            //    else
+            //        return await _context.Users
+            //    .Include(p => p.Plant)
+            //    .Include(a => a.Area)
+            //    .Include(d => d.Distribution)
+            //    .Include(g => g.Group)
+            //    .Include(s => s.Superior)
+            //    .Include(aa => aa.Areas)
+            //    .Include(ILU => ILU.ILURegisers)
+            //    .Where(u => u.UserType == typeUser && u.PlantId == plantId && u.AreaId == areaId).Where(u => u.IsActive == true)
+            //     .OrderBy(c => c.UserId).ToListAsync();
+            //}
+            //else
+            //{
+            //    if (includeSubordinates)
+            //        return await _context.Users
+            //        .Include(s => s.Superior)
+            //        .Include(ss => ss.Subordinates)
+
+            //    .Where(u => u.UserType == typeUser && u.PlantId == plantId && u.AreaId == areaId).Where(u => u.IsActive == true)
+            //     .OrderBy(c => c.UserId).ToListAsync();
+            //    else
+            //        return await _context.Users
+
+            //    .Where(u => u.UserType == typeUser && u.PlantId == plantId && u.AreaId == areaId).Where(u => u.IsActive == true)
+            //     .OrderBy(c => c.UserId).ToListAsync();
+            //}
 
         }
 
-        public async Task<IEnumerable<User>> GetAllUserByTypeInPlantAsync(int plantId, int typeUser, bool includeCollections = false, bool includeSubordinates = false)
+        public async Task<IEnumerable<User>> GetAllUserByTypeInPlantAsync(int plantId, int typeUser, bool includeCollections = false, bool includeSubordinates = false, bool includeLeadershipRecord = false)
         {
+            var query = _context.Users.Where(u => u.UserType == typeUser && u.PlantId == plantId && u.IsActive == true);
+
             if (includeCollections)
             {
-                if (includeSubordinates)
-                    return await _context.Users
-                    .Include(p => p.Plant)
+                query = query.Include(p => p.Plant)
                     .Include(a => a.Area)
                     .Include(d => d.Distribution)
                     .Include(g => g.Group)
                     .Include(s => s.Superior)
-                    .Include(ss => ss.Subordinates)
                     .Include(aa => aa.Areas)
-                    .Include(ILU => ILU.ILURegisers).Where(u => u.IsActive == true)
-                       .Where(u => u.UserType == typeUser && u.PlantId == plantId).Where(u => u.IsActive == true)
-                 .OrderBy(c => c.UserId).ToListAsync();
-                else
-                    return await _context.Users
-                .Include(p => p.Plant)
-                .Include(a => a.Area)
-                .Include(d => d.Distribution)
-                .Include(g => g.Group)
-                .Include(s => s.Superior)
-                .Include(aa => aa.Areas)
-                .Include(ILU => ILU.ILURegisers).Where(u => u.UserType == typeUser && u.PlantId == plantId).Where(u => u.IsActive == true)
-                 .OrderBy(c => c.UserId).ToListAsync();
+                    .Include(ILU => ILU.ILURegisers);
             }
-            else
+            if (includeSubordinates)
             {
-                if (includeSubordinates)
-                    return await _context.Users
-                    .Include(s => s.Superior)
-                    .Include(ss => ss.Subordinates)
-                       .Where(u => u.UserType == typeUser && u.PlantId == plantId).Where(u => u.IsActive == true)
-                 .OrderBy(c => c.UserId).ToListAsync();
-                else
-                    return await _context.Users
-   .Where(u => u.UserType == typeUser && u.PlantId == plantId).Where(u => u.IsActive == true)
-                 .OrderBy(c => c.UserId).ToListAsync();
+                query = query
+                    .Include(ss => ss.Subordinates);
+            }if (includeLeadershipRecord)
+            {
+                query = query.Include(u => u.LeadershipRecords);
             }
+
+            return await query.OrderBy(c => c.UserId).ToListAsync();
+
+            //         if (includeCollections)
+            //         {
+            //             if (includeSubordinates)
+            //                 return await _context.Users
+            //                 .Include(p => p.Plant)
+            //                 .Include(a => a.Area)
+            //                 .Include(d => d.Distribution)
+            //                 .Include(g => g.Group)
+            //                 .Include(s => s.Superior)
+            //                 .Include(ss => ss.Subordinates)
+            //                 .Include(aa => aa.Areas)
+            //                 .Include(ILU => ILU.ILURegisers).Where(u => u.IsActive == true)
+            //                    .Where(u => u.UserType == typeUser && u.PlantId == plantId).Where(u => u.IsActive == true)
+            //              .OrderBy(c => c.UserId).ToListAsync();
+            //             else
+            //                 return await _context.Users
+            //             .Include(p => p.Plant)
+            //             .Include(a => a.Area)
+            //             .Include(d => d.Distribution)
+            //             .Include(g => g.Group)
+            //             .Include(s => s.Superior)
+            //             .Include(aa => aa.Areas)
+            //             .Include(ILU => ILU.ILURegisers).Where(u => u.UserType == typeUser && u.PlantId == plantId).Where(u => u.IsActive == true)
+            //              .OrderBy(c => c.UserId).ToListAsync();
+            //         }
+            //         else
+            //         {
+            //             if (includeSubordinates)
+            //                 return await _context.Users
+            //                 .Include(s => s.Superior)
+            //                 .Include(ss => ss.Subordinates)
+            //                    .Where(u => u.UserType == typeUser && u.PlantId == plantId).Where(u => u.IsActive == true)
+            //              .OrderBy(c => c.UserId).ToListAsync();
+            //             else
+            //                 return await _context.Users
+            //.Where(u => u.UserType == typeUser && u.PlantId == plantId).Where(u => u.IsActive == true)
+            //              .OrderBy(c => c.UserId).ToListAsync();
+            //         }
 
 
 
@@ -1018,6 +1118,7 @@ namespace SupervisorMobility.API.Services
                 .Include(g => g.Group)
                 .Include(s => s.Superior)
                 .Include(s => s.Superior.Areas)
+                .Include(lr => lr.LeadershipRecords)
                 .Include(ss => ss.Subordinates)
                     .ThenInclude(sub => sub.Area)
                 .Include(ILU => ILU.ILURegisers)
@@ -1033,6 +1134,7 @@ namespace SupervisorMobility.API.Services
                 .Include(a => a.Area)
                 .Include(d => d.Distribution)
                 .Include(g => g.Group)
+                .Include(lr => lr.LeadershipRecords)
                 .Include(s => s.Superior)
                 .Include(ss => ss.Subordinates)
                 .Include(ILU => ILU.ILURegisers)
@@ -1046,6 +1148,7 @@ namespace SupervisorMobility.API.Services
            .Include(p => p.Plant)
                 .Include(a => a.Area)
                 .Include(d => d.Distribution)
+                .Include(lr => lr.LeadershipRecords)
                 .Include(g => g.Group)
                 .Include(s => s.Superior)
                 .Include(ss => ss.Subordinates)
@@ -1060,6 +1163,7 @@ namespace SupervisorMobility.API.Services
                 .Include(a => a.Area)
                 .Include(d => d.Distribution)
                 .Include(g => g.Group)
+                .Include(lr => lr.LeadershipRecords)
                 .Include(s => s.Superior)
                 .Include(ss => ss.Subordinates)
                 .Include(aa => aa.Areas)
@@ -1945,6 +2049,7 @@ namespace SupervisorMobility.API.Services
                    .Include(a => a.Area)
                    .Include(sv => sv.Supervisor)
                    .Include(ssv => ssv.SSVresponsible)
+                   .Include(lr => lr.LeadershipRecords)
                    .Where(p => p.PATid == patId).FirstOrDefaultAsync();
         }
         public async Task<PAT?> GetPatForYearOfSV(int sv, int Year)
@@ -1987,6 +2092,34 @@ namespace SupervisorMobility.API.Services
                            .Where(p => p.SSVresponsibleID == ssvID && p.IsActive == true)
                             .OrderBy(c => c.PATid).ToListAsync();
         }
+        #endregion
+        #region LeadershipRecords
+
+        public async Task<int> AddLeadershipRecordToPAT(PAT entity, LeadershipRecord leadershipRecordsForCreation)
+        {
+            if (entity.LeadershipRecords != null)
+            {
+                entity.LeadershipRecords.Add(leadershipRecordsForCreation);
+            }
+            else
+            {
+                entity.LeadershipRecords = new List<LeadershipRecord>();
+                entity.LeadershipRecords.Add(leadershipRecordsForCreation);
+            }
+
+            return await _context.SaveChangesAsync();
+        }
+
+        public async Task<int> UpdateLeadershipRecordToPAT(PAT entity, LeadershipRecordsForUpdateDto leadershipRecordsForUpdate)
+        {
+            LeadershipRecord recordEntity = new LeadershipRecord();
+
+            recordEntity = entity.LeadershipRecords.ToList().Find(r => r.LeadershipRecordsid == leadershipRecordsForUpdate.LeadershipRecordsid);
+            _mapper.Map(leadershipRecordsForUpdate, recordEntity);
+
+            return await _context.SaveChangesAsync();
+        }
+
         #endregion
         #region UserNotFound
         public async Task<IEnumerable<UserNotFound>> GetAllUsersNotFoundAsync()

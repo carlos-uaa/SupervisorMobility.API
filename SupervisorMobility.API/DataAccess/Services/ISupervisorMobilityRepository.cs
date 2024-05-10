@@ -10,6 +10,7 @@ using SupervisorMobility.API.Models.HCIDtos;
 using SupervisorMobility.API.Models.SOSReviewDtos;
 using SupervisorMobility.API.Models.Users;
 using System.Runtime.CompilerServices;
+using SupervisorMobility.API.Models.ILURegisterDtos;
 
 
 namespace SupervisorMobility.API.Services
@@ -156,11 +157,11 @@ namespace SupervisorMobility.API.Services
         void AssychartAddCodePath(AssyChart Master, SOSCodePath Slave);
         #endregion
         #region Users
-        Task<IEnumerable<User>> GetAllUsersAsync(bool includeCollections = false, bool includeSubordinates = false);
+        Task<IEnumerable<User>> GetAllUsersAsync(bool includeCollections = false, bool includeSubordinates = false, bool includeLeadershipRecord = false);
         Task<IEnumerable<User>> GetAllSubordinatesAsync(int superiorId);
-        Task<IEnumerable<User>> GetAllUserByTypeAsync(int typeUser, bool includeCollections = false, bool includeSubordinates = false);
-        Task<IEnumerable<User>> GetAllUserByTypeInPlantAreaAsync(int plantId, int areaId, int typeUser, bool includeCollections = false, bool includeSubordinates = false);
-        Task<IEnumerable<User>> GetAllUserByTypeInPlantAsync(int plantId, int typeUser, bool includeCollections = false, bool includeSubordinates = false);
+        Task<IEnumerable<User>> GetAllUserByTypeAsync(int typeUser, bool includeCollections = false, bool includeSubordinates = false, bool includeLeadershipRecord = false);
+        Task<IEnumerable<User>> GetAllUserByTypeInPlantAreaAsync(int plantId, int areaId, int typeUser, bool includeCollections = false, bool includeSubordinates = false, bool includeLeadershipRecord = false);
+        Task<IEnumerable<User>> GetAllUserByTypeInPlantAsync(int plantId, int typeUser, bool includeCollections = false, bool includeSubordinates = false, bool includeLeadershipRecord = false);
         Task<IEnumerable<User>> GetAllUsersWhitPlantAreaAndGroupAsync();
         Task<User?> GetUserAsync(int userId, bool collection = false);
         Task<User?> GetUserByObjectIdAsync(string objectId);
@@ -283,6 +284,10 @@ namespace SupervisorMobility.API.Services
         Task<IEnumerable<PAT>> GetAllPATsOfSv(int svId);
         Task<IEnumerable<PAT>> GetAllPATsofSSV(int ssvID);
 
+        #endregion
+        #region LeadershipRecord
+        Task<int> AddLeadershipRecordToPAT(PAT entity, LeadershipRecord leadershipRecordsForCreation);
+        Task<int> UpdateLeadershipRecordToPAT(PAT entity, LeadershipRecordsForUpdateDto leadershipRecordsForUpdate);
         #endregion
         #region Logger
 
