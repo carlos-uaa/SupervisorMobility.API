@@ -18,6 +18,11 @@ namespace SupervisorMobility.API.DataAccess.Entities
         public string? Email { get; set; } = string.Empty;
         public int UserType { get; set; }
 
+        public string? Management {  get; set; }
+        public string? Department {  get; set; }
+        public string? Process {  get; set; }
+        
+
         public int? SuperiorId { get; set; }
         [ForeignKey("SuperiorId")]
         [JsonIgnore]
@@ -30,7 +35,7 @@ namespace SupervisorMobility.API.DataAccess.Entities
             = new List<SOSReviewProgram>();
 
         public ICollection<ILURegister>? ILURegisers { get; set; }
-        public ICollection<UserCareerPath>? UserCareerPaths { get; set; }
+        public ICollection<LeadershipRecord>? LeadershipRecords { get; set; }
 
         [Column(TypeName = "Date")]
         public DateTime? CreatedDate { get; set; } = DateTime.Now;

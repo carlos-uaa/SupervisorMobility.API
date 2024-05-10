@@ -34,6 +34,8 @@ using DocumentFormat.OpenXml.Wordprocessing;
 using DocumentFormat.OpenXml.EMMA;
 using Irony.Parsing;
 using DuoVia.FuzzyStrings;
+using SupervisorMobility.API.Models.Users;
+using SupervisorMobility.API.Models.HCICategoryDtos;
 
 namespace SupervisorMobility.API.Controllers
 {
@@ -58,8 +60,7 @@ namespace SupervisorMobility.API.Controllers
         public async Task<ActionResult<HCIDto>> CreateNewHCI(CreateHCIDto hciForCreate)
         {
             HCI hciEntity = new();
-
-                _mapper.Map(hciEntity,hciForCreate);
+            _mapper.Map(hciForCreate, hciEntity);
 
             var entityhci = await _supervisorMobilityRepository.AddHCI(hciEntity);
 
@@ -70,23 +71,23 @@ namespace SupervisorMobility.API.Controllers
         }
 
         [HttpGet]
-        public async Task<ActionResult<IEnumerable<HCIDto>>> GetAllDataHCI(bool includeNavigation = false, bool includePeople = false, bool includeEvidences = false, bool includeTransactions = false)
+        public async Task<ActionResult<IEnumerable<HCIDto>>> GetAllDataHCI(bool includeNavigation = false, bool includePeople = false, bool includeComments = false, bool includeTransactions = false)
         {
 
-            var entityhci = await _supervisorMobilityRepository.GetAllHCIs(includeNavigation, includePeople, includeEvidences, includeTransactions);
+            var entityhci = await _supervisorMobilityRepository.GetAllHCIs(includeNavigation, includePeople, includeComments, includeTransactions);
             if (entityhci != null)
-                return Ok();
+                return Ok(entityhci);
             else
-                return BadRequest(); ;
+                return BadRequest(); 
         }
 
         [HttpGet("{hciId}")]
-        public async Task<ActionResult<HCIDto>> GetHCI(int hciId, bool includeNavigation = false, bool includePeople = false, bool includeEvidences = false, bool includeTransactions = false)
+        public async Task<ActionResult<HCIDto>> GetHCI(int hciId, bool includeNavigation = false, bool includePeople = false, bool includeComments = false, bool includeTransactions = false)
         {
 
-            var entityhci = await _supervisorMobilityRepository.GetHCI(hciId, includeNavigation, includePeople, includeEvidences, includeTransactions);
+            var entityhci = await _supervisorMobilityRepository.GetHCI(hciId, includeNavigation, includePeople, includeComments, includeTransactions);
             if (entityhci != null)
-                return Ok();
+                return Ok(entityhci);
             else
                 return BadRequest();
         }
@@ -118,5 +119,25 @@ namespace SupervisorMobility.API.Controllers
                 return BadRequest();
         }
 
+        [HttpGet("NoHciUsers")]
+        public async Task<ActionResult<UsersWithoutNavigationWithoutPeopleDetails>> GetUsersWithoutHCI()
+        {
+
+            var entityhci = await _supervisorMobilityRepository.GetUsersWithoutHci();
+            if (entityhci != null)
+                return Ok(_mapper.Map<List<UsersWithoutNavigationWithoutPeopleDetails>>(entityhci));
+            else
+                return BadRequest();
+        }
+
+        [HttpGet("Categories")]
+        public async Task<ActionResult<IEnumerable<HCICategoryDto>>> GetHCICategories()
+        {
+            var resultlist = await _supervisorMobilityRepository.GetHCICategories();
+            if(resultlist != null)
+                return Ok(resultlist);
+            else
+                return BadRequest();
+        }
     }
 }

@@ -15,6 +15,10 @@ namespace SupervisorMobility.API.Models.Users
 
         public int? SuperiorId { get; set; }
 
+        public string? Management { get; set; }
+        public string? Department { get; set; }
+        public string? Process { get; set; }
+
         [Column(TypeName = "Date")]
         public DateTime? CreatedDate { get; set; } = DateTime.Now;
         [Column(TypeName = "Date")]
@@ -29,6 +33,7 @@ namespace SupervisorMobility.API.Models.Users
         public int? GroupId { get; set; }
         public int? DistributionId { get; set; }
         public ICollection<ILURegisterWithoutNavigationDto>? ILURegisers { get; set; }
+        public ICollection<LeadershipRecordsWithoutNavigationDto>? LeadershipRecords { get; set; }
         public DateTime? IncomesDate { get; set; }
         public DateTime? BirthDate { get; set; }
         public int? ProfilePictureId { get; set; }

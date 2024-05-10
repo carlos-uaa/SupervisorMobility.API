@@ -9,7 +9,6 @@ namespace SupervisorMobility.API.DataAccess.Entities
 
         public int HCITransactionId { get; set; }
 
-        public string? Name { get; set; }
         public string? Description { get; set; }
         [Column(TypeName = "Date")]
         public DateTime? DateStart { get; set; }

@@ -10,6 +10,7 @@ using SupervisorMobility.API.Models.HCIDtos;
 using SupervisorMobility.API.Models.SOSReviewDtos;
 using SupervisorMobility.API.Models.Users;
 using System.Runtime.CompilerServices;
+using SupervisorMobility.API.Models.ILURegisterDtos;
 
 
 namespace SupervisorMobility.API.Services
@@ -156,11 +157,11 @@ namespace SupervisorMobility.API.Services
         void AssychartAddCodePath(AssyChart Master, SOSCodePath Slave);
         #endregion
         #region Users
-        Task<IEnumerable<User>> GetAllUsersAsync(bool includeCollections = false, bool includeSubordinates = false);
+        Task<IEnumerable<User>> GetAllUsersAsync(bool includeCollections = false, bool includeSubordinates = false, bool includeLeadershipRecord = false);
         Task<IEnumerable<User>> GetAllSubordinatesAsync(int superiorId);
-        Task<IEnumerable<User>> GetAllUserByTypeAsync(int typeUser, bool includeCollections = false, bool includeSubordinates = false);
-        Task<IEnumerable<User>> GetAllUserByTypeInPlantAreaAsync(int plantId, int areaId, int typeUser, bool includeCollections = false, bool includeSubordinates = false);
-        Task<IEnumerable<User>> GetAllUserByTypeInPlantAsync(int plantId, int typeUser, bool includeCollections = false, bool includeSubordinates = false);
+        Task<IEnumerable<User>> GetAllUserByTypeAsync(int typeUser, bool includeCollections = false, bool includeSubordinates = false, bool includeLeadershipRecord = false);
+        Task<IEnumerable<User>> GetAllUserByTypeInPlantAreaAsync(int plantId, int areaId, int typeUser, bool includeCollections = false, bool includeSubordinates = false, bool includeLeadershipRecord = false);
+        Task<IEnumerable<User>> GetAllUserByTypeInPlantAsync(int plantId, int typeUser, bool includeCollections = false, bool includeSubordinates = false, bool includeLeadershipRecord = false);
         Task<IEnumerable<User>> GetAllUsersWhitPlantAreaAndGroupAsync();
         Task<User?> GetUserAsync(int userId, bool collection = false);
         Task<User?> GetUserByObjectIdAsync(string objectId);
@@ -284,6 +285,10 @@ namespace SupervisorMobility.API.Services
         Task<IEnumerable<PAT>> GetAllPATsofSSV(int ssvID);
 
         #endregion
+        #region LeadershipRecord
+        Task<int> AddLeadershipRecordToPAT(PAT entity, LeadershipRecord leadershipRecordsForCreation);
+        Task<int> UpdateLeadershipRecordToPAT(PAT entity, LeadershipRecordsForUpdateDto leadershipRecordsForUpdate);
+        #endregion
         #region Logger
 
         #endregion
@@ -299,8 +304,8 @@ namespace SupervisorMobility.API.Services
         #region SOS_Reviews
         //startRegion
         Task<int> AddSOSReview(SOSReviewProgram SOSEntity);
-        Task<IEnumerable<SOSReviewProgram>> GetAllSOSReviews();
-        Task<SOSReviewProgram?> GetSOSasync(int sosId);
+        Task<IEnumerable<SOSReviewProgram>> GetAllSOSReviews(bool includeNavigation = false, bool includeUsers = false, bool includeSuggestions = false);
+        Task<SOSReviewProgram?> GetSOSasync(int sosId, bool includeNavigation = false, bool includeUsers = false, bool includeSuggestions = false);
         Task<int> UpdateSOSReview(SOSReviewForUpdateDto SOSForUpdate, SOSReviewProgram SOSEntity);
         Task<int> DeleteSOSReview(SOSReviewProgram SOSEntity);
 
@@ -386,6 +391,7 @@ namespace SupervisorMobility.API.Services
         Task<IEnumerable<Kaizen>> GetAllKaizens(bool includeNavigation = false, bool includePeople = false, bool includeEvidences = false, bool includeTransactions = false);
         Task AddPreviousEvidenceForKaizen(int kaizenId, FileUpload evidence);
         Task AddThenEvidenceForKaizen(int kaizenId, FileUpload evidence);
+        Task RemoveEvidenceForKaizenAsync(int lupId, int fileUploadId, bool isPreviousEvidence);
         #endregion
         #region HCI
         Task<HCI?> GetHCI(int HCIId, bool includeNavigation = false, bool includePeople = false, bool includeEvidences = false, bool includeTransactions = false);
@@ -393,6 +399,11 @@ namespace SupervisorMobility.API.Services
         Task<int> RemoveHCI(HCI HCIForAdd);
         Task<int> UpdateHCI(UpdateHCIDto HCIForUpdate, HCI HCIEntity);
         Task<IEnumerable<HCI>> GetAllHCIs(bool includeNavigation = false, bool includePeople = false, bool includeEvidences = false, bool includeTransactions = false);
+        Task<IEnumerable<User>> GetUsersWithoutHci();
+        Task<IEnumerable<HCICategory>> GetHCICategories();
+        #endregion
+        #region HCI ILU
+        Task<int> AddHciIluReg(HCIILU registry); 
         #endregion
     }
 }

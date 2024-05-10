@@ -20,6 +20,8 @@ namespace SupervisorMobility.API.Models.HCIDtos
           = new List<HCITransactionDto>();
         public ICollection<HCICategoryDto>? Categories { get; set; }
           = new List<HCICategoryDto>();
+        public ICollection<HCIILU>? ILUs { get; set; } = new List<HCIILU>();
+        public ICollection<UserCareerPath>? CareerPaths { get; set; } = new List<UserCareerPath>();
         public ICollection<CommentaryDto>? Comments { get; set; }
           = new List<CommentaryDto>();
         public bool? IsActive { get; set; }

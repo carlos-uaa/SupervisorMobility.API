@@ -47,6 +47,7 @@ namespace SupervisorMobility.API.Context
         public DbSet<ILULevel> ILULevels { get; set; }
         public DbSet<ILURegister> ILURegisters { get; set; }
         public DbSet<PAT> PATs { get; set; }
+        public DbSet<LeadershipRecord> LeadershipRecords { get; set; }
         public DbSet<UserCareerPath> UserCareerPaths { get; set; }
 
         public DbSet<SOSReviewProgram> SOSReviews { get; set; }
@@ -57,6 +58,7 @@ namespace SupervisorMobility.API.Context
         public DbSet<Commentary> Comments { get; set; }
         public DbSet<HCITransaction> HCITransactions { get; set; }
         public DbSet<HCICategory> HCICategories { get; set; }
+        public DbSet<HCIILU> HCIILUs { get; set; }
         public DbSet<Kaizen> Kaizens { get; set; }
         public DbSet<KaizenTransaction> KaizenTransactions { get; set; }
         #endregion
@@ -198,6 +200,10 @@ namespace SupervisorMobility.API.Context
 
             modelBuilder.Entity<PAT>()
               .Property(p => p.IsActive)
+              .HasDefaultValue(true);
+            
+            modelBuilder.Entity<LeadershipRecord>()
+              .Property(p => p.isActive)
               .HasDefaultValue(true);
 
             modelBuilder.Entity<PAT>()

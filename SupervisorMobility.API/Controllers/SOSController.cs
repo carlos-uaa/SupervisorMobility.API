@@ -37,38 +37,36 @@ namespace SupervisorMobility.API.Controllers
         }
 
         [HttpGet]
-        public async Task<ActionResult<IEnumerable<SOSReviewWithAllDto>>> GetAllSos(bool includeCollections = false)
+        public async Task<ActionResult<IEnumerable<SOSReviewWithAllDto>>> GetAllSos(bool includeNavigation = false, bool includeUsers = false, bool includeSuggestions = false)
         {
 
-            if (includeCollections)
-            {
-                var SOSRevierWhitDistributions = await _supervisorMobilityRepository.GetAllSOSReviews();
-                return Ok(_mapper.Map<IEnumerable<SOSReviewWithAllDto>>(SOSRevierWhitDistributions));
+            var SOS_Reviews = await _supervisorMobilityRepository.GetAllSOSReviews(includeNavigation,  includeUsers,  includeSuggestions);
 
+
+            if (includeNavigation || includeUsers || includeSuggestions)
+            {
+                return Ok(_mapper.Map<IEnumerable<SOSReviewWithAllDto>>(SOS_Reviews));
             }
             else
             {
-                var SOS_Reviews = await _supervisorMobilityRepository
-                                .GetAllSOSReviews();
                 return Ok(_mapper.Map<IEnumerable<SOSReviewWithOutDataDto>>(SOS_Reviews));
-
             }
 
         }//end get all
 
        
         [HttpGet("{sosId}", Name = "GetSOS")]
-        public async Task<ActionResult<SOSReviewWithAllDto>> GetSOS(int sosId, bool includeCollections = false)
+        public async Task<ActionResult<SOSReviewWithAllDto>> GetSOS(int sosId, bool includeNavigation = false, bool includeUsers = false, bool includeSuggestions = false)
         {
 
-            var SOS_Review = await _supervisorMobilityRepository.GetSOSasync(sosId);
+            var SOS_Review = await _supervisorMobilityRepository.GetSOSasync(sosId, includeNavigation, includeUsers, includeSuggestions);
 
             if (SOS_Review == null)
             {
                 return NotFound();
             }
 
-            if (includeCollections)
+            if (includeNavigation || includeUsers || includeSuggestions)
             {
                 return Ok(_mapper.Map<SOSReviewWithAllDto>(SOS_Review));
             }
@@ -150,7 +148,7 @@ namespace SupervisorMobility.API.Controllers
         {
 
             var SOS_Entity = await _supervisorMobilityRepository
-                .GetSOSasync(SOSid);
+                .GetSOSasync(SOSid, true, true, true);
 
             if (SOS_Entity == null)
             {
@@ -180,7 +178,7 @@ namespace SupervisorMobility.API.Controllers
         {
 
             var SOS_Entity = await _supervisorMobilityRepository
-              .GetSOSasync(SOSid);
+              .GetSOSasync(SOSid, true, true, true);
 
             var SOS_RegJobs = await _supervisorMobilityRepository.GetAllSOSReviewsRegisters(SOSid);
 

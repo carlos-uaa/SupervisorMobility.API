@@ -93,9 +93,9 @@ namespace SupervisorMobility.API.Controllers
 
             var result = await _supervisorMobilityRepository.AddSOSRegUserOperation(SOSRegUserOp);
             
-            var SOS_Review = await _supervisorMobilityRepository.GetSOSasync((int)SOSRegUserOp.SOSReviewProgramid);
+            var SOS_Review = await _supervisorMobilityRepository.GetSOSasync((int)SOSRegUserOp.SOSReviewProgramid, true, true, true);
 
-            if(!SOS_Review.Supervisors.Any(u => u.UserId == SOSRegUserOp.SupervisorId))
+            if (!SOS_Review.Supervisors.Any(u => u.UserId == SOSRegUserOp.SupervisorId))
             {
                 var usr = await _supervisorMobilityRepository.GetUserAsync((int)SOSRegUserOp.SupervisorId);
                 _supervisorMobilityRepository.SOSReviewAddUser(SOS_Review, usr);
@@ -131,7 +131,7 @@ namespace SupervisorMobility.API.Controllers
 
             var Jobs = await _supervisorMobilityRepository.GetAllSOSReviewsRegisters(sosId);
             var AllSosRegisters = await _supervisorMobilityRepository.GetAllSOSRegUserOperations(sosId);
-            var SOS_Review = await _supervisorMobilityRepository.GetSOSasync((int)SOS_Entity.SOSReviewProgramid);
+            var SOS_Review = await _supervisorMobilityRepository.GetSOSasync((int)SOS_Entity.SOSReviewProgramid, true, true, true);
 
 
             switch (option)
@@ -229,7 +229,6 @@ namespace SupervisorMobility.API.Controllers
 
                 }
 
-                //await _supervisorMobilityRepository.
             }
 
             await _supervisorMobilityRepository.SaveChangesAsync();

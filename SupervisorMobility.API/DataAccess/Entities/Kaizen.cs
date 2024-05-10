@@ -55,5 +55,9 @@ namespace SupervisorMobility.API.DataAccess.Entities
         public bool IsSignedSSV { get; set; }
         public bool IsSignedSupervisor { get; set; }
         public int OperatorPayroll { get; set; }
+
+        public string? Labor { get; set; }
+        public string? Material { get; set; }
+        public string? Machine { get; set; }
     }
 }

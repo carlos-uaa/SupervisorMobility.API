@@ -18,6 +18,10 @@ namespace SupervisorMobility.API.Models.Users
 
         public int? SuperiorId { get; set; }
 
+        public string? Management { get; set; }
+        public string? Department { get; set; }
+        public string? Process { get; set; }
+
         public DateTime? CreatedDate { get; set; } = DateTime.Now;
         public DateTime LastUpdated { get; set; }
         public DateTime? DisabledDate { get; set; }
@@ -40,6 +44,7 @@ namespace SupervisorMobility.API.Models.Users
         public ICollection<UsersWithoutPeopleWithNavigation>? Subordinates { get; set; }
         public ICollection<AreaDtos.AreaWithoutNavigationPropertiesDto>? Areas { get; set; }
         public ICollection<ILURegisterDto>? ILURegisers { get; set; }
+        public ICollection<LeadershipRecordsDto>? LeadershipRecords { get; set; }
         public DateTime? IncomesDate { get; set; }
         public DateTime? BirthDate { get; set; }
         public int? ProfilePictureId { get; set; }
