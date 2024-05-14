@@ -34,6 +34,9 @@
 	</ItemGroup>
 
 	<ItemGroup>
+		<Folder Include="downloads\CCP\" />
+		<Folder Include="downloads\HOE\" />
+		<Folder Include="downloads\GOS\" />
 		<Folder Include="Migrations\" />
 		<Folder Include="Documents\" />
 		<Folder Include="uploads\assycharts\" />
