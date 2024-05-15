@@ -3,6 +3,7 @@ using Serilog;
 using SupervisorMobility.API;
 using SupervisorMobility.API.DataAccess.Entities;
 using SupervisorMobility.API.DataAccess.Services;
+using System.Diagnostics;
 
 //Configure Serilog
 Log.Logger = new LoggerConfiguration()
@@ -114,6 +115,18 @@ if (app.Environment.IsDevelopment() || app.Environment.IsProduction())
     app.UseSwaggerUI();
 }
 
+app.Use(async (context, next) =>
+{
+    // Capturar la respuesta después de que se haya completado
+    await next();
+
+    // Registrar los headers de la respuesta
+    foreach (var header in context.Response.Headers)
+    {
+        Console.WriteLine($"Response Header: {header.Key} = {string.Join(",", header.Value)}");
+        Debug.WriteLine($"Response Header: {header.Key} = {string.Join(",", header.Value)}");
+    }
+});
 
 //app.UseHttpsRedirection();
 app.UseStaticFiles();
