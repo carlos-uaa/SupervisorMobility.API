@@ -121,64 +121,61 @@ namespace SupervisorMobility.API.Controllers
         public async Task<ActionResult> PostDownloadfileGos(Dictionary<string, string> parameters)
         {
             var content = new FormUrlEncodedContent(parameters);
+            //optenemos el enlace de descarga y la Key
+            var FileInfoResponse = await _bridgeHttpClient.PostAsync("SMGos/PostDownloadfileGos", content);
 
-            var response = await _bridgeHttpClient.PostAsync("SMGos/PostDownloadfileGos", content);
-            //Aqui esa logica
             CDMS_DownloadFile DownloadLink = new();
-            if (response.IsSuccessStatusCode)
+            if (FileInfoResponse.IsSuccessStatusCode)
             {
-                var result = await response.Content.ReadFromJsonAsync<CDMS_DownloadFile>();
+                var result = await FileInfoResponse.Content.ReadFromJsonAsync<CDMS_DownloadFile>();
                 DownloadLink = result;
             }
             else
             {
-                //await _js.InvokeVoidAsync("alert", $"Error get folders: {response.Content.ReadAsStringAsync().Result}");
-                Console.WriteLine($"GET LINK GOS, Status Code {response.StatusCode} : {response.Content.ReadAsStringAsync().Result}");
+                return NotFound("Error en la Ruta o no se encontro el archivo en el bridge");
             }
 
+            //Continua con la logica
 
-            var fileName = DownloadLink?.operation.NameDocKey;
+            var fileKey = DownloadLink?.operation.NameDocKey;
             var fileURL = DownloadLink?.operation.URL;
 
             if (_env.IsDevelopment())
             {
-                //https://10.91.117.5:3000/GOS/T10140-5NA_1_TAKE%20OFF-ISS%20CABLE%20BANDAHbV4ePCte.xls
-                //https://10.91.49.2:3000/GOS/T10140-5NA_1_TAKE%20OFF-ISS%20CABLE%20BANDAHbV4ePCte.xls
                 fileURL = fileURL.Replace("https://10.91.117.5:3000", "https://10.91.49.2:3000");
             }
 
-            Console.WriteLine($"NamekEY: {DownloadLink?.operation.NameDocKey}");
-
-            var fileWithOutIp = "";
+            var fileNameWithOutIp = "";
 
             if (_env.IsDevelopment())
             {
-                fileWithOutIp = fileURL.Replace("https://10.91.49.2:3000/GOS/", "");
+                fileNameWithOutIp = fileURL.Replace("https://10.91.49.2:3000/GOS/", "");
             }
             else
             {
-                fileWithOutIp = fileURL.Replace("https://10.91.117.5:3000/GOS/", "");
+                fileNameWithOutIp = fileURL.Replace("https://10.91.117.5:3000/GOS/", "");
             }
 
-            var filePath = Path.Combine(_env.ContentRootPath, "downloads\\GOS", fileWithOutIp);
+            var filePathSave = Path.Combine(_env.ContentRootPath, "downloads\\GOS", fileNameWithOutIp);
 
             try
             {
-                using (var fileResponse = await _bridgeHttpClient.GetAsync(fileURL))
+                //descargamos el archivo
+                using (var fileDownloadResponse = await _bridgeHttpClient.GetAsync(fileURL))
                 {
-                    if (fileResponse.IsSuccessStatusCode)
+                    if (fileDownloadResponse.IsSuccessStatusCode)
                     {
                         // Guardar el archivo descargado en el sistema local
-                        using (var fileStream = new FileStream(filePath, FileMode.Create))
+                        using (var fileStream = new FileStream(filePathSave, FileMode.Create))
                         {
-                            await fileResponse.Content.CopyToAsync(fileStream);
+                            await fileDownloadResponse.Content.CopyToAsync(fileStream);
                         }
 
-                        Console.WriteLine($"Archivo descargado exitosamente: {filePath}");
+                        Console.WriteLine($"Archivo descargado exitosamente: {filePathSave}");
                     }
                     else
                     {
-                        Console.WriteLine($"Error al descargar el archivo. StatusCode: {fileResponse.StatusCode}");
+                        Console.WriteLine($"Error al descargar el archivo. StatusCode: {fileDownloadResponse.StatusCode}");
                     }
                 }
 
@@ -188,37 +185,33 @@ namespace SupervisorMobility.API.Controllers
                 Console.WriteLine($"Error In Download Gos File: {ex.Message} ");
             }
 
-            // Construir la URL de descarga relativa
-            var relativeFilePath = Path.Combine("downloads/GOS", fileWithOutIp).Replace("\\", "/");
-           
+
+            // Retornamos el archivo local al cliente
             var provider = new FileExtensionContentTypeProvider();
-            if (!provider.TryGetContentType(filePath, out var contentType))
+            if (!provider.TryGetContentType(filePathSave, out var contentType))
             {
                 contentType = "application/octet-stream";
             }
 
-            // Leer los bytes del archivo descargado
-            var fileBytes = await System.IO.File.ReadAllBytesAsync(filePath);
-                                 // Crear una respuesta personalizada con los bytes del archivo y los encabezados
-            var responseHeaders = new HttpResponseMessage(HttpStatusCode.OK)
+            // Leer los bytes del archivo local
+            var fileBytes = await System.IO.File.ReadAllBytesAsync(filePathSave);
+
+            // Crear un FileContentResult con los bytes del archivo y el tipo de contenido
+            var resultWhitFile = new FileContentResult(fileBytes, contentType)
             {
-                Content = new ByteArrayContent(fileBytes)
+                FileDownloadName = fileKey // Nombre del archivo en la descarga
             };
 
-            responseHeaders.Content.Headers.ContentType = new MediaTypeHeaderValue(contentType);
-            responseHeaders.Content.Headers.ContentDisposition = new ContentDispositionHeaderValue("attachment")
-            {
-                FileName = fileName // Nombre del archivo en la descarga
-            };
+            // Establecer la disposición del contenido como "attachment"
+            Response.Headers.Add("Content-Disposition", "attachment; filename=" + resultWhitFile.FileDownloadName);
 
-          
+            // Añadir header personalizado "KeyDocument"
+            Response.Headers.Add("KeyDocument", fileKey);
 
-            // Convertir la respuesta a IActionResult y devolverla
-            var resultWhitFile = new FileContentResult(await responseHeaders.Content.ReadAsByteArrayAsync(), contentType)
-            {
-                FileDownloadName = fileName // Nombre del archivo en la descarga
-            };
+            // Añadir header personalizado "PathDocument"
+            Response.Headers.Add("PathDocument", filePathSave);
 
+            // Retornar el FileContentResult
             return resultWhitFile;
         }
 
