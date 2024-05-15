@@ -118,72 +118,102 @@ namespace SupervisorMobility.API.Controllers
         }
 
         [HttpPost("SMGos/PostDownloadfileGos")]
-        public async Task<IActionResult> PostDownloadfileGos(Dictionary<string, string> parameters)
+        public async Task<ActionResult> PostDownloadfileGos(Dictionary<string, string> parameters)
         {
+            var content = new FormUrlEncodedContent(parameters);
+            //optenemos el enlace de descarga y la Key
+            var FileInfoResponse = await _bridgeHttpClient.PostAsync("SMGos/PostDownloadfileGos", content);
+
+            CDMS_DownloadFile DownloadLink = new();
+            if (FileInfoResponse.IsSuccessStatusCode)
+            {
+                var result = await FileInfoResponse.Content.ReadFromJsonAsync<CDMS_DownloadFile>();
+                DownloadLink = result;
+            }
+            else
+            {
+                return NotFound("Error en la Ruta o no se encontro el archivo en el bridge");
+            }
+
+            //Continua con la logica
+
+            var fileKey = DownloadLink?.operation.NameDocKey;
+            var fileURL = DownloadLink?.operation.URL;
+
+            if (_env.IsDevelopment())
+            {
+                fileURL = fileURL.Replace("https://10.91.117.5:3000", "https://10.91.49.2:3000");
+            }
+
+            var fileNameWithOutIp = "";
+
+            if (_env.IsDevelopment())
+            {
+                fileNameWithOutIp = fileURL.Replace("https://10.91.49.2:3000/GOS/", "");
+            }
+            else
+            {
+                fileNameWithOutIp = fileURL.Replace("https://10.91.117.5:3000/GOS/", "");
+            }
+
+            var filePathSave = Path.Combine(_env.ContentRootPath, "downloads\\GOS", fileNameWithOutIp);
+
             try
             {
-                var content = new FormUrlEncodedContent(parameters);
-
-                var response = await _bridgeHttpClient.PostAsync("SMGos/PostDownloadfileGos", content);
-
-                if (!response.IsSuccessStatusCode)
+                //descargamos el archivo
+                using (var fileDownloadResponse = await _bridgeHttpClient.GetAsync(fileURL))
                 {
-                    Console.WriteLine($"GET LINK GOS, Status Code {response.StatusCode}");
-                    return BadRequest($"Error retrieving file: {response.StatusCode}");
-                }
-
-                var result = await response.Content.ReadFromJsonAsync<CDMS_DownloadFile>();
-
-                if (result == null || string.IsNullOrEmpty(result.operation?.URL))
-                {
-                    return NotFound("File information not found in response.");
-                }
-
-                var fileURL = result.operation.URL;
-
-                if (_env.IsDevelopment())
-                {
-                    // Replace development URL with production URL
-                    fileURL = fileURL.Replace("https://10.91.117.5:3000", "https://10.91.49.2:3000");
-                }
-
-                using (var fileResponse = await _bridgeHttpClient.GetAsync(fileURL))
-                {
-                    if (!fileResponse.IsSuccessStatusCode)
+                    if (fileDownloadResponse.IsSuccessStatusCode)
                     {
-                        Console.WriteLine($"Error downloading file. StatusCode: {fileResponse.StatusCode}");
-                        return StatusCode((int)fileResponse.StatusCode, "Error downloading file.");
+                        // Guardar el archivo descargado en el sistema local
+                        using (var fileStream = new FileStream(filePathSave, FileMode.Create))
+                        {
+                            await fileDownloadResponse.Content.CopyToAsync(fileStream);
+                        }
+
+                        Console.WriteLine($"Archivo descargado exitosamente: {filePathSave}");
                     }
-
-                    var fileBytes = await fileResponse.Content.ReadAsByteArrayAsync();
-                    var fileName = result.operation.NameDocKey ?? "downloaded_file"; // Default filename if not provided
-
-                    var provider = new FileExtensionContentTypeProvider();
-                    if (!provider.TryGetContentType(fileName, out var contentType))
+                    else
                     {
-                        contentType = "application/octet-stream"; // Default content type
+                        Console.WriteLine($"Error al descargar el archivo. StatusCode: {fileDownloadResponse.StatusCode}");
                     }
-                    // Save the downloaded file to a temporary directory
-                    var tempDir = Path.Combine(_env.ContentRootPath, "downloads", "temp");
-                    Directory.CreateDirectory(tempDir);
-                    var filePath = Path.Combine(tempDir, fileName);
-                    await System.IO.File.WriteAllBytesAsync(filePath, fileBytes);
-
-                    // Prepare response headers
-                    Response.Headers.Add("KeyDocument", fileName);
-                    Response.Headers.Add("PathDocument", filePath); // Include the file path in response headers
-
-                    // Return file as download attachment
-                    return File(fileBytes, contentType, fileName);
                 }
+
             }
             catch (Exception ex)
             {
-                Console.WriteLine($"Error in Download Gos File: {ex.Message}");
-                return StatusCode(StatusCodes.Status500InternalServerError, "Internal Server Error");
+                Console.WriteLine($"Error In Download Gos File: {ex.Message} ");
             }
-        }
 
+
+            // Retornamos el archivo local al cliente
+            var provider = new FileExtensionContentTypeProvider();
+            if (!provider.TryGetContentType(filePathSave, out var contentType))
+            {
+                contentType = "application/octet-stream";
+            }
+
+            // Leer los bytes del archivo local
+            var fileBytes = await System.IO.File.ReadAllBytesAsync(filePathSave);
+
+            // Crear un FileContentResult con los bytes del archivo y el tipo de contenido
+            var resultWhitFile = new FileContentResult(fileBytes, contentType)
+            {
+                FileDownloadName = fileKey // Nombre del archivo en la descarga
+            };
+
+            // Establecer la disposición del contenido como "attachment"
+            Response.Headers.Add("Content-Disposition", "attachment; filename=" + resultWhitFile.FileDownloadName);
+
+            // Añadir header personalizado "KeyDocument"
+            Response.Headers.Add("KeyDocument", fileKey);
+
+            // Añadir header personalizado "PathDocument"
+            Response.Headers.Add("PathDocument", filePathSave);
+
+            // Retornar el FileContentResult
+            return resultWhitFile;
+        }
 
 
         [HttpPost("SMGos/DeleteFileTempGos")]
