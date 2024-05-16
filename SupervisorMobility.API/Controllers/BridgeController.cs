@@ -253,18 +253,8 @@ namespace SupervisorMobility.API.Controllers
             CDMS_DownloadFile DownloadLink = new();
             if (FileInfoResponse.IsSuccessStatusCode)
             {
-                var result = await FileInfoResponse.Content.ReadFromJsonAsync<CDMS_DownloadFile>();
-                DownloadLink = result;
-            }
-            else
-            {
-                return NotFound("Error en la Ruta o no se encontro el archivo en el bridge");
-            }
-
-            //Continua con la logica
-
-            var fileKey = DownloadLink?.operation.NameDocKey;
-            var fileURL = DownloadLink?.operation.URL;
+                fileURL = documentUrlDownload;
+                Console.WriteLine($"url a descargar: {documentUrlDownload}");
 
             if (_env.IsDevelopment())
             {
