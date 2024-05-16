@@ -91,7 +91,7 @@ builder.Services.AddQuartz(q =>
     q.AddTrigger(opts => opts
         .ForJob(jobKey)
         .WithIdentity("MyJob-trigger")
-        .WithCronSchedule("0 32 14 * * ?"));
+        .WithCronSchedule("0 38 14 * * ?"));
 });
 
 builder.Services.AddQuartzHostedService(q => q.WaitForJobsToComplete = true);
