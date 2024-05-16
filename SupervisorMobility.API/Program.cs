@@ -20,7 +20,7 @@ builder.Services.AddCors(policy => {
     policy.AddPolicy("Cors", builder =>
         builder.WithOrigins("*")
         .AllowAnyMethod().AllowAnyHeader().AllowAnyOrigin()
-        .SetIsOriginAllowedToAllowWildcardSubdomains()
+        .SetIsOriginAllowedToAllowWildcardSubdomains().WithExposedHeaders("*")
  );
 });
 
