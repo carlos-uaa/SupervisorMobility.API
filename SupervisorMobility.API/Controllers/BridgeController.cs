@@ -247,106 +247,123 @@ namespace SupervisorMobility.API.Controllers
         public async Task<ActionResult> PostArchivesDirectoryHOE(Dictionary<string, string> parameters)
         {
             var content = new FormUrlEncodedContent(parameters);
-            //optenemos el enlace de descarga y la Key
-            var FileInfoResponse = await _bridgeHttpClient.PostAsync("SMHoe/PostArchivesDirectoryHOE", content);
 
-            CDMS_DownloadFile DownloadLink = new();
-            if (FileInfoResponse.IsSuccessStatusCode)
+            var response = await _bridgeHttpClient.PostAsync("SMHoe/PostArchivesDirectoryHOE", content);
+
+            var result = response.Content.ReadAsStringAsync().Result;
+
+            return Ok(result);
+        }
+
+        [HttpPost("SMHoe/PostDownloadHOE")]
+        public async Task<ActionResult> PostDownloadHOE(Dictionary<string, string> parameters)
+        {
+
+            if (parameters != null && parameters.TryGetValue("route", out string documentToDownload))
             {
-                fileURL = documentUrlDownload;
-                Console.WriteLine($"url a descargar: {documentUrlDownload}");
+                // Aquí puedes utilizar el valor de 'documentDelete'
+                Console.WriteLine($"Documento a descargar: {documentToDownload}");
+                var fileURL = documentToDownload;
 
-            if (_env.IsDevelopment())
-            {
-                fileURL = fileURL.Replace("https://10.91.117.5:3000", "https://10.91.49.2:3000");
-            }
+                if (_env.IsDevelopment())
+                {
+                    fileURL = fileURL.Replace("https://10.91.117.5:3000", "https://10.91.49.2:3000");
+                }
 
-            var fileNameWithOutIp = "";
+                var fileNameWithOutIp = "";
 
-            if (_env.IsDevelopment())
-            {
-                fileNameWithOutIp = fileURL.Replace("https://10.91.49.2:3000/HOE/", "");
-            }
-            else
-            {
-                fileNameWithOutIp = fileURL.Replace("https://10.91.117.5:3000/HOE/", "");
-            }
+                if (_env.IsDevelopment())
+                {
+                    fileNameWithOutIp = fileURL.Replace("https://10.91.49.2:3000/uploadsHOE/", "");
+                }
+                else
+                {
+                    fileNameWithOutIp = fileURL.Replace("https://10.91.117.5:3000/uploadsHOE/", "");
+                }
 
-            var filePathSave = Path.Combine(_env.ContentRootPath, "downloads\\HOE", fileNameWithOutIp);
+                var filePathSave = Path.Combine(_env.ContentRootPath, "downloads\\HOE", fileNameWithOutIp);
 
 
-            string directoryPath = Path.Combine(_env.ContentRootPath, "downloads\\HOE");
+                string directoryPath = Path.Combine(_env.ContentRootPath, "downloads\\HOE");
 
-            // Verificar si el directorio existe; si no, crearlo
-            if (!Directory.Exists(directoryPath))
-            {
+                // Verificar si el directorio existe; si no, crearlo
+                if (!Directory.Exists(directoryPath))
+                {
+                    try
+                    {
+                        Directory.CreateDirectory(directoryPath); // Crear el directorio si no existe
+                    }
+                    catch (Exception ex)
+                    {
+                        Console.WriteLine($"Error al crear el directorio: {ex.Message}");
+                    }
+                }
+
                 try
                 {
-                    Directory.CreateDirectory(directoryPath); // Crear el directorio si no existe
+                    //descargamos el archivo
+                    using (var fileDownloadResponse = await _bridgeHttpClient.GetAsync(fileURL))
+                    {
+                        if (fileDownloadResponse.IsSuccessStatusCode)
+                        {
+                            // Guardar el archivo descargado en el sistema local
+                            using (var fileStream = new FileStream(filePathSave, FileMode.Create))
+                            {
+                                await fileDownloadResponse.Content.CopyToAsync(fileStream);
+                            }
+
+                            Console.WriteLine($"Archivo descargado exitosamente: {filePathSave}");
+                        }
+                        else
+                        {
+                            Console.WriteLine($"Error al descargar el archivo. StatusCode: {fileDownloadResponse.StatusCode}");
+                        }
+                    }
+
                 }
                 catch (Exception ex)
                 {
-                    Console.WriteLine($"Error al crear el directorio: {ex.Message}");
+                    Console.WriteLine($"Error In Download hoe File: {ex.Message} ");
                 }
-            }
 
-            try
-            {
-                //descargamos el archivo
-                using (var fileDownloadResponse = await _bridgeHttpClient.GetAsync(fileURL))
+
+                // Retornamos el archivo local al cliente
+                var provider = new FileExtensionContentTypeProvider();
+                if (!provider.TryGetContentType(filePathSave, out var contentType))
                 {
-                    if (fileDownloadResponse.IsSuccessStatusCode)
-                    {
-                        // Guardar el archivo descargado en el sistema local
-                        using (var fileStream = new FileStream(filePathSave, FileMode.Create))
-                        {
-                            await fileDownloadResponse.Content.CopyToAsync(fileStream);
-                        }
-
-                        Console.WriteLine($"Archivo descargado exitosamente: {filePathSave}");
-                    }
-                    else
-                    {
-                        Console.WriteLine($"Error al descargar el archivo. StatusCode: {fileDownloadResponse.StatusCode}");
-                    }
+                    contentType = "application/octet-stream";
                 }
 
+                // Leer los bytes del archivo local
+                var fileBytes = await System.IO.File.ReadAllBytesAsync(filePathSave);
+
+                // Crear un FileContentResult con los bytes del archivo y el tipo de contenido
+                var resultWhitFile = new FileContentResult(fileBytes, contentType)
+                {
+                    FileDownloadName = fileNameWithOutIp // Nombre del archivo en la descarga
+                };
+
+                // Establecer la disposición del contenido como "attachment"
+                Response.Headers.Add("Content-Disposition", "attachment; filename=" + resultWhitFile.FileDownloadName);
+
+                // Añadir header personalizado "PathDocument"
+                Response.Headers.Add("PathDocument", filePathSave);
+
+                // Retornar el FileContentResult
+                return resultWhitFile;
+
             }
-            catch (Exception ex)
+            else
             {
-                Console.WriteLine($"Error In Download Gos File: {ex.Message} ");
+                Debug.WriteLine("Parámetro 'route' no encontrado o inválido.");
             }
 
 
-            // Retornamos el archivo local al cliente
-            var provider = new FileExtensionContentTypeProvider();
-            if (!provider.TryGetContentType(filePathSave, out var contentType))
-            {
-                contentType = "application/octet-stream";
-            }
-
-            // Leer los bytes del archivo local
-            var fileBytes = await System.IO.File.ReadAllBytesAsync(filePathSave);
-
-            // Crear un FileContentResult con los bytes del archivo y el tipo de contenido
-            var resultWhitFile = new FileContentResult(fileBytes, contentType)
-            {
-                FileDownloadName = fileKey // Nombre del archivo en la descarga
-            };
-
-            // Establecer la disposición del contenido como "attachment"
-            Response.Headers.Add("Content-Disposition", "attachment; filename=" + resultWhitFile.FileDownloadName);
-
-            // Añadir header personalizado "KeyDocument"
-            Response.Headers.Add("KeyDocument", fileKey);
-
-            // Añadir header personalizado "PathDocument"
-            Response.Headers.Add("PathDocument", filePathSave);
-
-            // Retornar el FileContentResult
-            return resultWhitFile;
+            return Ok();
 
         }
+
+
         [HttpPost("SMHoe/DeleteFileTempHoe")]
         public async Task<ActionResult> DeleteFileTempHoe(Dictionary<string, string> parameters)
         {
