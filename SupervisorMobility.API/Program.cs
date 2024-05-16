@@ -1,11 +1,17 @@
+using Microsoft.Extensions.DependencyInjection;
+using Microsoft.Extensions.Hosting;
 using Newtonsoft.Json;
+using Quartz;
+using Quartz.Impl;
 using Serilog;
 using SupervisorMobility.API;
+using SupervisorMobility.API.Business;
 using SupervisorMobility.API.DataAccess.Entities;
 using SupervisorMobility.API.DataAccess.Services;
+using SupervisorMobility.API.Models.NotificationDtos;
+using SupervisorMobility.API.Services;
 using System.Diagnostics;
 
-//Configure Serilog
 Log.Logger = new LoggerConfiguration()
     .MinimumLevel.Debug()
     .WriteTo.Console()
@@ -14,18 +20,15 @@ Log.Logger = new LoggerConfiguration()
 
 var builder = WebApplication.CreateBuilder(args);
 
-//Add Cors
-builder.Services.AddCors(policy => {
-
+// Add services to the container.
+builder.Services.AddCors(policy =>
+{
     policy.AddPolicy("Cors", builder =>
         builder.WithOrigins("*")
         .AllowAnyMethod().AllowAnyHeader().AllowAnyOrigin()
-        .SetIsOriginAllowedToAllowWildcardSubdomains()
- );
+        .SetIsOriginAllowedToAllowWildcardSubdomains());
 });
 
-
-//add json file to builder configuration
 var env = builder.Environment;
 if (env.IsDevelopment())
 {
@@ -36,79 +39,65 @@ else
     builder.Configuration.AddJsonFile("appsettings.json", optional: false, reloadOnChange: true);
 }
 
-// Add services to the container.
-// Configure the HTTP request pipeline.
-
 builder.Host.UseSerilog();
 
 builder.Services.AddControllers(options =>
 {
     options.ReturnHttpNotAcceptable = true;
 }).AddNewtonsoftJson()
-.AddXmlDataContractSerializerFormatters();
+ .AddXmlDataContractSerializerFormatters();
 
-// Learn more about configuring Swagger/OpenAPI at https://aka.ms/aspnetcore/swashbuckle
 builder.Services.AddEndpointsApiExplorer();
 builder.Services.AddSwaggerGen();
 builder.Services.AddSwaggerGen(options =>
 {
     options.CustomSchemaIds(type =>
     {
-        
         return type.FullName;
     });
 });
 
-//Add other services
 builder.Services.RegisterBusinessServices();
 builder.Services.RegisterDataServices(builder.Configuration);
 
-//
-
-
-//Add automapper
 builder.Services.AddAutoMapper(AppDomain.CurrentDomain.GetAssemblies());
 
-//Odmitir Referencias ciruclares
 builder.Services.AddControllers()
     .AddNewtonsoftJson(options =>
     {
         options.SerializerSettings.ReferenceLoopHandling = ReferenceLoopHandling.Ignore;
     });
 
-
 builder.WebHost.ConfigureKestrel(serverOptions =>
 {
     serverOptions.Limits.MaxRequestBodySize = 1073741824;
 });
 
-//mail
 var emailConfig = builder.Configuration
-        .GetSection("EmailConfiguration")
-        .Get<EmailConfiguration>();
+    .GetSection("EmailConfiguration")
+    .Get<EmailConfiguration>();
 builder.Services.AddSingleton(emailConfig);
 
-
-//peticion api
-//builder.Services.AddHostedService<MyScheduledTaskService>();
-
-
-//using namespaces este funciona mejor 
-//builder.Services.AddHostedService<MyScheduledTask>();
-
-
-// Crear una instancia del servicio en segundo plano
 builder.Services.AddSingleton<BackgroundProcessingService>();
-
-
 builder.Services.AddScoped<CustomHttpClientService>();
 
+// Configurar Quartz.NET
+builder.Services.AddQuartz(q =>
+{
+    q.UseMicrosoftDependencyInjectionJobFactory();
 
+    var jobKey = new JobKey("MyJob");
+    q.AddJob<MyJob>(opts => opts.WithIdentity(jobKey));
+    q.AddTrigger(opts => opts
+        .ForJob(jobKey)
+        .WithIdentity("MyJob-trigger")
+        .WithCronSchedule("0 32 14 * * ?"));
+});
+
+builder.Services.AddQuartzHostedService(q => q.WaitForJobsToComplete = true);
 
 var app = builder.Build();
 
-
-// Configure the HTTP request pipeline.
 if (app.Environment.IsDevelopment() || app.Environment.IsProduction())
 {
     app.UseSwagger();
@@ -131,11 +120,95 @@ app.Use(async (context, next) =>
 //app.UseHttpsRedirection();
 app.UseStaticFiles();
 app.UseRouting();
-
 app.UseCors("Cors");
-
 app.UseAuthorization();
-
 app.MapControllers();
 app.MapRazorPages();
+
 app.Run();
+
+public class MyJob : IJob
+{
+    private readonly IAssyChartService _assyChartService;
+    private readonly ISupervisorMobilityRepository _supervisorMobilityService;
+
+    public MyJob(IAssyChartService assyChartService, ISupervisorMobilityRepository supervisorMobilityService)
+    {
+        _assyChartService = assyChartService;
+        _supervisorMobilityService = supervisorMobilityService;
+    }
+
+    public async Task Execute(IJobExecutionContext context)
+    {
+        Console.ForegroundColor = ConsoleColor.Blue;
+        Console.WriteLine("Job executed !!!!!");
+        Console.ResetColor();
+
+        var _allJobObservations = await _supervisorMobilityService.GetAllJobObservationsAsync(includePeople: true, includeLup: true);
+        if (_allJobObservations != null)
+        {
+            var filteredJobObservations = _allJobObservations
+                .Where(j => j.Lup.Any(l => l.IsActive == true && (l.Status == 1 || l.Status == 2)))
+                .ToList();
+
+            var supervisorLupCounts = filteredJobObservations
+             .GroupBy(j => new { j.SupervisorId, j.Supervisor?.Name, j.Supervisor?.SuperiorId })
+             .Select(g => new
+             {
+                 SupervisorId = g.Key.SupervisorId,
+                 SupervisorName = g.Key.Name,
+                 SuperiorId = g.Key.SuperiorId,
+                 ActiveLupCount = g.Sum(j => j.Lup.Count(l => l.IsActive == true && (l.Status == 1 || l.Status == 2)))
+             })
+             .ToList();
+
+            foreach (var supervisor in supervisorLupCounts)
+            {
+                string notificationText = supervisor.ActiveLupCount == 1
+                                    ? $"Supervisor {supervisor.SupervisorName} has 1 LUP item active at {DateTime.Now:hh:mm tt}"
+                                    : $"Supervisor {supervisor.SupervisorName} has {supervisor.ActiveLupCount} LUP items active at {DateTime.Now:hh:mm tt}";
+
+                NotificationToCreateDto newnotify = new NotificationToCreateDto
+                {
+                    MadeBy = "SM Mobility",
+                    UserId = supervisor.SupervisorId.Value,
+                    IsAccepted = true,
+                    IsActive = true,
+                    NotificationText = notificationText,
+                    NotificationType = "Active Lup Item"
+                };
+
+                var response = await _assyChartService.CreateNotificationAsync(newnotify);
+
+                if (response != null)
+                {
+                    Console.ForegroundColor = ConsoleColor.Green;
+                    Console.WriteLine($"Notification created for Supervisor {supervisor.SupervisorName}");
+                    Console.ResetColor();
+                }
+
+                if (supervisor.SuperiorId.HasValue)
+                {
+                    NotificationToCreateDto newnotifyForSSV = new NotificationToCreateDto
+                    {
+                        MadeBy = "SM Mobility",
+                        UserId = supervisor.SuperiorId.Value,
+                        IsAccepted = true,
+                        IsActive = true,
+                        NotificationText = notificationText,
+                        NotificationType = "Active Lup Item"
+                    };
+
+                    var responseForSSV = await _assyChartService.CreateNotificationAsync(newnotifyForSSV);
+
+                    if (responseForSSV != null)
+                    {
+                        Console.ForegroundColor = ConsoleColor.Green;
+                        Console.WriteLine($"Notification created for Senior Supervisor of {supervisor.SupervisorName}");
+                        Console.ResetColor();
+                    }
+                }
+            }
+        }
+    }
+}
