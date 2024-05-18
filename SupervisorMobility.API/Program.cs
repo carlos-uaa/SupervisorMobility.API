@@ -3,6 +3,7 @@ using Microsoft.Extensions.Hosting;
 using Newtonsoft.Json;
 using Quartz;
 using Quartz.Impl;
+using Quartz.Spi;
 using Serilog;
 using SupervisorMobility.API;
 using SupervisorMobility.API.Business;
@@ -91,7 +92,7 @@ builder.Services.AddQuartz(q =>
     q.AddTrigger(opts => opts
         .ForJob(jobKey)
         .WithIdentity("MyJob-trigger")
-        .WithCronSchedule("0 38 14 * * ?"));
+        .WithCronSchedule("0 0 14 * * ?"));
 });
 
 builder.Services.AddQuartzHostedService(q => q.WaitForJobsToComplete = true);
@@ -131,11 +132,13 @@ public class MyJob : IJob
 {
     private readonly IAssyChartService _assyChartService;
     private readonly ISupervisorMobilityRepository _supervisorMobilityService;
+    private readonly IEmailService _emailService;
 
-    public MyJob(IAssyChartService assyChartService, ISupervisorMobilityRepository supervisorMobilityService)
+    public MyJob(IAssyChartService assyChartService, ISupervisorMobilityRepository supervisorMobilityService, IEmailService emailService)
     {
         _assyChartService = assyChartService;
         _supervisorMobilityService = supervisorMobilityService;
+        _emailService = emailService;
     }
 
     public async Task Execute(IJobExecutionContext context)
@@ -152,12 +155,13 @@ public class MyJob : IJob
                 .ToList();
 
             var supervisorLupCounts = filteredJobObservations
-             .GroupBy(j => new { j.SupervisorId, j.Supervisor?.Name, j.Supervisor?.SuperiorId })
+             .GroupBy(j => new { j.SupervisorId, j.Supervisor?.Name, j.Supervisor?.SuperiorId, j.Supervisor?.Email })
              .Select(g => new
              {
                  SupervisorId = g.Key.SupervisorId,
                  SupervisorName = g.Key.Name,
                  SuperiorId = g.Key.SuperiorId,
+                 SupervisorEmail = g.Key.Email,
                  ActiveLupCount = g.Sum(j => j.Lup.Count(l => l.IsActive == true && (l.Status == 1 || l.Status == 2)))
              })
              .ToList();
@@ -182,6 +186,9 @@ public class MyJob : IJob
 
                 if (response != null)
                 {
+                    //var emailMessageError = _emailService.CreateEmailMessage(supervisor.SupervisorEmail, "Active Lup Item", notificationText);
+                    var emailMessageError = _emailService.CreateEmailMessage("pmunoz@gruposinco.com.mx", "Active Lup Item", notificationText);
+                    _emailService.Send(emailMessageError);
                     Console.ForegroundColor = ConsoleColor.Green;
                     Console.WriteLine($"Notification created for Supervisor {supervisor.SupervisorName}");
                     Console.ResetColor();
@@ -203,6 +210,15 @@ public class MyJob : IJob
 
                     if (responseForSSV != null)
                     {
+
+                        User SSV = await _supervisorMobilityService.GetUserAsync(supervisor.SuperiorId.Value);
+                        if(SSV != null)
+                        {
+                            //var emailMessageError = _emailService.CreateEmailMessage(SSV.Email, "Active Lup Item", notificationText);
+                            var emailMessageError = _emailService.CreateEmailMessage("pmunoz@gruposinco.com.mx", "Active Lup Item SSV", notificationText);
+                            _emailService.Send(emailMessageError);
+                        }
+
                         Console.ForegroundColor = ConsoleColor.Green;
                         Console.WriteLine($"Notification created for Senior Supervisor of {supervisor.SupervisorName}");
                         Console.ResetColor();
