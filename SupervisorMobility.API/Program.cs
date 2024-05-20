@@ -92,7 +92,7 @@ builder.Services.AddQuartz(q =>
     q.AddTrigger(opts => opts
         .ForJob(jobKey)
         .WithIdentity("MyJob-trigger")
-        .WithCronSchedule("0 0 14 * * ?"));
+        .WithCronSchedule("0 26 9 * * ?"));
 });
 
 builder.Services.AddQuartzHostedService(q => q.WaitForJobsToComplete = true);
@@ -186,8 +186,8 @@ public class MyJob : IJob
 
                 if (response != null)
                 {
-                    //var emailMessageError = _emailService.CreateEmailMessage(supervisor.SupervisorEmail, "Active Lup Item", notificationText);
-                    var emailMessageError = _emailService.CreateEmailMessage("pmunoz@gruposinco.com.mx", "Active Lup Item", notificationText);
+                    var emailMessageError = _emailService.CreateEmailMessage(supervisor.SupervisorEmail, "Active Lup Item", notificationText);
+                    //var emailMessageError = _emailService.CreateEmailMessage("pmunoz@gruposinco.com.mx", "Active Lup Item", notificationText);
                     _emailService.Send(emailMessageError);
                     Console.ForegroundColor = ConsoleColor.Green;
                     Console.WriteLine($"Notification created for Supervisor {supervisor.SupervisorName}");
@@ -214,8 +214,8 @@ public class MyJob : IJob
                         User SSV = await _supervisorMobilityService.GetUserAsync(supervisor.SuperiorId.Value);
                         if(SSV != null)
                         {
-                            //var emailMessageError = _emailService.CreateEmailMessage(SSV.Email, "Active Lup Item", notificationText);
-                            var emailMessageError = _emailService.CreateEmailMessage("pmunoz@gruposinco.com.mx", "Active Lup Item SSV", notificationText);
+                            var emailMessageError = _emailService.CreateEmailMessage(SSV.Email, "Active Lup Item", notificationText);
+                            //var emailMessageError = _emailService.CreateEmailMessage("pmunoz@gruposinco.com.mx", "Active Lup Item SSV", notificationText);
                             _emailService.Send(emailMessageError);
                         }
 
