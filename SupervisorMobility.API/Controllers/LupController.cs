@@ -73,9 +73,9 @@ namespace SupervisorMobility.API.Controllers
 
 
         [HttpGet("Insidences/{checklistQuestionId}")]
-        public async Task<ActionResult<List<LupDto>>> GetChecklistQuestionInsidences(int checklistQuestionId, int sv_id)
+        public async Task<ActionResult<List<LupDto>>> GetChecklistQuestionInsidences(int checklistQuestionId, int supervisor_id)
         {
-            var checklistQuestions = await _supervisorMobilityRepository.GetAllLupInsidences(checklistQuestionId, sv_id);
+            var checklistQuestions = await _supervisorMobilityRepository.GetAllLupInsidences(checklistQuestionId, supervisor_id);
 
             if (checklistQuestions == null)
             {
