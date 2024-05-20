@@ -1,4 +1,5 @@
 ﻿using SupervisorMobility.API.Entities;
+using SupervisorMobility.API.Models.ChecklistQuestionDtos;
 
 namespace SupervisorMobility.API.Models.LupDtos
 {
@@ -24,6 +25,8 @@ namespace SupervisorMobility.API.Models.LupDtos
         public int? StdChange { get; set; }
         public int? StdUpdate { get; set; }
 
-
+        public int? ChecklistQuestionId { get; set; }
+        public ChecklistQuestionDto? ChecklistQuestion { get; set; }
+        
     }
 }

@@ -7,11 +7,13 @@ namespace SupervisorMobility.API.DataAccess.Services
 {
     public class EmailService : IEmailService
     {
+        private readonly IWebHostEnvironment _env;
 
         private readonly EmailConfiguration _emailConfig;
 
-        public EmailService(EmailConfiguration emailConfig)
+        public EmailService(EmailConfiguration emailConfig, IWebHostEnvironment env)
         {
+            _env = env;
             _emailConfig = emailConfig;
         }
 
@@ -30,17 +32,19 @@ namespace SupervisorMobility.API.DataAccess.Services
             {
                 try
                 {
+                    if (_env.IsDevelopment())
+                    {
                     //Development
-                    //client.Connect(_emailConfig.SmtpServer, _emailConfig.Port);
-                    //client.Authenticate(_emailConfig.UserName, _emailConfig.Password);
-
-
+                        client.Connect(_emailConfig.SmtpServer, _emailConfig.Port);
+                        client.Authenticate(_emailConfig.UserName, _emailConfig.Password);
+                    }
+                    else
+                    {
                     //Production
-                    client.Connect(_emailConfig.SmtpServer, _emailConfig.Port, SecureSocketOptions.None);
-                    
+                        client.Connect(_emailConfig.SmtpServer, _emailConfig.Port, SecureSocketOptions.None);
+                    }
                     
                     client.Send(mailMessage);
-                   
                 }
                 catch
                 {

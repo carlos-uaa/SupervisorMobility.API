@@ -1,5 +1,7 @@
 ﻿
 using SupervisorMobility.API.Entities;
+using SupervisorMobility.API.Models.ChecklistQuestionDtos;
+using SupervisorMobility.API.Models.DepartmentDtos;
 using SupervisorMobility.API.Models.JobObservationDtos;
 
 namespace SupervisorMobility.API.Models.LupDtos
@@ -24,7 +26,9 @@ namespace SupervisorMobility.API.Models.LupDtos
         public DateTime? CreatedDate { get; set; }
         public DateTime? EndDate { get; set; }
         public int? DepartmentId { get; set; }
-        public Department Department { get; set; }
+        public DepartmentDto? Department { get; set; }
+        public int? ChecklistQuestionId { get; set; }
+        public ChecklistQuestionDto? ChecklistQuestion { get; set; }
         public int? StdChange { get; set; }
         public int? StdUpdate { get; set; }
     }

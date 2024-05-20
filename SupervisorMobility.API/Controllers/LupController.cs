@@ -71,6 +71,20 @@ namespace SupervisorMobility.API.Controllers
             return Ok(_mapper.Map<IEnumerable<LupDto>>(allJobObservations));
         }
 
+
+        [HttpGet("Insidences/{checklistQuestionId}")]
+        public async Task<ActionResult<List<LupDto>>> GetChecklistQuestionInsidences(int checklistQuestionId, int sv_id)
+        {
+            var checklistQuestions = await _supervisorMobilityRepository.GetAllLupInsidences(checklistQuestionId, sv_id);
+
+            if (checklistQuestions == null)
+            {
+                return NotFound("No checklist Question Insidences found!");
+            }
+
+            return Ok(_mapper.Map<IEnumerable<LupDto>>(checklistQuestions));
+        }
+
         [HttpPost]
         public async Task<ActionResult<LupWithoutNavigationPropertiesDto>> CreateLup(
             LupForCreationDto lup)
