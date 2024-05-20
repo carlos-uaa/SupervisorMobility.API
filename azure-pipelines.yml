@@ -1,0 +1,43 @@
+trigger:
+- master
+
+pool:
+  vmImage: 'windows-latest'
+
+variables:
+  buildConfiguration: 'Release'
+
+steps:
+- script: |
+    dotnet restore
+    dotnet publish --configuration $(buildConfiguration) --output $(Build.ArtifactStagingDirectory)/app
+  displayName: 'Build and Publish .NET Core Web API'
+
+- powershell: |
+    # Create directories based on .csproj file
+    New-Item -Path "$(Build.ArtifactStagingDirectory)/app/uploads/assycharts" -ItemType Directory -Force
+    New-Item -Path "$(Build.ArtifactStagingDirectory)/app/uploads/attendance" -ItemType Directory -Force
+    New-Item -Path "$(Build.ArtifactStagingDirectory)/app/uploads/evidence/NewFolder" -ItemType Directory -Force
+    New-Item -Path "$(Build.ArtifactStagingDirectory)/app/uploads/guides" -ItemType Directory -Force
+    New-Item -Path "$(Build.ArtifactStagingDirectory)/app/uploads/headcount/NewFolder" -ItemType Directory -Force
+    New-Item -Path "$(Build.ArtifactStagingDirectory)/app/uploads/massive" -ItemType Directory -Force
+    New-Item -Path "$(Build.ArtifactStagingDirectory)/app/uploads/users" -ItemType Directory -Force
+    New-Item -Path "$(Build.ArtifactStagingDirectory)/app/uploads/operatorSignature" -ItemType Directory -Force
+    New-Item -Path "$(Build.ArtifactStagingDirectory)/app/uploads/thenEvidence" -ItemType Directory -Force
+    New-Item -Path "$(Build.ArtifactStagingDirectory)/app/uploads/previousEvidence" -ItemType Directory -Force
+  displayName: 'Create Directories'
+
+- task: ArchiveFiles@2
+  inputs:
+    rootFolderOrFile: '$(Build.ArtifactStagingDirectory)/app'
+    includeRootFolder: false
+    archiveType: 'zip'
+    archiveFile: '$(Build.ArtifactStagingDirectory)/app.zip'
+  displayName: 'Create ZIP Archive'
+
+- task: PublishBuildArtifacts@1
+  inputs:
+    PathtoPublish: '$(Build.ArtifactStagingDirectory)/app.zip'
+    ArtifactName: 'dotnet-core-app-artifact'
+    publishLocation: 'Container'
+  displayName: 'Publish ZIP Artifact'
