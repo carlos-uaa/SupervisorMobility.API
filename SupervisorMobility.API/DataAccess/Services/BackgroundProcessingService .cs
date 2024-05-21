@@ -35,7 +35,7 @@ namespace SupervisorMobility.API.DataAccess.Services
 
         public BackgroundProcessingService(IServiceProvider serviceProvider)
         {
-            
+
             _serviceProvider = serviceProvider ?? throw new ArgumentNullException(nameof(serviceProvider));
         }
 
@@ -50,7 +50,6 @@ namespace SupervisorMobility.API.DataAccess.Services
 
         protected override async Task ExecuteAsync(CancellationToken stoppingToken)
         {
-            // Tu lógica de procesamiento en segundo plano aquí
             switch (_option)
             {
                 case 1:
@@ -2251,14 +2250,15 @@ namespace SupervisorMobility.API.DataAccess.Services
                             if (DocumentError)
                             {
                                 // Algo salió mal en el ciclo, realiza un rollback de la transacción
-                                Debug.WriteLine($"No se aplicaron cambios : transaction.Rollback()");
-
-                                transaction.Rollback();
-
-                                //comited para provar funcionalidad
-                                //transaction.Commit();
-
-
+                                if (_env.IsDevelopment())
+                                {
+                                    Debug.WriteLine($"Simulate Transaction.Rollback: _env.IsDevelopment() -> transaction.Commit()");
+                                    transaction.Commit();
+                                }
+                                else
+                                {
+                                    transaction.Rollback();
+                                }
 
                                 //e-mail de errores 
                                 int maxRetriesMail = 3; // Número máximo de intentos
@@ -2407,11 +2407,10 @@ namespace SupervisorMobility.API.DataAccess.Services
                             {
                                 Debug.WriteLine($"Simulate Transaction.Rollback: _env.IsDevelopment() -> transaction.Commit()");
                                 transaction.Commit();
-
                             }
                             else
                             {
-                            transaction.Rollback();
+                                transaction.Rollback();
                             }
 
                             // Puedes registrar el error o realizar otras acciones necesarias

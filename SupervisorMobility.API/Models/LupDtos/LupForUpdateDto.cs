@@ -1,4 +1,6 @@
-﻿namespace SupervisorMobility.API.Models.LupDtos
+﻿using SupervisorMobility.API.Models.ChecklistQuestionDtos;
+
+namespace SupervisorMobility.API.Models.LupDtos
 {
     public class LupForUpdateDto
     {
@@ -19,6 +21,6 @@
         public int? DepartmentId { get; set; }
         public int? StdChange { get; set; }
         public int? StdUpdate { get; set; }
-
+        public int? ChecklistQuestionId { get; set; }
     }
 }

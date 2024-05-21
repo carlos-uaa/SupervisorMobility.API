@@ -174,7 +174,12 @@ namespace SupervisorMobility.API.Business
             _mapper.Map(newChecklistQuestionSequence, checklistQuestionEntity);
             await _repository.SaveChangesAsync();
         }
+
+        public async Task<IEnumerable<Lup>> GetChecklistQuestionInsidences(int questionId, int sv_id)
+        {
+            return await _repository.GetAllLupInsidences(questionId, sv_id);
+        }
         #endregion
-      
+
     }
 }

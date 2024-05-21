@@ -3,6 +3,7 @@ using Microsoft.AspNetCore.JsonPatch;
 using Microsoft.AspNetCore.Mvc;
 using SupervisorMobility.API.Business;
 using SupervisorMobility.API.Models.ChecklistQuestionDtos;
+using SupervisorMobility.API.Models.LupDtos;
 
 namespace SupervisorMobility.API.Controllers
 {
@@ -53,6 +54,8 @@ namespace SupervisorMobility.API.Controllers
 
             return Ok(_mapper.Map<ChecklistQuestionWithoutNavigationPropertiesDto>(checklistQuestion));
         }
+
+    
 
         [HttpPost]
         public async Task<ActionResult<ChecklistQuestionWithoutNavigationPropertiesDto>> CreateChecklistQuestion(
