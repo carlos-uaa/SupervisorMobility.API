@@ -27,7 +27,7 @@ builder.Services.AddCors(policy =>
     policy.AddPolicy("Cors", builder =>
         builder.WithOrigins("*")
         .AllowAnyMethod().AllowAnyHeader().AllowAnyOrigin()
-        .SetIsOriginAllowedToAllowWildcardSubdomains());
+        .SetIsOriginAllowedToAllowWildcardSubdomains().WithExposedHeaders("*")
 });
 
 var env = builder.Environment;
@@ -107,7 +107,7 @@ if (app.Environment.IsDevelopment() || app.Environment.IsProduction())
 
 app.Use(async (context, next) =>
 {
-    // Capturar la respuesta después de que se haya completado
+    // Capturar la respuesta despuÃ©s de que se haya completado
     await next();
 
     // Registrar los headers de la respuesta
