@@ -28,6 +28,7 @@ builder.Services.AddCors(policy =>
         builder.WithOrigins("*")
         .AllowAnyMethod().AllowAnyHeader().AllowAnyOrigin()
         .SetIsOriginAllowedToAllowWildcardSubdomains().WithExposedHeaders("*")
+ );
 });
 
 var env = builder.Environment;
