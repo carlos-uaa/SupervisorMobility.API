@@ -1596,7 +1596,7 @@ namespace SupervisorMobility.API.Services
 
         }
 
-        public async Task<IEnumerable<Lup>> GetAllLupInsidences(int QuestionId, int supervisorId)
+        public async Task<IEnumerable<Lup>> GetAllLupInsidences(int QuestionId, int supervisorId, int distributionId)
         {
             var query = _context.JobObservations
                 .Where(j => j.IsActive == true);
@@ -1605,6 +1605,13 @@ namespace SupervisorMobility.API.Services
             {
                 query = query.Where(j => j.SupervisorId == supervisorId);
             }
+
+            if (distributionId != default(int))
+            {
+                query = query.Where(j => j.DistributionId == distributionId);
+            }
+
+
 
             var lups = await query
                 .SelectMany(j => j.Lup.Where(lup => lup.IsActive == true))

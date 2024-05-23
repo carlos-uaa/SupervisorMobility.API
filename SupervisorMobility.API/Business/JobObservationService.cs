@@ -175,9 +175,9 @@ namespace SupervisorMobility.API.Business
             await _repository.SaveChangesAsync();
         }
 
-        public async Task<IEnumerable<Lup>> GetChecklistQuestionInsidences(int questionId, int sv_id)
+        public async Task<IEnumerable<Lup>> GetChecklistQuestionInsidences(int questionId, int sv_id, int distributionId)
         {
-            return await _repository.GetAllLupInsidences(questionId, sv_id);
+            return await _repository.GetAllLupInsidences(questionId, sv_id, distributionId);
         }
         #endregion
 

@@ -19,7 +19,7 @@ namespace SupervisorMobility.API.Business
         Task DeleteChecklistCategoryAsync(JobCategoryStructure checklistCategory);
         Task<bool> CheckChecklistCategoryExistAsync(int categoryId);
 
-        Task<IEnumerable<Lup>> GetChecklistQuestionInsidences(int questionId, int sv_id);
+        Task<IEnumerable<Lup>> GetChecklistQuestionInsidences(int questionId, int sv_id, int distributionId);
         #endregion
         #region Question
         Task<IEnumerable<ChecklistQuestion>> FetchChecklistQuestionsForCategoryAsync(int categoryId);
