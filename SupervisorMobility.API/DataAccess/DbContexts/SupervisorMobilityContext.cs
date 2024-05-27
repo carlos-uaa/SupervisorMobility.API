@@ -1230,7 +1230,7 @@ namespace SupervisorMobility.API.Context
 
                 );
 
-           
+
 
             //modelBuilder.Entity<ChecklistAnswer>()
             //    .HasData(
@@ -1243,6 +1243,46 @@ namespace SupervisorMobility.API.Context
             //        Answer = "YES",
 
             //    });
+
+            //IS - Data panels
+
+            modelBuilder.Entity<DataPanel>()
+               .HasData(
+               new DataPanel()
+               {
+                   DataPanelId = 1,
+                   IsActive = true,
+                   ItemOrder = 1,
+                   DataTitle = "ESPECIFICACION DEL MATERIAL",
+               },
+               new DataPanel()
+               {
+                   DataPanelId = 2,
+                   IsActive = true,
+                   ItemOrder = 2,
+                   DataTitle = "ESPESOR DE LA PARTE",
+               },
+               new DataPanel()
+               {
+                   DataPanelId = 3,
+                   IsActive = true,
+                   ItemOrder = 3,
+                   DataTitle = "CANTIDAD DE BARRENOS",
+               },
+               new DataPanel()
+               {
+                   DataPanelId = 4,
+                   IsActive = true,
+                   ItemOrder = 4,
+                   DataTitle = "LAMINA",
+               }, new DataPanel()
+               {
+                   DataPanelId = 5,
+                   IsActive = true,
+                   ItemOrder = 5,
+                   DataTitle = "No. DE PIEZA LIBERADA",
+               }
+           );
 
             base.OnModelCreating(modelBuilder);
         }

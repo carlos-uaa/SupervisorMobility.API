@@ -77,4 +77,5 @@
 		<MakeDir Directories="$(PublishUrl)\uploads\users\" />
 		<MakeDir Directories="$(PublishUrl)\logs\" />
 	</Target>
+
 </Project>
