@@ -908,20 +908,77 @@ namespace SupervisorMobility.API.Context
                         new ILULevel()
                         {
                             ILULevelId = 1,
-                            ILULevelCode = 'I',
-                            ILULevelDescription = "el operador necesita entrenamiento para realizar la operación",
+                            ILULevelCode = "ITrainee",
+                            ILULevelDescription = "el operador se está entrenando y necesita entrenamiento para realizar la operación",
                             isActive = true
                         },
                         new ILULevel()
                         {
                             ILULevelId = 2,
-                            ILULevelCode = 'L',
-                            ILULevelDescription = "el operador ya la puede realizar por si mismo",
+                            ILULevelCode = "I",
+                            ILULevelDescription = "el operador necesita entrenamiento para realizar la operación",
                             isActive = true
-                        }, new ILULevel()
+                        },
+                        new ILULevel()
                         {
                             ILULevelId = 3,
-                            ILULevelCode = 'U',
+                            ILULevelCode = "ILeader",
+                            ILULevelDescription = "el operador necesita entrenamiento para realizar la operación y es líder de operación",
+                            isActive = true
+                        },
+                        new ILULevel()
+                        {
+                            ILULevelId = 4,
+                            ILULevelCode = "LTrainee",
+                            ILULevelDescription = "el operador se está entrenando para realizarla por si mismo",
+                            isActive = true
+                        },
+                        new ILULevel()
+                        {
+                            ILULevelId = 5,
+                            ILULevelCode = "LTraineeLeader",
+                            ILULevelDescription = "el operador se está entrenando para realizarla por si mismo y es líder",
+                            isActive = true
+                        },
+                        new ILULevel()
+                        {
+                            ILULevelId = 6,
+                            ILULevelCode = "L",
+                            ILULevelDescription = "el operador ya la puede realizar por si mismo",
+                            isActive = true
+                        },
+                        new ILULevel()
+                        {
+                            ILULevelId = 7,
+                            ILULevelCode = "LLeader",
+                            ILULevelDescription = "el operador ya la puede realizar por si mismo y es líder",
+                            isActive = true
+                        },
+                        new ILULevel()
+                        {
+                            ILULevelId = 8,
+                            ILULevelCode = "UTrainee",
+                            ILULevelDescription = "el operador se está entrenando para dominar la operación y pueda enseñar",
+                            isActive = true
+                        },
+                       new ILULevel()
+                       {
+                           ILULevelId = 9,
+                           ILULevelCode = "ULeaderTrainee",
+                           ILULevelDescription = "el operador se está entrenando para dominar la operación, pueda enseñar y es líder",
+                           isActive = true
+                       },
+                        new ILULevel()
+                        {
+                            ILULevelId = 10,
+                            ILULevelCode = "ULeader",
+                            ILULevelDescription = "el operador domina la operación, puede enseñar y es líder",
+                            isActive = true
+                        },
+                        new ILULevel()
+                        {
+                            ILULevelId = 11,
+                            ILULevelCode = "U",
                             ILULevelDescription = "el operador domina la operación y puede enseñar",
                             isActive = true
                         }
