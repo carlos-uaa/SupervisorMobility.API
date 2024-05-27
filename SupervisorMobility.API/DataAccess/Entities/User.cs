@@ -6,6 +6,15 @@ using System.ComponentModel.DataAnnotations;
 using System.ComponentModel.DataAnnotations.Schema;
 using System.Text.Json.Serialization;
 
+public enum Usertype {
+    Admin,
+    SSV,
+    SV,
+    OP,
+    LS,
+}
+
+
 namespace SupervisorMobility.API.DataAccess.Entities
 {
     public class User

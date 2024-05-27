@@ -46,10 +46,26 @@ namespace SupervisorMobility.API
             // add the DbContext
             services.AddDbContext<SupervisorMobilityContext>(options => options.UseSqlServer(configuration.GetConnectionString("SupervisorMobilityDBConnectionString")), ServiceLifetime.Transient);
 
+            //Add automapper
+            services.AddAutoMapper(AppDomain.CurrentDomain.GetAssemblies());
+
             // register the repository
             services.AddScoped<ISupervisorMobilityRepository, SupervisorMobilityRepository>();
+            // register Stamping the repository
+            services.AddScoped<IStampingRepository, StampingRepository>();
 
-            
+            //custos HTTP client service
+            services.AddScoped<CustomHttpClientService>();
+
+            // servicio de ejecucion en segundo plano
+            // Procesamiento de documento Headcount
+            // Procesamiento de documento Plant Strcuture Building (Carga de trabajo)
+            services.AddSingleton<BackgroundProcessingService>();
+
+            //Lanel Attendance Service
+            services.AddHostedService<LanelAttendanceService>();
+
+
             return services;
         }
 

@@ -1,0 +1,20 @@
+﻿using System.ComponentModel.DataAnnotations.Schema;
+using System.ComponentModel.DataAnnotations;
+
+namespace SupervisorMobility.API.DataAccess.Entities.IS
+{
+    public class CheckpointNorm
+    {
+        [Key, DatabaseGenerated(DatabaseGeneratedOption.Identity)]
+        public int CheckpointNormId { get; set; }
+
+        public bool? IsActive { get; set; }
+
+        //Formato tiene datos con tendencia a ser establecidos
+        public int ItemOrder { get; set; }
+        public string Standard { get; set; } = string.Empty;
+
+        public ICollection<FileUpload>? Sketches { get; set; } = new List<FileUpload>();
+
+    }
+}

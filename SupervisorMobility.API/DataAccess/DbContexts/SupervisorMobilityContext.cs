@@ -1,6 +1,7 @@
 ﻿using Microsoft.EntityFrameworkCore;
 using SupervisorMobility.API.DataAccess.Entities;
 using SupervisorMobility.API.DataAccess.Entities.ILU;
+using SupervisorMobility.API.DataAccess.Entities.IS;
 using SupervisorMobility.API.DataAccess.Entities.Logger;
 using SupervisorMobility.API.DataAccess.Entities.LUP;
 using SupervisorMobility.API.DataAccess.Entities.Paths;
@@ -63,6 +64,22 @@ namespace SupervisorMobility.API.Context
         public DbSet<KaizenTransaction> KaizenTransactions { get; set; }
         #endregion
 
+        #region IS
+        public DbSet<Apearance> AppearanceInspections { get; set; }
+        public DbSet<Template> TemplateInspections { get; set; }
+        public DbSet<DataPanel> DataPanels { get; set; }
+        public DbSet<DataPanelSpecification> DataPanelSpecifications { get; set; }
+        public DbSet<DataPanelAnswer> DataPanelDefectAnswer { get; set; }
+        public DbSet<ProblemDefect> ProblemDefects { get; set; }
+        public DbSet<ProblemDefectAnswer> ProblemDefectAnswer { get; set; }
+        public DbSet<LogbookAparence> LogbooksAparence { get; set; }
+        public DbSet<LogbookTemplate> LogbooksTemplate { get; set; }
+        public DbSet<Part> Parts { get; set; }
+        public DbSet<Checkpoint> Checkpoints { get; set; }
+        public DbSet<CheckpointNorm> CheckpointsNorm { get; set; }
+        public DbSet<CheckpointNormAnswer> CheckpointsNormAnswer { get; set; }
+
+        #endregion
 
 
         public SupervisorMobilityContext(DbContextOptions<SupervisorMobilityContext> options)

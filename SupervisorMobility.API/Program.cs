@@ -63,12 +63,6 @@ builder.Services.AddSwaggerGen(options =>
 builder.Services.RegisterBusinessServices();
 builder.Services.RegisterDataServices(builder.Configuration);
 
-//
-
-
-//Add automapper
-builder.Services.AddAutoMapper(AppDomain.CurrentDomain.GetAssemblies());
-
 //Odmitir Referencias ciruclares
 builder.Services.AddControllers()
     .AddNewtonsoftJson(options =>
@@ -86,27 +80,10 @@ builder.WebHost.ConfigureKestrel(serverOptions =>
 var emailConfig = builder.Configuration
         .GetSection("EmailConfiguration")
         .Get<EmailConfiguration>();
+
 builder.Services.AddSingleton(emailConfig);
 
-
-//peticion api
-//builder.Services.AddHostedService<MyScheduledTaskService>();
-
-
-//using namespaces este funciona mejor 
-//builder.Services.AddHostedService<MyScheduledTask>();
-
-
-// Crear una instancia del servicio en segundo plano
-builder.Services.AddSingleton<BackgroundProcessingService>();
-
-
-builder.Services.AddScoped<CustomHttpClientService>();
-
-
-
 var app = builder.Build();
-
 
 // Configure the HTTP request pipeline.
 if (app.Environment.IsDevelopment() || app.Environment.IsProduction())
