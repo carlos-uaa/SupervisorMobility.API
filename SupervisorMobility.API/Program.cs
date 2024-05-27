@@ -62,8 +62,7 @@ builder.Services.AddSwaggerGen(options =>
 builder.Services.RegisterBusinessServices();
 builder.Services.RegisterDataServices(builder.Configuration);
 
-builder.Services.AddAutoMapper(AppDomain.CurrentDomain.GetAssemblies());
-
+//Odmitir Referencias ciruclares
 builder.Services.AddControllers()
     .AddNewtonsoftJson(options =>
     {
@@ -76,30 +75,16 @@ builder.WebHost.ConfigureKestrel(serverOptions =>
 });
 
 var emailConfig = builder.Configuration
-    .GetSection("EmailConfiguration")
-    .Get<EmailConfiguration>();
+        .GetSection("EmailConfiguration")
+        .Get<EmailConfiguration>();
+
 builder.Services.AddSingleton(emailConfig);
-
-builder.Services.AddSingleton<BackgroundProcessingService>();
-builder.Services.AddScoped<CustomHttpClientService>();
-
-// Configurar Quartz.NET
-builder.Services.AddQuartz(q =>
-{
-    q.UseMicrosoftDependencyInjectionJobFactory();
-
-    var jobKey = new JobKey("MyJob");
-    q.AddJob<MyJob>(opts => opts.WithIdentity(jobKey));
-    q.AddTrigger(opts => opts
-        .ForJob(jobKey)
-        .WithIdentity("MyJob-trigger")
-        .WithCronSchedule("0 26 9 * * ?"));
-});
 
 builder.Services.AddQuartzHostedService(q => q.WaitForJobsToComplete = true);
 
 var app = builder.Build();
 
+// Configure the HTTP request pipeline.
 if (app.Environment.IsDevelopment() || app.Environment.IsProduction())
 {
     app.UseSwagger();

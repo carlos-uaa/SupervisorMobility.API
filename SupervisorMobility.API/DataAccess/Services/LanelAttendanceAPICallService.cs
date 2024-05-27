@@ -16,13 +16,13 @@ using SupervisorMobility.API.Services;
 
 namespace SupervisorMobility.API.DataAccess.Services
 {
-    public class MyScheduledTaskService : BackgroundService
+    public class LanelAttendanceAPICallService : BackgroundService
     {
 
-        private readonly ILogger<MyScheduledTaskService> _logger;
+        private readonly ILogger<LanelAttendanceAPICallService> _logger;
         private readonly HttpClient _httpClient;
         
-        public MyScheduledTaskService(ILogger<MyScheduledTaskService> logger, CustomHttpClientService customHttp)
+        public LanelAttendanceAPICallService(ILogger<LanelAttendanceAPICallService> logger, CustomHttpClientService customHttp)
         {
             _httpClient = customHttp.GetApiHttpClient();
             _logger = logger;
