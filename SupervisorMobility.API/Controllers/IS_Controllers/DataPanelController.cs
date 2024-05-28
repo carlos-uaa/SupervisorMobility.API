@@ -5,7 +5,6 @@ using SupervisorMobility.API.Context;
 using SupervisorMobility.API.DataAccess.Services.TreeServices;
 using SupervisorMobility.API.DataAccess.Services;
 using SupervisorMobility.API.Services;
-using SupervisorMobility.API.Models.ChecklistCategoryDtos;
 using SupervisorMobility.API.Models.IS_Apariencia_PlantillaDtos.DataPanelDtos;
 using SupervisorMobility.API.DataAccess.Entities.IS;
 using Org.BouncyCastle.Pkcs;
@@ -69,9 +68,40 @@ namespace SupervisorMobility.API.Controllers.IS_Controllers
             return Ok(_mapper.Map<DataPanelDto>(DataPanelCategory));
         }
 
+        [HttpPut("sequence/{datapanel_Id}")]
+        public async Task<ActionResult> UpdatedataPanelItemOrder(int datapanel_Id,
+           DataPanelForUpdateSequenceDto dataPanel)
+        {
+            var dataPanelEntity = await _stampingRepository.getDataPanel(datapanel_Id);
+            if (dataPanelEntity == null)
+            {
+                return NotFound("Data Panel category not found.");
+            }
+
+            if (dataPanel.ItemOrder == dataPanelEntity.ItemOrder)
+            {
+                return NoContent();
+            }
+
+            if (dataPanel.ItemOrder < 1
+                || dataPanel.ItemOrder > await _stampingRepository.DataPanelMaxItemOrderAsync())
+            {
+                return BadRequest("ItemOrder must be greater than 1 and lower that the current max ItemOrder.");
+            }
+
+            var updateResult = await _stampingRepository.UpdateDataPanelsSequenceAsync(dataPanel, dataPanelEntity);
+            
+            if(updateResult > 0)
+            {
+                return Ok();
+            }
+
+            return NoContent();
+
+        }
 
         [HttpDelete("{dataPanelId}")]
-        public async Task<ActionResult> DeleteKaizen(int dataPanelId)
+        public async Task<ActionResult> DeleteDataPanel(int dataPanelId)
         {
             DataPanel? entityDataPanel = await _stampingRepository.getDataPanel(dataPanelId);
 

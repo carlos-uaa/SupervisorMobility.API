@@ -3,6 +3,9 @@ using DocumentFormat.OpenXml.Office2021.Excel.RichDataWebImage;
 using Microsoft.EntityFrameworkCore;
 using SupervisorMobility.API.Context;
 using SupervisorMobility.API.DataAccess.Entities.IS;
+using SupervisorMobility.API.Entities;
+using SupervisorMobility.API.Models.ChecklistCategoryDtos;
+using SupervisorMobility.API.Models.IS_Apariencia_PlantillaDtos.DataPanelDtos;
 using SupervisorMobility.API.Services;
 
 namespace SupervisorMobility.API.DataAccess.Services
@@ -62,6 +65,47 @@ namespace SupervisorMobility.API.DataAccess.Services
             }
 
             return await _context.SaveChangesAsync();
+        }
+
+        public async Task<int> DataPanelMaxItemOrderAsync()
+        {
+            return await _context.DataPanels.MaxAsync(cc => cc.ItemOrder) + 1;
+        }
+
+        public async Task<int> UpdateDataPanelsSequenceAsync(DataPanelForUpdateSequenceDto newDataPanelSequence, DataPanel DataPanelEntity)
+        {
+            //So we need to update the checklist categories ItemOrder between desiered and old one.
+            var currentItemOrder =
+                newDataPanelSequence.ItemOrder < DataPanelEntity.ItemOrder
+                ? newDataPanelSequence.ItemOrder
+                : DataPanelEntity.ItemOrder - 1;
+
+            var checklistCategoryEntities = await GetDataPanelForUpdateSequenceAsync(
+                       newDataPanelSequence.ItemOrder,
+                       DataPanelEntity.ItemOrder,
+                       DataPanelEntity.DataPanelId);
+
+            foreach (var DataPanelEntityForUpdate in checklistCategoryEntities)
+            {
+                currentItemOrder += 1;
+                DataPanelEntityForUpdate.ItemOrder = currentItemOrder;
+            }
+
+            _mapper.Map(newDataPanelSequence, DataPanelEntity);
+            return await _context.SaveChangesAsync();
+        }
+
+        public async Task<IEnumerable<DataPanel>> GetDataPanelForUpdateSequenceAsync(int currentSequence, int oldSequence, int categoryId)
+        {
+            int lowerValue = currentSequence < oldSequence ? currentSequence : oldSequence;
+            int upperValue = currentSequence > oldSequence ? currentSequence : oldSequence;
+
+            return await _context.DataPanels
+                        .Where(c => c.ItemOrder >= lowerValue
+                            && c.ItemOrder <= upperValue
+                            && c.DataPanelId != categoryId
+                            && c.IsActive == true)
+                        .OrderBy(c => c.ItemOrder).ToListAsync();
         }
 
         #endregion
