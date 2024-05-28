@@ -81,12 +81,7 @@ namespace SupervisorMobility.API.DataAccess.Services
                     {
                         try
                         {
-                            if (_env.IsDevelopment())
-                            {
-                                var emailMessageError = _emailService.CreateEmailMessage("pmunoz@gruposinco.com.mx", "Active Lup Item", notificationText);
-                                _emailService.Send(emailMessageError);
-                            }
-                            else
+                            if (_env.IsProduction())
                             {
                                 var emailMessageError = _emailService.CreateEmailMessage(supervisor.SupervisorEmail, "Active Lup Item", notificationText);
                                 _emailService.Send(emailMessageError);
@@ -123,12 +118,7 @@ namespace SupervisorMobility.API.DataAccess.Services
                             {
                                 try
                                 {
-                                    if (_env.IsDevelopment())
-                                    {
-                                        var emailMessageError = _emailService.CreateEmailMessage("pmunoz@gruposinco.com.mx", "Active Lup Item SSV", notificationText);
-                                        _emailService.Send(emailMessageError);
-                                    }
-                                    else
+                                    if (_env.IsProduction())
                                     {
                                         var emailMessageError = _emailService.CreateEmailMessage(SSV.Email, "Active Lup Item", notificationText);
                                         _emailService.Send(emailMessageError);
