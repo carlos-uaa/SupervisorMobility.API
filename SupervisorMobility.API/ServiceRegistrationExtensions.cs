@@ -95,7 +95,7 @@ namespace SupervisorMobility.API
                 q.AddTrigger(opts => opts
                     .ForJob(jobKey)
                     .WithIdentity("ActiveLupItemsJob-trigger")
-                    .WithCronSchedule("0 0 14 * * ?"));
+                    .WithCronSchedule("0 0 7 * * ?"));
             });
 
             services.AddQuartzHostedService(q => q.WaitForJobsToComplete = true);
