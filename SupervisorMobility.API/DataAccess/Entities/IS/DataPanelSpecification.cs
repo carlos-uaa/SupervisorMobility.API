@@ -6,7 +6,7 @@ namespace SupervisorMobility.API.DataAccess.Entities.IS
     public class DataPanelSpecification
     {
         [Key, DatabaseGenerated(DatabaseGeneratedOption.Identity)]
-        public int DataPanelSpecificationId { get; set; }
+        public int? DataPanelSpecificationId { get; set; }
 
         public bool? IsActive { get; set; }
 
@@ -14,8 +14,7 @@ namespace SupervisorMobility.API.DataAccess.Entities.IS
         public int ItemOrder { get; set; }
         public string DataSpecification { get; set; } = string.Empty;
 
-        public int? DataPanelId {  get; set; }
-        public DataPanel? DataPanel {  get; set; }
-
+        public int? DataPanelId { get; set; }
+       
     }
 }

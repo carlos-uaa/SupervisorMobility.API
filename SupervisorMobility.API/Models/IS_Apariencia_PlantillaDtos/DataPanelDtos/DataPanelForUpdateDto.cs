@@ -1,4 +1,5 @@
-﻿using SupervisorMobility.API.Models.IS_Apariencia_PlantillaDtos.DataPanelSpecificationDtos;
+﻿using SupervisorMobility.API.DataAccess.Entities.IS;
+using SupervisorMobility.API.Models.IS_Apariencia_PlantillaDtos.DataPanelSpecificationDtos;
 
 namespace SupervisorMobility.API.Models.IS_Apariencia_PlantillaDtos.DataPanelDtos
 {
@@ -8,9 +9,10 @@ namespace SupervisorMobility.API.Models.IS_Apariencia_PlantillaDtos.DataPanelDto
 
         public bool? IsActive { get; set; }
 
-        //Formato tiene datos con tendencia a ser establecidos
+        
         public int ItemOrder { get; set; }
         public string DataTitle { get; set; } = string.Empty;
+        public ICollection<DataPanelSpecificationForUpdateDto>? Specifications { get; set; }
 
     }
 }

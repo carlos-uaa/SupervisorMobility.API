@@ -285,6 +285,7 @@ namespace SupervisorMobility.API.Context
             modelBuilder.Entity<Kaizen>()
                .Property(p => p.IsActive)
                .HasDefaultValue(true);
+
             modelBuilder.Entity<FileUpload>()
                .Property(p => p.IsActive)
                .HasDefaultValue(true);
@@ -1243,6 +1244,8 @@ namespace SupervisorMobility.API.Context
             //        Answer = "YES",
 
             //    });
+
+
 
             //IS - Data panels
 

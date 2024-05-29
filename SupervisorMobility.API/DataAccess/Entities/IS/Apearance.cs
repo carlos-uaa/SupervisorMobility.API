@@ -31,9 +31,7 @@ namespace SupervisorMobility.API.DataAccess.Entities.IS
         //Item de la categoria
         public ICollection<DataPanel>? DataPanelItems { get; set; }
          = new List<DataPanel>(); 
-        //Specificaciones de la categoria
-        public ICollection<DataPanelSpecification>? DataPanelSpecificationItems { get; set; }
-         = new List<DataPanelSpecification>();
+     
 
         //Item de los problemas
         public ICollection<ProblemDefect>? ProblemDefectItems { get; set; }

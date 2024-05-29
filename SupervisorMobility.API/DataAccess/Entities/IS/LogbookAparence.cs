@@ -19,7 +19,6 @@ namespace SupervisorMobility.API.DataAccess.Entities.IS
               public ICollection<ProblemDefectAnswer>? ProblemDefectResults { get; set; }
   = new List<ProblemDefectAnswer>();
 
-
         public string? Programmed { get; set; }
 
         public int? InspectorId { get; set; }
