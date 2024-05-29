@@ -30,7 +30,7 @@ namespace SupervisorMobility.API.Controllers.IS_Controllers
         public async Task<ActionResult<IEnumerable<DataPanelSpecificationDto>>> GetAllDataPanelSpecificationCategories(int DataPanel_id ,bool includeDataPanel = false)
         {
 
-            var DataPanelSpecificationsEntities = await _stampingRepository.getAllDataPanelSpecificationFromDataPanel(DataPanel_id, includeDataPanel);
+            var DataPanelSpecificationsEntities = await _stampingRepository.getAllDataPanelSpecificationFromDataPanel(DataPanel_id);
             if (DataPanelSpecificationsEntities == null)
             {
                 return NotFound("DataPanelEntities categories not found!");
@@ -43,7 +43,7 @@ namespace SupervisorMobility.API.Controllers.IS_Controllers
         public async Task<ActionResult<DataPanelSpecificationDto>> GetDataPanelSpecificationCategory(int id, bool includeDataPanel = false)
         {
             //Find Checklist category
-            var DataPanelSpecificationEntiti = await _stampingRepository.getDataPanelSpecification(id, includeDataPanel);
+            var DataPanelSpecificationEntiti = await _stampingRepository.getDataPanelSpecification(id);
             if (DataPanelSpecificationEntiti == null)
             {
                 return NotFound("Data Panel not found!");
