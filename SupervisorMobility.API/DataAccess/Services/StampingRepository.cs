@@ -1,4 +1,5 @@
 ﻿using AutoMapper;
+using DocumentFormat.OpenXml.Office2016.Drawing.Charts;
 using DocumentFormat.OpenXml.Office2021.Excel.RichDataWebImage;
 using Microsoft.EntityFrameworkCore;
 using SupervisorMobility.API.Context;
@@ -88,9 +89,9 @@ namespace SupervisorMobility.API.DataAccess.Services
             return await _context.DataPanels.MaxAsync(cc => cc.ItemOrder) + 1;
         }
 
-        public async Task<int> DataPanelSpecificationMaxItemOrderAsync()
+        public async Task<int> DataPanelSpecificationMaxItemOrderAsync(int dp_id)
         {
-            return await _context.DataPanelSpecifications.MaxAsync(cc => cc.ItemOrder) + 1;
+            return await _context.DataPanelSpecifications.Where(dp => dp.DataPanelId == dp_id).MaxAsync(cc => cc.ItemOrder) + 1;
         }
 
         public async Task<int> UpdateDataPanelsSequenceAsync(DataPanelForUpdateSequenceDto newDataPanelSequence, DataPanel DataPanelEntity)
@@ -132,6 +133,14 @@ namespace SupervisorMobility.API.DataAccess.Services
         #endregion
 
         #region DataPanelSpecification
+        public async Task<int> AddDataPanelSpecification(DataPanel dataPanel, DataPanelSpecification specforCreate)
+        {
+            _context.DataPanelSpecifications.Add(specforCreate);
+
+            dataPanel.Specifications?.Add(specforCreate);
+
+            return _context.SaveChanges();
+        }
         public async Task<IEnumerable<DataPanelSpecification>> getAllDataPanelSpecificationFromDataPanel(int DataPanel_id)
         {
             var query = _context.DataPanelSpecifications.Where(dps => dps.DataPanelId == DataPanel_id && dps.IsActive == true);
@@ -145,6 +154,45 @@ namespace SupervisorMobility.API.DataAccess.Services
 
             return await query.FirstOrDefaultAsync(); ;
         }
+
+        public async Task<int> UpdateDataPanelSpecificationSequenceAsync(DataPanelSpecificationForUpdateSequenceDto newDataPanelSequence, DataPanelSpecification DataPanelEntity)
+        {
+            //So we need to update the checklist categories ItemOrder between desiered and old one.
+            var currentItemOrder =
+                newDataPanelSequence.ItemOrder < DataPanelEntity.ItemOrder
+                ? newDataPanelSequence.ItemOrder
+                : DataPanelEntity.ItemOrder - 1;
+
+            var checklistCategoryEntities = await GetDataPanelSpecificationForUpdateSequenceAsync(
+                       newDataPanelSequence.ItemOrder,
+                       DataPanelEntity.ItemOrder,
+                       (int)DataPanelEntity.DataPanelSpecificationId,
+                       (int)DataPanelEntity.DataPanelId);
+
+            foreach (var DataPanelEntityForUpdate in checklistCategoryEntities)
+            {
+                currentItemOrder += 1;
+                DataPanelEntityForUpdate.ItemOrder = currentItemOrder;
+            }
+
+            _mapper.Map(newDataPanelSequence, DataPanelEntity);
+            return await _context.SaveChangesAsync();
+        }
+
+        public async Task<IEnumerable<DataPanelSpecification>> GetDataPanelSpecificationForUpdateSequenceAsync(int currentSequence, int oldSequence, int categoryId, int panelid)
+        {
+            int lowerValue = currentSequence < oldSequence ? currentSequence : oldSequence;
+            int upperValue = currentSequence > oldSequence ? currentSequence : oldSequence;
+
+            return await _context.DataPanelSpecifications
+                        .Where(c => c.ItemOrder >= lowerValue
+                            && c.ItemOrder <= upperValue
+                            && c.DataPanelSpecificationId != categoryId
+                            && c.DataPanelId == panelid
+                            && c.IsActive == true)
+                        .OrderBy(c => c.ItemOrder).ToListAsync();
+        }
+
         #endregion
     }
 }

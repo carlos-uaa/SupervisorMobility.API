@@ -20,6 +20,7 @@ namespace SupervisorMobility.API.MapperProfiles.ISMapperProfiles
             CreateMap<DataPanelSpecification, DataPanelSpecificationDto>().ReverseMap();
             CreateMap<DataPanelSpecification, DataPanelSpecificationForCreateDto>().ReverseMap();
             CreateMap<DataPanelSpecification, DataPanelSpecificationForUpdateDto>().ReverseMap();
+            CreateMap<DataPanelSpecification, DataPanelSpecificationForUpdateSequenceDto>().ReverseMap();
         }
     }
 }

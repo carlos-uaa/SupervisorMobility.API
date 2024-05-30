@@ -15,6 +15,5 @@ namespace SupervisorMobility.API.DataAccess.Entities.IS
         public string DataSpecification { get; set; } = string.Empty;
 
         public int? DataPanelId { get; set; }
-       
     }
 }
