@@ -1,8 +1,11 @@
 ﻿using Microsoft.AspNetCore.DataProtection;
+using SupervisorMobility.API.DataAccess.Entities;
 using SupervisorMobility.API.DataAccess.Entities.IS;
 using SupervisorMobility.API.Entities;
+using SupervisorMobility.API.Models.FileUploadDto;
 using SupervisorMobility.API.Models.IS_Apariencia_PlantillaDtos.DataPanelDtos;
 using SupervisorMobility.API.Models.IS_Apariencia_PlantillaDtos.DataPanelSpecificationDtos;
+using SupervisorMobility.API.Models.IS_Apariencia_PlantillaDtos.PartDtos;
 using System.Runtime.CompilerServices;
 
 namespace SupervisorMobility.API.DataAccess.Services
@@ -35,6 +38,18 @@ namespace SupervisorMobility.API.DataAccess.Services
         Task<IEnumerable<DataPanelSpecification>> GetDataPanelSpecificationForUpdateSequenceAsync(int currentSequence, int oldSequence, int categoryId, int panelid);
         #endregion
 
+        #region Part
 
+        Task<int> AddPart(Part partToAdd);
+        Task<Part> GetPart(int part_id, bool includeScketes = false);
+        Task<IEnumerable<Part>> GetAllParts(bool includeScketes = false);
+        Task<int> UpdatePart(PartForUpdateDto partForUpdate, Part partentity);
+        Task<int> DeletePart(Part partentity);
+        Task<FileUpload> CreateFileAsync(FileUploadForCreationDto newFile);
+        Task AddPartSketch(int part_id, FileUpload evidence);
+        #endregion
+        Task<FileUpload?> FetchFileAsync(int fileid);
+       
+        Task<bool> SaveChangesAsync();
     }
 }
