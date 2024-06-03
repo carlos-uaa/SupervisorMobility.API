@@ -1,20 +1,14 @@
 ﻿using AutoMapper;
-using DocumentFormat.OpenXml.Office2016.Drawing.Charts;
-using DocumentFormat.OpenXml.Office2021.Excel.RichDataWebImage;
 using Microsoft.EntityFrameworkCore;
 using SupervisorMobility.API.Context;
 using SupervisorMobility.API.DataAccess.Entities;
 using SupervisorMobility.API.DataAccess.Entities.IS;
-using SupervisorMobility.API.Entities;
-using SupervisorMobility.API.Models.ChecklistCategoryDtos;
 using SupervisorMobility.API.Models.FileUploadDto;
 using SupervisorMobility.API.Models.IS_Apariencia_PlantillaDtos.DataPanelDtos;
 using SupervisorMobility.API.Models.IS_Apariencia_PlantillaDtos.DataPanelSpecificationDtos;
 using SupervisorMobility.API.Models.IS_Apariencia_PlantillaDtos.PartDtos;
-using SupervisorMobility.API.Models.KaizenDtos;
-using SupervisorMobility.API.Services;
+using SupervisorMobility.API.Models.IS_Apariencia_PlantillaDtos.ProblemDefectDtos;
 using System.Runtime.CompilerServices;
-using System.Text.RegularExpressions;
 
 namespace SupervisorMobility.API.DataAccess.Services
 {
@@ -90,12 +84,26 @@ namespace SupervisorMobility.API.DataAccess.Services
 
         public async Task<int> DataPanelMaxItemOrderAsync()
         {
-            return await _context.DataPanels.MaxAsync(cc => cc.ItemOrder) + 1;
+            if (await _context.ProblemDefects.AnyAsync())
+            {
+                return await _context.DataPanels.MaxAsync(cc => cc.ItemOrder) + 1;
+            }
+            else
+            {
+                return 1;
+            }
         }
 
         public async Task<int> DataPanelSpecificationMaxItemOrderAsync(int dp_id)
         {
-            return await _context.DataPanelSpecifications.Where(dp => dp.DataPanelId == dp_id).MaxAsync(cc => cc.ItemOrder) + 1;
+            if (await _context.ProblemDefects.AnyAsync())
+            {
+                return await _context.DataPanelSpecifications.Where(dp => dp.DataPanelId == dp_id).MaxAsync(cc => cc.ItemOrder) + 1;
+            }
+            else
+            {
+                return 1;
+            }
         }
 
         public async Task<int> UpdateDataPanelsSequenceAsync(DataPanelForUpdateSequenceDto newDataPanelSequence, DataPanel DataPanelEntity)
@@ -285,6 +293,56 @@ namespace SupervisorMobility.API.DataAccess.Services
             return await _context.Files
                 .Where(p => p.FileUploadId == fileid).FirstOrDefaultAsync();
         }
+        #endregion
+        #region ProblemDefect
+        public async Task<int> ProblemDefectMaxItemOrderAsync()
+        {
+
+            if (await _context.ProblemDefects.AnyAsync())
+            {
+                return await _context.ProblemDefects.MaxAsync(cc => cc.ItemOrder) + 1;
+            }
+            else
+            {
+                return 1;
+            }
+        }
+        public async Task<int> AddProblemDefect(ProblemDefect ProblemDefectToAdd)
+        {
+            _context.ProblemDefects.Add(ProblemDefectToAdd);
+            return await _context.SaveChangesAsync();
+        }
+        public async Task<ProblemDefect> GetProblemDefect(int ProblemDefect_id)
+        {
+            var query = _context.ProblemDefects.Where(p => p.ProblemDefectId == ProblemDefect_id && p.IsActive == true);
+
+            return await query.FirstOrDefaultAsync();
+
+        }
+        public async Task<IEnumerable<ProblemDefect>> GetAllProblemDefects()
+        {
+            var query = _context.ProblemDefects.Where(p => p.IsActive == true);
+
+
+            return await query.OrderBy(c => c.ProblemDefectId).ToListAsync();
+        }
+        public async Task<int> UpdateProblemDefect(ProblemDefectForUpdateDto ProblemDefectForUpdate, ProblemDefect ProblemDefectentity)
+        {
+            _mapper.Map(ProblemDefectForUpdate, ProblemDefectentity);
+
+            _context.ProblemDefects.Update(ProblemDefectentity);
+
+            return await _context.SaveChangesAsync();
+
+        }
+        public async Task<int> DeleteProblemDefect(ProblemDefect ProblemDefectentity)
+        {
+            ProblemDefectentity.IsActive = false;
+            _context.ProblemDefects.Update(ProblemDefectentity);
+
+            return await _context.SaveChangesAsync();
+        }
+
         #endregion
 
         public async Task<bool> SaveChangesAsync()

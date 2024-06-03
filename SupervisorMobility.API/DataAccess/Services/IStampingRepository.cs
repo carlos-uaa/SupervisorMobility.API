@@ -6,6 +6,7 @@ using SupervisorMobility.API.Models.FileUploadDto;
 using SupervisorMobility.API.Models.IS_Apariencia_PlantillaDtos.DataPanelDtos;
 using SupervisorMobility.API.Models.IS_Apariencia_PlantillaDtos.DataPanelSpecificationDtos;
 using SupervisorMobility.API.Models.IS_Apariencia_PlantillaDtos.PartDtos;
+using SupervisorMobility.API.Models.IS_Apariencia_PlantillaDtos.ProblemDefectDtos;
 using System.Runtime.CompilerServices;
 
 namespace SupervisorMobility.API.DataAccess.Services
@@ -48,6 +49,18 @@ namespace SupervisorMobility.API.DataAccess.Services
         Task<FileUpload> CreateFileAsync(FileUploadForCreationDto newFile);
         Task AddPartSketch(int part_id, FileUpload evidence);
         #endregion
+
+        #region ProblemDefect
+        Task<int> ProblemDefectMaxItemOrderAsync();
+
+        Task<int> AddProblemDefect(ProblemDefect ProblemDefectToAdd);
+        Task<ProblemDefect> GetProblemDefect(int ProblemDefect_id);
+        Task<IEnumerable<ProblemDefect>> GetAllProblemDefects();
+        Task<int> UpdateProblemDefect(ProblemDefectForUpdateDto ProblemDefectForUpdate, ProblemDefect ProblemDefectentity);
+        Task<int> DeleteProblemDefect(ProblemDefect ProblemDefectentity);
+
+        #endregion
+
         Task<FileUpload?> FetchFileAsync(int fileid);
        
         Task<bool> SaveChangesAsync();
