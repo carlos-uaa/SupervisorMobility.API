@@ -11,7 +11,7 @@ namespace SupervisorMobility.API.Models.IS_Apariencia_PlantillaDtos.DataPanelDto
 
         
         public int ItemOrder { get; set; }
-        public string DataTitle { get; set; } = string.Empty;
+        public string? DataTitle { get; set; }
         public ICollection<DataPanelSpecificationForUpdateDto>? Specifications { get; set; }
 
     }

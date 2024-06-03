@@ -40,9 +40,9 @@ namespace SupervisorMobility.API.Controllers.IS_Controllers
             DataPanel DPEntity = _mapper.Map<DataPanel>(dataPanelForCreate);
             DPEntity.ItemOrder = await _stampingRepository.DataPanelMaxItemOrderAsync();
 
-            if(DPEntity.Specifications?.Count > 0)
+            if (DPEntity.Specifications?.Count > 0)
             {
-                foreach( var (item, index) in DPEntity.Specifications?.Select((item, index) => (item, index)))
+                foreach (var (item, index) in DPEntity.Specifications?.Select((item, index) => (item, index)))
                 {
                     item.ItemOrder = index + 1;
                 }
@@ -85,48 +85,70 @@ namespace SupervisorMobility.API.Controllers.IS_Controllers
 
         [HttpPut("{dataPanelId}")]
         public async Task<ActionResult<DataPanelDto>> UpdateDataPanel(int dataPanelId, DataPanelForUpdateDto _DataPanelForUpdate)
-       {
+        {
 
-            DataPanel entityDataPanel = await _stampingRepository.getDataPanel(dataPanelId, true);
+            // Obtener el DataPanel existente junto con sus especificaciones
+            DataPanel entityDataPanel = await _stampingRepository.getDataPanel(dataPanelId, includeSpecifications: true);
 
+            if (entityDataPanel == null)
+            {
+                return NotFound();
+            }
 
-            List<DataPanelSpecificationForUpdateDto> filteredList = _DataPanelForUpdate.Specifications.Where(t => t.DataPanelSpecificationId == null || t.DataPanelSpecificationId <= 0).ToList();
+            // Filtrar nuevas especificaciones
+            List<DataPanelSpecificationForUpdateDto> filteredList = _DataPanelForUpdate.Specifications
+                .Where(t => t.DataPanelSpecificationId == null || t.DataPanelSpecificationId <= 0)
+                .ToList();
 
+            // Remover nuevas especificaciones de la lista principal para evitar duplicados
             if (filteredList.Any())
             {
-                var transactionsList = _DataPanelForUpdate.Specifications.ToList();
-                transactionsList.RemoveAll(t => t.DataPanelSpecificationId == null || t.DataPanelSpecificationId <= 0);
+                _DataPanelForUpdate.Specifications.ToList().RemoveAll(t => t.DataPanelSpecificationId == null || t.DataPanelSpecificationId <= 0);
 
-                // Asignar la lista actualizada de nuevo a la propiedad Transactions
-                _DataPanelForUpdate.Specifications = transactionsList;
-
+                // Mapear nuevas especificaciones
                 List<DataPanelSpecification> newSpecifications = _mapper.Map<List<DataPanelSpecification>>(filteredList);
 
-                int Sequence = await _stampingRepository.DataPanelSpecificationMaxItemOrderAsync() - 1;
-                //foreach (var (item, index) in newSpecifications.Select((item, index) => (item, index)))
-                //{
+                int sequence = await _stampingRepository.DataPanelSpecificationMaxItemOrderAsync(dataPanelId);
+
                 foreach (var item in newSpecifications)
                 {
                     item.DataPanelSpecificationId = null;
                     item.DataPanelId = dataPanelId;
-                    item.ItemOrder = Sequence;
-                    Sequence ++;
+                    item.ItemOrder = sequence++;
                 }
 
-                //await _stampingRepository.AddRangeDataPanelSpecifications(newSpecifications);
                 _context.DataPanelSpecifications.AddRange(newSpecifications);
-                _context.SaveChanges();
+                await _context.SaveChangesAsync();
 
-                List<DataPanelSpecificationForUpdateDto> NewSpecificationsCreated = _mapper.Map<List<DataPanelSpecificationForUpdateDto>>(newSpecifications);
+                // Mapear y agregar nuevas especificaciones creadas al DTO de actualización
+                List<DataPanelSpecificationForUpdateDto> newSpecificationsCreated = _mapper.Map<List<DataPanelSpecificationForUpdateDto>>(newSpecifications);
+                _DataPanelForUpdate.Specifications.ToList().AddRange(newSpecificationsCreated);
+            }
 
-                foreach (DataPanelSpecificationForUpdateDto item in NewSpecificationsCreated)
+            // Actualizar las propiedades del DataPanel
+            entityDataPanel.IsActive = _DataPanelForUpdate.IsActive;
+            entityDataPanel.ItemOrder = _DataPanelForUpdate.ItemOrder;
+            entityDataPanel.DataTitle = _DataPanelForUpdate.DataTitle;
+
+            // Manejar especificaciones existentes
+            foreach (var specDto in _DataPanelForUpdate.Specifications)
+            {
+                var existingSpec = entityDataPanel.Specifications
+                    .FirstOrDefault(s => s.DataPanelSpecificationId == specDto.DataPanelSpecificationId);
+
+                if (existingSpec != null)
                 {
-                    _DataPanelForUpdate.Specifications.Add(item);
+                    existingSpec.IsActive = specDto.IsActive;
+                    existingSpec.ItemOrder = specDto.ItemOrder;
+                    existingSpec.DataSpecification = specDto.DataSpecification;
                 }
             }
 
+            // Guardar los cambios en el DataPanel y sus especificaciones
+            _context.DataPanels.Update(entityDataPanel);
+            var result = await _context.SaveChangesAsync();
 
-            var result = await _stampingRepository.UpdateDataPanel(_DataPanelForUpdate, entityDataPanel);
+            //var result = await _stampingRepository.UpdateDataPanel(_DataPanelForUpdate, entityDataPanel);
 
             if (result > 0)
                 return Ok(entityDataPanel);
@@ -134,7 +156,7 @@ namespace SupervisorMobility.API.Controllers.IS_Controllers
                 return BadRequest();
         }
 
-        
+
 
         [HttpPut("sequence/{datapanel_Id}")]
         public async Task<ActionResult> UpdatedataPanelItemOrder(int datapanel_Id,
@@ -158,8 +180,8 @@ namespace SupervisorMobility.API.Controllers.IS_Controllers
             }
 
             var updateResult = await _stampingRepository.UpdateDataPanelsSequenceAsync(dataPanel, dataPanelEntity);
-            
-            if(updateResult > 0)
+
+            if (updateResult > 0)
             {
                 return Ok();
             }
