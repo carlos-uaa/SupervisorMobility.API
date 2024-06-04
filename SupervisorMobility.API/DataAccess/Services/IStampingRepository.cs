@@ -49,7 +49,15 @@ namespace SupervisorMobility.API.DataAccess.Services
         Task AddPartSketch(int part_id, FileUpload evidence);
         #endregion
         Task<FileUpload?> FetchFileAsync(int fileid);
-       
+
+        #region Appearance
+        Task<int> AddAppearance(Appearance appearanceToAdd);
+        Task<Appearance> GetAppearance(int appearance_id, bool includeDataPanelItems = false, bool includeProblemDefectItems = false, bool includeLogBookAppearance = false);
+        Task<IEnumerable<Appearance>> GetAllAppearances(bool includeDataPanelItems = false, bool includeProblemDefectItems = false, bool includeLogBookAppearance = false);
+        Task<int> UpdateAppearance(AppearanceForUpdateDto appearanceForUpdate, Appearance appearanceEntity);
+        Task<int> DeleteAppearance(Appearance appearanceEntity);
+        #endregion
+
         Task<bool> SaveChangesAsync();
     }
 }

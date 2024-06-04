@@ -4,14 +4,14 @@ using SupervisorMobility.API.DataAccess.Services;
 
 namespace SupervisorMobility.API.Controllers.IS_Controllers
 {
-    [Route("api/IS/Aparence")]
+    [Route("api/IS/Appearance/Logbook")]
     [ApiController]
-    public class AparenceController : Controller
+    public class AppearanceLogbookController : Controller
     {
         private readonly IMapper _mapper;
         private readonly IStampingRepository _stampingRepository;
         private readonly IWebHostEnvironment _env;
-        public AparenceController(IStampingRepository stampingRepository, IWebHostEnvironment env, IMapper mapper)
+        public AppearanceLogbookController(IStampingRepository stampingRepository, IWebHostEnvironment env, IMapper mapper)
         {
             _stampingRepository = stampingRepository ??
                 throw new ArgumentNullException(nameof(stampingRepository));

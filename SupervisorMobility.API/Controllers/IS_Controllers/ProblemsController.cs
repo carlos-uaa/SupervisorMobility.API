@@ -8,7 +8,7 @@ using SupervisorMobility.API.Services;
 
 namespace SupervisorMobility.API.Controllers.IS_Controllers
 {
-    [Route("api/IS/Aparence/Problems")]
+    [Route("api/IS/Appearance/Problems")]
     [ApiController]
     public class ProblemsController : ControllerBase
     {

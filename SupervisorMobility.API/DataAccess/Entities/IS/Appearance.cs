@@ -3,10 +3,10 @@ using System.ComponentModel.DataAnnotations;
 
 namespace SupervisorMobility.API.DataAccess.Entities.IS
 {
-    public class Apearance
+    public class Appearance
     {
         [Key, DatabaseGenerated(DatabaseGeneratedOption.Identity)]
-        public int ApearanceId { get; set; }
+        public int AppearanceId { get; set; }
         public bool? IsActive { get; set; }
         
         public int? PartId { get; set; }
@@ -34,10 +34,10 @@ namespace SupervisorMobility.API.DataAccess.Entities.IS
      
 
         //Item de los problemas
-        public ICollection<ProblemDefect>? ProblemDefectItems { get; set; }
-         = new List<ProblemDefect>();
+        public ICollection<ProblemDefectDto>? ProblemDefectItems { get; set; }
+         = new List<ProblemDefectDto>();
 
-        public ICollection<LogbookAparence>? LogbooksAparence { get; set; }
-         = new List<LogbookAparence>();
+        public ICollection<LogbookAppearanceDto>? LogbooksAppearance { get; set; }
+         = new List<LogbookAppearanceDto>();
     }
 }

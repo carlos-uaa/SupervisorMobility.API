@@ -291,5 +291,71 @@ namespace SupervisorMobility.API.DataAccess.Services
         {
             return (await _context.SaveChangesAsync() >= 0);
         }
+
+
+        #region Appearance
+
+        public async Task<int> AddAppearance(Appearance appearanceToAdd)
+        {
+            _context.AppearanceInspections.Add(appearanceToAdd);
+            return await _context.SaveChangesAsync();
+        }
+        public async Task<Appearance> GetAppearance(int appearance_id, bool includeDataPanelItems = false, bool includeProblemDefectItems = false, bool includeLogBookAppearance = false)
+        {
+            var query = _context.AppearanceInspections.Where(p => p.AppearanceId == appearance_id && p.IsActive == true);
+
+            if (includeDataPanelItems)
+            {
+                query = query.Include(a => a.DataPanelItems);
+            }
+            if (includeProblemDefectItems)
+            {
+                query = query.Include(a => a.ProblemDefectItems);
+            }
+            if (includeLogBookAppearance)
+            {
+                query = query.Include(a => a.LogbooksAppearance);
+            }
+
+            return await query.FirstOrDefaultAsync();
+
+        }
+        public async Task<IEnumerable<Appearance>> GetAllAppearances(bool includeDataPanelItems = false, bool includeProblemDefectItems = false, bool includeLogBookAppearance = false)
+{
+            var query = _context.AppearanceInspections.Where(p => p.IsActive == true);
+
+            if (includeDataPanelItems)
+            {
+                query = query.Include(a => a.DataPanelItems);
+            }
+            if (includeProblemDefectItems)
+            {
+                query = query.Include(a => a.ProblemDefectItems);
+            }
+            if (includeLogBookAppearance)
+            {
+                query = query.Include(a => a.LogbooksAppearance);
+            }
+
+            return await query.OrderBy(c => c.AppearanceId).ToListAsync();
+        }
+        public async Task<int> UpdateAppearance(AppearanceForUpdateDto appearanceForUpdate, Appearance appearanceEntity)
+        {
+            _mapper.Map(appearanceForUpdate, appearanceEntity);
+
+            _context.AppearanceInspections.Update(appearanceEntity);
+
+            return await _context.SaveChangesAsync();
+
+        }
+        public async Task<int> DeleteAppearance(Appearance appearanceEntity)
+        {
+            appearanceEntity.IsActive = false;
+            _context.AppearanceInspections.Update(appearanceEntity);
+
+            return await _context.SaveChangesAsync();
+        }
+
+        #endregion
     }
 }

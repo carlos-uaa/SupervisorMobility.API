@@ -4,15 +4,15 @@ using System.ComponentModel.DataAnnotations.Schema;
 
 namespace SupervisorMobility.API.DataAccess.Entities.IS
 {
-    public class LogbookAparence
+    public class LogbookAppearanceDto
     {
         [Key, DatabaseGenerated(DatabaseGeneratedOption.Identity)]
-        public int LogbookAparenceId { get; set; }
+        public int LogbookAppearanceId { get; set; }
         public int? Status { get; set; }
         public bool? IsActive { get; set; }
 
         public int? ApearanceId { get; set; }
-        public Apearance? ApearanceInspection {  get; set; }
+        public Appearance? ApearanceInspection {  get; set; }
 
         public ICollection<DataPanelAnswer>? PanelResults { get; set; }
   = new List<DataPanelAnswer>();

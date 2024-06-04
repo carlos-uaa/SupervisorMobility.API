@@ -16,7 +16,7 @@ using SupervisorMobility.API.Entities.CDMS;
 
 namespace SupervisorMobility.API.Controllers.IS_Controllers
 {
-    [Route("api/IS/Aparence/DataPanels")]
+    [Route("api/IS/Appearance/DataPanels")]
     [ApiController]
     public class DataPanelController : ControllerBase
     {

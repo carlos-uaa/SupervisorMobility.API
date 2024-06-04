@@ -4,7 +4,7 @@ using System.ComponentModel.DataAnnotations;
 
 namespace SupervisorMobility.API.DataAccess.Entities.IS
 {
-    public class ProblemDefect
+    public class ProblemDefectDto
     {
         [Key, DatabaseGenerated(DatabaseGeneratedOption.Identity)]
         public int ProblemDefectId { get; set; }
