@@ -560,6 +560,12 @@ namespace SupervisorMobility.API.DataAccess.Services
         }
         #endregion
 
+        public async Task<FileUpload?> FetchFileAsync(int fileid)
+        {
+            return await _context.Files
+                .Where(p => p.FileUploadId == fileid).FirstOrDefaultAsync();
+        }
+
         public async Task<bool> SaveChangesAsync()
         {
             return (await _context.SaveChangesAsync() >= 0);
