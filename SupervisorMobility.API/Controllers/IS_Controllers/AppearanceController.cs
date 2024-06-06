@@ -5,7 +5,6 @@ using SupervisorMobility.API.DataAccess.Entities.IS;
 using SupervisorMobility.API.DataAccess.Services;
 using SupervisorMobility.API.Models.IS_Apariencia_PlantillaDtos.AppearanceDtos;
 using SupervisorMobility.API.Models.IS_Apariencia_PlantillaDtos.DataPanelDtos;
-using SupervisorMobility.API.Models.IS_Apariencia_PlantillaDtos.PartDtos;
 
 namespace SupervisorMobility.API.Controllers.IS_Controllers
 {

@@ -3,6 +3,7 @@ using SupervisorMobility.API.DataAccess.Entities.IS;
 using SupervisorMobility.API.Models.CommentaryDtos;
 using SupervisorMobility.API.Models.FileUploadDto;
 using SupervisorMobility.API.Models.IS_Apariencia_PlantillaDtos.DataPanelDtos;
+using SupervisorMobility.API.Models.IS_Apariencia_PlantillaDtos.LogbookAppearanceDtos;
 using SupervisorMobility.API.Models.IS_Apariencia_PlantillaDtos.PartDtos;
 using SupervisorMobility.API.Models.ProductDtos;
 using System.ComponentModel.DataAnnotations.Schema;
@@ -19,6 +20,7 @@ namespace SupervisorMobility.API.Models.IS_Apariencia_PlantillaDtos.AppearanceDt
         public PartDto? Part { get; set; }
 
         public ICollection<CommentaryDto>? Observations { get; set; }
+          = new List<CommentaryDto>();
 
         public int? ManufacturerId { get; set; }
         public User? Manufacturer { get; set; }
@@ -35,8 +37,8 @@ namespace SupervisorMobility.API.Models.IS_Apariencia_PlantillaDtos.AppearanceDt
          = new List<DataPanelDto>();
 
 
-        public ICollection<ProblemDefectDto>? ProblemDefectItems { get; set; }
-         = new List<ProblemDefectDto>();
+        public ICollection<ProblemDefect>? ProblemDefectItems { get; set; }
+         = new List<ProblemDefect>();
 
         public ICollection<LogbookAppearanceDto>? LogbooksAppearance { get; set; }
          = new List<LogbookAppearanceDto>();
