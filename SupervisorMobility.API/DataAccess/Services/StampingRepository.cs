@@ -57,7 +57,7 @@ namespace SupervisorMobility.API.DataAccess.Services
                 query = query.Include(dp => dp.Specifications);
             }
 
-            return await query.FirstOrDefaultAsync(); 
+            return await query.FirstOrDefaultAsync();
         }
         public async Task<int> UpdateDataPanel(DataPanelForUpdateDto _DataPanelForUpdate, DataPanel _DataPanelEntity)
         {
@@ -293,7 +293,7 @@ namespace SupervisorMobility.API.DataAccess.Services
 
         }
 
-     
+
         #endregion
         #region ProblemDefect
         public async Task<int> ProblemDefectMaxItemOrderAsync()
@@ -377,7 +377,7 @@ namespace SupervisorMobility.API.DataAccess.Services
             if (includeStandars)
             {
                 query = query.Include(dp => dp.Standars);
-            } 
+            }
             if (includeSketches)
             {
                 query = query.Include(dp => dp.Sketches);
@@ -386,7 +386,7 @@ namespace SupervisorMobility.API.DataAccess.Services
             return await query.FirstOrDefaultAsync();
         }
 
-        public async  Task<int> UpdateCheckpoint(CheckpointForUpdateDto _CheckpointForUpdate, Checkpoint _CheckpointEntity)
+        public async Task<int> UpdateCheckpoint(CheckpointForUpdateDto _CheckpointForUpdate, Checkpoint _CheckpointEntity)
         {
             _mapper.Map(_CheckpointForUpdate, _CheckpointEntity);
             _context.Checkpoints.Update(_CheckpointEntity);
@@ -408,7 +408,7 @@ namespace SupervisorMobility.API.DataAccess.Services
             return await _context.SaveChangesAsync();
         }
 
-        public  async Task<int> CheckpointMaxItemOrderAsync()
+        public async Task<int> CheckpointMaxItemOrderAsync()
         {
             if (await _context.Checkpoints.AnyAsync())
             {
@@ -564,6 +564,11 @@ namespace SupervisorMobility.API.DataAccess.Services
         {
             return (await _context.SaveChangesAsync() >= 0);
         }
+        public async Task<FileUpload?> FetchFileAsync(int fileid)
+        {
+            return await _context.Files
+                .Where(p => p.FileUploadId == fileid).FirstOrDefaultAsync();
+        }
 
 
         #region Appearance
@@ -594,7 +599,7 @@ namespace SupervisorMobility.API.DataAccess.Services
 
         }
         public async Task<IEnumerable<Appearance>> GetAllAppearances(bool includeDataPanelItems = false, bool includeProblemDefectItems = false, bool includeLogBookAppearance = false)
-{
+        {
             var query = _context.AppearanceInspections.Where(p => p.IsActive == true);
 
             if (includeDataPanelItems)
