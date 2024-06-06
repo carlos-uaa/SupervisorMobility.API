@@ -3,9 +3,12 @@ using SupervisorMobility.API.DataAccess.Entities;
 using SupervisorMobility.API.DataAccess.Entities.IS;
 using SupervisorMobility.API.Entities;
 using SupervisorMobility.API.Models.FileUploadDto;
+using SupervisorMobility.API.Models.IS_Apariencia_PlantillaDtos.CheckpointDtos;
+using SupervisorMobility.API.Models.IS_Apariencia_PlantillaDtos.CheckpointNormDtos;
 using SupervisorMobility.API.Models.IS_Apariencia_PlantillaDtos.DataPanelDtos;
 using SupervisorMobility.API.Models.IS_Apariencia_PlantillaDtos.DataPanelSpecificationDtos;
 using SupervisorMobility.API.Models.IS_Apariencia_PlantillaDtos.PartDtos;
+using SupervisorMobility.API.Models.IS_Apariencia_PlantillaDtos.ProblemDefectDtos;
 using System.Runtime.CompilerServices;
 
 namespace SupervisorMobility.API.DataAccess.Services
@@ -45,9 +48,50 @@ namespace SupervisorMobility.API.DataAccess.Services
         Task<IEnumerable<Part>> GetAllParts(bool includeScketes = false);
         Task<int> UpdatePart(PartForUpdateDto partForUpdate, Part partentity);
         Task<int> DeletePart(Part partentity);
-        Task<FileUpload> CreateFileAsync(FileUploadForCreationDto newFile);
         Task AddPartSketch(int part_id, FileUpload evidence);
         #endregion
+
+        #region ProblemDefect
+        Task<int> ProblemDefectMaxItemOrderAsync();
+
+        Task<int> AddProblemDefect(ProblemDefect ProblemDefectToAdd);
+        Task<ProblemDefect> GetProblemDefect(int ProblemDefect_id);
+        Task<IEnumerable<ProblemDefect>> GetAllProblemDefects();
+        Task<int> UpdateProblemDefect(ProblemDefectForUpdateDto ProblemDefectForUpdate, ProblemDefect ProblemDefectentity);
+        Task<int> DeleteProblemDefect(ProblemDefect ProblemDefectentity);
+
+        #endregion
+
+        #region Checkpoint
+        Task<int> AddCheckpoint(Checkpoint CheckpointForCreate);
+        Task<IEnumerable<Checkpoint>> getAllCheckpoints(bool includeStandars = false, bool includeSketches = false);
+        Task<Checkpoint?> getCheckpoint(int Checkpoint_id, bool includeStandars = false, bool includeSketches = false);
+        Task<int> UpdateCheckpoint(CheckpointForUpdateDto _CheckpointForUpdate, Checkpoint _CheckpointEntity);
+        Task<AsyncVoidMethodBuilder> AddRangeCheckpointNorms(List<CheckpointNorm> CheckpointNorms);
+        Task<int?> removeCheckpoint(Checkpoint entityCheckpoint);
+        //Sketch from title
+        Task AddSketchCheckpoint(int checkpoint_id, FileUpload evidence);
+
+
+        Task<int> CheckpointMaxItemOrderAsync();
+        Task<int> CheckpointNormMaxItemOrderAsync(int dp_id);
+        //Task<int> UpdateCheckpointsSequenceAsync(CheckpointForUpdateSequenceDto newCheckpointSequence, Checkpoint CheckpointEntity);
+        //Task<IEnumerable<Checkpoint>> GetCheckpointForUpdateSequenceAsync(int currentSequence, int oldSequence, int categoryId);
+        #endregion
+        #region CheckpointNorm
+        Task<int> AddCheckpointNorm(Checkpoint Checkpoint, CheckpointNorm specforCreate);
+
+        //public Task<IEnumerable<CheckpointNorm>> getAllCheckpointNormFromCheckpoint(int Checkpoint_id, bool includeSketches = false);
+        Task<CheckpointNorm?> getCheckpointNorm(int CheckpointNorm_id, bool includeSketches = false);
+        //Task<int> UpdateCheckpointNormSequenceAsync(CheckpointNormForUpdateSequenceDto newDataPanelSequence, CheckpointNorm DataPanelEntity);
+        //Task<IEnumerable<CheckpointNorm>> GetCheckpointNormForUpdateSequenceAsync(int currentSequence, int oldSequence, int categoryId, int panelid);
+        Task<int?> removeCheckpointNorm(CheckpointNorm entityCheckpoint);
+        //Sketch form Norm
+        Task AddSketchChekpointNorm(int norm_id, FileUpload evidence);
+
+        #endregion
+
+        Task<FileUpload> CreateFileAsync(FileUploadForCreationDto newFile);
         Task<FileUpload?> FetchFileAsync(int fileid);
 
         #region Appearance
