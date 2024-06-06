@@ -33,10 +33,10 @@ namespace SupervisorMobility.API.Models.IS_Apariencia_PlantillaDtos.AppearanceDt
          = new List<DataPanelDto>();
 
 
-        public ICollection<ProblemDefectDto>? ProblemDefectItems { get; set; }
-         = new List<ProblemDefectDto>();
+        public ICollection<ProblemDefect>? ProblemDefectItems { get; set; }
+         = new List<ProblemDefect>();
 
-        public ICollection<LogbookAppearanceDto>? LogbooksAppearance { get; set; }
-         = new List<LogbookAppearanceDto>();
+        public ICollection<LogbookAppearanceForUpdateDto>? LogbooksAppearance { get; set; }
+         = new List<LogbookAppearanceForUpdateDto>();
     }
 }

@@ -70,7 +70,7 @@ namespace SupervisorMobility.API.Context
         public DbSet<DataPanel> DataPanels { get; set; }
         public DbSet<DataPanelSpecification> DataPanelSpecifications { get; set; }
         public DbSet<DataPanelAnswer> DataPanelDefectAnswer { get; set; }
-        public DbSet<ProblemDefectDto> ProblemDefects { get; set; }
+        public DbSet<ProblemDefect> ProblemDefects { get; set; }
         public DbSet<ProblemDefectAnswer> ProblemDefectAnswer { get; set; }
         public DbSet<LogbookAppearance> LogbookAppearance { get; set; }
         public DbSet<LogbookTemplate> LogbooksTemplate { get; set; }

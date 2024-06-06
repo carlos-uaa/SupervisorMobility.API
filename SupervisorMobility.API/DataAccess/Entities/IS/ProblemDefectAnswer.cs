@@ -17,6 +17,6 @@ namespace SupervisorMobility.API.DataAccess.Entities.IS
         public LogbookAppearance? Logbook { get; set; }
 
         public int? ProblemId { get; set; }
-        public ProblemDefectDto? Problem { get; set; }
+        public ProblemDefect? Problem { get; set; }
     }
 }

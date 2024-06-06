@@ -35,8 +35,8 @@ namespace SupervisorMobility.API.DataAccess.Entities.IS
      
 
         //Item de los problemas
-        public ICollection<ProblemDefectDto>? ProblemDefectItems { get; set; }
-         = new List<ProblemDefectDto>();
+        public ICollection<ProblemDefect>? ProblemDefectItems { get; set; }
+         = new List<ProblemDefect>();
 
         public ICollection<LogbookAppearance>? LogbooksAppearance { get; set; }
          = new List<LogbookAppearance>();
