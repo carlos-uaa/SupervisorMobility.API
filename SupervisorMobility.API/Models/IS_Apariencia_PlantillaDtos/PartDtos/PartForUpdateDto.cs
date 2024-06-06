@@ -14,6 +14,5 @@ namespace SupervisorMobility.API.Models.IS_Apariencia_PlantillaDtos.PartDtos
 
         public int ModelId { get; set; }
 
-        public ICollection<FileUploadGeneralDto> Sketches { get; set; } = new List<FileUploadGeneralDto>();
     }
 }
