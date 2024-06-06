@@ -6,7 +6,9 @@ using SupervisorMobility.API.Models.FileUploadDto;
 using SupervisorMobility.API.Models.IS_Apariencia_PlantillaDtos.DataPanelDtos;
 using SupervisorMobility.API.Models.IS_Apariencia_PlantillaDtos.DataPanelSpecificationDtos;
 using SupervisorMobility.API.Models.IS_Apariencia_PlantillaDtos.PartDtos;
+using SupervisorMobility.API.Models.IS_Apariencia_PlantillaDtos.AppearanceDtos;
 using System.Runtime.CompilerServices;
+using SupervisorMobility.API.Models.IS_Apariencia_PlantillaDtos.LogbookAppearanceDtos;
 
 namespace SupervisorMobility.API.DataAccess.Services
 {
@@ -57,6 +59,16 @@ namespace SupervisorMobility.API.DataAccess.Services
         Task<int> UpdateAppearance(AppearanceForUpdateDto appearanceForUpdate, Appearance appearanceEntity);
         Task<int> DeleteAppearance(Appearance appearanceEntity);
         #endregion
+
+
+        #region LogbookAppearance
+        Task<int> AddLogbookAppearance(LogbookAppearance logbookLogbookAppearanceToAdd);
+        Task<LogbookAppearance> GetLogbookAppearance(int logbookLogbookAppearance_id, bool includePanelResults = false, bool includeProblemDefectResults = false);
+        Task<IEnumerable<LogbookAppearance>> GetAllLogbookAppearances(bool includePanelResults = false, bool includeProblemDefectResults = false);
+        Task<int> UpdateLogbookAppearance(LogbookAppearanceForUpdateDto logbookLogbookAppearanceForUpdate, LogbookAppearance logbookLogbookAppearanceEntity);
+        Task<int> DeleteLogbookAppearance(LogbookAppearance logbookLogbookAppearanceEntity);
+        #endregion
+
 
         Task<bool> SaveChangesAsync();
     }

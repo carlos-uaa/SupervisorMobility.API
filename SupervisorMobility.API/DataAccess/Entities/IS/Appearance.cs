@@ -1,5 +1,6 @@
 ﻿using System.ComponentModel.DataAnnotations.Schema;
 using System.ComponentModel.DataAnnotations;
+using SupervisorMobility.API.Models.IS_Apariencia_PlantillaDtos.LogbookAppearanceDtos;
 
 namespace SupervisorMobility.API.DataAccess.Entities.IS
 {
@@ -37,7 +38,7 @@ namespace SupervisorMobility.API.DataAccess.Entities.IS
         public ICollection<ProblemDefectDto>? ProblemDefectItems { get; set; }
          = new List<ProblemDefectDto>();
 
-        public ICollection<LogbookAppearanceDto>? LogbooksAppearance { get; set; }
-         = new List<LogbookAppearanceDto>();
+        public ICollection<LogbookAppearance>? LogbooksAppearance { get; set; }
+         = new List<LogbookAppearance>();
     }
 }

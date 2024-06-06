@@ -11,10 +11,12 @@ using SupervisorMobility.API.Models.FileUploadDto;
 using SupervisorMobility.API.Models.IS_Apariencia_PlantillaDtos.DataPanelDtos;
 using SupervisorMobility.API.Models.IS_Apariencia_PlantillaDtos.DataPanelSpecificationDtos;
 using SupervisorMobility.API.Models.IS_Apariencia_PlantillaDtos.PartDtos;
+using SupervisorMobility.API.Models.IS_Apariencia_PlantillaDtos.AppearanceDtos;
 using SupervisorMobility.API.Models.KaizenDtos;
 using SupervisorMobility.API.Services;
 using System.Runtime.CompilerServices;
 using System.Text.RegularExpressions;
+using SupervisorMobility.API.Models.IS_Apariencia_PlantillaDtos.LogbookAppearanceDtos;
 
 namespace SupervisorMobility.API.DataAccess.Services
 {
@@ -352,6 +354,62 @@ namespace SupervisorMobility.API.DataAccess.Services
         {
             appearanceEntity.IsActive = false;
             _context.AppearanceInspections.Update(appearanceEntity);
+
+            return await _context.SaveChangesAsync();
+        }
+
+        #endregion
+
+        #region LogbookAppearance
+
+        public async Task<int> AddLogbookAppearance(LogbookAppearance logbookAppearanceToAdd)
+        {
+            _context.LogbookAppearance.Add(logbookAppearanceToAdd);
+            return await _context.SaveChangesAsync();
+        }
+        public async Task<LogbookAppearance> GetLogbookAppearance(int logbookAppearance_id, bool includePanelResults = false, bool includeProblemDefectResults = false)
+        {
+            var query = _context.LogbookAppearance.Where(p => p.LogbookAppearanceId == logbookAppearance_id && p.IsActive == true);
+
+            if (includePanelResults)
+            {
+                query = query.Include(l => l.PanelResults);
+            }
+            if (includeProblemDefectResults)
+            {
+                query = query.Include(l => l.ProblemDefectResults);
+            }
+            return await query.FirstOrDefaultAsync();
+
+        }
+        public async Task<IEnumerable<LogbookAppearance>> GetAllLogbookAppearances(bool includePanelResults = false, bool includeProblemDefectResults = false)
+        {
+            var query = _context.LogbookAppearance.Where(p => p.IsActive == true);
+
+            if (includePanelResults)
+            {
+                query = query.Include(l => l.PanelResults);
+            }
+            if (includeProblemDefectResults)
+            {
+                query = query.Include(l => l.ProblemDefectResults);
+            }
+
+            return await query.OrderBy(c => c.LogbookAppearanceId).ToListAsync();
+        }
+        public async Task<int> UpdateLogbookAppearance(LogbookAppearanceForUpdateDto logbookAppearanceForUpdate, LogbookAppearance logbookAppearanceEntity)
+        {
+            _mapper.Map(logbookAppearanceForUpdate, logbookAppearanceEntity);
+
+            _context.LogbookAppearance.Update(logbookAppearanceEntity);
+
+            return await _context.SaveChangesAsync();
+
+        }
+        public async Task<int> DeleteLogbookAppearance(LogbookAppearance logbookAppearanceEntity)
+        {
+            logbookAppearanceEntity.IsActive = false;
+            _context.LogbookAppearance.Update(logbookAppearanceEntity);
 
             return await _context.SaveChangesAsync();
         }

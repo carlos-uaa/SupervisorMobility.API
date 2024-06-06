@@ -1,9 +1,7 @@
 ﻿using AutoMapper;
+using SupervisorMobility.API.DataAccess.Entities;
 using SupervisorMobility.API.DataAccess.Entities.IS;
 using SupervisorMobility.API.Models.IS_Apariencia_PlantillaDtos.AppearanceDtos;
-using SupervisorMobility.API.Models.IS_Apariencia_PlantillaDtos.DataPanelDtos;
-using SupervisorMobility.API.Models.IS_Apariencia_PlantillaDtos.DataPanelSpecificationDtos;
-using SupervisorMobility.API.Models.IS_Apariencia_PlantillaDtos.PartDtos;
 
 namespace SupervisorMobility.API.MapperProfiles.ISMapperProfiles
 {
@@ -12,11 +10,12 @@ namespace SupervisorMobility.API.MapperProfiles.ISMapperProfiles
         public AppearanceProfile()
         {
             //data panel
-            CreateMap<Appearance, AppearanceDto>().ReverseMap();
+            CreateMap<Appearance, AppearanceDto>();
             CreateMap<Appearance, AppearanceForCreateDto>().ReverseMap();
             CreateMap<Appearance, AppearanceForUpdateDto>().ReverseMap();
-
-         
+            CreateMap<Commentary, Models.CommentaryDtos.CommentaryDto>().ReverseMap();
+            CreateMap<Commentary, Models.CommentaryDtos.CreateCommentaryDto>().ReverseMap();
+            CreateMap<Commentary, Models.CommentaryDtos.UpdateCommentaryDto>().ReverseMap();
         }
     }
 }

@@ -72,7 +72,7 @@ namespace SupervisorMobility.API.Context
         public DbSet<DataPanelAnswer> DataPanelDefectAnswer { get; set; }
         public DbSet<ProblemDefectDto> ProblemDefects { get; set; }
         public DbSet<ProblemDefectAnswer> ProblemDefectAnswer { get; set; }
-        public DbSet<LogbookAppearanceDto> LogbookAppearance { get; set; }
+        public DbSet<LogbookAppearance> LogbookAppearance { get; set; }
         public DbSet<LogbookTemplate> LogbooksTemplate { get; set; }
         public DbSet<Part> Parts { get; set; }
         public DbSet<Checkpoint> Checkpoints { get; set; }
@@ -94,9 +94,13 @@ namespace SupervisorMobility.API.Context
             //Default values
             modelBuilder.Entity<JobCategoryStructure>()
                 .Property(p => p.IsActive)
-                .HasDefaultValue(true);   
-            
-           
+                .HasDefaultValue(true);
+
+            modelBuilder.Entity<Commentary>()
+             .Property(p => p.IsActive)
+             .HasDefaultValue(true);
+
+
 
             modelBuilder.Entity<SOSReviewProgram>()
                .Property(p => p.IsActive)

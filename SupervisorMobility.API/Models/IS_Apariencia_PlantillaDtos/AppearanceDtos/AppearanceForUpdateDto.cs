@@ -3,9 +3,10 @@ using SupervisorMobility.API.DataAccess.Entities.IS;
 using SupervisorMobility.API.Models.CommentaryDtos;
 using SupervisorMobility.API.Models.FileUploadDto;
 using SupervisorMobility.API.Models.IS_Apariencia_PlantillaDtos.DataPanelDtos;
-using SupervisorMobility.API.Models.ProductDtos;
+using SupervisorMobility.API.Models.IS_Apariencia_PlantillaDtos.LogbookAppearanceDtos;
+using SupervisorMobility.API.Models.IS_Apariencia_PlantillaDtos.PartDtos;
 
-namespace SupervisorMobility.API.Models.IS_Apariencia_PlantillaDtos.PartDtos
+namespace SupervisorMobility.API.Models.IS_Apariencia_PlantillaDtos.AppearanceDtos
 {
     public class AppearanceForUpdateDto
     {
@@ -15,7 +16,7 @@ namespace SupervisorMobility.API.Models.IS_Apariencia_PlantillaDtos.PartDtos
         public int? PartId { get; set; }
         public PartDto? Part { get; set; }
 
-        public ICollection<CommentaryDto>? Observations { get; set; }
+        public ICollection<UpdateCommentaryDto>? Observations { get; set; } = new List<UpdateCommentaryDto>();
 
         public int? ManufacturerId { get; set; }
         public User? Manufacturer { get; set; }

@@ -4,7 +4,7 @@ using System.ComponentModel.DataAnnotations.Schema;
 
 namespace SupervisorMobility.API.DataAccess.Entities.IS
 {
-    public class LogbookAppearanceDto
+    public class LogbookAppearance
     {
         [Key, DatabaseGenerated(DatabaseGeneratedOption.Identity)]
         public int LogbookAppearanceId { get; set; }
