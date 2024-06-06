@@ -570,13 +570,7 @@ namespace SupervisorMobility.API.DataAccess.Services
         {
             return (await _context.SaveChangesAsync() >= 0);
         }
-        public async Task<FileUpload?> FetchFileAsync(int fileid)
-        {
-            return await _context.Files
-                .Where(p => p.FileUploadId == fileid).FirstOrDefaultAsync();
-        }
-
-
+      
         #region Appearance
 
         public async Task<int> AddAppearance(Appearance appearanceToAdd)
