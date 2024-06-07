@@ -107,7 +107,7 @@ namespace SupervisorMobility.API.Controllers.IS_Controllers
                 return BadRequest();
         }
 
-        [HttpPost("UploadSkecth/{Checkpoint_id}")]
+        [HttpPost("UploadSkecth/{CheckpointNorm_id}")]
         public async Task<ActionResult<FileUpload>> UploadPartSkecth(int CheckpointNorm_id, IFormFile file)
         {
 

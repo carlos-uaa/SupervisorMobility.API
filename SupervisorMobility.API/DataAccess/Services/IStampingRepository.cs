@@ -66,8 +66,8 @@ namespace SupervisorMobility.API.DataAccess.Services
 
         #region Checkpoint
         Task<int> AddCheckpoint(Checkpoint CheckpointForCreate);
-        Task<IEnumerable<Checkpoint>> getAllCheckpoints(bool includeStandars = false, bool includeSketches = false);
-        Task<Checkpoint?> getCheckpoint(int Checkpoint_id, bool includeStandars = false, bool includeSketches = false);
+        Task<IEnumerable<Checkpoint>> getAllCheckpoints(bool includeStandars = false, bool includeSketches = false, bool includeSketchesStandars = false);
+        Task<Checkpoint?> getCheckpoint(int Checkpoint_id, bool includeStandars = false, bool includeSketches = false, bool includeSketchesStandars = false);
         Task<int> UpdateCheckpoint(CheckpointForUpdateDto _CheckpointForUpdate, Checkpoint _CheckpointEntity);
         Task<AsyncVoidMethodBuilder> AddRangeCheckpointNorms(List<CheckpointNorm> CheckpointNorms);
         Task<int?> removeCheckpoint(Checkpoint entityCheckpoint);
@@ -95,7 +95,9 @@ namespace SupervisorMobility.API.DataAccess.Services
 
         Task<FileUpload> CreateFileAsync(FileUploadForCreationDto newFile);
         Task<FileUpload?> FetchFileAsync(int fileid);
-
+        Task RemoveSketchPart(int part_Id, int fileUploadId);
+        Task RemoveSketchCheckPoint(int CheckpointId, int fileUploadId);
+        Task RemoveSketchCheckPointNorm(int Checkpoint_NormId, int fileUploadId);
         #region Appearance
         Task<int> AddAppearance(Appearance appearanceToAdd);
         Task<Appearance> GetAppearance(int appearance_id, bool includeDataPanelItems = false, bool includeProblemDefectItems = false, bool includeLogBookAppearance = false);

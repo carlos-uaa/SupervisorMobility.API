@@ -52,10 +52,10 @@ namespace SupervisorMobility.API.Controllers.IS_Controllers
 
 
         [HttpGet]
-        public async Task<ActionResult<IEnumerable<CheckpointDto>>> GetCheckpointCategories(bool includeStandars = false, bool includeSketches = false)
+        public async Task<ActionResult<IEnumerable<CheckpointDto>>> GetCheckpointCategories(bool includeStandars = false, bool includeSketches = false, bool includeSketchesStandars = false)
         {
 
-            var CheckpointEntities = await _stampingRepository.getAllCheckpoints(includeStandars, includeSketches);
+            var CheckpointEntities = await _stampingRepository.getAllCheckpoints(includeStandars, includeSketches, includeSketchesStandars);
             if (CheckpointEntities == null)
             {
                 return NotFound("CheckpointEntities categories not found!");
@@ -65,10 +65,10 @@ namespace SupervisorMobility.API.Controllers.IS_Controllers
         }
 
         [HttpGet("{id}", Name = "GetCheckpointCategory")]
-        public async Task<ActionResult<CheckpointDto>> GetCheckpointCategory(int id, bool includeStandars = false, bool includeSketches = false)
+        public async Task<ActionResult<CheckpointDto>> GetCheckpointCategory(int id, bool includeStandars = false, bool includeSketches = false, bool includeSketchesStandars = false)
         {
             //Find Checklist category
-            var CheckpointCategory = await _stampingRepository.getCheckpoint(id, includeStandars, includeSketches);
+            var CheckpointCategory = await _stampingRepository.getCheckpoint(id, includeStandars, includeSketches, includeSketchesStandars);
             if (CheckpointCategory == null)
             {
                 return NotFound("Data Panel not found!");
@@ -255,6 +255,15 @@ namespace SupervisorMobility.API.Controllers.IS_Controllers
             }
             return NotFound("Error File download");
 
+        }
+
+
+        [HttpGet("{CheckpointId}/Sketch/{fileUploadId}/remove")]
+        public async Task<ActionResult<int>> RemoveEvidence(int CheckpointId, int fileUploadId)
+        {
+            await _stampingRepository.RemoveSketchCheckPoint(CheckpointId, fileUploadId);
+            await _stampingRepository.SaveChangesAsync();
+            return Ok();
         }
     }
 }

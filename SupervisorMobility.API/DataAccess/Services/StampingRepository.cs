@@ -353,13 +353,21 @@ namespace SupervisorMobility.API.DataAccess.Services
             return _context.SaveChanges();
         }
 
-        public async Task<IEnumerable<Checkpoint>> getAllCheckpoints(bool includeStandars = false, bool includeSketches = false)
+        public async Task<IEnumerable<Checkpoint>> getAllCheckpoints(bool includeStandars = false, bool includeSketches = false, bool includeSketchesStandars = false)
         {
             var query = _context.Checkpoints.Where(u => u.IsActive == true);
 
             if (includeStandars)
             {
-                query = query.Include(dp => dp.Standars);
+                if (includeSketchesStandars)
+                {
+                    query = query.Include(dp => dp.Standars).ThenInclude(d => d.Sketches);
+
+                }
+                else
+                {
+                    query = query.Include(dp => dp.Standars);
+                }
             }
 
             if (includeSketches)
@@ -370,17 +378,25 @@ namespace SupervisorMobility.API.DataAccess.Services
             return await query.OrderBy(c => c.CheckpointId).ToListAsync();
         }
 
-        public async Task<Checkpoint?> getCheckpoint(int Checkpoint_id, bool includeStandars = false, bool includeSketches = false)
+        public async Task<Checkpoint?> getCheckpoint(int Checkpoint_id, bool includeStandars = false, bool includeSketches = false, bool includeSketchesStandars = false)
         {
             var query = _context.Checkpoints.Where(u => u.CheckpointId == Checkpoint_id && u.IsActive == true);
 
             if (includeStandars)
             {
-                query = query.Include(dp => dp.Standars);
+                if (includeSketchesStandars)
+                {
+                    query = query.Include(dp => dp.Standars).ThenInclude(d => d.Sketches);
+
+                }
+                else
+                {
+                    query = query.Include(dp => dp.Standars);
+                }
             }
             if (includeSketches)
             {
-                query = query.Include(dp => dp.Sketches);
+                query = query.Include(dp => dp.Sketches) ;
             }
 
             return await query.FirstOrDefaultAsync();
@@ -570,7 +586,51 @@ namespace SupervisorMobility.API.DataAccess.Services
         {
             return (await _context.SaveChangesAsync() >= 0);
         }
-      
+
+        public async Task RemoveSketchCheckPoint(int CheckpointId, int fileUploadId)
+        {
+            var CheckPoint = await getCheckpoint(CheckpointId, true, true);
+
+            var Sketch = await FetchFileAsync(fileUploadId);
+            if (Sketch != null)
+            {
+                if (CheckPoint.Sketches != null)
+                {
+                    //Remove evidence
+                    CheckPoint.Sketches.Remove(item: CheckPoint.Sketches.ToList().Find(e => e.FileUploadId == fileUploadId));
+                }
+            }
+        }
+
+        public async Task RemoveSketchCheckPointNorm(int Checkpoint_NormId, int fileUploadId)
+        {
+            var CheckPointNorm = await getCheckpointNorm(Checkpoint_NormId, true);
+
+            var Sketch = await FetchFileAsync(fileUploadId);
+            if (Sketch != null)
+            {
+                if (CheckPointNorm.Sketches != null)
+                {
+                    //Remove evidence
+                    CheckPointNorm.Sketches.Remove(item: CheckPointNorm.Sketches.ToList().Find(e => e.FileUploadId == fileUploadId));
+                }
+            }
+        }
+        public async Task RemoveSketchPart(int part_Id, int fileUploadId)
+        {
+            var _part = await GetPart(part_Id, true);
+
+            var Sketch = await FetchFileAsync(fileUploadId);
+            if (Sketch != null)
+            {
+                if (_part.Sketches != null)
+                {
+                    //Remove evidence
+                    _part.Sketches.Remove(item: _part.Sketches.ToList().Find(e => e.FileUploadId == fileUploadId));
+                }
+            }
+        }
+
         #region Appearance
 
         public async Task<int> AddAppearance(Appearance appearanceToAdd)
