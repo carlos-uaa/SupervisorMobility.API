@@ -9,6 +9,7 @@ namespace SupervisorMobility.API.DataAccess.Entities.IS
         public int CheckpointNormId { get; set; }
 
         public bool? IsActive { get; set; }
+        public bool NA { get; set; }
 
         //Formato tiene datos con tendencia a ser establecidos
         public int ItemOrder { get; set; }

@@ -78,6 +78,7 @@ namespace SupervisorMobility.API.Context
         public DbSet<Checkpoint> Checkpoints { get; set; }
         public DbSet<CheckpointNorm> CheckpointsNorm { get; set; }
         public DbSet<CheckpointNormAnswer> CheckpointsNormAnswer { get; set; }
+        public DbSet<CheckpointAnswerColumn> CheckpointAnswerColumns { get; set; }
 
         #endregion
 

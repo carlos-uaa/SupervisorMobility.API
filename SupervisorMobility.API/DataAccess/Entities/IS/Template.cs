@@ -17,8 +17,8 @@ namespace SupervisorMobility.API.DataAccess.Entities.IS
         public ICollection<Checkpoint>? CheckpointItems { get; set; }
           = new List<Checkpoint>();
         //specificacion de la categoria
-        public ICollection<CheckpointNorm>? CheckpointNormItems { get; set; }
-          = new List<CheckpointNorm>();
+        //public ICollection<CheckpointNorm>? CheckpointNormItems { get; set; }
+        //  = new List<CheckpointNorm>();
 
 
 

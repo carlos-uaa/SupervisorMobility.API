@@ -41,7 +41,7 @@ namespace SupervisorMobility.API.DataAccess.Services
         #region Part
 
         Task<int> AddPart(Part partToAdd);
-        Task<Part> GetPart(int part_id, bool includeScketes = false);
+        Task<Part> GetPart(int part_id, bool includeScketes = false, bool includeModel = false);
         Task<IEnumerable<Part>> GetAllParts(bool includeScketes = false);
         Task<int> UpdatePart(PartForUpdateDto partForUpdate, Part partentity);
         Task<int> DeletePart(Part partentity);

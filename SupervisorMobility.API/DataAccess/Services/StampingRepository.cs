@@ -206,13 +206,17 @@ namespace SupervisorMobility.API.DataAccess.Services
             _context.Parts.Add(partToAdd);
             return await _context.SaveChangesAsync();
         }
-        public async Task<Part> GetPart(int part_id, bool includeScketes = false)
+        public async Task<Part> GetPart(int part_id, bool includeScketes = false, bool includeModel = false)
         {
             var query = _context.Parts.Where(p => p.PartId == part_id && p.IsActive == true);
 
             if (includeScketes)
             {
                 query = query.Include(pi => pi.Sketches);
+            }
+            if (includeModel)
+            {
+                query = query.Include(pi => pi.Model);
             }
 
             return await query.FirstOrDefaultAsync();
