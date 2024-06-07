@@ -65,14 +65,14 @@ namespace SupervisorMobility.API.Context
         #endregion
 
         #region IS
-        public DbSet<Apearance> AppearanceInspections { get; set; }
+        public DbSet<Appearance> AppearanceInspections { get; set; }
         public DbSet<Template> TemplateInspections { get; set; }
         public DbSet<DataPanel> DataPanels { get; set; }
         public DbSet<DataPanelSpecification> DataPanelSpecifications { get; set; }
         public DbSet<DataPanelAnswer> DataPanelDefectAnswer { get; set; }
         public DbSet<ProblemDefect> ProblemDefects { get; set; }
         public DbSet<ProblemDefectAnswer> ProblemDefectAnswer { get; set; }
-        public DbSet<LogbookAparence> LogbooksAparence { get; set; }
+        public DbSet<LogbookAppearance> LogbookAppearance { get; set; }
         public DbSet<LogbookTemplate> LogbooksTemplate { get; set; }
         public DbSet<Part> Parts { get; set; }
         public DbSet<Checkpoint> Checkpoints { get; set; }
@@ -95,9 +95,13 @@ namespace SupervisorMobility.API.Context
             //Default values
             modelBuilder.Entity<JobCategoryStructure>()
                 .Property(p => p.IsActive)
-                .HasDefaultValue(true);   
-            
-           
+                .HasDefaultValue(true);
+
+            modelBuilder.Entity<Commentary>()
+             .Property(p => p.IsActive)
+             .HasDefaultValue(true);
+
+
 
             modelBuilder.Entity<SOSReviewProgram>()
                .Property(p => p.IsActive)

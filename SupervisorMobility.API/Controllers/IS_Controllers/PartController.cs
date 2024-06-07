@@ -123,7 +123,7 @@ namespace SupervisorMobility.API.Controllers.IS_Controllers
             uploadResult.StorageFileName = trustedFileNameForStorage;
             uploadResult.ContentType = file.ContentType;
             uploadResult.UploadDate = DateTime.Now;
-
+            uploadResult.IsActive = true;
 
             var fileToReturn = await _stampingRepository.CreateFileAsync(uploadResult);
             await _stampingRepository.AddPartSketch(part_id, fileToReturn);

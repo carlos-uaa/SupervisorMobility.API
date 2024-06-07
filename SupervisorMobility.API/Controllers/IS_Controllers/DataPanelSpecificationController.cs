@@ -12,7 +12,7 @@ using DocumentFormat.OpenXml.Office2010.Excel;
 
 namespace SupervisorMobility.API.Controllers.IS_Controllers
 {
-    [Route("api/IS/Aparence/DataPanels/Specification")]
+    [Route("api/IS/Appearance/DataPanels/Specification")]
     [ApiController]
     public class DataPanelSpecificationController : ControllerBase
     {

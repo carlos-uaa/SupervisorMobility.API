@@ -1,12 +1,13 @@
 ﻿using System.ComponentModel.DataAnnotations.Schema;
 using System.ComponentModel.DataAnnotations;
+using SupervisorMobility.API.Models.IS_Apariencia_PlantillaDtos.LogbookAppearanceDtos;
 
 namespace SupervisorMobility.API.DataAccess.Entities.IS
 {
-    public class Apearance
+    public class Appearance
     {
         [Key, DatabaseGenerated(DatabaseGeneratedOption.Identity)]
-        public int ApearanceId { get; set; }
+        public int AppearanceId { get; set; }
         public bool? IsActive { get; set; }
         
         public int? PartId { get; set; }
@@ -37,7 +38,7 @@ namespace SupervisorMobility.API.DataAccess.Entities.IS
         public ICollection<ProblemDefect>? ProblemDefectItems { get; set; }
          = new List<ProblemDefect>();
 
-        public ICollection<LogbookAparence>? LogbooksAparence { get; set; }
-         = new List<LogbookAparence>();
+        public ICollection<LogbookAppearance>? LogbooksAppearance { get; set; }
+         = new List<LogbookAppearance>();
     }
 }
