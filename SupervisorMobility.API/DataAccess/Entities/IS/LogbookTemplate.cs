@@ -14,29 +14,13 @@ namespace SupervisorMobility.API.DataAccess.Entities.IS
         public int? TemplateId { get; set; }
         public Template? TemplateInspection {  get; set; }
 
+        public ICollection<CheckpointAnswerColumn>? CheckpointsResults { get; set; }
+        = new List<CheckpointAnswerColumn>();
 
-        [Column(TypeName = "Date")]
-        public DateTime? Date { get; set; }
-
-        [Column(TypeName = "Time")]
-        public TimeSpan? Time { get; set; }
-        public string? RAN { get; set; }
-
-        public ICollection<CheckpointNormAnswer>? CheckpointsResults { get; set; }
-= new List<CheckpointNormAnswer>();
-
-        public int? InspectorId { get; set; }
-        public User? Inspector { get; set; }
-        public string? InspectorSignature { get; set; }
-        [Column(TypeName = "Date")]
-        public DateTime? InspectorSignatureDate { get; set; }
-        public ICollection<Commentary>? InspectorObservations { get; set; }
         public int? SupervisorId { get; set; }
         public User? Supervisor { get; set; }
-        public string? SupervisorSignature { get; set; }
-        [Column(TypeName = "Date")]
-        public DateTime? SupervisorSignatureDate { get; set; }
+        public FileUpload? SupervisorSignatureImage { get; set; } = new();
 
-      
+
     }
 }
