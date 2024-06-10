@@ -29,7 +29,7 @@ namespace SupervisorMobility.API.Controllers.IS_Controllers
         }
 
         [HttpPost]
-        public async Task<ActionResult<CheckpointDto>> CreateDatePanelCategorie(CheckpointForCreateDto CheckpointForCreate)
+        public async Task<ActionResult<CheckpointDto>> CreateCheckpoint(CheckpointForCreateDto CheckpointForCreate)
         {
             Checkpoint DPEntity = _mapper.Map<Checkpoint>(CheckpointForCreate);
             DPEntity.ItemOrder = await _stampingRepository.CheckpointMaxItemOrderAsync();
@@ -38,6 +38,7 @@ namespace SupervisorMobility.API.Controllers.IS_Controllers
             {
                 foreach (var (item, index) in DPEntity.Standars?.Select((item, index) => (item, index)))
                 {
+                    item.CheckpointNormId = 0;
                     item.ItemOrder = index + 1;
                 }
             }
