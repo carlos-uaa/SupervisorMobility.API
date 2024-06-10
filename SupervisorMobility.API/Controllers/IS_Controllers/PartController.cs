@@ -54,10 +54,10 @@ namespace SupervisorMobility.API.Controllers.IS_Controllers
         }
 
         [HttpGet]
-        public async Task<ActionResult<IEnumerable<PartDto>>> GetAllParts(bool includeScketes = false)
+        public async Task<ActionResult<IEnumerable<PartDto>>> GetAllParts(bool includeScketes = false, bool includeModel = false)
         {
 
-            var partEntity = await _stampingRepository.GetAllParts(includeScketes);
+            var partEntity = await _stampingRepository.GetAllParts(includeScketes, includeModel);
             if (partEntity == null)
             {
                 return NotFound("Part not found!");

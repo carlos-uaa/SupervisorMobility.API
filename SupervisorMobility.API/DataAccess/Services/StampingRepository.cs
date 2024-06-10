@@ -236,13 +236,17 @@ namespace SupervisorMobility.API.DataAccess.Services
             return await query.FirstOrDefaultAsync();
 
         }
-        public async Task<IEnumerable<Part>> GetAllParts(bool includeScketes = false)
+        public async Task<IEnumerable<Part>> GetAllParts(bool includeScketes = false, bool includeModel = false)
         {
             var query = _context.Parts.Where(p => p.IsActive == true);
 
             if (includeScketes)
             {
                 query = query.Include(pi => pi.Sketches);
+            }
+            if (includeModel)
+            {
+                query = query.Include(pi => pi.Model);
             }
 
             return await query.OrderBy(c => c.PartId).ToListAsync();
