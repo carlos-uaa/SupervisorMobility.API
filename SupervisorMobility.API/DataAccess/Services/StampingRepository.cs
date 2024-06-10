@@ -390,22 +390,23 @@ namespace SupervisorMobility.API.DataAccess.Services
         {
             var query = _context.Checkpoints.Where(u => u.CheckpointId == Checkpoint_id && u.IsActive == true);
 
+            if (includeSketches)
+            {
+                query = query.Include(dp => dp.Sketches);
+            }
+
             if (includeStandars)
             {
                 if (includeSketchesStandars)
                 {
                     query = query.Include(dp => dp.Standars).ThenInclude(d => d.Sketches);
-
                 }
                 else
                 {
                     query = query.Include(dp => dp.Standars);
                 }
             }
-            if (includeSketches)
-            {
-                query = query.Include(dp => dp.Sketches) ;
-            }
+          
 
             return await query.FirstOrDefaultAsync();
         }
