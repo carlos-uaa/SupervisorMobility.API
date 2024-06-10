@@ -105,6 +105,7 @@ namespace SupervisorMobility.API.Controllers.IS_Controllers
 
                 foreach (var newNorm in newStandars)
                 {
+                    newNorm.CheckpointNormId = 0;
                     newNorm.CheckpointId = CheckpointId;
                     newNorm.ItemOrder = sequence++;
                 }

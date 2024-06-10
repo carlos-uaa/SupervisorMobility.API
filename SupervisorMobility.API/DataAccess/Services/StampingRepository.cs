@@ -486,7 +486,7 @@ namespace SupervisorMobility.API.DataAccess.Services
 
         public async Task<CheckpointNorm?> getCheckpointNorm(int CheckpointNorm_id, bool includeSketches = false)
         {
-            var query = _context.CheckpointsNorm.Where(dps => dps.CheckpointNormId == CheckpointNorm_id && dps.IsActive == true);
+            var query = _context.CheckpointsNorm.Include(ck => ck.Checkpoint).Where(dps => dps.CheckpointNormId == CheckpointNorm_id && dps.IsActive == true);
             if (includeSketches)
             {
                 query = query.Include(dps => dps.Sketches);
