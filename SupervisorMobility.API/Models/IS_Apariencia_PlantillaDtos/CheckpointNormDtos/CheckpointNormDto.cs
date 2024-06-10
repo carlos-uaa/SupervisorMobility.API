@@ -1,4 +1,7 @@
-﻿using SupervisorMobility.API.Models.FileUploadDto;
+﻿using Microsoft.Identity.Client;
+using MimeKit.Encodings;
+using SupervisorMobility.API.Models.FileUploadDto;
+using SupervisorMobility.API.Models.IS_Apariencia_PlantillaDtos.CheckpointDtos;
 
 namespace SupervisorMobility.API.Models.IS_Apariencia_PlantillaDtos.CheckpointNormDtos
 {
@@ -11,6 +14,8 @@ namespace SupervisorMobility.API.Models.IS_Apariencia_PlantillaDtos.CheckpointNo
         public int ItemOrder { get; set; }
         public string Standard { get; set; } = string.Empty;
         public int CheckpointId { get; set; }
+
+        public CheckpointDto? Checkpoint { get; set; }
 
         public ICollection<FileUploadGeneralDto>? Sketches { get; set; } = new List<FileUploadGeneralDto>();
 

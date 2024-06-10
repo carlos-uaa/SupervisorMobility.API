@@ -383,3 +383,4 @@ appsettings.json
 SupervisorMobility.API/Migrations/SupervisorMobilityContextModelSnapshot.cs
 *.xlsx
 *.csv
+/SupervisorMobility.API/uploads
