@@ -5,6 +5,7 @@ using SupervisorMobility.API.DataAccess.Entities.IS;
 using SupervisorMobility.API.DataAccess.Entities.Logger;
 using SupervisorMobility.API.DataAccess.Entities.LUP;
 using SupervisorMobility.API.DataAccess.Entities.Paths;
+using SupervisorMobility.API.DataAccess.Entities.SOS;
 using SupervisorMobility.API.DataAccess.Entities.SOS_Review;
 using SupervisorMobility.API.Entities;
 using System.Globalization;
@@ -18,7 +19,7 @@ namespace SupervisorMobility.API.Context
         public DbSet<JobCategoryStructure> JobCategoryStructures { get; set; }
         public DbSet<QuestionType> QuestionTypes { get; set; }
         public DbSet<ChecklistQuestion> ChecklistQuestions { get; set; }
-   
+
         public DbSet<JobObservation> JobObservations { get; set; }
         public DbSet<Lup> Lup { get; set; }
         public DbSet<ChecklistAnswer> ChecklistAnswers { get; set; }
@@ -82,6 +83,22 @@ namespace SupervisorMobility.API.Context
 
         #endregion
 
+        #region SOS
+        public DbSet<SOSHub> SOSHubs { get; set; }
+
+        public DbSet<Material> Materials { get; set; }
+        public DbSet<Tool> Tools { get; set; }
+        public DbSet<Equipment> Equipments { get; set; }
+
+
+
+        public DbSet<SOSAnalysis> SOSAnalyses { get; set; }
+        public DbSet<SOSCombination> SOSCombinations { get; set; }
+        public DbSet<SOSDistribution> SOSDistributions { get; set; }
+        public DbSet<SOSFlow> SOSFlows { get; set; }
+        public DbSet<SOSSequence> SOSSequences { get; set; }
+
+        #endregion
 
         public SupervisorMobilityContext(DbContextOptions<SupervisorMobilityContext> options)
             : base(options)
@@ -105,9 +122,9 @@ namespace SupervisorMobility.API.Context
 
             modelBuilder.Entity<SOSReviewProgram>()
                .Property(p => p.IsActive)
-               .HasDefaultValue(true); 
-            
-            
+               .HasDefaultValue(true);
+
+
             modelBuilder.Entity<SOSReviewDistSuggestion>()
                .Property(p => p.SuggestionApplied)
                .HasDefaultValue(false);
@@ -123,7 +140,7 @@ namespace SupervisorMobility.API.Context
             modelBuilder.Entity<JobObservation>()
                 .Property(p => p.IsActive)
                 .HasDefaultValue(true);
-         
+
 
             modelBuilder.Entity<Plant>()
                 .Property(p => p.IsActive)
@@ -155,8 +172,8 @@ namespace SupervisorMobility.API.Context
 
             modelBuilder.Entity<Lup>()
                 .Property(p => p.IsActive)
-                .HasDefaultValue(true); 
-            
+                .HasDefaultValue(true);
+
 
             modelBuilder.Entity<AssyChart>()
                 .Property(p => p.IsActive)
@@ -176,7 +193,7 @@ namespace SupervisorMobility.API.Context
             //Users
             modelBuilder.Entity<User>()
              .Property(p => p.IsActive)
-             .HasDefaultValue(true); 
+             .HasDefaultValue(true);
 
             modelBuilder.Entity<UserCareerPath>()
              .Property(p => p.IsActive)
@@ -223,7 +240,7 @@ namespace SupervisorMobility.API.Context
             modelBuilder.Entity<PAT>()
               .Property(p => p.IsActive)
               .HasDefaultValue(true);
-            
+
             modelBuilder.Entity<LeadershipRecord>()
               .Property(p => p.isActive)
               .HasDefaultValue(true);
@@ -283,10 +300,11 @@ namespace SupervisorMobility.API.Context
                 .Property(p => p.IsActive)
                 .HasDefaultValue(true);
 
-         
+
             modelBuilder.Entity<KaizenTransaction>()
-   .Property(p => p.IsActive)
-   .HasDefaultValue(true);
+               .Property(p => p.IsActive)
+               .HasDefaultValue(true);
+
             modelBuilder.Entity<Kaizen>()
                .Property(p => p.IsActive)
                .HasDefaultValue(true);
@@ -298,7 +316,7 @@ namespace SupervisorMobility.API.Context
             modelBuilder.Entity<HCI>()
             .Property(p => p.IsActive)
             .HasDefaultValue(true);
-            
+
             modelBuilder.Entity<Commentary>()
             .Property(p => p.IsActive)
             .HasDefaultValue(true);
@@ -309,6 +327,44 @@ namespace SupervisorMobility.API.Context
             modelBuilder.Entity<HCICategory>()
                 .Property(p => p.IsActive)
                 .HasDefaultValue(true);
+
+            //SOS
+            modelBuilder.Entity<SOSHub>()
+                .Property(p => p.IsActive)
+                .HasDefaultValue(true);
+
+            modelBuilder.Entity<Material>()
+                .Property(p => p.IsActive)
+                .HasDefaultValue(true);
+
+            modelBuilder.Entity<Equipment>()
+                .Property(p => p.IsActive)
+                .HasDefaultValue(true);
+
+            modelBuilder.Entity<Tool>()
+                .Property(p => p.IsActive)
+                .HasDefaultValue(true);
+
+            modelBuilder.Entity<SOSAnalysis>()
+                .Property(p => p.IsActive)
+                .HasDefaultValue(true);
+
+            modelBuilder.Entity<SOSCombination>()
+                .Property(p => p.IsActive)
+                .HasDefaultValue(true);
+
+            modelBuilder.Entity<SOSDistribution>()
+                .Property(p => p.IsActive)
+                .HasDefaultValue(true);
+
+            modelBuilder.Entity<SOSFlow>()
+                .Property(p => p.IsActive)
+                .HasDefaultValue(true);
+
+            modelBuilder.Entity<SOSSequence>()
+                .Property(p => p.IsActive)
+                .HasDefaultValue(true);
+
             //Constraints
             modelBuilder.Entity<JobCategoryStructure>()
                 .HasCheckConstraint("ck_cc_seq", "[Sequence] > 0");
@@ -387,10 +443,10 @@ namespace SupervisorMobility.API.Context
                 },
                  new JobCategoryStructure("OMEFE", "Observación para mejora del estándar de acuerdo al filtro elegido")
                  {
-                    JobCategoryStructureId = 7,
-                    Sequence = 7,
-                    IsActive = true,
-                    Type = StructureType.LUP
+                     JobCategoryStructureId = 7,
+                     Sequence = 7,
+                     IsActive = true,
+                     Type = StructureType.LUP
                  },
                  new JobCategoryStructure("CMT", "Comentarios")
                  {
@@ -433,7 +489,7 @@ namespace SupervisorMobility.API.Context
                     IsActive = true
                 });
 
-           
+
 
             modelBuilder.Entity<Entities.Group>()
                 .HasData(
@@ -1081,7 +1137,7 @@ namespace SupervisorMobility.API.Context
                     JobCategoryStructureId = 2,
                 }
                 //Seccion 2 Observacion para el cumlimiento del estandar
-                ,new ChecklistQuestion()
+                , new ChecklistQuestion()
                 {
                     QuestionID = 7,
                     Prompt = "El operador usa el EPP como se establece en la HOE y Hoja de asignación de equipo de protección personal (S / N) explicar (N)",
@@ -1117,7 +1173,7 @@ namespace SupervisorMobility.API.Context
                     JobCategoryStructureId = 3,
                 }, new ChecklistQuestion()
                 {
-                    QuestionID =11,
+                    QuestionID = 11,
                     Prompt = "Actividad regular de Calidad  (plan de inspección,chequeo  Poka Yoke ,…) se hacen en cumplimiento al estándar,  incluyendo registro, si procede (S/N) explicar (N)",
                     NotGood = "",
                     CategorySequence = 5,

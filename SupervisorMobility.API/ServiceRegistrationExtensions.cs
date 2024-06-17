@@ -20,11 +20,18 @@ namespace SupervisorMobility.API
         public static IServiceCollection RegisterBusinessServices(
            this IServiceCollection services)
         {
+            // register the repository
+            services.AddScoped<ISupervisorMobilityRepository, SupervisorMobilityRepository>();
+            // register Stamping the repository
+            services.AddScoped<IStampingRepository, StampingRepository>();
+            // HOE/SOS Analysis_Process
+            services.AddScoped<ISOSAnalysis_ProcessRepository, SOSAnalysis_ProcessRepository>();
+
+            //Antoher
             services.AddScoped<IJobObservationService, JobObservationService>();
             services.AddScoped<IAssyChartService, AssyChartService>();
             services.AddScoped<IEmailService, EmailService>();
             services.AddScoped<ITreeService, TreeService>();
-
 
             services.Configure<IISServerOptions>(options =>
             {
@@ -56,10 +63,7 @@ namespace SupervisorMobility.API
             //Add automapper
             services.AddAutoMapper(AppDomain.CurrentDomain.GetAssemblies());
 
-            // register the repository
-            services.AddScoped<ISupervisorMobilityRepository, SupervisorMobilityRepository>();
-            // register Stamping the repository
-            services.AddScoped<IStampingRepository, StampingRepository>();
+      
 
             //custos HTTP client service
             services.AddScoped<CustomHttpClientService>();

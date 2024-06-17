@@ -62,6 +62,33 @@ namespace SupervisorMobility.API.Controllers.IS_Controllers
             return Ok(_mapper.Map<CheckpointNormDto>(CheckpointNormEntiti));
         }
 
+        [HttpPut("{CheckpointId}")]
+        public async Task<ActionResult<CheckpointNormDto>> UpdateCheckpointNorm(int CheckpointNormId, CheckpointNormForUpdateDto _CheckpointForUpdate)
+        {
+
+            // Obtener el Checkpoint existente junto con sus norms/standars
+            CheckpointNorm entityCheckpoint = await _stampingRepository.getCheckpointNorm(CheckpointNormId);
+
+            if (entityCheckpoint == null)
+            {
+                return NotFound();
+            }
+
+            _mapper.Map(_CheckpointForUpdate, entityCheckpoint);
+
+            // Guardar los cambios en el Checkpoint y sus norms/standars
+            _context.CheckpointsNorm.Update(entityCheckpoint);
+            var result = await _context.SaveChangesAsync();
+
+
+            if (result > 0)
+                return Ok(entityCheckpoint);
+            else
+                return BadRequest();
+        }
+
+
+
         //[HttpPut("sequence/{dataSpecification_Id}")]
         //public async Task<ActionResult> UpdateDataSpecificationItemOrder(int dataSpecification_Id,
         //CheckpointNormForUpdateSequenceDto dataSpecification)

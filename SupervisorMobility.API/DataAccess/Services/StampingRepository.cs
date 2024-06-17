@@ -463,10 +463,7 @@ namespace SupervisorMobility.API.DataAccess.Services
                     {
                         evidence
                     };
-
                 }
-
-
             }
 
         }
