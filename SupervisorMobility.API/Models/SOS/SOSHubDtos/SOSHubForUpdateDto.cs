@@ -12,8 +12,8 @@ namespace SupervisorMobility.API.Models.SOS.SOSHubDtos
         public string OperationDescription { get; set; }
         public string ProcessSheet { get; set; }
         public ICollection<UpdateCommentaryDto>? ProcessSheetCommentary { get; set; } = new List<UpdateCommentaryDto>();
-        public FileUpload CommonDirection { get; set; }
-        public string AppliedModels { get; set; }
+        
+        public int? AppliedModelId { get; set; }
 
 
         public string RevisedItems { get; set; }
@@ -24,9 +24,9 @@ namespace SupervisorMobility.API.Models.SOS.SOSHubDtos
         public ICollection<MaterialForUpdateDto>? MaterialsUsed { get; set; } = new List<MaterialForUpdateDto>();
         public string OtherInformation { get; set; }
 
-        public int PlantId { get; set; }
-        public int AreaId { get; set; }
-        public int DepartamentId { get; set; }
+        public int? PlantId { get; set; }
+        public int? AreaId { get; set; }
+        public int? DepartamentId { get; set; }
 
         public int? OwnerId { get; set; }
 

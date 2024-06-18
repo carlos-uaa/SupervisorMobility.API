@@ -14,8 +14,9 @@ namespace SupervisorMobility.API.DataAccess.Entities.SOS
         public string OperationDescription { get; set; }
         public string ProcessSheet { get; set; }
         public ICollection<Commentary>? ProcessSheetCommentary { get; set; } = new List<Commentary>();
-        public FileUpload CommonDirection { get; set; }
-        public string AppliedModels { get; set; }
+        public ICollection<FileUpload>? CommonDirection { get; set; } = new List<FileUpload>();
+        public int? AppliedModelId { get; set; }
+        public Product? AppliedModel { get; set; }
         
         //steps stpes (Puntos Criticos?)
 
@@ -31,11 +32,11 @@ namespace SupervisorMobility.API.DataAccess.Entities.SOS
         public ICollection<Material>? MaterialsUsed { get; set; } = new List<Material>();
         public string OtherInformation { get; set; }
 
-        public int PlantId { get; set; }
+        public int? PlantId { get; set; }
         public Plant? Plant { get; set; }
-        public int AreaId { get; set; }
+        public int? AreaId { get; set; }
         public Area? Area { get; set; }
-        public int DepartamentId { get; set; }
+        public int? DepartamentId { get; set; }
         public Department? Department{ get; set; }
 
         public int? OwnerId { get; set; }

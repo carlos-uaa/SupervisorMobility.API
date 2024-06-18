@@ -8,6 +8,7 @@ using SupervisorMobility.API.Models.PlantDtos;
 using SupervisorMobility.API.Models.AreaDtos;
 using SupervisorMobility.API.Models.DepartmentDtos;
 using SupervisorMobility.API.Models.Users;
+using SupervisorMobility.API.Models.ProductDtos;
 
 namespace SupervisorMobility.API.Models.SOS.SOSHubDtos
 {
@@ -17,8 +18,9 @@ namespace SupervisorMobility.API.Models.SOS.SOSHubDtos
         public string OperationDescription { get; set; }
         public string ProcessSheet { get; set; }
         public ICollection<CommentaryDto>? ProcessSheetCommentary { get; set; } = new List<CommentaryDto>();
-        public FileUpload CommonDirection { get; set; }
-        public string AppliedModels { get; set; }
+        public ICollection<FileUploadGeneralDto>? CommonDirection { get; set; } = new List<FileUploadGeneralDto>();
+        public int? AppliedModelId { get; set; }
+        public ProductDto? AppliedModel { get; set; }
 
 
         public ICollection<FileUploadGeneralDto>? Images { get; set; } = new List<FileUploadGeneralDto>();
@@ -31,11 +33,11 @@ namespace SupervisorMobility.API.Models.SOS.SOSHubDtos
         public ICollection<MaterialDto>? MaterialsUsed { get; set; } = new List<MaterialDto>();
         public string OtherInformation { get; set; }
 
-        public int PlantId { get; set; }
+        public int? PlantId { get; set; }
         public PlantDto? Plant { get; set; }
-        public int AreaId { get; set; }
+        public int? AreaId { get; set; }
         public AreaWithoutNavigationPropertiesDto? Area { get; set; }
-        public int DepartamentId { get; set; }
+        public int? DepartamentId { get; set; }
         public DepartmentDto? Department { get; set; }
 
         public int? OwnerId { get; set; }

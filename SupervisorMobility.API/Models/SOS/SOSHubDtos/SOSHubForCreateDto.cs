@@ -11,11 +11,11 @@ namespace SupervisorMobility.API.Models.SOS.SOSHubDtos
         public string OperationDescription { get; set; }
         public string ProcessSheet { get; set; }
         public ICollection<CreateCommentaryDto>? ProcessSheetCommentary { get; set; } = new List<CreateCommentaryDto>();
-        public FileUpload CommonDirection { get; set; }
-        public string AppliedModels { get; set; }
+        
+        public int? AppliedModelId { get; set; }
 
 
-       public string RevisedItems { get; set; }
+        public string RevisedItems { get; set; }
 
         public TimeSpan? TrainingTime { get; set; }
         public ICollection<EquipmentDto>? SafetyEquipment { get; set; } = new List<EquipmentDto>();
@@ -23,9 +23,9 @@ namespace SupervisorMobility.API.Models.SOS.SOSHubDtos
         public ICollection<MaterialDto>? MaterialsUsed { get; set; } = new List<MaterialDto>();
         public string OtherInformation { get; set; }
 
-        public int PlantId { get; set; }
-        public int AreaId { get; set; }
-        public int DepartamentId { get; set; }
+        public int? PlantId { get; set; }
+        public int? AreaId { get; set; }
+        public int? DepartamentId { get; set; }
 
         public int? OwnerId { get; set; }
 

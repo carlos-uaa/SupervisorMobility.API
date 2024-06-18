@@ -315,7 +315,7 @@ namespace SupervisorMobility.API.Controllers.SOS_Controllers
 
             trustedFileNameForStorage = Path.GetRandomFileName();
 
-            var path = Path.Combine(_env.ContentRootPath, "uploads\\SOSData", trustedFileNameForStorage);
+            var path = Path.Combine(_env.ContentRootPath, "uploads\\SOSData\\Images", trustedFileNameForStorage);
             // Asegurarse de que el directorio de destino exista
             var directory = Path.GetDirectoryName(path);
             if (!Directory.Exists(directory))
@@ -348,7 +348,7 @@ namespace SupervisorMobility.API.Controllers.SOS_Controllers
 
             if (FileInfo is not null)
             {
-                var path = Path.Combine(_env.ContentRootPath, "uploads\\SOSData", FileInfo.StorageFileName);
+                var path = Path.Combine(_env.ContentRootPath, "uploads\\SOSData\\Images", FileInfo.StorageFileName);
 
                 var memory = new MemoryStream();
                 using (var stream = new FileStream(path, FileMode.Open))
@@ -375,7 +375,7 @@ namespace SupervisorMobility.API.Controllers.SOS_Controllers
 
             trustedFileNameForStorage = Path.GetRandomFileName();
 
-            var path = Path.Combine(_env.ContentRootPath, "uploads\\SOSData", trustedFileNameForStorage);
+            var path = Path.Combine(_env.ContentRootPath, "uploads\\SOSData\\Videos", trustedFileNameForStorage);
             // Asegurarse de que el directorio de destino exista
             var directory = Path.GetDirectoryName(path);
             if (!Directory.Exists(directory))
@@ -408,7 +408,7 @@ namespace SupervisorMobility.API.Controllers.SOS_Controllers
 
             if (FileInfo is not null)
             {
-                var path = Path.Combine(_env.ContentRootPath, "uploads\\SOSData", FileInfo.StorageFileName);
+                var path = Path.Combine(_env.ContentRootPath, "uploads\\SOSData\\Videos", FileInfo.StorageFileName);
 
                 var memory = new MemoryStream();
                 using (var stream = new FileStream(path, FileMode.Open))
@@ -425,6 +425,30 @@ namespace SupervisorMobility.API.Controllers.SOS_Controllers
             return NotFound("Error File download");
         }
         #endregion
+
+        [HttpDelete("Image/{pool_id}/remove/{fileUploadId}")]
+        public async Task<ActionResult<int>> RemoveImage(int pool_id, int fileUploadId)
+        {
+            var result = await _AnalysisProcessRepository.RemoveImageFromSOSData(pool_id, fileUploadId);
+
+            if (result > 0)
+                return Ok();
+            else
+                return BadRequest("something wrong");
+        }
+
+        [HttpDelete("Video/{pool_id}/remove/{fileUploadId}")]
+        public async Task<ActionResult<int>> RemoveVideo(int pool_id, int fileUploadId)
+        {
+            var result = await _AnalysisProcessRepository.RemoveVideoFromSOSData(pool_id, fileUploadId);
+
+            if (result > 0)
+                return Ok();
+            else
+                return BadRequest("something wrong");
+        }
+
+        /// Subir y borrar documento common direction
 
     }// End SOS Data pool controller
 }//end namespace

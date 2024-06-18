@@ -21,6 +21,8 @@ namespace SupervisorMobility.API.DataAccess.Services
         Task AddImageToSOSData(int SOS_DataPool_id, FileUpload evidence);
         Task AddVideoToSOSData(int SOS_DataPool_id, FileUpload evidence);
         Task<int> AddRangeCommentary(List<Commentary> commentariesToAdd);
+        Task<int> RemoveImageFromSOSData(int SOS_DataPool_id, int ImageFile_id);
+        Task<int> RemoveVideoFromSOSData(int SOS_DataPool_id, int ImageFile_id);
         #endregion
 
 

@@ -600,11 +600,13 @@ namespace SupervisorMobility.API.DataAccess.Services
             var Sketch = await FetchFileAsync(fileUploadId);
             if (Sketch != null)
             {
-                if (CheckPoint.Sketches != null)
-                {
-                    //Remove evidence
-                    CheckPoint.Sketches.Remove(item: CheckPoint.Sketches.ToList().Find(e => e.FileUploadId == fileUploadId));
-                }
+                //if (CheckPoint.Sketches != null)
+                //{
+                //    //Remove evidence
+                //    CheckPoint.Sketches.Remove(item: CheckPoint.Sketches.ToList().Find(e => e.FileUploadId == fileUploadId));
+                //}
+
+                Sketch.IsActive = false;
             }
         }
 
@@ -615,11 +617,12 @@ namespace SupervisorMobility.API.DataAccess.Services
             var Sketch = await FetchFileAsync(fileUploadId);
             if (Sketch != null)
             {
-                if (CheckPointNorm.Sketches != null)
-                {
-                    //Remove evidence
-                    CheckPointNorm.Sketches.Remove(item: CheckPointNorm.Sketches.ToList().Find(e => e.FileUploadId == fileUploadId));
-                }
+                //if (CheckPointNorm.Sketches != null)
+                //{
+                //    //Remove evidence
+                //    CheckPointNorm.Sketches.Remove(item: CheckPointNorm.Sketches.ToList().Find(e => e.FileUploadId == fileUploadId));
+                //}
+                Sketch.IsActive = false;
             }
         }
         public async Task RemoveSketchPart(int part_Id, int fileUploadId)
@@ -629,11 +632,12 @@ namespace SupervisorMobility.API.DataAccess.Services
             var Sketch = await FetchFileAsync(fileUploadId);
             if (Sketch != null)
             {
-                if (_part.Sketches != null)
-                {
-                    //Remove evidence
-                    _part.Sketches.Remove(item: _part.Sketches.ToList().Find(e => e.FileUploadId == fileUploadId));
-                }
+                //if (_part.Sketches != null)
+                //{
+                //    //Remove evidence
+                //    _part.Sketches.Remove(item: _part.Sketches.ToList().Find(e => e.FileUploadId == fileUploadId));
+                //}
+                Sketch.IsActive = false;
             }
         }
 
