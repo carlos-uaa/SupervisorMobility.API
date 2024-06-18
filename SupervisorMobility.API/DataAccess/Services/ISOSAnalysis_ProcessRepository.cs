@@ -18,6 +18,8 @@ namespace SupervisorMobility.API.DataAccess.Services
         Task<IEnumerable<SOSHub>> GetAllSOSHub(bool includeImages = false, bool includeVideos = false, bool includeTools = false, bool includeEquipments = false, bool includeMaterials = false, bool includeInformation = false, bool includePeople = false, bool includeDocuments = false);
 
         Task<int> UpdateSOSHub(SOSHubForUpdateDto HubUpdate, SOSHub SosEntity);
+        Task<int> RemoveSOSHub(int SOS_DataPool_id);
+
         Task AddImageToSOSData(int SOS_DataPool_id, FileUpload evidence);
         Task AddVideoToSOSData(int SOS_DataPool_id, FileUpload evidence);
         Task AddCDToSOSData(int SOS_DataPool_id, FileUpload evidence);
