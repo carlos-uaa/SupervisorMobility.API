@@ -12,6 +12,7 @@ using SupervisorMobility.API.Models.SOS.EquipmentDtos;
 using SupervisorMobility.API.Models.SOS.MaterialDtos;
 using SupervisorMobility.API.Models.SOS.SOSHubDtos;
 using SupervisorMobility.API.Models.SOS.ToolDtos;
+using Tavis.UriTemplates;
 
 namespace SupervisorMobility.API.DataAccess.Services
 {
@@ -35,7 +36,7 @@ namespace SupervisorMobility.API.DataAccess.Services
         }
 
 
-        public async Task<SOSHub> GetSOSHub(int HubId, bool includeImages = false, bool includeVideos = false, bool includeTools = false, bool includeEquipments = false, bool includeMaterials = false, bool includeInformation = false, bool includePeople = false)
+        public async Task<SOSHub> GetSOSHub(int HubId, bool includeImages = false, bool includeVideos = false, bool includeTools = false, bool includeEquipments = false, bool includeMaterials = false, bool includeInformation = false, bool includePeople = false, bool includeDocuments = false)
         {
             var query = _context.SOSHubs.Where(SOS => SOS.SOSHubId == HubId && SOS.IsActive == true);
 
@@ -73,11 +74,52 @@ namespace SupervisorMobility.API.DataAccess.Services
             {
                 query = query.Include(o => o.Owner).Include(e => e.Editor);
             }
+             
+            if (includeDocuments)
+            {
+                query = query.Include(o => o.CommonDirection);
+            }
 
 
-            return await query.FirstOrDefaultAsync();
+            var sosHub = await query.FirstOrDefaultAsync();
+
+            if (sosHub == null)
+                return null;
+
+            // Filtrar los subobjetos manualmente después de la carga inicial
+            if (includeImages)
+            {
+                sosHub.Images = sosHub.Images.Where(i => i.IsActive == true).ToList();
+            }
+
+            if (includeVideos)
+            {
+                sosHub.Videos = sosHub.Videos.Where(v => v.IsActive == true).ToList();
+            }
+
+            if (includeTools)
+            {
+                sosHub.ToolsUsed = sosHub.ToolsUsed.Where(t => t.IsActive == true).ToList();
+            }
+
+            if (includeEquipments)
+            {
+                sosHub.SafetyEquipment = sosHub.SafetyEquipment.Where(e => e.IsActive == true).ToList();
+            }
+
+            if (includeMaterials)
+            {
+                sosHub.MaterialsUsed = sosHub.MaterialsUsed.Where(m => m.IsActive == true).ToList();
+            }
+
+            if (includeDocuments)
+            {
+                sosHub.CommonDirection = sosHub.CommonDirection.Where(i => i.IsActive == true).ToList();
+            }
+
+            return sosHub;
         }
-        public async Task<IEnumerable<SOSHub>> GetAllSOSHub(bool includeImages = false, bool includeVideos = false, bool includeTools = false, bool includeEquipments = false, bool includeMaterials = false, bool includeInformation = false, bool includePeople = false)
+        public async Task<IEnumerable<SOSHub>> GetAllSOSHub(bool includeImages = false, bool includeVideos = false, bool includeTools = false, bool includeEquipments = false, bool includeMaterials = false, bool includeInformation = false, bool includePeople = false, bool includeDocuments = false)
         {
             var query = _context.SOSHubs.Where(h => h.IsActive == true);
 
@@ -116,7 +158,58 @@ namespace SupervisorMobility.API.DataAccess.Services
                 query = query.Include(o => o.Owner).Include(e => e.Editor);
             }
 
-            return await query.OrderBy(s => s.SOSHubId).ToListAsync();
+            var sosHubs = await query.OrderBy(s => s.SOSHubId).ToListAsync();
+
+            if (includeImages)
+            {
+                foreach (var sosHub in sosHubs)
+                {
+                    sosHub.Images = sosHub.Images.Where(i => i.IsActive == true).ToList();
+                }
+            }
+
+            if (includeVideos)
+            {
+                foreach (var sosHub in sosHubs)
+                {
+                    sosHub.Videos = sosHub.Videos.Where(v => v.IsActive == true).ToList();
+                }
+            }
+
+            if (includeTools)
+            {
+                foreach (var sosHub in sosHubs)
+                {
+                    sosHub.ToolsUsed = sosHub.ToolsUsed.Where(t => t.IsActive == true).ToList();
+                }
+            }
+
+            if (includeEquipments)
+            {
+                foreach (var sosHub in sosHubs)
+                {
+                    sosHub.SafetyEquipment = sosHub.SafetyEquipment.Where(e => e.IsActive == true).ToList();
+                }
+            }
+
+            if (includeMaterials)
+            {
+                foreach (var sosHub in sosHubs)
+                {
+                    sosHub.MaterialsUsed = sosHub.MaterialsUsed.Where(m => m.IsActive == true).ToList();
+                }
+            }
+
+            if (includeDocuments)
+            {
+                foreach (var sosHub in sosHubs)
+                {
+                    sosHub.CommonDirection = sosHub.CommonDirection.Where(m => m.IsActive == true).ToList();
+                }
+            }
+
+            return sosHubs;
+
         }
         public async Task<int> UpdateSOSHub(SOSHubForUpdateDto HubUpdate, SOSHub SosEntity)
         {
@@ -167,10 +260,46 @@ namespace SupervisorMobility.API.DataAccess.Services
 
         }
 
+        public async Task AddCDToSOSData(int SOS_DataPool_id, FileUpload evidence)
+        {
+            var SosHubEntity = await GetSOSHub(SOS_DataPool_id, includeDocuments: true);
+
+            if (SosHubEntity != null)
+            {
+
+                if (SosHubEntity.CommonDirection != null)
+                {
+                    SosHubEntity.CommonDirection.Add(evidence);
+                }
+                else
+                {
+                    SosHubEntity.CommonDirection = new List<FileUpload>
+                    {
+                        evidence
+                    };
+                }
+            }
+
+        }
+
         public async Task<int> AddRangeCommentary(List<Commentary> commentariesToAdd)
         {
             _context.Comments.AddRange(commentariesToAdd);
             return await _context.SaveChangesAsync();
+        }
+        public Task<int> RemoveImageFromSOSData(int SOS_DataPool_id, int ImageFile_id)
+        {
+            throw new NotImplementedException();
+        }
+
+        public Task<int> RemoveVideoFromSOSData(int SOS_DataPool_id, int ImageFile_id)
+        {
+            throw new NotImplementedException();
+        }
+
+        public Task<int> RemoveCDFromSOSData(int SOS_DataPool_id, int ImageFile_id)
+        {
+            throw new NotImplementedException();
         }
         #endregion
 
@@ -210,7 +339,6 @@ namespace SupervisorMobility.API.DataAccess.Services
             return await _context.SaveChangesAsync();
         }
         #endregion
-
         #region Material
         public async Task<int> AddRangeMaterial(List<Material> MaterialsToAdd)
         {
@@ -319,6 +447,8 @@ namespace SupervisorMobility.API.DataAccess.Services
         {
             return (await _context.SaveChangesAsync() >= 0);
         }
-        #endregion
+                #endregion
+
+
     }
 }

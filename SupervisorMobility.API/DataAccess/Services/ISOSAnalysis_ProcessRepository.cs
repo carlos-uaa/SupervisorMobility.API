@@ -14,15 +14,17 @@ namespace SupervisorMobility.API.DataAccess.Services
         #region SOS_DataPool
 
         Task<int> CreateSOScollection(SOSHub SOS_EntityToCreate);
-        Task<SOSHub> GetSOSHub(int HubId, bool includeImages = false, bool includeVideos = false, bool includeTools = false, bool includeEquipments = false, bool includeMaterials = false, bool includeInformation = false, bool includePeople = false);
-        Task<IEnumerable<SOSHub>> GetAllSOSHub(bool includeImages = false, bool includeVideos = false, bool includeTools = false, bool includeEquipments = false, bool includeMaterials = false, bool includeInformation = false, bool includePeople = false);
+        Task<SOSHub> GetSOSHub(int HubId, bool includeImages = false, bool includeVideos = false, bool includeTools = false, bool includeEquipments = false, bool includeMaterials = false, bool includeInformation = false, bool includePeople = false, bool includeDocuments = false);
+        Task<IEnumerable<SOSHub>> GetAllSOSHub(bool includeImages = false, bool includeVideos = false, bool includeTools = false, bool includeEquipments = false, bool includeMaterials = false, bool includeInformation = false, bool includePeople = false, bool includeDocuments = false);
 
         Task<int> UpdateSOSHub(SOSHubForUpdateDto HubUpdate, SOSHub SosEntity);
         Task AddImageToSOSData(int SOS_DataPool_id, FileUpload evidence);
         Task AddVideoToSOSData(int SOS_DataPool_id, FileUpload evidence);
+        Task AddCDToSOSData(int SOS_DataPool_id, FileUpload evidence);
         Task<int> AddRangeCommentary(List<Commentary> commentariesToAdd);
         Task<int> RemoveImageFromSOSData(int SOS_DataPool_id, int ImageFile_id);
         Task<int> RemoveVideoFromSOSData(int SOS_DataPool_id, int ImageFile_id);
+        Task<int> RemoveCDFromSOSData(int SOS_DataPool_id, int ImageFile_id);
         #endregion
 
 
