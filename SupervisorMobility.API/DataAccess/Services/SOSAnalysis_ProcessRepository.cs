@@ -217,6 +217,15 @@ namespace SupervisorMobility.API.DataAccess.Services
             _context.SOSHubs.Update(SosEntity);
             return await _context.SaveChangesAsync();
         }
+
+        public async Task<int> RemoveSOSHub(int SOS_DataPool_id)
+        {
+            var SosEntity = await GetSOSHub(SOS_DataPool_id);
+            SosEntity.IsActive = false;
+            _context.SOSHubs.Update(SosEntity);
+            return await _context.SaveChangesAsync();
+        }
+
         public async Task AddImageToSOSData(int SOS_DataPool_id, FileUpload evidence)
         {
             var SosHubEntity = await GetSOSHub(SOS_DataPool_id, includeImages: true);

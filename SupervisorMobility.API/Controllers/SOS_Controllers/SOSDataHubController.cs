@@ -1,4 +1,5 @@
 ﻿using AutoMapper;
+using DocumentFormat.OpenXml.Office2010.Excel;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore.Query;
 using SupervisorMobility.API.DataAccess.Entities;
@@ -302,6 +303,19 @@ namespace SupervisorMobility.API.Controllers.SOS_Controllers
                 return Ok(entitySOSHub);
             else
                 return BadRequest();
+        }
+
+        [HttpDelete("{SOSHubId}")]
+        public async Task<ActionResult<int>> RemoveSOSHub(int SOSHubId)
+        {
+            var result = await _AnalysisProcessRepository.RemoveSOSHub(SOSHubId);
+
+            var SOSHub = await _AnalysisProcessRepository.GetSOSHub(SOSHubId);
+
+            if (result > 0)
+                return Ok(SOSHub);
+            else
+                return BadRequest("something wrong");
         }
 
         #region UploadFiles
