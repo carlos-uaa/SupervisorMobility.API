@@ -47,6 +47,7 @@
 		<Folder Include="uploads\guides\" />
 		<Folder Include="uploads\headcount\" />
 		<Folder Include="uploads\massive\" />
+		<Folder Include="uploads\SOSData\Images\" />
 		<Folder Include="uploads\thenEvidence\" />
 		<Folder Include="uploads\previousEvidence\" />
 		<Folder Include="uploads\operatorSignature\" />
