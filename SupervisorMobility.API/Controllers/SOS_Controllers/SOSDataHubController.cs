@@ -356,30 +356,6 @@ namespace SupervisorMobility.API.Controllers.SOS_Controllers
             return Ok(fileToReturn);
         }
 
-        [HttpGet("Image/{fileid}")]
-        public async Task<IActionResult> DownloadImage(int fileid)
-        {
-            var FileInfo = await _AnalysisProcessRepository.FetchFileAsync(fileid);
-
-            if (FileInfo is not null)
-            {
-                var path = Path.Combine(_env.ContentRootPath, "uploads\\SOSData\\Images", FileInfo.StorageFileName);
-
-                var memory = new MemoryStream();
-                using (var stream = new FileStream(path, FileMode.Open))
-                {
-                    await stream.CopyToAsync(memory);
-                }
-                memory.Position = 0;
-
-                var result = File(memory, FileInfo.ContentType, Path.GetFileName(path));
-                result.EnableRangeProcessing = true;
-
-                return result;
-            }
-            return NotFound("Error File download");
-        }
-
         [HttpPost("Video/{pool_id}")]
         public async Task<ActionResult<FileUpload>> UploadVideo(int pool_id, IFormFile file)
         {
@@ -416,6 +392,66 @@ namespace SupervisorMobility.API.Controllers.SOS_Controllers
             return Ok(fileToReturn);
         }
 
+        [HttpPost("CD/{pool_id}")]
+        public async Task<ActionResult<FileUpload>> UploadCD(int pool_id, IFormFile file)
+        {
+
+            var uploadResult = new FileUploadForCreationDto();
+            string trustedFileNameForStorage = string.Empty;
+            var unstrustedFileName = file.FileName;
+
+            trustedFileNameForStorage = Path.GetRandomFileName();
+
+            var path = Path.Combine(_env.ContentRootPath, "uploads\\SOSData\\CommonDirection", trustedFileNameForStorage);
+            // Asegurarse de que el directorio de destino exista
+            var directory = Path.GetDirectoryName(path);
+            if (!Directory.Exists(directory))
+            {
+                Directory.CreateDirectory(directory);
+            }
+
+
+            await using FileStream fs = new(path, FileMode.Create);
+            await file.CopyToAsync(fs);
+
+            uploadResult.FileName = unstrustedFileName;
+            uploadResult.StorageFileName = trustedFileNameForStorage;
+            uploadResult.ContentType = file.ContentType;
+            uploadResult.UploadDate = DateTime.Now;
+            uploadResult.IsActive = true;
+
+            var fileToReturn = await _AnalysisProcessRepository.CreateFileAsync(uploadResult);
+
+            await _AnalysisProcessRepository.AddImageToSOSData(pool_id, fileToReturn);
+            await _AnalysisProcessRepository.SaveChangesAsync();
+
+            return Ok(fileToReturn);
+        }
+
+        [HttpGet("Image/{fileid}")]
+        public async Task<IActionResult> DownloadImage(int fileid)
+        {
+            var FileInfo = await _AnalysisProcessRepository.FetchFileAsync(fileid);
+
+            if (FileInfo is not null)
+            {
+                var path = Path.Combine(_env.ContentRootPath, "uploads\\SOSData\\Images", FileInfo.StorageFileName);
+
+                var memory = new MemoryStream();
+                using (var stream = new FileStream(path, FileMode.Open))
+                {
+                    await stream.CopyToAsync(memory);
+                }
+                memory.Position = 0;
+
+                var result = File(memory, FileInfo.ContentType, Path.GetFileName(path));
+                result.EnableRangeProcessing = true;
+
+                return result;
+            }
+            return NotFound("Error File download");
+        }
+
         [HttpGet("Video/{fileid}")]
         public async Task<IActionResult> DownloadVideo(int fileid)
         {
@@ -438,6 +474,34 @@ namespace SupervisorMobility.API.Controllers.SOS_Controllers
                 return result;
             }
             return NotFound("Error File download");
+        }
+
+        [HttpGet("CD/{fileid}")]
+        public async Task<IActionResult> DownloadCD(int fileid)
+        {
+            var FileInfo = await _AnalysisProcessRepository.FetchFileAsync(fileid);
+
+            if (FileInfo is not null)
+            {
+                var path = Path.Combine(_env.ContentRootPath, "uploads\\SOSData\\CommonDirection", FileInfo.StorageFileName);
+
+                var memory = new MemoryStream();
+                using (var stream = new FileStream(path, FileMode.Open))
+                {
+                    await stream.CopyToAsync(memory);
+                }
+                memory.Position = 0;
+
+
+                var result = File(memory, FileInfo.ContentType, Path.GetFileName(path));
+                result.EnableRangeProcessing = true;
+
+                return result;
+
+
+            }
+            return NotFound("Error File download");
+
         }
         #endregion
 
@@ -463,6 +527,16 @@ namespace SupervisorMobility.API.Controllers.SOS_Controllers
                 return BadRequest("something wrong");
         }
 
+        [HttpDelete("CD/{pool_id}/remove/{fileUploadId}")]
+        public async Task<ActionResult<int>> RemoveCD(int pool_id, int fileUploadId)
+        {
+            var result = await _AnalysisProcessRepository.RemoveCDFromSOSData(pool_id, fileUploadId);
+
+            if (result > 0)
+                return Ok();
+            else
+                return BadRequest("something wrong");
+        }
         /// Subir y borrar documento common direction
 
     }// End SOS Data pool controller

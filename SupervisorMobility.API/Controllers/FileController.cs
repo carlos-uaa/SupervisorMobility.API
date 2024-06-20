@@ -87,7 +87,11 @@ namespace SupervisorMobility.API.Controllers
 
             //trustedFileNameForFileStorage = Path.GetRandomFileName();
             var path = Path.Combine(_env.ContentRootPath, "uploads\\assycharts", trustedFileNameForFileStorage);
-
+            var directory = Path.GetDirectoryName(path);
+            if (!Directory.Exists(directory))
+            {
+                Directory.CreateDirectory(directory);
+            }
             await using FileStream fs = new(path, FileMode.Create);
             await file.CopyToAsync(fs);
 
@@ -111,6 +115,13 @@ namespace SupervisorMobility.API.Controllers
 
             trustedFileNameForStorage = Path.GetRandomFileName();
             var path = Path.Combine(_env.ContentRootPath, "uploads\\users", trustedFileNameForStorage);
+
+            // Asegurarse de que el directorio de destino exista
+            var directory = Path.GetDirectoryName(path);
+            if (!Directory.Exists(directory))
+            {
+                Directory.CreateDirectory(directory);
+            }
 
             await using FileStream fs = new(path, FileMode.Create);
             await file.CopyToAsync(fs);
@@ -136,7 +147,11 @@ namespace SupervisorMobility.API.Controllers
 
             trustedFileNameForStorage = Path.GetRandomFileName();
             var path = Path.Combine(_env.ContentRootPath, "uploads\\guides", trustedFileNameForStorage);
-
+            var directory = Path.GetDirectoryName(path);
+            if (!Directory.Exists(directory))
+            {
+                Directory.CreateDirectory(directory);
+            }
             await using FileStream fs = new(path, FileMode.Create);
             await file.CopyToAsync(fs);
 
@@ -162,7 +177,11 @@ namespace SupervisorMobility.API.Controllers
 
             trustedFileNameForStorage = Path.GetRandomFileName();
             var path = Path.Combine(_env.ContentRootPath, "uploads\\evidence", trustedFileNameForStorage);
-
+            var directory = Path.GetDirectoryName(path);
+            if (!Directory.Exists(directory))
+            {
+                Directory.CreateDirectory(directory);
+            }
             await using FileStream fs = new(path, FileMode.Create);
             await file.CopyToAsync(fs);
 
@@ -191,7 +210,11 @@ namespace SupervisorMobility.API.Controllers
 
             trustedFileNameForStorage = Path.GetRandomFileName();
             var path = Path.Combine(_env.ContentRootPath, "uploads\\operatorSignature", trustedFileNameForStorage);
-
+            var directory = Path.GetDirectoryName(path);
+            if (!Directory.Exists(directory))
+            {
+                Directory.CreateDirectory(directory);
+            }
             await using FileStream fs = new(path, FileMode.Create);
             await file.CopyToAsync(fs);
 
@@ -220,7 +243,11 @@ namespace SupervisorMobility.API.Controllers
 
             trustedFileNameForStorage = Path.GetRandomFileName();
             var path = Path.Combine(_env.ContentRootPath, "uploads\\previousEvidence", trustedFileNameForStorage);
-
+            var directory = Path.GetDirectoryName(path);
+            if (!Directory.Exists(directory))
+            {
+                Directory.CreateDirectory(directory);
+            }
             await using FileStream fs = new(path, FileMode.Create);
             await file.CopyToAsync(fs);
 
@@ -248,7 +275,11 @@ namespace SupervisorMobility.API.Controllers
 
             trustedFileNameForStorage = Path.GetRandomFileName();
             var path = Path.Combine(_env.ContentRootPath, "uploads\\thenEvidence", trustedFileNameForStorage);
-
+            var directory = Path.GetDirectoryName(path);
+            if (!Directory.Exists(directory))
+            {
+                Directory.CreateDirectory(directory);
+            }
             await using FileStream fs = new(path, FileMode.Create);
             await file.CopyToAsync(fs);
 
@@ -1355,7 +1386,7 @@ namespace SupervisorMobility.API.Controllers
             if (FileInfo is not null)
             {
                 var path = Path.Combine(_env.ContentRootPath, "uploads\\guides", FileInfo.StorageFileName);
-
+               
                 var memory = new MemoryStream();
                 using (var stream = new FileStream(path, FileMode.Open))
                 {
@@ -1390,20 +1421,20 @@ namespace SupervisorMobility.API.Controllers
             var bytes = await System.IO.File.ReadAllBytesAsync(filePath);
             return File(bytes, contentType, Path.GetFileName(filePath));
 
-            var path = Path.Combine(_env.ContentRootPath, "Documents\\All_Example.xlsx");
+            //var path = Path.Combine(_env.ContentRootPath, "Documents\\All_Example.xlsx");
 
-            var memory = new MemoryStream();
-            using (var stream = new FileStream(path, FileMode.Open))
-            {
-                await stream.CopyToAsync(memory);
-            }
-            memory.Position = 0;
+            //var memory = new MemoryStream();
+            //using (var stream = new FileStream(path, FileMode.Open))
+            //{
+            //    await stream.CopyToAsync(memory);
+            //}
+            //memory.Position = 0;
 
 
-            var result = File(memory, "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet", Path.GetFileName(path));
-            result.EnableRangeProcessing = true;
+            //var result = File(memory, "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet", Path.GetFileName(path));
+            //result.EnableRangeProcessing = true;
 
-            return result;
+            //return result;
 
         }//end download file function 
 
@@ -1819,7 +1850,11 @@ namespace SupervisorMobility.API.Controllers
             trustedFileNameForStorage = Path.GetRandomFileName();
             trustedFileNameForStorage = System.IO.Path.ChangeExtension(trustedFileNameForStorage, ".xlsx");
             var path = Path.Combine(_env.ContentRootPath, "uploads\\massive", trustedFileNameForStorage);
-
+            var directory = Path.GetDirectoryName(path);
+            if (!Directory.Exists(directory))
+            {
+                Directory.CreateDirectory(directory);
+            }
             await using (FileStream fs = new FileStream(path, FileMode.Create))
             {
                 // Utiliza "await" para asegurarte de que se complete la copia del archivo antes de continuar
@@ -1875,7 +1910,11 @@ namespace SupervisorMobility.API.Controllers
             trustedFileNameForStorage = Path.GetRandomFileName();
             trustedFileNameForStorage = System.IO.Path.ChangeExtension(trustedFileNameForStorage, ".xlsx");
             var path = Path.Combine(_env.ContentRootPath, "uploads\\massive", trustedFileNameForStorage);
-
+            var directory = Path.GetDirectoryName(path);
+            if (!Directory.Exists(directory))
+            {
+                Directory.CreateDirectory(directory);
+            }
             try
             {
                 await using (FileStream fs = new FileStream(path, FileMode.Create))
