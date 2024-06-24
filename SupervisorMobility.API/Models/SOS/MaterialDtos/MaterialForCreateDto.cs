@@ -2,6 +2,7 @@
 {
     public class MaterialForCreateDto
     {
+        public string MaterialCode { get; set; }
         public string MaterialName { get; set; }
         public bool? IsActive { get; set; }
     }

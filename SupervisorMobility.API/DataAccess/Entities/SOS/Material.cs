@@ -7,6 +7,7 @@ namespace SupervisorMobility.API.DataAccess.Entities.SOS
     {
         [Key, DatabaseGenerated(DatabaseGeneratedOption.Identity)]
         public int MaterialId { get; set; }
+        public string MaterialCode { get; set; }
         public string MaterialName { get; set; }
         public bool? IsActive { get; set; }
     }

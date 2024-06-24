@@ -8,6 +8,7 @@ namespace SupervisorMobility.API.DataAccess.Entities.SOS
 
         [Key, DatabaseGenerated(DatabaseGeneratedOption.Identity)]
         public int ToolId { get; set; }
+        public string ToolCode { get; set; }
         public string ToolName { get; set; }
         public bool? IsActive { get; set; }
     }
