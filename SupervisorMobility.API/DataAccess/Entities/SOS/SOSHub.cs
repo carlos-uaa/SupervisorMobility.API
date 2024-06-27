@@ -25,8 +25,7 @@ namespace SupervisorMobility.API.DataAccess.Entities.SOS
         public ICollection<FileUpload>? Videos { get; set; } = new List<FileUpload>();
         public string RevisedItems { get; set; }
 
-        [Column(TypeName = "Time")]
-        public TimeSpan? TrainingTime { get; set; }
+        public string? TrainingTime { get; set; }
         public ICollection<Equipment>? SafetyEquipment { get; set; } = new List<Equipment>();
         public ICollection<Tool>? ToolsUsed { get; set; } = new List<Tool>();
         public ICollection<Material>? MaterialsUsed { get; set; } = new List<Material>();
@@ -36,7 +35,7 @@ namespace SupervisorMobility.API.DataAccess.Entities.SOS
         public Plant? Plant { get; set; }
         public int? AreaId { get; set; }
         public Area? Area { get; set; }
-        public int? DepartamentId { get; set; }
+        public int? DepartmentId { get; set; }
         public Department? Department{ get; set; }
 
         public int? OwnerId { get; set; }
