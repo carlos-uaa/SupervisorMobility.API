@@ -1,4 +1,5 @@
 ﻿using AutoMapper;
+using DocumentFormat.OpenXml.Office2010.Drawing;
 using DocumentFormat.OpenXml.Office2010.Excel;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore.Query;
@@ -35,110 +36,68 @@ namespace SupervisorMobility.API.Controllers.SOS_Controllers
         [HttpPost]
         public async Task<ActionResult<SOSHubDto>> CreateSOSHub(SOSHubForCreateDto SOSHubForCreate)
         {
-            SOSHub SOSEntity = _mapper.Map<SOSHub>(SOSHubForCreate);
+            List<Tool> tools = new List<Tool>();
+            List<Material> materials = new List<Material>();
+            List<Equipment> equipments = new List<Equipment>();
 
-            //Comentarios 
-            if (SOSEntity.ProcessSheetCommentary?.Count > 0)
+            foreach(var tool in SOSHubForCreate.ToolsUsed)
             {
-                foreach (var (item, index) in SOSEntity.ProcessSheetCommentary?.Select((item, index) => (item, index)))
-                {
-                    item.ComentaryId = 0;
-                }
+                Tool toolaux = await _AnalysisProcessRepository.GetToolById(tool.ToolId);
+                tools.Add(toolaux);
+            }
+            foreach(var material in SOSHubForCreate.MaterialsUsed)
+            {
+                Material mataux = await _AnalysisProcessRepository.GetMaterialById(material.MaterialId);
+                materials.Add(mataux);
+            }
+            foreach(var equipment in SOSHubForCreate.SafetyEquipment)
+            {
+                Equipment equipmentaux = await _AnalysisProcessRepository.GetEquipmentById(equipment.EquipmentId);
+                equipments.Add(equipmentaux);
             }
 
-            // Filtrar nuevos Equipment
-            List<EquipmentDto> filteredEquipmentList = SOSHubForCreate.SafetyEquipment
-               .Where(t => t.EquipmentId <= 0).ToList();
-            // Filtrar nuevos ToolsUsed
-            List<ToolDto> filteredToolsUsedList = SOSHubForCreate.ToolsUsed
-               .Where(t => t.ToolId <= 0).ToList();
-            // Filtrar nuevos Materials
-            List<MaterialDto> filteredMaterialsList = SOSHubForCreate.MaterialsUsed
-               .Where(t => t.MaterialId <= 0).ToList();
+            SOSHubForCreate.ToolsUsed = null;
+            SOSHubForCreate.MaterialsUsed= null;
+            SOSHubForCreate.SafetyEquipment = null;
 
+            SOSHub SOSEntity = new SOSHub();
 
-            // Remover nuevos Equipment de la lista principal para evitar duplicados
-            if (filteredEquipmentList.Any())
-            {
-                SOSHubForCreate.SafetyEquipment.ToList().RemoveAll(t => t.EquipmentId == null || t.EquipmentId <= 0);
-
-                // Mapear nuevas norms/standars
-                List<Equipment> newEquipments = _mapper.Map<List<Equipment>>(filteredEquipmentList);
-
-                foreach (var newEquipment in newEquipments)
-                {
-                    newEquipment.EquipmentId = 0;
-                    newEquipment.IsActive = true;
-                }
-
-                var resultAddEquipment = await _AnalysisProcessRepository.AddRangeEquipment(newEquipments);
-
-                if (resultAddEquipment > 0)
-                {
-                    Debug.WriteLine("Equipaments añadidos con exitop");
-                }
-                // Mapear y agregar nuevas norms/standars creadas al DTO de actualización
-                List<EquipmentDto> newEquipmentsCreated = _mapper.Map<List<EquipmentDto>>(newEquipments);
-                SOSHubForCreate.SafetyEquipment.ToList().AddRange(newEquipmentsCreated);
-            }
-
-            // Remover nuevos ToolsUsed de la lista principal para evitar duplicados
-            if (filteredToolsUsedList.Any())
-            {
-                SOSHubForCreate.ToolsUsed.ToList().RemoveAll(t => t.ToolId == null || t.ToolId <= 0);
-
-                // Mapear nuevas norms/standars
-                List<Tool> newToolsUseds = _mapper.Map<List<Tool>>(filteredToolsUsedList);
-
-                foreach (var newTool in newToolsUseds)
-                {
-                    newTool.ToolId = 0;
-                    newTool.IsActive = true;
-                }
-
-                var resultAddToolsUsed = await _AnalysisProcessRepository.AddRangeTool(newToolsUseds);
-
-                if (resultAddToolsUsed > 0)
-                {
-                    Debug.WriteLine("Tools añadidos con exitop");
-                }
-                // Mapear y agregar nuevas norms/standars creadas al DTO de actualización
-                List<ToolDto> newToolsUsedsCreated = _mapper.Map<List<ToolDto>>(newToolsUseds);
-                SOSHubForCreate.ToolsUsed.ToList().AddRange(newToolsUsedsCreated);
-            }
-
-            // Remover nuevos Materials de la lista principal para evitar duplicados
-            if (filteredMaterialsList.Any())
-            {
-                SOSHubForCreate.MaterialsUsed.ToList().RemoveAll(t => t.MaterialId == null || t.MaterialId <= 0);
-
-                // Mapear nuevas norms/standars
-                List<Material> newMaterials = _mapper.Map<List<Material>>(filteredMaterialsList);
-
-                foreach (var newComentary in newMaterials)
-                {
-                    newComentary.MaterialId = 0;
-                    newComentary.IsActive = true;
-                }
-
-                var resultAddMaterial = await _AnalysisProcessRepository.AddRangeMaterial(newMaterials);
-
-                if (resultAddMaterial > 0)
-                {
-                    Debug.WriteLine("Materials añadidos con exitop");
-                }
-                // Mapear y agregar nuevas norms/standars creadas al DTO de actualización
-                List<MaterialDto> newMaterialsCreated = _mapper.Map<List<MaterialDto>>(newMaterials);
-                SOSHubForCreate.MaterialsUsed.ToList().AddRange(newMaterialsCreated);
-            }
-
-
+            _mapper.Map(SOSHubForCreate, SOSEntity);
 
             var createdResult = await _AnalysisProcessRepository.CreateSOScollection(SOSEntity);
+
+            if (tools.Any())
+            {
+                foreach (Tool tool in tools)
+                {
+                    _AnalysisProcessRepository.AddToolToSOSCollection(SOSEntity, tool);
+                }
+            }
+
+            if (materials.Any())
+            {
+                foreach (Material material in materials)
+                {
+                    _AnalysisProcessRepository.AddMaterialToSOSCollection(SOSEntity, material);
+                }
+            }
+
+            if (equipments.Any())
+            {
+                foreach (Equipment equipment in equipments)
+                {
+                    _AnalysisProcessRepository.AddEquipmentToSOSCollection(SOSEntity, equipment);
+                }
+            }
+
+            await _AnalysisProcessRepository.SaveChangesAsync();
+
             if (createdResult != null)
-                return Ok(SOSEntity);
+            {
+                    return Ok(SOSEntity);
+            }
             else
-                return BadRequest(); ;
+                return BadRequest(); 
 
         }
 

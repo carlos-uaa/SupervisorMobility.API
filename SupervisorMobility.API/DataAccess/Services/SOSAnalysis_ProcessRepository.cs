@@ -13,6 +13,7 @@ using SupervisorMobility.API.Models.SOS.MaterialDtos;
 using SupervisorMobility.API.Models.SOS.SOSAnalysisDtos;
 using SupervisorMobility.API.Models.SOS.SOSHubDtos;
 using SupervisorMobility.API.Models.SOS.ToolDtos;
+using System.Runtime.CompilerServices;
 using Tavis.UriTemplates;
 
 namespace SupervisorMobility.API.DataAccess.Services
@@ -33,7 +34,7 @@ namespace SupervisorMobility.API.DataAccess.Services
         public async Task<int> CreateSOScollection(SOSHub SOS_EntityToCreate)
         {
            _context.SOSHubs.Add(SOS_EntityToCreate);
-            return _context.SaveChanges();
+            return await _context.SaveChangesAsync();
         }
         public async Task<SOSHub> GetSOSHub(int HubId, bool includeImages = false, bool includeVideos = false, bool includeTools = false, bool includeEquipments = false, bool includeMaterials = false, bool includeInformation = false, bool includePeople = false, bool includeDocuments = false)
         {
@@ -223,6 +224,56 @@ namespace SupervisorMobility.API.DataAccess.Services
             SosEntity.IsActive = false;
             _context.SOSHubs.Update(SosEntity);
             return await _context.SaveChangesAsync();
+        }
+
+        public async Task<AsyncVoidMethodBuilder> AddToolToSOSCollection(SOSHub Master, Tool Slave)
+        {
+
+            if (Master.ToolsUsed != null)
+            {
+               
+                Master.ToolsUsed.Add(Slave);
+            }
+            else
+            {
+                Master.ToolsUsed = new List<Tool>();
+                Master.ToolsUsed.Add(Slave);
+            }
+            _context.SaveChanges();
+            return new AsyncVoidMethodBuilder();
+        }
+
+        public async Task<AsyncVoidMethodBuilder> AddEquipmentToSOSCollection(SOSHub Master, Equipment Slave)
+        {
+
+            if (Master.SafetyEquipment != null)
+            {
+
+                Master.SafetyEquipment.Add(Slave);
+            }
+            else
+            {
+                Master.SafetyEquipment = new List<Equipment>();
+                Master.SafetyEquipment.Add(Slave);
+            }
+            _context.SaveChanges();
+            return new AsyncVoidMethodBuilder();
+        }
+
+        public async Task<AsyncVoidMethodBuilder> AddMaterialToSOSCollection(SOSHub Master, Material Slave)
+        {
+
+            if (Master.MaterialsUsed != null)
+            {
+                Master.MaterialsUsed.Add(Slave);
+            }
+            else
+            {
+                Master.MaterialsUsed = new List<Material>();
+                Master.MaterialsUsed.Add(Slave);
+            }
+            _context.SaveChanges();
+            return new AsyncVoidMethodBuilder();
         }
 
         public async Task AddImageToSOSData(int SOS_DataPool_id, FileUpload evidence)

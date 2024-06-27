@@ -7,6 +7,7 @@ using SupervisorMobility.API.Models.SOS.MaterialDtos;
 using SupervisorMobility.API.Models.SOS.SOSAnalysisDtos;
 using SupervisorMobility.API.Models.SOS.SOSHubDtos;
 using SupervisorMobility.API.Models.SOS.ToolDtos;
+using System.Runtime.CompilerServices;
 
 namespace SupervisorMobility.API.DataAccess.Services
 {
@@ -20,7 +21,9 @@ namespace SupervisorMobility.API.DataAccess.Services
 
         Task<int> UpdateSOSHub(SOSHubForUpdateDto HubUpdate, SOSHub SosEntity);
         Task<int> RemoveSOSHub(int SOS_DataPool_id);
-
+        Task<AsyncVoidMethodBuilder> AddMaterialToSOSCollection(SOSHub Master, Material Slave);
+        Task<AsyncVoidMethodBuilder> AddEquipmentToSOSCollection(SOSHub Master, Equipment Slave);
+        Task<AsyncVoidMethodBuilder> AddToolToSOSCollection(SOSHub Master, Tool Slave);
         Task AddImageToSOSData(int SOS_DataPool_id, FileUpload evidence);
         Task AddVideoToSOSData(int SOS_DataPool_id, FileUpload evidence);
         Task AddCDToSOSData(int SOS_DataPool_id, FileUpload evidence);
