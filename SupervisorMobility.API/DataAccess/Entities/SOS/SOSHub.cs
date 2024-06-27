@@ -58,6 +58,12 @@ namespace SupervisorMobility.API.DataAccess.Entities.SOS
         public string Status { get; set; }
 
 
+        public ICollection<SOSAnalysis>? SOSAnalysis { get; set; } = new List<SOSAnalysis>();
+        public ICollection<SOSCombination>? SOSCombination { get; set; } = new List<SOSCombination>();
+        public ICollection<SOSDistribution>? SOSDistribution { get; set; } = new List<SOSDistribution>();
+        public ICollection<SOSFlow>? SOSFlow { get; set; } = new List<SOSFlow>();
+        public ICollection<SOSSequence>? SOSSequence { get; set; } = new List<SOSSequence>();
+
         public bool? IsActive { get; set; }
     }
 }

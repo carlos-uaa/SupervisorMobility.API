@@ -7,8 +7,9 @@ namespace SupervisorMobility.API.DataAccess.Entities.SOS
     {
         [Key, DatabaseGenerated(DatabaseGeneratedOption.Identity)]
         public int SOSCombinationId { get; set; }
-
         public bool? IsActive { get; set; }
+
+
         public int SOSHubId { get; set; }
         public SOSHub? SOSHub { get; set; }
     }

@@ -4,6 +4,7 @@ using SupervisorMobility.API.DataAccess.Entities.SOS;
 using SupervisorMobility.API.Models.FileUploadDto;
 using SupervisorMobility.API.Models.SOS.EquipmentDtos;
 using SupervisorMobility.API.Models.SOS.MaterialDtos;
+using SupervisorMobility.API.Models.SOS.SOSAnalysisDtos;
 using SupervisorMobility.API.Models.SOS.SOSHubDtos;
 using SupervisorMobility.API.Models.SOS.ToolDtos;
 
@@ -25,8 +26,8 @@ namespace SupervisorMobility.API.DataAccess.Services
         Task AddCDToSOSData(int SOS_DataPool_id, FileUpload evidence);
         Task<int> AddRangeCommentary(List<Commentary> commentariesToAdd);
         Task<int> RemoveImageFromSOSData(int SOS_DataPool_id, int ImageFile_id);
-        Task<int> RemoveVideoFromSOSData(int SOS_DataPool_id, int ImageFile_id);
-        Task<int> RemoveCDFromSOSData(int SOS_DataPool_id, int ImageFile_id);
+        Task<int> RemoveVideoFromSOSData(int SOS_DataPool_id, int VideoFile_id);
+        Task<int> RemoveCDFromSOSData(int SOS_DataPool_id, int File_id);
         #endregion
 
 
@@ -63,6 +64,19 @@ namespace SupervisorMobility.API.DataAccess.Services
         Task<IEnumerable<Equipment>> GetMatchEquipments(string EquipmentToFind);
         Task<int> UpdateEquipment(EquipmentForUpdateDto EquipmentForUpdate, Equipment EquipmentEntity);
         Task<int> DeleteEquipment(int id);
+        #endregion
+
+        #region SOSAnalysis
+        Task<int> CreateSOSAnalysis(SOSAnalysis SOS_AnalysisToCreate);
+        Task<SOSAnalysis> GetSOSAnalysis(int SOSAnalysisId, bool includeImages = false, bool includeNotes= false, bool includeLogbooks = false, bool includeSpecialCases = false, bool includeSOS = false);
+        Task<IEnumerable<SOSAnalysis>> GetAllSOSAnalysis(bool includeImages = false, bool includeNotes = false, bool includeLogbooks = false, bool includeSpecialCases = false, bool includeSOS = false);
+
+        Task<int> UpdateSOSAnalysis(SOSAnalysisForUpdateDto AnalysisUpdate, SOSAnalysis AnalysisEntity);
+        Task<int> RemoveSOSAnalysis(int SOS_Analysis_id);
+
+        Task AddImageToSOSAnalysis(int SOS_Analysis_id, FileUpload evidence);
+        Task<int> RemoveImageFromSOSAnalysis(int SOS_Analysis_id, int ImageFile_id);
+
         #endregion
     }
 }

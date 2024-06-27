@@ -10,6 +10,7 @@ using SupervisorMobility.API.DataAccess.Entities.SOS;
 using SupervisorMobility.API.Models.FileUploadDto;
 using SupervisorMobility.API.Models.SOS.EquipmentDtos;
 using SupervisorMobility.API.Models.SOS.MaterialDtos;
+using SupervisorMobility.API.Models.SOS.SOSAnalysisDtos;
 using SupervisorMobility.API.Models.SOS.SOSHubDtos;
 using SupervisorMobility.API.Models.SOS.ToolDtos;
 using Tavis.UriTemplates;
@@ -34,8 +35,6 @@ namespace SupervisorMobility.API.DataAccess.Services
            _context.SOSHubs.Add(SOS_EntityToCreate);
             return _context.SaveChanges();
         }
-
-
         public async Task<SOSHub> GetSOSHub(int HubId, bool includeImages = false, bool includeVideos = false, bool includeTools = false, bool includeEquipments = false, bool includeMaterials = false, bool includeInformation = false, bool includePeople = false, bool includeDocuments = false)
         {
             var query = _context.SOSHubs.Where(SOS => SOS.SOSHubId == HubId && SOS.IsActive == true);
@@ -296,22 +295,51 @@ namespace SupervisorMobility.API.DataAccess.Services
             _context.Comments.AddRange(commentariesToAdd);
             return await _context.SaveChangesAsync();
         }
-        public Task<int> RemoveImageFromSOSData(int SOS_DataPool_id, int ImageFile_id)
+        public async Task<int> RemoveImageFromSOSData(int SOS_DataPool_id, int ImageFile_id)
         {
-            throw new NotImplementedException();
+            var SOSHubEntity = await GetSOSHub(SOS_DataPool_id, includeImages: true);
+
+            var Sketch = SOSHubEntity.Images.ToList().Find(i => i.FileUploadId == ImageFile_id);
+            if (Sketch != null)
+            {
+                Sketch.IsActive = false;
+            }
+
+            _context.SOSHubs.Update(SOSHubEntity);
+
+            return await _context.SaveChangesAsync(); 
+        } 
+
+        public async Task<int> RemoveVideoFromSOSData(int SOS_DataPool_id, int VideoFile_id)
+        {
+            var SOSHubEntity = await GetSOSHub(SOS_DataPool_id, includeVideos: true);
+
+            var Sketch = SOSHubEntity.Videos.ToList().Find(i => i.FileUploadId == VideoFile_id);
+            if (Sketch != null)
+            {
+                Sketch.IsActive = false;
+            }
+
+            _context.SOSHubs.Update(SOSHubEntity);
+
+            return await _context.SaveChangesAsync();
         }
 
-        public Task<int> RemoveVideoFromSOSData(int SOS_DataPool_id, int ImageFile_id)
+        public async Task<int> RemoveCDFromSOSData(int SOS_DataPool_id, int File_id)
         {
-            throw new NotImplementedException();
-        }
+            var SOSHubEntity = await GetSOSHub(SOS_DataPool_id, includeDocuments: true);
 
-        public Task<int> RemoveCDFromSOSData(int SOS_DataPool_id, int ImageFile_id)
-        {
-            throw new NotImplementedException();
+            var Sketch = SOSHubEntity.CommonDirection.ToList().Find(i => i.FileUploadId == File_id);
+            if (Sketch != null)
+            {
+                Sketch.IsActive = false;
+            }
+
+            _context.SOSHubs.Update(SOSHubEntity);
+
+            return await _context.SaveChangesAsync();
         }
         #endregion
-
         #region Tool
         public async Task<int> AddRangeTool(List<Tool> ToolsToAdd) {
             _context.Tools.AddRange(ToolsToAdd);
@@ -433,12 +461,6 @@ namespace SupervisorMobility.API.DataAccess.Services
             return await _context.SaveChangesAsync();
         }
         #endregion
-
-
-
-
-
-
         #region CommonOperations
         public async Task<FileUpload?> FetchFileAsync(int fileid)
         {
@@ -456,8 +478,193 @@ namespace SupervisorMobility.API.DataAccess.Services
         {
             return (await _context.SaveChangesAsync() >= 0);
         }
-                #endregion
 
+
+        #endregion
+
+        #region SOSAnalysis
+        public async Task<int> CreateSOSAnalysis(SOSAnalysis SOS_AnalysisToCreate)
+        {
+            _context.SOSAnalyses.Add(SOS_AnalysisToCreate);
+            return _context.SaveChanges();
+        }
+
+        public async Task<SOSAnalysis> GetSOSAnalysis(int SOSAnalysisId, bool includeImages = false, bool includeNotes = false, bool includeLogbooks = false, bool includeSpecialCases = false, bool includeSOS = false)
+        {
+            var query = _context.SOSAnalyses.Where(SOS => SOS.SOSAnalysisId == SOSAnalysisId && SOS.IsActive == true);
+
+            if (includeImages)
+            {
+                query = query.Include(i => i.Illustrations);
+            }
+
+            if (includeNotes)
+            {
+                query = query.Include(query => query.Notes);
+            }
+
+            if (includeLogbooks)
+            {
+                query = query.Include(t => t.AnalysisLogbooks);
+            }
+
+            if (includeSpecialCases)
+            {
+                query = query.Include(e => e.SpecialCasesAbnormalSituations);
+            }
+
+            if (includeSOS)
+            {
+                query = query.Include(m => m.SOSHub);
+            }
+
+
+            var sosHub = await query.FirstOrDefaultAsync();
+
+            if (sosHub == null)
+                return null;
+
+            // Filtrar los subobjetos manualmente después de la carga inicial
+            if (includeImages)
+            {
+                sosHub.Illustrations = sosHub.Illustrations.Where(i => i.IsActive == true).ToList();
+            }
+
+            if (includeNotes)
+            {
+                sosHub.Notes = sosHub.Notes.Where(v => v.IsActive == true).ToList();
+            }
+
+            if (includeLogbooks)
+            {
+                sosHub.AnalysisLogbooks = sosHub.AnalysisLogbooks.Where(t => t.IsActive == true).ToList();
+            }
+
+            if (includeSpecialCases)
+            {
+                sosHub.SpecialCasesAbnormalSituations = sosHub.SpecialCasesAbnormalSituations.Where(e => e.IsActive == true).ToList();
+            }
+
+            return sosHub;
+        }
+
+        public async Task<IEnumerable<SOSAnalysis>> GetAllSOSAnalysis(bool includeImages = false, bool includeNotes = false, bool includeLogbooks = false, bool includeSpecialCases = false, bool includeSOS = false)
+        {
+            var query = _context.SOSAnalyses.Where(SOS => SOS.IsActive == true);
+
+            if (includeImages)
+            {
+                query = query.Include(i => i.Illustrations);
+            }
+
+            if (includeNotes)
+            {
+                query = query.Include(query => query.Notes);
+            }
+
+            if (includeLogbooks)
+            {
+                query = query.Include(t => t.AnalysisLogbooks);
+            }
+
+            if (includeSpecialCases)
+            {
+                query = query.Include(e => e.SpecialCasesAbnormalSituations);
+            }
+
+            if (includeSOS)
+            {
+                query = query.Include(m => m.SOSHub);
+            }
+
+            var sosAnalyses = await query.OrderBy(s => s.SOSHubId).ToListAsync();
+
+            if (includeImages)
+            {
+                foreach (var SOSAnalysis in sosAnalyses)
+                {
+                    SOSAnalysis.Illustrations = SOSAnalysis.Illustrations.Where(i => i.IsActive == true).ToList();
+                }
+            }
+
+            if (includeNotes)
+            {
+                foreach (var SOSAnalysis in sosAnalyses)
+                {
+                    SOSAnalysis.Notes = SOSAnalysis.Notes.Where(v => v.IsActive == true).ToList();
+                }
+            }
+
+            if (includeLogbooks)
+            {
+                foreach (var SOSAnalysis in sosAnalyses)
+                {
+                    SOSAnalysis.AnalysisLogbooks = SOSAnalysis.AnalysisLogbooks.Where(t => t.IsActive == true).ToList();
+                }
+            }
+
+            if (includeSpecialCases)
+            {
+                foreach (var SOSAnalysis in sosAnalyses)
+                {
+                    SOSAnalysis.SpecialCasesAbnormalSituations = SOSAnalysis.SpecialCasesAbnormalSituations.Where(e => e.IsActive == true).ToList();
+                }
+            }
+
+            return sosAnalyses;
+        }
+
+        public async Task<int> UpdateSOSAnalysis(SOSAnalysisForUpdateDto AnalysisUpdate, SOSAnalysis AnalysisEntity)
+        {
+            _mapper.Map(AnalysisUpdate, AnalysisEntity);
+            _context.SOSAnalyses.Update(AnalysisEntity);
+            return await _context.SaveChangesAsync();
+        }
+
+        public async Task<int> RemoveSOSAnalysis(int SOS_Analysis_id)
+        {
+            var SOS_AnalysisEntity = await GetSOSAnalysis(SOS_Analysis_id);
+            SOS_AnalysisEntity.IsActive = false;
+            _context.SOSAnalyses.Update(SOS_AnalysisEntity);
+            return await _context.SaveChangesAsync();
+        }
+
+        public async Task AddImageToSOSAnalysis(int SOS_Analysis_id, FileUpload evidence)
+        {
+            var SosHubEntity = await GetSOSAnalysis(SOS_Analysis_id, includeImages: true);
+
+            if (SosHubEntity != null)
+            {
+
+                if (SosHubEntity.Illustrations != null)
+                {
+                    SosHubEntity.Illustrations.Add(evidence);
+                }
+                else
+                {
+                    SosHubEntity.Illustrations = new List<FileUpload>
+                    {
+                        evidence
+                    };
+                }
+            }
+        }
+
+        public async Task<int> RemoveImageFromSOSAnalysis(int SOS_Analysis_id, int ImageFile_id)
+        {
+            var SOSAnalysisEntity = await GetSOSAnalysis(SOS_Analysis_id, includeImages: true);
+
+            var Sketch = SOSAnalysisEntity.Illustrations.ToList().Find(i => i.FileUploadId == ImageFile_id);
+            if (Sketch != null)
+            {
+                Sketch.IsActive = false;
+            }
+
+            _context.SOSAnalyses.Update(SOSAnalysisEntity);
+
+            return await _context.SaveChangesAsync();
+        }
+        #endregion
 
     }
 }
