@@ -10,5 +10,6 @@ namespace SupervisorMobility.API.DataAccess.Entities.SOS
         public string MaterialCode { get; set; }
         public string MaterialName { get; set; }
         public bool? IsActive { get; set; }
+        public ICollection<SOSHub>? MaterialsUsed { get; set; } = new List<SOSHub>();
     }
 }

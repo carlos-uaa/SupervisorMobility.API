@@ -77,8 +77,8 @@ namespace SupervisorMobility.API.DataAccess.Services
         Task<int> UpdateSOSAnalysis(SOSAnalysisForUpdateDto AnalysisUpdate, SOSAnalysis AnalysisEntity);
         Task<int> RemoveSOSAnalysis(int SOS_Analysis_id);
 
-        Task AddImageToSOSAnalysis(int SOS_Analysis_id, FileUpload evidence);
-        Task<int> RemoveImageFromSOSAnalysis(int SOS_Analysis_id, int ImageFile_id);
+        Task AddIlustrationToSOSAnalysis(int SOS_Analysis_id, FileUpload evidence);
+        Task<int> RemoveIlustrationFromSOSAnalysis(int SOS_Analysis_id, int ImageFile_id);
 
         #endregion
     }

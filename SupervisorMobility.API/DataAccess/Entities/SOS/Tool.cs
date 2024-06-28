@@ -11,5 +11,7 @@ namespace SupervisorMobility.API.DataAccess.Entities.SOS
         public string ToolCode { get; set; }
         public string ToolName { get; set; }
         public bool? IsActive { get; set; }
+
+        public ICollection<SOSHub>? ToolsUsed { get; set; } = new List<SOSHub>();
     }
 }

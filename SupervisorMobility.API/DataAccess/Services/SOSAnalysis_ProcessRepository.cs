@@ -680,7 +680,7 @@ namespace SupervisorMobility.API.DataAccess.Services
             return await _context.SaveChangesAsync();
         }
 
-        public async Task AddImageToSOSAnalysis(int SOS_Analysis_id, FileUpload evidence)
+        public async Task AddIlustrationToSOSAnalysis(int SOS_Analysis_id, FileUpload evidence)
         {
             var SosHubEntity = await GetSOSAnalysis(SOS_Analysis_id, includeImages: true);
 
@@ -701,7 +701,7 @@ namespace SupervisorMobility.API.DataAccess.Services
             }
         }
 
-        public async Task<int> RemoveImageFromSOSAnalysis(int SOS_Analysis_id, int ImageFile_id)
+        public async Task<int> RemoveIlustrationFromSOSAnalysis(int SOS_Analysis_id, int ImageFile_id)
         {
             var SOSAnalysisEntity = await GetSOSAnalysis(SOS_Analysis_id, includeImages: true);
 
