@@ -1,5 +1,6 @@
 ﻿using AutoMapper;
 using Microsoft.AspNetCore.Mvc;
+using SupervisorMobility.API.Context;
 using SupervisorMobility.API.DataAccess.Entities;
 using SupervisorMobility.API.DataAccess.Entities.SOS;
 using SupervisorMobility.API.DataAccess.Services;
@@ -9,6 +10,7 @@ using SupervisorMobility.API.Models.SOS.MaterialDtos;
 using SupervisorMobility.API.Models.SOS.SOSAnalysisDtos;
 using SupervisorMobility.API.Models.SOS.SOSHubDtos;
 using SupervisorMobility.API.Models.SOS.ToolDtos;
+using SupervisorMobility.API.Models.SOSReviewDtos;
 using System.Diagnostics;
 
 namespace SupervisorMobility.API.Controllers.SOS_Controllers
@@ -20,9 +22,11 @@ namespace SupervisorMobility.API.Controllers.SOS_Controllers
         private readonly ISOSAnalysis_ProcessRepository _AnalysisProcessRepository;
         private readonly IMapper _mapper;
         private readonly IWebHostEnvironment _env;
-        public AnalysisController(IWebHostEnvironment env, IMapper mapper, ISOSAnalysis_ProcessRepository repository)
+        private readonly SupervisorMobilityContext _context;
+        public AnalysisController(IWebHostEnvironment env, SupervisorMobilityContext context, IMapper mapper, ISOSAnalysis_ProcessRepository repository)
         {
             _AnalysisProcessRepository = repository;
+            _context = context ?? throw new ArgumentNullException(nameof(context));
             _mapper = mapper ??
                   throw new ArgumentNullException(nameof(mapper));
             _env = env ?? throw new ArgumentNullException(nameof(env));
@@ -79,6 +83,21 @@ namespace SupervisorMobility.API.Controllers.SOS_Controllers
         }
 
         //Update
+
+        //[HttpPut("{SOSid}")]
+        //public async Task<ActionResult> UpdateSOSAnalysis(int SOSid, SOSReviewForUpdateDto sosUpdateEntity)
+        //{
+
+            
+
+        //    var result = await _AnalysisProcessRepository.UpdateSOSAnalysis(_CheckpointForUpdate, entityCheckpoint);
+
+        //    if (result > 0)
+        //        return Ok(entityCheckpoint);
+        //    else
+        //        return BadRequest();
+
+        //}//end Update 
 
         [HttpDelete("{SOSAnaysisId}")]
         public async Task<ActionResult<int>> RemoveSOSHub(int SOSAnaysisId)
