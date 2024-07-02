@@ -11,8 +11,8 @@ namespace SupervisorMobility.API.DataAccess.Entities.SOS
         public int SOSHubId { get; set; }
 
         //Es el analisis
-        public ICollection<AnalysisBkup> AnalysesBkup { get; set; } = new List<AnalysisBkup>();
-        public ICollection<Section> Sections { get; set; } = new List<Section>();
+        public ICollection<AnalysisBkup>? AnalysesBkup { get; set; } = new List<AnalysisBkup>();
+        public ICollection<Section>? Sections { get; set; } = new List<Section>();
 
         public string ProcessSheet { get; set; }
         public ICollection<Commentary>? ProcessSheetCommentary { get; set; } = new List<Commentary>();

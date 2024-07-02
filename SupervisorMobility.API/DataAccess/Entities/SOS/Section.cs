@@ -7,9 +7,7 @@ namespace SupervisorMobility.API.DataAccess.Entities.SOS
     {
         [Key, DatabaseGenerated(DatabaseGeneratedOption.Identity)]
         public int SectionId { get; set; }
-
-
-        public List<Analysis> Analyses { get; set; } = new List<Analysis>();
+        public ICollection<Analysis> Analyses { get; set; } = new List<Analysis>();
         public string Step { get; set; } = "";
         public bool? IsActive { get; set; }
 
