@@ -105,10 +105,10 @@ namespace SupervisorMobility.API.Controllers.SOS_Controllers
 
         //get
         [HttpGet("{id}", Name = "GetSOSHub")]
-        public async Task<ActionResult<SOSHubDto>> GetSOSHub(int id, bool includeImages = false, bool includeVideos = false, bool includeCommentaries = false, bool includeTools = false, bool includeEquipments = false, bool includeMaterials = false, bool includeInformation = false, bool includePeople = false, bool includeDocuments = false)
+        public async Task<ActionResult<SOSHubDto>> GetSOSHub(int id, bool includeAnalysesBkup = false, bool includeSections = false, bool includeImages = false, bool includeVideos = false, bool includeCommentaries = false, bool includeTools = false, bool includeEquipments = false, bool includeMaterials = false, bool includeInformation = false, bool includePeople = false, bool includeDocuments = false)
         {
 
-            var SOSHub = await _AnalysisProcessRepository.GetSOSHub(id, includeImages, includeVideos,includeCommentaries, includeTools, includeEquipments, includeMaterials, includeInformation, includePeople, includeDocuments);
+            var SOSHub = await _AnalysisProcessRepository.GetSOSHub(id, includeAnalysesBkup, includeSections, includeImages, includeVideos,includeCommentaries, includeTools, includeEquipments, includeMaterials, includeInformation, includePeople, includeDocuments);
             if (SOSHub == null)
             {
                 return NotFound("SOSHub not found!");

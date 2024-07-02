@@ -337,6 +337,18 @@ namespace SupervisorMobility.API.Context
                 .Property(p => p.IsActive)
                 .HasDefaultValue(true);
 
+            modelBuilder.Entity<Section>()
+                .Property(p => p.IsActive)
+                .HasDefaultValue(true);
+            
+            modelBuilder.Entity<Analysis>()
+                .Property(p => p.IsActive)
+                .HasDefaultValue(true);
+
+            modelBuilder.Entity<AnalysisBkup>()
+                .Property(p => p.IsActive)
+                .HasDefaultValue(true);
+
             modelBuilder.Entity<Material>()
                 .Property(p => p.IsActive)
                 .HasDefaultValue(true);
