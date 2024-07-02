@@ -85,6 +85,9 @@ namespace SupervisorMobility.API.Context
 
         #region SOS
         public DbSet<SOSHub> SOSHubs { get; set; }
+        public DbSet<Section> Sections { get; set; }
+        public DbSet<Analysis> Analyses { get; set; }
+        public DbSet<AnalysisBkup> AnalysisBkups { get; set; }
 
         public DbSet<Material> Materials { get; set; }
         public DbSet<Tool> Tools { get; set; }
