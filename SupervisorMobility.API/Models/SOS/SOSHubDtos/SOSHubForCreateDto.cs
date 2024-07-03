@@ -1,14 +1,18 @@
 ﻿using SupervisorMobility.API.DataAccess.Entities;
+using SupervisorMobility.API.DataAccess.Entities.SOS;
 using SupervisorMobility.API.Models.CommentaryDtos;
 using SupervisorMobility.API.Models.SOS.EquipmentDtos;
 using SupervisorMobility.API.Models.SOS.MaterialDtos;
+using SupervisorMobility.API.Models.SOS.SOSHubDtos.AnalysisBkupDtos;
+using SupervisorMobility.API.Models.SOS.SOSHubDtos.SectionDtos;
 using SupervisorMobility.API.Models.SOS.ToolDtos;
 
 namespace SupervisorMobility.API.Models.SOS.SOSHubDtos
 {
     public class SOSHubForCreateDto
     {
-        public string OperationDescription { get; set; }
+        public ICollection<AnalysisBkupForCreateDto> AnalysesBkup { get; set; } = new List<AnalysisBkupForCreateDto>();
+        public ICollection<SectionForCreateDto> Sections { get; set; } = new List<SectionForCreateDto>();
         public string ProcessSheet { get; set; }
         public ICollection<CreateCommentaryDto>? ProcessSheetCommentary { get; set; } = new List<CreateCommentaryDto>();
         

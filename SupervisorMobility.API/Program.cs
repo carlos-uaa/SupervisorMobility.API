@@ -1,6 +1,9 @@
+using DocumentFormat.OpenXml.Office2016.Drawing.ChartDrawing;
+using Microsoft.EntityFrameworkCore;
 using Serilog;
 using SupervisorMobility.API;
 using SupervisorMobility.API.Business;
+using SupervisorMobility.API.Context;
 using SupervisorMobility.API.DataAccess.Entities;
 using SupervisorMobility.API.DataAccess.Services;
 using SupervisorMobility.API.Models.NotificationDtos;
@@ -24,6 +27,12 @@ builder.Services.AddCors(policy =>
         .SetIsOriginAllowedToAllowWildcardSubdomains().WithExposedHeaders("*")
  );
 });
+
+builder.Services.AddDbContextFactory<SupervisorMobilityContext>(options =>
+{
+    options.UseSqlServer(builder.Configuration.GetConnectionString("SupervisorMobilityDBConnectionString"));
+}, ServiceLifetime.Singleton);
+
 
 var env = builder.Environment;
 if (env.IsDevelopment())

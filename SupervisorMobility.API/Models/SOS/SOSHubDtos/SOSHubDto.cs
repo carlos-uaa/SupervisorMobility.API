@@ -9,13 +9,17 @@ using SupervisorMobility.API.Models.AreaDtos;
 using SupervisorMobility.API.Models.DepartmentDtos;
 using SupervisorMobility.API.Models.Users;
 using SupervisorMobility.API.Models.ProductDtos;
+using SupervisorMobility.API.DataAccess.Entities.SOS;
+using SupervisorMobility.API.Models.SOS.SOSHubDtos.AnalysisBkupDtos;
+using SupervisorMobility.API.Models.SOS.SOSHubDtos.SectionDtos;
 
 namespace SupervisorMobility.API.Models.SOS.SOSHubDtos
 {
     public class SOSHubDto
     {
         public int SOSHubId { get; set; }
-        public string OperationDescription { get; set; }
+        public ICollection<AnalysisBkupDto> AnalysesBkup { get; set; } = new List<AnalysisBkupDto>();
+        public ICollection<SectionDto> Sections { get; set; } = new List<SectionDto>();
         public string ProcessSheet { get; set; }
         public ICollection<CommentaryDto>? ProcessSheetCommentary { get; set; } = new List<CommentaryDto>();
         public ICollection<FileUploadGeneralDto>? CommonDirection { get; set; } = new List<FileUploadGeneralDto>();

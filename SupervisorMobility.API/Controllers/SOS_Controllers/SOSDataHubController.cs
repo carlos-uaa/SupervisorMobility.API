@@ -3,6 +3,7 @@ using DocumentFormat.OpenXml.Office2010.Drawing;
 using DocumentFormat.OpenXml.Office2010.Excel;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore.Query;
+using SupervisorMobility.API.Context;
 using SupervisorMobility.API.DataAccess.Entities;
 using SupervisorMobility.API.DataAccess.Entities.IS;
 using SupervisorMobility.API.DataAccess.Entities.SOS;
@@ -24,7 +25,8 @@ namespace SupervisorMobility.API.Controllers.SOS_Controllers
     {
         private readonly ISOSAnalysis_ProcessRepository _AnalysisProcessRepository;
         private readonly IMapper _mapper;
-        private readonly IWebHostEnvironment _env;
+        private readonly IWebHostEnvironment _env; 
+
         public SOSDataHubController(ISOSAnalysis_ProcessRepository repository, IWebHostEnvironment env, IMapper mapper)
         {
             _AnalysisProcessRepository = repository;
@@ -103,10 +105,10 @@ namespace SupervisorMobility.API.Controllers.SOS_Controllers
 
         //get
         [HttpGet("{id}", Name = "GetSOSHub")]
-        public async Task<ActionResult<SOSHubDto>> GetSOSHub(int id, bool includeImages = false, bool includeVideos = false, bool includeTools = false, bool includeEquipments = false, bool includeMaterials = false, bool includeInformation = false, bool includePeople = false, bool includeDocuments = false)
+        public async Task<ActionResult<SOSHubDto>> GetSOSHub(int id, bool includeAnalysesBkup = false, bool includeSections = false, bool includeImages = false, bool includeVideos = false, bool includeCommentaries = false, bool includeTools = false, bool includeEquipments = false, bool includeMaterials = false, bool includeInformation = false, bool includePeople = false, bool includeDocuments = false)
         {
 
-            var SOSHub = await _AnalysisProcessRepository.GetSOSHub(id, includeImages, includeVideos, includeTools, includeEquipments, includeMaterials, includeInformation, includePeople, includeDocuments);
+            var SOSHub = await _AnalysisProcessRepository.GetSOSHub(id, includeAnalysesBkup, includeSections, includeImages, includeVideos,includeCommentaries, includeTools, includeEquipments, includeMaterials, includeInformation, includePeople, includeDocuments);
             if (SOSHub == null)
             {
                 return NotFound("SOSHub not found!");
@@ -116,10 +118,10 @@ namespace SupervisorMobility.API.Controllers.SOS_Controllers
         }
 
         [HttpGet]
-        public async Task<ActionResult<IEnumerable<SOSHubDto>>> GetAllSOSHub(bool includeImages = false, bool includeVideos = false, bool includeTools = false, bool includeEquipments = false, bool includeMaterials = false, bool includeInformation = false, bool includePeople = false, bool includeDocuments = false)
+        public async Task<ActionResult<IEnumerable<SOSHubDto>>> GetAllSOSHub(bool includeImages = false, bool includeVideos = false, bool includeCommentaries = false, bool includeTools = false, bool includeEquipments = false, bool includeMaterials = false, bool includeInformation = false, bool includePeople = false, bool includeDocuments = false)
         {
 
-            var CheckpointEntities = await _AnalysisProcessRepository.GetAllSOSHub(includeImages, includeVideos, includeTools, includeEquipments, includeMaterials, includeInformation, includePeople, includeDocuments);
+            var CheckpointEntities = await _AnalysisProcessRepository.GetAllSOSHub(includeImages, includeVideos, includeCommentaries, includeTools, includeEquipments, includeMaterials, includeInformation, includePeople, includeDocuments);
             if (CheckpointEntities == null)
             {
                 return NotFound("Get All Sos Hub not found!");
@@ -133,26 +135,10 @@ namespace SupervisorMobility.API.Controllers.SOS_Controllers
         public async Task<ActionResult<SOSHubDto>> UpdateSOSHub(int SOSHubId, SOSHubForUpdateDto _SOSHubForUpdate)
         {
 
-            // Obtener el SOSHub existente junto con sus norms/standars
-            SOSHub entitySOSHub = await _AnalysisProcessRepository.GetSOSHub(SOSHubId, false, false, true, true, true, true, true);
-
-            if (entitySOSHub == null)
-            {
-                return NotFound();
-            }
-
             // Filtrar nuevos Comentarios
             List<UpdateCommentaryDto> filteredCommentaryList = _SOSHubForUpdate.ProcessSheetCommentary
                 .Where(t => t.ComentaryId <= 0).ToList();
-            // Filtrar nuevos Equipment
-            List<EquipmentForUpdateDto> filteredEquipmentList = _SOSHubForUpdate.SafetyEquipment
-               .Where(t => t.EquipmentId <= 0).ToList();
-            // Filtrar nuevos ToolsUsed
-            List<ToolForUpdateDto> filteredToolsUsedList = _SOSHubForUpdate.ToolsUsed
-               .Where(t => t.ToolId <= 0).ToList();
-            // Filtrar nuevos Materials
-            List<MaterialForUpdateDto> filteredMaterialsList = _SOSHubForUpdate.MaterialsUsed
-               .Where(t => t.MaterialId <= 0).ToList();
+         
 
             // Remover nuevos Comentarios de la lista principal para evitar duplicados
             if (filteredCommentaryList.Any())
@@ -174,94 +160,89 @@ namespace SupervisorMobility.API.Controllers.SOS_Controllers
                 {
                     Debug.WriteLine("Commentarios añadidos con exitop");
                 }
+
+                //_context.Comments.AddRange(newCommentarys);
+                //await _context.SaveChangesAsync();
+
                 // Mapear y agregar nuevas norms/standars creadas al DTO de actualización
                 List<UpdateCommentaryDto> newCommentarysCreated = _mapper.Map<List<UpdateCommentaryDto>>(newCommentarys);
                 _SOSHubForUpdate.ProcessSheetCommentary.ToList().AddRange(newCommentarysCreated);
             }
 
-            // Remover nuevos Equipment de la lista principal para evitar duplicados
-            if (filteredEquipmentList.Any())
+            //List<Tool> tools = new List<Tool>();
+            //List<Material> materials = new List<Material>();
+            //List<Equipment> equipments = new List<Equipment>();
+
+            //foreach (var tool in _SOSHubForUpdate.ToolsUsed)
+            //{
+            //    Tool toolaux = await _AnalysisProcessRepository.GetToolById(tool.ToolId);
+            //    tools.Add(toolaux);
+            //}
+            //foreach (var material in _SOSHubForUpdate.MaterialsUsed)
+            //{
+            //    Material mataux = await _AnalysisProcessRepository.GetMaterialById(material.MaterialId);
+            //    materials.Add(mataux);
+            //}
+            //foreach (var equipment in _SOSHubForUpdate.SafetyEquipment)
+            //{
+            //    Equipment equipmentaux = await _AnalysisProcessRepository.GetEquipmentById(equipment.EquipmentId);
+            //    equipments.Add(equipmentaux);
+            //}
+
+            //_SOSHubForUpdate.ToolsUsed = null;
+            //_SOSHubForUpdate.MaterialsUsed = null;
+            //_SOSHubForUpdate.SafetyEquipment = null;
+
+            // Obtener el SOSHub existente junto con sus norms/standars
+            SOSHub entitySOSHub = await _AnalysisProcessRepository.GetSOSHub(SOSHubId, false, false, true, true, true, true, true, true);
+
+            //await _AnalysisProcessRepository.SOSDataRemoveAllToolsEquipmentMaterial(entitySOSHub);
+
+            if (entitySOSHub == null)
             {
-                _SOSHubForUpdate.SafetyEquipment.ToList().RemoveAll(t => t.EquipmentId == null || t.EquipmentId <= 0);
-
-                // Mapear nuevas norms/standars
-                List<Equipment> newEquipments = _mapper.Map<List<Equipment>>(filteredEquipmentList);
-
-                foreach (var newEquipment in newEquipments)
-                {
-                    newEquipment.EquipmentId = 0;
-                    newEquipment.IsActive = true;
-                }
-
-                var resultAddEquipment = await _AnalysisProcessRepository.AddRangeEquipment(newEquipments);
-
-                if (resultAddEquipment > 0)
-                {
-                    Debug.WriteLine("Equipaments añadidos con exitop");
-                }
-                // Mapear y agregar nuevas norms/standars creadas al DTO de actualización
-                List<EquipmentForUpdateDto> newEquipmentsCreated = _mapper.Map<List<EquipmentForUpdateDto>>(newEquipments);
-                _SOSHubForUpdate.SafetyEquipment.ToList().AddRange(newEquipmentsCreated);
+                return NotFound();
             }
 
-            // Remover nuevos ToolsUsed de la lista principal para evitar duplicados
-            if (filteredToolsUsedList.Any())
-            {
-                _SOSHubForUpdate.ToolsUsed.ToList().RemoveAll(t => t.ToolId == null || t.ToolId <= 0);
+            //_mapper.Map(_SOSHubForUpdate, entitySOSHub);
+            //_context.SOSHubs.Update(entitySOSHub);
 
-                // Mapear nuevas norms/standars
-                List<Tool> newToolsUseds = _mapper.Map<List<Tool>>(filteredToolsUsedList);
-
-                foreach (var newTool in newToolsUseds)
-                {
-                    newTool.ToolId = 0;
-                    newTool.IsActive = true;
-                }
-
-                var resultAddToolsUsed = await _AnalysisProcessRepository.AddRangeTool(newToolsUseds);
-
-                if (resultAddToolsUsed > 0)
-                {
-                    Debug.WriteLine("Tools añadidos con exitop");
-                }
-                // Mapear y agregar nuevas norms/standars creadas al DTO de actualización
-                List<ToolForUpdateDto> newToolsUsedsCreated = _mapper.Map<List<ToolForUpdateDto>>(newToolsUseds);
-                _SOSHubForUpdate.ToolsUsed.ToList().AddRange(newToolsUsedsCreated);
-            }
-
-            // Remover nuevos Materials de la lista principal para evitar duplicados
-            if (filteredMaterialsList.Any())
-            {
-                _SOSHubForUpdate.MaterialsUsed.ToList().RemoveAll(t => t.MaterialId == null || t.MaterialId <= 0);
-
-                // Mapear nuevas norms/standars
-                List<Material> newMaterials = _mapper.Map<List<Material>>(filteredMaterialsList);
-
-                foreach (var newComentary in newMaterials)
-                {
-                    newComentary.MaterialId = 0;
-                    newComentary.IsActive = true;
-                }
-
-                var resultAddMaterial = await _AnalysisProcessRepository.AddRangeMaterial(newMaterials);
-
-                if (resultAddMaterial > 0)
-                {
-                    Debug.WriteLine("Materials añadidos con exitop");
-                }
-                // Mapear y agregar nuevas norms/standars creadas al DTO de actualización
-                List<MaterialForUpdateDto> newMaterialsCreated = _mapper.Map<List<MaterialForUpdateDto>>(newMaterials);
-                _SOSHubForUpdate.MaterialsUsed.ToList().AddRange(newMaterialsCreated);
-            }
-
-
+            //var result = await _context.SaveChangesAsync();
 
             var result = await _AnalysisProcessRepository.UpdateSOSHub(_SOSHubForUpdate, entitySOSHub);
 
-            if (result > 0)
+            //if (tools.Any())
+            //{
+            //    foreach (Tool tool in tools)
+            //    {
+            //        _AnalysisProcessRepository.AddToolToSOSCollection(entitySOSHub, tool);
+            //    }
+            //}
+
+            //if (materials.Any())
+            //{
+            //    foreach (Material material in materials)
+            //    {
+            //        _AnalysisProcessRepository.AddMaterialToSOSCollection(entitySOSHub, material);
+            //    }
+            //}
+
+            //if (equipments.Any())
+            //{
+            //    foreach (Equipment equipment in equipments)
+            //    {
+            //        _AnalysisProcessRepository.AddEquipmentToSOSCollection(entitySOSHub, equipment);
+            //    }
+            //}
+
+            //await _AnalysisProcessRepository.SaveChangesAsync();
+
+            if (result != null)
+            {
                 return Ok(entitySOSHub);
+            }
             else
                 return BadRequest();
+
         }
 
         [HttpDelete("{SOSHubId}")]

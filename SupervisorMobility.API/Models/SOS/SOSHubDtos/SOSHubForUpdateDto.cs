@@ -2,6 +2,8 @@
 using SupervisorMobility.API.Models.CommentaryDtos;
 using SupervisorMobility.API.Models.SOS.EquipmentDtos;
 using SupervisorMobility.API.Models.SOS.MaterialDtos;
+using SupervisorMobility.API.Models.SOS.SOSHubDtos.AnalysisBkupDtos;
+using SupervisorMobility.API.Models.SOS.SOSHubDtos.SectionDtos;
 using SupervisorMobility.API.Models.SOS.ToolDtos;
 
 namespace SupervisorMobility.API.Models.SOS.SOSHubDtos
@@ -9,7 +11,8 @@ namespace SupervisorMobility.API.Models.SOS.SOSHubDtos
     public class SOSHubForUpdateDto
     {
         public int SOSHubId { get; set; }
-        public string OperationDescription { get; set; }
+        public ICollection<AnalysisBkupForUpdateDto> AnalysesBkup { get; set; } = new List<AnalysisBkupForUpdateDto>();
+        public ICollection<SectionForUpdateDto> Sections { get; set; } = new List<SectionForUpdateDto>();
         public string ProcessSheet { get; set; }
         public ICollection<UpdateCommentaryDto>? ProcessSheetCommentary { get; set; } = new List<UpdateCommentaryDto>();
         

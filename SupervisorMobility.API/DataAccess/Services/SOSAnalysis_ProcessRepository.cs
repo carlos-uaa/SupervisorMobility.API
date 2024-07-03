@@ -1,4 +1,5 @@
 ﻿using AutoMapper;
+using CsvHelper;
 using DocumentFormat.OpenXml.InkML;
 using DocumentFormat.OpenXml.Office2010.Excel;
 using DuoVia.FuzzyStrings;
@@ -24,10 +25,10 @@ namespace SupervisorMobility.API.DataAccess.Services
         private readonly IMapper _mapper;
 
 
-        public SOSAnalysis_ProcessRepository(SupervisorMobilityContext context, IMapper mapper)
+        public SOSAnalysis_ProcessRepository(ContextFactory context, IMapper mapper)
         {
             _mapper = mapper;
-            _context = context ?? throw new ArgumentNullException(nameof(context));
+            _context = context.CreateDbContext() ?? throw new ArgumentNullException(nameof(context));
         }
 
         #region SOS_DataPool
@@ -36,9 +37,19 @@ namespace SupervisorMobility.API.DataAccess.Services
            _context.SOSHubs.Add(SOS_EntityToCreate);
             return await _context.SaveChangesAsync();
         }
-        public async Task<SOSHub> GetSOSHub(int HubId, bool includeImages = false, bool includeVideos = false, bool includeTools = false, bool includeEquipments = false, bool includeMaterials = false, bool includeInformation = false, bool includePeople = false, bool includeDocuments = false)
+        public async Task<SOSHub> GetSOSHub(int HubId, bool includeAnalysesBkup = false, bool includeSections = false, bool includeImages = false, bool includeVideos = false, bool includeCommentaries = false, bool includeTools = false, bool includeEquipments = false, bool includeMaterials = false, bool includeInformation = false, bool includePeople = false, bool includeDocuments = false)
         {
             var query = _context.SOSHubs.Where(SOS => SOS.SOSHubId == HubId && SOS.IsActive == true);
+
+            if (includeAnalysesBkup)
+            {
+                query = query.Include(i => i.AnalysesBkup);
+            }
+
+            if (includeSections)
+            {
+                query = query.Include(i => i.Sections).ThenInclude(s => s.Analyses);
+            }
 
             if (includeImages)
             {
@@ -48,6 +59,10 @@ namespace SupervisorMobility.API.DataAccess.Services
             if (includeVideos)
             {
                 query = query.Include(query => query.Videos);
+            }  
+            if ( includeCommentaries)
+            {
+                query = query.Include(query => query.ProcessSheetCommentary);
             }
 
             if (includeTools)
@@ -87,6 +102,16 @@ namespace SupervisorMobility.API.DataAccess.Services
                 return null;
 
             // Filtrar los subobjetos manualmente después de la carga inicial
+            if (includeAnalysesBkup)
+            {
+                sosHub.AnalysesBkup = sosHub.AnalysesBkup.Where(i => i.IsActive == true).ToList();
+            }
+
+            if (includeSections)
+            {
+                sosHub.Sections  = sosHub.Sections.Where(i => i.IsActive == true).ToList();
+            }
+
             if (includeImages)
             {
                 sosHub.Images = sosHub.Images.Where(i => i.IsActive == true).ToList();
@@ -97,6 +122,10 @@ namespace SupervisorMobility.API.DataAccess.Services
                 sosHub.Videos = sosHub.Videos.Where(v => v.IsActive == true).ToList();
             }
 
+            if (includeCommentaries)
+            {
+                sosHub.ProcessSheetCommentary = sosHub.ProcessSheetCommentary.Where(t => t.IsActive == true).ToList();
+            }
             if (includeTools)
             {
                 sosHub.ToolsUsed = sosHub.ToolsUsed.Where(t => t.IsActive == true).ToList();
@@ -119,9 +148,19 @@ namespace SupervisorMobility.API.DataAccess.Services
 
             return sosHub;
         }
-        public async Task<IEnumerable<SOSHub>> GetAllSOSHub(bool includeImages = false, bool includeVideos = false, bool includeTools = false, bool includeEquipments = false, bool includeMaterials = false, bool includeInformation = false, bool includePeople = false, bool includeDocuments = false)
+        public async Task<IEnumerable<SOSHub>> GetAllSOSHub(bool includeAnalysesBkup = false, bool includeSections = false, bool includeImages = false, bool includeVideos = false, bool includeCommentaries = false, bool includeTools = false, bool includeEquipments = false, bool includeMaterials = false, bool includeInformation = false, bool includePeople = false, bool includeDocuments = false)
         {
             var query = _context.SOSHubs.Where(h => h.IsActive == true);
+
+            if (includeAnalysesBkup)
+            {
+                query = query.Include(i => i.AnalysesBkup);
+            }
+
+            if (includeSections)
+            {
+                query = query.Include(i => i.Sections).ThenInclude(s => s.Analyses);
+            }
 
             if (includeImages)
             {
@@ -133,6 +172,10 @@ namespace SupervisorMobility.API.DataAccess.Services
                 query = query.Include(query => query.Videos);
             }
 
+            if (includeCommentaries)
+            {
+                query = query.Include(query => query.ProcessSheetCommentary);
+            }
             if (includeTools)
             {
                 query = query.Include(t => t.ToolsUsed);
@@ -173,6 +216,14 @@ namespace SupervisorMobility.API.DataAccess.Services
                 foreach (var sosHub in sosHubs)
                 {
                     sosHub.Videos = sosHub.Videos.Where(v => v.IsActive == true).ToList();
+                }
+            }
+
+            if (includeCommentaries)
+            {
+                foreach (var sosHub in sosHubs)
+                {
+                    sosHub.ProcessSheetCommentary = sosHub.ProcessSheetCommentary.Where(t => t.IsActive == true).ToList();
                 }
             }
 
@@ -389,6 +440,18 @@ namespace SupervisorMobility.API.DataAccess.Services
             _context.SOSHubs.Update(SOSHubEntity);
 
             return await _context.SaveChangesAsync();
+        }
+
+        public async Task<AsyncVoidMethodBuilder> SOSDataRemoveAllToolsEquipmentMaterial(SOSHub Master)
+        {
+          
+                Master.ToolsUsed?.Clear();
+                Master.SafetyEquipment?.Clear();
+                Master.MaterialsUsed?.Clear();
+
+                _context.SaveChanges();
+
+            return new AsyncVoidMethodBuilder();
         }
         #endregion
         #region Tool
