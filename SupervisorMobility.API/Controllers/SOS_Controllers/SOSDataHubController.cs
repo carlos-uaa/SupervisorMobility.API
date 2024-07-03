@@ -345,7 +345,7 @@ namespace SupervisorMobility.API.Controllers.SOS_Controllers
 
             var fileToReturn = await _AnalysisProcessRepository.CreateFileAsync(uploadResult);
 
-            await _AnalysisProcessRepository.AddImageToSOSData(pool_id, fileToReturn);
+            await _AnalysisProcessRepository.AddVideoToSOSData(pool_id, fileToReturn);
             await _AnalysisProcessRepository.SaveChangesAsync();
 
             return Ok(fileToReturn);
