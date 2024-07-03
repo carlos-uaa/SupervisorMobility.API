@@ -12,12 +12,15 @@ using SupervisorMobility.API.Models.ProductDtos;
 using SupervisorMobility.API.DataAccess.Entities.SOS;
 using SupervisorMobility.API.Models.SOS.SOSHubDtos.AnalysisBkupDtos;
 using SupervisorMobility.API.Models.SOS.SOSHubDtos.SectionDtos;
+using SupervisorMobility.API.Models.DistributionDtos;
 
 namespace SupervisorMobility.API.Models.SOS.SOSHubDtos
 {
     public class SOSHubDto
     {
         public int SOSHubId { get; set; }
+        public string? OperationName { get; set; }
+        public string? ProcessName { get; set; }
         public ICollection<AnalysisBkupDto> AnalysesBkup { get; set; } = new List<AnalysisBkupDto>();
         public ICollection<SectionDto> Sections { get; set; } = new List<SectionDto>();
         public string ProcessSheet { get; set; }
@@ -41,6 +44,8 @@ namespace SupervisorMobility.API.Models.SOS.SOSHubDtos
         public PlantDto? Plant { get; set; }
         public int? AreaId { get; set; }
         public AreaWithoutNavigationPropertiesDto? Area { get; set; }
+        public int? DistributionId { get; set; }
+        public DistributionWithoutNavigationPropertiesDto? Distribution { get; set; }
         public int? DepartmentId { get; set; }
         public DepartmentDto? Department { get; set; }
 

@@ -1,5 +1,6 @@
 ﻿using SupervisorMobility.API.DataAccess.Entities;
 using SupervisorMobility.API.Models.CommentaryDtos;
+using SupervisorMobility.API.Models.DistributionDtos;
 using SupervisorMobility.API.Models.SOS.EquipmentDtos;
 using SupervisorMobility.API.Models.SOS.MaterialDtos;
 using SupervisorMobility.API.Models.SOS.SOSHubDtos.AnalysisBkupDtos;
@@ -30,6 +31,7 @@ namespace SupervisorMobility.API.Models.SOS.SOSHubDtos
         public int? PlantId { get; set; }
         public int? AreaId { get; set; }
         public int? DepartmentId { get; set; }
+        public DistributionWithoutNavigationPropertiesDto? Distribution { get; set; }
 
         public int? OwnerId { get; set; }
 

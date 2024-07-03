@@ -10,6 +10,9 @@ namespace SupervisorMobility.API.DataAccess.Entities.SOS
         [Key, DatabaseGenerated(DatabaseGeneratedOption.Identity)]
         public int SOSHubId { get; set; }
 
+        public string? OperationName { get; set; }
+        public string? ProcessName { get; set; }
+
         //Es el analisis
         public ICollection<AnalysisBkup>? AnalysesBkup { get; set; } = new List<AnalysisBkup>();
         public ICollection<Section>? Sections { get; set; } = new List<Section>();
@@ -37,6 +40,9 @@ namespace SupervisorMobility.API.DataAccess.Entities.SOS
         public Plant? Plant { get; set; }
         public int? AreaId { get; set; }
         public Area? Area { get; set; }
+        public int? DistributionId { get; set; }
+        public Distribution? Distribution { get; set; }
+
         public int? DepartmentId { get; set; }
         public Department? Department{ get; set; }
 

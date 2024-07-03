@@ -33,7 +33,7 @@ namespace SupervisorMobility.API.Controllers
         {
             ServicePointManager.ServerCertificateValidationCallback = (sender, certificate, chain, sslPolicyErrors) => true;
 
-            var response = await _bridgeHttpClient.GetAsync("SMCcp/GetDirectoryPathsCcp");
+            var response = await _bridgeHttpClient.GetAsync("SMCCP/GetDirectoryPathsCCP");
 
             return Ok(response.Content.ReadAsStringAsync().Result);
         }
@@ -43,7 +43,7 @@ namespace SupervisorMobility.API.Controllers
         {
             var content = new FormUrlEncodedContent(parameters);
 
-            var response = await _bridgeHttpClient.PostAsync("SMCcp/PostArchivesDirectoryCcp", content);
+            var response = await _bridgeHttpClient.PostAsync("SMCCP/PostArchivesDirectoryCCP", content);
 
             return Ok(response.Content.ReadAsStringAsync().Result);
         }
@@ -55,7 +55,7 @@ namespace SupervisorMobility.API.Controllers
 
             var content = new FormUrlEncodedContent(parameters);
             //optenemos el enlace de descarga y la Key
-            var FileInfoResponse = await _bridgeHttpClient.PostAsync("SMCcp/PostDownloadfileCcp", content);
+            var FileInfoResponse = await _bridgeHttpClient.PostAsync("SMCCP/PostDownloadfileCCP", content);
 
             CDMS_DownloadFile DownloadLink = new();
             if (FileInfoResponse.IsSuccessStatusCode)
@@ -195,39 +195,39 @@ namespace SupervisorMobility.API.Controllers
                 Debug.WriteLine("Parámetro 'documentDelete' no encontrado o inválido.");
             }
 
-            var content = new FormUrlEncodedContent(parameters);
+            //var content = new FormUrlEncodedContent(parameters);
 
-            try
-            {
-                var uri = new Uri(_bridgeHttpClient.BaseAddress, "SMCcp/DeleteFileTempCcp");
+            //try
+            //{
+            //    var uri = new Uri(_bridgeHttpClient.BaseAddress, "SMCcp/DeleteFileTempCCP");
 
-                var request = new HttpRequestMessage(HttpMethod.Delete, uri)
-                {
-                    Content = content
-                };
+            //    var request = new HttpRequestMessage(HttpMethod.Delete, uri)
+            //    {
+            //        Content = content
+            //    };
 
-                var response = await _bridgeHttpClient.SendAsync(request);
+            //    var response = await _bridgeHttpClient.SendAsync(request);
 
-                if (response.IsSuccessStatusCode)
-                {
-                    var result = response.Content.ReadAsStringAsync().Result;
+            //    if (response.IsSuccessStatusCode)
+            //    {
+            //        var result = response.Content.ReadAsStringAsync().Result;
 
-                    return Ok(result);
-                }
-                else
-                {
-                    //await _js.InvokeVoidAsync("alert", $"Error get folders: {response.Content.ReadAsStringAsync().Result}");
-                    Console.WriteLine($"DELETE TEMP CCP, Status Code {response.StatusCode} : {response.Content.ReadAsStringAsync().Result}");
-                }
-            }
-            catch (HttpRequestException ex)
-            {
-                Console.WriteLine($"Error al hacer la solicitud: {ex.Message}");
-            }
-            catch (TaskCanceledException ex)
-            {
-                Console.WriteLine($"La solicitud ha sido cancelada: {ex.Message}");
-            }
+            //        return Ok(result);
+            //    }
+            //    else
+            //    {
+            //        //await _js.InvokeVoidAsync("alert", $"Error get folders: {response.Content.ReadAsStringAsync().Result}");
+            //        Console.WriteLine($"DELETE TEMP CCP, Status Code {response.StatusCode} : {response.Content.ReadAsStringAsync().Result}");
+            //    }
+            //}
+            //catch (HttpRequestException ex)
+            //{
+            //    Console.WriteLine($"Error al hacer la solicitud: {ex.Message}");
+            //}
+            //catch (TaskCanceledException ex)
+            //{
+            //    Console.WriteLine($"La solicitud ha sido cancelada: {ex.Message}");
+            //}
 
 
             return Ok();
@@ -238,7 +238,7 @@ namespace SupervisorMobility.API.Controllers
         [HttpGet("SMHoe/GetDirectoryPaths")]
         public async Task<ActionResult> GetDirectoryPaths()
         {
-            var response = await _bridgeHttpClient.GetAsync("SMHoe/GetDirectoryPaths");
+            var response = await _bridgeHttpClient.GetAsync("SMHOE/GetDirectoryPaths");
 
             return Ok(response.Content.ReadAsStringAsync().Result);
         }
@@ -248,7 +248,7 @@ namespace SupervisorMobility.API.Controllers
         {
             var content = new FormUrlEncodedContent(parameters);
 
-            var response = await _bridgeHttpClient.PostAsync("SMHoe/PostArchivesDirectoryHOE", content);
+            var response = await _bridgeHttpClient.PostAsync("SMHOE/PostArchivesDirectoryHOE", content);
 
             var result = response.Content.ReadAsStringAsync().Result;
 
@@ -402,7 +402,7 @@ namespace SupervisorMobility.API.Controllers
         [HttpGet("SMGos/GetDirectoryPathsGos")]
         public async Task<ActionResult> GetDirectoryPathsGos()
         {
-            var response = await _bridgeHttpClient.GetAsync("SMGos/GetDirectoryPathsGos");
+            var response = await _bridgeHttpClient.GetAsync("SMGOS/GetDirectoryPathsGOS");
 
             var result = response.Content.ReadAsStringAsync().Result;
 
@@ -414,7 +414,7 @@ namespace SupervisorMobility.API.Controllers
         {
             var content = new FormUrlEncodedContent(parameters);
 
-            var response = await _bridgeHttpClient.PostAsync("SMGos/PostArchivesDirectoryGos", content);
+            var response = await _bridgeHttpClient.PostAsync("SMGOS/PostArchivesDirectoryGOS", content);
 
             return Ok(response.Content.ReadAsStringAsync().Result);
         }
@@ -431,7 +431,7 @@ namespace SupervisorMobility.API.Controllers
         {
             var content = new FormUrlEncodedContent(parameters);
             //optenemos el enlace de descarga y la Key
-            var FileInfoResponse = await _bridgeHttpClient.PostAsync("SMGos/PostDownloadfileGos", content);
+            var FileInfoResponse = await _bridgeHttpClient.PostAsync("SMGOS/PostDownloadfileGOS", content);
 
             CDMS_DownloadFile DownloadLink = new();
             if (FileInfoResponse.IsSuccessStatusCode)
@@ -571,39 +571,39 @@ namespace SupervisorMobility.API.Controllers
                 Debug.WriteLine("Parámetro 'documentDelete' no encontrado o inválido.");
             }
 
-            var content = new FormUrlEncodedContent(parameters);
+            //var content = new FormUrlEncodedContent(parameters);
 
-            try
-            {
-                var uri = new Uri(_bridgeHttpClient.BaseAddress, "SMGos/DeleteFileTempGos");
+            //try
+            //{
+            //    var uri = new Uri(_bridgeHttpClient.BaseAddress, "SMGos/DeleteFileTempGOS");
 
-                var request = new HttpRequestMessage(HttpMethod.Delete, uri)
-                {
-                    Content = content
-                };
+            //    var request = new HttpRequestMessage(HttpMethod.Delete, uri)
+            //    {
+            //        Content = content
+            //    };
 
-                var response = await _bridgeHttpClient.SendAsync(request);
+            //    var response = await _bridgeHttpClient.SendAsync(request);
 
-                if (response.IsSuccessStatusCode)
-                {
-                    var result = response.Content.ReadAsStringAsync().Result;
+            //    if (response.IsSuccessStatusCode)
+            //    {
+            //        var result = response.Content.ReadAsStringAsync().Result;
 
-                    return Ok(result);
-                }
-                else
-                {
-                    //await _js.InvokeVoidAsync("alert", $"Error get folders: {response.Content.ReadAsStringAsync().Result}");
-                    Console.WriteLine($"DELETE TEMP GOS, Status Code {response.StatusCode} : {response.Content.ReadAsStringAsync().Result}");
-                }
-            }
-            catch (HttpRequestException ex)
-            {
-                Console.WriteLine($"Error al hacer la solicitud: {ex.Message}");
-            }
-            catch (TaskCanceledException ex)
-            {
-                Console.WriteLine($"La solicitud ha sido cancelada: {ex.Message}");
-            }
+            //        return Ok(result);
+            //    }
+            //    else
+            //    {
+            //        //await _js.InvokeVoidAsync("alert", $"Error get folders: {response.Content.ReadAsStringAsync().Result}");
+            //        Console.WriteLine($"DELETE TEMP GOS, Status Code {response.StatusCode} : {response.Content.ReadAsStringAsync().Result}");
+            //    }
+            //}
+            //catch (HttpRequestException ex)
+            //{
+            //    Console.WriteLine($"Error al hacer la solicitud: {ex.Message}");
+            //}
+            //catch (TaskCanceledException ex)
+            //{
+            //    Console.WriteLine($"La solicitud ha sido cancelada: {ex.Message}");
+            //}
 
            
 

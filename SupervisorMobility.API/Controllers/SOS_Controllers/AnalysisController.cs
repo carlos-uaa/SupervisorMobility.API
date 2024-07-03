@@ -39,9 +39,9 @@ namespace SupervisorMobility.API.Controllers.SOS_Controllers
 
             SOSAnalysis sOSAnalysisToCreate = new SOSAnalysis();
 
+            //generarlo desde aqui
 
             sOSAnalysisToCreate.InternalControlNumber = InternalControlNumber;
-            sOSAnalysisToCreate.ProcessNumber = ProcessNumber;
 
             sOSAnalysisToCreate.CreatedDate = DateTime.Now;
             sOSAnalysisToCreate.IsActive = true;
