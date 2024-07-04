@@ -82,7 +82,7 @@ namespace SupervisorMobility.API.DataAccess.Services
 
             if (includeInformation)
             {
-                query = query.Include(i => i.Plant).Include(t => t.Area).Include(d => d.Department);
+                query = query.Include(i => i.Plant).Include(t => t.Area).Include(d => d.Distribution).Include(d => d.Department);
             }
 
             if (includePeople)
@@ -193,7 +193,7 @@ namespace SupervisorMobility.API.DataAccess.Services
 
             if (includeInformation)
             {
-                query = query.Include(i => i.Plant).Include(t => t.Area).Include(d => d.Department);
+                query = query.Include(i => i.Plant).Include(t => t.Area).Include(d => d.Distribution).Include(d => d.Department);
             }
 
             if (includePeople)

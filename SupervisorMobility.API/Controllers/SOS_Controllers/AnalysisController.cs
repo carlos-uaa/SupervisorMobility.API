@@ -32,15 +32,17 @@ namespace SupervisorMobility.API.Controllers.SOS_Controllers
             _env = env ?? throw new ArgumentNullException(nameof(env));
         }
 
-        [HttpPost]
-        public async Task<ActionResult<SOSAnalysisDto>> GenerateAnalysis(int SOSHubCollection_Id, string InternalControlNumber, string ProcessNumber)
+        [HttpGet]
+        public async Task<ActionResult<SOSAnalysisDto>> GenerateAnalysis(int SOSHubCollection_Id, string side)
         {
-            SOSHub SOSEntity = await _AnalysisProcessRepository.GetSOSHub(SOSHubCollection_Id);
+            SOSHub SOSEntity = await _AnalysisProcessRepository.GetSOSHub(SOSHubCollection_Id, includeInformation: true);
 
             SOSAnalysis sOSAnalysisToCreate = new SOSAnalysis();
 
             //generarlo desde aqui
 
+            string InternalControlNumber = string.Concat(SOSEntity.Area != null ? SOSEntity.Area.Code : "[Area Not Exist]," , SOSEntity.Distribution != null ? SOSEntity.Distribution.Code : "[Distribution Not Exist]", side, "ANLY");
+            
             sOSAnalysisToCreate.InternalControlNumber = InternalControlNumber;
 
             sOSAnalysisToCreate.CreatedDate = DateTime.Now;
@@ -69,7 +71,7 @@ namespace SupervisorMobility.API.Controllers.SOS_Controllers
             return Ok(_mapper.Map<SOSAnalysisDto>(SOSAnalysis));
         }
 
-        [HttpGet]
+        [HttpGet("all")]
         public async Task<ActionResult<IEnumerable<SOSAnalysisDto>>> GetAllSOSAnalysis(bool includeImages = false, bool includeNotes = false, bool includeLogbooks = false, bool includeSpecialCases = false, bool includeSOS = false)
         {
 
