@@ -10,8 +10,7 @@ namespace SupervisorMobility.API.DataAccess.Entities.SOS
         [Key, DatabaseGenerated(DatabaseGeneratedOption.Identity)]
         public int SOSHubId { get; set; }
 
-        public string? OperationName { get; set; }
-        public string? ProcessName { get; set; }
+        public string? Folio { get; set; }
 
         //Es el analisis
         public ICollection<AnalysisBkup>? AnalysesBkup { get; set; } = new List<AnalysisBkup>();

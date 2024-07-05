@@ -19,8 +19,7 @@ namespace SupervisorMobility.API.Models.SOS.SOSHubDtos
     public class SOSHubDto
     {
         public int SOSHubId { get; set; }
-        public string? OperationName { get; set; }
-        public string? ProcessName { get; set; }
+        public string? Folio { get; set; }
         public ICollection<AnalysisBkupDto> AnalysesBkup { get; set; } = new List<AnalysisBkupDto>();
         public ICollection<SectionDto> Sections { get; set; } = new List<SectionDto>();
         public string ProcessSheet { get; set; }

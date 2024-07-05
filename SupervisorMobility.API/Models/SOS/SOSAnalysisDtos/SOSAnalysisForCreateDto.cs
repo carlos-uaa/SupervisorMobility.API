@@ -10,7 +10,8 @@ namespace SupervisorMobility.API.Models.SOS.SOSAnalysisDtos
     {
         public int SOSAnalysisId { get; set; }
         public string? InternalControlNumber { get; set; }
-        public string? ProcessNumber { get; set; }
+        public string? OperationName { get; set; }
+        public string? ProcessName { get; set; }
         ICollection<SOSAnalysisLogbookDto>? AnalysisLogbooks { get; set; } = new List<SOSAnalysisLogbookDto>();
         ICollection<CreateCommentaryDto>? Notes { get; set; } = new List<CreateCommentaryDto>();
         ICollection<SpecialCaseAbnormalSituationDto>? SpecialCasesAbnormalSituations { get; set; } = new List<SpecialCaseAbnormalSituationDto>();

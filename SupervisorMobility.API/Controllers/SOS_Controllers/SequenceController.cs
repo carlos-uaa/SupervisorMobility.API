@@ -3,7 +3,7 @@ using Microsoft.AspNetCore.Mvc;
 
 namespace SupervisorMobility.API.Controllers.SOS_Controllers
 {
-    [Route("api/Analysis_Process/Sequence")]
+    [Route("api/SOS/Sequence")]
     [ApiController]
     public class SequenceController : Controller
     {
