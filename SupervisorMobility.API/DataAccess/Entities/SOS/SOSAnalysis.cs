@@ -9,8 +9,9 @@ namespace SupervisorMobility.API.DataAccess.Entities.SOS
         [Key, DatabaseGenerated(DatabaseGeneratedOption.Identity)]
         public int SOSAnalysisId { get; set; }
 
+        public string? OperationName { get; set; }
+        public string? ProcessName { get; set; }
         public string? InternalControlNumber {  get; set; }
-
 
         public ICollection<SOSAnalysisLogbook>? AnalysisLogbooks { get; set; } = new List<SOSAnalysisLogbook>();
 

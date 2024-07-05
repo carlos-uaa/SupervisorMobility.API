@@ -2,12 +2,14 @@
 using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.AspNetCore.StaticFiles;
+using Newtonsoft.Json;
 using SupervisorMobility.API.Entities.CDMS;
 using SupervisorMobility.API.Entities.CDMS.Downloads;
 using System.Diagnostics;
 using System.Net;
 using System.Net.Http;
 using System.Net.Http.Headers;
+using System.Text;
 using static System.Net.WebRequestMethods;
 
 namespace SupervisorMobility.API.Controllers
@@ -49,12 +51,15 @@ namespace SupervisorMobility.API.Controllers
         }
 
         [HttpPost("SMCcp/PostDownloadfileCcp")]
-        public async Task<ActionResult> PostDownloadfileCcp(Dictionary<string, string> parameters)
+        public async Task<ActionResult> PostDownloadfileCcp(Dictionary<string, int> parameters)
         {
 
 
-            var content = new FormUrlEncodedContent(parameters);
-            //optenemos el enlace de descarga y la Key
+            //var content = new FormUrlEncodedContent(parameters);
+            var json = JsonConvert.SerializeObject(parameters);
+
+            var content = new StringContent(json, Encoding.UTF8, "application/json");
+
             var FileInfoResponse = await _bridgeHttpClient.PostAsync("SMCCP/PostDownloadfileCCP", content);
 
             CDMS_DownloadFile DownloadLink = new();
@@ -75,18 +80,20 @@ namespace SupervisorMobility.API.Controllers
 
             if (_env.IsDevelopment())
             {
-                fileURL = fileURL.Replace("https://10.91.117.5:3000", "https://10.91.49.2:3000");
+                fileURL = fileURL.Replace("https://10.91.117.5:\\", "https://10.91.49.2:\\");
             }
 
             var fileNameWithOutIp = "";
 
             if (_env.IsDevelopment())
             {
-                fileNameWithOutIp = fileURL.Replace("https://10.91.49.2:3000/CCP/", "");
+                //fileNameWithOutIp = fileURL.Replace("https://10.91.49.2", "");
+                fileNameWithOutIp = fileURL.Split("\\").Last();
             }
             else
             {
-                fileNameWithOutIp = fileURL.Replace("https://10.91.117.5:3000/CCP/", "");
+                //fileNameWithOutIp = fileURL.Replace("https://10.91.117.5", "");
+                fileNameWithOutIp = fileURL.Split("\\").Last();
             }
 
             var filePathSave = Path.Combine(_env.ContentRootPath, "downloads\\CCP", fileNameWithOutIp);
@@ -235,10 +242,10 @@ namespace SupervisorMobility.API.Controllers
 
 
         //HOE
-        [HttpGet("SMHoe/GetDirectoryPaths")]
+        [HttpGet("SMHoe/GetDirectoryPathsHoe")]
         public async Task<ActionResult> GetDirectoryPaths()
         {
-            var response = await _bridgeHttpClient.GetAsync("SMHOE/GetDirectoryPaths");
+            var response = await _bridgeHttpClient.GetAsync("SMHOE/GetDirectoryPathsHOE");
 
             return Ok(response.Content.ReadAsStringAsync().Result);
         }

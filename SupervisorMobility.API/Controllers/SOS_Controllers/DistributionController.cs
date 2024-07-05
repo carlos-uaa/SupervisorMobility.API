@@ -3,7 +3,7 @@ using Microsoft.AspNetCore.Mvc;
 
 namespace SupervisorMobility.API.Controllers.SOS_Controllers
 {
-    [Route("api/Analysis_Process/Distribution")]
+    [Route("api/SOS/Distribution")]
     [ApiController]
     public class DistributionController : Controller
     {
