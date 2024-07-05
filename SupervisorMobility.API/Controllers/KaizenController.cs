@@ -43,7 +43,7 @@ namespace SupervisorMobility.API.Controllers
             if (entityKaizen != null)
                 return Ok(KaizenEntity);
             else
-                return BadRequest(); ;
+                return BadRequest(); 
         }
 
         [HttpGet]

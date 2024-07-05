@@ -8,7 +8,7 @@ namespace SupervisorMobility.API.DataAccess.Entities.LUP
         [Key, DatabaseGenerated(DatabaseGeneratedOption.Identity)]
         public int ILULevelId { get; set; }
 
-        public char ILULevelCode { get; set; }
+        public string ILULevelCode { get; set; } = string.Empty;
         public string ILULevelDescription { get; set; } = string.Empty;
 
         public bool isActive { get; set; }

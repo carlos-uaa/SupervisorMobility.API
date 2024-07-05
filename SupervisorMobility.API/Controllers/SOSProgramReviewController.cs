@@ -19,13 +19,13 @@ namespace SupervisorMobility.API.Controllers
     [Route("api/SOSReview")]
     [ApiController]
 
-    public class SOSController : ControllerBase
+    public class SOSProgramReviewController : ControllerBase
     {
         private readonly IMapper _mapper;
         private readonly ISupervisorMobilityRepository _supervisorMobilityRepository;
         private readonly IAssyChartService _assyChartService;
 
-        public SOSController(ISupervisorMobilityRepository supervisorMobilityRepository, IAssyChartService assyChartService,
+        public SOSProgramReviewController(ISupervisorMobilityRepository supervisorMobilityRepository, IAssyChartService assyChartService,
             IMapper mapper)
         {
             _supervisorMobilityRepository = supervisorMobilityRepository ??

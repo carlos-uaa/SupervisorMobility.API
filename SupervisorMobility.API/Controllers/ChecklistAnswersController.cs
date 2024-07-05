@@ -6,6 +6,7 @@ using SupervisorMobility.API.DataAccess.Entities;
 using SupervisorMobility.API.Entities;
 using SupervisorMobility.API.Models.ChecklistAnswerDtos;
 using SupervisorMobility.API.Models.FileUploadDto;
+using SupervisorMobility.API.Models.LupDtos;
 using SupervisorMobility.API.Services;
 using System.Linq;
 
@@ -52,7 +53,6 @@ namespace SupervisorMobility.API.Controllers
 
 
         }
-
 
         [HttpGet("JobObservationId/{jobObservationId}", Name = "GetAnswersByJobObservationId")]
         public async Task<ActionResult<IEnumerable<ChecklistAnswerDto>>> GetAllChecklistAnswerAsync(int jobObservationId)

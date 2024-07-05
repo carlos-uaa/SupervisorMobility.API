@@ -7,12 +7,11 @@ using System.ComponentModel.DataAnnotations.Schema;
 
 public enum LUPStatus
 {
-    Titular,
-    Checklist,
-    Timer,
-    LUP,
-    LUP_SSV,
-    Signature
+    Percent0,
+    Percent25,
+    Percent50,
+    Percent75,
+    Percent100,
 }
 
 namespace SupervisorMobility.API.Entities
@@ -25,6 +24,7 @@ namespace SupervisorMobility.API.Entities
         public JobObservation JobObservation {  get; set; }
 
         public string? Oportunity { get; set; }
+
         public string? Observer { get; set; }
         public int Pillar { get; set; }
         public string? Q3 { get; set; }
@@ -43,6 +43,8 @@ namespace SupervisorMobility.API.Entities
         public int? StdChange { get; set; }
         public int? StdUpdate { get; set; }
 
+        public int? ChecklistQuestionId { get; set; }
+        public ChecklistQuestion? ChecklistQuestion { get; set; }
 
         public bool? IsActive { get; set; }
     }

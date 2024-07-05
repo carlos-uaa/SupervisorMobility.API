@@ -241,6 +241,7 @@ namespace SupervisorMobility.API.Services
         #endregion
         #region LupOperations
         Task<IEnumerable<Lup>> GetAllLupAsync();
+        Task<IEnumerable<Lup>> GetAllLupInsidences(int QuestionId, int supervisorId, int distributionId); 
         Task<Lup?> GetLupAsync(int lupId, bool includeFile = false);
         Task<IEnumerable<Lup>> GetLupsByFiltersAsync(DateTime startDate, DateTime endDate, int plantId, int areaId, int distributionId, int operationId, int supervisorId, int status);
         void AddLup(Lup lup);

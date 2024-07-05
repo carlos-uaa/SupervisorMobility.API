@@ -1,9 +1,11 @@
 ﻿using Microsoft.EntityFrameworkCore;
 using SupervisorMobility.API.DataAccess.Entities;
 using SupervisorMobility.API.DataAccess.Entities.ILU;
+using SupervisorMobility.API.DataAccess.Entities.IS;
 using SupervisorMobility.API.DataAccess.Entities.Logger;
 using SupervisorMobility.API.DataAccess.Entities.LUP;
 using SupervisorMobility.API.DataAccess.Entities.Paths;
+using SupervisorMobility.API.DataAccess.Entities.SOS;
 using SupervisorMobility.API.DataAccess.Entities.SOS_Review;
 using SupervisorMobility.API.Entities;
 using System.Globalization;
@@ -17,7 +19,7 @@ namespace SupervisorMobility.API.Context
         public DbSet<JobCategoryStructure> JobCategoryStructures { get; set; }
         public DbSet<QuestionType> QuestionTypes { get; set; }
         public DbSet<ChecklistQuestion> ChecklistQuestions { get; set; }
-   
+
         public DbSet<JobObservation> JobObservations { get; set; }
         public DbSet<Lup> Lup { get; set; }
         public DbSet<ChecklistAnswer> ChecklistAnswers { get; set; }
@@ -63,7 +65,44 @@ namespace SupervisorMobility.API.Context
         public DbSet<KaizenTransaction> KaizenTransactions { get; set; }
         #endregion
 
+        #region IS
+        public DbSet<Appearance> AppearanceInspections { get; set; }
+        public DbSet<Template> TemplateInspections { get; set; }
+        public DbSet<DataPanel> DataPanels { get; set; }
+        public DbSet<DataPanelSpecification> DataPanelSpecifications { get; set; }
+        public DbSet<DataPanelAnswer> DataPanelDefectAnswer { get; set; }
+        public DbSet<ProblemDefect> ProblemDefects { get; set; }
+        public DbSet<ProblemDefectAnswer> ProblemDefectAnswer { get; set; }
+        public DbSet<LogbookAppearance> LogbookAppearance { get; set; }
+        public DbSet<LogbookTemplate> LogbooksTemplate { get; set; }
+        public DbSet<Part> Parts { get; set; }
+        public DbSet<Checkpoint> Checkpoints { get; set; }
+        public DbSet<CheckpointNorm> CheckpointsNorm { get; set; }
+        public DbSet<CheckpointNormAnswer> CheckpointsNormAnswer { get; set; }
+        public DbSet<CheckpointAnswerColumn> CheckpointAnswerColumns { get; set; }
 
+        #endregion
+
+        #region SOS
+        public DbSet<SOSHub> SOSHubs { get; set; }
+        public DbSet<Section> Sections { get; set; }
+        public DbSet<Analysis> Analyses { get; set; }
+        public DbSet<AnalysisBkup> AnalysisBkups { get; set; }
+
+        public DbSet<Material> Materials { get; set; }
+        public DbSet<Tool> Tools { get; set; }
+        public DbSet<Equipment> Equipments { get; set; }
+
+
+
+        public DbSet<SOSAnalysis> SOSAnalyses { get; set; }
+        public DbSet<SpecialCaseAbnormalSituation> SpecialCasesAbnormalSituations { get; set; }
+        public DbSet<SOSCombination> SOSCombinations { get; set; }
+        public DbSet<SOSDistribution> SOSDistributions { get; set; }
+        public DbSet<SOSFlow> SOSFlows { get; set; }
+        public DbSet<SOSSequence> SOSSequences { get; set; }
+
+        #endregion
 
         public SupervisorMobilityContext(DbContextOptions<SupervisorMobilityContext> options)
             : base(options)
@@ -77,15 +116,19 @@ namespace SupervisorMobility.API.Context
             //Default values
             modelBuilder.Entity<JobCategoryStructure>()
                 .Property(p => p.IsActive)
-                .HasDefaultValue(true);   
-            
-           
+                .HasDefaultValue(true);
+
+            modelBuilder.Entity<Commentary>()
+             .Property(p => p.IsActive)
+             .HasDefaultValue(true);
+
+
 
             modelBuilder.Entity<SOSReviewProgram>()
                .Property(p => p.IsActive)
-               .HasDefaultValue(true); 
-            
-            
+               .HasDefaultValue(true);
+
+
             modelBuilder.Entity<SOSReviewDistSuggestion>()
                .Property(p => p.SuggestionApplied)
                .HasDefaultValue(false);
@@ -101,7 +144,7 @@ namespace SupervisorMobility.API.Context
             modelBuilder.Entity<JobObservation>()
                 .Property(p => p.IsActive)
                 .HasDefaultValue(true);
-         
+
 
             modelBuilder.Entity<Plant>()
                 .Property(p => p.IsActive)
@@ -133,8 +176,8 @@ namespace SupervisorMobility.API.Context
 
             modelBuilder.Entity<Lup>()
                 .Property(p => p.IsActive)
-                .HasDefaultValue(true); 
-            
+                .HasDefaultValue(true);
+
 
             modelBuilder.Entity<AssyChart>()
                 .Property(p => p.IsActive)
@@ -154,7 +197,7 @@ namespace SupervisorMobility.API.Context
             //Users
             modelBuilder.Entity<User>()
              .Property(p => p.IsActive)
-             .HasDefaultValue(true); 
+             .HasDefaultValue(true);
 
             modelBuilder.Entity<UserCareerPath>()
              .Property(p => p.IsActive)
@@ -201,7 +244,7 @@ namespace SupervisorMobility.API.Context
             modelBuilder.Entity<PAT>()
               .Property(p => p.IsActive)
               .HasDefaultValue(true);
-            
+
             modelBuilder.Entity<LeadershipRecord>()
               .Property(p => p.isActive)
               .HasDefaultValue(true);
@@ -261,13 +304,15 @@ namespace SupervisorMobility.API.Context
                 .Property(p => p.IsActive)
                 .HasDefaultValue(true);
 
-         
+
             modelBuilder.Entity<KaizenTransaction>()
-   .Property(p => p.IsActive)
-   .HasDefaultValue(true);
+               .Property(p => p.IsActive)
+               .HasDefaultValue(true);
+
             modelBuilder.Entity<Kaizen>()
                .Property(p => p.IsActive)
                .HasDefaultValue(true);
+
             modelBuilder.Entity<FileUpload>()
                .Property(p => p.IsActive)
                .HasDefaultValue(true);
@@ -275,7 +320,7 @@ namespace SupervisorMobility.API.Context
             modelBuilder.Entity<HCI>()
             .Property(p => p.IsActive)
             .HasDefaultValue(true);
-            
+
             modelBuilder.Entity<Commentary>()
             .Property(p => p.IsActive)
             .HasDefaultValue(true);
@@ -286,6 +331,60 @@ namespace SupervisorMobility.API.Context
             modelBuilder.Entity<HCICategory>()
                 .Property(p => p.IsActive)
                 .HasDefaultValue(true);
+
+            //SOS
+            modelBuilder.Entity<SOSHub>()
+                .Property(p => p.IsActive)
+                .HasDefaultValue(true);
+
+            modelBuilder.Entity<Section>()
+                .Property(p => p.IsActive)
+                .HasDefaultValue(true);
+            
+            modelBuilder.Entity<Analysis>()
+                .Property(p => p.IsActive)
+                .HasDefaultValue(true);
+
+            modelBuilder.Entity<AnalysisBkup>()
+                .Property(p => p.IsActive)
+                .HasDefaultValue(true);
+
+            modelBuilder.Entity<Material>()
+                .Property(p => p.IsActive)
+                .HasDefaultValue(true);
+
+            modelBuilder.Entity<Equipment>()
+                .Property(p => p.IsActive)
+                .HasDefaultValue(true);
+
+            modelBuilder.Entity<Tool>()
+                .Property(p => p.IsActive)
+                .HasDefaultValue(true);
+
+            modelBuilder.Entity<SOSAnalysis>()
+                .Property(p => p.IsActive)
+                .HasDefaultValue(true); 
+            
+            modelBuilder.Entity<SpecialCaseAbnormalSituation>()
+                .Property(p => p.IsActive)
+                .HasDefaultValue(true);
+
+            modelBuilder.Entity<SOSCombination>()
+                .Property(p => p.IsActive)
+                .HasDefaultValue(true);
+
+            modelBuilder.Entity<SOSDistribution>()
+                .Property(p => p.IsActive)
+                .HasDefaultValue(true);
+
+            modelBuilder.Entity<SOSFlow>()
+                .Property(p => p.IsActive)
+                .HasDefaultValue(true);
+
+            modelBuilder.Entity<SOSSequence>()
+                .Property(p => p.IsActive)
+                .HasDefaultValue(true);
+
             //Constraints
             modelBuilder.Entity<JobCategoryStructure>()
                 .HasCheckConstraint("ck_cc_seq", "[Sequence] > 0");
@@ -364,10 +463,10 @@ namespace SupervisorMobility.API.Context
                 },
                  new JobCategoryStructure("OMEFE", "Observación para mejora del estándar de acuerdo al filtro elegido")
                  {
-                    JobCategoryStructureId = 7,
-                    Sequence = 7,
-                    IsActive = true,
-                    Type = StructureType.LUP
+                     JobCategoryStructureId = 7,
+                     Sequence = 7,
+                     IsActive = true,
+                     Type = StructureType.LUP
                  },
                  new JobCategoryStructure("CMT", "Comentarios")
                  {
@@ -410,7 +509,7 @@ namespace SupervisorMobility.API.Context
                     IsActive = true
                 });
 
-           
+
 
             modelBuilder.Entity<Entities.Group>()
                 .HasData(
@@ -891,20 +990,77 @@ namespace SupervisorMobility.API.Context
                         new ILULevel()
                         {
                             ILULevelId = 1,
-                            ILULevelCode = 'I',
-                            ILULevelDescription = "el operador necesita entrenamiento para realizar la operación",
+                            ILULevelCode = "ITrainee",
+                            ILULevelDescription = "el operador se está entrenando y necesita entrenamiento para realizar la operación",
                             isActive = true
                         },
                         new ILULevel()
                         {
                             ILULevelId = 2,
-                            ILULevelCode = 'L',
-                            ILULevelDescription = "el operador ya la puede realizar por si mismo",
+                            ILULevelCode = "I",
+                            ILULevelDescription = "el operador necesita entrenamiento para realizar la operación",
                             isActive = true
-                        }, new ILULevel()
+                        },
+                        new ILULevel()
                         {
                             ILULevelId = 3,
-                            ILULevelCode = 'U',
+                            ILULevelCode = "ILeader",
+                            ILULevelDescription = "el operador necesita entrenamiento para realizar la operación y es líder de operación",
+                            isActive = true
+                        },
+                        new ILULevel()
+                        {
+                            ILULevelId = 4,
+                            ILULevelCode = "LTrainee",
+                            ILULevelDescription = "el operador se está entrenando para realizarla por si mismo",
+                            isActive = true
+                        },
+                        new ILULevel()
+                        {
+                            ILULevelId = 5,
+                            ILULevelCode = "LTraineeLeader",
+                            ILULevelDescription = "el operador se está entrenando para realizarla por si mismo y es líder",
+                            isActive = true
+                        },
+                        new ILULevel()
+                        {
+                            ILULevelId = 6,
+                            ILULevelCode = "L",
+                            ILULevelDescription = "el operador ya la puede realizar por si mismo",
+                            isActive = true
+                        },
+                        new ILULevel()
+                        {
+                            ILULevelId = 7,
+                            ILULevelCode = "LLeader",
+                            ILULevelDescription = "el operador ya la puede realizar por si mismo y es líder",
+                            isActive = true
+                        },
+                        new ILULevel()
+                        {
+                            ILULevelId = 8,
+                            ILULevelCode = "UTrainee",
+                            ILULevelDescription = "el operador se está entrenando para dominar la operación y pueda enseñar",
+                            isActive = true
+                        },
+                       new ILULevel()
+                       {
+                           ILULevelId = 9,
+                           ILULevelCode = "ULeaderTrainee",
+                           ILULevelDescription = "el operador se está entrenando para dominar la operación, pueda enseñar y es líder",
+                           isActive = true
+                       },
+                        new ILULevel()
+                        {
+                            ILULevelId = 10,
+                            ILULevelCode = "ULeader",
+                            ILULevelDescription = "el operador domina la operación, puede enseñar y es líder",
+                            isActive = true
+                        },
+                        new ILULevel()
+                        {
+                            ILULevelId = 11,
+                            ILULevelCode = "U",
                             ILULevelDescription = "el operador domina la operación y puede enseñar",
                             isActive = true
                         }
@@ -1001,7 +1157,7 @@ namespace SupervisorMobility.API.Context
                     JobCategoryStructureId = 2,
                 }
                 //Seccion 2 Observacion para el cumlimiento del estandar
-                ,new ChecklistQuestion()
+                , new ChecklistQuestion()
                 {
                     QuestionID = 7,
                     Prompt = "El operador usa el EPP como se establece en la HOE y Hoja de asignación de equipo de protección personal (S / N) explicar (N)",
@@ -1037,7 +1193,7 @@ namespace SupervisorMobility.API.Context
                     JobCategoryStructureId = 3,
                 }, new ChecklistQuestion()
                 {
-                    QuestionID =11,
+                    QuestionID = 11,
                     Prompt = "Actividad regular de Calidad  (plan de inspección,chequeo  Poka Yoke ,…) se hacen en cumplimiento al estándar,  incluyendo registro, si procede (S/N) explicar (N)",
                     NotGood = "",
                     CategorySequence = 5,
@@ -1156,7 +1312,7 @@ namespace SupervisorMobility.API.Context
 
                 );
 
-           
+
 
             //modelBuilder.Entity<ChecklistAnswer>()
             //    .HasData(
@@ -1169,6 +1325,48 @@ namespace SupervisorMobility.API.Context
             //        Answer = "YES",
 
             //    });
+
+
+
+            //IS - Data panels
+
+            modelBuilder.Entity<DataPanel>()
+               .HasData(
+               new DataPanel()
+               {
+                   DataPanelId = 1,
+                   IsActive = true,
+                   ItemOrder = 1,
+                   DataTitle = "ESPECIFICACION DEL MATERIAL",
+               },
+               new DataPanel()
+               {
+                   DataPanelId = 2,
+                   IsActive = true,
+                   ItemOrder = 2,
+                   DataTitle = "ESPESOR DE LA PARTE",
+               },
+               new DataPanel()
+               {
+                   DataPanelId = 3,
+                   IsActive = true,
+                   ItemOrder = 3,
+                   DataTitle = "CANTIDAD DE BARRENOS",
+               },
+               new DataPanel()
+               {
+                   DataPanelId = 4,
+                   IsActive = true,
+                   ItemOrder = 4,
+                   DataTitle = "LAMINA",
+               }, new DataPanel()
+               {
+                   DataPanelId = 5,
+                   IsActive = true,
+                   ItemOrder = 5,
+                   DataTitle = "No. DE PIEZA LIBERADA",
+               }
+           );
 
             base.OnModelCreating(modelBuilder);
         }
