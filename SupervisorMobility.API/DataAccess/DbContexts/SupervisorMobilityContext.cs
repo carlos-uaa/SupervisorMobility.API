@@ -27,6 +27,7 @@ namespace SupervisorMobility.API.Context
         public DbSet<Pillar> Pillars { get; set; }
         public DbSet<Glosary> Glosary { get; set; }
         public DbSet<Department> Departments { get; set; }
+        public DbSet<Station> Stations { get; set; }
         public DbSet<Plant> Plants { get; set; }
         public DbSet<Area> Areas { get; set; }
         public DbSet<Distribution> Distributions { get; set; }
@@ -171,6 +172,10 @@ namespace SupervisorMobility.API.Context
                 .HasDefaultValue(true);
 
             modelBuilder.Entity<Department>()
+                .Property(p => p.IsActive)
+                .HasDefaultValue(true);
+
+                 modelBuilder.Entity<Station>()
                 .Property(p => p.IsActive)
                 .HasDefaultValue(true);
 

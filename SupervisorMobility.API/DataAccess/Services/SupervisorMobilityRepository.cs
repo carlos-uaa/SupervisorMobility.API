@@ -2257,6 +2257,37 @@ namespace SupervisorMobility.API.Services
             _context.SaveChanges();
         }
         #endregion
+        #region StationOperations
+        public async Task<IEnumerable<Entities.Station>> GetStationsAsync()
+        {
+            return await _context.Stations.Where(d => d.IsActive == true)
+                .OrderBy(d => d.StationId).ToListAsync();
+        }
+
+        public async Task<Entities.Station?> GetStationAsync(int StationId)
+        {
+            return await _context.Stations
+                .Where(c => c.StationId == StationId).FirstOrDefaultAsync();
+        }
+
+        public async Task<bool> StationExistAsync(int StationId)
+        {
+            return await _context.Stations.AnyAsync(p => p.StationId == StationId);
+        }
+
+
+        public void AddStation(Entities.Station Station)
+        {
+            _context.Stations.Add(Station);
+        }
+
+        public void DeleteStation(Entities.Station Station)
+        {
+            //_context.Groups.Remove(group);
+            Station.IsActive = false;
+            _context.SaveChanges();
+        }
+        #endregion
         #region PillarOperations
         public async Task<IEnumerable<Pillar>> GetPillarsAsync()
         {

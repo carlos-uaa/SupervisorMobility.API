@@ -360,6 +360,14 @@ namespace SupervisorMobility.API.Services
 
         void AddDepartment(Department department);
         void DeleteDepartment(Department department);
+        #endregion    
+        #region StationOperations
+        Task<IEnumerable<Station>> GetStationsAsync();
+        Task<Station?> GetStationAsync(int StationId);
+        Task<bool> StationExistAsync(int StationId);
+
+        void AddStation(Station Station);
+        void DeleteStation(Station Station);
         #endregion
         #region PillarOperations
         Task<IEnumerable<Pillar>> GetPillarsAsync();
