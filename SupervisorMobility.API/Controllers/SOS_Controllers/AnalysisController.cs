@@ -32,18 +32,10 @@ namespace SupervisorMobility.API.Controllers.SOS_Controllers
             _env = env ?? throw new ArgumentNullException(nameof(env));
         }
 
-        [HttpGet]
-        public async Task<ActionResult<SOSAnalysisDto>> GenerateAnalysis(int SOSHubCollection_Id, string side)
+        [HttpPost]
+        public async Task<ActionResult<SOSAnalysisDto>> GenerateAnalysis( SOSAnalysis sOSAnalysisToCreate, int SOSHubCollection_Id)
         {
             SOSHub SOSEntity = await _AnalysisProcessRepository.GetSOSHub(SOSHubCollection_Id, includeInformation: true);
-
-            SOSAnalysis sOSAnalysisToCreate = new SOSAnalysis();
-
-            //generarlo desde aqui
-
-            string InternalControlNumber = string.Concat(SOSEntity.Area != null ? SOSEntity.Area.Code : "[Area Not Exist]," , SOSEntity.Distribution != null ? SOSEntity.Distribution.Code : "[Distribution Not Exist]", side, "ANLY");
-            
-            sOSAnalysisToCreate.InternalControlNumber = InternalControlNumber;
 
             sOSAnalysisToCreate.CreatedDate = DateTime.Now;
             sOSAnalysisToCreate.IsActive = true;

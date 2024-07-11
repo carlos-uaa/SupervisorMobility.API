@@ -13,6 +13,7 @@ using SupervisorMobility.API.DataAccess.Entities.SOS;
 using SupervisorMobility.API.Models.SOS.SOSHubDtos.AnalysisBkupDtos;
 using SupervisorMobility.API.Models.SOS.SOSHubDtos.SectionDtos;
 using SupervisorMobility.API.Models.DistributionDtos;
+using SupervisorMobility.API.Models.StationDtos;
 
 namespace SupervisorMobility.API.Models.SOS.SOSHubDtos
 {
@@ -47,7 +48,8 @@ namespace SupervisorMobility.API.Models.SOS.SOSHubDtos
         public DistributionWithoutNavigationPropertiesDto? Distribution { get; set; }
         public int? DepartmentId { get; set; }
         public DepartmentDto? Department { get; set; }
-
+        public int? StationId { get; set; }
+        public StationDto? Station { get; set; }
         public int? OwnerId { get; set; }
         public UsersWithoutPeopleWithNavigation? Owner { get; set; }
 

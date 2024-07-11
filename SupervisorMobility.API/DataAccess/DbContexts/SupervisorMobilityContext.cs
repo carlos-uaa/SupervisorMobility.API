@@ -1,4 +1,6 @@
 ﻿using Microsoft.EntityFrameworkCore;
+using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
+using Newtonsoft.Json;
 using SupervisorMobility.API.DataAccess.Entities;
 using SupervisorMobility.API.DataAccess.Entities.ILU;
 using SupervisorMobility.API.DataAccess.Entities.IS;
@@ -350,6 +352,18 @@ namespace SupervisorMobility.API.Context
                 .Property(p => p.IsActive)
                 .HasDefaultValue(true);
 
+            var jsonListConverter = new ValueConverter<List<string>, string>(
+          v => JsonConvert.SerializeObject(v), // Convert List<string> to JSON string
+          v => JsonConvert.DeserializeObject<List<string>>(v)); // Convert JSON string to List<string>
+
+            modelBuilder.Entity<Analysis>()
+                .Property(e => e.CriticalPoints)
+                .HasConversion(jsonListConverter);
+
+            modelBuilder.Entity<Analysis>()
+                .Property(e => e.Reasons)
+                .HasConversion(jsonListConverter);
+
             modelBuilder.Entity<AnalysisBkup>()
                 .Property(p => p.IsActive)
                 .HasDefaultValue(true);
@@ -369,6 +383,7 @@ namespace SupervisorMobility.API.Context
             modelBuilder.Entity<SOSAnalysis>()
                 .Property(p => p.IsActive)
                 .HasDefaultValue(true); 
+
             
             modelBuilder.Entity<SpecialCaseAbnormalSituation>()
                 .Property(p => p.IsActive)

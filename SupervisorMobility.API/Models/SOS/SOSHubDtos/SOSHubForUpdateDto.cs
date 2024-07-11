@@ -32,7 +32,7 @@ namespace SupervisorMobility.API.Models.SOS.SOSHubDtos
         public int? PlantId { get; set; }
         public int? AreaId { get; set; }
         public int? DepartmentId { get; set; }
-        public DistributionWithoutNavigationPropertiesDto? Distribution { get; set; }
+        public int? StationId { get; set; }
 
         public int? OwnerId { get; set; }
 
