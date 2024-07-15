@@ -1,43 +1,12 @@
 ﻿using AutoMapper;
-using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
 using SupervisorMobility.API.DataAccess.Entities;
 using SupervisorMobility.API.Models.HCIDtos;
 using SupervisorMobility.API.Services;
-using System.Diagnostics;
-using AutoMapper;
-using Microsoft.AspNetCore.JsonPatch;
-using Microsoft.AspNetCore.Mvc;
-using SupervisorMobility.API.Business;
-using SupervisorMobility.API.DataAccess.Entities;
-using SupervisorMobility.API.DataAccess.Services.TreeServices;
-using SupervisorMobility.API.DataAccess.Services;
-using SupervisorMobility.API.Entities;
-using SupervisorMobility.API.Models.AreaDtos;
-using Microsoft.IdentityModel.Tokens;
-using SupervisorMobility.API.DataAccess.Entities.Paths;
-using FuzzyString;
-using SupervisorMobility.API.Models.AssyChart;
-using ClosedXML.Excel;
-using DocumentFormat.OpenXml.Spreadsheet;
-using DocumentFormat.OpenXml.Packaging;
-using SupervisorMobility.API.Models.OperationDtos;
-using Slugify;
-using SupervisorMobility.API.Models.DistributionDtos;
-using SupervisorMobility.API.DataAccess.Entities.TreeStruct;
-using SupervisorMobility.API.Entities.CDMS;
-using SupervisorMobility.API.Context;
-using DocumentFormat.OpenXml.Bibliography;
-using Microsoft.EntityFrameworkCore;
-using static Microsoft.EntityFrameworkCore.DbLoggerCategory;
-using DocumentFormat.OpenXml.Wordprocessing;
-using DocumentFormat.OpenXml.EMMA;
-using Irony.Parsing;
-using DuoVia.FuzzyStrings;
 using SupervisorMobility.API.Models.Users;
 using SupervisorMobility.API.Models.HCICategoryDtos;
 
-namespace SupervisorMobility.API.Controllers
+namespace SupervisorMobility.API.Controllers.IS_Controllers
 {
     [Route("api/HCI")]
     [ApiController]
@@ -78,7 +47,7 @@ namespace SupervisorMobility.API.Controllers
             if (entityhci != null)
                 return Ok(entityhci);
             else
-                return BadRequest(); 
+                return BadRequest();
         }
 
         [HttpGet("{hciId}")]
@@ -134,7 +103,7 @@ namespace SupervisorMobility.API.Controllers
         public async Task<ActionResult<IEnumerable<HCICategoryDto>>> GetHCICategories()
         {
             var resultlist = await _supervisorMobilityRepository.GetHCICategories();
-            if(resultlist != null)
+            if (resultlist != null)
                 return Ok(resultlist);
             else
                 return BadRequest();

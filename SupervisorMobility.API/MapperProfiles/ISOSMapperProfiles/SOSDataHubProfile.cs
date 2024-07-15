@@ -1,4 +1,5 @@
 ﻿using AutoMapper;
+using SupervisorMobility.API.DataAccess.Entities;
 using SupervisorMobility.API.DataAccess.Entities.SOS;
 using SupervisorMobility.API.Models.SOS.SOSHubDtos;
 using SupervisorMobility.API.Models.SOS.SOSHubDtos.AnalysisBkupDtos;
@@ -27,6 +28,11 @@ namespace SupervisorMobility.API.MapperProfiles.ISOSMapperProfiles
             CreateMap<AnalysisBkup, AnalysisBkupDto>().ReverseMap();
             CreateMap<AnalysisBkup, AnalysisBkupForCreateDto>().ReverseMap();
             CreateMap<AnalysisBkup, AnalysisBkupForUpdateDto>().ReverseMap();
+
+
+            CreateMap<Commentary, Models.CommentaryDtos.CommentaryDto>().ReverseMap();
+            CreateMap<Commentary, Models.CommentaryDtos.CreateCommentaryDto>().ReverseMap();
+            CreateMap<Commentary, Models.CommentaryDtos.UpdateCommentaryDto>().ReverseMap();
         }
     }
 }

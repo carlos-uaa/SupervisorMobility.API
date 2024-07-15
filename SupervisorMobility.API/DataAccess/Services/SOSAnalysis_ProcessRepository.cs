@@ -25,10 +25,10 @@ namespace SupervisorMobility.API.DataAccess.Services
         private readonly IMapper _mapper;
 
 
-        public SOSAnalysis_ProcessRepository(ContextFactory context, IMapper mapper)
+        public SOSAnalysis_ProcessRepository(SupervisorMobilityContext context, IMapper mapper)
         {
             _mapper = mapper;
-            _context = context.CreateDbContext() ?? throw new ArgumentNullException(nameof(context));
+            _context = context ?? throw new ArgumentNullException(nameof(context));
         }
 
         #region SOS_DataPool
@@ -277,12 +277,62 @@ namespace SupervisorMobility.API.DataAccess.Services
             return await _context.SaveChangesAsync();
         }
 
+  
+
+        #endregion
+
+        #region AddTo Sos Hub
+        public async Task<AsyncVoidMethodBuilder> AddProcessSheetCommentaryToSOSCollection(SOSHub Master, Commentary Slave)
+        {
+            if (Master.ProcessSheetCommentary != null)
+            {
+                Master.ProcessSheetCommentary.Add(Slave);
+            }
+            else
+            {
+                Master.ProcessSheetCommentary = new List<Commentary>();
+                Master.ProcessSheetCommentary.Add(Slave);
+            }
+            _context.SaveChanges();
+            return new AsyncVoidMethodBuilder();
+        }
+
+        public async Task<AsyncVoidMethodBuilder> AddAnaysisBkupToSOSCollection(SOSHub Master, AnalysisBkup Slave)
+        {
+            if (Master.AnalysesBkup != null)
+            {
+                Master.AnalysesBkup.Add(Slave);
+            }
+            else
+            {
+                Master.AnalysesBkup = new List<AnalysisBkup>();
+                Master.AnalysesBkup.Add(Slave);
+            }
+            _context.SaveChanges();
+            return new AsyncVoidMethodBuilder();
+        }
+        
+        public async Task<AsyncVoidMethodBuilder> AddSectionSOSCollection(SOSHub Master, Section Slave)
+        {
+            if (Master.Sections != null)
+            {
+                Master.Sections.Add(Slave);
+            }
+            else
+            {
+                Master.Sections = new List<Section>();
+                Master.Sections.Add(Slave);
+            }
+            _context.SaveChanges();
+            return new AsyncVoidMethodBuilder();
+        }
+
         public async Task<AsyncVoidMethodBuilder> AddToolToSOSCollection(SOSHub Master, Tool Slave)
         {
 
             if (Master.ToolsUsed != null)
             {
-               
+
                 Master.ToolsUsed.Add(Slave);
             }
             else
@@ -391,12 +441,41 @@ namespace SupervisorMobility.API.DataAccess.Services
             }
 
         }
+        #endregion
 
-        public async Task<int> AddRangeCommentary(List<Commentary> commentariesToAdd)
+        #region Remove from Sos Hub
+        public async Task<AsyncVoidMethodBuilder> SOSDataRemoveAllAnalysisBkups(SOSHub Master)
         {
-            _context.Comments.AddRange(commentariesToAdd);
-            return await _context.SaveChangesAsync();
+            Master.AnalysesBkup?.Clear();
+            _context.SaveChanges();
+            return new AsyncVoidMethodBuilder();
         }
+        public async Task<AsyncVoidMethodBuilder> SOSDataRemoveAllSections(SOSHub Master)
+        {
+            Master.Sections?.Clear();
+            _context.SaveChanges();
+            return new AsyncVoidMethodBuilder();
+        }
+        public async Task<AsyncVoidMethodBuilder> SOSDataRemoveAllProcessSheetCommentary(SOSHub Master)
+        {
+            Master.ProcessSheetCommentary?.Clear();
+            _context.SaveChanges();
+            return new AsyncVoidMethodBuilder();
+        }
+
+        public async Task<AsyncVoidMethodBuilder> SOSDataRemoveAllToolsEquipmentMaterial(SOSHub Master)
+        {
+
+            Master.ToolsUsed?.Clear();
+            Master.SafetyEquipment?.Clear();
+            Master.MaterialsUsed?.Clear();
+
+            _context.SaveChanges();
+
+            return new AsyncVoidMethodBuilder();
+        }
+
+
         public async Task<int> RemoveImageFromSOSData(int SOS_DataPool_id, int ImageFile_id)
         {
             var SOSHubEntity = await GetSOSHub(SOS_DataPool_id, includeImages: true);
@@ -409,8 +488,8 @@ namespace SupervisorMobility.API.DataAccess.Services
 
             _context.SOSHubs.Update(SOSHubEntity);
 
-            return await _context.SaveChangesAsync(); 
-        } 
+            return await _context.SaveChangesAsync();
+        }
 
         public async Task<int> RemoveVideoFromSOSData(int SOS_DataPool_id, int VideoFile_id)
         {
@@ -441,19 +520,27 @@ namespace SupervisorMobility.API.DataAccess.Services
 
             return await _context.SaveChangesAsync();
         }
-
-        public async Task<AsyncVoidMethodBuilder> SOSDataRemoveAllToolsEquipmentMaterial(SOSHub Master)
-        {
-          
-                Master.ToolsUsed?.Clear();
-                Master.SafetyEquipment?.Clear();
-                Master.MaterialsUsed?.Clear();
-
-                _context.SaveChanges();
-
-            return new AsyncVoidMethodBuilder();
-        }
         #endregion
+
+        #region AddTo Ranges
+        public async Task<int> AddRangeSections(List<Section> SectionsToAdd)
+        {
+            _context.Sections.AddRange(SectionsToAdd);
+            return await _context.SaveChangesAsync();
+        }
+        public async Task<int> AddRangeCommentary(List<Commentary> commentariesToAdd)
+        {
+            _context.Comments.AddRange(commentariesToAdd);
+            return await _context.SaveChangesAsync();
+        }
+        public async Task<int> AddRangeAnalysisBkup(List<AnalysisBkup> analysisBkupsToAdd)
+        {
+            _context.AnalysisBkups.AddRange(analysisBkupsToAdd);
+            return await _context.SaveChangesAsync();
+        }
+
+        #endregion
+
         #region Tool
         public async Task<int> AddRangeTool(List<Tool> ToolsToAdd) {
             _context.Tools.AddRange(ToolsToAdd);
@@ -490,6 +577,7 @@ namespace SupervisorMobility.API.DataAccess.Services
             return await _context.SaveChangesAsync();
         }
         #endregion
+
         #region Material
         public async Task<int> AddRangeMaterial(List<Material> MaterialsToAdd)
         {
@@ -532,6 +620,7 @@ namespace SupervisorMobility.API.DataAccess.Services
             return await _context.SaveChangesAsync();
         }
         #endregion
+
         #region Equipment
         public async Task<int> AddRangeEquipment(List<Equipment> EquipmentsToAdd)
         {
@@ -575,25 +664,28 @@ namespace SupervisorMobility.API.DataAccess.Services
             return await _context.SaveChangesAsync();
         }
         #endregion
-        #region CommonOperations
-        public async Task<FileUpload?> FetchFileAsync(int fileid)
-        {
-            return await _context.Files
-                .Where(p => p.FileUploadId == fileid).FirstOrDefaultAsync();
-        }
-        public async Task<FileUpload> CreateFileAsync(FileUploadForCreationDto newFile)
-        {
-            var finalNewFile = _mapper.Map<FileUpload>(newFile);
-            _context.Files.Add(finalNewFile);
-            await _context.SaveChangesAsync();
-            return finalNewFile;
-        }
-        public async Task<bool> SaveChangesAsync()
-        {
-            return (await _context.SaveChangesAsync() >= 0);
-        }
 
+        #region Analysis Bkup
+        public async Task<AnalysisBkup> GetAnalysisBkupId(int id)
+        {
+            var bkup = await _context.AnalysisBkups.Where(t => t.AnalysisBkupId == id && t.IsActive == true).FirstOrDefaultAsync();
+            return bkup;
+        }
+        #endregion
+        
+        #region Section
+        public async Task<Section> GetSectionById(int id)
+        {
+            var section = await _context.Sections.Where(t => t.SectionId== id && t.IsActive == true).FirstOrDefaultAsync();
+            return section;
+        }
+        #endregion
 
+        #region Commentary
+        public async Task<Commentary> GetCommentaryById(int Id)
+        {
+            return await _context.Comments.Where(t => t.ComentaryId == Id && t.IsActive == true).FirstOrDefaultAsync();
+        }
         #endregion
 
         #region SOSAnalysis
@@ -778,6 +870,27 @@ namespace SupervisorMobility.API.DataAccess.Services
 
             return await _context.SaveChangesAsync();
         }
+        #endregion
+
+        #region CommonOperations
+        public async Task<FileUpload?> FetchFileAsync(int fileid)
+        {
+            return await _context.Files
+                .Where(p => p.FileUploadId == fileid).FirstOrDefaultAsync();
+        }
+        public async Task<FileUpload> CreateFileAsync(FileUploadForCreationDto newFile)
+        {
+            var finalNewFile = _mapper.Map<FileUpload>(newFile);
+            _context.Files.Add(finalNewFile);
+            await _context.SaveChangesAsync();
+            return finalNewFile;
+        }
+        public async Task<bool> SaveChangesAsync()
+        {
+            return (await _context.SaveChangesAsync() >= 0);
+        }
+
+
         #endregion
 
     }

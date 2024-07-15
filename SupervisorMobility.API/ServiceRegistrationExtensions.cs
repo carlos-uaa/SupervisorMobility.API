@@ -22,20 +22,22 @@ namespace SupervisorMobility.API
         public static IServiceCollection RegisterBusinessServices(
            this IServiceCollection services)
         {
-            services.AddSingleton<ContextFactory>();
+            //services.AddSingleton<ContextFactory>();
             // register the repository
             services.AddScoped<ISupervisorMobilityRepository, SupervisorMobilityRepository>();
             // register Stamping the repository
             services.AddScoped<IStampingRepository, StampingRepository>();
             // HOE/SOS Analysis_Process
-            services.AddSingleton<ISOSAnalysis_ProcessRepository, SOSAnalysis_ProcessRepository>(sp =>
-            {
-                var scopeFactory = sp.GetRequiredService<ContextFactory>();
-                var mapper = sp.GetRequiredService<IMapper>();
-                return new SOSAnalysis_ProcessRepository(scopeFactory, mapper);
-            });
+            services.AddScoped<ISOSAnalysis_ProcessRepository, SOSAnalysis_ProcessRepository>();
+         
+            //services.AddSingleton<ISOSAnalysis_ProcessRepository, SOSAnalysis_ProcessRepository>(sp =>
+            //{
+            //    var scopeFactory = sp.GetRequiredService<ContextFactory>();
+            //    var mapper = sp.GetRequiredService<IMapper>();
+            //    return new SOSAnalysis_ProcessRepository(scopeFactory, mapper);
+            //});
 
-            //Antoher
+            //Another
             services.AddScoped<IJobObservationService, JobObservationService>();
             services.AddScoped<IAssyChartService, AssyChartService>();
             services.AddScoped<IEmailService, EmailService>();
