@@ -70,7 +70,7 @@ namespace SupervisorMobility.API.Controllers
             }
             else
             {
-                return NotFound("Error en la Ruta o no se encontro el archivo en el bridge");
+                return NotFound("Error en ID o no se encontro el archivo en bridge CMDS");
             }
 
             //Continua con la logica
@@ -80,7 +80,7 @@ namespace SupervisorMobility.API.Controllers
 
             if (_env.IsDevelopment())
             {
-                fileURL = fileURL.Replace("https://10.91.117.5:\\", "https://10.91.49.2:\\");
+                fileURL = fileURL.Replace("https://10.91.117.5:3000/", "https://10.91.49.2:3000/");
             }
 
             var fileNameWithOutIp = "";
@@ -88,12 +88,12 @@ namespace SupervisorMobility.API.Controllers
             if (_env.IsDevelopment())
             {
                 //fileNameWithOutIp = fileURL.Replace("https://10.91.49.2", "");
-                fileNameWithOutIp = fileURL.Split("\\").Last();
+                fileNameWithOutIp = fileURL.Split("/").Last();
             }
             else
             {
                 //fileNameWithOutIp = fileURL.Replace("https://10.91.117.5", "");
-                fileNameWithOutIp = fileURL.Split("\\").Last();
+                fileNameWithOutIp = fileURL.Split("/").Last();
             }
 
             var filePathSave = Path.Combine(_env.ContentRootPath, "downloads\\CCP", fileNameWithOutIp);
@@ -138,7 +138,8 @@ namespace SupervisorMobility.API.Controllers
             }
             catch (Exception ex)
             {
-                Console.WriteLine($"Error In Download Gos File: {ex.Message} ");
+                Console.WriteLine($"Error In Download CCP File: {ex.Message} ");
+                return NotFound($"Error In Download CCP File: {ex.Message}");
             }
 
 
@@ -177,67 +178,27 @@ namespace SupervisorMobility.API.Controllers
         {
             if (parameters != null && parameters.TryGetValue("documentDelete", out string documentToDelete))
             {
-                // Aquí puedes utilizar el valor de 'documentDelete'
                 Console.WriteLine($"Documento a eliminar: {documentToDelete}");
 
-                // Verificar si el archivo existe en la ruta proporcionada
                 if (System.IO.File.Exists(documentToDelete))
                 {
-                    // Eliminar el archivo
                     System.IO.File.Delete(documentToDelete);
-                    // Devolver una respuesta exitosa
                     Debug.WriteLine("Archivo eliminado correctamente.");
+                    return Ok("Archivo eliminado correctamente.");
                 }
                 else
                 {
                     Debug.WriteLine("El archivo no existe en la ubicación especificada.");
+                    return NotFound("Documento eliminado correctamente.");
                 }
-
-                // Devolver una respuesta exitosa si la operación fue exitosa
-                Debug.WriteLine("Documento eliminado correctamente.");
             }
             else
             {
-                // Si no se encuentra el parámetro 'documentDelete', devolver un error
                 Debug.WriteLine("Parámetro 'documentDelete' no encontrado o inválido.");
             }
 
-            //var content = new FormUrlEncodedContent(parameters);
 
-            //try
-            //{
-            //    var uri = new Uri(_bridgeHttpClient.BaseAddress, "SMCcp/DeleteFileTempCCP");
-
-            //    var request = new HttpRequestMessage(HttpMethod.Delete, uri)
-            //    {
-            //        Content = content
-            //    };
-
-            //    var response = await _bridgeHttpClient.SendAsync(request);
-
-            //    if (response.IsSuccessStatusCode)
-            //    {
-            //        var result = response.Content.ReadAsStringAsync().Result;
-
-            //        return Ok(result);
-            //    }
-            //    else
-            //    {
-            //        //await _js.InvokeVoidAsync("alert", $"Error get folders: {response.Content.ReadAsStringAsync().Result}");
-            //        Console.WriteLine($"DELETE TEMP CCP, Status Code {response.StatusCode} : {response.Content.ReadAsStringAsync().Result}");
-            //    }
-            //}
-            //catch (HttpRequestException ex)
-            //{
-            //    Console.WriteLine($"Error al hacer la solicitud: {ex.Message}");
-            //}
-            //catch (TaskCanceledException ex)
-            //{
-            //    Console.WriteLine($"La solicitud ha sido cancelada: {ex.Message}");
-            //}
-
-
-            return Ok();
+                return Ok();
         }
 
 
@@ -278,15 +239,8 @@ namespace SupervisorMobility.API.Controllers
                 }
 
                 var fileNameWithOutIp = "";
+                fileNameWithOutIp = fileURL.Split("HOE/").Last();
 
-                if (_env.IsDevelopment())
-                {
-                    fileNameWithOutIp = fileURL.Replace("https://10.91.49.2:3000/uploadsHOE/", "");
-                }
-                else
-                {
-                    fileNameWithOutIp = fileURL.Replace("https://10.91.117.5:3000/uploadsHOE/", "");
-                }
 
                 var filePathSave = Path.Combine(_env.ContentRootPath, "downloads\\HOE", fileNameWithOutIp);
 
@@ -331,6 +285,7 @@ namespace SupervisorMobility.API.Controllers
                 catch (Exception ex)
                 {
                     Console.WriteLine($"Error In Download hoe File: {ex.Message} ");
+                    return NotFound($"Error In Download hoe File: {ex.Message} ");
                 }
 
 
@@ -363,6 +318,7 @@ namespace SupervisorMobility.API.Controllers
             else
             {
                 Debug.WriteLine("Parámetro 'route' no encontrado o inválido.");
+                return NotFound("Parámetro 'route' no encontrado o inválido. HOE Bridge");
             }
 
 
@@ -448,7 +404,7 @@ namespace SupervisorMobility.API.Controllers
             }
             else
             {
-                return NotFound("Error en la Ruta o no se encontro el archivo en el bridge");
+                return NotFound("Error en ID o no se encontro el archivo en bridge CMDS");
             }
 
             //Continua con la logica
@@ -458,20 +414,21 @@ namespace SupervisorMobility.API.Controllers
 
             if (_env.IsDevelopment())
             {
-                fileURL = fileURL.Replace("https://10.91.117.5:3000", "https://10.91.49.2:3000");
+                fileURL = fileURL.Replace("https://10.91.117.5:3000/", "https://10.91.49.2:3000/");
             }
 
             var fileNameWithOutIp = "";
 
             if (_env.IsDevelopment())
             {
-                fileNameWithOutIp = fileURL.Replace("https://10.91.49.2:3000/GOS/", "");
+                //fileNameWithOutIp = fileURL.Replace("https://10.91.49.2", "");
+                fileNameWithOutIp = fileURL.Split("/").Last();
             }
             else
             {
-                fileNameWithOutIp = fileURL.Replace("https://10.91.117.5:3000/GOS/", "");
+                //fileNameWithOutIp = fileURL.Replace("https://10.91.117.5", "");
+                fileNameWithOutIp = fileURL.Split("/").Last();
             }
-
             var filePathSave = Path.Combine(_env.ContentRootPath, "downloads\\GOS", fileNameWithOutIp);
 
 
@@ -515,6 +472,7 @@ namespace SupervisorMobility.API.Controllers
             catch (Exception ex)
             {
                 Console.WriteLine($"Error In Download Gos File: {ex.Message} ");
+                return NotFound($"Error In Download Gos File: {ex.Message} ");
             }
 
 
@@ -577,42 +535,6 @@ namespace SupervisorMobility.API.Controllers
                 // Si no se encuentra el parámetro 'documentDelete', devolver un error
                 Debug.WriteLine("Parámetro 'documentDelete' no encontrado o inválido.");
             }
-
-            //var content = new FormUrlEncodedContent(parameters);
-
-            //try
-            //{
-            //    var uri = new Uri(_bridgeHttpClient.BaseAddress, "SMGos/DeleteFileTempGOS");
-
-            //    var request = new HttpRequestMessage(HttpMethod.Delete, uri)
-            //    {
-            //        Content = content
-            //    };
-
-            //    var response = await _bridgeHttpClient.SendAsync(request);
-
-            //    if (response.IsSuccessStatusCode)
-            //    {
-            //        var result = response.Content.ReadAsStringAsync().Result;
-
-            //        return Ok(result);
-            //    }
-            //    else
-            //    {
-            //        //await _js.InvokeVoidAsync("alert", $"Error get folders: {response.Content.ReadAsStringAsync().Result}");
-            //        Console.WriteLine($"DELETE TEMP GOS, Status Code {response.StatusCode} : {response.Content.ReadAsStringAsync().Result}");
-            //    }
-            //}
-            //catch (HttpRequestException ex)
-            //{
-            //    Console.WriteLine($"Error al hacer la solicitud: {ex.Message}");
-            //}
-            //catch (TaskCanceledException ex)
-            //{
-            //    Console.WriteLine($"La solicitud ha sido cancelada: {ex.Message}");
-            //}
-
-           
 
             return Ok();
         }
