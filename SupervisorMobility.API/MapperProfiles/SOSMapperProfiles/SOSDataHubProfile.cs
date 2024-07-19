@@ -1,12 +1,13 @@
 ﻿using AutoMapper;
 using SupervisorMobility.API.DataAccess.Entities;
 using SupervisorMobility.API.DataAccess.Entities.SOS;
+using SupervisorMobility.API.DataAccess.Entities.SOS.History;
 using SupervisorMobility.API.Models.SOS.SOSHubDtos;
 using SupervisorMobility.API.Models.SOS.SOSHubDtos.AnalysisBkupDtos;
 using SupervisorMobility.API.Models.SOS.SOSHubDtos.AnalysisDtos;
 using SupervisorMobility.API.Models.SOS.SOSHubDtos.SectionDtos;
 
-namespace SupervisorMobility.API.MapperProfiles.ISOSMapperProfiles
+namespace SupervisorMobility.API.MapperProfiles.SOSMapperProfiles
 {
     public class SOSDataHubProfile : Profile
     {
@@ -28,11 +29,20 @@ namespace SupervisorMobility.API.MapperProfiles.ISOSMapperProfiles
             CreateMap<AnalysisBkup, AnalysisBkupDto>().ReverseMap();
             CreateMap<AnalysisBkup, AnalysisBkupForCreateDto>().ReverseMap();
             CreateMap<AnalysisBkup, AnalysisBkupForUpdateDto>().ReverseMap();
+            
+            //History
+            CreateMap<SOSHub, SOSHubHistory>().ReverseMap();
 
+            CreateMap<SOSHubHistory, SOSHubHistoryDto>().ReverseMap();
+            CreateMap<SOSHubHistory, SOSHubDto>().ReverseMap();
+            CreateMap<SOSHubHistory, SOSHubForCreateDto>().ReverseMap();
+            CreateMap<SOSHubHistory, SOSHubForUpdateDto>().ReverseMap();
 
-            CreateMap<Commentary, Models.CommentaryDtos.CommentaryDto>().ReverseMap();
-            CreateMap<Commentary, Models.CommentaryDtos.CreateCommentaryDto>().ReverseMap();
-            CreateMap<Commentary, Models.CommentaryDtos.UpdateCommentaryDto>().ReverseMap();
+            CreateMap<Section, SectionHistory>().ReverseMap();
+
+            CreateMap<Analysis, AnalysisHistory>().ReverseMap();
+
+            CreateMap<AnalysisBkup, AnalysisBkupHistory>().ReverseMap();
         }
     }
 }

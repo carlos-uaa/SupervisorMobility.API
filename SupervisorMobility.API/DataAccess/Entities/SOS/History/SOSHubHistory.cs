@@ -2,29 +2,26 @@
 using System.ComponentModel.DataAnnotations;
 using Microsoft.Identity.Client;
 using SupervisorMobility.API.Entities;
-using SupervisorMobility.API.DataAccess.Entities.SOS.History;
 
-namespace SupervisorMobility.API.DataAccess.Entities.SOS
+namespace SupervisorMobility.API.DataAccess.Entities.SOS.History
 {
-    public class SOSHub
+    public class SOSHubHistory
     {
         [Key, DatabaseGenerated(DatabaseGeneratedOption.Identity)]
+        public int SOSHubHistoryId { get; set; }
         public int SOSHubId { get; set; }
 
         public string? Folio { get; set; }
 
         //Es el analisis
-        public ICollection<AnalysisBkup>? AnalysesBkup { get; set; } = new List<AnalysisBkup>();
-        public ICollection<Section>? Sections { get; set; } = new List<Section>();
+        public ICollection<AnalysisBkupHistory>? AnalysesBkup { get; set; } = new List<AnalysisBkupHistory>();
+        public ICollection<SectionHistory>? Sections { get; set; } = new List<SectionHistory>();
 
         public string ProcessSheet { get; set; }
-        public ICollection<Commentary>? ProcessSheetCommentary { get; set; } = new List<Commentary>();
+        public ICollection<CommentaryHistory>? ProcessSheetCommentary { get; set; } = new List<CommentaryHistory>();
         public ICollection<FileUpload>? CommonDirection { get; set; } = new List<FileUpload>();
         public int? AppliedModelId { get; set; }
         public Product? AppliedModel { get; set; }
-        
-        //steps stpes (Puntos Criticos?)
-
 
         public ICollection<FileUpload>? Images { get; set; } = new List<FileUpload>();
         public ICollection<FileUpload>? Videos { get; set; } = new List<FileUpload>();
@@ -44,7 +41,7 @@ namespace SupervisorMobility.API.DataAccess.Entities.SOS
         public Distribution? Distribution { get; set; }
 
         public int? DepartmentId { get; set; }
-        public Department? Department{ get; set; }
+        public Department? Department { get; set; }
 
         public int? StationId { get; set; }
         public Station? Station { get; set; }
@@ -52,16 +49,18 @@ namespace SupervisorMobility.API.DataAccess.Entities.SOS
         public int? OwnerId { get; set; }
         public User? Owner { get; set; }
 
+        [Column(TypeName = "Date")]
         public DateTime? CreatedDate { get; set; }
-        
+
         public int? EditorId { get; set; }
         public User? Editor { get; set; }
 
+        [Column(TypeName = "Date")]
         public DateTime? ModifiedDate { get; set; }
 
 
         //estos 3 podrian ser una entidad (pero la flojera)
-        public string Plan { get; set; } 
+        public string Plan { get; set; }
         public string SourcePlan { get; set; }
         public string Status { get; set; }
 
@@ -71,8 +70,8 @@ namespace SupervisorMobility.API.DataAccess.Entities.SOS
         public ICollection<SOSDistribution>? SOSDistribution { get; set; } = new List<SOSDistribution>();
         public ICollection<SOSFlow>? SOSFlow { get; set; } = new List<SOSFlow>();
         public ICollection<SOSSequence>? SOSSequence { get; set; } = new List<SOSSequence>();
-        public ICollection<SOSHubHistory>? History { get; set; } = new List<SOSHubHistory>();
 
+        public string? VersionChanges { get; set; }
         public bool? IsActive { get; set; }
     }
 }

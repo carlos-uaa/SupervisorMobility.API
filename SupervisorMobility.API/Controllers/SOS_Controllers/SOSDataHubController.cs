@@ -2,12 +2,16 @@
 using DocumentFormat.OpenXml.Office2010.Drawing;
 using DocumentFormat.OpenXml.Office2010.Excel;
 using DocumentFormat.OpenXml.Wordprocessing;
+using KellermanSoftware.CompareNetObjects;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore.Query;
+using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
+using Newtonsoft.Json;
 using SupervisorMobility.API.Context;
 using SupervisorMobility.API.DataAccess.Entities;
 using SupervisorMobility.API.DataAccess.Entities.IS;
 using SupervisorMobility.API.DataAccess.Entities.SOS;
+using SupervisorMobility.API.DataAccess.Entities.SOS.History;
 using SupervisorMobility.API.DataAccess.Services;
 using SupervisorMobility.API.Models.CommentaryDtos;
 using SupervisorMobility.API.Models.FileUploadDto;
@@ -175,7 +179,6 @@ namespace SupervisorMobility.API.Controllers.SOS_Controllers
             List<AnalysisBkupForUpdateDto> filteredAnalysisBkupList = _SOSHubForUpdate.AnalysesBkup
                 .Where(t => t.AnalysisBkupId <= 0).ToList();
 
-
             // Remover nuevos AnalysisBkup de la lista principal para evitar duplicados
             if (filteredAnalysisBkupList.Any())
             {
@@ -232,6 +235,20 @@ namespace SupervisorMobility.API.Controllers.SOS_Controllers
             }
 
 
+            SOSHub entitySOSHub = await _AnalysisProcessRepository.GetSOSHub(SOSHubId, true, true, true, true, true, true, true, true, true, true, true);
+
+
+            string jsonResult = CompareAndGenerateJson(_mapper.Map<SOSHubForUpdateDto>(entitySOSHub), _SOSHubForUpdate);
+
+            SOSHubHistory newHistory = new SOSHubHistory();
+            _mapper.Map(entitySOSHub, newHistory);
+            newHistory.VersionChanges = jsonResult;
+
+            await _AnalysisProcessRepository.CreateHistorySOScollection(newHistory);
+
+
+
+
             List<Commentary> ProcessSheetCommentaries = new List<Commentary>();
             List<AnalysisBkup> AnalysisBkups = new List<AnalysisBkup>();
             List<Section> Sections = new List<Section>();
@@ -274,15 +291,13 @@ namespace SupervisorMobility.API.Controllers.SOS_Controllers
             }
 
             _SOSHubForUpdate.ProcessSheetCommentary = null;
-            _SOSHubForUpdate.AnalysesBkup = null; 
-            _SOSHubForUpdate.Sections = null; 
+            _SOSHubForUpdate.AnalysesBkup = null;
+            _SOSHubForUpdate.Sections = null;
             _SOSHubForUpdate.ToolsUsed = null;
             _SOSHubForUpdate.MaterialsUsed = null;
             _SOSHubForUpdate.SafetyEquipment = null;
 
-            // Obtener el SOSHub existente junto con sus norms/standars
-            SOSHub entitySOSHub = await _AnalysisProcessRepository.GetSOSHub(SOSHubId, includeAnalysesBkup: true, includeSections: true, includeCommentaries:true, includeTools: true, includeEquipments: true, includeMaterials: true);
-           
+
             await _AnalysisProcessRepository.SOSDataRemoveAllProcessSheetCommentary(entitySOSHub);
             await _AnalysisProcessRepository.SOSDataRemoveAllAnalysisBkups(entitySOSHub);
             await _AnalysisProcessRepository.SOSDataRemoveAllSections(entitySOSHub);
@@ -293,11 +308,6 @@ namespace SupervisorMobility.API.Controllers.SOS_Controllers
             {
                 return NotFound();
             }
-
-            //_mapper.Map(_SOSHubForUpdate, entitySOSHub);
-            //_context.SOSHubs.Update(entitySOSHub);
-
-            //var result = await _context.SaveChangesAsync();
 
             var result = await _AnalysisProcessRepository.UpdateSOSHub(_SOSHubForUpdate, entitySOSHub);
 
@@ -350,6 +360,8 @@ namespace SupervisorMobility.API.Controllers.SOS_Controllers
                 }
             }
 
+            await _AnalysisProcessRepository.AddHistoryToSOSCollection(entitySOSHub, newHistory);
+
             if (result != null)
             {
                 return Ok(entitySOSHub);
@@ -357,6 +369,49 @@ namespace SupervisorMobility.API.Controllers.SOS_Controllers
             else
                 return BadRequest();
 
+        }
+
+        static string CompareAndGenerateJson(SOSHubForUpdateDto obj1, SOSHubForUpdateDto obj2)
+        {
+            var compareLogic = new CompareLogic
+            {
+                Config = new ComparisonConfig
+                {
+                    CompareChildren = true,
+                    MaxDifferences = int.MaxValue
+                }
+            };
+
+            ComparisonResult result = compareLogic.Compare(obj1, obj2);
+
+            var differencesList = new List<DifferenceDetail>();
+
+            foreach (var difference in result.Differences)
+            {
+                var differenceDetail = new DifferenceDetail
+                {
+                    Property = difference.PropertyName,
+                    Before = difference.Object1Value?.ToString(),
+                    After = difference.Object2Value?.ToString()
+                };
+                differencesList.Add(differenceDetail);
+            }
+
+            ValueConverter<List<DifferenceDetail>, string> jsonListConverter = new ValueConverter<List<DifferenceDetail>, string>(
+                        v => JsonConvert.SerializeObject(v),
+                        v => JsonConvert.DeserializeObject<List<DifferenceDetail>>(v)
+                    );
+
+            string jsonResult = (string)jsonListConverter.ConvertToProvider(differencesList);
+            return jsonResult;
+
+        }
+
+        public class DifferenceDetail
+        {
+            public string Property { get; set; }
+            public string Before { get; set; }
+            public string After { get; set; }
         }
 
         [HttpDelete("{SOSHubId}")]
@@ -593,5 +648,20 @@ namespace SupervisorMobility.API.Controllers.SOS_Controllers
         }
         /// Subir y borrar documento common direction
 
+
+        //History
+        [HttpGet("{id}/History", Name = "GetSOSHubHistory")]
+
+        public async Task<ActionResult<List<SOSHubDto>>> GetSOSHubHistory(int id, bool includeAnalysesBkup = false, bool includeSections = false, bool includeImages = false, bool includeVideos = false, bool includeCommentaries = false, bool includeTools = false, bool includeEquipments = false, bool includeMaterials = false, bool includeInformation = false, bool includePeople = false, bool includeDocuments = false)
+        {
+
+            var SOSHubs = await _AnalysisProcessRepository.GetAllHistorySOSHub(id, includeAnalysesBkup, includeSections, includeImages, includeVideos, includeCommentaries, includeTools, includeEquipments, includeMaterials, includeInformation, includePeople, includeDocuments);
+            if (SOSHubs == null)
+            {
+                return NotFound("SOSHub History not found!");
+            }
+
+            return Ok(_mapper.Map<List<SOSHubDto>>(SOSHubs));
+        }
     }// End SOS Data pool controller
 }//end namespace

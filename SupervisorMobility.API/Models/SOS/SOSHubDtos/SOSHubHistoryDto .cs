@@ -17,10 +17,9 @@ using SupervisorMobility.API.Models.StationDtos;
 
 namespace SupervisorMobility.API.Models.SOS.SOSHubDtos
 {
-    public class SOSHubDto
+    public class SOSHubHistoryDto
     {
         public int SOSHubHistoryId { get; set; }
-
         public int SOSHubId { get; set; }
         public string? Folio { get; set; }
         public ICollection<AnalysisBkupDto> AnalysesBkup { get; set; } = new List<AnalysisBkupDto>();

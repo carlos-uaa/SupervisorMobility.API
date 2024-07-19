@@ -2,7 +2,7 @@
 using SupervisorMobility.API.DataAccess.Entities.SOS;
 using SupervisorMobility.API.Models.SOS.EquipmentDtos;
 
-namespace SupervisorMobility.API.MapperProfiles.ISOSMapperProfiles
+namespace SupervisorMobility.API.MapperProfiles.SOSMapperProfiles
 {
     public class EquipmentProfile : Profile
     {

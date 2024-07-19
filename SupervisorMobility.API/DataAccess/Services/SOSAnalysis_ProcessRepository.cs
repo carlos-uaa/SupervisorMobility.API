@@ -8,6 +8,7 @@ using SupervisorMobility.API.Context;
 using SupervisorMobility.API.DataAccess.Entities;
 using SupervisorMobility.API.DataAccess.Entities.IS;
 using SupervisorMobility.API.DataAccess.Entities.SOS;
+using SupervisorMobility.API.DataAccess.Entities.SOS.History;
 using SupervisorMobility.API.Models.FileUploadDto;
 using SupervisorMobility.API.Models.SOS.EquipmentDtos;
 using SupervisorMobility.API.Models.SOS.MaterialDtos;
@@ -277,7 +278,146 @@ namespace SupervisorMobility.API.DataAccess.Services
             return await _context.SaveChangesAsync();
         }
 
-  
+
+
+        #endregion
+        #region SOS History Collection
+        public async Task<int> CreateHistorySOScollection(SOSHubHistory SOS_EntityToCreate)
+        {
+            _context.SOSHubsHistory.Add(SOS_EntityToCreate);
+            return await _context.SaveChangesAsync();
+        }
+        public async Task<IEnumerable<SOSHubHistory>> GetAllHistorySOSHub(int HubId, bool includeAnalysesBkup = false, bool includeSections = false, bool includeImages = false, bool includeVideos = false, bool includeCommentaries = false, bool includeTools = false, bool includeEquipments = false, bool includeMaterials = false, bool includeInformation = false, bool includePeople = false, bool includeDocuments = false)
+        {
+            var query = _context.SOSHubsHistory.Where(h => h.IsActive == true && h.SOSHubId == HubId);
+
+            if (includeAnalysesBkup)
+            {
+                query = query.Include(i => i.AnalysesBkup);
+            }
+
+            if (includeSections)
+            {
+                query = query.Include(i => i.Sections).ThenInclude(s => s.Analyses);
+            }
+
+            if (includeImages)
+            {
+                query = query.Include(i => i.Images);
+            }
+
+            if (includeVideos)
+            {
+                query = query.Include(query => query.Videos);
+            }
+
+            if (includeCommentaries)
+            {
+                query = query.Include(query => query.ProcessSheetCommentary);
+            }
+            if (includeTools)
+            {
+                query = query.Include(t => t.ToolsUsed);
+            }
+
+            if (includeEquipments)
+            {
+                query = query.Include(e => e.SafetyEquipment);
+            }
+
+            if (includeMaterials)
+            {
+                query = query.Include(m => m.MaterialsUsed);
+            }
+
+            if (includeInformation)
+            {
+                query = query.Include(i => i.Plant).Include(t => t.Area).Include(d => d.Distribution).Include(d => d.Department);
+            }
+
+            if (includePeople)
+            {
+                query = query.Include(o => o.Owner).Include(e => e.Editor);
+            }
+
+            var sosHubs = await query.OrderBy(s => s.SOSHubId).ToListAsync();
+
+            if (includeImages)
+            {
+                foreach (var sosHub in sosHubs)
+                {
+                    sosHub.Images = sosHub.Images.Where(i => i.IsActive == true).ToList();
+                }
+            }
+
+            if (includeVideos)
+            {
+                foreach (var sosHub in sosHubs)
+                {
+                    sosHub.Videos = sosHub.Videos.Where(v => v.IsActive == true).ToList();
+                }
+            }
+
+            if (includeCommentaries)
+            {
+                foreach (var sosHub in sosHubs)
+                {
+                    sosHub.ProcessSheetCommentary = sosHub.ProcessSheetCommentary.Where(t => t.IsActive == true).ToList();
+                }
+            }
+
+            if (includeTools)
+            {
+                foreach (var sosHub in sosHubs)
+                {
+                    sosHub.ToolsUsed = sosHub.ToolsUsed.Where(t => t.IsActive == true).ToList();
+                }
+            }
+
+            if (includeEquipments)
+            {
+                foreach (var sosHub in sosHubs)
+                {
+                    sosHub.SafetyEquipment = sosHub.SafetyEquipment.Where(e => e.IsActive == true).ToList();
+                }
+            }
+
+            if (includeMaterials)
+            {
+                foreach (var sosHub in sosHubs)
+                {
+                    sosHub.MaterialsUsed = sosHub.MaterialsUsed.Where(m => m.IsActive == true).ToList();
+                }
+            }
+
+            if (includeDocuments)
+            {
+                foreach (var sosHub in sosHubs)
+                {
+                    sosHub.CommonDirection = sosHub.CommonDirection.Where(m => m.IsActive == true).ToList();
+                }
+            }
+
+            return sosHubs;
+
+        }
+
+
+        public async Task<AsyncVoidMethodBuilder> AddHistoryToSOSCollection(SOSHub Master, SOSHubHistory Slave)
+        {
+
+            if (Master.History != null)
+            {
+                Master.History.Add(Slave);
+            }
+            else
+            {
+                Master.History = new List<SOSHubHistory>();
+                Master.History.Add(Slave);
+            }
+            _context.SaveChanges();
+            return new AsyncVoidMethodBuilder();
+        }
 
         #endregion
 

@@ -8,6 +8,7 @@ using SupervisorMobility.API.DataAccess.Entities.Logger;
 using SupervisorMobility.API.DataAccess.Entities.LUP;
 using SupervisorMobility.API.DataAccess.Entities.Paths;
 using SupervisorMobility.API.DataAccess.Entities.SOS;
+using SupervisorMobility.API.DataAccess.Entities.SOS.History;
 using SupervisorMobility.API.DataAccess.Entities.SOS_Review;
 using SupervisorMobility.API.Entities;
 using System.Globalization;
@@ -91,6 +92,12 @@ namespace SupervisorMobility.API.Context
         public DbSet<Section> Sections { get; set; }
         public DbSet<Analysis> Analyses { get; set; }
         public DbSet<AnalysisBkup> AnalysisBkups { get; set; }
+
+        public DbSet<SOSHubHistory> SOSHubsHistory { get; set; }
+        public DbSet<CommentaryHistory> CommentaryHistorys { get; set; }
+        public DbSet<SectionHistory> SectionsHistory { get; set; }
+        public DbSet<AnalysisHistory> AnalysesHistory { get; set; }
+        public DbSet<AnalysisBkupHistory> AnalysisBkupsHistory { get; set; }
 
         public DbSet<Material> Materials { get; set; }
         public DbSet<Tool> Tools { get; set; }
@@ -367,6 +374,37 @@ namespace SupervisorMobility.API.Context
             modelBuilder.Entity<AnalysisBkup>()
                 .Property(p => p.IsActive)
                 .HasDefaultValue(true);
+
+            //Sos hub History
+
+            modelBuilder.Entity<SOSHubHistory>()
+                .Property(p => p.IsActive)
+                .HasDefaultValue(true);
+
+            modelBuilder.Entity<SectionHistory>()
+                .Property(p => p.IsActive)
+                .HasDefaultValue(true);
+
+            modelBuilder.Entity<CommentaryHistory>()
+                .Property(p => p.IsActive)
+                .HasDefaultValue(true);
+
+            modelBuilder.Entity<AnalysisHistory>()
+                .Property(p => p.IsActive)
+                .HasDefaultValue(true);
+
+            modelBuilder.Entity<AnalysisHistory>()
+                .Property(e => e.CriticalPoints)
+                .HasConversion(jsonListConverter);
+
+            modelBuilder.Entity<AnalysisHistory>()
+                .Property(e => e.Reasons)
+                .HasConversion(jsonListConverter);
+
+            modelBuilder.Entity<AnalysisBkupHistory>()
+                .Property(p => p.IsActive)
+                .HasDefaultValue(true);
+            //Sos hub history end
 
             modelBuilder.Entity<Material>()
                 .Property(p => p.IsActive)
