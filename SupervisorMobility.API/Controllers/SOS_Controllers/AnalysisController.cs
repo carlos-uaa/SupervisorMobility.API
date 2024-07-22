@@ -37,10 +37,15 @@ namespace SupervisorMobility.API.Controllers.SOS_Controllers
         {
             SOSHub SOSEntity = await _AnalysisProcessRepository.GetSOSHub(SOSHubCollection_Id, includeInformation: true);
 
+            //Nombre del documento GOS o processShet
+            //sOSAnalysisToCreate.OperationName = SOSEntity.;
+            sOSAnalysisToCreate.OperationName = SOSEntity.ProcessSheet;
+
             sOSAnalysisToCreate.CreatedDate = DateTime.Now;
             sOSAnalysisToCreate.IsActive = true;
 
             sOSAnalysisToCreate.SOSHubId = SOSHubCollection_Id;
+            sOSAnalysisToCreate.SOSHub = SOSEntity;
 
             var createdResult = await _AnalysisProcessRepository.CreateSOSAnalysis(sOSAnalysisToCreate);
             if (createdResult != null)

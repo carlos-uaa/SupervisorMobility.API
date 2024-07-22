@@ -25,6 +25,7 @@ namespace SupervisorMobility.API.DataAccess.Entities.SOS
         public bool? IsActive { get; set; }
 
         public int SOSHubId { get; set; }
+        [ForeignKey("SOSHubId")]
         public SOSHub? SOSHub { get; set; }
     }
 }
