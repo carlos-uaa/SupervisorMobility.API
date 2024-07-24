@@ -22,6 +22,8 @@ namespace SupervisorMobility.API.MapperProfiles.SOSMapperProfiles
             CreateMap<Section, SectionForUpdateDto>().ReverseMap();
             CreateMap<Section, SectionForCreateDto>().ReverseMap();
 
+            CreateMap<CommonDirection, CommonDirectionDto>().ReverseMap();
+
             CreateMap<Analysis, AnalysisDto>().ReverseMap();
             CreateMap<Analysis, AnalysisForCreateDto>().ReverseMap();
             CreateMap<Analysis, AnalysisForUpdateDto>().ReverseMap();

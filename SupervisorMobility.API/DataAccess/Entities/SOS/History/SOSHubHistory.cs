@@ -19,7 +19,7 @@ namespace SupervisorMobility.API.DataAccess.Entities.SOS.History
 
         public string ProcessSheet { get; set; }
         public ICollection<CommentaryHistory>? ProcessSheetCommentary { get; set; } = new List<CommentaryHistory>();
-        public ICollection<FileUpload>? CommonDirection { get; set; } = new List<FileUpload>();
+        public ICollection<CommonDirection>? CommonDirection { get; set; } = new List<CommonDirection>();
         public int? AppliedModelId { get; set; }
         public Product? AppliedModel { get; set; }
 

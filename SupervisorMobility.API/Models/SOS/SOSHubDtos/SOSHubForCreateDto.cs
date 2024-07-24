@@ -17,7 +17,8 @@ namespace SupervisorMobility.API.Models.SOS.SOSHubDtos
         public ICollection<SectionForCreateDto> Sections { get; set; } = new List<SectionForCreateDto>();
         public string ProcessSheet { get; set; }
         public ICollection<CreateCommentaryDto>? ProcessSheetCommentary { get; set; } = new List<CreateCommentaryDto>();
-        
+        public ICollection<CommonDirectionDto>? CommonDirection { get; set; } = new List<CommonDirectionDto>();
+
         public int? AppliedModelId { get; set; }
 
 
