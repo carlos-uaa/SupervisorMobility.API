@@ -1467,6 +1467,75 @@ namespace SupervisorMobility.API.DataAccess.Services
 
         #endregion
 
+        #region CommonDirection
+
+        public async Task<List<CommonDirectionDto>> ManageRangeCommonDirs(List<CommonDirectionDto> listToManage, int SOSHubId)
+        {
+            List<CommonDirectionDto> finalList = new List<CommonDirectionDto>();
+            var existingList = _context.SOSHubs.Where(p => p.SOSHubId == SOSHubId).Select(p => p.CommonDirection).FirstOrDefault();
+            existingList ??= new List<CommonDirection>();
+            foreach(var item in listToManage)
+            {
+                if(item.CommonDirectionId > 0)
+                {
+                    var element = existingList.First(p => p.CommonDirectionId == item.CommonDirectionId);
+                    _mapper.Map(item, element);
+                    _context.Update(element);
+                }
+                else if(existingList.Where(p => p.DOC_ID == item.DOC_ID).Any())
+                {
+                    var element = existingList.FirstOrDefault(p => p.DOC_ID == item.DOC_ID);
+                    element.IsActive = item.IsActive;
+                    _context.Update(element);
+                }
+                else
+                {
+                    var element = _mapper.Map<CommonDirection>(item);
+                    _context.Add(element);
+                }
+            }
+            await _context.SaveChangesAsync();
+
+            //Retrive updated list
+            var updatedList = _context.SOSHubs.Where(p => p.SOSHubId == SOSHubId).SelectMany(p => p.CommonDirection).ToList();
+
+            // Map the updated entities back to DTOs and add them to the final list
+            finalList = updatedList.Select(cd => _mapper.Map<CommonDirectionDto>(cd)).ToList();
+
+            return finalList;
+        }
+
+        public async Task<CommonDirection> CreateNewCommonDir(CommonDirection CommonDirtoCreate)
+        {
+            _context.Add(CommonDirtoCreate);
+            await _context.SaveChangesAsync();
+
+            return CommonDirtoCreate;
+        }
+
+        public async Task<List<CommonDirection>> TrackCommonDirs(List<CommonDirectionDto> commonDirections)
+        {
+            List<CommonDirection> trackedCommons = new();
+            foreach(var common in commonDirections)
+            {
+                CommonDirection tc = _mapper.Map<CommonDirection>(common);
+                var existingEntity = _context.Set<CommonDirection>().Local.FirstOrDefault(e => e.CommonDirectionId == tc.CommonDirectionId);
+
+                if (existingEntity == null)
+                {
+                    _context.Attach(tc);
+                }
+                else
+                {
+                    tc = existingEntity;
+                }
+
+                trackedCommons.Add(tc);
+            }
+            return trackedCommons;
+        }
+        #endregion
+
         #region SOSAnalysis
         public async Task<int> CreateSOSAnalysis(SOSAnalysis SOS_AnalysisToCreate)
         {
