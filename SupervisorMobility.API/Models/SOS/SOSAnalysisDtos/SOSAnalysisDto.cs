@@ -13,16 +13,16 @@ namespace SupervisorMobility.API.Models.SOS.SOSAnalysisDtos
         public string? OperationName { get; set; }
         public string? ProcessName { get; set; }
 
-        ICollection<SOSAnalysisLogbookDto>? AnalysisLogbooks { get; set; } = new List<SOSAnalysisLogbookDto>();
-        ICollection<FileUploadGeneralDto>? Illustrations { get; set; } = new List<FileUploadGeneralDto>();
-        ICollection<CommentaryDto>? Notes { get; set; } = new List<CommentaryDto>();
-        ICollection<SpecialCaseAbnormalSituationDto>? SpecialCasesAbnormalSituations { get; set; } = new List<SpecialCaseAbnormalSituationDto>();
+        public ICollection<SOSAnalysisLogbookDto>? AnalysisLogbooks { get; set; } = new List<SOSAnalysisLogbookDto>();
+        public ICollection<FileUploadGeneralDto>? Illustrations { get; set; } = new List<FileUploadGeneralDto>();
+        public ICollection<CommentaryDto>? Notes { get; set; } = new List<CommentaryDto>();
+        public ICollection<SpecialCaseAbnormalSituationDto>? SpecialCasesAbnormalSituations { get; set; } = new List<SpecialCaseAbnormalSituationDto>();
 
         public DateTime? CreatedDate { get; set; }
 
         public bool? IsActive { get; set; }
 
-        public int SOSHubId { get; set; }
+        public int? SOSHubId { get; set; }
         public SOSHubDto? SOSHub { get; set; }
     }
 }

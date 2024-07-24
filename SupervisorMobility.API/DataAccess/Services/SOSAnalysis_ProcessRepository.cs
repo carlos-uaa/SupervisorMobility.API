@@ -831,7 +831,7 @@ namespace SupervisorMobility.API.DataAccess.Services
             return await _context.Comments.Where(t => t.ComentaryId == Id && t.IsActive == true).FirstOrDefaultAsync();
         }
         #endregion
-
+      
         #region SOSAnalysis
         public async Task<int> CreateSOSAnalysis(SOSAnalysis SOS_AnalysisToCreate)
         {
@@ -839,14 +839,13 @@ namespace SupervisorMobility.API.DataAccess.Services
             return _context.SaveChanges();
         }
 
-        public async Task<SOSAnalysis> GetSOSAnalysis(int SOSAnalysisId, bool includeImages = false, bool includeNotes = false, bool includeLogbooks = false, bool includeSpecialCases = false, bool includeSOS = false)
+        public async Task<SOSAnalysis> GetSOSAnalysis(int SOSAnalysisId, bool includeImages = false, bool includeNotes = false, bool includeLogbooks = false, bool includeSpecialCases = false, bool includeSOS = false, bool includeImagesSOS = false)
         {
             var query = _context.SOSAnalyses.Where(SOS => SOS.SOSAnalysisId == SOSAnalysisId && SOS.IsActive == true);
 
             if (includeImages)
             {
                 query = query.Include(i => i.Illustrations);
-                query = query.Include(m => m.SOSHub).ThenInclude(s => s.Images);
             }
 
             if (includeNotes)
@@ -870,6 +869,11 @@ namespace SupervisorMobility.API.DataAccess.Services
                 query = query.Include(m => m.SOSHub).ThenInclude(s => s.AppliedModel);
                 query = query.Include(m => m.SOSHub).ThenInclude(s => s.ToolsUsed);
                 query = query.Include(m => m.SOSHub).ThenInclude(s => s.SafetyEquipment);
+            }
+
+            if (includeImagesSOS)
+            {
+                query = query.Include(m => m.SOSHub).ThenInclude(s => s.Images);
             }
 
 
@@ -1019,7 +1023,95 @@ namespace SupervisorMobility.API.DataAccess.Services
             return await _context.SaveChangesAsync();
         }
         #endregion
+        #region Add Range SOS Analysis
+        public async Task<int> AddRangeSpecialCasesAbnormalSituations(List<SpecialCaseAbnormalSituation> SpecialCasesAbnormalSituationsToAdd)
+        {
+            _context.SpecialCasesAbnormalSituations.AddRange(SpecialCasesAbnormalSituationsToAdd);
+            return await _context.SaveChangesAsync();
+        }
+        public async Task<int> AddRangeSOSAnalysisLogbook(List<SOSAnalysisLogbook> SOSAnalysisLogbooksToAdd)
+        {
+            _context.SOSAnalysisLogbooks.AddRange(SOSAnalysisLogbooksToAdd);
+            return await _context.SaveChangesAsync();
+        }
+        #endregion
+        #region Add To Sos Analysis
+        public async Task<AsyncVoidMethodBuilder> AddNoteToSOSAnalysis(SOSAnalysis Master, Commentary Slave)
+        {
+            if (Master.Notes != null)
+            {
+                Master.Notes.Add(Slave);
+            }
+            else
+            {
+                Master.Notes = new List<Commentary>();
+                Master.Notes.Add(Slave);
+            }
+            _context.SaveChanges();
+            return new AsyncVoidMethodBuilder();
+        }
+        public async Task<AsyncVoidMethodBuilder> AddSpecialCasesAbnormalSituationsToSOSAnalysis(SOSAnalysis Master, SpecialCaseAbnormalSituation Slave)
+        {
+            if (Master.SpecialCasesAbnormalSituations != null)
+            {
+                Master.SpecialCasesAbnormalSituations.Add(Slave);
+            }
+            else
+            {
+                Master.SpecialCasesAbnormalSituations = new List<SpecialCaseAbnormalSituation>();
+                Master.SpecialCasesAbnormalSituations.Add(Slave);
+            }
+            _context.SaveChanges();
+            return new AsyncVoidMethodBuilder();
+        }
+        public async Task<AsyncVoidMethodBuilder> AddSOSAnalysisLogbookToSOSAnalysis(SOSAnalysis Master, SOSAnalysisLogbook Slave)
+        {
+            if (Master.AnalysisLogbooks != null)
+            {
+                Master.AnalysisLogbooks.Add(Slave);
+            }
+            else
+            {
+                Master.AnalysisLogbooks = new List<SOSAnalysisLogbook>();
+                Master.AnalysisLogbooks.Add(Slave);
+            }
+            _context.SaveChanges();
+            return new AsyncVoidMethodBuilder();
+        }
+        #endregion
+        #region Remove from SOSAnalysis
+        public async Task<AsyncVoidMethodBuilder> SOSDataRemoveAllSpecialCasesAbnormalSituationsFromSOSAnalysis(SOSAnalysis Master)
+        {
+            Master.SpecialCasesAbnormalSituations?.Clear();
+            _context.SaveChanges();
+            return new AsyncVoidMethodBuilder();
+        }
+        public async Task<AsyncVoidMethodBuilder> SOSDataRemoveAllSOSAnalysisLogbookFromSOSAnalysis(SOSAnalysis Master)
+        {
+            Master.AnalysisLogbooks?.Clear();
+            _context.SaveChanges();
+            return new AsyncVoidMethodBuilder();
+        }
+        public async Task<AsyncVoidMethodBuilder> SOSDataRemoveAllNotesFromSOSAnalysis(SOSAnalysis Master)
+        {
+            Master.Notes?.Clear();
+            _context.SaveChanges();
+            return new AsyncVoidMethodBuilder();
+        }
 
+        #endregion
+        #region SpecialCaseAbnormalSituation
+        public async Task<SpecialCaseAbnormalSituation> GetSpecialCaseAbnormalSituationById(int id)
+        {
+            return await _context.SpecialCasesAbnormalSituations.Where(t => t.SpecialCaseAbnormalSituationId == id && t.IsActive == true).FirstOrDefaultAsync();
+        }
+        #endregion
+        #region SOSAnalysisLogbook
+        public async Task<SOSAnalysisLogbook> GetSOSAnalysisLogbookById(int id)
+        {
+            return await _context.SOSAnalysisLogbooks.Where(t => t.SOSAnalysisLogbookId == id && t.IsActive == true).FirstOrDefaultAsync();
+        }
+        #endregion
         #region CommonOperations
         public async Task<FileUpload?> FetchFileAsync(int fileid)
         {

@@ -169,8 +169,6 @@ namespace SupervisorMobility.API.Controllers.SOS_Controllers
                     Debug.WriteLine("Commentarios añadidos con exitop");
                 }
 
-                //_context.Comments.AddRange(newCommentarys);
-                //await _context.SaveChangesAsync();
 
                 List<UpdateCommentaryDto> newCommentarysCreated = _mapper.Map<List<UpdateCommentaryDto>>(newCommentarys);
                 _SOSHubForUpdate.ProcessSheetCommentary.ToList().AddRange(newCommentarysCreated);
@@ -259,18 +257,21 @@ namespace SupervisorMobility.API.Controllers.SOS_Controllers
             foreach (var commentary in _SOSHubForUpdate.ProcessSheetCommentary)
             {
                 Commentary analysisBkaux = await _AnalysisProcessRepository.GetCommentaryById(commentary.ComentaryId);
+                _mapper.Map(commentary, analysisBkaux);
                 ProcessSheetCommentaries.Add(analysisBkaux);
             }
 
             foreach (var analysisBkup in _SOSHubForUpdate.AnalysesBkup)
             {
                 AnalysisBkup analysisBkaux = await _AnalysisProcessRepository.GetAnalysisBkupId(analysisBkup.AnalysisBkupId);
+                _mapper.Map(analysisBkup, analysisBkaux);
                 AnalysisBkups.Add(analysisBkaux);
             }
 
             foreach (var section in _SOSHubForUpdate.Sections)
             {
                 Section sectionToAdd = await _AnalysisProcessRepository.GetSectionById(section.SectionId);
+                _mapper.Map(section, sectionToAdd);
                 Sections.Add(sectionToAdd);
             }
 

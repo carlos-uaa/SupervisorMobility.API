@@ -8,10 +8,10 @@ namespace SupervisorMobility.API.DataAccess.Entities.SOS
     {
         [Key, DatabaseGenerated(DatabaseGeneratedOption.Identity)]
         public int SpecialCaseAbnormalSituationId { get; set; }
-        public string key { get; set; }
+        public string? key { get; set; }
 
-        public string PartName { get; set; }
-        public string PartNumber { get; set; }
+        public string? PartName { get; set; }
+        public string? PartNumber { get; set; }
 
         public int? PartId { get; set; }
         public Part? Part { get; set; }

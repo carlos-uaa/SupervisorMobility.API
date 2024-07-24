@@ -81,7 +81,12 @@ namespace SupervisorMobility.API.DataAccess.Services
         #endregion
         #region Commentary
         Task<Commentary> GetCommentaryById(int id);
-
+        #endregion
+        #region SpecialCaseAbnormalSituation
+        Task<SpecialCaseAbnormalSituation> GetSpecialCaseAbnormalSituationById(int id);
+        #endregion
+        #region SOSAnalysisLogbook
+        Task<SOSAnalysisLogbook> GetSOSAnalysisLogbookById(int id);
         #endregion
         #region Analysis Bkup
         Task<AnalysisBkup> GetAnalysisBkupId(int id);
@@ -93,7 +98,7 @@ namespace SupervisorMobility.API.DataAccess.Services
         #endregion
         #region SOSAnalysis
         Task<int> CreateSOSAnalysis(SOSAnalysis SOS_AnalysisToCreate);
-        Task<SOSAnalysis> GetSOSAnalysis(int SOSAnalysisId, bool includeImages = false, bool includeNotes= false, bool includeLogbooks = false, bool includeSpecialCases = false, bool includeSOS = false);
+        Task<SOSAnalysis> GetSOSAnalysis(int SOSAnalysisId, bool includeImages = false, bool includeNotes= false, bool includeLogbooks = false, bool includeSpecialCases = false, bool includeSOS = false, bool includeImagesSOS = false);
         Task<IEnumerable<SOSAnalysis>> GetAllSOSAnalysis(bool includeImages = false, bool includeNotes = false, bool includeLogbooks = false, bool includeSpecialCases = false, bool includeSOS = false);
 
         Task<int> UpdateSOSAnalysis(SOSAnalysisForUpdateDto AnalysisUpdate, SOSAnalysis AnalysisEntity);
@@ -101,6 +106,22 @@ namespace SupervisorMobility.API.DataAccess.Services
 
         Task AddIlustrationToSOSAnalysis(int SOS_Analysis_id, FileUpload evidence);
         Task<int> RemoveIlustrationFromSOSAnalysis(int SOS_Analysis_id, int ImageFile_id);
+
+        #endregion
+        #region Add Range SOS Analysis
+        Task<int> AddRangeSpecialCasesAbnormalSituations(List<SpecialCaseAbnormalSituation> SpecialCasesAbnormalSituationsToAdd);
+        Task<int> AddRangeSOSAnalysisLogbook(List<SOSAnalysisLogbook> SOSAnalysisLogbooksToAdd);
+        #endregion
+        #region Add To Sos Analysis
+        Task<AsyncVoidMethodBuilder> AddSpecialCasesAbnormalSituationsToSOSAnalysis(SOSAnalysis Master, SpecialCaseAbnormalSituation Slave);
+        Task<AsyncVoidMethodBuilder> AddSOSAnalysisLogbookToSOSAnalysis(SOSAnalysis Master, SOSAnalysisLogbook Slave);
+        Task<AsyncVoidMethodBuilder> AddNoteToSOSAnalysis(SOSAnalysis Master, Commentary Slave);
+
+        #endregion
+        #region Remove from Sos Hub
+        Task<AsyncVoidMethodBuilder> SOSDataRemoveAllSpecialCasesAbnormalSituationsFromSOSAnalysis(SOSAnalysis Master);
+        Task<AsyncVoidMethodBuilder> SOSDataRemoveAllSOSAnalysisLogbookFromSOSAnalysis(SOSAnalysis Master);
+        Task<AsyncVoidMethodBuilder> SOSDataRemoveAllNotesFromSOSAnalysis(SOSAnalysis Master);
 
         #endregion
         #region commonOperations

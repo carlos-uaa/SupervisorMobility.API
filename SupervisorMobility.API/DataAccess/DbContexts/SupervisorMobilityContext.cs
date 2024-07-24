@@ -107,6 +107,7 @@ namespace SupervisorMobility.API.Context
 
         public DbSet<SOSAnalysis> SOSAnalyses { get; set; }
         public DbSet<SpecialCaseAbnormalSituation> SpecialCasesAbnormalSituations { get; set; }
+        public DbSet<SOSAnalysisLogbook> SOSAnalysisLogbooks { get; set; }
         public DbSet<SOSCombination> SOSCombinations { get; set; }
         public DbSet<SOSDistribution> SOSDistributions { get; set; }
         public DbSet<SOSFlow> SOSFlows { get; set; }

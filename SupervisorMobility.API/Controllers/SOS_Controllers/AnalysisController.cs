@@ -1,14 +1,19 @@
 ﻿using AutoMapper;
+using DocumentFormat.OpenXml.Office2010.Excel;
 using Microsoft.AspNetCore.Mvc;
 using SupervisorMobility.API.Context;
 using SupervisorMobility.API.DataAccess.Entities;
 using SupervisorMobility.API.DataAccess.Entities.SOS;
+using SupervisorMobility.API.DataAccess.Entities.SOS.History;
 using SupervisorMobility.API.DataAccess.Services;
+using SupervisorMobility.API.Models.CommentaryDtos;
 using SupervisorMobility.API.Models.FileUploadDto;
 using SupervisorMobility.API.Models.SOS.EquipmentDtos;
 using SupervisorMobility.API.Models.SOS.MaterialDtos;
 using SupervisorMobility.API.Models.SOS.SOSAnalysisDtos;
+using SupervisorMobility.API.Models.SOS.SOSAnalysisLogbookDtos;
 using SupervisorMobility.API.Models.SOS.SOSHubDtos;
+using SupervisorMobility.API.Models.SOS.SpecialCaseAbnormalSituationDtos;
 using SupervisorMobility.API.Models.SOS.ToolDtos;
 using SupervisorMobility.API.Models.SOSReviewDtos;
 using System.Diagnostics;
@@ -56,10 +61,10 @@ namespace SupervisorMobility.API.Controllers.SOS_Controllers
         }
 
         [HttpGet("{id}", Name = "GetSOSAnalysis")]
-        public async Task<ActionResult<SOSAnalysisDto>> GetSOSAnalysis(int id, bool includeImages = false, bool includeNotes = false, bool includeLogbooks = false, bool includeSpecialCases = false, bool includeSOS = false)
+        public async Task<ActionResult<SOSAnalysisDto>> GetSOSAnalysis(int id, bool includeImages = false, bool includeNotes = false, bool includeLogbooks = false, bool includeSpecialCases = false, bool includeSOS = false, bool includeImagesSOS = false)
         {
 
-            var SOSAnalysis = await _AnalysisProcessRepository.GetSOSAnalysis(id, includeImages, includeNotes, includeLogbooks, includeSpecialCases, includeSOS);
+            var SOSAnalysis = await _AnalysisProcessRepository.GetSOSAnalysis(id, includeImages, includeNotes, includeLogbooks, includeSpecialCases, includeSOS, includeImagesSOS);
             if (SOSAnalysis == null)
             {
                 return NotFound("SOSAnalysis not found!");
@@ -83,20 +88,181 @@ namespace SupervisorMobility.API.Controllers.SOS_Controllers
 
         //Update
 
-        //[HttpPut("{SOSid}")]
-        //public async Task<ActionResult> UpdateSOSAnalysis(int SOSid, SOSReviewForUpdateDto sosUpdateEntity)
-        //{
+        [HttpPut("{sosAnalysis_Id}")]
+        public async Task<ActionResult> UpdateSOSAnalysis(int sosAnalysis_Id, SOSAnalysisForUpdateDto sosUpdateEntity)
+        {
 
-            
 
-        //    var result = await _AnalysisProcessRepository.UpdateSOSAnalysis(_CheckpointForUpdate, entityCheckpoint);
 
-        //    if (result > 0)
-        //        return Ok(entityCheckpoint);
-        //    else
-        //        return BadRequest();
+            // Filtrar nuevos Comentarios
+            List<UpdateCommentaryDto> filteredCommentaryList = sosUpdateEntity.Notes.Where(t => t.ComentaryId <= 0).ToList();
+            // Filtrar nuevos AnalysisLogbooks
+            List<SOSAnalysisLogbookForUpdateDto> filteredAnalysisLogbooksList = sosUpdateEntity.AnalysisLogbooks.Where(t => t.SOSAnalysisLogbookId <= 0).ToList();
+            // Filtrar nuevos SpecialCasesAbnormalSituations
+            List<SpecialCaseAbnormalSituationForUpdateDto> filteredSpecialCasesAbnormalSituationsList = sosUpdateEntity.SpecialCasesAbnormalSituations.Where(t => t.SpecialCaseAbnormalSituationId <= 0).ToList();
 
-        //}//end Update 
+
+            // Remover nuevos Comentarios de la lista principal para evitar duplicados
+            if (filteredCommentaryList.Any())
+            {
+                sosUpdateEntity.Notes.ToList().RemoveAll(t => t.ComentaryId == null || t.ComentaryId <= 0);
+
+                // Mapear nuevas norms/standars
+                List<Commentary> newCommentarys = _mapper.Map<List<Commentary>>(filteredCommentaryList);
+
+                foreach (var newComentary in newCommentarys)
+                {
+                    newComentary.ComentaryId = 0;
+                    newComentary.IsActive = true;
+                }
+
+                var resultAddCommentary = await _AnalysisProcessRepository.AddRangeCommentary(newCommentarys);
+
+                if (resultAddCommentary > 0)
+                {
+                    Debug.WriteLine("Commentarios añadidos con exitop");
+                }
+
+                List<UpdateCommentaryDto> newCommentarysCreated = _mapper.Map<List<UpdateCommentaryDto>>(newCommentarys);
+                sosUpdateEntity.Notes.ToList().AddRange(newCommentarysCreated);
+            }
+
+            // Remover nuevos SpecialCaseAbnormalSituationId de la lista principal para evitar duplicados
+            if (filteredSpecialCasesAbnormalSituationsList.Any())
+            {
+                sosUpdateEntity.SpecialCasesAbnormalSituations.ToList().RemoveAll(t => t.SpecialCaseAbnormalSituationId == null || t.SpecialCaseAbnormalSituationId <= 0);
+
+                // Mapear nuevas SpecialCasesAbnormalSituations
+                List<SpecialCaseAbnormalSituation> newSpecialCasesAbnormalSituations = _mapper.Map<List<SpecialCaseAbnormalSituation>>(filteredSpecialCasesAbnormalSituationsList);
+
+                foreach (var newSpecialCases in newSpecialCasesAbnormalSituations)
+                {
+                    newSpecialCases.SpecialCaseAbnormalSituationId = 0;
+                    newSpecialCases.IsActive = true;
+                }
+
+                var resultAddSpecialCaseAbnormalSituation = await _AnalysisProcessRepository.AddRangeSpecialCasesAbnormalSituations(newSpecialCasesAbnormalSituations);
+
+                if (resultAddSpecialCaseAbnormalSituation > 0)
+                {
+                    Debug.WriteLine("SpecialCaseAbnormalSituation añadidos con exitop");
+                }
+
+                List<SpecialCaseAbnormalSituationForUpdateDto> newSpecialCaseAbnormalSituationCreated = _mapper.Map<List<SpecialCaseAbnormalSituationForUpdateDto>>(newSpecialCasesAbnormalSituations);
+                sosUpdateEntity.SpecialCasesAbnormalSituations.ToList().AddRange(newSpecialCaseAbnormalSituationCreated);
+            }
+
+            // Remover nuevos AnalysisLogbooks de la lista principal para evitar duplicados
+            if (filteredAnalysisLogbooksList.Any())
+            {
+                sosUpdateEntity.AnalysisLogbooks.ToList().RemoveAll(t => t.SOSAnalysisLogbookId == null || t.SOSAnalysisLogbookId <= 0);
+
+                // Mapear nuevas norms/standars
+                List<SOSAnalysisLogbook> newSOSAnalysisLogbook = _mapper.Map<List<SOSAnalysisLogbook>>(filteredAnalysisLogbooksList);
+
+                foreach (var analysisLogbook in newSOSAnalysisLogbook)
+                {
+                    analysisLogbook.SOSAnalysisLogbookId = 0;
+                    analysisLogbook.IsActive = true;
+                }
+
+                var resultAddSOSAnalysisLogbook = await _AnalysisProcessRepository.AddRangeSOSAnalysisLogbook(newSOSAnalysisLogbook);
+
+                if (resultAddSOSAnalysisLogbook > 0)
+                {
+                    Debug.WriteLine("SOSAnalysisLogbook añadidos con exitop");
+                }
+
+                List<SOSAnalysisLogbookForUpdateDto> newSOSAnalysisLogbookCreated = _mapper.Map<List<SOSAnalysisLogbookForUpdateDto>>(newSOSAnalysisLogbook);
+                sosUpdateEntity.AnalysisLogbooks.ToList().AddRange(newSOSAnalysisLogbookCreated);
+            }
+
+            SOSAnalysis _sosAnalysis = await _AnalysisProcessRepository.GetSOSAnalysis(sosAnalysis_Id, true, true, true, true);
+
+            ////Aqui va el historico de ser necesario en  un futuro 
+
+            ////Ejemplo de uso 
+            ////Compare genera un string que menciona las diferencias
+            ////string jsonResult = CompareAndGenerateJson(_mapper.Map<SOSHubForUpdateDto>(entitySOSHub), _SOSHubForUpdate);
+            ////se crea un entity 
+            ////SOSHubHistory newHistory = new SOSHubHistory();
+            ////_mapper.Map(entitySOSHub, newHistory);
+            ////newHistory.VersionChanges = jsonResult;
+            ////se almacena la entity anterior y se le añade el resumen de cambios
+            ////await _AnalysisProcessRepository.CreateHistorySOScollection(newHistory);
+
+
+            List<Commentary> Bkup_Notes = new List<Commentary>();
+            List<SOSAnalysisLogbook> Bkup_AnalysisLogbook = new List<SOSAnalysisLogbook>();
+            List<SpecialCaseAbnormalSituation> Bkup_SpecialCases = new List<SpecialCaseAbnormalSituation>();
+
+            //Crear bkup de datos relacionados
+            //hacer update entity sin relaciones
+            foreach (var note in sosUpdateEntity.Notes)
+            {
+                Commentary analysisBkaux = await _AnalysisProcessRepository.GetCommentaryById(note.ComentaryId);
+                _mapper.Map(note, analysisBkaux);
+                Bkup_Notes.Add(analysisBkaux);
+            }
+            foreach (var logbook in sosUpdateEntity.AnalysisLogbooks)
+            {
+                SOSAnalysisLogbook analysisBkaux = await _AnalysisProcessRepository.GetSOSAnalysisLogbookById(logbook.SOSAnalysisLogbookId);
+                _mapper.Map(logbook, analysisBkaux);
+                Bkup_AnalysisLogbook.Add(analysisBkaux);
+            }
+            foreach (var specialCase in sosUpdateEntity.SpecialCasesAbnormalSituations)
+            {
+                SpecialCaseAbnormalSituation analysisBkaux = await _AnalysisProcessRepository.GetSpecialCaseAbnormalSituationById(specialCase.SpecialCaseAbnormalSituationId);
+                _mapper.Map(specialCase, analysisBkaux);
+                Bkup_SpecialCases.Add(analysisBkaux);
+            }
+
+            //Nulleamos el update para evitar errores
+            sosUpdateEntity.Notes = null;
+            sosUpdateEntity.AnalysisLogbooks = null;
+            sosUpdateEntity.SpecialCasesAbnormalSituations = null;
+
+            await _AnalysisProcessRepository.SOSDataRemoveAllNotesFromSOSAnalysis(_sosAnalysis);
+            await _AnalysisProcessRepository.SOSDataRemoveAllSOSAnalysisLogbookFromSOSAnalysis(_sosAnalysis);
+            await _AnalysisProcessRepository.SOSDataRemoveAllSpecialCasesAbnormalSituationsFromSOSAnalysis(_sosAnalysis);
+
+            var result = await _AnalysisProcessRepository.UpdateSOSAnalysis(sosUpdateEntity, _sosAnalysis);
+
+            //Notes - Volver a añádir las notas
+            if (Bkup_Notes.Any())
+            {
+                foreach (Commentary Comment in Bkup_Notes)
+                {
+                    _AnalysisProcessRepository.AddNoteToSOSAnalysis(_sosAnalysis, Comment);
+                }
+            }
+            //SpecialCases
+            if (Bkup_SpecialCases.Any())
+            {
+                foreach (SpecialCaseAbnormalSituation specialcase in Bkup_SpecialCases)
+                {
+                    _AnalysisProcessRepository.AddSpecialCasesAbnormalSituationsToSOSAnalysis(_sosAnalysis, specialcase);
+                }
+            }
+            //Analysis Logbook
+            if (Bkup_AnalysisLogbook.Any())
+            {
+                foreach (SOSAnalysisLogbook logbook in Bkup_AnalysisLogbook)
+                {
+                    _AnalysisProcessRepository.AddSOSAnalysisLogbookToSOSAnalysis(_sosAnalysis, logbook);
+                }
+            }
+
+
+
+            if (result != null)
+            {
+                return Ok(_sosAnalysis);
+            }
+            else
+                return BadRequest();
+
+        }//end Update 
 
         [HttpDelete("{SOSAnaysisId}")]
         public async Task<ActionResult<int>> RemoveSOSHub(int SOSAnaysisId)
