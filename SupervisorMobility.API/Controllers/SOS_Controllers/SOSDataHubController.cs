@@ -382,6 +382,7 @@ namespace SupervisorMobility.API.Controllers.SOS_Controllers
             _SOSHubForUpdate.SafetyEquipment = null;
             _SOSHubForUpdate.CommonDirection = null;
 
+
             //update base entity
             var result = await _AnalysisProcessRepository.UpdateSOSHub(_SOSHubForUpdate, entitySOSHub);
 
@@ -438,6 +439,11 @@ namespace SupervisorMobility.API.Controllers.SOS_Controllers
             if (commons.Any())
             {
                 await _AnalysisProcessRepository.AddCommonDirectionsToSOSCollection(entitySOSHub, commons);
+            }
+            //Common Directions
+            if (commons.Any())
+            {
+                await _AnalysisProcessRepository.AddCommonDirectionsToSOSCollection(entitySOSHub,commons);
             }
 
             //await _AnalysisProcessRepository.AddHistoryToSOSCollection(entitySOSHub, sOSHubHistory);
