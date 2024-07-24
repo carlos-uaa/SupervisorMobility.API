@@ -522,6 +522,14 @@ namespace SupervisorMobility.API.DataAccess.Services
             return new AsyncVoidMethodBuilder();
         }
 
+        public async Task<AsyncVoidMethodBuilder> AddCommonDirectionsToSOSCollection(SOSHub Master, List<CommonDirection> Slave)
+        {
+            Master.CommonDirection ??= new List<CommonDirection>();
+            ((List<CommonDirection>)Master.CommonDirection).AddRange(Slave);
+            _context.SaveChanges();
+            return new AsyncVoidMethodBuilder();
+        }
+
         public async Task<AsyncVoidMethodBuilder> AddMaterialToSOSCollection(SOSHub Master, Material Slave)
         {
 
@@ -583,23 +591,24 @@ namespace SupervisorMobility.API.DataAccess.Services
 
         public async Task AddCDToSOSData(int SOS_DataPool_id, FileUpload evidence)
         {
-            var SosHubEntity = await GetSOSHub(SOS_DataPool_id, includeDocuments: true);
+            //var SosHubEntity = await GetSOSHub(SOS_DataPool_id, includeDocuments: true);
 
-            if (SosHubEntity != null)
-            {
+            //if (SosHubEntity != null)
+            //{
 
-                if (SosHubEntity.CommonDirection != null)
-                {
-                    SosHubEntity.CommonDirection.Add(evidence);
-                }
-                else
-                {
-                    SosHubEntity.CommonDirection = new List<FileUpload>
-                    {
-                        evidence
-                    };
-                }
-            }
+            //    if (SosHubEntity.CommonDirection != null)
+            //    {
+            //        SosHubEntity.CommonDirection.Add(evidence);
+            //    }
+            //    else
+            //    {
+            //        SosHubEntity.CommonDirection = new List<FileUpload>
+            //        {
+            //            evidence
+            //        };
+            //    }
+            //}
+            return;
 
         }
         #endregion
@@ -655,6 +664,14 @@ namespace SupervisorMobility.API.DataAccess.Services
             return new AsyncVoidMethodBuilder();
         }
 
+        public async Task<AsyncVoidMethodBuilder> SOSDataRemoveAllCommonDirections(SOSHub Master)
+        {
+            Master.CommonDirection?.Clear();
+            Master.CommonDirection?.Clear();
+            await _context.SaveChangesAsync();
+            return new AsyncVoidMethodBuilder();
+        }
+
 
         public async Task<int> RemoveImageFromSOSData(int SOS_DataPool_id, int ImageFile_id)
         {
@@ -690,7 +707,7 @@ namespace SupervisorMobility.API.DataAccess.Services
         {
             var SOSHubEntity = await GetSOSHub(SOS_DataPool_id, includeDocuments: true);
 
-            var Sketch = SOSHubEntity.CommonDirection.ToList().Find(i => i.FileUploadId == File_id);
+            var Sketch = SOSHubEntity.CommonDirection.ToList().Find(i => i.CommonDirectionId == File_id);
             if (Sketch != null)
             {
                 Sketch.IsActive = false;

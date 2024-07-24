@@ -26,7 +26,7 @@ namespace SupervisorMobility.API.Models.SOS.SOSHubDtos
         public ICollection<SectionDto> Sections { get; set; } = new List<SectionDto>();
         public string ProcessSheet { get; set; }
         public ICollection<CommentaryDto>? ProcessSheetCommentary { get; set; } = new List<CommentaryDto>();
-        public ICollection<FileUploadGeneralDto>? CommonDirection { get; set; } = new List<FileUploadGeneralDto>();
+        public ICollection<CommonDirectionDto>? CommonDirection { get; set; } = new List<CommonDirectionDto>();
         public int? AppliedModelId { get; set; }
         public ProductDto? AppliedModel { get; set; }
 

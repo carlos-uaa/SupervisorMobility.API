@@ -1,4 +1,5 @@
 ﻿using SupervisorMobility.API.DataAccess.Entities;
+using SupervisorMobility.API.DataAccess.Entities.SOS;
 using SupervisorMobility.API.Models.CommentaryDtos;
 using SupervisorMobility.API.Models.DistributionDtos;
 using SupervisorMobility.API.Models.SOS.EquipmentDtos;
@@ -17,7 +18,8 @@ namespace SupervisorMobility.API.Models.SOS.SOSHubDtos
         public List<SectionForUpdateDto>? Sections { get; set; } = new List<SectionForUpdateDto>();
         public string ProcessSheet { get; set; }
         public ICollection<UpdateCommentaryDto>? ProcessSheetCommentary { get; set; } = new List<UpdateCommentaryDto>();
-        
+        public ICollection<CommonDirectionDto>? CommonDirection { get; set; } = new List<CommonDirectionDto>();
+
         public int? AppliedModelId { get; set; }
 
 

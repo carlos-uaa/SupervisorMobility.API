@@ -35,6 +35,7 @@ namespace SupervisorMobility.API.DataAccess.Services
         Task<AsyncVoidMethodBuilder> AddMaterialToSOSCollection(SOSHub Master, Material Slave);
         Task<AsyncVoidMethodBuilder> AddEquipmentToSOSCollection(SOSHub Master, Equipment Slave);
         Task<AsyncVoidMethodBuilder> AddToolToSOSCollection(SOSHub Master, Tool Slave);
+        Task<AsyncVoidMethodBuilder> AddCommonDirectionsToSOSCollection(SOSHub Master, List<CommonDirection> Slave);
         Task AddImageToSOSData(int SOS_DataPool_id, FileUpload evidence);
         Task AddVideoToSOSData(int SOS_DataPool_id, FileUpload evidence);
         Task AddCDToSOSData(int SOS_DataPool_id, FileUpload evidence);
@@ -47,6 +48,7 @@ namespace SupervisorMobility.API.DataAccess.Services
         Task<AsyncVoidMethodBuilder> SOSDataRemoveAllAnalysisBkups(SOSHub Master);
         Task<AsyncVoidMethodBuilder> SOSDataRemoveAllSections(SOSHub Master);
         Task<AsyncVoidMethodBuilder> SOSDataRemoveAllProcessSheetCommentary(SOSHub Master);
+        Task<AsyncVoidMethodBuilder> SOSDataRemoveAllCommonDirections(SOSHub Master);
         #endregion 
         #region AddTo Ranges
         Task<int> AddRangeCommentary(List<Commentary> commentariesToAdd);
@@ -88,6 +90,11 @@ namespace SupervisorMobility.API.DataAccess.Services
         #endregion
         #region SOSAnalysisLogbook
         Task<SOSAnalysisLogbook> GetSOSAnalysisLogbookById(int id);
+        #endregion
+        #region CommonDirection
+        Task<List<CommonDirectionDto>> ManageRangeCommonDirs(List<CommonDirectionDto> listToManage, int SOSHubId);
+        Task<CommonDirection> CreateNewCommonDir(CommonDirection CommonDirtoCreate);
+        Task<List<CommonDirection>> TrackCommonDirs(List<CommonDirectionDto> commonDirections);
         #endregion
         #region Analysis Bkup
         Task<AnalysisBkup> GetAnalysisBkupId(int id);
