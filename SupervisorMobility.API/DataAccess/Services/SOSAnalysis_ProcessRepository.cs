@@ -886,7 +886,8 @@ namespace SupervisorMobility.API.DataAccess.Services
             await _context.SaveChangesAsync();
 
             //Retrive updated list
-            var updatedList = _context.SOSHubs.Where(p => p.SOSHubId == SOSHubId).SelectMany(p => p.CommonDirection).ToList();
+            //var updatedList = _context.SOSHubs.Where(p => p.SOSHubId == SOSHubId).SelectMany(p => p.CommonDirection).ToList();
+            var updatedList = _context.CommonDirections.Local.ToList();
 
             // Map the updated entities back to DTOs and add them to the final list
             finalList = updatedList.Select(cd => _mapper.Map<CommonDirectionDto>(cd)).ToList();
