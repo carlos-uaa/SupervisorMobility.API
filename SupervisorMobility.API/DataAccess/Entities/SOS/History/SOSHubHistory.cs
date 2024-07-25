@@ -28,9 +28,9 @@ namespace SupervisorMobility.API.DataAccess.Entities.SOS.History
         public string RevisedItems { get; set; }
 
         public string? TrainingTime { get; set; }
-        public ICollection<Equipment>? SafetyEquipment { get; set; } = new List<Equipment>();
-        public ICollection<Tool>? ToolsUsed { get; set; } = new List<Tool>();
-        public ICollection<Material>? MaterialsUsed { get; set; } = new List<Material>();
+        public ICollection<Equipment>? SafetyEquipment { get; set; } 
+        public ICollection<Tool>? ToolsUsed { get; set; } 
+        public ICollection<Material>? MaterialsUsed { get; set; }
         public string OtherInformation { get; set; }
 
         public int? PlantId { get; set; }

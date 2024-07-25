@@ -2,6 +2,7 @@
 using CsvHelper;
 using DocumentFormat.OpenXml.InkML;
 using DocumentFormat.OpenXml.Office2010.Excel;
+using DocumentFormat.OpenXml.Office2021.PowerPoint.Tasks;
 using DuoVia.FuzzyStrings;
 using Microsoft.EntityFrameworkCore;
 using SupervisorMobility.API.Context;
@@ -38,7 +39,7 @@ namespace SupervisorMobility.API.DataAccess.Services
            _context.SOSHubs.Add(SOS_EntityToCreate);
             return await _context.SaveChangesAsync();
         }
-        public async Task<SOSHub> GetSOSHub(int HubId, bool includeAnalysesBkup = false, bool includeSections = false, bool includeImages = false, bool includeVideos = false, bool includeCommentaries = false, bool includeTools = false, bool includeEquipments = false, bool includeMaterials = false, bool includeInformation = false, bool includePeople = false, bool includeDocuments = false, bool includeModel = false)
+        public async Task<SOSHub> GetSOSHub(int HubId, bool includeAnalysesBkup = false, bool includeSections = false, bool includeImages = false, bool includeVideos = false, bool includeCommentaries = false, bool includeTools = false, bool includeEquipments = false, bool includeMaterials = false, bool includeInformation = false, bool includePeople = false, bool includeDocuments = false, bool includeModel = false, bool includeHistory = false)
         {
             var query = _context.SOSHubs.Where(SOS => SOS.SOSHubId == HubId && SOS.IsActive == true);
 
@@ -99,6 +100,11 @@ namespace SupervisorMobility.API.DataAccess.Services
             if (includeModel)
             {
                 query = query.Include(m => m.AppliedModel);
+            }  
+
+            if (includeHistory)
+            {
+                query = query.Include(m => m.History);
             }
 
             var sosHub = await query.FirstOrDefaultAsync();
@@ -419,7 +425,7 @@ namespace SupervisorMobility.API.DataAccess.Services
                 Master.History = new List<SOSHubHistory>();
                 Master.History.Add(Slave);
             }
-            _context.SaveChanges();
+            await _context.SaveChangesAsync();
             return new AsyncVoidMethodBuilder();
         }
 
@@ -590,30 +596,49 @@ namespace SupervisorMobility.API.DataAccess.Services
         #region Remove from Sos Hub
         public async Task<AsyncVoidMethodBuilder> SOSDataRemoveAllAnalysisBkups(SOSHub Master)
         {
+            if(Master.AnalysesBkup?.Count > 0)
+            {
             Master.AnalysesBkup?.Clear();
             _context.SaveChanges();
+            }
             return new AsyncVoidMethodBuilder();
         }
         public async Task<AsyncVoidMethodBuilder> SOSDataRemoveAllSections(SOSHub Master)
         {
-            Master.Sections?.Clear();
-            _context.SaveChanges();
+            if (Master.Sections?.Count > 0)
+            {
+                Master.Sections?.Clear();
+                _context.SaveChanges();
+            }
             return new AsyncVoidMethodBuilder();
         }
         public async Task<AsyncVoidMethodBuilder> SOSDataRemoveAllProcessSheetCommentary(SOSHub Master)
         {
+
+            if(Master.ProcessSheetCommentary?.Count > 0)
+            {
             Master.ProcessSheetCommentary?.Clear();
             _context.SaveChanges();
+            }
             return new AsyncVoidMethodBuilder();
         }
 
         public async Task<AsyncVoidMethodBuilder> SOSDataRemoveAllToolsEquipmentMaterial(SOSHub Master)
         {
+            if(Master.ToolsUsed?.Count> 0)
+            {
+                Master.ToolsUsed?.Clear();
+            }
+            if(Master.SafetyEquipment?.Count > 0)
+            {
+                Master.SafetyEquipment?.Clear();
+            }
+            if(Master.MaterialsUsed?.Count > 0)
+            {
+                Master.MaterialsUsed?.Clear();
+            }
 
-            Master.ToolsUsed?.Clear();
-            Master.SafetyEquipment?.Clear();
-            Master.MaterialsUsed?.Clear();
-
+            
             _context.SaveChanges();
 
             return new AsyncVoidMethodBuilder();

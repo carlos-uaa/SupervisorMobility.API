@@ -233,17 +233,48 @@ namespace SupervisorMobility.API.Controllers.SOS_Controllers
             }
 
 
-            SOSHub entitySOSHub = await _AnalysisProcessRepository.GetSOSHub(SOSHubId, true, true, true, true, true, true, true, true, true, true, true);
+            SOSHub entitySOSHub = await _AnalysisProcessRepository.GetSOSHub(SOSHubId,true, true, true, true, true, true,true, true, true, true, true );
+            //var auxEntity = ObjectCloner.ObjectCloner.DeepClone(entitySOSHub);
+
+            ////Compare objects
+            //string jsonResult = CompareAndGenerateJson(_mapper.Map<SOSHubForUpdateDto>(entitySOSHub), _SOSHubForUpdate);
+            ////Start Create History
+            //SOSHubHistoryForCreateDto newHistory = new SOSHubHistoryForCreateDto();
+            //_mapper.Map(auxEntity, newHistory);
+            //newHistory.VersionChanges = jsonResult;
+
+            ////Create History
+            //SOSHubHistory sOSHubHistory = new SOSHubHistory();
+            //sOSHubHistory.MaterialsUsed = new List<Material>();
+            //sOSHubHistory.SafetyEquipment = new List<Equipment>();
+            //sOSHubHistory.ToolsUsed = new List<Tool>();
+
+            //_mapper.Map(newHistory, sOSHubHistory);
+
+            //foreach (var tool in newHistory.ToolsUsed)
+            //{
+            //    Tool toolaux = await _AnalysisProcessRepository.GetToolById(tool.ToolId);
+            //    sOSHubHistory.ToolsUsed.Add(toolaux);
+            //}
+            //foreach (var material in newHistory.MaterialsUsed)
+            //{
+            //    Material mataux = await _AnalysisProcessRepository.GetMaterialById(material.MaterialId);
+            //    sOSHubHistory.MaterialsUsed.Add(mataux);
+            //}
+            //foreach (var equipment in newHistory.SafetyEquipment)
+            //{
+            //    Equipment equipmentaux = await _AnalysisProcessRepository.GetEquipmentById(equipment.EquipmentId);
+            //    sOSHubHistory.SafetyEquipment.Add(equipmentaux);
+            //}
 
 
-            string jsonResult = CompareAndGenerateJson(_mapper.Map<SOSHubForUpdateDto>(entitySOSHub), _SOSHubForUpdate);
+            //_ = await _AnalysisProcessRepository.CreateHistorySOScollection(sOSHubHistory);
 
-            SOSHubHistory newHistory = new SOSHubHistory();
-            _mapper.Map(entitySOSHub, newHistory);
-            newHistory.VersionChanges = jsonResult;
 
-            await _AnalysisProcessRepository.CreateHistorySOScollection(newHistory);
-
+            await _AnalysisProcessRepository.SOSDataRemoveAllProcessSheetCommentary(entitySOSHub);
+            await _AnalysisProcessRepository.SOSDataRemoveAllSections(entitySOSHub);
+            await _AnalysisProcessRepository.SOSDataRemoveAllAnalysisBkups(entitySOSHub);
+            await _AnalysisProcessRepository.SOSDataRemoveAllToolsEquipmentMaterial(entitySOSHub);
 
 
 
@@ -256,9 +287,9 @@ namespace SupervisorMobility.API.Controllers.SOS_Controllers
 
             foreach (var commentary in _SOSHubForUpdate.ProcessSheetCommentary)
             {
-                Commentary analysisBkaux = await _AnalysisProcessRepository.GetCommentaryById(commentary.ComentaryId);
-                _mapper.Map(commentary, analysisBkaux);
-                ProcessSheetCommentaries.Add(analysisBkaux);
+                Commentary commentaryaux = await _AnalysisProcessRepository.GetCommentaryById(commentary.ComentaryId);
+                _mapper.Map(commentary, commentaryaux);
+                ProcessSheetCommentaries.Add(commentaryaux);
             }
 
             foreach (var analysisBkup in _SOSHubForUpdate.AnalysesBkup)
@@ -298,17 +329,6 @@ namespace SupervisorMobility.API.Controllers.SOS_Controllers
             _SOSHubForUpdate.MaterialsUsed = null;
             _SOSHubForUpdate.SafetyEquipment = null;
 
-
-            await _AnalysisProcessRepository.SOSDataRemoveAllProcessSheetCommentary(entitySOSHub);
-            await _AnalysisProcessRepository.SOSDataRemoveAllAnalysisBkups(entitySOSHub);
-            await _AnalysisProcessRepository.SOSDataRemoveAllSections(entitySOSHub);
-            await _AnalysisProcessRepository.SOSDataRemoveAllToolsEquipmentMaterial(entitySOSHub);
-
-
-            if (entitySOSHub == null)
-            {
-                return NotFound();
-            }
 
             var result = await _AnalysisProcessRepository.UpdateSOSHub(_SOSHubForUpdate, entitySOSHub);
 
@@ -361,7 +381,7 @@ namespace SupervisorMobility.API.Controllers.SOS_Controllers
                 }
             }
 
-            await _AnalysisProcessRepository.AddHistoryToSOSCollection(entitySOSHub, newHistory);
+            //await _AnalysisProcessRepository.AddHistoryToSOSCollection(entitySOSHub, sOSHubHistory);
 
             if (result != null)
             {
