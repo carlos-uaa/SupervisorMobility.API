@@ -269,7 +269,14 @@ namespace SupervisorMobility.API.DataAccess.Services
         }
         public async Task<int> UpdateSOSHub(SOSHubForUpdateDto HubUpdate, SOSHub SosEntity)
         {
+
+            foreach (var common in SosEntity.CommonDirection)
+            {
+                HubUpdate.CommonDirection.Where(p => p.DOC_ID == common.DOC_ID).ToList().ForEach(p => p.CommonDirectionId = common.CommonDirectionId);
+            }
+
             _mapper.Map(HubUpdate, SosEntity);
+
             _context.SOSHubs.Update(SosEntity);
             return await _context.SaveChangesAsync();
         }
@@ -505,6 +512,14 @@ namespace SupervisorMobility.API.DataAccess.Services
             return new AsyncVoidMethodBuilder();
         }
 
+        public async Task<AsyncVoidMethodBuilder> AddCommonDirectionsToSOSCollection(SOSHub Master, List<CommonDirection> Slave)
+        {
+            Master.CommonDirection ??= new List<CommonDirection>();
+            ((List<CommonDirection>)Master.CommonDirection).AddRange(Slave);
+            _context.SaveChanges();
+            return new AsyncVoidMethodBuilder();
+        }
+
         public async Task<AsyncVoidMethodBuilder> AddMaterialToSOSCollection(SOSHub Master, Material Slave)
         {
 
@@ -566,23 +581,24 @@ namespace SupervisorMobility.API.DataAccess.Services
 
         public async Task AddCDToSOSData(int SOS_DataPool_id, FileUpload evidence)
         {
-            var SosHubEntity = await GetSOSHub(SOS_DataPool_id, includeDocuments: true);
+            //var SosHubEntity = await GetSOSHub(SOS_DataPool_id, includeDocuments: true);
 
-            if (SosHubEntity != null)
-            {
+            //if (SosHubEntity != null)
+            //{
 
-                if (SosHubEntity.CommonDirection != null)
-                {
-                    SosHubEntity.CommonDirection.Add(evidence);
-                }
-                else
-                {
-                    SosHubEntity.CommonDirection = new List<FileUpload>
-                    {
-                        evidence
-                    };
-                }
-            }
+            //    if (SosHubEntity.CommonDirection != null)
+            //    {
+            //        SosHubEntity.CommonDirection.Add(evidence);
+            //    }
+            //    else
+            //    {
+            //        SosHubEntity.CommonDirection = new List<FileUpload>
+            //        {
+            //            evidence
+            //        };
+            //    }
+            //}
+            return;
 
         }
         #endregion
@@ -616,6 +632,14 @@ namespace SupervisorMobility.API.DataAccess.Services
 
             _context.SaveChanges();
 
+            return new AsyncVoidMethodBuilder();
+        }
+
+        public async Task<AsyncVoidMethodBuilder> SOSDataRemoveAllCommonDirections(SOSHub Master)
+        {
+            Master.CommonDirection?.Clear();
+            Master.CommonDirection?.Clear();
+            await _context.SaveChangesAsync();
             return new AsyncVoidMethodBuilder();
         }
 
@@ -654,7 +678,7 @@ namespace SupervisorMobility.API.DataAccess.Services
         {
             var SOSHubEntity = await GetSOSHub(SOS_DataPool_id, includeDocuments: true);
 
-            var Sketch = SOSHubEntity.CommonDirection.ToList().Find(i => i.FileUploadId == File_id);
+            var Sketch = SOSHubEntity.CommonDirection.ToList().Find(i => i.CommonDirectionId == File_id);
             if (Sketch != null)
             {
                 Sketch.IsActive = false;
@@ -831,7 +855,77 @@ namespace SupervisorMobility.API.DataAccess.Services
             return await _context.Comments.Where(t => t.ComentaryId == Id && t.IsActive == true).FirstOrDefaultAsync();
         }
         #endregion
-      
+
+        #region CommonDirection
+
+        public async Task<List<CommonDirectionDto>> ManageRangeCommonDirs(List<CommonDirectionDto> listToManage, int SOSHubId)
+        {
+            List<CommonDirectionDto> finalList = new List<CommonDirectionDto>();
+            var existingList = _context.SOSHubs.Where(p => p.SOSHubId == SOSHubId).Select(p => p.CommonDirection).FirstOrDefault();
+            existingList ??= new List<CommonDirection>();
+            foreach(var item in listToManage)
+            {
+                if(item.CommonDirectionId > 0)
+                {
+                    var element = existingList.First(p => p.CommonDirectionId == item.CommonDirectionId);
+                    _mapper.Map(item, element);
+                    _context.Update(element);
+                }
+                else if(existingList.Where(p => p.DOC_ID == item.DOC_ID).Any())
+                {
+                    var element = existingList.FirstOrDefault(p => p.DOC_ID == item.DOC_ID);
+                    element.IsActive = item.IsActive;
+                    _context.Update(element);
+                }
+                else
+                {
+                    var element = _mapper.Map<CommonDirection>(item);
+                    _context.Add(element);
+                }
+            }
+            await _context.SaveChangesAsync();
+
+            //Retrive updated list
+            //var updatedList = _context.SOSHubs.Where(p => p.SOSHubId == SOSHubId).SelectMany(p => p.CommonDirection).ToList();
+            var updatedList = _context.CommonDirections.Local.ToList();
+
+            // Map the updated entities back to DTOs and add them to the final list
+            finalList = updatedList.Select(cd => _mapper.Map<CommonDirectionDto>(cd)).ToList();
+
+            return finalList;
+        }
+
+        public async Task<CommonDirection> CreateNewCommonDir(CommonDirection CommonDirtoCreate)
+        {
+            _context.Add(CommonDirtoCreate);
+            await _context.SaveChangesAsync();
+
+            return CommonDirtoCreate;
+        }
+
+        public async Task<List<CommonDirection>> TrackCommonDirs(List<CommonDirectionDto> commonDirections)
+        {
+            List<CommonDirection> trackedCommons = new();
+            foreach(var common in commonDirections)
+            {
+                CommonDirection tc = _mapper.Map<CommonDirection>(common);
+                var existingEntity = _context.Set<CommonDirection>().Local.FirstOrDefault(e => e.CommonDirectionId == tc.CommonDirectionId);
+
+                if (existingEntity == null)
+                {
+                    _context.Attach(tc);
+                }
+                else
+                {
+                    tc = existingEntity;
+                }
+
+                trackedCommons.Add(tc);
+            }
+            return trackedCommons;
+        }
+        #endregion
+
         #region SOSAnalysis
         public async Task<int> CreateSOSAnalysis(SOSAnalysis SOS_AnalysisToCreate)
         {
