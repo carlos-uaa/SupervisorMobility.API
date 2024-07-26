@@ -151,6 +151,13 @@ namespace SupervisorMobility.API.Controllers.SOS_Controllers
             List<Material> materials = new List<Material>();
             List<Equipment> equipments = new List<Equipment>();
 
+            //ManipulateCommonDir
+            var successCD = await _AnalysisProcessRepository.ManageRangeCommonDirs(_SOSHubForUpdate.CommonDirection.ToList(),SOSHubId);
+            if(successCD != null)
+            {
+                Debug.WriteLine("Common Directions managed succsesfully");
+                _SOSHubForUpdate.CommonDirection = successCD;
+            }
             // Filtrar nuevos Comentarios
             List<UpdateCommentaryDto> filteredCommentaryList = _SOSHubForUpdate.ProcessSheetCommentary
                 .Where(t => t.ComentaryId <= 0).ToList();
@@ -333,6 +340,7 @@ namespace SupervisorMobility.API.Controllers.SOS_Controllers
             _SOSHubForUpdate.ToolsUsed = null;
             _SOSHubForUpdate.MaterialsUsed = null;
             _SOSHubForUpdate.SafetyEquipment = null;
+            _SOSHubForUpdate.CommonDirection = null;
 
 
             var result = await _AnalysisProcessRepository.UpdateSOSHub(_SOSHubForUpdate, entitySOSHub);
@@ -384,6 +392,11 @@ namespace SupervisorMobility.API.Controllers.SOS_Controllers
                 {
                     _AnalysisProcessRepository.AddEquipmentToSOSCollection(entitySOSHub, equipment);
                 }
+            }
+            //Common Directions
+            if (commons.Any())
+            {
+                await _AnalysisProcessRepository.AddCommonDirectionsToSOSCollection(entitySOSHub,commons);
             }
 
             //await _AnalysisProcessRepository.AddHistoryToSOSCollection(entitySOSHub, sOSHubHistory);

@@ -112,15 +112,14 @@ namespace SupervisorMobility.API.Context
         public DbSet<SOSDistribution> SOSDistributions { get; set; }
         public DbSet<SOSFlow> SOSFlows { get; set; }
         public DbSet<SOSSequence> SOSSequences { get; set; }
+        public DbSet<CommonDirection> CommonDirections { get; set; }
 
         #endregion
 
         public SupervisorMobilityContext(DbContextOptions<SupervisorMobilityContext> options)
             : base(options)
         {
-
         }
-
 
         protected override void OnModelCreating(ModelBuilder modelBuilder)
         {
@@ -375,6 +374,16 @@ namespace SupervisorMobility.API.Context
             modelBuilder.Entity<AnalysisBkup>()
                 .Property(p => p.IsActive)
                 .HasDefaultValue(true);
+
+            modelBuilder.Entity<SOSHub>(p => {
+                p.HasMany(p => p.CommonDirection)
+                .WithMany("SOSHubId")
+                .UsingEntity<Dictionary<string, object>>(
+                    "SOSHubCommons",
+                    x => x.HasOne<CommonDirection>().WithMany().OnDelete(DeleteBehavior.Cascade),
+                    x => x.HasOne<SOSHub>().WithMany().OnDelete(DeleteBehavior.Cascade)
+                    );
+            });
 
             //Sos hub History
 
