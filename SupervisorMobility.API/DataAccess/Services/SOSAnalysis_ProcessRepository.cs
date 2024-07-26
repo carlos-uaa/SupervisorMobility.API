@@ -15,6 +15,7 @@ using SupervisorMobility.API.Models.SOS.EquipmentDtos;
 using SupervisorMobility.API.Models.SOS.MaterialDtos;
 using SupervisorMobility.API.Models.SOS.SOSAnalysisDtos;
 using SupervisorMobility.API.Models.SOS.SOSHubDtos;
+using SupervisorMobility.API.Models.SOS.SOSHubDtos.SectionDtos;
 using SupervisorMobility.API.Models.SOS.ToolDtos;
 using System.Runtime.CompilerServices;
 using Tavis.UriTemplates;
@@ -41,7 +42,7 @@ namespace SupervisorMobility.API.DataAccess.Services
         }
         public async Task<SOSHub> GetSOSHub(int HubId, bool includeAnalysesBkup = false, bool includeSections = false, bool includeImages = false, bool includeVideos = false, bool includeCommentaries = false, bool includeTools = false, bool includeEquipments = false, bool includeMaterials = false, bool includeInformation = false, bool includePeople = false, bool includeDocuments = false, bool includeModel = false, bool includeHistory = false)
         {
-            var query = _context.SOSHubs.Where(SOS => SOS.SOSHubId == HubId && SOS.IsActive == true);
+            var query = _context.SOSHubs.AsNoTracking().Where(SOS => SOS.SOSHubId == HubId && SOS.IsActive == true);
 
             if (includeAnalysesBkup)
             {
@@ -161,7 +162,7 @@ namespace SupervisorMobility.API.DataAccess.Services
         }
         public async Task<IEnumerable<SOSHub>> GetAllSOSHub(bool includeAnalysesBkup = false, bool includeSections = false, bool includeImages = false, bool includeVideos = false, bool includeCommentaries = false, bool includeTools = false, bool includeEquipments = false, bool includeMaterials = false, bool includeInformation = false, bool includePeople = false, bool includeDocuments = false)
         {
-            var query = _context.SOSHubs.Where(h => h.IsActive == true);
+            var query = _context.SOSHubs.AsNoTracking().Where(h => h.IsActive == true);
 
             if (includeAnalysesBkup)
             {
@@ -275,8 +276,18 @@ namespace SupervisorMobility.API.DataAccess.Services
         }
         public async Task<int> UpdateSOSHub(SOSHubForUpdateDto HubUpdate, SOSHub SosEntity)
         {
+            // Adjunta la entidad al contexto si no está ya adjunta
+            if (_context.Entry(SosEntity).State == EntityState.Detached)
+            {
+                _context.SOSHubs.Attach(SosEntity);
+            }
+
+            // Mapea los cambios del DTO a la entidad
             _mapper.Map(HubUpdate, SosEntity);
-            _context.SOSHubs.Update(SosEntity);
+
+            // Marca la entidad como modificada
+            _context.Entry(SosEntity).State = EntityState.Modified;
+
             return await _context.SaveChangesAsync();
         }
 
@@ -299,7 +310,7 @@ namespace SupervisorMobility.API.DataAccess.Services
         }
         public async Task<IEnumerable<SOSHubHistory>> GetAllHistorySOSHub(int HubId, bool includeAnalysesBkup = false, bool includeSections = false, bool includeImages = false, bool includeVideos = false, bool includeCommentaries = false, bool includeTools = false, bool includeEquipments = false, bool includeMaterials = false, bool includeInformation = false, bool includePeople = false, bool includeDocuments = false)
         {
-            var query = _context.SOSHubsHistory.Where(h => h.IsActive == true && h.SOSHubId == HubId);
+            var query = _context.SOSHubsHistory.AsNoTracking().Where(h => h.IsActive == true && h.SOSHubId == HubId);
 
             if (includeAnalysesBkup)
             {
@@ -722,15 +733,15 @@ namespace SupervisorMobility.API.DataAccess.Services
             return TooltoCreate;
         }
         public async  Task<Tool> GetToolById(int id) {
-            var tool = await _context.Tools.Where(t => t.ToolId == id && t.IsActive== true).FirstOrDefaultAsync();
+            var tool = await _context.Tools.AsNoTracking().Where(t => t.ToolId == id && t.IsActive== true).FirstOrDefaultAsync();
             return tool;
         }
         public async  Task<IEnumerable<Tool>> GetAllTools() {
-            var tools =  _context.Tools.Where(t => t.IsActive == true);
+            var tools =  _context.Tools.AsNoTracking().Where(t => t.IsActive == true);
             return await tools.OrderBy(t => t.ToolId).ToListAsync();
         }
         public async  Task<IEnumerable<Tool>> GetMatchTools(string ToolToFind) {
-            return _context.Tools.Where(t => t.ToolName.DiceCoefficient(ToolToFind) > 0.5).ToList();
+            return _context.Tools.AsNoTracking().Where(t => t.ToolName.DiceCoefficient(ToolToFind) > 0.5).ToList();
         }
         public async  Task<int> UpdateTool(ToolForUpdateDto ToolForUpdate, Tool ToolEntity) {
 
@@ -762,17 +773,17 @@ namespace SupervisorMobility.API.DataAccess.Services
         }
         public async Task<Material> GetMaterialById(int id)
         {
-            var Material = await _context.Materials.Where(t => t.MaterialId == id && t.IsActive == true).FirstOrDefaultAsync();
+            var Material = await _context.Materials.AsNoTracking().Where(t => t.MaterialId == id && t.IsActive == true).FirstOrDefaultAsync();
             return Material;
         }
         public async Task<IEnumerable<Material>> GetAllMaterials()
         {
-            var Materials = _context.Materials.Where(t => t.IsActive == true);
+            var Materials = _context.Materials.AsNoTracking().Where(t => t.IsActive == true);
             return await Materials.OrderBy(t => t.MaterialId).ToListAsync();
         }
         public async Task<IEnumerable<Material>> GetMatchMaterials(string MaterialToFind)
         {
-            return _context.Materials.Where(t => t.MaterialName.DiceCoefficient(MaterialToFind) > 0.5).ToList();
+            return _context.Materials.AsNoTracking().Where(t => t.MaterialName.DiceCoefficient(MaterialToFind) > 0.5).ToList();
         }
         public async Task<int> UpdateMaterial(MaterialForUpdateDto MaterialForUpdate, Material MaterialEntity)
         {
@@ -805,17 +816,17 @@ namespace SupervisorMobility.API.DataAccess.Services
         }
         public async Task<Equipment> GetEquipmentById(int id)
         {
-            var Equipment = await _context.Equipments.Where(t => t.EquipmentId == id && t.IsActive == true).FirstOrDefaultAsync();
+            var Equipment = await _context.Equipments.AsNoTracking().Where(t => t.EquipmentId == id && t.IsActive == true).FirstOrDefaultAsync();
             return Equipment;
         }
         public async Task<IEnumerable<Equipment>> GetAllEquipments()
         {
-            var Equipments = _context.Equipments.Where(t => t.IsActive == true);
+            var Equipments = _context.Equipments.AsNoTracking().Where(t => t.IsActive == true);
             return await Equipments.OrderBy(t => t.EquipmentId).ToListAsync();
         }
         public async Task<IEnumerable<Equipment>> GetMatchEquipments(string EquipmentToFind)
         {
-            return _context.Equipments.Where(t => t.EquipmentName.DiceCoefficient(EquipmentToFind) > 0.5).ToList();
+            return _context.Equipments.AsNoTracking().Where(t => t.EquipmentName.DiceCoefficient(EquipmentToFind) > 0.5).ToList();
         }
         public async Task<int> UpdateEquipment(EquipmentForUpdateDto EquipmentForUpdate, Equipment EquipmentEntity)
         {
@@ -837,7 +848,7 @@ namespace SupervisorMobility.API.DataAccess.Services
         #region Analysis Bkup
         public async Task<AnalysisBkup> GetAnalysisBkupId(int id)
         {
-            var bkup = await _context.AnalysisBkups.Where(t => t.AnalysisBkupId == id && t.IsActive == true).FirstOrDefaultAsync();
+            var bkup = await _context.AnalysisBkups.AsNoTracking().Where(t => t.AnalysisBkupId == id && t.IsActive == true).FirstOrDefaultAsync();
             return bkup;
         }
         #endregion
@@ -845,15 +856,32 @@ namespace SupervisorMobility.API.DataAccess.Services
         #region Section
         public async Task<Section> GetSectionById(int id)
         {
-            var section = await _context.Sections.Where(t => t.SectionId== id && t.IsActive == true).FirstOrDefaultAsync();
-            return section;
+            var query = _context.Sections.AsNoTracking().Where(t => t.SectionId == id && t.IsActive == true);
+
+            query = query.Include(s => s.Analyses);
+                _context.Dispose();
+            return await query.FirstOrDefaultAsync();
+        }   
+        public async Task<int> UpdateSection(SectionForUpdateDto sectionForUpdate)
+        {
+
+            var query = _context.Sections.AsNoTracking().Where(t => t.SectionId == sectionForUpdate.SectionId && t.IsActive == true);
+
+            query = query.Include(s => s.Analyses);
+
+            Section section = await query.FirstOrDefaultAsync();
+
+            _mapper.Map(sectionForUpdate, section);
+            _context.Sections.Update(section);                           
+
+            return _context.SaveChanges();
         }
         #endregion
 
         #region Commentary
         public async Task<Commentary> GetCommentaryById(int Id)
         {
-            return await _context.Comments.Where(t => t.ComentaryId == Id && t.IsActive == true).FirstOrDefaultAsync();
+            return await _context.Comments.AsNoTracking().Where(t => t.ComentaryId == Id && t.IsActive == true).FirstOrDefaultAsync();
         }
         #endregion
       
@@ -866,7 +894,7 @@ namespace SupervisorMobility.API.DataAccess.Services
 
         public async Task<SOSAnalysis> GetSOSAnalysis(int SOSAnalysisId, bool includeImages = false, bool includeNotes = false, bool includeLogbooks = false, bool includeSpecialCases = false, bool includeSOS = false, bool includeImagesSOS = false)
         {
-            var query = _context.SOSAnalyses.Where(SOS => SOS.SOSAnalysisId == SOSAnalysisId && SOS.IsActive == true);
+            var query = _context.SOSAnalyses.AsNoTracking().Where(SOS => SOS.SOSAnalysisId == SOSAnalysisId && SOS.IsActive == true);
 
             if (includeImages)
             {
@@ -933,7 +961,7 @@ namespace SupervisorMobility.API.DataAccess.Services
 
         public async Task<IEnumerable<SOSAnalysis>> GetAllSOSAnalysis(bool includeImages = false, bool includeNotes = false, bool includeLogbooks = false, bool includeSpecialCases = false, bool includeSOS = false)
         {
-            var query = _context.SOSAnalyses.Where(SOS => SOS.IsActive == true);
+            var query = _context.SOSAnalyses.AsNoTracking().Where(SOS => SOS.IsActive == true);
 
             if (includeImages)
             {
@@ -1128,19 +1156,19 @@ namespace SupervisorMobility.API.DataAccess.Services
         #region SpecialCaseAbnormalSituation
         public async Task<SpecialCaseAbnormalSituation> GetSpecialCaseAbnormalSituationById(int id)
         {
-            return await _context.SpecialCasesAbnormalSituations.Where(t => t.SpecialCaseAbnormalSituationId == id && t.IsActive == true).FirstOrDefaultAsync();
+            return await _context.SpecialCasesAbnormalSituations.AsNoTracking().Where(t => t.SpecialCaseAbnormalSituationId == id && t.IsActive == true).FirstOrDefaultAsync();
         }
         #endregion
         #region SOSAnalysisLogbook
         public async Task<SOSAnalysisLogbook> GetSOSAnalysisLogbookById(int id)
         {
-            return await _context.SOSAnalysisLogbooks.Where(t => t.SOSAnalysisLogbookId == id && t.IsActive == true).FirstOrDefaultAsync();
+            return await _context.SOSAnalysisLogbooks.AsNoTracking().Where(t => t.SOSAnalysisLogbookId == id && t.IsActive == true).FirstOrDefaultAsync();
         }
         #endregion
         #region CommonOperations
         public async Task<FileUpload?> FetchFileAsync(int fileid)
         {
-            return await _context.Files
+            return await _context.Files.AsNoTracking()
                 .Where(p => p.FileUploadId == fileid).FirstOrDefaultAsync();
         }
         public async Task<FileUpload> CreateFileAsync(FileUploadForCreationDto newFile)

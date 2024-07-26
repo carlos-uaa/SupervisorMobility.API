@@ -7,6 +7,7 @@ using SupervisorMobility.API.Models.SOS.EquipmentDtos;
 using SupervisorMobility.API.Models.SOS.MaterialDtos;
 using SupervisorMobility.API.Models.SOS.SOSAnalysisDtos;
 using SupervisorMobility.API.Models.SOS.SOSHubDtos;
+using SupervisorMobility.API.Models.SOS.SOSHubDtos.SectionDtos;
 using SupervisorMobility.API.Models.SOS.ToolDtos;
 using System.Runtime.CompilerServices;
 
@@ -94,6 +95,7 @@ namespace SupervisorMobility.API.DataAccess.Services
         #endregion
         #region Section
         Task<Section> GetSectionById(int id);
+        Task<int> UpdateSection(SectionForUpdateDto sectionForUpdate);
 
         #endregion
         #region SOSAnalysis
