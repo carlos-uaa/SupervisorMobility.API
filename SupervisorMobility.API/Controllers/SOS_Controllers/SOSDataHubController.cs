@@ -150,6 +150,7 @@ namespace SupervisorMobility.API.Controllers.SOS_Controllers
             List<Tool> tools = new List<Tool>();
             List<Material> materials = new List<Material>();
             List<Equipment> equipments = new List<Equipment>();
+            List<CommonDirection> commons = new List<CommonDirection>();
 
             // Filtrar nuevos Comentarios
             List<UpdateCommentaryDto> filteredCommentaryList = _SOSHubForUpdate.ProcessSheetCommentary
