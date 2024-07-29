@@ -800,7 +800,28 @@ namespace SupervisorMobility.API.DataAccess.Services
                     Console.WriteLine($"Exception: {ex.Message}");
                 }
             }
-            return new AsyncVoidMethodBuilder();
+
+            if (Master.AnalysesBkup?.Count > 0)
+            {
+                Master.AnalysesBkup.Clear();
+
+                try
+                {
+                    await _context.SaveChangesAsync();
+
+                }
+                catch (DbUpdateException ex)
+                {
+                    // Manejar las excepciones relacionadas con la actualización de la base de datos
+                    Console.WriteLine($"DbUpdateException [SOSDataRemoveAllAnalysisBkups]: {ex.Message}");
+                }
+                catch (Exception ex)
+                {
+                    // Manejar cualquier otra excepción que pueda ocurrir
+                    Console.WriteLine($"Exception: {ex.Message}");
+                }
+            }
+                    return new AsyncVoidMethodBuilder();
         }
         public async Task<AsyncVoidMethodBuilder> SOSDataRemoveAllSections(SOSHub Master)
         {
@@ -1469,9 +1490,9 @@ namespace SupervisorMobility.API.DataAccess.Services
 
         #region CommonDirection
 
-        public async Task<List<CommonDirectionDto>> ManageRangeCommonDirs(List<CommonDirectionDto> listToManage, int SOSHubId)
+        public async Task<List<CommonDirection>> ManageRangeCommonDirs(List<CommonDirectionDto> listToManage, int SOSHubId)
         {
-            List<CommonDirectionDto> finalList = new List<CommonDirectionDto>();
+            List<CommonDirection> finalList = new List<CommonDirection>();
             var existingList = _context.SOSHubs.Where(p => p.SOSHubId == SOSHubId).Select(p => p.CommonDirection).FirstOrDefault();
             existingList ??= new List<CommonDirection>();
             foreach(var item in listToManage)
@@ -1494,14 +1515,21 @@ namespace SupervisorMobility.API.DataAccess.Services
                     _context.Add(element);
                 }
             }
+            // Guarda los cambios en el contexto
             await _context.SaveChangesAsync();
 
             //Retrive updated list
             //var updatedList = _context.SOSHubs.Where(p => p.SOSHubId == SOSHubId).SelectMany(p => p.CommonDirection).ToList();
             var updatedList = _context.CommonDirections.Local.ToList();
 
+            foreach(var item in updatedList)
+            {
+                _context.Entry(item).State = EntityState.Detached;
+
+                finalList.Add(item);
+            }
             // Map the updated entities back to DTOs and add them to the final list
-            finalList = updatedList.Select(cd => _mapper.Map<CommonDirectionDto>(cd)).ToList();
+            
 
             return finalList;
         }
