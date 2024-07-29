@@ -18,6 +18,7 @@ using SupervisorMobility.API.Models.SOS.SOSHubDtos;
 using SupervisorMobility.API.Models.SOS.SOSHubDtos.SectionDtos;
 using SupervisorMobility.API.Models.SOS.ToolDtos;
 using System.Runtime.CompilerServices;
+using System.Xml.Linq;
 using Tavis.UriTemplates;
 
 namespace SupervisorMobility.API.DataAccess.Services
@@ -432,6 +433,10 @@ namespace SupervisorMobility.API.DataAccess.Services
 
         public async Task<AsyncVoidMethodBuilder> AddHistoryToSOSCollection(SOSHub Master, SOSHubHistory Slave)
         {
+            if (_context.Entry(Master).State == EntityState.Detached)
+            {
+                _context.SOSHubs.Attach(Master);
+            }
 
             if (Master.History != null)
             {
@@ -451,6 +456,10 @@ namespace SupervisorMobility.API.DataAccess.Services
         #region AddTo Sos Hub
         public async Task<AsyncVoidMethodBuilder> AddProcessSheetCommentaryToSOSCollection(SOSHub Master, Commentary Slave)
         {
+            if (_context.Entry(Master).State == EntityState.Detached)
+            {
+                _context.SOSHubs.Attach(Master);
+            }
             if (Master.ProcessSheetCommentary != null)
             {
                 Master.ProcessSheetCommentary.Add(Slave);
@@ -466,6 +475,10 @@ namespace SupervisorMobility.API.DataAccess.Services
 
         public async Task<AsyncVoidMethodBuilder> AddAnaysisBkupToSOSCollection(SOSHub Master, AnalysisBkup Slave)
         {
+            if (_context.Entry(Master).State == EntityState.Detached)
+            {
+                _context.SOSHubs.Attach(Master);
+            }
             if (Master.AnalysesBkup != null)
             {
                 Master.AnalysesBkup.Add(Slave);
@@ -481,6 +494,12 @@ namespace SupervisorMobility.API.DataAccess.Services
         
         public async Task<AsyncVoidMethodBuilder> AddSectionSOSCollection(SOSHub Master, Section Slave)
         {
+
+            if (_context.Entry(Master).State == EntityState.Detached)
+            {
+                _context.SOSHubs.Attach(Master);
+            }
+
             if (Master.Sections != null)
             {
                 Master.Sections.Add(Slave);
@@ -496,6 +515,10 @@ namespace SupervisorMobility.API.DataAccess.Services
 
         public async Task<AsyncVoidMethodBuilder> AddToolToSOSCollection(SOSHub Master, Tool Slave)
         {
+            if (_context.Entry(Master).State == EntityState.Detached)
+            {
+                _context.SOSHubs.Attach(Master);
+            }
 
             if (Master.ToolsUsed != null)
             {
@@ -513,10 +536,12 @@ namespace SupervisorMobility.API.DataAccess.Services
 
         public async Task<AsyncVoidMethodBuilder> AddEquipmentToSOSCollection(SOSHub Master, Equipment Slave)
         {
-
+            if (_context.Entry(Master).State == EntityState.Detached)
+            {
+                _context.SOSHubs.Attach(Master);
+            }
             if (Master.SafetyEquipment != null)
             {
-
                 Master.SafetyEquipment.Add(Slave);
             }
             else
@@ -530,14 +555,27 @@ namespace SupervisorMobility.API.DataAccess.Services
 
         public async Task<AsyncVoidMethodBuilder> AddCommonDirectionsToSOSCollection(SOSHub Master, List<CommonDirection> Slave)
         {
-            Master.CommonDirection ??= new List<CommonDirection>();
-            ((List<CommonDirection>)Master.CommonDirection).AddRange(Slave);
+            
+            if (Master.CommonDirection != null)
+            {
+                Master.CommonDirection.ToList().AddRange(Slave);
+            }
+            else
+            {
+                Master.CommonDirection = new List<CommonDirection>();
+                Master.CommonDirection.ToList().AddRange(Slave);
+            }
+
             _context.SaveChanges();
             return new AsyncVoidMethodBuilder();
         }
 
         public async Task<AsyncVoidMethodBuilder> AddMaterialToSOSCollection(SOSHub Master, Material Slave)
         {
+            if (_context.Entry(Master).State == EntityState.Detached)
+            {
+                _context.SOSHubs.Attach(Master);
+            }
 
             if (Master.MaterialsUsed != null)
             {
@@ -555,6 +593,10 @@ namespace SupervisorMobility.API.DataAccess.Services
         public async Task AddImageToSOSData(int SOS_DataPool_id, FileUpload evidence)
         {
             var SosHubEntity = await GetSOSHub(SOS_DataPool_id, includeImages: true);
+            if (_context.Entry(SosHubEntity).State == EntityState.Detached)
+            {
+                _context.SOSHubs.Attach(SosHubEntity);
+            }
 
             if (SosHubEntity != null)
             {
@@ -576,6 +618,11 @@ namespace SupervisorMobility.API.DataAccess.Services
         public async Task AddVideoToSOSData(int SOS_DataPool_id, FileUpload evidence)
         {
             var SosHubEntity = await GetSOSHub(SOS_DataPool_id, includeImages: true);
+
+            if (_context.Entry(SosHubEntity).State == EntityState.Detached)
+            {
+                _context.SOSHubs.Attach(SosHubEntity);
+            }
 
             if (SosHubEntity != null)
             {
@@ -622,60 +669,198 @@ namespace SupervisorMobility.API.DataAccess.Services
         #region Remove from Sos Hub
         public async Task<AsyncVoidMethodBuilder> SOSDataRemoveAllAnalysisBkups(SOSHub Master)
         {
-            if(Master.AnalysesBkup?.Count > 0)
+            if (_context.Entry(Master).State == EntityState.Detached)
             {
-            Master.AnalysesBkup?.Clear();
-            _context.SaveChanges();
+                _context.SOSHubs.Attach(Master);
             }
-            return new AsyncVoidMethodBuilder();
+
+            if (Master.AnalysesBkup?.Count > 0)
+            {
+                Master.AnalysesBkup.Clear();
+
+                try
+                {
+                    await _context.SaveChangesAsync();
+
+                }
+                catch (DbUpdateException ex)
+                {
+                    // Manejar las excepciones relacionadas con la actualización de la base de datos
+                    Console.WriteLine($"DbUpdateException [SOSDataRemoveAllAnalysisBkups]: {ex.Message}");
+                }
+                catch (Exception ex)
+                {
+                    // Manejar cualquier otra excepción que pueda ocurrir
+                    Console.WriteLine($"Exception: {ex.Message}");
+                }
+            }
+                    return new AsyncVoidMethodBuilder();
         }
         public async Task<AsyncVoidMethodBuilder> SOSDataRemoveAllSections(SOSHub Master)
         {
+            
+            if (_context.Entry(Master).State == EntityState.Detached)
+            {
+                _context.SOSHubs.Attach(Master);
+            }
+
             if (Master.Sections?.Count > 0)
             {
-                Master.Sections?.Clear();
-                _context.SaveChanges();
+                Master.Sections.Clear();
+
+                try
+                {
+                    await _context.SaveChangesAsync();
+
+                }
+                catch (DbUpdateException ex)
+                {
+                    // Manejar las excepciones relacionadas con la actualización de la base de datos
+                    Console.WriteLine($"DbUpdateException [SOSDataRemoveAllSections]: {ex.Message}");
+                }
+                catch (Exception ex)
+                {
+                    // Manejar cualquier otra excepción que pueda ocurrir
+                    Console.WriteLine($"Exception: {ex.Message}");
+                }
             }
-            return new AsyncVoidMethodBuilder();
+                    return new AsyncVoidMethodBuilder();
         }
         public async Task<AsyncVoidMethodBuilder> SOSDataRemoveAllProcessSheetCommentary(SOSHub Master)
         {
-
-            if(Master.ProcessSheetCommentary?.Count > 0)
+            if (_context.Entry(Master).State == EntityState.Detached)
             {
-            Master.ProcessSheetCommentary?.Clear();
-            _context.SaveChanges();
+                _context.SOSHubs.Attach(Master);
+            }
+
+            if (Master.ProcessSheetCommentary?.Count > 0)
+            {
+                Master.ProcessSheetCommentary.Clear();
+
+                try
+                {
+                    await _context.SaveChangesAsync();
+
+                }
+                catch (DbUpdateException ex)
+                {
+                    // Manejar las excepciones relacionadas con la actualización de la base de datos
+                    Console.WriteLine($"DbUpdateException [SOSDataRemoveAllProcessSheetCommentary]: {ex.Message}");
+                }
+                catch (Exception ex)
+                {
+                    // Manejar cualquier otra excepción que pueda ocurrir
+                    Console.WriteLine($"Exception: {ex.Message}");
+                }
             }
             return new AsyncVoidMethodBuilder();
+
         }
 
         public async Task<AsyncVoidMethodBuilder> SOSDataRemoveAllToolsEquipmentMaterial(SOSHub Master)
         {
-            if(Master.ToolsUsed?.Count> 0)
+            if (_context.Entry(Master).State == EntityState.Detached)
             {
-                Master.ToolsUsed?.Clear();
-            }
-            if(Master.SafetyEquipment?.Count > 0)
-            {
-                Master.SafetyEquipment?.Clear();
-            }
-            if(Master.MaterialsUsed?.Count > 0)
-            {
-                Master.MaterialsUsed?.Clear();
+                _context.SOSHubs.Attach(Master);
             }
 
-            
-            _context.SaveChanges();
+            if (Master.ToolsUsed?.Count > 0)
+            {
+                Master.ToolsUsed.Clear();
+
+                try
+                {
+                    await _context.SaveChangesAsync();
+
+                }
+                catch (DbUpdateException ex)
+                {
+                    // Manejar las excepciones relacionadas con la actualización de la base de datos
+                    Console.WriteLine($"DbUpdateException [SOSDataRemoveAllToolsEquipmentMaterial]: {ex.Message}");
+                }
+                catch (Exception ex)
+                {
+                    // Manejar cualquier otra excepción que pueda ocurrir
+                    Console.WriteLine($"Exception: {ex.Message}");
+                }
+            }
+
+            if (Master.SafetyEquipment?.Count > 0)
+            {
+                Master.SafetyEquipment.Clear();
+
+                try
+                {
+                    await _context.SaveChangesAsync();
+
+                }
+                catch (DbUpdateException ex)
+                {
+                    // Manejar las excepciones relacionadas con la actualización de la base de datos
+                    Console.WriteLine($"DbUpdateException [SOSDataRemoveAllToolsEquipmentMaterial]: {ex.Message}");
+                }
+                catch (Exception ex)
+                {
+                    // Manejar cualquier otra excepción que pueda ocurrir
+                    Console.WriteLine($"Exception: {ex.Message}");
+                }
+            }
+
+            if (Master.MaterialsUsed?.Count > 0)
+            {
+                Master.MaterialsUsed.Clear();
+
+                try
+                {
+                    await _context.SaveChangesAsync();
+
+                }
+                catch (DbUpdateException ex)
+                {
+                    // Manejar las excepciones relacionadas con la actualización de la base de datos
+                    Console.WriteLine($"DbUpdateException [SOSDataRemoveAllToolsEquipmentMaterial]: {ex.Message}");
+                }
+                catch (Exception ex)
+                {
+                    // Manejar cualquier otra excepción que pueda ocurrir
+                    Console.WriteLine($"Exception: {ex.Message}");
+                }
+            }
+
 
             return new AsyncVoidMethodBuilder();
+
         }
 
         public async Task<AsyncVoidMethodBuilder> SOSDataRemoveAllCommonDirections(SOSHub Master)
         {
-            Master.CommonDirection?.Clear();
-            Master.CommonDirection?.Clear();
-            await _context.SaveChangesAsync();
+            if (_context.Entry(Master).State == EntityState.Detached)
+            {
+                _context.SOSHubs.Attach(Master);
+            }
+
+            if (Master.CommonDirection?.Count > 0)
+            {
+                Master.CommonDirection.Clear();
+
+                try
+                {
+                    await _context.SaveChangesAsync();
+
+                }
+                catch (DbUpdateException ex)
+                {
+                    // Manejar las excepciones relacionadas con la actualización de la base de datos
+                    Console.WriteLine($"DbUpdateException [SOSDataRemoveAllCommonDirections]: {ex.Message}");
+                }
+                catch (Exception ex)
+                {
+                    // Manejar cualquier otra excepción que pueda ocurrir
+                    Console.WriteLine($"Exception: {ex.Message}");
+                }
+            }
             return new AsyncVoidMethodBuilder();
+
         }
 
 
@@ -882,7 +1067,6 @@ namespace SupervisorMobility.API.DataAccess.Services
             var query = _context.Sections.AsNoTracking().Where(t => t.SectionId == id && t.IsActive == true);
 
             query = query.Include(s => s.Analyses);
-                _context.Dispose();
             return await query.FirstOrDefaultAsync();
         }   
         public async Task<int> UpdateSection(SectionForUpdateDto sectionForUpdate)
@@ -893,6 +1077,11 @@ namespace SupervisorMobility.API.DataAccess.Services
             query = query.Include(s => s.Analyses);
 
             Section section = await query.FirstOrDefaultAsync();
+
+            if (_context.Entry(section).State == EntityState.Detached)
+            {
+                _context.Sections.Attach(section);
+            }
 
             _mapper.Map(sectionForUpdate, section);
             _context.Sections.Update(section);                           
@@ -910,9 +1099,9 @@ namespace SupervisorMobility.API.DataAccess.Services
 
         #region CommonDirection
 
-        public async Task<List<CommonDirectionDto>> ManageRangeCommonDirs(List<CommonDirectionDto> listToManage, int SOSHubId)
+        public async Task<List<CommonDirection>> ManageRangeCommonDirs(List<CommonDirectionDto> listToManage, int SOSHubId)
         {
-            List<CommonDirectionDto> finalList = new List<CommonDirectionDto>();
+            List<CommonDirection> finalList = new List<CommonDirection>();
             var existingList = _context.SOSHubs.Where(p => p.SOSHubId == SOSHubId).Select(p => p.CommonDirection).FirstOrDefault();
             existingList ??= new List<CommonDirection>();
             foreach(var item in listToManage)
@@ -935,14 +1124,21 @@ namespace SupervisorMobility.API.DataAccess.Services
                     _context.Add(element);
                 }
             }
+            // Guarda los cambios en el contexto
             await _context.SaveChangesAsync();
 
             //Retrive updated list
             //var updatedList = _context.SOSHubs.Where(p => p.SOSHubId == SOSHubId).SelectMany(p => p.CommonDirection).ToList();
             var updatedList = _context.CommonDirections.Local.ToList();
 
+            foreach(var item in updatedList)
+            {
+                _context.Entry(item).State = EntityState.Detached;
+
+                finalList.Add(item);
+            }
             // Map the updated entities back to DTOs and add them to the final list
-            finalList = updatedList.Select(cd => _mapper.Map<CommonDirectionDto>(cd)).ToList();
+            
 
             return finalList;
         }
@@ -1274,6 +1470,23 @@ namespace SupervisorMobility.API.DataAccess.Services
         public async Task<bool> SaveChangesAsync()
         {
             return (await _context.SaveChangesAsync() >= 0);
+        }
+        public async Task<bool> SaveChanges()
+        {
+            try
+            {
+                return (await _context.SaveChangesAsync() >= 0);
+            }
+            catch (DbUpdateException ex)
+            {
+                Console.WriteLine($"DbUpdateException: {ex.Message}");
+                return false;
+            }
+            catch (Exception ex)
+            {
+                Console.WriteLine($"Exception: {ex.Message}");
+                return false;
+            }
         }
 
 

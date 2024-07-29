@@ -92,7 +92,7 @@ namespace SupervisorMobility.API.DataAccess.Services
         Task<SOSAnalysisLogbook> GetSOSAnalysisLogbookById(int id);
         #endregion
         #region CommonDirection
-        Task<List<CommonDirectionDto>> ManageRangeCommonDirs(List<CommonDirectionDto> listToManage, int SOSHubId);
+        Task<List<CommonDirection>> ManageRangeCommonDirs(List<CommonDirectionDto> listToManage, int SOSHubId);
         Task<CommonDirection> CreateNewCommonDir(CommonDirection CommonDirtoCreate);
         Task<List<CommonDirection>> TrackCommonDirs(List<CommonDirectionDto> commonDirections);
         #endregion
@@ -137,6 +137,7 @@ namespace SupervisorMobility.API.DataAccess.Services
         Task<FileUpload?> FetchFileAsync(int fileid);
         Task<FileUpload> CreateFileAsync(FileUploadForCreationDto newFile);
         Task<bool> SaveChangesAsync();
+        Task<bool> SaveChanges();
         #endregion
 
     }

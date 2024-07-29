@@ -157,7 +157,7 @@ namespace SupervisorMobility.API.Controllers.SOS_Controllers
             if(successCD != null)
             {
                 Debug.WriteLine("Common Directions managed succsesfully");
-                _SOSHubForUpdate.CommonDirection = successCD;
+                commons.AddRange(successCD);
             }
             // Filtrar nuevos Comentarios
             List<UpdateCommentaryDto> filteredCommentaryList = _SOSHubForUpdate.ProcessSheetCommentary
@@ -185,9 +185,7 @@ namespace SupervisorMobility.API.Controllers.SOS_Controllers
                     Debug.WriteLine("Commentarios añadidos con exitop");
                 }
 
-
-                List<UpdateCommentaryDto> newCommentarysCreated = _mapper.Map<List<UpdateCommentaryDto>>(newCommentarys);
-                _SOSHubForUpdate.ProcessSheetCommentary.ToList().AddRange(newCommentarysCreated);
+                ProcessSheetCommentaries.AddRange(newCommentarys);
             }
 
             List<AnalysisBkupForUpdateDto> filteredAnalysisBkupList = _SOSHubForUpdate.AnalysesBkup
@@ -214,10 +212,8 @@ namespace SupervisorMobility.API.Controllers.SOS_Controllers
                     Debug.WriteLine("AnalysisBkup añadidos con exitop");
                 }
 
-                // Mapear y agregar nuevas AnalysisBkup creadas al DTO de actualización
-                List<AnalysisBkupForUpdateDto> newAnalysisBkupCreated = _mapper.Map<List<AnalysisBkupForUpdateDto>>(newAnalysisBkups);
-                _SOSHubForUpdate.AnalysesBkup.ToList().AddRange(newAnalysisBkupCreated);
-            }
+                    AnalysisBkups.AddRange(newAnalysisBkups);
+                }
 
             List<SectionForUpdateDto> filteredSectionList = _SOSHubForUpdate.Sections
               .Where(t => t.SectionId <= 0).ToList();
@@ -243,8 +239,6 @@ namespace SupervisorMobility.API.Controllers.SOS_Controllers
                     Debug.WriteLine("Sections añadidas con exitop");
                 }
 
-                // Mapear y agregar nuevas secciones creadas al DTO de actualización
-                List<SectionForUpdateDto> newSectionsCreated = _mapper.Map<List<SectionForUpdateDto>>(newSections);
                 Sections.AddRange(newSections);
             }
 
@@ -289,6 +283,7 @@ namespace SupervisorMobility.API.Controllers.SOS_Controllers
 
             await _AnalysisProcessRepository.SOSDataRemoveAllProcessSheetCommentary(entitySOSHub);
             await _AnalysisProcessRepository.SOSDataRemoveAllSections(entitySOSHub);
+            await _AnalysisProcessRepository.SOSDataRemoveAllCommonDirections(entitySOSHub);
             await _AnalysisProcessRepository.SOSDataRemoveAllAnalysisBkups(entitySOSHub);
             await _AnalysisProcessRepository.SOSDataRemoveAllToolsEquipmentMaterial(entitySOSHub);
 
@@ -395,12 +390,14 @@ namespace SupervisorMobility.API.Controllers.SOS_Controllers
                 }
             }
             //Common Directions
-            if (commons.Any())
-            {
-                await _AnalysisProcessRepository.AddCommonDirectionsToSOSCollection(entitySOSHub,commons);
-            }
+            //if (commons.Any())
+            //{
+            //    await _AnalysisProcessRepository.AddCommonDirectionsToSOSCollection(entitySOSHub,commons);
+            //}
 
             //await _AnalysisProcessRepository.AddHistoryToSOSCollection(entitySOSHub, sOSHubHistory);
+
+            //await _AnalysisProcessRepository.SaveChangesAsync();
 
             if (result != null)
             {
