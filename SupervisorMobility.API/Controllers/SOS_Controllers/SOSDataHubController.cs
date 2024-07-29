@@ -441,10 +441,10 @@ namespace SupervisorMobility.API.Controllers.SOS_Controllers
                 await _AnalysisProcessRepository.AddCommonDirectionsToSOSCollection(entitySOSHub, commons);
             }
             //Common Directions
-            if (commons.Any())
-            {
-                await _AnalysisProcessRepository.AddCommonDirectionsToSOSCollection(entitySOSHub,commons);
-            }
+            //if (commons.Any())
+            //{
+            //    await _AnalysisProcessRepository.AddCommonDirectionsToSOSCollection(entitySOSHub,commons);
+            //}
 
             //await _AnalysisProcessRepository.AddHistoryToSOSCollection(entitySOSHub, sOSHubHistory);
 

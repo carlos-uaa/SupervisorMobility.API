@@ -806,7 +806,28 @@ namespace SupervisorMobility.API.DataAccess.Services
                     Console.WriteLine($"Exception: {ex.Message}");
                 }
             }
-            return new AsyncVoidMethodBuilder();
+
+            if (Master.AnalysesBkup?.Count > 0)
+            {
+                Master.AnalysesBkup.Clear();
+
+                try
+                {
+                    await _context.SaveChangesAsync();
+
+                }
+                catch (DbUpdateException ex)
+                {
+                    // Manejar las excepciones relacionadas con la actualización de la base de datos
+                    Console.WriteLine($"DbUpdateException [SOSDataRemoveAllAnalysisBkups]: {ex.Message}");
+                }
+                catch (Exception ex)
+                {
+                    // Manejar cualquier otra excepción que pueda ocurrir
+                    Console.WriteLine($"Exception: {ex.Message}");
+                }
+            }
+                    return new AsyncVoidMethodBuilder();
         }
         public async Task<AsyncVoidMethodBuilder> SOSDataRemoveAllSections(SOSHub Master)
         {
