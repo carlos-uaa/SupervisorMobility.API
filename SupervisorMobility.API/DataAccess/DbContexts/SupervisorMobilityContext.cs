@@ -92,6 +92,7 @@ namespace SupervisorMobility.API.Context
         public DbSet<Section> Sections { get; set; }
         public DbSet<Analysis> Analyses { get; set; }
         public DbSet<AnalysisBkup> AnalysisBkups { get; set; }
+        public DbSet<CommonDirection> CommonDirections { get; set; }
 
         public DbSet<SOSHubHistory> SOSHubsHistory { get; set; }
         public DbSet<CommentaryHistory> CommentaryHistorys { get; set; }
@@ -112,7 +113,6 @@ namespace SupervisorMobility.API.Context
         public DbSet<SOSDistribution> SOSDistributions { get; set; }
         public DbSet<SOSFlow> SOSFlows { get; set; }
         public DbSet<SOSSequence> SOSSequences { get; set; }
-        public DbSet<CommonDirection> CommonDirections { get; set; }
 
         #endregion
 

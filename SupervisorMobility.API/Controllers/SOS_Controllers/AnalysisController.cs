@@ -38,21 +38,23 @@ namespace SupervisorMobility.API.Controllers.SOS_Controllers
         }
 
         [HttpPost]
-        public async Task<ActionResult<SOSAnalysisDto>> GenerateAnalysis( SOSAnalysis sOSAnalysisToCreate, int SOSHubCollection_Id)
+        public async Task<ActionResult<SOSAnalysisDto>> GenerateAnalysis( SOSAnalysisForCreateDto sOSAnalysisToCreate, int SOSHubCollection_Id)
         {
             SOSHub SOSEntity = await _AnalysisProcessRepository.GetSOSHub(SOSHubCollection_Id, includeInformation: true);
 
             //Nombre del documento GOS o processShet
-            //sOSAnalysisToCreate.OperationName = SOSEntity.;
             sOSAnalysisToCreate.OperationName = SOSEntity.ProcessSheet;
+            sOSAnalysisToCreate.InternalControlNumber= SOSEntity.ProcessSheet;
+            sOSAnalysisToCreate.ProcessName = SOSEntity.ProcessSheet;
 
             sOSAnalysisToCreate.CreatedDate = DateTime.Now;
             sOSAnalysisToCreate.IsActive = true;
 
             sOSAnalysisToCreate.SOSHubId = SOSHubCollection_Id;
-            sOSAnalysisToCreate.SOSHub = SOSEntity;
 
-            var createdResult = await _AnalysisProcessRepository.CreateSOSAnalysis(sOSAnalysisToCreate);
+            SOSAnalysis AnalysisToCreate = _mapper.Map<SOSAnalysis>(sOSAnalysisToCreate);
+
+            var createdResult = await _AnalysisProcessRepository.CreateSOSAnalysis(AnalysisToCreate);
             if (createdResult != null)
                 return Ok(sOSAnalysisToCreate);
             else
@@ -118,7 +120,7 @@ namespace SupervisorMobility.API.Controllers.SOS_Controllers
 
                 var resultAddCommentary = await _AnalysisProcessRepository.AddRangeCommentary(newCommentarys);
 
-                if (resultAddCommentary > 0)
+                if (resultAddCommentary != null)
                 {
                     Debug.WriteLine("Commentarios añadidos con exitop");
                 }
