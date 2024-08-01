@@ -292,7 +292,6 @@ namespace SupervisorMobility.API.DataAccess.Services
                 _context.SOSHubs.Attach(SosEntity);
             }
 
-            // Mapea los cambios del DTO a la entidad
             _mapper.Map(HubUpdate, SosEntity);
 
             // Marca la entidad como modificada
@@ -821,7 +820,7 @@ namespace SupervisorMobility.API.DataAccess.Services
                     Console.WriteLine($"Exception: {ex.Message}");
                 }
             }
-                    return new AsyncVoidMethodBuilder();
+            return new AsyncVoidMethodBuilder();
         }
         public async Task<AsyncVoidMethodBuilder> SOSDataRemoveAllSections(SOSHub Master)
         {
@@ -1273,7 +1272,7 @@ namespace SupervisorMobility.API.DataAccess.Services
         #region Section
         public async Task<Section> GetSectionById(int id)
         {
-            var query = _context.Sections.AsNoTracking().Where(t => t.SectionId == id );
+            var query = _context.Sections.AsNoTracking().Where(t => t.SectionId == id);
 
             query = query.Include(s => s.Analyses);
             return await query.FirstOrDefaultAsync();
@@ -1346,7 +1345,7 @@ namespace SupervisorMobility.API.DataAccess.Services
             }
         }
 
-      
+
         #endregion
 
         #region Commentary
@@ -1400,136 +1399,6 @@ namespace SupervisorMobility.API.DataAccess.Services
         #endregion
 
         #region CommonDirection
-
-
-        public async Task<CommonDirection> CreateNewCommonDir(CommonDirection CommonDirtoCreate)
-        {
-            _context.Add(CommonDirtoCreate);
-            await _context.SaveChangesAsync();
-
-            return CommonDirtoCreate;
-        }
-
-        public async Task<List<CommonDirection>> AddRangeCommonDirection(List<CommonDirection> CommonDirtoCreate)
-        {
-            _context.CommonDirections.AddRange(CommonDirtoCreate);
-
-            await _context.SaveChangesAsync();
-
-            // Desvincular las nuevas secciones del contexto
-            foreach (var section in CommonDirtoCreate)
-            {
-                _context.Entry(section).State = EntityState.Detached;
-            }
-            return CommonDirtoCreate;
-        }
-
-        public async Task<CommonDirection> GetCommonDirectionById(int id)
-        {
-            var query = _context.CommonDirections.AsNoTracking().Where(t => t.CommonDirectionId == id);
-
-            return await query.FirstOrDefaultAsync();
-        }
-
-        public async Task<int> UpdateCommonDirection(CommonDirectionDto commonDirectionForUpdate)
-        {
-            try
-            {
-                var query = _context.CommonDirections.Where(t => t.CommonDirectionId == commonDirectionForUpdate.CommonDirectionId);
-
-                CommonDirection commonDirection = await query.FirstOrDefaultAsync();
-
-                if (commonDirection == null)
-                {
-                    throw new InvalidOperationException("commonDirection not found or is not active.");
-                }
-
-                var localEntry = _context.CommonDirections.Local.FirstOrDefault(entry => entry.CommonDirectionId == commonDirectionForUpdate.CommonDirectionId);
-                if (localEntry != null)
-                {
-                    _context.Entry(localEntry).CurrentValues.SetValues(commonDirectionForUpdate);
-                }
-                else
-                {
-                    if (_context.Entry(commonDirection).State == EntityState.Detached)
-                    {
-                        _context.CommonDirections.Attach(commonDirection);
-                    }
-
-                    _mapper.Map(commonDirectionForUpdate, commonDirection);
-                    _context.CommonDirections.Update(commonDirection);
-                }
-
-                return await _context.SaveChangesAsync();
-            }
-            catch (Exception ex)
-            {
-                // Manejar el error apropiadamente, puedes loguearlo o lanzar una excepción personalizada
-                Debug.WriteLine("An error occurred while updating the commonDirection.", ex.Message);
-                return 0;
-
-            }
-        }
-
-        public async Task<List<CommonDirection>> GetAllCommonDirectionInactives()
-        {
-            var linkedCommonDirectionIds = await _context.SOSHubs
-        .AsNoTracking()
-        .SelectMany(hub => hub.CommonDirection.Select(cd => cd.CommonDirectionId))
-        .ToListAsync();
-
-            var unlinkedCommonDirections = await _context.CommonDirections
-                .AsNoTracking()
-                .Where(cd => !linkedCommonDirectionIds.Contains(cd.CommonDirectionId))
-                .ToListAsync();
-
-            return unlinkedCommonDirections;
-        }
-
-        #endregion
-
-        #region CommonDirection
-
-        public async Task<List<CommonDirection>> ManageRangeCommonDirs(List<CommonDirectionDto> listToManage, int SOSHubId)
-        {
-            List<CommonDirection> finalList = new List<CommonDirection>();
-            var existingList = _context.SOSHubs.Where(p => p.SOSHubId == SOSHubId).Select(p => p.CommonDirection).FirstOrDefault();
-            existingList ??= new List<CommonDirection>();
-            foreach(var item in listToManage)
-            {
-                if(item.CommonDirectionId > 0)
-                {
-                    var element = existingList.First(p => p.CommonDirectionId == item.CommonDirectionId);
-                    _mapper.Map(item, element);
-                    _context.Update(element);
-                }
-                else if(existingList.Where(p => p.DOC_ID == item.DOC_ID).Any())
-                {
-                    var element = existingList.FirstOrDefault(p => p.DOC_ID == item.DOC_ID);
-                    element.IsActive = item.IsActive;
-                    _context.Update(element);
-                }
-                else
-                {
-                    var element = _mapper.Map<CommonDirection>(item);
-                    _context.Add(element);
-                }
-            }
-            // Guarda los cambios en el contexto
-            await _context.SaveChangesAsync();
-
-            //Retrive updated list
-            //var updatedList = _context.SOSHubs.Where(p => p.SOSHubId == SOSHubId).SelectMany(p => p.CommonDirection).ToList();
-            var updatedList = _context.CommonDirections.Local.ToList();
-
-            foreach(var item in updatedList)
-            {
-                _context.Entry(item).State = EntityState.Detached;
-
-                finalList.Add(item);
-            }
-            // Map the updated entities back to DTOs and add them to the final list
-            
 
 
         public async Task<CommonDirection> CreateNewCommonDir(CommonDirection CommonDirtoCreate)
