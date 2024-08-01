@@ -820,7 +820,7 @@ namespace SupervisorMobility.API.DataAccess.Services
                     Console.WriteLine($"Exception: {ex.Message}");
                 }
             }
-                    return new AsyncVoidMethodBuilder();
+            return new AsyncVoidMethodBuilder();
         }
         public async Task<AsyncVoidMethodBuilder> SOSDataRemoveAllSections(SOSHub Master)
         {
@@ -1272,7 +1272,7 @@ namespace SupervisorMobility.API.DataAccess.Services
         #region Section
         public async Task<Section> GetSectionById(int id)
         {
-            var query = _context.Sections.AsNoTracking().Where(t => t.SectionId == id );
+            var query = _context.Sections.AsNoTracking().Where(t => t.SectionId == id);
 
             query = query.Include(s => s.Analyses);
             return await query.FirstOrDefaultAsync();
@@ -1345,7 +1345,7 @@ namespace SupervisorMobility.API.DataAccess.Services
             }
         }
 
-      
+
         #endregion
 
         #region Commentary
