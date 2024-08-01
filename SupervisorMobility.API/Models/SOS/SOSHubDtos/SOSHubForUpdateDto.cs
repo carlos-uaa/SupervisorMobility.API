@@ -14,11 +14,11 @@ namespace SupervisorMobility.API.Models.SOS.SOSHubDtos
     {
         public int SOSHubId { get; set; }
         public string Folio { get; set; }
-        public ICollection<AnalysisBkupForUpdateDto>? AnalysesBkup { get; set; } = new List<AnalysisBkupForUpdateDto>();
+        public List<AnalysisBkupForUpdateDto>? AnalysesBkup { get; set; } = new List<AnalysisBkupForUpdateDto>();
         public List<SectionForUpdateDto>? Sections { get; set; } = new List<SectionForUpdateDto>();
         public string ProcessSheet { get; set; }
-        public ICollection<UpdateCommentaryDto>? ProcessSheetCommentary { get; set; } = new List<UpdateCommentaryDto>();
-        public ICollection<CommonDirectionDto>? CommonDirection { get; set; } = new List<CommonDirectionDto>();
+        public List<UpdateCommentaryDto>? ProcessSheetCommentary { get; set; } = new List<UpdateCommentaryDto>();
+        public List<CommonDirectionDto>? CommonDirection { get; set; } = new List<CommonDirectionDto>();
 
         public int? AppliedModelId { get; set; }
 

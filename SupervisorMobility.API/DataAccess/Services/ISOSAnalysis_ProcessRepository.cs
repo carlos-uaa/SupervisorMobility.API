@@ -2,11 +2,13 @@
 using SupervisorMobility.API.DataAccess.Entities;
 using SupervisorMobility.API.DataAccess.Entities.SOS;
 using SupervisorMobility.API.DataAccess.Entities.SOS.History;
+using SupervisorMobility.API.Models.CommentaryDtos;
 using SupervisorMobility.API.Models.FileUploadDto;
 using SupervisorMobility.API.Models.SOS.EquipmentDtos;
 using SupervisorMobility.API.Models.SOS.MaterialDtos;
 using SupervisorMobility.API.Models.SOS.SOSAnalysisDtos;
 using SupervisorMobility.API.Models.SOS.SOSHubDtos;
+using SupervisorMobility.API.Models.SOS.SOSHubDtos.AnalysisBkupDtos;
 using SupervisorMobility.API.Models.SOS.SOSHubDtos.SectionDtos;
 using SupervisorMobility.API.Models.SOS.ToolDtos;
 using System.Runtime.CompilerServices;
@@ -17,7 +19,7 @@ namespace SupervisorMobility.API.DataAccess.Services
     {
         #region SOS_DataPool
         Task<int> CreateSOScollection(SOSHub SOS_EntityToCreate);
-        Task<SOSHub> GetSOSHub(int HubId, bool includeAnalysesBkup = false, bool includeSections = false, bool includeImages = false, bool includeVideos = false, bool includeCommentaries = false, bool includeTools = false, bool includeEquipments = false, bool includeMaterials = false, bool includeInformation = false, bool includePeople = false, bool includeDocuments = false, bool includeModel = false,bool includeHistory = false);
+        Task<SOSHub> GetSOSHub(int HubId, bool includeAnalysesBkup = false, bool includeSections = false, bool includeImages = false, bool includeVideos = false, bool includeCommentaries = false, bool includeTools = false, bool includeEquipments = false, bool includeMaterials = false, bool includeInformation = false, bool includePeople = false, bool includeDocuments = false, bool includeModel = false,bool includeHistory = false, bool includeDeleteds = false);
         Task<IEnumerable<SOSHub>> GetAllSOSHub(bool includeAnalysesBkup = false, bool includeSections = false, bool includeImages = false, bool includeVideos = false, bool includeCommentaries = false, bool includeTools = false, bool includeEquipments = false, bool includeMaterials = false, bool includeInformation = false, bool includePeople = false, bool includeDocuments = false);
         Task<int> UpdateSOSHub(SOSHubForUpdateDto HubUpdate, SOSHub SosEntity);
         Task<int> RemoveSOSHub(int SOS_DataPool_id);
@@ -38,7 +40,6 @@ namespace SupervisorMobility.API.DataAccess.Services
         Task<AsyncVoidMethodBuilder> AddCommonDirectionsToSOSCollection(SOSHub Master, List<CommonDirection> Slave);
         Task AddImageToSOSData(int SOS_DataPool_id, FileUpload evidence);
         Task AddVideoToSOSData(int SOS_DataPool_id, FileUpload evidence);
-        Task AddCDToSOSData(int SOS_DataPool_id, FileUpload evidence);
         #endregion
         #region Remove from Sos Hub
         Task<int> RemoveImageFromSOSData(int SOS_DataPool_id, int ImageFile_id);
@@ -51,9 +52,9 @@ namespace SupervisorMobility.API.DataAccess.Services
         Task<AsyncVoidMethodBuilder> SOSDataRemoveAllCommonDirections(SOSHub Master);
         #endregion 
         #region AddTo Ranges
-        Task<int> AddRangeCommentary(List<Commentary> commentariesToAdd);
-        Task<int> AddRangeAnalysisBkup(List<AnalysisBkup> analysisBkupsToAdd);
-        Task<int> AddRangeSections(List<Section> SectionsToAdd);
+        Task<List<Commentary>> AddRangeCommentary(List<Commentary> commentariesToAdd);
+        Task<List<AnalysisBkup>> AddRangeAnalysisBkup(List<AnalysisBkup> analysisBkupsToAdd);
+        Task<List<Section>> AddRangeSections(List<Section> SectionsToAdd);
         #endregion
         #region Tool
         Task<int> AddRangeTool(List<Tool> ToolsToAdd);
@@ -84,6 +85,8 @@ namespace SupervisorMobility.API.DataAccess.Services
         #endregion
         #region Commentary
         Task<Commentary> GetCommentaryById(int id);
+        Task<int> UpdateCommentary(UpdateCommentaryDto CommentaryForUpdate);
+       
         #endregion
         #region SpecialCaseAbnormalSituation
         Task<SpecialCaseAbnormalSituation> GetSpecialCaseAbnormalSituationById(int id);
@@ -92,13 +95,15 @@ namespace SupervisorMobility.API.DataAccess.Services
         Task<SOSAnalysisLogbook> GetSOSAnalysisLogbookById(int id);
         #endregion
         #region CommonDirection
-        Task<List<CommonDirection>> ManageRangeCommonDirs(List<CommonDirectionDto> listToManage, int SOSHubId);
+        Task<CommonDirection> GetCommonDirectionById(int id);
+        Task<int> UpdateCommonDirection(CommonDirectionDto commonDirectionForUpdate);
         Task<CommonDirection> CreateNewCommonDir(CommonDirection CommonDirtoCreate);
-        Task<List<CommonDirection>> TrackCommonDirs(List<CommonDirectionDto> commonDirections);
+        Task<List<CommonDirection>> AddRangeCommonDirection(List<CommonDirection> CommonDirtoCreate);
+        Task<List<CommonDirection>> GetAllCommonDirectionInactives();
         #endregion
         #region Analysis Bkup
         Task<AnalysisBkup> GetAnalysisBkupId(int id);
-
+        Task<int> UpdateAnalysisBkup(AnalysisBkupForUpdateDto analysisBkupForUpdate);
         #endregion
         #region Section
         Task<Section> GetSectionById(int id);
