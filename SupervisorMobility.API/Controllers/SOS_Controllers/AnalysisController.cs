@@ -38,13 +38,13 @@ namespace SupervisorMobility.API.Controllers.SOS_Controllers
         }
 
         [HttpPost]
-        public async Task<ActionResult<SOSAnalysisDto>> GenerateAnalysis( SOSAnalysisForCreateDto sOSAnalysisToCreate, int SOSHubCollection_Id)
+        public async Task<ActionResult<SOSAnalysisDto>> GenerateAnalysis(SOSAnalysisForCreateDto sOSAnalysisToCreate, int SOSHubCollection_Id)
         {
             SOSHub SOSEntity = await _AnalysisProcessRepository.GetSOSHub(SOSHubCollection_Id, includeInformation: true);
 
             //Nombre del documento GOS o processShet
             sOSAnalysisToCreate.OperationName = SOSEntity.ProcessSheet;
-            sOSAnalysisToCreate.InternalControlNumber= SOSEntity.ProcessSheet;
+            sOSAnalysisToCreate.InternalControlNumber = SOSEntity.ProcessSheet;
             sOSAnalysisToCreate.ProcessName = SOSEntity.ProcessSheet;
 
             sOSAnalysisToCreate.CreatedDate = DateTime.Now;
