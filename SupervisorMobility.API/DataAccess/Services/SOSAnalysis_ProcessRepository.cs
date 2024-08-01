@@ -800,28 +800,7 @@ namespace SupervisorMobility.API.DataAccess.Services
                     Console.WriteLine($"Exception: {ex.Message}");
                 }
             }
-
-            if (Master.AnalysesBkup?.Count > 0)
-            {
-                Master.AnalysesBkup.Clear();
-
-                try
-                {
-                    await _context.SaveChangesAsync();
-
-                }
-                catch (DbUpdateException ex)
-                {
-                    // Manejar las excepciones relacionadas con la actualización de la base de datos
-                    Console.WriteLine($"DbUpdateException [SOSDataRemoveAllAnalysisBkups]: {ex.Message}");
-                }
-                catch (Exception ex)
-                {
-                    // Manejar cualquier otra excepción que pueda ocurrir
-                    Console.WriteLine($"Exception: {ex.Message}");
-                }
-            }
-                    return new AsyncVoidMethodBuilder();
+            return new AsyncVoidMethodBuilder();
         }
         public async Task<AsyncVoidMethodBuilder> SOSDataRemoveAllSections(SOSHub Master)
         {
@@ -1531,8 +1510,6 @@ namespace SupervisorMobility.API.DataAccess.Services
             // Map the updated entities back to DTOs and add them to the final list
             
 
-            return finalList;
-        }
 
         public async Task<CommonDirection> CreateNewCommonDir(CommonDirection CommonDirtoCreate)
         {
@@ -1542,27 +1519,82 @@ namespace SupervisorMobility.API.DataAccess.Services
             return CommonDirtoCreate;
         }
 
-        public async Task<List<CommonDirection>> TrackCommonDirs(List<CommonDirectionDto> commonDirections)
+        public async Task<List<CommonDirection>> AddRangeCommonDirection(List<CommonDirection> CommonDirtoCreate)
         {
-            List<CommonDirection> trackedCommons = new();
-            foreach(var common in commonDirections)
-            {
-                CommonDirection tc = _mapper.Map<CommonDirection>(common);
-                var existingEntity = _context.Set<CommonDirection>().Local.FirstOrDefault(e => e.CommonDirectionId == tc.CommonDirectionId);
+            _context.CommonDirections.AddRange(CommonDirtoCreate);
 
-                if (existingEntity == null)
+            await _context.SaveChangesAsync();
+
+            // Desvincular las nuevas secciones del contexto
+            foreach (var section in CommonDirtoCreate)
+            {
+                _context.Entry(section).State = EntityState.Detached;
+            }
+            return CommonDirtoCreate;
+        }
+
+        public async Task<CommonDirection> GetCommonDirectionById(int id)
+        {
+            var query = _context.CommonDirections.AsNoTracking().Where(t => t.CommonDirectionId == id);
+
+            return await query.FirstOrDefaultAsync();
+        }
+
+        public async Task<int> UpdateCommonDirection(CommonDirectionDto commonDirectionForUpdate)
+        {
+            try
+            {
+                var query = _context.CommonDirections.Where(t => t.CommonDirectionId == commonDirectionForUpdate.CommonDirectionId);
+
+                CommonDirection commonDirection = await query.FirstOrDefaultAsync();
+
+                if (commonDirection == null)
                 {
-                    _context.Attach(tc);
+                    throw new InvalidOperationException("commonDirection not found or is not active.");
+                }
+
+                var localEntry = _context.CommonDirections.Local.FirstOrDefault(entry => entry.CommonDirectionId == commonDirectionForUpdate.CommonDirectionId);
+                if (localEntry != null)
+                {
+                    _context.Entry(localEntry).CurrentValues.SetValues(commonDirectionForUpdate);
                 }
                 else
                 {
-                    tc = existingEntity;
+                    if (_context.Entry(commonDirection).State == EntityState.Detached)
+                    {
+                        _context.CommonDirections.Attach(commonDirection);
+                    }
+
+                    _mapper.Map(commonDirectionForUpdate, commonDirection);
+                    _context.CommonDirections.Update(commonDirection);
                 }
 
-                trackedCommons.Add(tc);
+                return await _context.SaveChangesAsync();
             }
-            return trackedCommons;
+            catch (Exception ex)
+            {
+                // Manejar el error apropiadamente, puedes loguearlo o lanzar una excepción personalizada
+                Debug.WriteLine("An error occurred while updating the commonDirection.", ex.Message);
+                return 0;
+
+            }
         }
+
+        public async Task<List<CommonDirection>> GetAllCommonDirectionInactives()
+        {
+            var linkedCommonDirectionIds = await _context.SOSHubs
+        .AsNoTracking()
+        .SelectMany(hub => hub.CommonDirection.Select(cd => cd.CommonDirectionId))
+        .ToListAsync();
+
+            var unlinkedCommonDirections = await _context.CommonDirections
+                .AsNoTracking()
+                .Where(cd => !linkedCommonDirectionIds.Contains(cd.CommonDirectionId))
+                .ToListAsync();
+
+            return unlinkedCommonDirections;
+        }
+
         #endregion
 
         #region SOSAnalysis

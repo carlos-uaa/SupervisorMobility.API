@@ -101,11 +101,6 @@ namespace SupervisorMobility.API.DataAccess.Services
         Task<List<CommonDirection>> AddRangeCommonDirection(List<CommonDirection> CommonDirtoCreate);
         Task<List<CommonDirection>> GetAllCommonDirectionInactives();
         #endregion
-        #region CommonDirection
-        Task<List<CommonDirectionDto>> ManageRangeCommonDirs(List<CommonDirectionDto> listToManage, int SOSHubId);
-        Task<CommonDirection> CreateNewCommonDir(CommonDirection CommonDirtoCreate);
-        Task<List<CommonDirection>> TrackCommonDirs(List<CommonDirectionDto> commonDirections);
-        #endregion
         #region Analysis Bkup
         Task<AnalysisBkup> GetAnalysisBkupId(int id);
         Task<int> UpdateAnalysisBkup(AnalysisBkupForUpdateDto analysisBkupForUpdate);
