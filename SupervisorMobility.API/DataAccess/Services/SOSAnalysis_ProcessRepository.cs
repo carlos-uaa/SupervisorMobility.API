@@ -292,13 +292,6 @@ namespace SupervisorMobility.API.DataAccess.Services
                 _context.SOSHubs.Attach(SosEntity);
             }
 
-            // Mapea los cambios del DTO a la entidad
-
-            foreach (var common in SosEntity.CommonDirection)
-            {
-                HubUpdate.CommonDirection.Where(p => p.DOC_ID == common.DOC_ID).ToList().ForEach(p => p.CommonDirectionId = common.CommonDirectionId);
-            }
-
             _mapper.Map(HubUpdate, SosEntity);
 
             // Marca la entidad como modificada
