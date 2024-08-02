@@ -82,7 +82,7 @@ namespace SupervisorMobility.API.Controllers.SOS_Controllers
             {
                 foreach (Tool tool in tools)
                 {
-                    _AnalysisProcessRepository.AddToolToSOSCollection(SOSEntity, tool);
+                    await _AnalysisProcessRepository.AddToolToSOSCollection(SOSEntity, tool);
                 }
             }
 
@@ -90,7 +90,7 @@ namespace SupervisorMobility.API.Controllers.SOS_Controllers
             {
                 foreach (Material material in materials)
                 {
-                    _AnalysisProcessRepository.AddMaterialToSOSCollection(SOSEntity, material);
+                    await _AnalysisProcessRepository.AddMaterialToSOSCollection(SOSEntity, material);
                 }
             }
 
@@ -98,11 +98,10 @@ namespace SupervisorMobility.API.Controllers.SOS_Controllers
             {
                 foreach (Equipment equipment in equipments)
                 {
-                    _AnalysisProcessRepository.AddEquipmentToSOSCollection(SOSEntity, equipment);
+                    await _AnalysisProcessRepository.AddEquipmentToSOSCollection(SOSEntity, equipment);
                 }
             }
 
-            await _AnalysisProcessRepository.SaveChangesAsync();
 
             if (createdResult != null)
             {
@@ -209,19 +208,19 @@ namespace SupervisorMobility.API.Controllers.SOS_Controllers
 
             // Filtrar nuevos Comentarios
             List<UpdateCommentaryDto> filteredCommentaryList = _SOSHubForUpdate.ProcessSheetCommentary
-                .Where(t => t.ComentaryId <= 0).ToList();
+                .Where(t => t.CommentaryId <= 0).ToList();
 
             // Remover nuevos Comentarios de la lista principal para evitar duplicados
             if (filteredCommentaryList.Any())
             {
-                _SOSHubForUpdate.ProcessSheetCommentary.RemoveAll(t => t.ComentaryId == null || t.ComentaryId <= 0);
+                _SOSHubForUpdate.ProcessSheetCommentary.RemoveAll(t => t.CommentaryId == null || t.CommentaryId <= 0);
 
                 // Mapear nuevas norms/standars
                 List<Commentary> newCommentarys = _mapper.Map<List<Commentary>>(filteredCommentaryList);
 
                 foreach (var newComentary in newCommentarys)
                 {
-                    newComentary.ComentaryId = 0;
+                    newComentary.CommentaryId = 0;
                     newComentary.IsActive = true;
                 }
 
@@ -337,7 +336,7 @@ namespace SupervisorMobility.API.Controllers.SOS_Controllers
             {
                 var CommentaryUpdate = await _AnalysisProcessRepository.UpdateCommentary(commentary);
 
-                Commentary CommentaryToAdd = await _AnalysisProcessRepository.GetCommentaryById(commentary.ComentaryId);
+                Commentary CommentaryToAdd = await _AnalysisProcessRepository.GetCommentaryById(commentary.CommentaryId);
                 ProcessSheetCommentaries.Add(CommentaryToAdd);
             }
 
@@ -416,7 +415,7 @@ namespace SupervisorMobility.API.Controllers.SOS_Controllers
             {
                 foreach (Tool tool in tools)
                 {
-                    _AnalysisProcessRepository.AddToolToSOSCollection(entitySOSHub, tool);
+                    await _AnalysisProcessRepository.AddToolToSOSCollection(entitySOSHub, tool);
                 }
             }
             //Materials
@@ -424,7 +423,7 @@ namespace SupervisorMobility.API.Controllers.SOS_Controllers
             {
                 foreach (Material material in materials)
                 {
-                    _AnalysisProcessRepository.AddMaterialToSOSCollection(entitySOSHub, material);
+                    await _AnalysisProcessRepository.AddMaterialToSOSCollection(entitySOSHub, material);
                 }
             }
             //Equipments
@@ -432,7 +431,7 @@ namespace SupervisorMobility.API.Controllers.SOS_Controllers
             {
                 foreach (Equipment equipment in equipments)
                 {
-                    _AnalysisProcessRepository.AddEquipmentToSOSCollection(entitySOSHub, equipment);
+                    await _AnalysisProcessRepository.AddEquipmentToSOSCollection(entitySOSHub, equipment);
                 }
             }
             //Common Directions

@@ -2558,13 +2558,13 @@ namespace SupervisorMobility.API.Services
         }
         #endregion
         #region HCI
-        public async Task<HCI?> GetHCI(int HCIId, bool includeNavigation = false, bool includePeople = false, bool includeComments = false, bool includeTransactions = false)
+        public async Task<HCI?> GetHCI(int HCIId, bool includeNavigation = false, bool includePeople = false, bool includeCommentaries = false, bool includeTransactions = false)
         {
             var query = _context.HCIs.Where(k => k.IsActive == true && k.HCIId == HCIId);
 
             if (includeNavigation)
             {
-                query = query.Include(p => p.CareerPaths).Include(p => p.Categories).Include(p => p.Comments).Include(p => p.ILUs).Include(p => p.Transactions);
+                query = query.Include(p => p.CareerPaths).Include(p => p.Categories).Include(p => p.Commentaries).Include(p => p.ILUs).Include(p => p.Transactions);
             }
 
             if (includePeople)
@@ -2585,7 +2585,7 @@ namespace SupervisorMobility.API.Services
             return await query.FirstOrDefaultAsync();
 
         }
-        public async Task<IEnumerable<HCI>> GetAllHCIs(bool includeNavigation = false, bool includePeople = false, bool includeComments = false, bool includeTransactions = false)
+        public async Task<IEnumerable<HCI>> GetAllHCIs(bool includeNavigation = false, bool includePeople = false, bool includeCommentaries = false, bool includeTransactions = false)
         {
             var query = _context.HCIs.Where(u => u.IsActive == true);
 
@@ -2594,9 +2594,9 @@ namespace SupervisorMobility.API.Services
                 query = query.Include(t => t.User);
             }
 
-            if (includeComments)
+            if (includeCommentaries)
             {
-                query = query.Include(c => c.Comments);
+                query = query.Include(c => c.Commentaries);
             }
 
             if (includeNavigation)
