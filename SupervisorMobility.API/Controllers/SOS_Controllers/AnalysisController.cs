@@ -97,7 +97,7 @@ namespace SupervisorMobility.API.Controllers.SOS_Controllers
 
 
             // Filtrar nuevos Comentarios
-            List<UpdateCommentaryDto> filteredCommentaryList = sosUpdateEntity.Notes.Where(t => t.ComentaryId <= 0).ToList();
+            List<UpdateCommentaryDto> filteredCommentaryList = sosUpdateEntity.Notes.Where(t => t.CommentaryId <= 0).ToList();
             // Filtrar nuevos AnalysisLogbooks
             List<SOSAnalysisLogbookForUpdateDto> filteredAnalysisLogbooksList = sosUpdateEntity.AnalysisLogbooks.Where(t => t.SOSAnalysisLogbookId <= 0).ToList();
             // Filtrar nuevos SpecialCasesAbnormalSituations
@@ -107,14 +107,14 @@ namespace SupervisorMobility.API.Controllers.SOS_Controllers
             // Remover nuevos Comentarios de la lista principal para evitar duplicados
             if (filteredCommentaryList.Any())
             {
-                sosUpdateEntity.Notes.ToList().RemoveAll(t => t.ComentaryId == null || t.ComentaryId <= 0);
+                sosUpdateEntity.Notes.ToList().RemoveAll(t => t.CommentaryId == null || t.CommentaryId <= 0);
 
                 // Mapear nuevas norms/standars
                 List<Commentary> newCommentarys = _mapper.Map<List<Commentary>>(filteredCommentaryList);
 
                 foreach (var newComentary in newCommentarys)
                 {
-                    newComentary.ComentaryId = 0;
+                    newComentary.CommentaryId = 0;
                     newComentary.IsActive = true;
                 }
 
@@ -202,7 +202,7 @@ namespace SupervisorMobility.API.Controllers.SOS_Controllers
             //hacer update entity sin relaciones
             foreach (var note in sosUpdateEntity.Notes)
             {
-                Commentary analysisBkaux = await _AnalysisProcessRepository.GetCommentaryById(note.ComentaryId);
+                Commentary analysisBkaux = await _AnalysisProcessRepository.GetCommentaryById(note.CommentaryId);
                 _mapper.Map(note, analysisBkaux);
                 Bkup_Notes.Add(analysisBkaux);
             }

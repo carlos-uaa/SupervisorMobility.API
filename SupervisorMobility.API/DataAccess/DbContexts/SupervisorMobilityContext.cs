@@ -61,7 +61,7 @@ namespace SupervisorMobility.API.Context
         public DbSet<SOSRegisterJobObservation> SOSRegisters { get; set; }
         public DbSet<SOSRegUserOperation> SOSRegsUserOperation { get; set; }
         public DbSet<HCI> HCIs { get; set; }
-        public DbSet<Commentary> Comments { get; set; }
+        public DbSet<Commentary> Commentaries { get; set; }
         public DbSet<HCITransaction> HCITransactions { get; set; }
         public DbSet<HCICategory> HCICategories { get; set; }
         public DbSet<HCIILU> HCIILUs { get; set; }

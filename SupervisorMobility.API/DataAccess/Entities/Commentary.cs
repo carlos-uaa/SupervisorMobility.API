@@ -6,7 +6,7 @@ namespace SupervisorMobility.API.DataAccess.Entities
     public class Commentary
     {
         [Key, DatabaseGenerated(DatabaseGeneratedOption.Identity)]
-        public int ComentaryId { get; set; }
+        public int CommentaryId { get; set; }
        
         public string? Comment { get; set; }
         

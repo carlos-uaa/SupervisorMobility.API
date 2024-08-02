@@ -456,22 +456,58 @@ namespace SupervisorMobility.API.DataAccess.Services
         #endregion
 
         #region AddTo Sos Hub
-        public async Task<AsyncVoidMethodBuilder> AddProcessSheetCommentaryToSOSCollection(SOSHub Master, Commentary Slave)
+        public async Task<AsyncVoidMethodBuilder> AddProcessSheetCommentaryToSOSCollection(SOSHub master, Commentary slave)
         {
-            if (_context.Entry(Master).State == EntityState.Detached)
+            try
             {
-                _context.SOSHubs.Attach(Master);
+                // Verificar si el master ya está siendo rastreado en el contexto
+                var localMasterEntry = _context.SOSHubs.Local.FirstOrDefault(entry => entry.SOSHubId == master.SOSHubId);
+                if (localMasterEntry != null)
+                {
+                    master = localMasterEntry;
+                }
+                else
+                {
+                    if (_context.Entry(master).State == EntityState.Detached)
+                    {
+                        _context.SOSHubs.Attach(master);
+                    }
+                }
+
+                // Verificar si el slave ya está siendo rastreado en el contexto
+                var localSlaveEntry = _context.Commentaries.Local.FirstOrDefault(entry => entry.CommentaryId == slave.CommentaryId);
+                if (localSlaveEntry != null)
+                {
+                    slave = localSlaveEntry;
+                }
+                else
+                {
+                    if (_context.Entry(slave).State == EntityState.Detached)
+                    {
+                        _context.Commentaries.Attach(slave);
+                    }
+                }
+
+                // Añadir el comentario a la colección de ProcessSheetCommentary del master
+                if (master.ProcessSheetCommentary == null)
+                {
+                    master.ProcessSheetCommentary = new List<Commentary>();
+                }
+
+                // Verificar si el comentario ya está en la colección
+                if (!master.ProcessSheetCommentary.Any(c => c.CommentaryId == slave.CommentaryId))
+                {
+                    master.ProcessSheetCommentary.Add(slave);
+                }
+
+                // Guardar los cambios
+                await _context.SaveChangesAsync();
             }
-            if (Master.ProcessSheetCommentary != null)
+            catch (Exception ex)
             {
-                Master.ProcessSheetCommentary.Add(Slave);
+                // Manejar el error apropiadamente, puedes loguearlo o lanzar una excepción personalizada
+                Debug.WriteLine("An error occurred while updating the SOSHub: " + ex.Message);
             }
-            else
-            {
-                Master.ProcessSheetCommentary = new List<Commentary>();
-                Master.ProcessSheetCommentary.Add(Slave);
-            }
-            _context.SaveChanges();
             return new AsyncVoidMethodBuilder();
         }
 
@@ -588,43 +624,113 @@ namespace SupervisorMobility.API.DataAccess.Services
             return new AsyncVoidMethodBuilder();
         }
 
-        public async Task<AsyncVoidMethodBuilder> AddToolToSOSCollection(SOSHub Master, Tool Slave)
+        public async Task<AsyncVoidMethodBuilder> AddToolToSOSCollection(SOSHub master, Tool slave)
         {
-            if (_context.Entry(Master).State == EntityState.Detached)
+            try
             {
-                _context.SOSHubs.Attach(Master);
-            }
+                // Verificar si el master ya está siendo rastreado en el contexto
+                var localMasterEntry = _context.SOSHubs.Local.FirstOrDefault(entry => entry.SOSHubId == master.SOSHubId);
+                if (localMasterEntry != null)
+                {
+                    master = localMasterEntry;
+                }
+                else
+                {
+                    if (_context.Entry(master).State == EntityState.Detached)
+                    {
+                        _context.SOSHubs.Attach(master);
+                    }
+                }
 
-            if (Master.ToolsUsed != null)
-            {
+                // Verificar si el slave ya está siendo rastreado en el contexto
+                var localSlaveEntry = _context.Tools.Local.FirstOrDefault(entry => entry.ToolId == slave.ToolId);
+                if (localSlaveEntry != null)
+                {
+                    slave = localSlaveEntry;
+                }
+                else
+                {
+                    if (_context.Entry(slave).State == EntityState.Detached)
+                    {
+                        _context.Tools.Attach(slave);
+                    }
+                }
 
-                Master.ToolsUsed.Add(Slave);
+                // Añadir la Material a la colección de ToolsUsed del master
+                if (master.ToolsUsed == null)
+                {
+                    master.ToolsUsed = new List<Tool>();
+                }
+
+                // Verificar si la Material ya está en la colección
+                if (!master.ToolsUsed.Any(t => t.ToolId == slave.ToolId))
+                {
+                    master.ToolsUsed.Add(slave);
+                }
+
+                // Guardar los cambios
+                await _context.SaveChangesAsync();
             }
-            else
+            catch (Exception ex)
             {
-                Master.ToolsUsed = new List<Tool>();
-                Master.ToolsUsed.Add(Slave);
+                // Manejar el error apropiadamente, puedes loguearlo o lanzar una excepción personalizada
+                Debug.WriteLine("An error occurred while updating the SOSHub: " + ex.Message);
             }
-            _context.SaveChanges();
             return new AsyncVoidMethodBuilder();
         }
 
-        public async Task<AsyncVoidMethodBuilder> AddEquipmentToSOSCollection(SOSHub Master, Equipment Slave)
+        public async Task<AsyncVoidMethodBuilder> AddEquipmentToSOSCollection(SOSHub master, Equipment slave)
         {
-            if (_context.Entry(Master).State == EntityState.Detached)
+            try
             {
-                _context.SOSHubs.Attach(Master);
+                // Verificar si el master ya está siendo rastreado en el contexto
+                var localMasterEntry = _context.SOSHubs.Local.FirstOrDefault(entry => entry.SOSHubId == master.SOSHubId);
+                if (localMasterEntry != null)
+                {
+                    master = localMasterEntry;
+                }
+                else
+                {
+                    if (_context.Entry(master).State == EntityState.Detached)
+                    {
+                        _context.SOSHubs.Attach(master);
+                    }
+                }
+
+                // Verificar si el slave ya está siendo rastreado en el contexto
+                var localSlaveEntry = _context.Equipments.Local.FirstOrDefault(entry => entry.EquipmentId == slave.EquipmentId);
+                if (localSlaveEntry != null)
+                {
+                    slave = localSlaveEntry;
+                }
+                else
+                {
+                    if (_context.Entry(slave).State == EntityState.Detached)
+                    {
+                        _context.Equipments.Attach(slave);
+                    }
+                }
+
+                // Añadir la herramienta a la colección de Equipment del master
+                if (master.SafetyEquipment == null)
+                {
+                    master.SafetyEquipment = new List<Equipment>();
+                }
+
+                // Verificar si Equipment ya está en la colección
+                if (!master.SafetyEquipment.Any(t => t.EquipmentId == slave.EquipmentId))
+                {
+                    master.SafetyEquipment.Add(slave);
+                }
+
+                // Guardar los cambios
+                await _context.SaveChangesAsync();
             }
-            if (Master.SafetyEquipment != null)
+            catch (Exception ex)
             {
-                Master.SafetyEquipment.Add(Slave);
+                // Manejar el error apropiadamente, puedes loguearlo o lanzar una excepción personalizada
+                Debug.WriteLine("An error occurred while updating the SOSHub: " + ex.Message);
             }
-            else
-            {
-                Master.SafetyEquipment = new List<Equipment>();
-                Master.SafetyEquipment.Add(Slave);
-            }
-            _context.SaveChanges();
             return new AsyncVoidMethodBuilder();
         }
 
@@ -697,23 +803,58 @@ namespace SupervisorMobility.API.DataAccess.Services
             return new AsyncVoidMethodBuilder();
         }
 
-        public async Task<AsyncVoidMethodBuilder> AddMaterialToSOSCollection(SOSHub Master, Material Slave)
+        public async Task<AsyncVoidMethodBuilder> AddMaterialToSOSCollection(SOSHub master, Material slave)
         {
-            if (_context.Entry(Master).State == EntityState.Detached)
+            try
             {
-                _context.SOSHubs.Attach(Master);
-            }
+                // Verificar si el master ya está siendo rastreado en el contexto
+                var localMasterEntry = _context.SOSHubs.Local.FirstOrDefault(entry => entry.SOSHubId == master.SOSHubId);
+                if (localMasterEntry != null)
+                {
+                    master = localMasterEntry;
+                }
+                else
+                {
+                    if (_context.Entry(master).State == EntityState.Detached)
+                    {
+                        _context.SOSHubs.Attach(master);
+                    }
+                }
 
-            if (Master.MaterialsUsed != null)
-            {
-                Master.MaterialsUsed.Add(Slave);
+                // Verificar si el Material slave ya está siendo rastreado en el contexto
+                var localSlaveEntry = _context.Materials.Local.FirstOrDefault(entry => entry.MaterialId == slave.MaterialId);
+                if (localSlaveEntry != null)
+                {
+                    slave = localSlaveEntry;
+                }
+                else
+                {
+                    if (_context.Entry(slave).State == EntityState.Detached)
+                    {
+                        _context.Materials.Attach(slave);
+                    }
+                }
+
+                // Añadir la herramienta a la colección de ToolsUsed del master
+                if (master.MaterialsUsed == null)
+                {
+                    master.MaterialsUsed = new List<Material>();
+                }
+
+                // Verificar si la Materials ya está en la colección
+                if (!master.MaterialsUsed.Any(t => t.MaterialId == slave.MaterialId))
+                {
+                    master.MaterialsUsed.Add(slave);
+                }
+
+                // Guardar los cambios
+                await _context.SaveChangesAsync();
             }
-            else
+            catch (Exception ex)
             {
-                Master.MaterialsUsed = new List<Material>();
-                Master.MaterialsUsed.Add(Slave);
+                // Manejar el error apropiadamente, puedes loguearlo o lanzar una excepción personalizada
+                Debug.WriteLine("An error occurred while updating the SOSHub: " + ex.Message);
             }
-            _context.SaveChanges();
             return new AsyncVoidMethodBuilder();
         }
 
@@ -1057,7 +1198,7 @@ namespace SupervisorMobility.API.DataAccess.Services
         }
         public async Task<List<Commentary>> AddRangeCommentary(List<Commentary> commentariesToAdd)
         {
-            _context.Comments.AddRange(commentariesToAdd);
+            _context.Commentaries.AddRange(commentariesToAdd);
 
             await _context.SaveChangesAsync();
 
@@ -1351,14 +1492,14 @@ namespace SupervisorMobility.API.DataAccess.Services
         #region Commentary
         public async Task<Commentary> GetCommentaryById(int Id)
         {
-            return await _context.Comments.AsNoTracking().Where(t => t.ComentaryId == Id).FirstOrDefaultAsync();
+            return await _context.Commentaries.AsNoTracking().Where(t => t.CommentaryId == Id).FirstOrDefaultAsync();
         }
 
         public async Task<int> UpdateCommentary(UpdateCommentaryDto CommentaryForUpdate)
         {
             try
             {
-                var query = _context.Comments.Where(t => t.ComentaryId == CommentaryForUpdate.ComentaryId && t.IsActive == true);
+                var query = _context.Commentaries.Where(t => t.CommentaryId == CommentaryForUpdate.CommentaryId && t.IsActive == true);
 
                 Commentary commentary = await query.FirstOrDefaultAsync();
 
@@ -1368,7 +1509,7 @@ namespace SupervisorMobility.API.DataAccess.Services
                 }
 
                 // Verifica si la entidad ya está siendo rastreada
-                var localEntry = _context.Comments.Local.FirstOrDefault(entry => entry.ComentaryId == CommentaryForUpdate.ComentaryId);
+                var localEntry = _context.Commentaries.Local.FirstOrDefault(entry => entry.CommentaryId == CommentaryForUpdate.CommentaryId);
                 if (localEntry != null)
                 {
                     // Si la entidad localmente rastreada es diferente, usa esa instancia
@@ -1379,11 +1520,11 @@ namespace SupervisorMobility.API.DataAccess.Services
                     // Si no, adjunta la entidad obtenida de la base de datos
                     if (_context.Entry(commentary).State == EntityState.Detached)
                     {
-                        _context.Comments.Attach(commentary);
+                        _context.Commentaries.Attach(commentary);
                     }
 
                     _mapper.Map(CommentaryForUpdate, commentary);
-                    _context.Comments.Update(commentary);
+                    _context.Commentaries.Update(commentary);
                 }
 
                 return await _context.SaveChangesAsync();
