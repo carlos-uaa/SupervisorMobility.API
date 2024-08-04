@@ -40,10 +40,10 @@ namespace SupervisorMobility.API.Controllers.IS_Controllers
         }
 
         [HttpGet]
-        public async Task<ActionResult<IEnumerable<HCIDto>>> GetAllDataHCI(bool includeNavigation = false, bool includePeople = false, bool includeComments = false, bool includeTransactions = false)
+        public async Task<ActionResult<IEnumerable<HCIDto>>> GetAllDataHCI(bool includeNavigation = false, bool includePeople = false, bool includeCommentaries = false, bool includeTransactions = false)
         {
 
-            var entityhci = await _supervisorMobilityRepository.GetAllHCIs(includeNavigation, includePeople, includeComments, includeTransactions);
+            var entityhci = await _supervisorMobilityRepository.GetAllHCIs(includeNavigation, includePeople, includeCommentaries, includeTransactions);
             if (entityhci != null)
                 return Ok(entityhci);
             else
@@ -51,10 +51,10 @@ namespace SupervisorMobility.API.Controllers.IS_Controllers
         }
 
         [HttpGet("{hciId}")]
-        public async Task<ActionResult<HCIDto>> GetHCI(int hciId, bool includeNavigation = false, bool includePeople = false, bool includeComments = false, bool includeTransactions = false)
+        public async Task<ActionResult<HCIDto>> GetHCI(int hciId, bool includeNavigation = false, bool includePeople = false, bool includeCommentaries = false, bool includeTransactions = false)
         {
 
-            var entityhci = await _supervisorMobilityRepository.GetHCI(hciId, includeNavigation, includePeople, includeComments, includeTransactions);
+            var entityhci = await _supervisorMobilityRepository.GetHCI(hciId, includeNavigation, includePeople, includeCommentaries, includeTransactions);
             if (entityhci != null)
                 return Ok(entityhci);
             else

@@ -2,7 +2,7 @@
 {
     public class CommentaryDto
     {
-        public int ComentaryId { get; set; }
+        public int CommentaryId { get; set; }
 
         public string Comment { get; set; }
 

@@ -22,7 +22,9 @@ using SupervisorMobility.API.Models.SOS.SOSHubDtos;
 using SupervisorMobility.API.Models.SOS.SOSHubDtos.AnalysisBkupDtos;
 using SupervisorMobility.API.Models.SOS.SOSHubDtos.SectionDtos;
 using SupervisorMobility.API.Models.SOS.ToolDtos;
+using System.Collections.Immutable;
 using System.Diagnostics;
+using System.Security.Cryptography.Xml;
 
 namespace SupervisorMobility.API.Controllers.SOS_Controllers
 {
@@ -80,7 +82,7 @@ namespace SupervisorMobility.API.Controllers.SOS_Controllers
             {
                 foreach (Tool tool in tools)
                 {
-                    _AnalysisProcessRepository.AddToolToSOSCollection(SOSEntity, tool);
+                    await _AnalysisProcessRepository.AddToolToSOSCollection(SOSEntity, tool);
                 }
             }
 
@@ -88,7 +90,7 @@ namespace SupervisorMobility.API.Controllers.SOS_Controllers
             {
                 foreach (Material material in materials)
                 {
-                    _AnalysisProcessRepository.AddMaterialToSOSCollection(SOSEntity, material);
+                    await _AnalysisProcessRepository.AddMaterialToSOSCollection(SOSEntity, material);
                 }
             }
 
@@ -96,11 +98,10 @@ namespace SupervisorMobility.API.Controllers.SOS_Controllers
             {
                 foreach (Equipment equipment in equipments)
                 {
-                    _AnalysisProcessRepository.AddEquipmentToSOSCollection(SOSEntity, equipment);
+                    await _AnalysisProcessRepository.AddEquipmentToSOSCollection(SOSEntity, equipment);
                 }
             }
 
-            await _AnalysisProcessRepository.SaveChangesAsync();
 
             if (createdResult != null)
             {
@@ -113,10 +114,10 @@ namespace SupervisorMobility.API.Controllers.SOS_Controllers
 
         //get
         [HttpGet("{id}", Name = "GetSOSHub")]
-        public async Task<ActionResult<SOSHubDto>> GetSOSHub(int id, bool includeAnalysesBkup = false, bool includeSections = false, bool includeImages = false, bool includeVideos = false, bool includeCommentaries = false, bool includeTools = false, bool includeEquipments = false, bool includeMaterials = false, bool includeInformation = false, bool includePeople = false, bool includeDocuments = false, bool includeModel = false)
+        public async Task<ActionResult<SOSHubDto>> GetSOSHub(int id, bool includeAnalysesBkup = false, bool includeSections = false, bool includeImages = false, bool includeVideos = false, bool includeCommentaries = false, bool includeTools = false, bool includeEquipments = false, bool includeMaterials = false, bool includeInformation = false, bool includePeople = false, bool includeDocuments = false, bool includeModel = false, bool includeCommonDirections = false)
         {
 
-            var SOSHub = await _AnalysisProcessRepository.GetSOSHub(id, includeAnalysesBkup, includeSections, includeImages, includeVideos, includeCommentaries, includeTools, includeEquipments, includeMaterials, includeInformation, includePeople, includeDocuments, includeModel);
+            var SOSHub = await _AnalysisProcessRepository.GetSOSHub(id, includeAnalysesBkup, includeSections, includeImages, includeVideos, includeCommentaries, includeTools, includeEquipments, includeMaterials, includeInformation, includePeople, includeDocuments, includeModel, includeCommonDirections);
             if (SOSHub == null)
             {
                 return NotFound("SOSHub not found!");
@@ -142,42 +143,98 @@ namespace SupervisorMobility.API.Controllers.SOS_Controllers
         [HttpPut("{SOSHubId}")]
         public async Task<ActionResult<SOSHubDto>> UpdateSOSHub(int SOSHubId, SOSHubForUpdateDto _SOSHubForUpdate)
         {
-            //ManipulateCommonDir
-            var successCD = await _AnalysisProcessRepository.ManageRangeCommonDirs(_SOSHubForUpdate.CommonDirection.ToList(),SOSHubId);
-            if(successCD != null)
+
+            SOSHub entitySOSHub = await _AnalysisProcessRepository.GetSOSHub(SOSHubId, true, true, true, true, true, true, true, true, true, true, true, includeDeleteds: true);
+
+            List<Commentary> ProcessSheetCommentaries = new List<Commentary>();
+            List<AnalysisBkup> AnalysisBkups = new List<AnalysisBkup>();
+            List<Section> Sections = new List<Section>();
+            List<Tool> tools = new List<Tool>();
+            List<Material> materials = new List<Material>();
+            List<Equipment> equipments = new List<Equipment>();
+            List<CommonDirection> commons = new List<CommonDirection>();
+
+            //Commmon direction 
+
+            List<CommonDirectionDto> filteredCommonDirectionList = _SOSHubForUpdate.CommonDirection
+           .Where(t => t.CommonDirectionId <= 0).ToList();
+
+            if (filteredCommonDirectionList.Count > 0)
             {
-                Debug.WriteLine("Common Directions managed succsesfully");
-                _SOSHubForUpdate.CommonDirection = successCD;
+
+                List<CommonDirection> commonDirectionUnlinked = await _AnalysisProcessRepository.GetAllCommonDirectionInactives();
+
+                List<CommonDirection> existingList = entitySOSHub.CommonDirection.ToList();
+                existingList = existingList.Union(commonDirectionUnlinked).ToList();
+
+                List<CommonDirection> CDtoCreate = new List<CommonDirection>();
+
+
+                // Remover nuevos commonDirection de la lista principal para evitar duplicados
+                if (filteredCommonDirectionList.Any())
+                {
+                    _SOSHubForUpdate.CommonDirection.RemoveAll(t => t.CommonDirectionId == null || t.CommonDirectionId <= 0);
+
+                    foreach (var commonDirection in filteredCommonDirectionList)
+                    {
+                        if (existingList.Any(p => p.DOC_ID == commonDirection.DOC_ID))
+                        {
+                            var element = existingList.First(p => p.DOC_ID == commonDirection.DOC_ID);
+                            commonDirection.CommonDirectionId = element.CommonDirectionId;
+
+                            _SOSHubForUpdate.CommonDirection.Add(commonDirection);
+                        }
+                        else
+                        {
+                            var element = _mapper.Map<CommonDirection>(commonDirection);
+                            CDtoCreate.Add(element);
+                        }
+                    }
+
+                    if (CDtoCreate.Count > 0)
+                    {
+                        var resultAddCD = await _AnalysisProcessRepository.AddRangeCommonDirection(CDtoCreate);
+
+                        if (resultAddCD != null)
+                        {
+                            Debug.WriteLine("Common Direction añadidas con éxito");
+                            commons.AddRange(resultAddCD);
+                        }
+                    }
+
+                }
             }
+
+
             // Filtrar nuevos Comentarios
             List<UpdateCommentaryDto> filteredCommentaryList = _SOSHubForUpdate.ProcessSheetCommentary
-                .Where(t => t.ComentaryId <= 0).ToList();
-
+                .Where(t => t.CommentaryId <= 0).ToList();
 
             // Remover nuevos Comentarios de la lista principal para evitar duplicados
             if (filteredCommentaryList.Any())
             {
-                _SOSHubForUpdate.ProcessSheetCommentary.ToList().RemoveAll(t => t.ComentaryId == null || t.ComentaryId <= 0);
+                _SOSHubForUpdate.ProcessSheetCommentary.RemoveAll(t => t.CommentaryId == null || t.CommentaryId <= 0);
 
                 // Mapear nuevas norms/standars
                 List<Commentary> newCommentarys = _mapper.Map<List<Commentary>>(filteredCommentaryList);
 
                 foreach (var newComentary in newCommentarys)
                 {
-                    newComentary.ComentaryId = 0;
+                    newComentary.CommentaryId = 0;
                     newComentary.IsActive = true;
                 }
 
                 var resultAddCommentary = await _AnalysisProcessRepository.AddRangeCommentary(newCommentarys);
 
-                if (resultAddCommentary > 0)
+                if (resultAddCommentary != null)
                 {
                     Debug.WriteLine("Commentarios añadidos con exitop");
+                    ProcessSheetCommentaries.AddRange(resultAddCommentary);
                 }
-
-
-                List<UpdateCommentaryDto> newCommentarysCreated = _mapper.Map<List<UpdateCommentaryDto>>(newCommentarys);
-                _SOSHubForUpdate.ProcessSheetCommentary.ToList().AddRange(newCommentarysCreated);
+                else
+                {
+                    Debug.WriteLine("Error Commentarios añadidos");
+                }
             }
 
             List<AnalysisBkupForUpdateDto> filteredAnalysisBkupList = _SOSHubForUpdate.AnalysesBkup
@@ -186,7 +243,7 @@ namespace SupervisorMobility.API.Controllers.SOS_Controllers
             // Remover nuevos AnalysisBkup de la lista principal para evitar duplicados
             if (filteredAnalysisBkupList.Any())
             {
-                _SOSHubForUpdate.AnalysesBkup.ToList().RemoveAll(t => t.AnalysisBkupId == null || t.AnalysisBkupId <= 0);
+                _SOSHubForUpdate.AnalysesBkup.RemoveAll(t => t.AnalysisBkupId == null || t.AnalysisBkupId <= 0);
 
                 // Mapear nuevas AnalysisBkup
                 List<AnalysisBkup> newAnalysisBkups = _mapper.Map<List<AnalysisBkup>>(filteredAnalysisBkupList);
@@ -199,14 +256,16 @@ namespace SupervisorMobility.API.Controllers.SOS_Controllers
 
                 var resultAddAnalysisBkup = await _AnalysisProcessRepository.AddRangeAnalysisBkup(newAnalysisBkups);
 
-                if (resultAddAnalysisBkup > 0)
+                if (resultAddAnalysisBkup != null)
                 {
                     Debug.WriteLine("AnalysisBkup añadidos con exitop");
+                    AnalysisBkups.AddRange(resultAddAnalysisBkup);
+                }
+                else
+                {
+                    Debug.WriteLine("Error AnalysisBkup añadidos");
                 }
 
-                // Mapear y agregar nuevas AnalysisBkup creadas al DTO de actualización
-                List<AnalysisBkupForUpdateDto> newAnalysisBkupCreated = _mapper.Map<List<AnalysisBkupForUpdateDto>>(newAnalysisBkups);
-                _SOSHubForUpdate.AnalysesBkup.ToList().AddRange(newAnalysisBkupCreated);
             }
 
             List<SectionForUpdateDto> filteredSectionList = _SOSHubForUpdate.Sections
@@ -215,7 +274,7 @@ namespace SupervisorMobility.API.Controllers.SOS_Controllers
             // Remover nuevos Section de la lista principal para evitar duplicados
             if (filteredSectionList.Any())
             {
-                _SOSHubForUpdate.Sections.ToList().RemoveAll(t => t.SectionId == null || t.SectionId <= 0);
+                _SOSHubForUpdate.Sections.RemoveAll(t => t.SectionId == null || t.SectionId <= 0);
 
                 // Mapear nuevas sections
                 List<Section> newSections = _mapper.Map<List<Section>>(filteredSectionList);
@@ -228,58 +287,73 @@ namespace SupervisorMobility.API.Controllers.SOS_Controllers
 
                 var resultAddSections = await _AnalysisProcessRepository.AddRangeSections(newSections);
 
-                if (resultAddSections > 0)
+                if (resultAddSections != null)
                 {
-                    Debug.WriteLine("Sections añadidas con exitop");
+                    Debug.WriteLine("Sections añadidas con exito");
+                    Sections.AddRange(resultAddSections);
+                }
+                else
+                {
+                    Debug.WriteLine("Error Sections añadidos");
                 }
 
-                // Mapear y agregar nuevas secciones creadas al DTO de actualización
-                List<SectionForUpdateDto> newSectionsCreated = _mapper.Map<List<SectionForUpdateDto>>(newSections);
-                _SOSHubForUpdate.Sections.ToList().AddRange(newSectionsCreated);
             }
 
+            //var auxEntity = ObjectCloner.ObjectCloner.DeepClone(entitySOSHub);
+            //Compare objects
+            //string jsonResult = CompareAndGenerateJson(_mapper.Map<SOSHubForUpdateDto>(entitySOSHub), _SOSHubForUpdate);
+            //Start Create History
+            //SOSHubHistoryForCreateDto newHistory = new SOSHubHistoryForCreateDto();
+            //_mapper.Map(auxEntity, newHistory);
+            //newHistory.VersionChanges = jsonResult;
+            //Create History
+            //SOSHubHistory sOSHubHistory = new SOSHubHistory();
+            //_ = await _AnalysisProcessRepository.CreateHistorySOScollection(sOSHubHistory);
 
-            SOSHub entitySOSHub = await _AnalysisProcessRepository.GetSOSHub(SOSHubId, true, true, true, true, true, true, true, true, true, true, true);
+            //Guardar viejos registros
+            ProcessSheetCommentaries.AddRange(entitySOSHub.ProcessSheetCommentary?.Where(p => p.IsActive == false));
+            AnalysisBkups.AddRange(entitySOSHub.AnalysesBkup?.Where(p => p.IsActive == false));
+            Sections.AddRange(entitySOSHub.Sections?.Where(p => p.IsActive == false));
+            commons.AddRange(entitySOSHub.CommonDirection?.Where(p => p.IsActive == false));
 
-            string jsonResult = CompareAndGenerateJson(_mapper.Map<SOSHubForUpdateDto>(entitySOSHub), _SOSHubForUpdate);
+            //eliminar relaciones de entity bdd
+            await _AnalysisProcessRepository.SOSDataRemoveAllProcessSheetCommentary(entitySOSHub);
+            await _AnalysisProcessRepository.SOSDataRemoveAllSections(entitySOSHub);
+            await _AnalysisProcessRepository.SOSDataRemoveAllCommonDirections(entitySOSHub);
+            await _AnalysisProcessRepository.SOSDataRemoveAllAnalysisBkups(entitySOSHub);
+            await _AnalysisProcessRepository.SOSDataRemoveAllToolsEquipmentMaterial(entitySOSHub);
 
-            
+            //almacenar y actualizar informacion de relaciones
+            foreach (var commonD in _SOSHubForUpdate.CommonDirection)
+            {
+                var _commonDirection = await _AnalysisProcessRepository.UpdateCommonDirection(commonD);
 
-            SOSHubHistory newHistory = new SOSHubHistory();
-            _mapper.Map(entitySOSHub, newHistory);
-            newHistory.VersionChanges = jsonResult;
-
-            await _AnalysisProcessRepository.CreateHistorySOScollection(newHistory);
-
-
-
-
-            List<Commentary> ProcessSheetCommentaries = new List<Commentary>();
-            List<AnalysisBkup> AnalysisBkups = new List<AnalysisBkup>();
-            List<Section> Sections = new List<Section>();
-            List<Tool> tools = new List<Tool>();
-            List<Material> materials = new List<Material>();
-            List<Equipment> equipments = new List<Equipment>();
-            List<CommonDirection> commons = await _AnalysisProcessRepository.TrackCommonDirs(_SOSHubForUpdate.CommonDirection.ToList());
+                CommonDirection commonDirectionToAdd = await _AnalysisProcessRepository.GetCommonDirectionById(commonD.CommonDirectionId);
+                commons.Add(commonDirectionToAdd);
+            }
 
             foreach (var commentary in _SOSHubForUpdate.ProcessSheetCommentary)
             {
-                Commentary analysisBkaux = await _AnalysisProcessRepository.GetCommentaryById(commentary.ComentaryId);
-                _mapper.Map(commentary, analysisBkaux);
-                ProcessSheetCommentaries.Add(analysisBkaux);
+                var CommentaryUpdate = await _AnalysisProcessRepository.UpdateCommentary(commentary);
+
+                Commentary CommentaryToAdd = await _AnalysisProcessRepository.GetCommentaryById(commentary.CommentaryId);
+                ProcessSheetCommentaries.Add(CommentaryToAdd);
             }
 
             foreach (var analysisBkup in _SOSHubForUpdate.AnalysesBkup)
             {
-                AnalysisBkup analysisBkaux = await _AnalysisProcessRepository.GetAnalysisBkupId(analysisBkup.AnalysisBkupId);
-                _mapper.Map(analysisBkup, analysisBkaux);
-                AnalysisBkups.Add(analysisBkaux);
+                var analysisBkUpdate = await _AnalysisProcessRepository.UpdateAnalysisBkup(analysisBkup);
+
+                AnalysisBkup analysisBkToAdd = await _AnalysisProcessRepository.GetAnalysisBkupId(analysisBkup.AnalysisBkupId);
+                AnalysisBkups.Add(analysisBkToAdd);
+
             }
 
             foreach (var section in _SOSHubForUpdate.Sections)
             {
+                var SecUpdate = await _AnalysisProcessRepository.UpdateSection(section);
+
                 Section sectionToAdd = await _AnalysisProcessRepository.GetSectionById(section.SectionId);
-                _mapper.Map(section, sectionToAdd);
                 Sections.Add(sectionToAdd);
             }
 
@@ -308,20 +382,10 @@ namespace SupervisorMobility.API.Controllers.SOS_Controllers
             _SOSHubForUpdate.CommonDirection = null;
 
 
-            await _AnalysisProcessRepository.SOSDataRemoveAllProcessSheetCommentary(entitySOSHub);
-            await _AnalysisProcessRepository.SOSDataRemoveAllAnalysisBkups(entitySOSHub);
-            await _AnalysisProcessRepository.SOSDataRemoveAllSections(entitySOSHub);
-            await _AnalysisProcessRepository.SOSDataRemoveAllToolsEquipmentMaterial(entitySOSHub);
-            await _AnalysisProcessRepository.SOSDataRemoveAllCommonDirections(entitySOSHub);
-
-
-            if (entitySOSHub == null)
-            {
-                return NotFound();
-            }
-
+            //update base entity
             var result = await _AnalysisProcessRepository.UpdateSOSHub(_SOSHubForUpdate, entitySOSHub);
 
+            //restore all relationships
             //ProcessSheetCommentaries
             if (ProcessSheetCommentaries.Any())
             {
@@ -335,7 +399,7 @@ namespace SupervisorMobility.API.Controllers.SOS_Controllers
             {
                 foreach (Section sec in Sections)
                 {
-                    _AnalysisProcessRepository.AddSectionSOSCollection(entitySOSHub, sec);
+                    await _AnalysisProcessRepository.AddSectionSOSCollection(entitySOSHub, sec);
                 }
             }
             //Analysis Backups
@@ -343,7 +407,7 @@ namespace SupervisorMobility.API.Controllers.SOS_Controllers
             {
                 foreach (AnalysisBkup analysisBk in AnalysisBkups)
                 {
-                    _AnalysisProcessRepository.AddAnaysisBkupToSOSCollection(entitySOSHub, analysisBk);
+                    await _AnalysisProcessRepository.AddAnaysisBkupToSOSCollection(entitySOSHub, analysisBk);
                 }
             }
             //Tools
@@ -351,7 +415,7 @@ namespace SupervisorMobility.API.Controllers.SOS_Controllers
             {
                 foreach (Tool tool in tools)
                 {
-                    _AnalysisProcessRepository.AddToolToSOSCollection(entitySOSHub, tool);
+                    await _AnalysisProcessRepository.AddToolToSOSCollection(entitySOSHub, tool);
                 }
             }
             //Materials
@@ -359,7 +423,7 @@ namespace SupervisorMobility.API.Controllers.SOS_Controllers
             {
                 foreach (Material material in materials)
                 {
-                    _AnalysisProcessRepository.AddMaterialToSOSCollection(entitySOSHub, material);
+                    await _AnalysisProcessRepository.AddMaterialToSOSCollection(entitySOSHub, material);
                 }
             }
             //Equipments
@@ -367,16 +431,23 @@ namespace SupervisorMobility.API.Controllers.SOS_Controllers
             {
                 foreach (Equipment equipment in equipments)
                 {
-                    _AnalysisProcessRepository.AddEquipmentToSOSCollection(entitySOSHub, equipment);
+                    await _AnalysisProcessRepository.AddEquipmentToSOSCollection(entitySOSHub, equipment);
                 }
             }
             //Common Directions
             if (commons.Any())
             {
-                await _AnalysisProcessRepository.AddCommonDirectionsToSOSCollection(entitySOSHub,commons);
+                await _AnalysisProcessRepository.AddCommonDirectionsToSOSCollection(entitySOSHub, commons);
+            }
+            //Common Directions
+            if (commons.Any())
+            {
+                await _AnalysisProcessRepository.AddCommonDirectionsToSOSCollection(entitySOSHub, commons);
             }
 
-            await _AnalysisProcessRepository.AddHistoryToSOSCollection(entitySOSHub, newHistory);
+            //await _AnalysisProcessRepository.AddHistoryToSOSCollection(entitySOSHub, sOSHubHistory);
+
+            //await _AnalysisProcessRepository.SaveChangesAsync();
 
             if (result != null)
             {

@@ -38,21 +38,23 @@ namespace SupervisorMobility.API.Controllers.SOS_Controllers
         }
 
         [HttpPost]
-        public async Task<ActionResult<SOSAnalysisDto>> GenerateAnalysis( SOSAnalysis sOSAnalysisToCreate, int SOSHubCollection_Id)
+        public async Task<ActionResult<SOSAnalysisDto>> GenerateAnalysis(SOSAnalysisForCreateDto sOSAnalysisToCreate, int SOSHubCollection_Id)
         {
             SOSHub SOSEntity = await _AnalysisProcessRepository.GetSOSHub(SOSHubCollection_Id, includeInformation: true);
 
             //Nombre del documento GOS o processShet
-            //sOSAnalysisToCreate.OperationName = SOSEntity.;
             sOSAnalysisToCreate.OperationName = SOSEntity.ProcessSheet;
+            sOSAnalysisToCreate.InternalControlNumber = SOSEntity.ProcessSheet;
+            sOSAnalysisToCreate.ProcessName = SOSEntity.ProcessSheet;
 
             sOSAnalysisToCreate.CreatedDate = DateTime.Now;
             sOSAnalysisToCreate.IsActive = true;
 
             sOSAnalysisToCreate.SOSHubId = SOSHubCollection_Id;
-            sOSAnalysisToCreate.SOSHub = SOSEntity;
 
-            var createdResult = await _AnalysisProcessRepository.CreateSOSAnalysis(sOSAnalysisToCreate);
+            SOSAnalysis AnalysisToCreate = _mapper.Map<SOSAnalysis>(sOSAnalysisToCreate);
+
+            var createdResult = await _AnalysisProcessRepository.CreateSOSAnalysis(AnalysisToCreate);
             if (createdResult != null)
                 return Ok(sOSAnalysisToCreate);
             else
@@ -95,7 +97,7 @@ namespace SupervisorMobility.API.Controllers.SOS_Controllers
 
 
             // Filtrar nuevos Comentarios
-            List<UpdateCommentaryDto> filteredCommentaryList = sosUpdateEntity.Notes.Where(t => t.ComentaryId <= 0).ToList();
+            List<UpdateCommentaryDto> filteredCommentaryList = sosUpdateEntity.Notes.Where(t => t.CommentaryId <= 0).ToList();
             // Filtrar nuevos AnalysisLogbooks
             List<SOSAnalysisLogbookForUpdateDto> filteredAnalysisLogbooksList = sosUpdateEntity.AnalysisLogbooks.Where(t => t.SOSAnalysisLogbookId <= 0).ToList();
             // Filtrar nuevos SpecialCasesAbnormalSituations
@@ -105,20 +107,20 @@ namespace SupervisorMobility.API.Controllers.SOS_Controllers
             // Remover nuevos Comentarios de la lista principal para evitar duplicados
             if (filteredCommentaryList.Any())
             {
-                sosUpdateEntity.Notes.ToList().RemoveAll(t => t.ComentaryId == null || t.ComentaryId <= 0);
+                sosUpdateEntity.Notes.ToList().RemoveAll(t => t.CommentaryId == null || t.CommentaryId <= 0);
 
                 // Mapear nuevas norms/standars
                 List<Commentary> newCommentarys = _mapper.Map<List<Commentary>>(filteredCommentaryList);
 
                 foreach (var newComentary in newCommentarys)
                 {
-                    newComentary.ComentaryId = 0;
+                    newComentary.CommentaryId = 0;
                     newComentary.IsActive = true;
                 }
 
                 var resultAddCommentary = await _AnalysisProcessRepository.AddRangeCommentary(newCommentarys);
 
-                if (resultAddCommentary > 0)
+                if (resultAddCommentary != null)
                 {
                     Debug.WriteLine("Commentarios añadidos con exitop");
                 }
@@ -200,7 +202,7 @@ namespace SupervisorMobility.API.Controllers.SOS_Controllers
             //hacer update entity sin relaciones
             foreach (var note in sosUpdateEntity.Notes)
             {
-                Commentary analysisBkaux = await _AnalysisProcessRepository.GetCommentaryById(note.ComentaryId);
+                Commentary analysisBkaux = await _AnalysisProcessRepository.GetCommentaryById(note.CommentaryId);
                 _mapper.Map(note, analysisBkaux);
                 Bkup_Notes.Add(analysisBkaux);
             }

@@ -31,20 +31,7 @@ namespace SupervisorMobility.API.MapperProfiles.SOSMapperProfiles
             CreateMap<AnalysisBkup, AnalysisBkupDto>().ReverseMap();
             CreateMap<AnalysisBkup, AnalysisBkupForCreateDto>().ReverseMap();
             CreateMap<AnalysisBkup, AnalysisBkupForUpdateDto>().ReverseMap();
-            
-            //History
-            CreateMap<SOSHub, SOSHubHistory>().ReverseMap();
-
-            CreateMap<SOSHubHistory, SOSHubHistoryDto>().ReverseMap();
-            CreateMap<SOSHubHistory, SOSHubDto>().ReverseMap();
-            CreateMap<SOSHubHistory, SOSHubForCreateDto>().ReverseMap();
-            CreateMap<SOSHubHistory, SOSHubForUpdateDto>().ReverseMap();
-
-            CreateMap<Section, SectionHistory>().ReverseMap();
-
-            CreateMap<Analysis, AnalysisHistory>().ReverseMap();
-
-            CreateMap<AnalysisBkup, AnalysisBkupHistory>().ReverseMap();
+           
         }
     }
 }

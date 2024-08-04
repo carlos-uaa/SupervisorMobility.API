@@ -61,7 +61,7 @@ namespace SupervisorMobility.API.Context
         public DbSet<SOSRegisterJobObservation> SOSRegisters { get; set; }
         public DbSet<SOSRegUserOperation> SOSRegsUserOperation { get; set; }
         public DbSet<HCI> HCIs { get; set; }
-        public DbSet<Commentary> Comments { get; set; }
+        public DbSet<Commentary> Commentaries { get; set; }
         public DbSet<HCITransaction> HCITransactions { get; set; }
         public DbSet<HCICategory> HCICategories { get; set; }
         public DbSet<HCIILU> HCIILUs { get; set; }
@@ -92,6 +92,7 @@ namespace SupervisorMobility.API.Context
         public DbSet<Section> Sections { get; set; }
         public DbSet<Analysis> Analyses { get; set; }
         public DbSet<AnalysisBkup> AnalysisBkups { get; set; }
+        public DbSet<CommonDirection> CommonDirections { get; set; }
 
         public DbSet<SOSHubHistory> SOSHubsHistory { get; set; }
         public DbSet<CommentaryHistory> CommentaryHistorys { get; set; }
@@ -112,7 +113,6 @@ namespace SupervisorMobility.API.Context
         public DbSet<SOSDistribution> SOSDistributions { get; set; }
         public DbSet<SOSFlow> SOSFlows { get; set; }
         public DbSet<SOSSequence> SOSSequences { get; set; }
-        public DbSet<CommonDirection> CommonDirections { get; set; }
 
         #endregion
 
