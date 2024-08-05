@@ -17,7 +17,7 @@ namespace SupervisorMobility.API.DataAccess.Entities.SOS
 
         public ICollection<FileUpload>? Illustrations { get; set; } = new List<FileUpload>();
         public ICollection<Commentary>? Notes { get; set; } = new List<Commentary>();
-        public ICollection<SpecialCaseAbnormalSituation>? SpecialCasesAbnormalSituations { get; set; } = new List<SpecialCaseAbnormalSituation>();
+     
 
         [Column(TypeName = "Date")]
         public DateTime? CreatedDate { get; set; }

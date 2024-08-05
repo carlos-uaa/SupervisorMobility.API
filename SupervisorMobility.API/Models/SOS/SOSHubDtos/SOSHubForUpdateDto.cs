@@ -28,7 +28,7 @@ namespace SupervisorMobility.API.Models.SOS.SOSHubDtos
         public string? TrainingTime { get; set; }
         public ICollection<EquipmentForUpdateDto>? SafetyEquipment { get; set; } = new List<EquipmentForUpdateDto>();
         public ICollection<ToolForUpdateDto>? ToolsUsed { get; set; } = new List<ToolForUpdateDto>();
-        public ICollection<MaterialForUpdateDto>? MaterialsUsed { get; set; } = new List<MaterialForUpdateDto>();
+        public List<MaterialsUsedForUpdateDto>? MaterialsUsed { get; set; } = new List<MaterialsUsedForUpdateDto>();
         public string OtherInformation { get; set; }
 
         public int? PlantId { get; set; }

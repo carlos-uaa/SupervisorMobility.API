@@ -34,7 +34,7 @@ namespace SupervisorMobility.API.DataAccess.Services
         Task<AsyncVoidMethodBuilder> AddProcessSheetCommentaryToSOSCollection(SOSHub Master, Commentary Slave);
         Task<AsyncVoidMethodBuilder> AddAnaysisBkupToSOSCollection(SOSHub Master, AnalysisBkup Slave);
         Task<AsyncVoidMethodBuilder> AddSectionSOSCollection(SOSHub Master, Section Slave);
-        Task<AsyncVoidMethodBuilder> AddMaterialToSOSCollection(SOSHub Master, Material Slave);
+        Task<AsyncVoidMethodBuilder> AddMaterialToSOSCollection(SOSHub Master, MaterialUsed Slave);
         Task<AsyncVoidMethodBuilder> AddEquipmentToSOSCollection(SOSHub Master, Equipment Slave);
         Task<AsyncVoidMethodBuilder> AddToolToSOSCollection(SOSHub Master, Tool Slave);
         Task<AsyncVoidMethodBuilder> AddCommonDirectionsToSOSCollection(SOSHub Master, List<CommonDirection> Slave);
@@ -67,11 +67,14 @@ namespace SupervisorMobility.API.DataAccess.Services
         #endregion
         #region Material
         Task<int> AddRangeMaterial(List<Material> MaterialsToAdd);
+        Task<List<MaterialUsed>> AddRangeMaterialUsed(List<MaterialUsed> MaterialsUsedToAdd);
         Task<Material> CreateNewMaterial(Material MaterialtoCreate);
         Task<Material> GetMaterialById(int id);
+        Task<MaterialUsed> GetMaterialUsedById(int id);
         Task<IEnumerable<Material>> GetAllMaterials();
         Task<IEnumerable<Material>> GetMatchMaterials(string MaterialToFind);
         Task<int> UpdateMaterial(MaterialForUpdateDto materialForUpdate, Material MaterialEntity);
+        Task<int> UpdateMaterialUsed(MaterialsUsedForUpdateDto materialForUpdate);
         Task<int> DeleteMaterial(int id);
         #endregion
         #region Equipment
@@ -88,9 +91,7 @@ namespace SupervisorMobility.API.DataAccess.Services
         Task<int> UpdateCommentary(UpdateCommentaryDto CommentaryForUpdate);
 
         #endregion
-        #region SpecialCaseAbnormalSituation
-        Task<SpecialCaseAbnormalSituation> GetSpecialCaseAbnormalSituationById(int id);
-        #endregion
+       
         #region SOSAnalysisLogbook
         Task<SOSAnalysisLogbook> GetSOSAnalysisLogbookById(int id);
         #endregion
@@ -123,17 +124,14 @@ namespace SupervisorMobility.API.DataAccess.Services
 
         #endregion
         #region Add Range SOS Analysis
-        Task<int> AddRangeSpecialCasesAbnormalSituations(List<SpecialCaseAbnormalSituation> SpecialCasesAbnormalSituationsToAdd);
         Task<int> AddRangeSOSAnalysisLogbook(List<SOSAnalysisLogbook> SOSAnalysisLogbooksToAdd);
         #endregion
         #region Add To Sos Analysis
-        Task<AsyncVoidMethodBuilder> AddSpecialCasesAbnormalSituationsToSOSAnalysis(SOSAnalysis Master, SpecialCaseAbnormalSituation Slave);
         Task<AsyncVoidMethodBuilder> AddSOSAnalysisLogbookToSOSAnalysis(SOSAnalysis Master, SOSAnalysisLogbook Slave);
         Task<AsyncVoidMethodBuilder> AddNoteToSOSAnalysis(SOSAnalysis Master, Commentary Slave);
 
         #endregion
         #region Remove from Sos Hub
-        Task<AsyncVoidMethodBuilder> SOSDataRemoveAllSpecialCasesAbnormalSituationsFromSOSAnalysis(SOSAnalysis Master);
         Task<AsyncVoidMethodBuilder> SOSDataRemoveAllSOSAnalysisLogbookFromSOSAnalysis(SOSAnalysis Master);
         Task<AsyncVoidMethodBuilder> SOSDataRemoveAllNotesFromSOSAnalysis(SOSAnalysis Master);
 

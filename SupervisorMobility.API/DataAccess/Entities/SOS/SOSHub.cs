@@ -33,7 +33,7 @@ namespace SupervisorMobility.API.DataAccess.Entities.SOS
         public string? TrainingTime { get; set; }
         public ICollection<Equipment>? SafetyEquipment { get; set; } = new List<Equipment>();
         public ICollection<Tool>? ToolsUsed { get; set; } = new List<Tool>();
-        public ICollection<Material>? MaterialsUsed { get; set; } = new List<Material>();
+        public ICollection<MaterialUsed>? MaterialsUsed { get; set; } = new List<MaterialUsed>();
         public string OtherInformation { get; set; }
 
         public int? PlantId { get; set; }

@@ -49,7 +49,7 @@ namespace SupervisorMobility.API.Controllers.SOS_Controllers
         public async Task<ActionResult<SOSHubDto>> CreateSOSHub(SOSHubForCreateDto SOSHubForCreate)
         {
             List<Tool> tools = new List<Tool>();
-            List<Material> materials = new List<Material>();
+            List<MaterialUsed> materials = new List<MaterialUsed>();
             List<Equipment> equipments = new List<Equipment>();
 
             foreach (var tool in SOSHubForCreate.ToolsUsed)
@@ -57,11 +57,7 @@ namespace SupervisorMobility.API.Controllers.SOS_Controllers
                 Tool toolaux = await _AnalysisProcessRepository.GetToolById(tool.ToolId);
                 tools.Add(toolaux);
             }
-            foreach (var material in SOSHubForCreate.MaterialsUsed)
-            {
-                Material mataux = await _AnalysisProcessRepository.GetMaterialById(material.MaterialId);
-                materials.Add(mataux);
-            }
+            
             foreach (var equipment in SOSHubForCreate.SafetyEquipment)
             {
                 Equipment equipmentaux = await _AnalysisProcessRepository.GetEquipmentById(equipment.EquipmentId);
@@ -69,7 +65,6 @@ namespace SupervisorMobility.API.Controllers.SOS_Controllers
             }
 
             SOSHubForCreate.ToolsUsed = null;
-            SOSHubForCreate.MaterialsUsed = null;
             SOSHubForCreate.SafetyEquipment = null;
 
             SOSHub SOSEntity = new SOSHub();
@@ -88,7 +83,7 @@ namespace SupervisorMobility.API.Controllers.SOS_Controllers
 
             if (materials.Any())
             {
-                foreach (Material material in materials)
+                foreach (MaterialUsed material in materials)
                 {
                     await _AnalysisProcessRepository.AddMaterialToSOSCollection(SOSEntity, material);
                 }
@@ -150,7 +145,7 @@ namespace SupervisorMobility.API.Controllers.SOS_Controllers
             List<AnalysisBkup> AnalysisBkups = new List<AnalysisBkup>();
             List<Section> Sections = new List<Section>();
             List<Tool> tools = new List<Tool>();
-            List<Material> materials = new List<Material>();
+            List<MaterialUsed> materials = new List<MaterialUsed>();
             List<Equipment> equipments = new List<Equipment>();
             List<CommonDirection> commons = new List<CommonDirection>();
 
@@ -299,6 +294,38 @@ namespace SupervisorMobility.API.Controllers.SOS_Controllers
 
             }
 
+            // Filtrar nuevos MaterialUsed
+            List<MaterialsUsedForUpdateDto> filteredMaterialsUsedList = _SOSHubForUpdate.MaterialsUsed
+                .Where(t => t.MaterialUsedId <= 0).ToList();
+
+            // Remover nuevos MaterialUsed de la lista principal para evitar duplicados
+            if (filteredMaterialsUsedList.Any())
+            {
+                _SOSHubForUpdate.MaterialsUsed.RemoveAll(t => t.MaterialUsedId == null || t.MaterialUsedId <= 0);
+
+                // Mapear nuevas norms/standars
+                List<MaterialUsed> newMaterialsUseds = _mapper.Map<List<MaterialUsed>>(filteredMaterialsUsedList);
+
+                foreach (var newmaterial in newMaterialsUseds)
+                {
+                    newmaterial.MaterialUsedId = 0;
+                    newmaterial.IsActive = true;
+                }
+
+                var resultAddMaterialsUsed = await _AnalysisProcessRepository.AddRangeMaterialUsed(newMaterialsUseds);
+
+                if (resultAddMaterialsUsed != null)
+                {
+                    Debug.WriteLine("Materials used añadidos con exitop");
+                    materials.AddRange(resultAddMaterialsUsed);
+                }
+                else
+                {
+                    Debug.WriteLine("Error Materials used añadidos");
+                }
+            }
+
+
             //var auxEntity = ObjectCloner.ObjectCloner.DeepClone(entitySOSHub);
             //Compare objects
             //string jsonResult = CompareAndGenerateJson(_mapper.Map<SOSHubForUpdateDto>(entitySOSHub), _SOSHubForUpdate);
@@ -315,6 +342,7 @@ namespace SupervisorMobility.API.Controllers.SOS_Controllers
             AnalysisBkups.AddRange(entitySOSHub.AnalysesBkup?.Where(p => p.IsActive == false));
             Sections.AddRange(entitySOSHub.Sections?.Where(p => p.IsActive == false));
             commons.AddRange(entitySOSHub.CommonDirection?.Where(p => p.IsActive == false));
+            materials.AddRange(entitySOSHub.MaterialsUsed?.Where(p => p.IsActive == false));
 
             //eliminar relaciones de entity bdd
             await _AnalysisProcessRepository.SOSDataRemoveAllProcessSheetCommentary(entitySOSHub);
@@ -357,16 +385,20 @@ namespace SupervisorMobility.API.Controllers.SOS_Controllers
                 Sections.Add(sectionToAdd);
             }
 
+            foreach (var material in _SOSHubForUpdate.MaterialsUsed)
+            {
+                var MatUsedUpdate = await _AnalysisProcessRepository.UpdateMaterialUsed(material);
+
+                MaterialUsed mataux = await _AnalysisProcessRepository.GetMaterialUsedById(material.MaterialUsedId);
+                materials.Add(mataux);
+            }
+
             foreach (var tool in _SOSHubForUpdate.ToolsUsed)
             {
                 Tool toolaux = await _AnalysisProcessRepository.GetToolById(tool.ToolId);
                 tools.Add(toolaux);
             }
-            foreach (var material in _SOSHubForUpdate.MaterialsUsed)
-            {
-                Material mataux = await _AnalysisProcessRepository.GetMaterialById(material.MaterialId);
-                materials.Add(mataux);
-            }
+           
             foreach (var equipment in _SOSHubForUpdate.SafetyEquipment)
             {
                 Equipment equipmentaux = await _AnalysisProcessRepository.GetEquipmentById(equipment.EquipmentId);
@@ -421,7 +453,7 @@ namespace SupervisorMobility.API.Controllers.SOS_Controllers
             //Materials
             if (materials.Any())
             {
-                foreach (Material material in materials)
+                foreach (MaterialUsed material in materials)
                 {
                     await _AnalysisProcessRepository.AddMaterialToSOSCollection(entitySOSHub, material);
                 }

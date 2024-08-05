@@ -13,7 +13,6 @@ using SupervisorMobility.API.Models.SOS.MaterialDtos;
 using SupervisorMobility.API.Models.SOS.SOSAnalysisDtos;
 using SupervisorMobility.API.Models.SOS.SOSAnalysisLogbookDtos;
 using SupervisorMobility.API.Models.SOS.SOSHubDtos;
-using SupervisorMobility.API.Models.SOS.SpecialCaseAbnormalSituationDtos;
 using SupervisorMobility.API.Models.SOS.ToolDtos;
 using SupervisorMobility.API.Models.SOSReviewDtos;
 using System.Diagnostics;
@@ -100,9 +99,7 @@ namespace SupervisorMobility.API.Controllers.SOS_Controllers
             List<UpdateCommentaryDto> filteredCommentaryList = sosUpdateEntity.Notes.Where(t => t.CommentaryId <= 0).ToList();
             // Filtrar nuevos AnalysisLogbooks
             List<SOSAnalysisLogbookForUpdateDto> filteredAnalysisLogbooksList = sosUpdateEntity.AnalysisLogbooks.Where(t => t.SOSAnalysisLogbookId <= 0).ToList();
-            // Filtrar nuevos SpecialCasesAbnormalSituations
-            List<SpecialCaseAbnormalSituationForUpdateDto> filteredSpecialCasesAbnormalSituationsList = sosUpdateEntity.SpecialCasesAbnormalSituations.Where(t => t.SpecialCaseAbnormalSituationId <= 0).ToList();
-
+           
 
             // Remover nuevos Comentarios de la lista principal para evitar duplicados
             if (filteredCommentaryList.Any())
@@ -129,30 +126,7 @@ namespace SupervisorMobility.API.Controllers.SOS_Controllers
                 sosUpdateEntity.Notes.ToList().AddRange(newCommentarysCreated);
             }
 
-            // Remover nuevos SpecialCaseAbnormalSituationId de la lista principal para evitar duplicados
-            if (filteredSpecialCasesAbnormalSituationsList.Any())
-            {
-                sosUpdateEntity.SpecialCasesAbnormalSituations.ToList().RemoveAll(t => t.SpecialCaseAbnormalSituationId == null || t.SpecialCaseAbnormalSituationId <= 0);
-
-                // Mapear nuevas SpecialCasesAbnormalSituations
-                List<SpecialCaseAbnormalSituation> newSpecialCasesAbnormalSituations = _mapper.Map<List<SpecialCaseAbnormalSituation>>(filteredSpecialCasesAbnormalSituationsList);
-
-                foreach (var newSpecialCases in newSpecialCasesAbnormalSituations)
-                {
-                    newSpecialCases.SpecialCaseAbnormalSituationId = 0;
-                    newSpecialCases.IsActive = true;
-                }
-
-                var resultAddSpecialCaseAbnormalSituation = await _AnalysisProcessRepository.AddRangeSpecialCasesAbnormalSituations(newSpecialCasesAbnormalSituations);
-
-                if (resultAddSpecialCaseAbnormalSituation > 0)
-                {
-                    Debug.WriteLine("SpecialCaseAbnormalSituation añadidos con exitop");
-                }
-
-                List<SpecialCaseAbnormalSituationForUpdateDto> newSpecialCaseAbnormalSituationCreated = _mapper.Map<List<SpecialCaseAbnormalSituationForUpdateDto>>(newSpecialCasesAbnormalSituations);
-                sosUpdateEntity.SpecialCasesAbnormalSituations.ToList().AddRange(newSpecialCaseAbnormalSituationCreated);
-            }
+           
 
             // Remover nuevos AnalysisLogbooks de la lista principal para evitar duplicados
             if (filteredAnalysisLogbooksList.Any())
@@ -196,7 +170,6 @@ namespace SupervisorMobility.API.Controllers.SOS_Controllers
 
             List<Commentary> Bkup_Notes = new List<Commentary>();
             List<SOSAnalysisLogbook> Bkup_AnalysisLogbook = new List<SOSAnalysisLogbook>();
-            List<SpecialCaseAbnormalSituation> Bkup_SpecialCases = new List<SpecialCaseAbnormalSituation>();
 
             //Crear bkup de datos relacionados
             //hacer update entity sin relaciones
@@ -212,21 +185,14 @@ namespace SupervisorMobility.API.Controllers.SOS_Controllers
                 _mapper.Map(logbook, analysisBkaux);
                 Bkup_AnalysisLogbook.Add(analysisBkaux);
             }
-            foreach (var specialCase in sosUpdateEntity.SpecialCasesAbnormalSituations)
-            {
-                SpecialCaseAbnormalSituation analysisBkaux = await _AnalysisProcessRepository.GetSpecialCaseAbnormalSituationById(specialCase.SpecialCaseAbnormalSituationId);
-                _mapper.Map(specialCase, analysisBkaux);
-                Bkup_SpecialCases.Add(analysisBkaux);
-            }
+           
 
             //Nulleamos el update para evitar errores
             sosUpdateEntity.Notes = null;
             sosUpdateEntity.AnalysisLogbooks = null;
-            sosUpdateEntity.SpecialCasesAbnormalSituations = null;
 
             await _AnalysisProcessRepository.SOSDataRemoveAllNotesFromSOSAnalysis(_sosAnalysis);
             await _AnalysisProcessRepository.SOSDataRemoveAllSOSAnalysisLogbookFromSOSAnalysis(_sosAnalysis);
-            await _AnalysisProcessRepository.SOSDataRemoveAllSpecialCasesAbnormalSituationsFromSOSAnalysis(_sosAnalysis);
 
             var result = await _AnalysisProcessRepository.UpdateSOSAnalysis(sosUpdateEntity, _sosAnalysis);
 
@@ -238,14 +204,7 @@ namespace SupervisorMobility.API.Controllers.SOS_Controllers
                     _AnalysisProcessRepository.AddNoteToSOSAnalysis(_sosAnalysis, Comment);
                 }
             }
-            //SpecialCases
-            if (Bkup_SpecialCases.Any())
-            {
-                foreach (SpecialCaseAbnormalSituation specialcase in Bkup_SpecialCases)
-                {
-                    _AnalysisProcessRepository.AddSpecialCasesAbnormalSituationsToSOSAnalysis(_sosAnalysis, specialcase);
-                }
-            }
+            
             //Analysis Logbook
             if (Bkup_AnalysisLogbook.Any())
             {
