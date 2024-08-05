@@ -1669,7 +1669,10 @@ namespace SupervisorMobility.API.DataAccess.Services
         public async Task AddIlustrationToSOSAnalysis(int SOS_Analysis_id, FileUpload evidence)
         {
             var SosHubEntity = await GetSOSAnalysis(SOS_Analysis_id, includeImages: true);
-
+            if (_context.Entry(SosHubEntity).State == EntityState.Detached)
+            {
+                _context.SOSAnalyses.Attach(SosHubEntity);
+            }
             if (SosHubEntity != null)
             {
 

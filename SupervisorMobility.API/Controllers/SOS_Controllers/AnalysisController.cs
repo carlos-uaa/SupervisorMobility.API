@@ -342,7 +342,16 @@ namespace SupervisorMobility.API.Controllers.SOS_Controllers
             return NotFound("Error File download");
         }
 
+        [HttpDelete("Ilustrations/{SOS_SOSAnalysis_id}/remove/{ImageFile_id}")]
+        public async Task<ActionResult<int>> RemoveImage(int SOS_SOSAnalysis_id, int ImageFile_id)
+        {
+            var result = await _AnalysisProcessRepository.RemoveIlustrationFromSOSAnalysis(SOS_SOSAnalysis_id, ImageFile_id);
 
+            if (result > 0)
+                return Ok();
+            else
+                return BadRequest("something went wrong");
+        }
 
     }
 }
