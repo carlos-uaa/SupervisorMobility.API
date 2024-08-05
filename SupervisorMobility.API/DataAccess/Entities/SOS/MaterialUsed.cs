@@ -4,17 +4,13 @@ using SupervisorMobility.API.DataAccess.Entities.IS;
 
 namespace SupervisorMobility.API.DataAccess.Entities.SOS
 {
-    public class SpecialCaseAbnormalSituation
+    public class MaterialUsed
     {
         [Key, DatabaseGenerated(DatabaseGeneratedOption.Identity)]
-        public int SpecialCaseAbnormalSituationId { get; set; }
-        public string? key { get; set; }
-
-        public string? PartName { get; set; }
-        public string? PartNumber { get; set; }
-
-        public int? PartId { get; set; }
-        public Part? Part { get; set; }
+        public int MaterialUsedId { get; set; }
+        
+        public int MaterialId { get; set; }
+        public Material Material { get; set; }
 
         public double Quantity { get; set; }
 

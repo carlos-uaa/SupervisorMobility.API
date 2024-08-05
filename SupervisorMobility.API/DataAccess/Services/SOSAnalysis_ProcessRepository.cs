@@ -803,7 +803,7 @@ namespace SupervisorMobility.API.DataAccess.Services
             return new AsyncVoidMethodBuilder();
         }
 
-        public async Task<AsyncVoidMethodBuilder> AddMaterialToSOSCollection(SOSHub master, Material slave)
+        public async Task<AsyncVoidMethodBuilder> AddMaterialToSOSCollection(SOSHub master, MaterialUsed slave)
         {
             try
             {
@@ -822,7 +822,7 @@ namespace SupervisorMobility.API.DataAccess.Services
                 }
 
                 // Verificar si el Material slave ya está siendo rastreado en el contexto
-                var localSlaveEntry = _context.Materials.Local.FirstOrDefault(entry => entry.MaterialId == slave.MaterialId);
+                var localSlaveEntry = _context.MaterialsUsed.Local.FirstOrDefault(entry => entry.MaterialId == slave.MaterialId);
                 if (localSlaveEntry != null)
                 {
                     slave = localSlaveEntry;
@@ -831,14 +831,14 @@ namespace SupervisorMobility.API.DataAccess.Services
                 {
                     if (_context.Entry(slave).State == EntityState.Detached)
                     {
-                        _context.Materials.Attach(slave);
+                        _context.MaterialsUsed.Attach(slave);
                     }
                 }
 
                 // Añadir la herramienta a la colección de ToolsUsed del master
                 if (master.MaterialsUsed == null)
                 {
-                    master.MaterialsUsed = new List<Material>();
+                    master.MaterialsUsed = new List<MaterialUsed>();
                 }
 
                 // Verificar si la Materials ya está en la colección
@@ -1210,6 +1210,20 @@ namespace SupervisorMobility.API.DataAccess.Services
 
             return commentariesToAdd;
         }
+        public async Task<List<MaterialUsed>> AddRangeMaterialUsed(List<MaterialUsed> MaterialsUsedToAdd)
+        {
+            _context.MaterialsUsed.AddRange(MaterialsUsedToAdd);
+
+            await _context.SaveChangesAsync();
+
+            // Desvincular las nuevas secciones del contexto
+            foreach (var materialuse in MaterialsUsedToAdd)
+            {
+                _context.Entry(materialuse).State = EntityState.Detached;
+            }
+
+            return MaterialsUsedToAdd;
+        }
 
         public async Task<List<AnalysisBkup>> AddRangeAnalysisBkup(List<AnalysisBkup> analysisBkupsToAdd)
         {
@@ -1290,6 +1304,11 @@ namespace SupervisorMobility.API.DataAccess.Services
             var Material = await _context.Materials.AsNoTracking().Where(t => t.MaterialId == id && t.IsActive == true).FirstOrDefaultAsync();
             return Material;
         }
+        public async Task<MaterialUsed> GetMaterialUsedById(int id)
+        {
+            var Material = await _context.MaterialsUsed.AsNoTracking().Where(t => t.MaterialUsedId == id && t.IsActive == true).FirstOrDefaultAsync();
+            return Material;
+        }
         public async Task<IEnumerable<Material>> GetAllMaterials()
         {
             var Materials = _context.Materials.AsNoTracking().Where(t => t.IsActive == true);
@@ -1297,7 +1316,7 @@ namespace SupervisorMobility.API.DataAccess.Services
         }
         public async Task<IEnumerable<Material>> GetMatchMaterials(string MaterialToFind)
         {
-            return _context.Materials.AsNoTracking().Where(t => t.MaterialName.DiceCoefficient(MaterialToFind) > 0.5).ToList();
+            return _context.Materials.AsNoTracking().Where(t => t.PartName.DiceCoefficient(MaterialToFind) > 0.5).ToList();
         }
         public async Task<int> UpdateMaterial(MaterialForUpdateDto MaterialForUpdate, Material MaterialEntity)
         {
@@ -1305,6 +1324,45 @@ namespace SupervisorMobility.API.DataAccess.Services
             _context.Update(MaterialEntity);
 
             return await _context.SaveChangesAsync();
+        }
+
+        public async Task<int> UpdateMaterialUsed(MaterialsUsedForUpdateDto materialForUpdate)
+        {
+            try
+            {
+                var query = _context.MaterialsUsed
+                                    .Where(t => t.MaterialUsedId == materialForUpdate.MaterialUsedId);
+
+                MaterialUsed materialused = await query.FirstOrDefaultAsync();
+
+                if (materialused == null)
+                {
+                    throw new InvalidOperationException("materialused not found or is not active.");
+                }
+
+                var localEntry = _context.MaterialsUsed.Local.FirstOrDefault(entry => entry.MaterialUsedId == materialForUpdate.MaterialUsedId);
+                if (localEntry != null)
+                {
+                    _context.Entry(localEntry).CurrentValues.SetValues(materialForUpdate);
+                }
+                else
+                {
+                    if (_context.Entry(materialused).State == EntityState.Detached)
+                    {
+                        _context.MaterialsUsed.Attach(materialused);
+                    }
+
+                    _mapper.Map(materialForUpdate, materialused);
+                    _context.MaterialsUsed.Update(materialused);
+                }
+
+                return await _context.SaveChangesAsync();
+            }
+            catch (Exception ex)
+            {
+                Debug.WriteLine("An error occurred while updating the materialused: " + ex.Message);
+                return 0;
+            }
         }
         public async Task<int> DeleteMaterial(int id)
         {
@@ -1654,10 +1712,7 @@ namespace SupervisorMobility.API.DataAccess.Services
                 query = query.Include(t => t.AnalysisLogbooks);
             }
 
-            if (includeSpecialCases)
-            {
-                query = query.Include(e => e.SpecialCasesAbnormalSituations);
-            }
+
 
             if (includeSOS)
             {
@@ -1694,10 +1749,7 @@ namespace SupervisorMobility.API.DataAccess.Services
                 sosHub.AnalysisLogbooks = sosHub.AnalysisLogbooks.Where(t => t.IsActive == true).ToList();
             }
 
-            if (includeSpecialCases)
-            {
-                sosHub.SpecialCasesAbnormalSituations = sosHub.SpecialCasesAbnormalSituations.Where(e => e.IsActive == true).ToList();
-            }
+
 
             return sosHub;
         }
@@ -1721,10 +1773,7 @@ namespace SupervisorMobility.API.DataAccess.Services
                 query = query.Include(t => t.AnalysisLogbooks);
             }
 
-            if (includeSpecialCases)
-            {
-                query = query.Include(e => e.SpecialCasesAbnormalSituations);
-            }
+
 
             if (includeSOS)
             {
@@ -1757,13 +1806,7 @@ namespace SupervisorMobility.API.DataAccess.Services
                 }
             }
 
-            if (includeSpecialCases)
-            {
-                foreach (var SOSAnalysis in sosAnalyses)
-                {
-                    SOSAnalysis.SpecialCasesAbnormalSituations = SOSAnalysis.SpecialCasesAbnormalSituations.Where(e => e.IsActive == true).ToList();
-                }
-            }
+
 
             return sosAnalyses;
         }
@@ -1844,11 +1887,11 @@ namespace SupervisorMobility.API.DataAccess.Services
         }
         #endregion
         #region Add Range SOS Analysis
-        public async Task<int> AddRangeSpecialCasesAbnormalSituations(List<SpecialCaseAbnormalSituation> SpecialCasesAbnormalSituationsToAdd)
-        {
-            _context.SpecialCasesAbnormalSituations.AddRange(SpecialCasesAbnormalSituationsToAdd);
-            return await _context.SaveChangesAsync();
-        }
+        //public async Task<int> AddRangeSpecialCasesAbnormalSituations(List<SpecialCaseAbnormalSituation> SpecialCasesAbnormalSituationsToAdd)
+        //{
+        //    _context.SpecialCasesAbnormalSituations.AddRange(SpecialCasesAbnormalSituationsToAdd);
+        //    return await _context.SaveChangesAsync();
+        //}
         public async Task<int> AddRangeSOSAnalysisLogbook(List<SOSAnalysisLogbook> SOSAnalysisLogbooksToAdd)
         {
             _context.SOSAnalysisLogbooks.AddRange(SOSAnalysisLogbooksToAdd);
@@ -1870,20 +1913,20 @@ namespace SupervisorMobility.API.DataAccess.Services
             _context.SaveChanges();
             return new AsyncVoidMethodBuilder();
         }
-        public async Task<AsyncVoidMethodBuilder> AddSpecialCasesAbnormalSituationsToSOSAnalysis(SOSAnalysis Master, SpecialCaseAbnormalSituation Slave)
-        {
-            if (Master.SpecialCasesAbnormalSituations != null)
-            {
-                Master.SpecialCasesAbnormalSituations.Add(Slave);
-            }
-            else
-            {
-                Master.SpecialCasesAbnormalSituations = new List<SpecialCaseAbnormalSituation>();
-                Master.SpecialCasesAbnormalSituations.Add(Slave);
-            }
-            _context.SaveChanges();
-            return new AsyncVoidMethodBuilder();
-        }
+        //public async Task<AsyncVoidMethodBuilder> AddSpecialCasesAbnormalSituationsToSOSAnalysis(SOSAnalysis Master, SpecialCaseAbnormalSituation Slave)
+        //{
+        //    if (Master.SpecialCasesAbnormalSituations != null)
+        //    {
+        //        Master.SpecialCasesAbnormalSituations.Add(Slave);
+        //    }
+        //    else
+        //    {
+        //        Master.SpecialCasesAbnormalSituations = new List<SpecialCaseAbnormalSituation>();
+        //        Master.SpecialCasesAbnormalSituations.Add(Slave);
+        //    }
+        //    _context.SaveChanges();
+        //    return new AsyncVoidMethodBuilder();
+        //}
         public async Task<AsyncVoidMethodBuilder> AddSOSAnalysisLogbookToSOSAnalysis(SOSAnalysis Master, SOSAnalysisLogbook Slave)
         {
             if (Master.AnalysisLogbooks != null)
@@ -1900,12 +1943,7 @@ namespace SupervisorMobility.API.DataAccess.Services
         }
         #endregion
         #region Remove from SOSAnalysis
-        public async Task<AsyncVoidMethodBuilder> SOSDataRemoveAllSpecialCasesAbnormalSituationsFromSOSAnalysis(SOSAnalysis Master)
-        {
-            Master.SpecialCasesAbnormalSituations?.Clear();
-            _context.SaveChanges();
-            return new AsyncVoidMethodBuilder();
-        }
+
         public async Task<AsyncVoidMethodBuilder> SOSDataRemoveAllSOSAnalysisLogbookFromSOSAnalysis(SOSAnalysis Master)
         {
             Master.AnalysisLogbooks?.Clear();
@@ -1921,10 +1959,7 @@ namespace SupervisorMobility.API.DataAccess.Services
 
         #endregion
         #region SpecialCaseAbnormalSituation
-        public async Task<SpecialCaseAbnormalSituation> GetSpecialCaseAbnormalSituationById(int id)
-        {
-            return await _context.SpecialCasesAbnormalSituations.AsNoTracking().Where(t => t.SpecialCaseAbnormalSituationId == id && t.IsActive == true).FirstOrDefaultAsync();
-        }
+
         #endregion
         #region SOSAnalysisLogbook
         public async Task<SOSAnalysisLogbook> GetSOSAnalysisLogbookById(int id)

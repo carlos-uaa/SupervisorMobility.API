@@ -100,6 +100,7 @@ namespace SupervisorMobility.API.Context
         public DbSet<AnalysisHistory> AnalysesHistory { get; set; }
         public DbSet<AnalysisBkupHistory> AnalysisBkupsHistory { get; set; }
 
+        public DbSet<MaterialUsed> MaterialsUsed { get; set; }
         public DbSet<Material> Materials { get; set; }
         public DbSet<Tool> Tools { get; set; }
         public DbSet<Equipment> Equipments { get; set; }
@@ -107,7 +108,7 @@ namespace SupervisorMobility.API.Context
 
 
         public DbSet<SOSAnalysis> SOSAnalyses { get; set; }
-        public DbSet<SpecialCaseAbnormalSituation> SpecialCasesAbnormalSituations { get; set; }
+        //public DbSet<SpecialCaseAbnormalSituation> SpecialCasesAbnormalSituations { get; set; }
         public DbSet<SOSAnalysisLogbook> SOSAnalysisLogbooks { get; set; }
         public DbSet<SOSCombination> SOSCombinations { get; set; }
         public DbSet<SOSDistribution> SOSDistributions { get; set; }
@@ -416,6 +417,10 @@ namespace SupervisorMobility.API.Context
                 .HasDefaultValue(true);
             //Sos hub history end
 
+            modelBuilder.Entity<MaterialUsed>()
+                .Property(p => p.IsActive)
+                .HasDefaultValue(true);
+
             modelBuilder.Entity<Material>()
                 .Property(p => p.IsActive)
                 .HasDefaultValue(true);
@@ -432,10 +437,7 @@ namespace SupervisorMobility.API.Context
                 .Property(p => p.IsActive)
                 .HasDefaultValue(true); 
 
-            
-            modelBuilder.Entity<SpecialCaseAbnormalSituation>()
-                .Property(p => p.IsActive)
-                .HasDefaultValue(true);
+      
 
             modelBuilder.Entity<SOSCombination>()
                 .Property(p => p.IsActive)

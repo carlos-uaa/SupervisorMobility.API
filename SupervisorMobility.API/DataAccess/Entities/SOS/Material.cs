@@ -8,10 +8,9 @@ namespace SupervisorMobility.API.DataAccess.Entities.SOS
     {
         [Key, DatabaseGenerated(DatabaseGeneratedOption.Identity)]
         public int MaterialId { get; set; }
-        public string MaterialCode { get; set; }
-        public string MaterialName { get; set; }
+        public string? key { get; set; }
+        public string? PartName { get; set; }
+        public string? PartNumber { get; set; }
         public bool? IsActive { get; set; }
-        public ICollection<SOSHub>? MaterialsUsed { get; set; } = new List<SOSHub>();
-        public ICollection<SOSHubHistory>? MaterialsUsedHistory { get; set; } = new List<SOSHubHistory>();
     }
 }

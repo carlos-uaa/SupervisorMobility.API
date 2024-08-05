@@ -1,7 +1,6 @@
 ﻿using SupervisorMobility.API.Models.SOS.SOSAnalysisLogbookDtos;
 using SupervisorMobility.API.Models.FileUploadDto;
 using SupervisorMobility.API.Models.CommentaryDtos;
-using SupervisorMobility.API.Models.SOS.SpecialCaseAbnormalSituationDtos;
 using SupervisorMobility.API.Models.SOS.SOSHubDtos;
 
 namespace SupervisorMobility.API.Models.SOS.SOSAnalysisDtos
@@ -15,7 +14,6 @@ namespace SupervisorMobility.API.Models.SOS.SOSAnalysisDtos
 
         public ICollection<SOSAnalysisLogbookForUpdateDto>? AnalysisLogbooks { get; set; } = new List<SOSAnalysisLogbookForUpdateDto>();
         public ICollection<UpdateCommentaryDto>? Notes { get; set; } = new List<UpdateCommentaryDto>();
-        public ICollection<SpecialCaseAbnormalSituationForUpdateDto>? SpecialCasesAbnormalSituations { get; set; } = new List<SpecialCaseAbnormalSituationForUpdateDto>();
 
         public DateTime? CreatedDate { get; set; }
 
