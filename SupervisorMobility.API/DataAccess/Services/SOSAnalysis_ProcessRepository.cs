@@ -1815,6 +1815,12 @@ namespace SupervisorMobility.API.DataAccess.Services
         {
             try
             {
+                // Adjunta la entidad al contexto si no está ya adjunta
+                if (_context.Entry(AnalysisEntity).State == EntityState.Detached)
+                {
+                    _context.SOSAnalyses.Attach(AnalysisEntity);
+                }
+
                 var localEntry = _context.SOSAnalyses.Local.FirstOrDefault(entry => entry.SOSAnalysisId == AnalysisEntity.SOSAnalysisId);
                 if (localEntry != null)
                 {
@@ -1822,11 +1828,6 @@ namespace SupervisorMobility.API.DataAccess.Services
                 }
                 else
                 {
-                    if (_context.Entry(AnalysisEntity).State == EntityState.Detached)
-                    {
-                        _context.SOSAnalyses.Attach(AnalysisEntity);
-                    }
-
                     _mapper.Map(AnalysisUpdate, AnalysisEntity);
                     _context.SOSAnalyses.Update(AnalysisEntity);
                 }
