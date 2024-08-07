@@ -22,6 +22,7 @@ using SupervisorMobility.API.Models.SOS.SOSHubDtos.AnalysisBkupDtos;
 using SupervisorMobility.API.Models.SOS.SOSHubDtos.AnalysisDtos;
 using SupervisorMobility.API.Models.SOS.SOSHubDtos.SectionDtos;
 using SupervisorMobility.API.Models.SOS.ToolDtos;
+using SupervisorMobility.API.Models.SOS.ToolsUsedDtos;
 using System.Diagnostics;
 using System.Runtime.CompilerServices;
 using System.Xml.Linq;
@@ -624,7 +625,7 @@ namespace SupervisorMobility.API.DataAccess.Services
             return new AsyncVoidMethodBuilder();
         }
 
-        public async Task<AsyncVoidMethodBuilder> AddToolToSOSCollection(SOSHub master, Tool slave)
+        public async Task<AsyncVoidMethodBuilder> AddToolToSOSCollection(SOSHub master, ToolUsed slave)
         {
             try
             {
@@ -643,7 +644,7 @@ namespace SupervisorMobility.API.DataAccess.Services
                 }
 
                 // Verificar si el slave ya está siendo rastreado en el contexto
-                var localSlaveEntry = _context.Tools.Local.FirstOrDefault(entry => entry.ToolId == slave.ToolId);
+                var localSlaveEntry = _context.ToolsUsed.Local.FirstOrDefault(entry => entry.ToolId == slave.ToolId);
                 if (localSlaveEntry != null)
                 {
                     slave = localSlaveEntry;
@@ -652,14 +653,14 @@ namespace SupervisorMobility.API.DataAccess.Services
                 {
                     if (_context.Entry(slave).State == EntityState.Detached)
                     {
-                        _context.Tools.Attach(slave);
+                        _context.ToolsUsed.Attach(slave);
                     }
                 }
 
                 // Añadir la Material a la colección de ToolsUsed del master
                 if (master.ToolsUsed == null)
                 {
-                    master.ToolsUsed = new List<Tool>();
+                    master.ToolsUsed = new List<ToolUsed>();
                 }
 
                 // Verificar si la Material ya está en la colección
@@ -1248,6 +1249,22 @@ namespace SupervisorMobility.API.DataAccess.Services
             _context.Tools.AddRange(ToolsToAdd);
             return await _context.SaveChangesAsync();
         }
+
+        public async Task<List<ToolUsed>> AddRangeToolsUsed(List<ToolUsed> ToolsUsedToAdd)
+        {
+            _context.ToolsUsed.AddRange(ToolsUsedToAdd);
+
+            await _context.SaveChangesAsync();
+
+            // Desvincular las nuevas secciones del contexto
+            foreach (var tooluse in ToolsUsedToAdd)
+            {
+                _context.Entry(tooluse).State = EntityState.Detached;
+            }
+
+            return ToolsUsedToAdd;
+        }
+
         public async Task<Tool> CreateNewTool(Tool TooltoCreate)
         {
             _context.Add(TooltoCreate);
@@ -1259,6 +1276,11 @@ namespace SupervisorMobility.API.DataAccess.Services
         {
             var tool = await _context.Tools.AsNoTracking().Where(t => t.ToolId == id && t.IsActive == true).FirstOrDefaultAsync();
             return tool;
+        }
+        public async Task<ToolUsed> GetToolUsedById(int id)
+        {
+            var toolUse = await _context.ToolsUsed.AsNoTracking().Where(t => t.ToolUsedId == id).FirstOrDefaultAsync();
+            return toolUse;
         }
         public async Task<IEnumerable<Tool>> GetAllTools()
         {
@@ -1276,6 +1298,44 @@ namespace SupervisorMobility.API.DataAccess.Services
             _context.Update(ToolEntity);
 
             return await _context.SaveChangesAsync();
+        }
+
+        public async Task<int> UpdateToolUsed(ToolUsedForUpdateDto ToolForUpdate)
+        {
+            try
+            {
+                var query = _context.ToolsUsed.Where(t => t.ToolUsedId == ToolForUpdate.ToolUsedId);
+
+                ToolUsed Toolused = await query.FirstOrDefaultAsync();
+
+                if (Toolused == null)
+                {
+                    throw new InvalidOperationException("Toolused not found or is not active.");
+                }
+
+                var localEntry = _context.ToolsUsed.Local.FirstOrDefault(entry => entry.ToolUsedId == ToolForUpdate.ToolUsedId);
+                if (localEntry != null)
+                {
+                    _context.Entry(localEntry).CurrentValues.SetValues(ToolForUpdate);
+                }
+                else
+                {
+                    if (_context.Entry(Toolused).State == EntityState.Detached)
+                    {
+                        _context.ToolsUsed.Attach(Toolused);
+                    }
+
+                    _mapper.Map(ToolForUpdate, Toolused);
+                    _context.ToolsUsed.Update(Toolused);
+                }
+
+                return await _context.SaveChangesAsync();
+            }
+            catch (Exception ex)
+            {
+                Debug.WriteLine("An error occurred while updating the Toolused: " + ex.Message);
+                return 0;
+            }
         }
         public async Task<int> DeleteTool(int id)
         {
@@ -1306,9 +1366,10 @@ namespace SupervisorMobility.API.DataAccess.Services
         }
         public async Task<MaterialUsed> GetMaterialUsedById(int id)
         {
-            var Material = await _context.MaterialsUsed.AsNoTracking().Where(t => t.MaterialUsedId == id && t.IsActive == true).FirstOrDefaultAsync();
+            var Material = await _context.MaterialsUsed.AsNoTracking().Where(t => t.MaterialUsedId == id ).FirstOrDefaultAsync();
             return Material;
         }
+        
         public async Task<IEnumerable<Material>> GetAllMaterials()
         {
             var Materials = _context.Materials.AsNoTracking().Where(t => t.IsActive == true);

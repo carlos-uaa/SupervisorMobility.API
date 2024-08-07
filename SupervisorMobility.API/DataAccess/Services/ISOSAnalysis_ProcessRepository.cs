@@ -11,6 +11,7 @@ using SupervisorMobility.API.Models.SOS.SOSHubDtos;
 using SupervisorMobility.API.Models.SOS.SOSHubDtos.AnalysisBkupDtos;
 using SupervisorMobility.API.Models.SOS.SOSHubDtos.SectionDtos;
 using SupervisorMobility.API.Models.SOS.ToolDtos;
+using SupervisorMobility.API.Models.SOS.ToolsUsedDtos;
 using System.Runtime.CompilerServices;
 
 namespace SupervisorMobility.API.DataAccess.Services
@@ -36,7 +37,7 @@ namespace SupervisorMobility.API.DataAccess.Services
         Task<AsyncVoidMethodBuilder> AddSectionSOSCollection(SOSHub Master, Section Slave);
         Task<AsyncVoidMethodBuilder> AddMaterialToSOSCollection(SOSHub Master, MaterialUsed Slave);
         Task<AsyncVoidMethodBuilder> AddEquipmentToSOSCollection(SOSHub Master, Equipment Slave);
-        Task<AsyncVoidMethodBuilder> AddToolToSOSCollection(SOSHub Master, Tool Slave);
+        Task<AsyncVoidMethodBuilder> AddToolToSOSCollection(SOSHub Master, ToolUsed Slave);
         Task<AsyncVoidMethodBuilder> AddCommonDirectionsToSOSCollection(SOSHub Master, List<CommonDirection> Slave);
         Task AddImageToSOSData(int SOS_DataPool_id, FileUpload evidence);
         Task AddVideoToSOSData(int SOS_DataPool_id, FileUpload evidence);
@@ -58,11 +59,15 @@ namespace SupervisorMobility.API.DataAccess.Services
         #endregion
         #region Tool
         Task<int> AddRangeTool(List<Tool> ToolsToAdd);
+        Task<List<ToolUsed>> AddRangeToolsUsed(List<ToolUsed> ToolsUsedToAdd);
         Task<Tool> CreateNewTool(Tool TooltoCreate);
         Task<Tool> GetToolById(int id);
+        Task<ToolUsed> GetToolUsedById(int id);
         Task<IEnumerable<Tool>> GetAllTools();
         Task<IEnumerable<Tool>> GetMatchTools(string ToolToFind);
         Task<int> UpdateTool(ToolForUpdateDto ToolForUpdate, Tool ToolEntity);
+        Task<int> UpdateToolUsed(ToolUsedForUpdateDto toolForUpdate);
+
         Task<int> DeleteTool(int id);
         #endregion
         #region Material
