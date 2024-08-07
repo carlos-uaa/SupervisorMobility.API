@@ -59,7 +59,7 @@ namespace SupervisorMobility.API.Controllers
                 string Tools = "";
                 if (SosAnalysis.SOSHub?.ToolsUsed != null && SosAnalysis.SOSHub.ToolsUsed.Any())
                 {
-                    Tools = string.Join(", ", SosAnalysis.SOSHub.ToolsUsed.Select(tu => tu.ToolName));
+                    Tools = string.Join(", ", SosAnalysis.SOSHub.ToolsUsed.Select(tu => tu.Tool.ToolName));
                 }
                 sheet.Cells["D8"].Value = Tools;
                 sheet.Cells["D9"].Value = SosAnalysis.SOSHub.AppliedModel?.Description;
