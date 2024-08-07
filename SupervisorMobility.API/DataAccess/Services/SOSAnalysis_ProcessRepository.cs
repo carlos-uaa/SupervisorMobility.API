@@ -1876,6 +1876,12 @@ namespace SupervisorMobility.API.DataAccess.Services
         {
             try
             {
+                // Adjunta la entidad al contexto si no está ya adjunta
+                if (_context.Entry(AnalysisEntity).State == EntityState.Detached)
+                {
+                    _context.SOSAnalyses.Attach(AnalysisEntity);
+                }
+
                 var localEntry = _context.SOSAnalyses.Local.FirstOrDefault(entry => entry.SOSAnalysisId == AnalysisEntity.SOSAnalysisId);
                 if (localEntry != null)
                 {
@@ -1883,11 +1889,6 @@ namespace SupervisorMobility.API.DataAccess.Services
                 }
                 else
                 {
-                    if (_context.Entry(AnalysisEntity).State == EntityState.Detached)
-                    {
-                        _context.SOSAnalyses.Attach(AnalysisEntity);
-                    }
-
                     _mapper.Map(AnalysisUpdate, AnalysisEntity);
                     _context.SOSAnalyses.Update(AnalysisEntity);
                 }
@@ -1914,7 +1915,10 @@ namespace SupervisorMobility.API.DataAccess.Services
         public async Task AddIlustrationToSOSAnalysis(int SOS_Analysis_id, FileUpload evidence)
         {
             var SosHubEntity = await GetSOSAnalysis(SOS_Analysis_id, includeImages: true);
-
+            if (_context.Entry(SosHubEntity).State == EntityState.Detached)
+            {
+                _context.SOSAnalyses.Attach(SosHubEntity);
+            }
             if (SosHubEntity != null)
             {
 
