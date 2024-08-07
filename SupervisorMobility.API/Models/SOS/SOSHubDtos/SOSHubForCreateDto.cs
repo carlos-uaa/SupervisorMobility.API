@@ -7,6 +7,7 @@ using SupervisorMobility.API.Models.SOS.MaterialDtos;
 using SupervisorMobility.API.Models.SOS.SOSHubDtos.AnalysisBkupDtos;
 using SupervisorMobility.API.Models.SOS.SOSHubDtos.SectionDtos;
 using SupervisorMobility.API.Models.SOS.ToolDtos;
+using SupervisorMobility.API.Models.SOS.ToolsUsedDtos;
 
 namespace SupervisorMobility.API.Models.SOS.SOSHubDtos
 {
@@ -26,7 +27,7 @@ namespace SupervisorMobility.API.Models.SOS.SOSHubDtos
 
         public string? TrainingTime { get; set; }
         public ICollection<EquipmentDto>? SafetyEquipment { get; set; } = new List<EquipmentDto>();
-        public ICollection<ToolDto>? ToolsUsed { get; set; } = new List<ToolDto>();
+        public ICollection<ToolUsedForCreateDto>? ToolsUsed { get; set; } = new List<ToolUsedForCreateDto>();
         public ICollection<MaterialsUsedForCreateDto>? MaterialsUsed { get; set; } = new List<MaterialsUsedForCreateDto>();
         public string OtherInformation { get; set; }
 

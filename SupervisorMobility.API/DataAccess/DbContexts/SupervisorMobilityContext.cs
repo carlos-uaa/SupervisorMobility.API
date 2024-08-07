@@ -102,6 +102,7 @@ namespace SupervisorMobility.API.Context
 
         public DbSet<MaterialUsed> MaterialsUsed { get; set; }
         public DbSet<Material> Materials { get; set; }
+        public DbSet<ToolUsed> ToolsUsed { get; set; }
         public DbSet<Tool> Tools { get; set; }
         public DbSet<Equipment> Equipments { get; set; }
 
