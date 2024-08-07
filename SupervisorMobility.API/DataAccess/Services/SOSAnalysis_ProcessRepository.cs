@@ -1780,6 +1780,7 @@ namespace SupervisorMobility.API.DataAccess.Services
                 query = query.Include(m => m.SOSHub).ThenInclude(s => s.Sections).ThenInclude(a => a.Analyses);
                 query = query.Include(m => m.SOSHub).ThenInclude(s => s.AppliedModel);
                 query = query.Include(m => m.SOSHub).ThenInclude(s => s.ToolsUsed);
+                query = query.Include(m => m.SOSHub).ThenInclude(s => s.MaterialsUsed).ThenInclude(m => m.Material);
                 query = query.Include(m => m.SOSHub).ThenInclude(s => s.SafetyEquipment);
             }
 
