@@ -42,7 +42,6 @@ namespace SupervisorMobility.API.Controllers.SOS_Controllers
             SOSHub SOSEntity = await _AnalysisProcessRepository.GetSOSHub(SOSHubCollection_Id, includeInformation: true);
 
             //Nombre del documento GOS o processShet
-            sOSAnalysisToCreate.OperationName = SOSEntity.ProcessSheet;
             sOSAnalysisToCreate.InternalControlNumber = SOSEntity.ProcessSheet;
             sOSAnalysisToCreate.ProcessName = SOSEntity.ProcessSheet;
 
@@ -50,6 +49,7 @@ namespace SupervisorMobility.API.Controllers.SOS_Controllers
             sOSAnalysisToCreate.IsActive = true;
 
             sOSAnalysisToCreate.SOSHubId = SOSHubCollection_Id;
+
 
             SOSAnalysis AnalysisToCreate = _mapper.Map<SOSAnalysis>(sOSAnalysisToCreate);
 
