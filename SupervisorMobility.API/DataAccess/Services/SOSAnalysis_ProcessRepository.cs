@@ -78,7 +78,7 @@ namespace SupervisorMobility.API.DataAccess.Services
 
             if (includeTools)
             {
-                query = query.Include(t => t.ToolsUsed);
+                query = query.Include(t => t.ToolsUsed).ThenInclude(t => t.Tool);
             }
 
             if (includeEquipments)
@@ -88,7 +88,7 @@ namespace SupervisorMobility.API.DataAccess.Services
 
             if (includeMaterials)
             {
-                query = query.Include(m => m.MaterialsUsed);
+                query = query.Include(m => m.MaterialsUsed).ThenInclude(m => m.Material);
             }
 
             if (includeInformation)
@@ -201,7 +201,7 @@ namespace SupervisorMobility.API.DataAccess.Services
             }
             if (includeTools)
             {
-                query = query.Include(t => t.ToolsUsed);
+                query = query.Include(t => t.ToolsUsed).ThenInclude(p=>p.Tool);
             }
 
             if (includeEquipments)
@@ -211,7 +211,7 @@ namespace SupervisorMobility.API.DataAccess.Services
 
             if (includeMaterials)
             {
-                query = query.Include(m => m.MaterialsUsed);
+                query = query.Include(m => m.MaterialsUsed).ThenInclude(p=>p.Material);
             }
 
             if (includeInformation)
@@ -1779,9 +1779,9 @@ namespace SupervisorMobility.API.DataAccess.Services
             {
                 query = query.Include(m => m.SOSHub).ThenInclude(s => s.Sections).ThenInclude(a => a.Analyses);
                 query = query.Include(m => m.SOSHub).ThenInclude(s => s.AppliedModel);
-                query = query.Include(m => m.SOSHub).ThenInclude(s => s.ToolsUsed);
-                query = query.Include(m => m.SOSHub).ThenInclude(s => s.MaterialsUsed).ThenInclude(m => m.Material);
+                query = query.Include(m => m.SOSHub).ThenInclude(s => s.ToolsUsed).ThenInclude(p=>p.Tool);
                 query = query.Include(m => m.SOSHub).ThenInclude(s => s.SafetyEquipment);
+                query = query.Include(m => m.SOSHub).ThenInclude(s => s.MaterialsUsed).ThenInclude(p => p.Material);
             }
 
             if (includeImagesSOS)
