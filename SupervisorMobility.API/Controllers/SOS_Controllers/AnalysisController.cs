@@ -63,7 +63,7 @@ namespace SupervisorMobility.API.Controllers.SOS_Controllers
             }
             else
             {
-
+                //only add revision
                 return Ok("Revision");
             }
 
