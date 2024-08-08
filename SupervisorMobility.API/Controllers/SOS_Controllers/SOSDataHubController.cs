@@ -95,10 +95,10 @@ namespace SupervisorMobility.API.Controllers.SOS_Controllers
 
         //get
         [HttpGet("{id}", Name = "GetSOSHub")]
-        public async Task<ActionResult<SOSHubDto>> GetSOSHub(int id, bool includeAnalysesBkup = false, bool includeSections = false, bool includeImages = false, bool includeVideos = false, bool includeCommentaries = false, bool includeTools = false, bool includeEquipments = false, bool includeMaterials = false, bool includeInformation = false, bool includePeople = false, bool includeDocuments = false, bool includeModel = false, bool includeCommonDirections = false)
+        public async Task<ActionResult<SOSHubDto>> GetSOSHub(int id, bool includeAnalysesBkup = false, bool includeSections = false, bool includeImages = false, bool includeVideos = false, bool includeCommentaries = false, bool includeTools = false, bool includeEquipments = false, bool includeMaterials = false, bool includeInformation = false, bool includePeople = false, bool includeDocuments = false, bool includeModel = false)
         {
 
-            var SOSHub = await _AnalysisProcessRepository.GetSOSHub(id, includeAnalysesBkup, includeSections, includeImages, includeVideos, includeCommentaries, includeTools, includeEquipments, includeMaterials, includeInformation, includePeople, includeDocuments, includeModel, includeCommonDirections);
+            var SOSHub = await _AnalysisProcessRepository.GetSOSHub(id, includeAnalysesBkup: includeAnalysesBkup, includeSections: includeSections, includeImages: includeImages, includeVideos: includeVideos, includeCommentaries: includeCommentaries, includeTools: includeTools, includeEquipments: includeEquipments, includeMaterials: includeMaterials, includeInformation: includeInformation, includePeople: includePeople, includeDocuments: includeDocuments, includeModel: includeModel);
             if (SOSHub == null)
             {
                 return NotFound("SOSHub not found!");
@@ -111,7 +111,7 @@ namespace SupervisorMobility.API.Controllers.SOS_Controllers
         public async Task<ActionResult<IEnumerable<SOSHubDto>>> GetAllSOSHub(bool includeImages = false, bool includeVideos = false, bool includeCommentaries = false, bool includeTools = false, bool includeEquipments = false, bool includeMaterials = false, bool includeInformation = false, bool includePeople = false, bool includeDocuments = false)
         {
 
-            var CheckpointEntities = await _AnalysisProcessRepository.GetAllSOSHub(includeImages, includeVideos, includeCommentaries, includeTools, includeEquipments, includeMaterials, includeInformation, includePeople, includeDocuments);
+            var CheckpointEntities = await _AnalysisProcessRepository.GetAllSOSHub(includeImages:includeImages, includeVideos:includeVideos, includeCommentaries: includeCommentaries, includeTools: includeTools, includeEquipments: includeEquipments, includeMaterials: includeMaterials, includeInformation: includeInformation, includePeople: includePeople, includeDocuments: includeDocuments);
             if (CheckpointEntities == null)
             {
                 return NotFound("Get All Sos Hub not found!");

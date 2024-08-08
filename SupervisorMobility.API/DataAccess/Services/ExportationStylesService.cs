@@ -20,6 +20,7 @@ namespace SupervisorMobility.API.DataAccess.Services
             sheet.Cells[$"B{rownumber}"].Style.HorizontalAlignment = ExcelHorizontalAlignment.Center;
 
             sheet.Cells[$"C{rownumber}:D{rownumber}"].Merge = true;
+            sheet.Cells[$"C{rownumber}:D{rownumber}"].Style.WrapText = true;
             sheet.Cells[$"C{rownumber}:D{rownumber}"].Style.Border.Left.Style = ExcelBorderStyle.Thin;
             sheet.Cells[$"C{rownumber}:D{rownumber}"].Style.Border.Right.Style = ExcelBorderStyle.Thin;
             sheet.Cells[$"C{rownumber}:D{rownumber}"].Style.Border.Bottom.Style = !last ? ExcelBorderStyle.Dashed : ExcelBorderStyle.Medium;
@@ -33,6 +34,7 @@ namespace SupervisorMobility.API.DataAccess.Services
             sheet.Cells[$"E{rownumber}"].Style.HorizontalAlignment = ExcelHorizontalAlignment.Center;
 
             sheet.Cells[$"F{rownumber}:G{rownumber}"].Merge = true;
+            sheet.Cells[$"F{rownumber}:G{rownumber}"].Style.WrapText = true;
             sheet.Cells[$"F{rownumber}:G{rownumber}"].Style.Border.Left.Style = ExcelBorderStyle.Thin;
             sheet.Cells[$"F{rownumber}:G{rownumber}"].Style.Border.Right.Style = ExcelBorderStyle.Thin;
             sheet.Cells[$"F{rownumber}:G{rownumber}"].Style.Border.Bottom.Style = !last ? ExcelBorderStyle.Dashed : ExcelBorderStyle.Medium;
@@ -52,6 +54,7 @@ namespace SupervisorMobility.API.DataAccess.Services
             sheet.Cells[$"I{rownumber}"].Style.HorizontalAlignment = ExcelHorizontalAlignment.Center;
 
             sheet.Cells[$"J{rownumber}:L{rownumber}"].Merge = true;
+            sheet.Cells[$"J{rownumber}:L{rownumber}"].Style.WrapText = true;
             sheet.Cells[$"J{rownumber}:L{rownumber}"].Style.Border.Left.Style = ExcelBorderStyle.Thin;
             sheet.Cells[$"J{rownumber}:L{rownumber}"].Style.Border.Right.Style = ExcelBorderStyle.Medium;
             sheet.Cells[$"J{rownumber}:L{rownumber}"].Style.Border.Bottom.Style = !last ? ExcelBorderStyle.Dashed : ExcelBorderStyle.Medium;
@@ -120,6 +123,19 @@ namespace SupervisorMobility.API.DataAccess.Services
             sheet.Cells[$"E{row}"].Style.Border.Left.Style = ExcelBorderStyle.Thin;
             sheet.Cells[$"E{row}"].Style.Border.Bottom.Style = ExcelBorderStyle.Thin;
             sheet.Cells[$"E{row}"].Style.Border.Right.Style = ExcelBorderStyle.Thin;
+        }
+
+        public double CalculateRowHeight(string text, double columnWidth, double fontsize = 11, double lineSpacing = 1.2)
+        {
+            // Count the number of line breaks
+            int lineBreaks = text.Split(new[] { '\n' }, StringSplitOptions.None).Length;
+
+            // Estimate the number of lines the text will occupy
+            double lineCount = (int)Math.Ceiling(text.Length / columnWidth) + lineBreaks;
+
+            // Adjust the row height based on the estimated line count
+            double lineHeight = fontsize * lineSpacing;
+            return (lineHeight * lineCount);
         }
 
         public double MeasureTextHeight(string text, ExcelFont font, double width)
