@@ -109,8 +109,8 @@ namespace SupervisorMobility.API.Controllers
                 const int row13 = 13;//to propperly merge rows in the illustration column
                 const int sheetBrow6 = 6; //to propperly merge in the illustation column in Sheet B
                 double TotalRowHight = 0;//to be able to know when to jump to next sheet
-                double TotalRowHightA = 0;
-                double TotalRowHightB = 0;
+                double TotalRowHightA = 15;
+                double TotalRowHightB = 15;
                 bool changedAnalysis = false;
                 const int ChangeHeight = 580;//Total row height from an empty template to change sheet
 
@@ -152,7 +152,7 @@ namespace SupervisorMobility.API.Controllers
 
                         sheet.Cells[$"B{rowindex}"].Value = indexAnalysis;
 
-                        MatchCollection result = Regex.Matches(analysis.Text, @"(\*\w*\*|\s*[^*]+\s*)");
+                        MatchCollection result = Regex.Matches(analysis.Text, @"(\*[^*]+\*|\s*[^*]+\s*)");
                         foreach(Match text in result)
                         {
                             if (text.Value.Contains("*"))
@@ -185,7 +185,11 @@ namespace SupervisorMobility.API.Controllers
                             {
                                 string indexString = $"{indexAnalysis}.{cpIndex + 1}- ";
                                 string critString = $"{cp}\r\n";
-                                string reasonString = $"{analysis.Reasons[cpIndex]}\r\n";
+                                string reasonString = $"( {analysis.Reasons[cpIndex]} )";
+                                if (cp != analysis.CriticalPoints.Last())
+                                {
+                                    reasonString += "\r\n";
+                                }
 
                                 sheet.Cells[$"J{rowindex}"].RichText.Add(indexString);
                                 sheet.Cells[$"J{rowindex}"].RichText.Add(critString);
@@ -195,9 +199,9 @@ namespace SupervisorMobility.API.Controllers
                             }
                         }
 
-                        analysisHeight = stylesService.MeasureTextHeight(analysis.Text, ValuesFont, (sheet.Columns[3].Width + sheet.Columns[4].Width));
-                        StepHeight = stylesService.MeasureTextHeight(section.Step, ValuesFont, (sheet.Columns[6].Width + sheet.Columns[7].Width));
-                        CriticalHeight = stylesService.MeasureTextHeightWithLineBreak(fullText, ValuesFont, (sheet.Columns[10].Width + sheet.Columns[11].Width + sheet.Columns[12].Width));
+                        analysisHeight = stylesService.CalculateRowHeight(analysis.Text, sheet.Columns[3].Width + sheet.Columns[4].Width, sheet.Cells["B14"].Style.Font.Size);
+                        StepHeight = stylesService.CalculateRowHeight(section.Step, (sheet.Columns[6].Width + sheet.Columns[7].Width), sheet.Cells["F14"].Style.Font.Size);
+                        CriticalHeight = stylesService.CalculateRowHeight(fullText, (sheet.Columns[10].Width + sheet.Columns[11].Width + sheet.Columns[12].Width), sheet.Cells["J14"].Style.Font.Size);
 
                         var rowheight = Math.Max(20, Math.Max(analysisHeight,Math.Max( StepHeight, CriticalHeight)));
 
@@ -208,7 +212,7 @@ namespace SupervisorMobility.API.Controllers
                         if(TotalRowHight >= ChangeHeight && !changedAnalysis)
                         {
                             sheet = package.Workbook.Worksheets["Analysis B"];
-                            TotalRowHightA = TotalRowHight;
+                            TotalRowHightA += TotalRowHight;
                             TotalRowHight = 0;
                             leftoffrow = rowindex;
                             sheetStartRow = rowindex = startingRowB;
@@ -217,6 +221,7 @@ namespace SupervisorMobility.API.Controllers
                         }
                     }
                 }
+                double templateExtrahight = 25.1 + 8 + 16.2;
                 if (changedAnalysis)
                 {
                     //to return to package A
@@ -228,7 +233,13 @@ namespace SupervisorMobility.API.Controllers
                     //save the rowindex of sheet B in case whe need to write more special cases
                     leftoffrow = temp;
                     //save rowheight
-                    TotalRowHightB = TotalRowHight;
+                    TotalRowHightB += TotalRowHight + templateExtrahight;
+                    TotalRowHightA += templateExtrahight; 
+                }
+                else
+                {
+                    TotalRowHightA += TotalRowHight + templateExtrahight;
+                    TotalRowHightB += templateExtrahight;
                 }
                 rowindex++;
                 double totalTime = SosAnalysis.SOSHub.Sections
@@ -257,51 +268,61 @@ namespace SupervisorMobility.API.Controllers
                 int startingAbnormalRow = rowindex;
                 int startingAbnormalRowB = leftoffrow == 0? 12 : leftoffrow==7? leftoffrow + 5 : leftoffrow + 4;
                 bool changedSheet = false;
+                int specialTotalHeight = 0;
 
-                //if (SosAnalysis..SpecialCasesAbnormalSituations != null && SosAnalysis.SpecialCasesAbnormalSituations.Any())
-                //{
-                //    foreach (var item in SosAnalysis.SpecialCasesAbnormalSituations)
-                //    {
-                //        sheet.InsertRow(rowindex, 1);
-                //        bool last = item == SosAnalysis.SpecialCasesAbnormalSituations.Last();
-                //        stylesService.ApplySpecialCasesRowStyle(sheet, rowindex, last);
+                if (SosAnalysis.SOSHub.MaterialsUsed != null && SosAnalysis.SOSHub.MaterialsUsed.Any())
+                {
+                    foreach (var item in SosAnalysis.SOSHub.MaterialsUsed)
+                    {
+                        sheet.InsertRow(rowindex, 1);
+                        bool last = item == SosAnalysis.SOSHub.MaterialsUsed.Last();
+                        stylesService.ApplySpecialCasesRowStyle(sheet, rowindex, last);
 
-                //        sheet.Cells[$"E{rowindex}"].Value = item.key;
-                //        sheet.Cells[$"F{rowindex}"].Value = item.PartName;
-                //        sheet.Cells[$"H{rowindex}"].Value = item.PartNumber;
-                //        sheet.Cells[$"K{rowindex}"].Value = item.Quantity;
+                        sheet.Cells[$"E{rowindex}"].Value = item.Material.key;
+                        sheet.Cells[$"F{rowindex}"].Value = item.Material.PartName;
+                        sheet.Cells[$"H{rowindex}"].Value = item.Material.PartNumber;
+                        sheet.Cells[$"K{rowindex}"].Value = item.Quantity;
 
-                //        rowindex++;
+                        rowindex++;
 
-                //        if(rowindex - startingAbnormalRow >= 8)
-                //        {
-                //            changedSheet = true;
-                //            sheet = package.Workbook.Worksheets["Analysis B"];
-                //            var temp = leftoffrow;
-                //            leftoffrow = rowindex;
-                //            rowindex = temp==7?temp+5:temp+4;
-                //            startingAbnormalRowB = rowindex;
-                //        }
-                //    }
-                //    if(!changedSheet)
-                //    {
-                //        if (leftoffrow == 0 || leftoffrow == 7) { i = 12; max = 15; }
-                //        else { i = leftoffrow + 4; max = i + 3; }
-                //          sheet = package.Workbook.Worksheets["Analysis B"];
-                //        do
-                //        {
-                //            sheet.InsertRow(i, 1);
-                //            bool last = i + 1 >= max;
-                //            stylesService.ApplySpecialCasesRowStyle(sheet, i, last);
-                //            i++;
-                //       } while (i < max);
-                //
-                //        stylesService.SetSpecialCasesFirstColumnStyle(sheet, startingAbnormalRow, rowindex);
-                //        sheet = package.Workbook.Worksheets["Analysis A"];
-                //    }
-                //}
-                //else
-                //{
+                        specialTotalHeight += 20;
+                        if (rowindex - startingAbnormalRow >= 8)
+                        {
+                            TotalRowHightA += specialTotalHeight - 20;
+                            specialTotalHeight = 0;
+                            changedSheet = true;
+                            sheet = package.Workbook.Worksheets["Analysis B"];
+                            var temp = leftoffrow;
+                            leftoffrow = rowindex;
+                            rowindex = temp == 7 ? temp + 5 : temp + 4;
+                            startingAbnormalRowB = rowindex;
+                        }
+                    }
+                    if (!changedSheet)
+                    {
+                        int i, max;
+                        if (leftoffrow == 0 || leftoffrow == 7) { i = 12; max = 15; leftoffrow = 14;}
+                        else { i = leftoffrow + 4; max = i + 3; }
+                        sheet = package.Workbook.Worksheets["Analysis B"];
+                        do
+                        {
+                            sheet.InsertRow(i, 1);
+                            bool last = i + 1 >= max;
+                            stylesService.ApplySpecialCasesRowStyle(sheet, i, last);
+                            i++;
+                        } while (i < max);
+
+                        TotalRowHightB += 60;
+                        stylesService.SetSpecialCasesFirstColumnStyle(sheet, startingAbnormalRowB, leftoffrow);
+                        sheet = package.Workbook.Worksheets["Analysis A"];
+                    }
+                    else
+                    {
+                        TotalRowHightB += specialTotalHeight - 20;
+                    }
+                }
+                else
+                {
                     int max = rowindex + 3;
                     do
                     {
@@ -324,7 +345,10 @@ namespace SupervisorMobility.API.Controllers
 
                     stylesService.SetSpecialCasesFirstColumnStyle(sheet, startingAbnormalRowB, leftoffrow);
                     sheet = package.Workbook.Worksheets["Analysis A"];
-                //}
+
+                    TotalRowHightA += 60;
+                    TotalRowHightB += 60;
+                }
 
                 if (changedSheet)
                 {
@@ -359,56 +383,112 @@ namespace SupervisorMobility.API.Controllers
 
                 #region images
 
+                sheet = package.Workbook.Worksheets["Analysis A"];
+
                 if (SosAnalysis.Illustrations != null && SosAnalysis.Illustrations.Any()) {
 
                     string[] imgPath = { $"uploads/SOSAnalysis/Ilustrations/", "" };
-                    string tempPath = "Temp/excelImage.png";
+
 
                     int _case = SosAnalysis.Illustrations.Count > 2 ? 1 : 0;
-                    double currentSheetColumnWidth = imgCellWidthA;
+
+                    double changeHeightP = imgService.HeightToPixels(TotalRowHightA);
+
+                    int currentSheetColumnWidth = imgService.WidthToPixels(imgCellWidthA);
 
                     bool add2ndImg = false;
+                    bool changedImgSheet = false;
 
+                    int offsetY = 2;
+
+                    //if anything is moved in template this needs to be updated
+                    double globalXoffset = imgService.WidthToPixels(175.39)+20/*169.39*/, globalYoffset = imgService.HeightToPixels(295.2)+20/*280.2*/;
+
+                    int tempindex = 0;
                     foreach (var image in SosAnalysis.Illustrations)
                     {
-                        imgPath[1] = image.StorageFileName;
-                        using FileStream stream = System.IO.File.OpenRead($"{imgPath[0]}{imgPath[1]}");
-                        Image imgObj = Image.FromStream(stream);
-
-                        imgObj.Save(tempPath);
-
-                        FileInfo fileInfo = new FileInfo(tempPath);
-
-                        var picture = sheet.Drawings.AddPicture(image.FileName, fileInfo);
-
-                        switch (_case)
+                        if (offsetY >= changeHeightP - 150 && !changedImgSheet)
                         {
-                            case 0:
-                                //Horizontal offset
-                                int horizontalOffset = (int)((currentSheetColumnWidth - picture.Image.Bounds.Width) / 2);
-                                break;
-                            case 1:
-                                break;
+                            sheet = package.Workbook.Worksheets["Analysis B"];
+                            changeHeightP = imgService.HeightToPixels(TotalRowHightB);
+                            currentSheetColumnWidth = imgService.WidthToPixels(imgCellWidthB);
+                            offsetY = 2;
+                            changedImgSheet = true;
                         }
 
-                        //picture.SetPosition();
+                        imgPath[1] = image.StorageFileName;
+                        int horizontalOffset = 0;
+                        using (FileStream stream = System.IO.File.OpenRead($"{imgPath[0]}{imgPath[1]}"))
+                        {
+                            Image imgObj = Image.FromStream(stream);
+                            
+                            int w = imgObj.Width, h = imgObj.Height;
 
-                        System.IO.File.Delete(tempPath);
+                            switch (_case)
+                            {
+                                case 0:
+                                    do
+                                    {
+                                        if (w > currentSheetColumnWidth)
+                                        {
+                                            (w, h) = imgService.GetResizeMagnitudesMaintainingAspectRatio(w, h, currentSheetColumnWidth, true);
+                                        }
+                                        else if (h > changeHeightP)
+                                        {
+                                            (w, h) = imgService.GetResizeMagnitudesMaintainingAspectRatio(w, h, (int)changeHeightP, false);
+                                        }
+                                        else
+                                        {
+                                            break;
+                                        }
+                                    } while (true);
+                                    horizontalOffset = (int)((currentSheetColumnWidth - w) / 2);
+                                    break;
+                                case 1:
+                                    (w, h) = (currentSheetColumnWidth / 2 - 20, 160);
+                                    if (!add2ndImg)
+                                    {
+                                        horizontalOffset = 5;
+                                        add2ndImg = true;
+                                    }
+                                    else
+                                    {
+                                        horizontalOffset = currentSheetColumnWidth - w - 5;
+                                        add2ndImg = false;
+                                    }
+                                    break;
+                            }
 
+                            string pictureName = image.FileName.Split(".")[0];
+                            var picture = sheet.Drawings.AddPicture($"{pictureName}{tempindex}.png", stream);
+                            picture.SetSize(w, h);
 
+                            if (!changedImgSheet)
+                            {
+                                picture.SetPosition((int)globalYoffset + offsetY,(int)globalXoffset + horizontalOffset);
+                            }
+                            else
+                            {
+                                picture.SetPosition(sheetBrow6-1, offsetY, 12, horizontalOffset);
+                            }
+
+                            if (_case == 0)
+                            {
+                                offsetY += h;
+                            }
+                            else if (!add2ndImg)
+                            {
+                                offsetY += h + 5;
+                            }
+
+                            tempindex++;
+                        }
                     }
+
                 }
 
                 #endregion
-
-                //Horizontal offset
-                //int horizontalOffset = (int)((cellWidth - picture.Image.Width) / 2);
-                // Set the position of the image (row, rowOffsetPixels, column, columnOffsetPixels)
-                //picture.SetPosition(1, 0, 1, horizontalOffset);
-                /*
-                 * FileStream filestream = new FileStream(filePath, FileMode.Open, FileAccess.Read);
-                 * Image image = Image.FromStream(fileStream);
-                 */
+                
                 #endregion
 
                 // Save to file

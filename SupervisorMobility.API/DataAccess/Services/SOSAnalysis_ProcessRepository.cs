@@ -78,7 +78,7 @@ namespace SupervisorMobility.API.DataAccess.Services
 
             if (includeTools)
             {
-                query = query.Include(t => t.ToolsUsed);
+                query = query.Include(t => t.ToolsUsed).ThenInclude(t => t.Tool);
             }
 
             if (includeEquipments)
@@ -88,7 +88,7 @@ namespace SupervisorMobility.API.DataAccess.Services
 
             if (includeMaterials)
             {
-                query = query.Include(m => m.MaterialsUsed);
+                query = query.Include(m => m.MaterialsUsed).ThenInclude(m => m.Material);
             }
 
             if (includeInformation)
@@ -201,7 +201,7 @@ namespace SupervisorMobility.API.DataAccess.Services
             }
             if (includeTools)
             {
-                query = query.Include(t => t.ToolsUsed);
+                query = query.Include(t => t.ToolsUsed).ThenInclude(p=>p.Tool);
             }
 
             if (includeEquipments)
@@ -211,7 +211,7 @@ namespace SupervisorMobility.API.DataAccess.Services
 
             if (includeMaterials)
             {
-                query = query.Include(m => m.MaterialsUsed);
+                query = query.Include(m => m.MaterialsUsed).ThenInclude(p=>p.Material);
             }
 
             if (includeInformation)
