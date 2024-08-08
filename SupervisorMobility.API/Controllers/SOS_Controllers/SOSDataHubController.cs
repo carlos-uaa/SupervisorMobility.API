@@ -57,12 +57,20 @@ namespace SupervisorMobility.API.Controllers.SOS_Controllers
                 equipments.Add(equipmentaux);
             }
 
-            SOSHubForCreate.ToolsUsed = null;
             SOSHubForCreate.SafetyEquipment = null;
 
             SOSHub SOSEntity = new SOSHub();
 
             _mapper.Map(SOSHubForCreate, SOSEntity);
+
+            if(SOSEntity.OwnerId <= 0)
+            {
+                SOSEntity.OwnerId= null;
+            }
+            if(SOSEntity.EditorId <= 0)
+            {
+                SOSEntity.EditorId = null;
+            }
 
             var createdResult = await _AnalysisProcessRepository.CreateSOScollection(SOSEntity);
 
