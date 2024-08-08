@@ -109,8 +109,8 @@ namespace SupervisorMobility.API.Controllers
                 const int row13 = 13;//to propperly merge rows in the illustration column
                 const int sheetBrow6 = 6; //to propperly merge in the illustation column in Sheet B
                 double TotalRowHight = 0;//to be able to know when to jump to next sheet
-                double TotalRowHightA = 0;
-                double TotalRowHightB = 0;
+                double TotalRowHightA = 15;
+                double TotalRowHightB = 15;
                 bool changedAnalysis = false;
                 const int ChangeHeight = 580;//Total row height from an empty template to change sheet
 
@@ -212,7 +212,7 @@ namespace SupervisorMobility.API.Controllers
                         if(TotalRowHight >= ChangeHeight && !changedAnalysis)
                         {
                             sheet = package.Workbook.Worksheets["Analysis B"];
-                            TotalRowHightA = TotalRowHight;
+                            TotalRowHightA += TotalRowHight;
                             TotalRowHight = 0;
                             leftoffrow = rowindex;
                             sheetStartRow = rowindex = startingRowB;
@@ -221,6 +221,7 @@ namespace SupervisorMobility.API.Controllers
                         }
                     }
                 }
+                double templateExtrahight = 25.1 + 8 + 16.2;
                 if (changedAnalysis)
                 {
                     //to return to package A
@@ -232,11 +233,13 @@ namespace SupervisorMobility.API.Controllers
                     //save the rowindex of sheet B in case whe need to write more special cases
                     leftoffrow = temp;
                     //save rowheight
-                    TotalRowHightB = TotalRowHight;
+                    TotalRowHightB += TotalRowHight + templateExtrahight;
+                    TotalRowHightA += templateExtrahight; 
                 }
                 else
                 {
-                    TotalRowHightA = TotalRowHight;
+                    TotalRowHightA += TotalRowHight + templateExtrahight;
+                    TotalRowHightB += templateExtrahight;
                 }
                 rowindex++;
                 double totalTime = SosAnalysis.SOSHub.Sections
@@ -265,6 +268,7 @@ namespace SupervisorMobility.API.Controllers
                 int startingAbnormalRow = rowindex;
                 int startingAbnormalRowB = leftoffrow == 0? 12 : leftoffrow==7? leftoffrow + 5 : leftoffrow + 4;
                 bool changedSheet = false;
+                int specialTotalHeight = 0;
 
                 if (SosAnalysis.SOSHub.MaterialsUsed != null && SosAnalysis.SOSHub.MaterialsUsed.Any())
                 {
@@ -281,8 +285,11 @@ namespace SupervisorMobility.API.Controllers
 
                         rowindex++;
 
+                        specialTotalHeight += 20;
                         if (rowindex - startingAbnormalRow >= 8)
                         {
+                            TotalRowHightA += specialTotalHeight - 20;
+                            specialTotalHeight = 0;
                             changedSheet = true;
                             sheet = package.Workbook.Worksheets["Analysis B"];
                             var temp = leftoffrow;
@@ -305,8 +312,13 @@ namespace SupervisorMobility.API.Controllers
                             i++;
                         } while (i < max);
 
+                        TotalRowHightB += 60;
                         stylesService.SetSpecialCasesFirstColumnStyle(sheet, startingAbnormalRowB, leftoffrow);
                         sheet = package.Workbook.Worksheets["Analysis A"];
+                    }
+                    else
+                    {
+                        TotalRowHightB += specialTotalHeight - 20;
                     }
                 }
                 else
@@ -333,6 +345,9 @@ namespace SupervisorMobility.API.Controllers
 
                     stylesService.SetSpecialCasesFirstColumnStyle(sheet, startingAbnormalRowB, leftoffrow);
                     sheet = package.Workbook.Worksheets["Analysis A"];
+
+                    TotalRowHightA += 60;
+                    TotalRowHightB += 60;
                 }
 
                 if (changedSheet)
@@ -386,6 +401,7 @@ namespace SupervisorMobility.API.Controllers
 
                     int offsetY = 2;
 
+                    //if anything is moved in template this needs to be updated
                     double globalXoffset = imgService.WidthToPixels(175.39)+20/*169.39*/, globalYoffset = imgService.HeightToPixels(295.2)+20/*280.2*/;
 
                     int tempindex = 0;
@@ -394,7 +410,7 @@ namespace SupervisorMobility.API.Controllers
                         if (offsetY >= changeHeightP - 150 && !changedImgSheet)
                         {
                             sheet = package.Workbook.Worksheets["Analysis B"];
-                            //changeHeightP = TotalRowHightB >= 100 ?  : ; to change height maybe
+                            changeHeightP = imgService.HeightToPixels(TotalRowHightB);
                             currentSheetColumnWidth = imgService.WidthToPixels(imgCellWidthB);
                             offsetY = 2;
                             changedImgSheet = true;
@@ -405,43 +421,30 @@ namespace SupervisorMobility.API.Controllers
                         using (FileStream stream = System.IO.File.OpenRead($"{imgPath[0]}{imgPath[1]}"))
                         {
                             Image imgObj = Image.FromStream(stream);
-                            int w = 0, h = 0;
+                            
+                            int w = imgObj.Width, h = imgObj.Height;
 
                             switch (_case)
                             {
                                 case 0:
-                                    if(imgObj.Height > changeHeightP || imgObj.Width > currentSheetColumnWidth)
+                                    do
                                     {
-                                        //if(imgObj.Height == imgObj.Width)
-                                        //{
-                                        //    //imgObj = imgService.ResizeImage(imgObj, currentSheetColumnWidth, (int)changeHeightP);
-                                        //    (w, h) = (currentSheetColumnWidth, (int)changeHeightP);
-                                        //}
-                                        if(imgObj.Width > imgObj.Height)
+                                        if (w > currentSheetColumnWidth)
                                         {
-                                            //imgObj = imgService.ResizeImageMaintainingAspectRatio(imgObj, currentSheetColumnWidth, true);
-                                            (w, h) = imgService.GetResizeMagnitudesMaintainingAspectRatio(imgObj, currentSheetColumnWidth, true);
+                                            (w, h) = imgService.GetResizeMagnitudesMaintainingAspectRatio(w, h, currentSheetColumnWidth, true);
+                                        }
+                                        else if (h > changeHeightP)
+                                        {
+                                            (w, h) = imgService.GetResizeMagnitudesMaintainingAspectRatio(w, h, (int)changeHeightP, false);
                                         }
                                         else
                                         {
-                                            //imgObj = imgService.ResizeImageMaintainingAspectRatio(imgObj, (int)changeHeightP, false);
-                                            (w, h) = imgService.GetResizeMagnitudesMaintainingAspectRatio(imgObj, (int)changeHeightP, false);
+                                            break;
                                         }
-                                    }
-                                    //else if(imgObj.Width > currentSheetColumnWidth)
-                                    //{
-                                    //    //imgObj = imgService.ResizeImageMaintainingAspectRatio(imgObj, currentSheetColumnWidth, true);
-                                    //    (w, h) = imgService.GetResizeMagnitudesMaintainingAspectRatio(imgObj, currentSheetColumnWidth, true);
-                                    //}
-                                    //else if (imgObj.Height > changeHeightP)
-                                    //{
-                                    //    (w, h) = imgService.GetResizeMagnitudesMaintainingAspectRatio(imgObj, (int)changeHeightP, false);
-                                    //}
-                                    //Horizontal offset
+                                    } while (true);
                                     horizontalOffset = (int)((currentSheetColumnWidth - w) / 2);
                                     break;
                                 case 1:
-                                    //imgObj = imgService.ResizeImage(imgObj, (currentSheetColumnWidth / 2) - 20, 160);
                                     (w, h) = (currentSheetColumnWidth / 2 - 20, 160);
                                     if (!add2ndImg)
                                     {
@@ -455,10 +458,6 @@ namespace SupervisorMobility.API.Controllers
                                     }
                                     break;
                             }
-
-                            //imgObj.Save($"Temp/{tempindex}.png");
-
-                            //FileInfo fileInfo = new FileInfo($"Temp/{tempindex}.png");
 
                             string pictureName = image.FileName.Split(".")[0];
                             var picture = sheet.Drawings.AddPicture($"{pictureName}{tempindex}.png", stream);
