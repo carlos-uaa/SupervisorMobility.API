@@ -95,10 +95,10 @@ namespace SupervisorMobility.API.Controllers.SOS_Controllers
 
         //get
         [HttpGet("{id}", Name = "GetSOSHub")]
-        public async Task<ActionResult<SOSHubDto>> GetSOSHub(int id, bool includeAnalysesBkup = false, bool includeSections = false, bool includeImages = false, bool includeVideos = false, bool includeCommentaries = false, bool includeTools = false, bool includeEquipments = false, bool includeMaterials = false, bool includeInformation = false, bool includePeople = false, bool includeDocuments = false, bool includeModel = false)
+        public async Task<ActionResult<SOSHubDto>> GetSOSHub(int id, bool includeAnalysesBkup = false, bool includeSections = false, bool includeImages = false, bool includeVideos = false, bool includeCommentaries = false, bool includeTools = false, bool includeEquipments = false, bool includeMaterials = false, bool includeInformation = false, bool includePeople = false, bool includeDocuments = false, bool includeModel = false, bool includeCollections = false)
         {
 
-            var SOSHub = await _AnalysisProcessRepository.GetSOSHub(id, includeAnalysesBkup: includeAnalysesBkup, includeSections: includeSections, includeImages: includeImages, includeVideos: includeVideos, includeCommentaries: includeCommentaries, includeTools: includeTools, includeEquipments: includeEquipments, includeMaterials: includeMaterials, includeInformation: includeInformation, includePeople: includePeople, includeDocuments: includeDocuments, includeModel: includeModel);
+            var SOSHub = await _AnalysisProcessRepository.GetSOSHub(id, includeAnalysesBkup: includeAnalysesBkup, includeSections: includeSections, includeImages: includeImages, includeVideos: includeVideos, includeCommentaries: includeCommentaries, includeTools: includeTools, includeEquipments: includeEquipments, includeMaterials: includeMaterials, includeInformation: includeInformation, includePeople: includePeople, includeDocuments: includeDocuments, includeModel: includeModel, includeCollections: includeCollections);
             if (SOSHub == null)
             {
                 return NotFound("SOSHub not found!");

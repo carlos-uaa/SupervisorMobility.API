@@ -41,23 +41,34 @@ namespace SupervisorMobility.API.Controllers.SOS_Controllers
         {
             SOSHub SOSEntity = await _AnalysisProcessRepository.GetSOSHub(SOSHubCollection_Id, includeInformation: true);
 
-            //Nombre del documento GOS o processShet
-            sOSAnalysisToCreate.InternalControlNumber = SOSEntity.ProcessSheet;
-            sOSAnalysisToCreate.ProcessName = SOSEntity.ProcessSheet;
+            if(sOSAnalysisToCreate.SOSAnalysisId == 0)
+            {
+                //Nombre del documento GOS o processShet
+                sOSAnalysisToCreate.InternalControlNumber = SOSEntity.Folio;
+                sOSAnalysisToCreate.ProcessName = SOSEntity.ProcessSheet;
 
-            sOSAnalysisToCreate.CreatedDate = DateTime.Now;
-            sOSAnalysisToCreate.IsActive = true;
+                sOSAnalysisToCreate.CreatedDate = DateTime.Now;
+                sOSAnalysisToCreate.IsActive = true;
 
-            sOSAnalysisToCreate.SOSHubId = SOSHubCollection_Id;
+                sOSAnalysisToCreate.SOSHubId = SOSHubCollection_Id;
 
 
-            SOSAnalysis AnalysisToCreate = _mapper.Map<SOSAnalysis>(sOSAnalysisToCreate);
-
-            var createdResult = await _AnalysisProcessRepository.CreateSOSAnalysis(AnalysisToCreate);
-            if (createdResult != null)
-                return Ok(sOSAnalysisToCreate);
+                SOSAnalysis AnalysisToCreate = _mapper.Map<SOSAnalysis>(sOSAnalysisToCreate);
+                
+                var createdResult = await _AnalysisProcessRepository.CreateSOSAnalysis(AnalysisToCreate);
+                if (createdResult != null)
+                    return Ok(sOSAnalysisToCreate);
+                else
+                    return BadRequest(); 
+            }
             else
-                return BadRequest(); ;
+            {
+                //only add revision
+                return Ok("Revision");
+            }
+
+
+
 
         }
 
