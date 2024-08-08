@@ -1,4 +1,5 @@
-﻿using System.Drawing;
+﻿using DocumentFormat.OpenXml.Drawing.Charts;
+using System.Drawing;
 using System.Drawing.Drawing2D;
 using System.Drawing.Imaging;
 
@@ -9,7 +10,7 @@ namespace SupervisorMobility.API.DataAccess.Services
         public ExportationImgService() { }
 
         
-        public static Image ResizeImage(Image image, int width, int height)
+        public Image ResizeImage(Image image, int width, int height)
         {
             var destRect = new Rectangle(0, 0, width, height);
             var destImage = new Bitmap(width, height);
@@ -35,10 +36,22 @@ namespace SupervisorMobility.API.DataAccess.Services
         }
 
         
-        public static Image ResizeImageMaintainingAspectRatio(Image image, int width)
+        public Image ResizeImageMaintainingAspectRatio(Image image, int size, bool isWidth)
         {
-            // Calculate the new height to maintain the aspect ratio
-            int height = (int)((float)width / image.Width * image.Height);
+            int width, height;
+
+            if (isWidth)
+            {
+                // Calculate the new height to maintain the aspect ratio
+                width = size;
+                height = (int)((float)size / image.Width * image.Height);
+            }
+            else
+            {
+                // Calculate the new width to maintain the aspect ratio
+                height = size;
+                width = (int)((float)size / image.Height * image.Width);
+            }
 
             var destRect = new Rectangle(0, 0, width, height);
             var destImage = new Bitmap(width, height);
@@ -63,13 +76,42 @@ namespace SupervisorMobility.API.DataAccess.Services
             return destImage;
         }
 
-         int WidthToPixels(double width)
-         {
-             return (int)((width - 1) * 7.0 + 12 - 5);
-         }
-         int HeightToPixels(double height)
-         {
-             return (int)(height * 96.0 / 72);
-         }
+        public (int, int) GetResizeMagnitudesMaintainingAspectRatio(Image image, int size, bool isWidth)
+        {
+            int width, height;
+
+            if (isWidth)
+            {
+                // Calculate the new height to maintain the aspect ratio
+                width = size;
+                height = (int)((float)size / image.Width * image.Height);
+            }
+            else
+            {
+                // Calculate the new width to maintain the aspect ratio
+                height = size;
+                width = (int)((float)size / image.Height * image.Width);
+            }
+
+            return (height, width);
+        }
+
+
+        public int WidthToPixels(double width)
+        {
+            return (int)((width - 1) * 7.0 + 12 - 5);
+        }
+        public int HeightToPixels(double height)
+        {
+            return (int)(height * 96.0 / 72);
+        }
+        double PixelsToWidth(int pixels)
+        {
+            return (pixels - 12 + 5) / 7.0 + 1;
+        }
+        double PixelsToHeight(int pixels)
+        {
+            return pixels * 72 / 96.0;
+        }
     }
 }
