@@ -11,7 +11,7 @@ namespace SupervisorMobility.API.DataAccess.Entities.SOS
 
         public string? OperationName { get; set; }
         public string? ProcessName { get; set; }
-        public string? InternalControlNumber {  get; set; }
+        public string? InternalControlNumber {  get; set; } //Folio
 
         public ICollection<SOSAnalysisLogbook>? AnalysisLogbooks { get; set; } = new List<SOSAnalysisLogbook>();
 
