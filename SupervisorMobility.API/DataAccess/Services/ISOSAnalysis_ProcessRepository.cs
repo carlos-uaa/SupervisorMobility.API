@@ -99,6 +99,7 @@ namespace SupervisorMobility.API.DataAccess.Services
        
         #region SOSAnalysisLogbook
         Task<SOSAnalysisLogbook> GetSOSAnalysisLogbookById(int id);
+        Task<int> CreateSOSAnalysisLogbook(SOSAnalysisLogbook LogBook_ToCreate);
         #endregion
         #region CommonDirection
         Task<CommonDirection> GetCommonDirectionById(int id);
