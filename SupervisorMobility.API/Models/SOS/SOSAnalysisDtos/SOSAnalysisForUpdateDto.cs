@@ -12,8 +12,8 @@ namespace SupervisorMobility.API.Models.SOS.SOSAnalysisDtos
         public string? OperationName { get; set; }
         public string? ProcessName { get; set; }
 
-        public ICollection<SOSAnalysisLogbookForUpdateDto>? AnalysisLogbooks { get; set; } = new List<SOSAnalysisLogbookForUpdateDto>();
-        public ICollection<UpdateCommentaryDto>? Notes { get; set; } = new List<UpdateCommentaryDto>();
+        public List<SOSAnalysisLogbookForUpdateDto>? AnalysisLogbooks { get; set; } = new List<SOSAnalysisLogbookForUpdateDto>();
+        public List<UpdateCommentaryDto>? Notes { get; set; } = new List<UpdateCommentaryDto>();
 
         public DateTime? CreatedDate { get; set; }
 

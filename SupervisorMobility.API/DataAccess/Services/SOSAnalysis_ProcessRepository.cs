@@ -693,6 +693,7 @@ namespace SupervisorMobility.API.DataAccess.Services
         }
 
         public async Task<AsyncVoidMethodBuilder> AddEquipmentToSOSCollection(SOSHub master, Equipment slave)
+        
         {
             try
             {
