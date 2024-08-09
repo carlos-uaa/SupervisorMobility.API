@@ -76,7 +76,7 @@ namespace SupervisorMobility.API.DataAccess.Services
             return destImage;
         }
 
-        public (int, int) GetResizeMagnitudesMaintainingAspectRatio(Image image, int size, bool isWidth)
+        public (int, int) GetResizeMagnitudesMaintainingAspectRatio(int imageW, int imageH, int size, bool isWidth)
         {
             int width, height;
 
@@ -84,13 +84,13 @@ namespace SupervisorMobility.API.DataAccess.Services
             {
                 // Calculate the new height to maintain the aspect ratio
                 width = size;
-                height = (int)((float)size / image.Width * image.Height);
+                height = (int)((float)size / imageW * imageH);
             }
             else
             {
                 // Calculate the new width to maintain the aspect ratio
                 height = size;
-                width = (int)((float)size / image.Height * image.Width);
+                width = (int)((float)size / imageH * imageW);
             }
 
             return (height, width);
@@ -105,11 +105,11 @@ namespace SupervisorMobility.API.DataAccess.Services
         {
             return (int)(height * 96.0 / 72);
         }
-        double PixelsToWidth(int pixels)
+        public double PixelsToWidth(int pixels)
         {
             return (pixels - 12 + 5) / 7.0 + 1;
         }
-        double PixelsToHeight(int pixels)
+        public double PixelsToHeight(int pixels)
         {
             return pixels * 72 / 96.0;
         }
