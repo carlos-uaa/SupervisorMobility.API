@@ -105,11 +105,11 @@ namespace SupervisorMobility.API.DataAccess.Services
         {
             return (int)(height * 96.0 / 72);
         }
-        double PixelsToWidth(int pixels)
+        public double PixelsToWidth(int pixels)
         {
             return (pixels - 12 + 5) / 7.0 + 1;
         }
-        double PixelsToHeight(int pixels)
+        public double PixelsToHeight(int pixels)
         {
             return pixels * 72 / 96.0;
         }

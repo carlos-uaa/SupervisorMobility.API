@@ -222,8 +222,15 @@ namespace SupervisorMobility.API.Controllers
                     }
                 }
                 double templateExtrahight = 25.1 + 8 + 16.2;
+
+                int rowSpaceA = 17, rowSpaceB = 10;
+
                 if (changedAnalysis)
                 {
+                    rowindex++;
+                    sheet.Cells[$"H{rowindex}"].Formula = $"SUM(H{startingRowB}:H{rowindex-1})";
+                    sheet.Cells[$"I{rowindex}"].Formula = $"SUM(I{startingRowB}:I{rowindex-1})";
+                    rowSpaceB = rowindex + 1;
                     //to return to package A
                     sheet = package.Workbook.Worksheets["Analysis A"];
                     //save the rowindex in sheet B
@@ -242,22 +249,21 @@ namespace SupervisorMobility.API.Controllers
                     TotalRowHightB += templateExtrahight;
                 }
                 rowindex++;
-                double totalTime = SosAnalysis.SOSHub.Sections
-                            .Select(sect =>
-                            {
-                                double timeValue;
-                                return double.TryParse(sect.Time, out timeValue) ? timeValue : (double?)null;
-                            })
-                            .Where(timeValue => timeValue.HasValue)
-                            .Select(timeValue => timeValue.Value)
-                            .DefaultIfEmpty(0.0)
-                            .Sum();
-                string[] splittedTime = totalTime.ToString().Split(".");
+                //double totalTime = SosAnalysis.SOSHub.Sections
+                //            .Select(sect =>
+                //            {
+                //                double timeValue;
+                //                return double.TryParse(sect.Time, out timeValue) ? timeValue : (double?)null;
+                //            })
+                //            .Where(timeValue => timeValue.HasValue)
+                //            .Select(timeValue => timeValue.Value)
+                //            .DefaultIfEmpty(0.0)
+                //            .Sum();
+                //string[] splittedTime = totalTime.ToString().Split(".");
 
-                sheet.Cells[$"H{rowindex}"].Value = splittedTime[0];
-                sheet.Cells[$"I{rowindex}"].Value = splittedTime.Length == 2? splittedTime[1] : splittedTime[0];
-
-
+                sheet.Cells[$"H{rowindex}"].Formula = $"SUM(H{startingRowB}:H{rowindex - 1})";
+                sheet.Cells[$"I{rowindex}"].Formula = $"SUM(I{startingRowB}:I{rowindex - 1})";
+                rowSpaceA = rowindex + 1;
 
                 #endregion
 
@@ -294,7 +300,7 @@ namespace SupervisorMobility.API.Controllers
                             sheet = package.Workbook.Worksheets["Analysis B"];
                             var temp = leftoffrow;
                             leftoffrow = rowindex;
-                            rowindex = temp == 7 ? temp + 5 : temp + 4;
+                            rowindex = temp == 7 ? temp + 5 : temp + 3;
                             startingAbnormalRowB = rowindex;
                         }
                     }
@@ -398,24 +404,21 @@ namespace SupervisorMobility.API.Controllers
 
                     bool add2ndImg = false;
                     bool changedImgSheet = false;
+                    bool ASheetfirstAttemptGrowing = true;
 
                     int offsetY = 2;
 
                     //if anything is moved in template this needs to be updated
-                    double globalXoffset = imgService.WidthToPixels(175.39)+20/*169.39*/, globalYoffset = imgService.HeightToPixels(295.2)+20/*280.2*/;
+                    double globalXoffsetA = imgService.WidthToPixels(175.39)+23/*169.39*/, globalYoffsetA = imgService.HeightToPixels(295.2)+20/*280.2*/;
+                    double globalXoffsetB = imgService.WidthToPixels(175.89)+27/*169.89*/, globalYoffsetB = imgService.HeightToPixels(60.6)+22/*90.6*/;
+
+                    double globalXoffset = globalXoffsetA, globalYoffset = globalYoffsetA;
 
                     int tempindex = 0;
+                    int spacing = 5;
                     foreach (var image in SosAnalysis.Illustrations)
                     {
-                        if (offsetY >= changeHeightP - 150 && !changedImgSheet)
-                        {
-                            sheet = package.Workbook.Worksheets["Analysis B"];
-                            changeHeightP = imgService.HeightToPixels(TotalRowHightB);
-                            currentSheetColumnWidth = imgService.WidthToPixels(imgCellWidthB);
-                            offsetY = 2;
-                            changedImgSheet = true;
-                        }
-
+                        
                         imgPath[1] = image.StorageFileName;
                         int horizontalOffset = 0;
                         using (FileStream stream = System.IO.File.OpenRead($"{imgPath[0]}{imgPath[1]}"))
@@ -433,7 +436,7 @@ namespace SupervisorMobility.API.Controllers
                                         {
                                             (w, h) = imgService.GetResizeMagnitudesMaintainingAspectRatio(w, h, currentSheetColumnWidth, true);
                                         }
-                                        else if (h > changeHeightP)
+                                        else if (h > changeHeightP - offsetY)
                                         {
                                             (w, h) = imgService.GetResizeMagnitudesMaintainingAspectRatio(w, h, (int)changeHeightP, false);
                                         }
@@ -459,18 +462,53 @@ namespace SupervisorMobility.API.Controllers
                                     break;
                             }
 
+                            bool willNotBeAdded = false;
+                            if (offsetY + h > changeHeightP)
+                            {
+                                double percent = (offsetY / changeHeightP) * 100;
+                                if (changedImgSheet || (_case == 1 && (percent >= 65 && percent <= 75) && ASheetfirstAttemptGrowing))
+                                {
+                                    if (add2ndImg)
+                                    {
+                                        double aboveP = ((offsetY+h)/changeHeightP)*100;
+                                        aboveP -= 100;
+                                        double growth = (aboveP/100)*changeHeightP;
+                                        if (changedImgSheet || growth <= 40)
+                                        {
+                                            changeHeightP += growth;
+                                            if (!changedImgSheet)
+                                            {
+                                                sheet.Rows[rowSpaceA].Height += imgService.PixelsToHeight((int)growth);
+                                                ASheetfirstAttemptGrowing = false;
+                                            }
+                                            else
+                                            {
+                                                sheet.Rows[rowSpaceB].Height += imgService.PixelsToHeight((int)growth);
+                                                changeHeightP += growth;
+                                            }
+                                        }
+                                        else
+                                            willNotBeAdded = true;
+                                    }
+                                }
+                                if ((!changedImgSheet && percent > 75) || willNotBeAdded)
+                                {
+                                    sheet = package.Workbook.Worksheets["Analysis B"];
+                                    changeHeightP = imgService.HeightToPixels(TotalRowHightB);
+                                    currentSheetColumnWidth = imgService.WidthToPixels(imgCellWidthB);
+                                    globalXoffset = globalXoffsetB;
+                                    globalYoffset = globalYoffsetB;
+                                    offsetY = 2;
+                                    changedImgSheet = true;
+                                    spacing = 10;
+                                }
+                            }
+
                             string pictureName = image.FileName.Split(".")[0];
                             var picture = sheet.Drawings.AddPicture($"{pictureName}{tempindex}.png", stream);
                             picture.SetSize(w, h);
 
-                            if (!changedImgSheet)
-                            {
-                                picture.SetPosition((int)globalYoffset + offsetY,(int)globalXoffset + horizontalOffset);
-                            }
-                            else
-                            {
-                                picture.SetPosition(sheetBrow6-1, offsetY, 12, horizontalOffset);
-                            }
+                            picture.SetPosition((int)globalYoffset + offsetY,(int)globalXoffset + horizontalOffset);
 
                             if (_case == 0)
                             {
@@ -478,7 +516,7 @@ namespace SupervisorMobility.API.Controllers
                             }
                             else if (!add2ndImg)
                             {
-                                offsetY += h + 5;
+                                offsetY += h + spacing;
                             }
 
                             tempindex++;
@@ -487,8 +525,10 @@ namespace SupervisorMobility.API.Controllers
 
                 }
 
+                package.Workbook.Worksheets.First().Select();
+
                 #endregion
-                
+
                 #endregion
 
                 // Save to file
