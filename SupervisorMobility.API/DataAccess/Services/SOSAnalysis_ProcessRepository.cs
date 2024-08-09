@@ -693,6 +693,7 @@ namespace SupervisorMobility.API.DataAccess.Services
         }
 
         public async Task<AsyncVoidMethodBuilder> AddEquipmentToSOSCollection(SOSHub master, Equipment slave)
+        
         {
             try
             {
@@ -1782,7 +1783,8 @@ namespace SupervisorMobility.API.DataAccess.Services
 
             if (includeLogbooks)
             {
-                query = query.Include(t => t.AnalysisLogbooks);
+                query = query.Include(t => t.AnalysisLogbooks).ThenInclude(l => l.Supervisor);
+                query = query.Include(t => t.AnalysisLogbooks).ThenInclude(l => l.SeniorSupervisor);
             }
 
 
@@ -1965,11 +1967,7 @@ namespace SupervisorMobility.API.DataAccess.Services
         }
         #endregion
         #region Add Range SOS Analysis
-        //public async Task<int> AddRangeSpecialCasesAbnormalSituations(List<SpecialCaseAbnormalSituation> SpecialCasesAbnormalSituationsToAdd)
-        //{
-        //    _context.SpecialCasesAbnormalSituations.AddRange(SpecialCasesAbnormalSituationsToAdd);
-        //    return await _context.SaveChangesAsync();
-        //}
+  
         public async Task<int> AddRangeSOSAnalysisLogbook(List<SOSAnalysisLogbook> SOSAnalysisLogbooksToAdd)
         {
             _context.SOSAnalysisLogbooks.AddRange(SOSAnalysisLogbooksToAdd);
@@ -1977,18 +1975,58 @@ namespace SupervisorMobility.API.DataAccess.Services
         }
         #endregion
         #region Add To Sos Analysis
-        public async Task<AsyncVoidMethodBuilder> AddNoteToSOSAnalysis(SOSAnalysis Master, Commentary Slave)
+        public async Task<AsyncVoidMethodBuilder> AddNoteToSOSAnalysis(SOSAnalysis master, Commentary slave)
         {
-            if (Master.Notes != null)
+            try
             {
-                Master.Notes.Add(Slave);
+                // Verificar si el master ya está siendo rastreado en el contexto
+                var localMasterEntry = _context.SOSAnalyses.Local.FirstOrDefault(entry => entry.SOSAnalysisId == master.SOSAnalysisId);
+                if (localMasterEntry != null)
+                {
+                    master = localMasterEntry;
+                }
+                else
+                {
+                    if (_context.Entry(master).State == EntityState.Detached)
+                    {
+                        _context.SOSAnalyses.Attach(master);
+                    }
+                }
+
+                // Verificar si el slave ya está siendo rastreado en el contexto
+                var localSlaveEntry = _context.Commentaries.Local.FirstOrDefault(entry => entry.CommentaryId == slave.CommentaryId);
+                if (localSlaveEntry != null)
+                {
+                    slave = localSlaveEntry;
+                }
+                else
+                {
+                    if (_context.Entry(slave).State == EntityState.Detached)
+                    {
+                        _context.Commentaries.Attach(slave);
+                    }
+                }
+
+                // Añadir el comentario a la colección de ProcessSheetCommentary del master
+                if (master.Notes == null)
+                {
+                    master.Notes = new List<Commentary>();
+                }
+
+                // Verificar si el comentario ya está en la colección
+                if (!master.Notes.Any(c => c.CommentaryId == slave.CommentaryId))
+                {
+                    master.Notes.Add(slave);
+                }
+
+                // Guardar los cambios
+                await _context.SaveChangesAsync();
             }
-            else
+            catch (Exception ex)
             {
-                Master.Notes = new List<Commentary>();
-                Master.Notes.Add(Slave);
+                // Manejar el error apropiadamente, puedes loguearlo o lanzar una excepción personalizada
+                Debug.WriteLine("An error occurred while updating the SOSHub: " + ex.Message);
             }
-            _context.SaveChanges();
             return new AsyncVoidMethodBuilder();
         }
         //public async Task<AsyncVoidMethodBuilder> AddSpecialCasesAbnormalSituationsToSOSAnalysis(SOSAnalysis Master, SpecialCaseAbnormalSituation Slave)
@@ -2005,18 +2043,58 @@ namespace SupervisorMobility.API.DataAccess.Services
         //    _context.SaveChanges();
         //    return new AsyncVoidMethodBuilder();
         //}
-        public async Task<AsyncVoidMethodBuilder> AddSOSAnalysisLogbookToSOSAnalysis(SOSAnalysis Master, SOSAnalysisLogbook Slave)
+        public async Task<AsyncVoidMethodBuilder> AddSOSAnalysisLogbookToSOSAnalysis(SOSAnalysis master, SOSAnalysisLogbook slave)
         {
-            if (Master.AnalysisLogbooks != null)
+            try
             {
-                Master.AnalysisLogbooks.Add(Slave);
+                // Verificar si el master ya está siendo rastreado en el contexto
+                var localMasterEntry = _context.SOSAnalyses.Local.FirstOrDefault(entry => entry.SOSHubId == master.SOSHubId);
+                if (localMasterEntry != null)
+                {
+                    master = localMasterEntry;
+                }
+                else
+                {
+                    if (_context.Entry(master).State == EntityState.Detached)
+                    {
+                        _context.SOSAnalyses.Attach(master);
+                    }
+                }
+
+                // Verificar si el slave ya está siendo rastreado en el contexto
+                var localSlaveEntry = _context.SOSAnalysisLogbooks.Local.FirstOrDefault(entry => entry.SOSAnalysisLogbookId == slave.SOSAnalysisLogbookId);
+                if (localSlaveEntry != null)
+                {
+                    slave = localSlaveEntry;
+                }
+                else
+                {
+                    if (_context.Entry(slave).State == EntityState.Detached)
+                    {
+                        _context.SOSAnalysisLogbooks.Attach(slave);
+                    }
+                }
+
+                // Añadir el comentario a la colección de ProcessSheetCommentary del master
+                if (master.AnalysisLogbooks == null)
+                {
+                    master.AnalysisLogbooks = new List<SOSAnalysisLogbook>();
+                }
+
+                // Verificar si el comentario ya está en la colección
+                if (!master.AnalysisLogbooks.Any(c => c.SOSAnalysisLogbookId == slave.SOSAnalysisLogbookId))
+                {
+                    master.AnalysisLogbooks.Add(slave);
+                }
+
+                // Guardar los cambios
+                await _context.SaveChangesAsync();
             }
-            else
+            catch (Exception ex)
             {
-                Master.AnalysisLogbooks = new List<SOSAnalysisLogbook>();
-                Master.AnalysisLogbooks.Add(Slave);
+                // Manejar el error apropiadamente, puedes loguearlo o lanzar una excepción personalizada
+                Debug.WriteLine("An error occurred while updating the SOSHub: " + ex.Message);
             }
-            _context.SaveChanges();
             return new AsyncVoidMethodBuilder();
         }
         #endregion
@@ -2043,6 +2121,12 @@ namespace SupervisorMobility.API.DataAccess.Services
         public async Task<SOSAnalysisLogbook> GetSOSAnalysisLogbookById(int id)
         {
             return await _context.SOSAnalysisLogbooks.AsNoTracking().Where(t => t.SOSAnalysisLogbookId == id && t.IsActive == true).FirstOrDefaultAsync();
+        }
+
+        public async Task<int> CreateSOSAnalysisLogbook(SOSAnalysisLogbook LogBook_ToCreate)
+        {
+            _context.SOSAnalysisLogbooks.Add(LogBook_ToCreate);
+            return await _context.SaveChangesAsync();
         }
         #endregion
         #region CommonOperations

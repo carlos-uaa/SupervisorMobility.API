@@ -64,6 +64,26 @@ namespace SupervisorMobility.API.Controllers.SOS_Controllers
             else
             {
                 //only add revision
+                SOSAnalysis _sosAnalysis = await _AnalysisProcessRepository.GetSOSAnalysis(sOSAnalysisToCreate.SOSAnalysisId, true, true, true, true,true,true);
+              
+                SOSAnalysisLogbook _logbookToCreate = _mapper.Map<SOSAnalysisLogbook>(sOSAnalysisToCreate.AnalysisLogbooks?.Last());
+                _logbookToCreate.SOSAnalysisId = _sosAnalysis.SOSAnalysisId;
+
+                var resultAddSections = await _AnalysisProcessRepository.CreateSOSAnalysisLogbook(_logbookToCreate);
+
+                if (resultAddSections > 0)
+                {
+                    Debug.WriteLine("SOSAnalysisLogbook añadidas con exito");
+                await _AnalysisProcessRepository.AddSOSAnalysisLogbookToSOSAnalysis(_sosAnalysis, _logbookToCreate);
+                }
+                else
+                {
+                    Debug.WriteLine("Error Sections añadidos");
+                    return BadRequest();
+                }
+
+
+
                 return Ok("Revision");
             }
 
@@ -105,6 +125,8 @@ namespace SupervisorMobility.API.Controllers.SOS_Controllers
         {
 
 
+            List<Commentary> Bkup_Notes = new List<Commentary>();
+            List<SOSAnalysisLogbook> Bkup_AnalysisLogbook = new List<SOSAnalysisLogbook>();
 
             // Filtrar nuevos Comentarios
             List<UpdateCommentaryDto> filteredCommentaryList = sosUpdateEntity.Notes.Where(t => t.CommentaryId <= 0).ToList();
@@ -115,7 +137,7 @@ namespace SupervisorMobility.API.Controllers.SOS_Controllers
             // Remover nuevos Comentarios de la lista principal para evitar duplicados
             if (filteredCommentaryList.Any())
             {
-                sosUpdateEntity.Notes.ToList().RemoveAll(t => t.CommentaryId == null || t.CommentaryId <= 0);
+                sosUpdateEntity.Notes.RemoveAll(t => t.CommentaryId == null || t.CommentaryId <= 0);
 
                 // Mapear nuevas norms/standars
                 List<Commentary> newCommentarys = _mapper.Map<List<Commentary>>(filteredCommentaryList);
@@ -131,10 +153,12 @@ namespace SupervisorMobility.API.Controllers.SOS_Controllers
                 if (resultAddCommentary != null)
                 {
                     Debug.WriteLine("Commentarios añadidos con exitop");
+                    Bkup_Notes.AddRange(resultAddCommentary);
                 }
-
-                List<UpdateCommentaryDto> newCommentarysCreated = _mapper.Map<List<UpdateCommentaryDto>>(newCommentarys);
-                sosUpdateEntity.Notes.ToList().AddRange(newCommentarysCreated);
+                else
+                {
+                    Debug.WriteLine("Error Commentarios añadidos");
+                }
             }
 
            
@@ -142,7 +166,7 @@ namespace SupervisorMobility.API.Controllers.SOS_Controllers
             // Remover nuevos AnalysisLogbooks de la lista principal para evitar duplicados
             if (filteredAnalysisLogbooksList.Any())
             {
-                sosUpdateEntity.AnalysisLogbooks.ToList().RemoveAll(t => t.SOSAnalysisLogbookId == null || t.SOSAnalysisLogbookId <= 0);
+                sosUpdateEntity.AnalysisLogbooks.RemoveAll(t => t.SOSAnalysisLogbookId == null || t.SOSAnalysisLogbookId <= 0);
 
                 // Mapear nuevas norms/standars
                 List<SOSAnalysisLogbook> newSOSAnalysisLogbook = _mapper.Map<List<SOSAnalysisLogbook>>(filteredAnalysisLogbooksList);
@@ -179,17 +203,17 @@ namespace SupervisorMobility.API.Controllers.SOS_Controllers
             ////await _AnalysisProcessRepository.CreateHistorySOScollection(newHistory);
 
 
-            List<Commentary> Bkup_Notes = new List<Commentary>();
-            List<SOSAnalysisLogbook> Bkup_AnalysisLogbook = new List<SOSAnalysisLogbook>();
 
             //Crear bkup de datos relacionados
             //hacer update entity sin relaciones
             foreach (var note in sosUpdateEntity.Notes)
             {
-                Commentary analysisBkaux = await _AnalysisProcessRepository.GetCommentaryById(note.CommentaryId);
-                _mapper.Map(note, analysisBkaux);
-                Bkup_Notes.Add(analysisBkaux);
+                var CommentaryUpdate = await _AnalysisProcessRepository.UpdateCommentary(note);
+
+                Commentary CommentaryToAdd = await _AnalysisProcessRepository.GetCommentaryById(note.CommentaryId);
+                Bkup_Notes.Add(CommentaryToAdd);
             }
+
             foreach (var logbook in sosUpdateEntity.AnalysisLogbooks)
             {
                 SOSAnalysisLogbook analysisBkaux = await _AnalysisProcessRepository.GetSOSAnalysisLogbookById(logbook.SOSAnalysisLogbookId);
@@ -212,7 +236,7 @@ namespace SupervisorMobility.API.Controllers.SOS_Controllers
             {
                 foreach (Commentary Comment in Bkup_Notes)
                 {
-                    _AnalysisProcessRepository.AddNoteToSOSAnalysis(_sosAnalysis, Comment);
+                  await  _AnalysisProcessRepository.AddNoteToSOSAnalysis(_sosAnalysis, Comment);
                 }
             }
             
@@ -221,7 +245,7 @@ namespace SupervisorMobility.API.Controllers.SOS_Controllers
             {
                 foreach (SOSAnalysisLogbook logbook in Bkup_AnalysisLogbook)
                 {
-                    _AnalysisProcessRepository.AddSOSAnalysisLogbookToSOSAnalysis(_sosAnalysis, logbook);
+                   await _AnalysisProcessRepository.AddSOSAnalysisLogbookToSOSAnalysis(_sosAnalysis, logbook);
                 }
             }
 
