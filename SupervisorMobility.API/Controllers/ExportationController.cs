@@ -439,11 +439,16 @@ namespace SupervisorMobility.API.Controllers
                                         else if (h > changeHeightP - offsetY)
                                         {
                                             (w, h) = imgService.GetResizeMagnitudesMaintainingAspectRatio(w, h, (int)changeHeightP, false);
+                                            double hp = (((h+offsetY) / changeHeightP) * 100)-100;
+
+                                            if (hp > 20)
+                                                break;
                                         }
                                         else
                                         {
                                             break;
                                         }
+
                                     } while (true);
                                     horizontalOffset = (int)((currentSheetColumnWidth - w) / 2);
                                     break;
@@ -501,6 +506,25 @@ namespace SupervisorMobility.API.Controllers
                                     offsetY = 2;
                                     changedImgSheet = true;
                                     spacing = 10;
+                                    if(_case == 0)
+                                    {
+                                        do
+                                        {
+                                            if (w > currentSheetColumnWidth)
+                                            {
+                                                (w, h) = imgService.GetResizeMagnitudesMaintainingAspectRatio(w, h, currentSheetColumnWidth, true);
+                                            }
+                                            else if (h > changeHeightP)
+                                            {
+                                                (w, h) = imgService.GetResizeMagnitudesMaintainingAspectRatio(w, h, (int)changeHeightP, false);
+                                            }
+                                            else
+                                            {
+                                                break;
+                                            }
+                                        } while (true);
+                                        horizontalOffset = (int)((currentSheetColumnWidth - w) / 2);
+                                    }
                                 }
                             }
 
