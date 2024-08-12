@@ -15,12 +15,12 @@ namespace SupervisorMobility.API.Controllers
     [ApiController]
     public class ExportationController : ControllerBase
     {
-        private readonly ISOSAnalysis_ProcessRepository _AnalysisProcessRepository;
+        private readonly ISOS_ProcessRepository _AnalysisProcessRepository;
         private readonly IWebHostEnvironment _env;
         private readonly ExportationStylesService stylesService;
         private readonly ExportationImgService imgService;
 
-        public ExportationController(ISOSAnalysis_ProcessRepository repository, IWebHostEnvironment env)
+        public ExportationController(ISOS_ProcessRepository repository, IWebHostEnvironment env)
         {
             _AnalysisProcessRepository = repository;
             _env = env ?? throw new ArgumentNullException(nameof(env));

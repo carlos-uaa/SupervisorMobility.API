@@ -23,14 +23,12 @@ namespace SupervisorMobility.API.Controllers.SOS_Controllers
     [ApiController]
     public class AnalysisController : Controller
     {
-        private readonly ISOSAnalysis_ProcessRepository _AnalysisProcessRepository;
+        private readonly ISOS_ProcessRepository _AnalysisProcessRepository;
         private readonly IMapper _mapper;
         private readonly IWebHostEnvironment _env;
-        private readonly SupervisorMobilityContext _context;
-        public AnalysisController(IWebHostEnvironment env, SupervisorMobilityContext context, IMapper mapper, ISOSAnalysis_ProcessRepository repository)
+        public AnalysisController(IWebHostEnvironment env, IMapper mapper, ISOS_ProcessRepository repository)
         {
             _AnalysisProcessRepository = repository;
-            _context = context ?? throw new ArgumentNullException(nameof(context));
             _mapper = mapper ??
                   throw new ArgumentNullException(nameof(mapper));
             _env = env ?? throw new ArgumentNullException(nameof(env));
@@ -86,9 +84,6 @@ namespace SupervisorMobility.API.Controllers.SOS_Controllers
 
                 return Ok("Revision");
             }
-
-
-
 
         }
 
