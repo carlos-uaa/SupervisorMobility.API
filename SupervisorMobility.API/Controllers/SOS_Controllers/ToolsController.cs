@@ -10,10 +10,10 @@ namespace SupervisorMobility.API.Controllers.SOS_Controllers
     [ApiController]
     public class ToolsController : Controller
     {
-        private readonly ISOSAnalysis_ProcessRepository _toolService;
+        private readonly ISOS_ProcessRepository _toolService;
         private readonly IMapper _mapper;
         private readonly IWebHostEnvironment _env;
-        public ToolsController(ISOSAnalysis_ProcessRepository tools, IWebHostEnvironment env, IMapper mapper)
+        public ToolsController(ISOS_ProcessRepository tools, IWebHostEnvironment env, IMapper mapper)
         {
             _toolService = tools ??
                   throw new ArgumentNullException(nameof(tools));

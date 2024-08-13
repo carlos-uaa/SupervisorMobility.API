@@ -10,13 +10,14 @@ using SupervisorMobility.API.Models.SOS.SOSAnalysisDtos;
 using SupervisorMobility.API.Models.SOS.SOSHubDtos;
 using SupervisorMobility.API.Models.SOS.SOSHubDtos.AnalysisBkupDtos;
 using SupervisorMobility.API.Models.SOS.SOSHubDtos.SectionDtos;
+using SupervisorMobility.API.Models.SOS.SOSSequenceDtos;
 using SupervisorMobility.API.Models.SOS.ToolDtos;
 using SupervisorMobility.API.Models.SOS.ToolsUsedDtos;
 using System.Runtime.CompilerServices;
 
 namespace SupervisorMobility.API.DataAccess.Services
 {
-    public interface ISOSAnalysis_ProcessRepository
+    public interface ISOS_ProcessRepository
     {
         #region SOS_DataPool
         Task<int> CreateSOScollection(SOSHub SOS_EntityToCreate);
@@ -97,10 +98,6 @@ namespace SupervisorMobility.API.DataAccess.Services
 
         #endregion
        
-        #region SOSAnalysisLogbook
-        Task<SOSAnalysisLogbook> GetSOSAnalysisLogbookById(int id);
-        Task<int> CreateSOSAnalysisLogbook(SOSAnalysisLogbook LogBook_ToCreate);
-        #endregion
         #region CommonDirection
         Task<CommonDirection> GetCommonDirectionById(int id);
         Task<int> UpdateCommonDirection(CommonDirectionDto commonDirectionForUpdate);
@@ -117,6 +114,7 @@ namespace SupervisorMobility.API.DataAccess.Services
         Task<int> UpdateSection(SectionForUpdateDto sectionForUpdate);
 
         #endregion
+
         #region SOSAnalysis
         Task<int> CreateSOSAnalysis(SOSAnalysis SOS_AnalysisToCreate);
         Task<SOSAnalysis> GetSOSAnalysis(int SOSAnalysisId, bool includeImages = false, bool includeNotes = false, bool includeLogbooks = false, bool includeSpecialCases = false, bool includeSOS = false, bool includeImagesSOS = false);
@@ -137,11 +135,44 @@ namespace SupervisorMobility.API.DataAccess.Services
         Task<AsyncVoidMethodBuilder> AddNoteToSOSAnalysis(SOSAnalysis Master, Commentary Slave);
 
         #endregion
-        #region Remove from Sos Hub
+        #region Remove from SosAnalysis
         Task<AsyncVoidMethodBuilder> SOSDataRemoveAllSOSAnalysisLogbookFromSOSAnalysis(SOSAnalysis Master);
         Task<AsyncVoidMethodBuilder> SOSDataRemoveAllNotesFromSOSAnalysis(SOSAnalysis Master);
+        #endregion
+        #region SOSAnalysisLogbook
+        Task<SOSAnalysisLogbook> GetSOSAnalysisLogbookById(int id);
+        Task<int> CreateSOSAnalysisLogbook(SOSAnalysisLogbook LogBook_ToCreate);
+        #endregion
+
+        #region SOSSequence
+        Task<int> CreateSOSSequence(SOSSequence SOS_SequenceToCreate);
+        Task<SOSSequence> GetSOSSequence(int SOSSequenceId, bool includeImages = false, bool includeNotes = false, bool includeLogbooks = false, bool includeSpecialCases = false, bool includeSOS = false, bool includeImagesSOS = false);
+        Task<IEnumerable<SOSSequence>> GetAllSOSSequence(bool includeImages = false, bool includeNotes = false, bool includeLogbooks = false, bool includeSpecialCases = false, bool includeSOS = false);
+
+        Task<int> UpdateSOSSequence(SOSSequenceForUpdateDto SequenceUpdate, SOSSequence SequenceEntity);
+        Task<int> RemoveSOSSequence(int SOS_Sequence_id);
+
+        Task AddIlustrationToSOSSequence(int SOS_Sequence_id, FileUpload evidence);
+        Task<int> RemoveIlustrationFromSOSSequence(int SOS_Sequence_id, int ImageFile_id);
 
         #endregion
+        #region Add Range SOS Sequence
+        Task<int> AddRangeSOSSequenceLogbook(List<SOSSequenceLogbook> SOSSequenceLogbooksToAdd);
+        #endregion
+        #region Add To Sos Sequence
+        Task<AsyncVoidMethodBuilder> AddSOSSequenceLogbookToSOSSequence(SOSSequence Master, SOSSequenceLogbook Slave);
+        Task<AsyncVoidMethodBuilder> AddNoteToSOSSequence(SOSSequence Master, Commentary Slave);
+
+        #endregion
+        #region Remove from SosSequence
+        Task<AsyncVoidMethodBuilder> SOSDataRemoveAllSOSSequenceLogbookFromSOSSequence(SOSSequence Master);
+        Task<AsyncVoidMethodBuilder> SOSDataRemoveAllNotesFromSOSSequence(SOSSequence Master);
+        #endregion
+        #region SOSSequenceLogbook
+        Task<SOSSequenceLogbook> GetSOSSequenceLogbookById(int id);
+        Task<int> CreateSOSSequenceLogbook(SOSSequenceLogbook LogBook_ToCreate);
+        #endregion
+
         #region commonOperations
         Task<FileUpload?> FetchFileAsync(int fileid);
         Task<FileUpload> CreateFileAsync(FileUploadForCreationDto newFile);

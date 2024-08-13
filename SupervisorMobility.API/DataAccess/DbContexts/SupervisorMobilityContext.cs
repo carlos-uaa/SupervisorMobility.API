@@ -115,6 +115,7 @@ namespace SupervisorMobility.API.Context
         public DbSet<SOSDistribution> SOSDistributions { get; set; }
         public DbSet<SOSFlow> SOSFlows { get; set; }
         public DbSet<SOSSequence> SOSSequences { get; set; }
+        public DbSet<SOSSequenceLogbook> SOSSequenceLogbooks { get; set; }
 
         #endregion
 

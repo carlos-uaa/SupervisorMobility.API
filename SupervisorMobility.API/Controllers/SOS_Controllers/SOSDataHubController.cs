@@ -33,12 +33,12 @@ namespace SupervisorMobility.API.Controllers.SOS_Controllers
     [ApiController]
     public class SOSDataHubController : Controller
     {
-        private readonly ISOSAnalysis_ProcessRepository _AnalysisProcessRepository;
+        private readonly ISOS_ProcessRepository _AnalysisProcessRepository;
         private readonly IMapper _mapper;
         //private readonly SupervisorMobilityContext _context;
         private readonly IWebHostEnvironment _env;
 
-        public SOSDataHubController(ISOSAnalysis_ProcessRepository repository, IWebHostEnvironment env, IMapper mapper)
+        public SOSDataHubController(ISOS_ProcessRepository repository, IWebHostEnvironment env, IMapper mapper)
         {
             _AnalysisProcessRepository = repository;
             _mapper = mapper ??

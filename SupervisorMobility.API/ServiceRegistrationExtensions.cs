@@ -28,7 +28,7 @@ namespace SupervisorMobility.API
             // register Stamping the repository
             services.AddScoped<IStampingRepository, StampingRepository>();
             // HOE/SOS Analysis_Process
-            services.AddScoped<ISOSAnalysis_ProcessRepository, SOSAnalysis_ProcessRepository>();
+            services.AddScoped<ISOS_ProcessRepository, SOS_ProcessRepository>();
          
             //services.AddSingleton<ISOSAnalysis_ProcessRepository, SOSAnalysis_ProcessRepository>(sp =>
             //{
