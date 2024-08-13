@@ -76,7 +76,7 @@ namespace SupervisorMobility.API.Controllers
                     foreach (var (item, index) in SosAnalysis.AnalysisLogbooks.Take(4).Select((item, index)=>(item, index)))
                     {
                         sheet.Cells[$"{Cols[index]}4"].Value = item.NoRevision;
-                        sheet.Cells[$"{Cols[index]}5"].Value = item.Date;
+                        sheet.Cells[$"{Cols[index]}5"].Value = item.Date?.ToString("dd-MMM-yyyy").Replace(".", "");
                         sheet.Cells[$"{Cols[index]}6"].Value = item.RevisedItem;
                         sheet.Cells[$"{Cols[index]}9"].Value = item.SeniorSupervisor.Name;
                         sheet.Cells[$"{Cols[index]}10"].Value = item.Supervisor.Name;
@@ -173,8 +173,10 @@ namespace SupervisorMobility.API.Controllers
                             sheet.Cells[$"F{rowindex}"].Value = section.Step;
                             if (!string.IsNullOrEmpty(section.Time))
                             {
-                                sheet.Cells[$"H{rowindex}"].Value = section.Time.Split(".")[0];
-                                sheet.Cells[$"I{rowindex}"].Value = section.Time.Split(".")[1];
+                                string[] times = section.Time.Split('.');
+                                sheet.Cells[$"H{rowindex}"].Value = times[0];
+                                if(times.Length > 1)
+                                    sheet.Cells[$"I{rowindex}"].Value = times[1];
                             }
                         }
 
@@ -249,20 +251,9 @@ namespace SupervisorMobility.API.Controllers
                     TotalRowHightB += templateExtrahight;
                 }
                 rowindex++;
-                //double totalTime = SosAnalysis.SOSHub.Sections
-                //            .Select(sect =>
-                //            {
-                //                double timeValue;
-                //                return double.TryParse(sect.Time, out timeValue) ? timeValue : (double?)null;
-                //            })
-                //            .Where(timeValue => timeValue.HasValue)
-                //            .Select(timeValue => timeValue.Value)
-                //            .DefaultIfEmpty(0.0)
-                //            .Sum();
-                //string[] splittedTime = totalTime.ToString().Split(".");
 
-                sheet.Cells[$"H{rowindex}"].Formula = $"SUM(H{startingRowB}:H{rowindex - 1})";
-                sheet.Cells[$"I{rowindex}"].Formula = $"SUM(I{startingRowB}:I{rowindex - 1})";
+                sheet.Cells[$"H{rowindex}"].Formula = $"SUM(H{startingRow}:H{rowindex - 1})";
+                sheet.Cells[$"I{rowindex}"].Formula = $"SUM(I{startingRow}:I{rowindex - 1})";
                 rowSpaceA = rowindex + 1;
 
                 #endregion
@@ -292,7 +283,7 @@ namespace SupervisorMobility.API.Controllers
                         rowindex++;
 
                         specialTotalHeight += 20;
-                        if (rowindex - startingAbnormalRow >= 8)
+                        if (!changedSheet && rowindex - startingAbnormalRow >= 8)
                         {
                             TotalRowHightA += specialTotalHeight - 20;
                             specialTotalHeight = 0;
@@ -391,6 +382,8 @@ namespace SupervisorMobility.API.Controllers
 
                 sheet = package.Workbook.Worksheets["Analysis A"];
 
+
+                bool changedImgSheet = false;
                 if (SosAnalysis.Illustrations != null && SosAnalysis.Illustrations.Any()) {
 
                     string[] imgPath = { $"uploads/SOSAnalysis/Ilustrations/", "" };
@@ -403,7 +396,6 @@ namespace SupervisorMobility.API.Controllers
                     int currentSheetColumnWidth = imgService.WidthToPixels(imgCellWidthA);
 
                     bool add2ndImg = false;
-                    bool changedImgSheet = false;
                     bool ASheetfirstAttemptGrowing = true;
 
                     int offsetY = 2;
@@ -430,22 +422,34 @@ namespace SupervisorMobility.API.Controllers
                             switch (_case)
                             {
                                 case 0:
+                                    int changeableW = currentSheetColumnWidth, changeableH = (int)changeHeightP;
+                                    int changeableOff = offsetY;
                                     do
                                     {
-                                        if (w > currentSheetColumnWidth)
+                                        if (w > changeableW)
                                         {
-                                            (w, h) = imgService.GetResizeMagnitudesMaintainingAspectRatio(w, h, currentSheetColumnWidth, true);
+                                            (h, w) = imgService.GetResizeMagnitudesMaintainingAspectRatio(w, h, changeableW, true);
                                         }
-                                        else if (h > changeHeightP - offsetY)
+                                        else if (h + changeableOff > changeableH )
                                         {
-                                            (w, h) = imgService.GetResizeMagnitudesMaintainingAspectRatio(w, h, (int)changeHeightP, false);
+                                            double hp = ((changeableOff + h) * 100)/changeableH;
+                                            //hp -= 100;
+                                            
+                                            if(tempindex != 0 && hp > 20)
+                                            {
+                                                changeableH = imgService.HeightToPixels(TotalRowHightB);
+                                                changeableW = imgService.WidthToPixels(imgCellWidthB);
+                                                changeableOff = 2;
+                                            }
+                                            (h, w) = imgService.GetResizeMagnitudesMaintainingAspectRatio(w, h, changeableH - changeableOff, false);
                                         }
                                         else
                                         {
                                             break;
                                         }
                                     } while (true);
-                                    horizontalOffset = (int)((currentSheetColumnWidth - w) / 2);
+                                    
+                                    horizontalOffset = (int)((changeableW - w) / 2);
                                     break;
                                 case 1:
                                     (w, h) = (currentSheetColumnWidth / 2 - 20, 160);
@@ -524,6 +528,15 @@ namespace SupervisorMobility.API.Controllers
                     }
 
                 }
+
+                if(changedAnalysis || changedSheet || changedImgSheet)
+                {
+                    sheet = package.Workbook.Worksheets["Analysis B"];
+                    sheet.Cells[$"B{startingAbnormalRowB}"].Value = SosAnalysis.SOSHub.OtherInformation;
+                }
+                if (sheet.Name == "Analysis B")
+                    sheet = package.Workbook.Worksheets["Analysis A"];
+                sheet.Cells[$"B{startingAbnormalRow}"].Value = SosAnalysis.SOSHub.OtherInformation;
 
                 package.Workbook.Worksheets.First().Select();
 
