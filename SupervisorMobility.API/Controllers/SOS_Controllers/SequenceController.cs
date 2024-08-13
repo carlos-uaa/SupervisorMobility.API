@@ -5,8 +5,6 @@ using SupervisorMobility.API.DataAccess.Entities.SOS;
 using SupervisorMobility.API.DataAccess.Services;
 using SupervisorMobility.API.Models.CommentaryDtos;
 using SupervisorMobility.API.Models.FileUploadDto;
-using SupervisorMobility.API.Models.SOS.SOSAnalysisDtos;
-using SupervisorMobility.API.Models.SOS.SOSAnalysisLogbookDtos;
 using SupervisorMobility.API.Models.SOS.SOSSequenceDtos;
 using SupervisorMobility.API.Models.SOS.SOSSequenceLogbookDtos;
 using System.Diagnostics;
@@ -38,7 +36,7 @@ namespace SupervisorMobility.API.Controllers.SOS_Controllers
             {
                 //Nombre del documento GOS o processShet
                 sOSSequenceToCreate.InternalControlNumber = SOSEntity.Folio;
-                sOSSequenceToCreate.ProcessName = SOSEntity.ProcessSheet;
+                //sOSSequenceToCreate.ProcessName = SOSEntity.ProcessSheet;
 
                 sOSSequenceToCreate.CreatedDate = DateTime.Now;
                 sOSSequenceToCreate.IsActive = true;
