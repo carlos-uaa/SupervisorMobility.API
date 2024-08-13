@@ -8,6 +8,7 @@ using SupervisorMobility.API.Models.FileUploadDto;
 using SupervisorMobility.API.Models.SOS.SOSAnalysisDtos;
 using SupervisorMobility.API.Models.SOS.SOSAnalysisLogbookDtos;
 using SupervisorMobility.API.Models.SOS.SOSSequenceDtos;
+using SupervisorMobility.API.Models.SOS.SOSSequenceLogbookDtos;
 using System.Diagnostics;
 
 namespace SupervisorMobility.API.Controllers.SOS_Controllers
