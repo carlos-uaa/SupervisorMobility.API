@@ -55,7 +55,7 @@ namespace SupervisorMobility.API.Controllers.SOS_Controllers
                 
                 var createdResult = await _AnalysisProcessRepository.CreateSOSAnalysis(AnalysisToCreate);
                 if (createdResult != null)
-                    return Ok(sOSAnalysisToCreate);
+                    return Ok(AnalysisToCreate);
                 else
                     return BadRequest(); 
             }

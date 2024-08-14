@@ -48,7 +48,7 @@ namespace SupervisorMobility.API.Controllers.SOS_Controllers
 
                 var createdResult = await _SequenceProcessRepository.CreateSOSSequence(SequenceToCreate);
                 if (createdResult != null)
-                    return Ok(sOSSequenceToCreate);
+                    return Ok(SequenceToCreate);
                 else
                     return BadRequest();
             }

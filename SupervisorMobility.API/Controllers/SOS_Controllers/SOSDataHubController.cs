@@ -63,11 +63,11 @@ namespace SupervisorMobility.API.Controllers.SOS_Controllers
 
             _mapper.Map(SOSHubForCreate, SOSEntity);
 
-            if(SOSEntity.OwnerId <= 0)
+            if (SOSEntity.OwnerId <= 0)
             {
-                SOSEntity.OwnerId= null;
+                SOSEntity.OwnerId = null;
             }
-            if(SOSEntity.EditorId <= 0)
+            if (SOSEntity.EditorId <= 0)
             {
                 SOSEntity.EditorId = null;
             }
@@ -111,7 +111,7 @@ namespace SupervisorMobility.API.Controllers.SOS_Controllers
         public async Task<ActionResult<IEnumerable<SOSHubDto>>> GetAllSOSHub(bool includeImages = false, bool includeVideos = false, bool includeCommentaries = false, bool includeTools = false, bool includeEquipments = false, bool includeMaterials = false, bool includeInformation = false, bool includePeople = false, bool includeDocuments = false)
         {
 
-            var CheckpointEntities = await _AnalysisProcessRepository.GetAllSOSHub(includeImages:includeImages, includeVideos:includeVideos, includeCommentaries: includeCommentaries, includeTools: includeTools, includeEquipments: includeEquipments, includeMaterials: includeMaterials, includeInformation: includeInformation, includePeople: includePeople, includeDocuments: includeDocuments);
+            var CheckpointEntities = await _AnalysisProcessRepository.GetAllSOSHub(includeImages: includeImages, includeVideos: includeVideos, includeCommentaries: includeCommentaries, includeTools: includeTools, includeEquipments: includeEquipments, includeMaterials: includeMaterials, includeInformation: includeInformation, includePeople: includePeople, includeDocuments: includeDocuments);
             if (CheckpointEntities == null)
             {
                 return NotFound("Get All Sos Hub not found!");
@@ -283,20 +283,20 @@ namespace SupervisorMobility.API.Controllers.SOS_Controllers
             // Filtrar nuevos ToolUsed
             List<ToolUsedForUpdateDto> filteredToolsUsedList = _SOSHubForUpdate.ToolsUsed
                 .Where(t => t.ToolUsedId <= 0).ToList();
-            if(filteredToolsUsedList.Any())
+            if (filteredToolsUsedList.Any())
             {
                 _SOSHubForUpdate.ToolsUsed.RemoveAll(t => t.ToolUsedId == null || t.ToolUsedId <= 0);
 
                 List<ToolUsed> newToolsUseds = new List<ToolUsed>();
 
                 List<ToolUsed> existingToolList = entitySOSHub.ToolsUsed.ToList();
-              
+
                 foreach (var toolUsed in filteredToolsUsedList)
                 {
                     if (existingToolList.Any(p => p.ToolId == toolUsed.ToolId))
                     {
-                        var element = existingToolList.First(p => p.ToolId== toolUsed.ToolId);
-                        toolUsed.ToolUsedId= element.ToolUsedId;
+                        var element = existingToolList.First(p => p.ToolId == toolUsed.ToolId);
+                        toolUsed.ToolUsedId = element.ToolUsedId;
 
                         _SOSHubForUpdate.ToolsUsed.Add(toolUsed);
                     }
@@ -318,7 +318,7 @@ namespace SupervisorMobility.API.Controllers.SOS_Controllers
 
                     var resultAddToolsUsed = await _AnalysisProcessRepository.AddRangeToolsUsed(newToolsUseds);
 
-                    if (resultAddToolsUsed!= null)
+                    if (resultAddToolsUsed != null)
                     {
                         Debug.WriteLine("Tools used añadidos con exito");
                         tools.AddRange(resultAddToolsUsed);
@@ -465,7 +465,7 @@ namespace SupervisorMobility.API.Controllers.SOS_Controllers
                 ToolUsed toolaux = await _AnalysisProcessRepository.GetToolUsedById(tool.ToolUsedId);
                 tools.Add(toolaux);
             }
-           
+
             foreach (var equipment in _SOSHubForUpdate.SafetyEquipment)
             {
                 Equipment equipmentaux = await _AnalysisProcessRepository.GetEquipmentById(equipment.EquipmentId);
@@ -480,7 +480,14 @@ namespace SupervisorMobility.API.Controllers.SOS_Controllers
             _SOSHubForUpdate.SafetyEquipment = null;
             _SOSHubForUpdate.CommonDirection = null;
 
-
+            if (_SOSHubForUpdate.OwnerId <= 0)
+            {
+                _SOSHubForUpdate.OwnerId = null;
+            }
+            if (_SOSHubForUpdate.EditorId <= 0)
+            {
+                _SOSHubForUpdate.EditorId = null;
+            }
             //update base entity
             var result = await _AnalysisProcessRepository.UpdateSOSHub(_SOSHubForUpdate, entitySOSHub);
 
@@ -518,7 +525,7 @@ namespace SupervisorMobility.API.Controllers.SOS_Controllers
                 }
             }
             //Materials
-             if (materials.Any())
+            if (materials.Any())
             {
                 foreach (MaterialUsed material in materials)
                 {
@@ -851,3 +858,5 @@ namespace SupervisorMobility.API.Controllers.SOS_Controllers
         }
     }// End SOS Data pool controller
 }//end namespace
+
+
