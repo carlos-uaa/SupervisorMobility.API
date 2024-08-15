@@ -7,6 +7,21 @@ namespace SupervisorMobility.API.DataAccess.Entities.SOS
     {
         [Key, DatabaseGenerated(DatabaseGeneratedOption.Identity)]
         public int SOSFlowId { get; set; }
+        public string? OperationName { get; set; }
+        public string? InternalControlNumber { get; set; }
+
+        public int? ReviewerId { get; set; }
+        public User? Reviewer { get; set; }
+        public FileUpload? ReviewerSignatureImage { get; set; } = new();
+
+        public int? ApproverId { get; set; }
+        public User? Approver { get; set; }
+        public FileUpload? ApproverSignatureImage { get; set; } = new();
+
+        public string? TargetTime { get; set; }
+
+        public ICollection<SOSFlowLogbook>? FlowLogbooks { get; set; } = new List<SOSFlowLogbook>();
+
 
         public bool? IsActive { get; set; }
         public int SOSHubId { get; set; }

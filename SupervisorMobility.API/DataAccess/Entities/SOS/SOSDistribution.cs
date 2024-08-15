@@ -8,6 +8,27 @@ namespace SupervisorMobility.API.DataAccess.Entities.SOS
         [Key, DatabaseGenerated(DatabaseGeneratedOption.Identity)]
         public int SOSDistributionId { get; set; }
 
+
+        public int? ReviewerId { get; set; }
+        public User? Reviewer { get; set; }
+        public FileUpload? ReviewerSignatureImage { get; set; } = new();
+
+        public int? ApproverId { get; set; }
+        public User? Approver { get; set; }
+        public FileUpload? ApproverSignatureImage { get; set; } = new();
+
+        public string? TackTime {  get; set; }
+
+        public ICollection<Turn>? Turns { get; set; }
+        public string? AplicationModels { get; set; } = "§§§§";
+        public ICollection<ModelTimeStep>? AplicationModelsTimes { get; set; }
+
+
+        public string? AdditionalTime { get; set; } = "§§§§";
+        public string? CycleTime { get; set; } = "§§§§";
+        public string? ControlNumber { get; set; } 
+
+
         public bool? IsActive { get; set; }
         public int SOSHubId { get; set; }
         public SOSHub? SOSHub { get; set; }

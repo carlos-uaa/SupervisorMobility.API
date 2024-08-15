@@ -113,7 +113,11 @@ namespace SupervisorMobility.API.Context
         public DbSet<SOSAnalysisLogbook> SOSAnalysisLogbooks { get; set; }
         public DbSet<SOSCombination> SOSCombinations { get; set; }
         public DbSet<SOSDistribution> SOSDistributions { get; set; }
+        public DbSet<Turn> Turns { get; set; }
+        public DbSet<ModelTimeStep> ModelsTimesSteps { get; set; }
+
         public DbSet<SOSFlow> SOSFlows { get; set; }
+        public DbSet<SOSFlowLogbook> SOSFlowLogbooks { get; set; }
         public DbSet<SOSSequence> SOSSequences { get; set; }
         public DbSet<SOSSequenceLogbook> SOSSequenceLogbooks { get; set; }
 
@@ -453,9 +457,17 @@ namespace SupervisorMobility.API.Context
                 .Property(p => p.IsActive)
                 .HasDefaultValue(true);
 
+            modelBuilder.Entity<SOSFlowLogbook>()
+            .Property(p => p.IsActive)
+            .HasDefaultValue(true);
+
             modelBuilder.Entity<SOSSequence>()
                 .Property(p => p.IsActive)
                 .HasDefaultValue(true);
+
+
+      
+
 
             //Constraints
             modelBuilder.Entity<JobCategoryStructure>()
