@@ -7,6 +7,7 @@ using SupervisorMobility.API.Models.FileUploadDto;
 using SupervisorMobility.API.Models.SOS.EquipmentDtos;
 using SupervisorMobility.API.Models.SOS.MaterialDtos;
 using SupervisorMobility.API.Models.SOS.SOSAnalysisDtos;
+using SupervisorMobility.API.Models.SOS.SOSDistributionDtos;
 using SupervisorMobility.API.Models.SOS.SOSHubDtos;
 using SupervisorMobility.API.Models.SOS.SOSHubDtos.AnalysisBkupDtos;
 using SupervisorMobility.API.Models.SOS.SOSHubDtos.SectionDtos;
@@ -171,6 +172,35 @@ namespace SupervisorMobility.API.DataAccess.Services
         #region SOSSequenceLogbook
         Task<SOSSequenceLogbook> GetSOSSequenceLogbookById(int id);
         Task<int> CreateSOSSequenceLogbook(SOSSequenceLogbook LogBook_ToCreate);
+        #endregion
+        //Distribution
+        #region SOSDistribution
+        Task<int> CreateSOSDistribution(SOSDistribution SOS_DistributionToCreate);
+        Task<SOSDistribution> GetSOSDistribution(int SOSDistributionId, bool includeImages = false, bool includeNotes = false, bool includeLogbooks = false, bool includeSOS = false, bool includeImagesSOS = false);
+        Task<IEnumerable<SOSDistribution>> GetAllSOSDistribution(bool includeImages = false, bool includeNotes = false, bool includeLogbooks = false, bool includeSOS = false);
+
+        Task<int> UpdateSOSDistribution(SOSDistributionForUpdateDto DistributionUpdate, SOSDistribution DistributionEntity);
+        Task<int> RemoveSOSDistribution(int SOS_Distribution_id);
+
+        Task AddIlustrationToSOSDistribution(int SOS_Distribution_id, FileUpload evidence);
+        Task<int> RemoveIlustrationFromSOSDistribution(int SOS_Distribution_id, int ImageFile_id);
+
+        #endregion
+        #region Add Range SOS Distribution
+        Task<int> AddRangeSOSDistributionLogbook(List<SOSDistributionLogbook> SOSDistributionLogbooksToAdd);
+        #endregion
+        #region Add To Sos Distribution
+        Task<AsyncVoidMethodBuilder> AddSOSDistributionLogbookToSOSDistribution(SOSDistribution Master, SOSDistributionLogbook Slave);
+        Task<AsyncVoidMethodBuilder> AddNoteToSOSDistribution(SOSDistribution Master, Commentary Slave);
+
+        #endregion
+        #region Remove from SosDistribution
+        Task<AsyncVoidMethodBuilder> SOSDataRemoveAllSOSDistributionLogbookFromSOSDistribution(SOSDistribution Master);
+        Task<AsyncVoidMethodBuilder> SOSDataRemoveAllNotesFromSOSDistribution(SOSDistribution Master);
+        #endregion
+        #region SOSDistributionLogbook
+        Task<SOSDistributionLogbook> GetSOSDistributionLogbookById(int id);
+        Task<int> CreateSOSDistributionLogbook(SOSDistributionLogbook LogBook_ToCreate);
         #endregion
 
         #region commonOperations

@@ -1,10 +1,10 @@
 ﻿using SupervisorMobility.API.Models.FileUploadDto;
-using SupervisorMobility.API.Models.SOS.SOSAnalysisDtos;
+using SupervisorMobility.API.Models.SOS.SOSFlowDtos;
 using SupervisorMobility.API.Models.Users;
 
-namespace SupervisorMobility.API.Models.SOS.SOSAnalysisLogbookDtos
+namespace SupervisorMobility.API.Models.SOS.SOSFlowLogbookDtos
 {
-    public class SOSAnalysisLogbookForCreateDto
+    public class SOSFlowLogbookForCreateDto
     {
         public string? Changes { get; set; }
         public DateTime? Date { get; set; }
@@ -12,7 +12,7 @@ namespace SupervisorMobility.API.Models.SOS.SOSAnalysisLogbookDtos
         public int? Status { get; set; }
         public bool? IsActive { get; set; }
 
-        public int SOSAnalysisId { get; set; }
+        public int SOSFlowId { get; set; }
 
         public int? ApproverId { get; set; }
         public int? ReviewerId { get; set; }

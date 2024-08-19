@@ -77,9 +77,9 @@ namespace SupervisorMobility.API.Controllers
                     {
                         sheet.Cells[$"{Cols[index]}4"].Value = item.NoRevision;
                         sheet.Cells[$"{Cols[index]}5"].Value = item.Date?.ToString("dd-MMM-yyyy").Replace(".", "");
-                        sheet.Cells[$"{Cols[index]}6"].Value = item.RevisedItem;
-                        sheet.Cells[$"{Cols[index]}9"].Value = item.SeniorSupervisor.Name;
-                        sheet.Cells[$"{Cols[index]}10"].Value = item.Supervisor.Name;
+                        sheet.Cells[$"{Cols[index]}6"].Value = item.Changes;
+                        sheet.Cells[$"{Cols[index]}9"].Value = item.Approver.Name;
+                        sheet.Cells[$"{Cols[index]}10"].Value = item.Reviewer.Name;
                     }
 
                     if (SosAnalysis.AnalysisLogbooks.Skip(4).Any())
@@ -91,9 +91,9 @@ namespace SupervisorMobility.API.Controllers
                             stylesService.BackupRowStyle(sheet, backuprow);
                             sheet.Cells[$"A{backuprow}"].Value = item.NoRevision;
                             sheet.Cells[$"B{backuprow}"].Value = item.Date;
-                            sheet.Cells[$"C{backuprow}"].Value = item.RevisedItem;
-                            sheet.Cells[$"D{backuprow}"].Value = item.SeniorSupervisor.Name;
-                            sheet.Cells[$"E{backuprow}"].Value = item.Supervisor.Name;
+                            sheet.Cells[$"C{backuprow}"].Value = item.Changes;
+                            sheet.Cells[$"D{backuprow}"].Value = item.Approver.Name;
+                            sheet.Cells[$"E{backuprow}"].Value = item.Reviewer.Name;
                             backuprow++;
                         }
                         sheet = package.Workbook.Worksheets["Analysis A"];

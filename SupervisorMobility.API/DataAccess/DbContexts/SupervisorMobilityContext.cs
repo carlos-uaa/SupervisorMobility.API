@@ -113,6 +113,7 @@ namespace SupervisorMobility.API.Context
         public DbSet<SOSAnalysisLogbook> SOSAnalysisLogbooks { get; set; }
         public DbSet<SOSCombination> SOSCombinations { get; set; }
         public DbSet<SOSDistribution> SOSDistributions { get; set; }
+        public DbSet<SOSDistributionLogbook> SOSDistributionLogbooks { get; set; }
         public DbSet<Turn> Turns { get; set; }
         public DbSet<ModelTimeStep> ModelsTimesSteps { get; set; }
 

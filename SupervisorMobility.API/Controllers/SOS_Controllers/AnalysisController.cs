@@ -23,12 +23,12 @@ namespace SupervisorMobility.API.Controllers.SOS_Controllers
     [ApiController]
     public class AnalysisController : Controller
     {
-        private readonly ISOS_ProcessRepository _AnalysisProcessRepository;
+        private readonly ISOS_ProcessRepository _ProcessRepository;
         private readonly IMapper _mapper;
         private readonly IWebHostEnvironment _env;
         public AnalysisController(IWebHostEnvironment env, IMapper mapper, ISOS_ProcessRepository repository)
         {
-            _AnalysisProcessRepository = repository;
+            _ProcessRepository = repository;
             _mapper = mapper ??
                   throw new ArgumentNullException(nameof(mapper));
             _env = env ?? throw new ArgumentNullException(nameof(env));
@@ -37,13 +37,13 @@ namespace SupervisorMobility.API.Controllers.SOS_Controllers
         [HttpPost]
         public async Task<ActionResult<SOSAnalysisDto>> GenerateAnalysis(SOSAnalysisForCreateDto sOSAnalysisToCreate, int SOSHubCollection_Id)
         {
-            SOSHub SOSEntity = await _AnalysisProcessRepository.GetSOSHub(SOSHubCollection_Id, includeInformation: true);
+            SOSHub SOSEntity = await _ProcessRepository.GetSOSHub(SOSHubCollection_Id, includeInformation: true);
 
             if(sOSAnalysisToCreate.SOSAnalysisId == 0)
             {
                 //Nombre del documento GOS o processShet
-                sOSAnalysisToCreate.InternalControlNumber = SOSEntity.Folio;
-                sOSAnalysisToCreate.ProcessName = SOSEntity.ProcessSheet;
+                //sOSAnalysisToCreate.InternalControlNumber = SOSEntity.Folio;
+                //sOSAnalysisToCreate.ProcessName = SOSEntity.ProcessSheet;
 
                 sOSAnalysisToCreate.CreatedDate = DateTime.Now;
                 sOSAnalysisToCreate.IsActive = true;
@@ -53,7 +53,7 @@ namespace SupervisorMobility.API.Controllers.SOS_Controllers
 
                 SOSAnalysis AnalysisToCreate = _mapper.Map<SOSAnalysis>(sOSAnalysisToCreate);
                 
-                var createdResult = await _AnalysisProcessRepository.CreateSOSAnalysis(AnalysisToCreate);
+                var createdResult = await _ProcessRepository.CreateSOSAnalysis(AnalysisToCreate);
                 if (createdResult != null)
                     return Ok(AnalysisToCreate);
                 else
@@ -62,17 +62,17 @@ namespace SupervisorMobility.API.Controllers.SOS_Controllers
             else
             {
                 //only add revision
-                SOSAnalysis _sosAnalysis = await _AnalysisProcessRepository.GetSOSAnalysis(sOSAnalysisToCreate.SOSAnalysisId, true, true, true, true,true,true);
+                SOSAnalysis _sosAnalysis = await _ProcessRepository.GetSOSAnalysis(sOSAnalysisToCreate.SOSAnalysisId, true, true, true, true,true,true);
               
                 SOSAnalysisLogbook _logbookToCreate = _mapper.Map<SOSAnalysisLogbook>(sOSAnalysisToCreate.AnalysisLogbooks?.Last());
                 _logbookToCreate.SOSAnalysisId = _sosAnalysis.SOSAnalysisId;
 
-                var resultAddSections = await _AnalysisProcessRepository.CreateSOSAnalysisLogbook(_logbookToCreate);
+                var resultAddSections = await _ProcessRepository.CreateSOSAnalysisLogbook(_logbookToCreate);
 
                 if (resultAddSections > 0)
                 {
                     Debug.WriteLine("SOSAnalysisLogbook añadidas con exito");
-                await _AnalysisProcessRepository.AddSOSAnalysisLogbookToSOSAnalysis(_sosAnalysis, _logbookToCreate);
+                await _ProcessRepository.AddSOSAnalysisLogbookToSOSAnalysis(_sosAnalysis, _logbookToCreate);
                 }
                 else
                 {
@@ -91,7 +91,7 @@ namespace SupervisorMobility.API.Controllers.SOS_Controllers
         public async Task<ActionResult<SOSAnalysisDto>> GetSOSAnalysis(int id, bool includeImages = false, bool includeNotes = false, bool includeLogbooks = false, bool includeSpecialCases = false, bool includeSOS = false, bool includeImagesSOS = false)
         {
 
-            var SOSAnalysis = await _AnalysisProcessRepository.GetSOSAnalysis(id, includeImages, includeNotes, includeLogbooks, includeSpecialCases, includeSOS, includeImagesSOS);
+            var SOSAnalysis = await _ProcessRepository.GetSOSAnalysis(id, includeImages, includeNotes, includeLogbooks, includeSpecialCases, includeSOS, includeImagesSOS);
             if (SOSAnalysis == null)
             {
                 return NotFound("SOSAnalysis not found!");
@@ -104,7 +104,7 @@ namespace SupervisorMobility.API.Controllers.SOS_Controllers
         public async Task<ActionResult<IEnumerable<SOSAnalysisDto>>> GetAllSOSAnalysis(bool includeImages = false, bool includeNotes = false, bool includeLogbooks = false, bool includeSpecialCases = false, bool includeSOS = false)
         {
 
-            var CheckpointEntities = await _AnalysisProcessRepository.GetAllSOSAnalysis(includeImages, includeNotes, includeLogbooks, includeSpecialCases, includeSOS);
+            var CheckpointEntities = await _ProcessRepository.GetAllSOSAnalysis(includeImages, includeNotes, includeLogbooks, includeSpecialCases, includeSOS);
             if (CheckpointEntities == null)
             {
                 return NotFound("Get All Sos Analisis not found!");
@@ -143,7 +143,7 @@ namespace SupervisorMobility.API.Controllers.SOS_Controllers
                     newComentary.IsActive = true;
                 }
 
-                var resultAddCommentary = await _AnalysisProcessRepository.AddRangeCommentary(newCommentarys);
+                var resultAddCommentary = await _ProcessRepository.AddRangeCommentary(newCommentarys);
 
                 if (resultAddCommentary != null)
                 {
@@ -172,7 +172,7 @@ namespace SupervisorMobility.API.Controllers.SOS_Controllers
                     analysisLogbook.IsActive = true;
                 }
 
-                var resultAddSOSAnalysisLogbook = await _AnalysisProcessRepository.AddRangeSOSAnalysisLogbook(newSOSAnalysisLogbook);
+                var resultAddSOSAnalysisLogbook = await _ProcessRepository.AddRangeSOSAnalysisLogbook(newSOSAnalysisLogbook);
 
                 if (resultAddSOSAnalysisLogbook > 0)
                 {
@@ -183,7 +183,7 @@ namespace SupervisorMobility.API.Controllers.SOS_Controllers
                 sosUpdateEntity.AnalysisLogbooks.ToList().AddRange(newSOSAnalysisLogbookCreated);
             }
 
-            SOSAnalysis _sosAnalysis = await _AnalysisProcessRepository.GetSOSAnalysis(sosAnalysis_Id, true, true, true, true);
+            SOSAnalysis _sosAnalysis = await _ProcessRepository.GetSOSAnalysis(sosAnalysis_Id, true, true, true, true);
 
             ////Aqui va el historico de ser necesario en  un futuro 
 
@@ -195,7 +195,7 @@ namespace SupervisorMobility.API.Controllers.SOS_Controllers
             ////_mapper.Map(entitySOSHub, newHistory);
             ////newHistory.VersionChanges = jsonResult;
             ////se almacena la entity anterior y se le añade el resumen de cambios
-            ////await _AnalysisProcessRepository.CreateHistorySOScollection(newHistory);
+            ////await _ProcessRepository.CreateHistorySOScollection(newHistory);
 
 
 
@@ -203,15 +203,15 @@ namespace SupervisorMobility.API.Controllers.SOS_Controllers
             //hacer update entity sin relaciones
             foreach (var note in sosUpdateEntity.Notes)
             {
-                var CommentaryUpdate = await _AnalysisProcessRepository.UpdateCommentary(note);
+                var CommentaryUpdate = await _ProcessRepository.UpdateCommentary(note);
 
-                Commentary CommentaryToAdd = await _AnalysisProcessRepository.GetCommentaryById(note.CommentaryId);
+                Commentary CommentaryToAdd = await _ProcessRepository.GetCommentaryById(note.CommentaryId);
                 Bkup_Notes.Add(CommentaryToAdd);
             }
 
             foreach (var logbook in sosUpdateEntity.AnalysisLogbooks)
             {
-                SOSAnalysisLogbook analysisBkaux = await _AnalysisProcessRepository.GetSOSAnalysisLogbookById(logbook.SOSAnalysisLogbookId);
+                SOSAnalysisLogbook analysisBkaux = await _ProcessRepository.GetSOSAnalysisLogbookById(logbook.SOSAnalysisLogbookId);
                 _mapper.Map(logbook, analysisBkaux);
                 Bkup_AnalysisLogbook.Add(analysisBkaux);
             }
@@ -221,17 +221,17 @@ namespace SupervisorMobility.API.Controllers.SOS_Controllers
             sosUpdateEntity.Notes = null;
             sosUpdateEntity.AnalysisLogbooks = null;
 
-            await _AnalysisProcessRepository.SOSDataRemoveAllNotesFromSOSAnalysis(_sosAnalysis);
-            await _AnalysisProcessRepository.SOSDataRemoveAllSOSAnalysisLogbookFromSOSAnalysis(_sosAnalysis);
+            await _ProcessRepository.SOSDataRemoveAllNotesFromSOSAnalysis(_sosAnalysis);
+            await _ProcessRepository.SOSDataRemoveAllSOSAnalysisLogbookFromSOSAnalysis(_sosAnalysis);
 
-            var result = await _AnalysisProcessRepository.UpdateSOSAnalysis(sosUpdateEntity, _sosAnalysis);
+            var result = await _ProcessRepository.UpdateSOSAnalysis(sosUpdateEntity, _sosAnalysis);
 
             //Notes - Volver a añádir las notas
             if (Bkup_Notes.Any())
             {
                 foreach (Commentary Comment in Bkup_Notes)
                 {
-                  await  _AnalysisProcessRepository.AddNoteToSOSAnalysis(_sosAnalysis, Comment);
+                  await  _ProcessRepository.AddNoteToSOSAnalysis(_sosAnalysis, Comment);
                 }
             }
             
@@ -240,7 +240,7 @@ namespace SupervisorMobility.API.Controllers.SOS_Controllers
             {
                 foreach (SOSAnalysisLogbook logbook in Bkup_AnalysisLogbook)
                 {
-                   await _AnalysisProcessRepository.AddSOSAnalysisLogbookToSOSAnalysis(_sosAnalysis, logbook);
+                   await _ProcessRepository.AddSOSAnalysisLogbookToSOSAnalysis(_sosAnalysis, logbook);
                 }
             }
 
@@ -258,9 +258,9 @@ namespace SupervisorMobility.API.Controllers.SOS_Controllers
         [HttpDelete("{SOSAnaysisId}")]
         public async Task<ActionResult<int>> RemoveSOSHub(int SOSAnaysisId)
         {
-            var result = await _AnalysisProcessRepository.RemoveSOSAnalysis(SOSAnaysisId);
+            var result = await _ProcessRepository.RemoveSOSAnalysis(SOSAnaysisId);
 
-            var SOSHub = await _AnalysisProcessRepository.GetSOSHub(SOSAnaysisId);
+            var SOSHub = await _ProcessRepository.GetSOSHub(SOSAnaysisId);
 
             if (result > 0)
                 return Ok(SOSHub);
@@ -299,10 +299,10 @@ namespace SupervisorMobility.API.Controllers.SOS_Controllers
             uploadResult.UploadDate = DateTime.Now;
             uploadResult.IsActive = true;
 
-            var fileToReturn = await _AnalysisProcessRepository.CreateFileAsync(uploadResult);
+            var fileToReturn = await _ProcessRepository.CreateFileAsync(uploadResult);
 
-            await _AnalysisProcessRepository.AddIlustrationToSOSAnalysis(analysis_id, fileToReturn);
-            await _AnalysisProcessRepository.SaveChangesAsync();
+            await _ProcessRepository.AddIlustrationToSOSAnalysis(analysis_id, fileToReturn);
+            await _ProcessRepository.SaveChangesAsync();
 
             return Ok(fileToReturn);
         }
@@ -310,7 +310,7 @@ namespace SupervisorMobility.API.Controllers.SOS_Controllers
         [HttpGet("Ilustrations/{fileid}")]
         public async Task<IActionResult> DownloadIlustrations(int fileid)
         {
-            var FileInfo = await _AnalysisProcessRepository.FetchFileAsync(fileid);
+            var FileInfo = await _ProcessRepository.FetchFileAsync(fileid);
 
             if (FileInfo is not null)
             {
@@ -334,7 +334,7 @@ namespace SupervisorMobility.API.Controllers.SOS_Controllers
         [HttpDelete("Ilustrations/{SOS_SOSAnalysis_id}/remove/{ImageFile_id}")]
         public async Task<ActionResult<int>> RemoveImage(int SOS_SOSAnalysis_id, int ImageFile_id)
         {
-            var result = await _AnalysisProcessRepository.RemoveIlustrationFromSOSAnalysis(SOS_SOSAnalysis_id, ImageFile_id);
+            var result = await _ProcessRepository.RemoveIlustrationFromSOSAnalysis(SOS_SOSAnalysis_id, ImageFile_id);
 
             if (result > 0)
                 return Ok();
