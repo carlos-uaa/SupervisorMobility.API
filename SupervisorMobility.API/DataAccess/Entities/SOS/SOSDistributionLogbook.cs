@@ -1,22 +1,20 @@
 ﻿using System.ComponentModel.DataAnnotations.Schema;
 using System.ComponentModel.DataAnnotations;
-using SupervisorMobility.API.DataAccess.Entities.IS;
 
 namespace SupervisorMobility.API.DataAccess.Entities.SOS
 {
-    public class SOSAnalysisLogbook
+    public class SOSDistributionLogbook
     {
-     
         [Key, DatabaseGenerated(DatabaseGeneratedOption.Identity)]
-        public int SOSAnalysisLogbookId { get; set; }
+        public int SOSDistributionLogbookId { get; set; }
         public string? Changes { get; set; }
         public DateTime? Date { get; set; }
         public int? NoRevision { get; set; }
         public int? Status { get; set; }
         public bool? IsActive { get; set; }
 
-        public int SOSAnalysisId { get; set; }
-        public SOSAnalysis? SOSAnalysis { get; set; }
+        public int SOSDistributionId { get; set; }
+        public SOSDistribution? SOSDistribution { get; set; }
 
 
         public int? ApproverId { get; set; }

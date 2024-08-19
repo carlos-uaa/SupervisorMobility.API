@@ -8,7 +8,9 @@ namespace SupervisorMobility.API.DataAccess.Entities.SOS
         [Key, DatabaseGenerated(DatabaseGeneratedOption.Identity)]
         public int SOSCombinationId { get; set; }
         public bool? IsActive { get; set; }
-
+        public string? InternalControlNumber { get; set; }
+        public string? OperationName { get; set; }
+        public string? ProcessName { get; set; }
         public int? ReviewerId { get; set; }
         public User? Reviewer { get; set; }
         public FileUpload? ReviewerSignatureImage { get; set; } = new();
@@ -27,6 +29,7 @@ namespace SupervisorMobility.API.DataAccess.Entities.SOS
 
         public string? ProductionVolumePerShift { get; set; }
         public string? ControlNumber { get; set; }
+        public ICollection<SOSCombinationLogbook>? CombinationLogbooks { get; set; } = new List<SOSCombinationLogbook>();
 
 
         public int SOSHubId { get; set; }
