@@ -2,8 +2,9 @@
 using OfficeOpenXml.Style;
 using OfficeOpenXml;
 using System.Drawing;
+using DocumentFormat.OpenXml.Spreadsheet;
 
-namespace SupervisorMobility.API.DataAccess.Services
+namespace SupervisorMobility.API.DataAccess.Services.ExportationServices
 {
     public class ExportationStylesService
     {
@@ -59,7 +60,24 @@ namespace SupervisorMobility.API.DataAccess.Services
             sheet.Cells[$"J{rownumber}:L{rownumber}"].Style.Border.Right.Style = ExcelBorderStyle.Medium;
             sheet.Cells[$"J{rownumber}:L{rownumber}"].Style.Border.Bottom.Style = !last ? ExcelBorderStyle.Dashed : ExcelBorderStyle.Medium;
             sheet.Cells[$"J{rownumber}:L{rownumber}"].Style.VerticalAlignment = ExcelVerticalAlignment.Center;
-            sheet.Cells[$"J{rownumber}:L{rownumber}"].Style.HorizontalAlignment = ExcelHorizontalAlignment.Center;
+            sheet.Cells[$"J{rownumber}:L{rownumber}"].Style.HorizontalAlignment = ExcelHorizontalAlignment.Left;
+        }
+
+        public void ChangeLastRowStyle(ExcelWorksheet sheet, int rownumber, bool last)
+        {
+            sheet.Cells[$"B{rownumber}"].Style.Border.Bottom.Style = !last ? ExcelBorderStyle.Dashed : ExcelBorderStyle.Thin;
+
+            sheet.Cells[$"C{rownumber}:D{rownumber}"].Style.Border.Bottom.Style = !last ? ExcelBorderStyle.Dashed : ExcelBorderStyle.Thin;
+
+            sheet.Cells[$"E{rownumber}"].Style.Border.Bottom.Style = !last ? ExcelBorderStyle.Dashed : ExcelBorderStyle.Thin;
+
+            sheet.Cells[$"F{rownumber}:G{rownumber}"].Style.Border.Bottom.Style = !last ? ExcelBorderStyle.Dashed : ExcelBorderStyle.Thin;
+
+            sheet.Cells[$"H{rownumber}"].Style.Border.Bottom.Style = !last ? ExcelBorderStyle.Dashed : ExcelBorderStyle.Thin;
+
+            sheet.Cells[$"I{rownumber}"].Style.Border.Bottom.Style = !last ? ExcelBorderStyle.Dashed : ExcelBorderStyle.Thin;
+
+            sheet.Cells[$"J{rownumber}:L{rownumber}"].Style.Border.Bottom.Style = !last ? ExcelBorderStyle.Dashed : ExcelBorderStyle.Thin;
         }
 
         public void SetSpecialCasesFirstColumnStyle(ExcelWorksheet sheet, int initialrow, int lastrow)
@@ -125,6 +143,31 @@ namespace SupervisorMobility.API.DataAccess.Services
             sheet.Cells[$"E{row}"].Style.Border.Right.Style = ExcelBorderStyle.Thin;
         }
 
+        public void SetAbnormalsAndImgsStyles(ExcelWorksheet worksheet, int abnormalStarts, int rowIndex, string currentChar)
+        {
+            SetSpecialCasesFirstColumnStyle(worksheet, abnormalStarts, rowIndex);
+
+            int templateRow;
+
+            switch (currentChar) //To check where in the template sheet is the row to start merging cells
+            {
+                case "A":
+                    templateRow = 13;
+
+                    worksheet.Cells[$"M{templateRow}:P{rowIndex}"].Merge = true;
+                    worksheet.Cells[$"M{templateRow}:P{rowIndex}"].Style.Border.Right.Style = ExcelBorderStyle.Medium;
+                    worksheet.Cells[$"M{templateRow}:P{rowIndex}"].Style.Border.Bottom.Style = ExcelBorderStyle.Medium;
+                    break;
+                default:
+                    templateRow = 6;
+
+                    worksheet.Cells[$"M{templateRow}:M{rowIndex}"].Merge = true;
+                    worksheet.Cells[$"M{templateRow}:M{rowIndex}"].Style.Border.Right.Style = ExcelBorderStyle.Medium;
+                    worksheet.Cells[$"M{templateRow}:M{rowIndex}"].Style.Border.Bottom.Style = ExcelBorderStyle.Medium;
+                    break;
+            }
+        }
+
         public double CalculateRowHeight(string text, double columnWidth, double fontsize = 11, double lineSpacing = 1.2)
         {
             // Count the number of line breaks
@@ -135,7 +178,7 @@ namespace SupervisorMobility.API.DataAccess.Services
 
             // Adjust the row height based on the estimated line count
             double lineHeight = fontsize * lineSpacing;
-            return (lineHeight * lineCount);
+            return lineHeight * lineCount;
         }
 
         public double MeasureTextHeight(string text, ExcelFont font, double width)
@@ -147,7 +190,7 @@ namespace SupervisorMobility.API.DataAccess.Services
             var graphics = Graphics.FromImage(bitmap);
             var pixelWidth = Convert.ToInt32(width * 7); // 7 pixels per Excel column width
             var fontSize = font.Size * 1.01f;
-            var drawingFont = new Font(font.Name, fontSize);
+            var drawingFont = new System.Drawing.Font(font.Name, fontSize);
             var size = graphics.MeasureString(text, drawingFont, pixelWidth, new StringFormat { FormatFlags = StringFormatFlags.MeasureTrailingSpaces });
 
             // Convert to points (72 DPI and 96 points per inch) with a max of 409 (Excel requirement)
@@ -168,7 +211,7 @@ namespace SupervisorMobility.API.DataAccess.Services
                 var graphics = Graphics.FromImage(bitmap);
                 var pixelWidth = Convert.ToInt32(width * 7); // 7 pixels per Excel column width
                 var fontSize = font.Size * 1.01f;
-                var drawingFont = new Font(font.Name, fontSize);
+                var drawingFont = new System.Drawing.Font(font.Name, fontSize);
                 var size = graphics.MeasureString(line, drawingFont, pixelWidth, new StringFormat { FormatFlags = StringFormatFlags.MeasureTrailingSpaces });
 
                 // Convert to points (72 DPI and 96 points per inch) with a max of 409 (Excel requirement)
