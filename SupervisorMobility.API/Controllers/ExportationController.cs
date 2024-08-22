@@ -353,7 +353,7 @@ namespace SupervisorMobility.API.Controllers
                                 rowHeights.Add(nextPage, 0);
                                 rowIndexes.Add(nextPage, (7, 8));
 
-                                
+
                                 var idx = rowIndexes[nextPage].Item2;
                                 var height = rowHeights[nextPage];
 
@@ -362,7 +362,7 @@ namespace SupervisorMobility.API.Controllers
                                 rowIndexes[nextPage] = (rowIndexes[nextPage].Item1, idx + 4);
                                 rowHeights[nextPage] = height;
 
-                                abnormalStarts.Add(nextPage, idx);
+                                abnormalStarts.Add(nextPage, idx + 4);
                             }
                             rowIndexes[currentChar] = (rowIndexes[currentChar].Item1, rowindex - 1);
                             rowHeights[currentChar] += specialTotalHeight;
@@ -372,6 +372,11 @@ namespace SupervisorMobility.API.Controllers
                             rowindex = startingAbnormalRow = abnormalStarts[nextPage];
                         }
                     }
+                    //last page assignments
+                    string lastPage = sheet.Name.Split(" ")[1];
+                    rowIndexes[lastPage] = (rowIndexes[lastPage].Item1, rowindex - 1);
+                    rowHeights[lastPage] += specialTotalHeight;
+
                     foreach (var item in package.Workbook.Worksheets.Where(ws => ws.Name.Contains("Analysis")))
                     {
                         string currentChar = item.Name.Split(" ")[1];
