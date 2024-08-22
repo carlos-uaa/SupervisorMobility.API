@@ -705,31 +705,31 @@ namespace SupervisorMobility.API.Controllers
 
                     List<string> Cols = new List<string> { "K", "N", "O", "P" };
 
-                    foreach (var (item, index) in SosAnalysis.AnalysisLogbooks.Take(4).Select((item, index) => (item, index)))
-                    {
-                        sheet.Cells[$"{Cols[index]}6"].Value = item == SosAnalysis.AnalysisLogbooks.First() ? "N" : item.NoRevision;
-                        sheet.Cells[$"{Cols[index]}7"].Value = item.Date?.ToString("dd-MMM-yyyy").Replace(".", "");
-                        sheet.Cells[$"{Cols[index]}8"].Value = item.RevisedItem;
-                        sheet.Cells[$"{Cols[index]}11"].Value = item.SeniorSupervisor.Name;
-                        sheet.Cells[$"{Cols[index]}12"].Value = item.Supervisor.Name;
-                    }
+                    //foreach (var (item, index) in SosAnalysis.AnalysisLogbooks.Take(4).Select((item, index) => (item, index)))
+                    //{
+                    //    sheet.Cells[$"{Cols[index]}6"].Value = item == SosAnalysis.AnalysisLogbooks.First() ? "N" : item.NoRevision;
+                    //    sheet.Cells[$"{Cols[index]}7"].Value = item.Date?.ToString("dd-MMM-yyyy").Replace(".", "");
+                    //    sheet.Cells[$"{Cols[index]}8"].Value = item.RevisedItem;
+                    //    sheet.Cells[$"{Cols[index]}11"].Value = item.SeniorSupervisor.Name;
+                    //    sheet.Cells[$"{Cols[index]}12"].Value = item.Supervisor.Name;
+                    //}
 
-                    if (SosAnalysis.AnalysisLogbooks.Skip(4).Any())
-                    {
-                        sheet = package.Workbook.Worksheets[2];
-                        int backuprow = 3;
-                        foreach (var item in SosAnalysis.AnalysisLogbooks.Skip(4))
-                        {
-                            stylesService.BackupRowStyle(sheet, backuprow);
-                            sheet.Cells[$"A{backuprow}"].Value = item.NoRevision;
-                            sheet.Cells[$"B{backuprow}"].Value = item.Date;
-                            sheet.Cells[$"C{backuprow}"].Value = item.RevisedItem;
-                            sheet.Cells[$"D{backuprow}"].Value = item.SeniorSupervisor.Name;
-                            sheet.Cells[$"E{backuprow}"].Value = item.Supervisor.Name;
-                            backuprow++;
-                        }
-                        sheet = package.Workbook.Worksheets.First();
-                    }
+                    //if (SosAnalysis.AnalysisLogbooks.Skip(4).Any())
+                    //{
+                    //    sheet = package.Workbook.Worksheets[2];
+                    //    int backuprow = 3;
+                    //    foreach (var item in SosAnalysis.AnalysisLogbooks.Skip(4))
+                    //    {
+                    //        stylesService.BackupRowStyle(sheet, backuprow);
+                    //        sheet.Cells[$"A{backuprow}"].Value = item.NoRevision;
+                    //        sheet.Cells[$"B{backuprow}"].Value = item.Date;
+                    //        sheet.Cells[$"C{backuprow}"].Value = item.RevisedItem;
+                    //        sheet.Cells[$"D{backuprow}"].Value = item.SeniorSupervisor.Name;
+                    //        sheet.Cells[$"E{backuprow}"].Value = item.Supervisor.Name;
+                    //        backuprow++;
+                    //    }
+                    //    sheet = package.Workbook.Worksheets.First();
+                    //}
                 }
 
                 #endregion
