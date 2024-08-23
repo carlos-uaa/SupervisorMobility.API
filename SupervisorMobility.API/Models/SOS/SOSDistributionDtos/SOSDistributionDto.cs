@@ -38,6 +38,7 @@ namespace SupervisorMobility.API.Models.SOS.SOSDistributionDtos
         public string? CycleTime { get; set; } = "§§§§";
         public string? ControlNumber { get; set; }
         public DateTime? CreatedAt { get; set; }
+        public DateTime? ApplicationMonth { get; set; }
 
         public bool? IsActive { get; set; }
 

@@ -33,6 +33,7 @@ namespace SupervisorMobility.API.DataAccess.Entities.SOS
         public ICollection<FileUpload>? Illustrations { get; set; } = new List<FileUpload>();
         public ICollection<Commentary>? Notes { get; set; } = new List<Commentary>();
         public DateTime? CreatedAt { get; set; }
+        public DateTime? ApplicationMonth { get; set; }
 
         public bool? IsActive { get; set; }
         public int SOSHubId { get; set; }

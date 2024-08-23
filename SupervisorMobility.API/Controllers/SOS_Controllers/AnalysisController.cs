@@ -82,7 +82,7 @@ namespace SupervisorMobility.API.Controllers.SOS_Controllers
 
 
 
-                return Ok("Revision");
+                return Ok(_sosAnalysis);
             }
 
         }
@@ -118,8 +118,6 @@ namespace SupervisorMobility.API.Controllers.SOS_Controllers
         [HttpPut("{sosAnalysis_Id}")]
         public async Task<ActionResult> UpdateSOSAnalysis(int sosAnalysis_Id, SOSAnalysisForUpdateDto sosUpdateEntity)
         {
-
-
             List<Commentary> Bkup_Notes = new List<Commentary>();
             List<SOSAnalysisLogbook> Bkup_AnalysisLogbook = new List<SOSAnalysisLogbook>();
 
@@ -211,11 +209,12 @@ namespace SupervisorMobility.API.Controllers.SOS_Controllers
 
             foreach (var logbook in sosUpdateEntity.AnalysisLogbooks)
             {
+                var analysisUpdate = await _ProcessRepository.UpdateAnalysisLogbook(logbook);
                 SOSAnalysisLogbook analysisBkaux = await _ProcessRepository.GetSOSAnalysisLogbookById(logbook.SOSAnalysisLogbookId);
-                _mapper.Map(logbook, analysisBkaux);
                 Bkup_AnalysisLogbook.Add(analysisBkaux);
             }
            
+
 
             //Nulleamos el update para evitar errores
             sosUpdateEntity.Notes = null;
