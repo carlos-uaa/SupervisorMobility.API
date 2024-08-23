@@ -75,7 +75,7 @@ namespace SupervisorMobility.API.Controllers.SOS_Controllers
 
 
 
-                return Ok("Revision");
+                return Ok(_sosSequence);
             }
 
         }

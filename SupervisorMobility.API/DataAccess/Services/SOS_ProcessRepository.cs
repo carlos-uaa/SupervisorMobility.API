@@ -17,6 +17,7 @@ using SupervisorMobility.API.Models.FileUploadDto;
 using SupervisorMobility.API.Models.SOS.EquipmentDtos;
 using SupervisorMobility.API.Models.SOS.MaterialDtos;
 using SupervisorMobility.API.Models.SOS.SOSAnalysisDtos;
+using SupervisorMobility.API.Models.SOS.SOSAnalysisLogbookDtos;
 using SupervisorMobility.API.Models.SOS.SOSDistributionDtos;
 using SupervisorMobility.API.Models.SOS.SOSHubDtos;
 using SupervisorMobility.API.Models.SOS.SOSHubDtos.AnalysisBkupDtos;
@@ -2113,6 +2114,45 @@ namespace SupervisorMobility.API.DataAccess.Services
         {
             _context.SOSAnalysisLogbooks.Add(LogBook_ToCreate);
             return await _context.SaveChangesAsync();
+        }
+
+        public async Task<int> UpdateAnalysisLogbook(SOSAnalysisLogbookForUpdateDto analysisForUpdate)
+        {
+            try
+            {
+                var query = _context.SOSAnalysisLogbooks
+                                    .Where(t => t.SOSAnalysisLogbookId == analysisForUpdate.SOSAnalysisLogbookId);
+
+                SOSAnalysisLogbook analysisLogbook = await query.FirstOrDefaultAsync();
+
+                if (analysisLogbook == null)
+                {
+                    throw new InvalidOperationException("Analysis Logbook not found or is not active.");
+                }
+
+                var localEntry = _context.SOSAnalysisLogbooks.Local.FirstOrDefault(entry => entry.SOSAnalysisLogbookId == analysisForUpdate.SOSAnalysisLogbookId);
+                if (localEntry != null)
+                {
+                    _context.Entry(localEntry).CurrentValues.SetValues(analysisForUpdate);
+                }
+                else
+                {
+                    if (_context.Entry(analysisLogbook).State == EntityState.Detached)
+                    {
+                        _context.SOSAnalysisLogbooks.Attach(analysisLogbook);
+                    }
+
+                    _mapper.Map(analysisForUpdate, analysisLogbook);
+                    _context.SOSAnalysisLogbooks.Update(analysisLogbook);
+                }
+
+                return await _context.SaveChangesAsync();
+            }
+            catch (Exception ex)
+            {
+                Debug.WriteLine("An error occurred while updating the analysis Logbook: " + ex.Message);
+                return 0;
+            }
         }
         #endregion
         //Sequence
