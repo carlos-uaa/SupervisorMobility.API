@@ -11,7 +11,7 @@ namespace SupervisorMobility.API.Models.SOS.SOSSequenceDtos
         public string? InternalControlNumber { get; set; }
         public string? OperationName { get; set; }
         public string? ProcessName { get; set; }
-        public ICollection<SOSSequenceLogbookDto>? SequenceLogbooks { get; set; } = new List<SOSSequenceLogbookDto>();
+        public ICollection<SOSSequenceLogbookForCreateDto>? SequenceLogbooks { get; set; } = new List<SOSSequenceLogbookForCreateDto>();
         public ICollection<CreateCommentaryDto>? Notes { get; set; } = new List<CreateCommentaryDto>();
 
         public DateTime? CreatedDate { get; set; }
