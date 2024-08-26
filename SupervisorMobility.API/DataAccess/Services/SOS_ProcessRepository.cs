@@ -125,10 +125,12 @@ namespace SupervisorMobility.API.DataAccess.Services
             if (includeCollections)
             {
                 query = query.Include(a => a.SOSAnalysis).ThenInclude(aa=> aa.AnalysisLogbooks)
-                            .Include(c => c.SOSCombination)
-                            .Include(d => d.SOSDistribution)
-                            .Include(f => f.SOSFlow)
-                            .Include(s => s.SOSSequence);
+                            .Include(c => c.SOSCombination).ThenInclude(aa => aa.CombinationLogbooks)
+                            .Include(c => c.SOSCombination).ThenInclude(aa => aa.Turns)
+                            .Include(d => d.SOSDistribution).ThenInclude(aa => aa.DistributionLogbooks)
+                            .Include(d => d.SOSDistribution).ThenInclude(aa => aa.Turns)
+                            .Include(f => f.SOSFlow).ThenInclude(aa => aa.FlowLogbooks)
+                            .Include(s => s.SOSSequence).ThenInclude(aa => aa.SequenceLogbooks);
             }
 
             var sosHub = await query.FirstOrDefaultAsync();
