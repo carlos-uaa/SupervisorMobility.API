@@ -891,16 +891,9 @@ namespace SupervisorMobility.API.Controllers
                     rowIndexes[currentChar] = (rowIndexes[currentChar].Item1, rowIndexes[currentChar].Item2 + 1);
                     rowHeights[currentChar] += templateExtrahight;
 
-                    //string currentSheet = worksheet.Name.Split(" ")[1];
-                    //sheet.Cells[$"H{rowIndexes[currentSheet].Item2}"].Style.Numberformat.Format = "0.0#";
-                    //sheet.Cells[$"I{rowIndexes[currentSheet].Item2}"].Style.Numberformat.Format = "0.0##";
-
                     sheet.Cells[$"H{rowIndexes[currentChar].Item2}"].Formula = $"SUM(H{rowIndexes[currentChar].Item1}:H{rowIndexes[currentChar].Item2 - 1})";
                     sheet.Cells[$"I{rowIndexes[currentChar].Item2}"].Formula = $"SUM(I{rowIndexes[currentChar].Item1}:I{rowIndexes[currentChar].Item2 - 1})";
                 }
-
-                //rowHeights = rowHeights.ToDictionary(kvp => kvp.Key, kvp => (kvp.Value + templateExtrahight));
-                //rowIndexes = rowIndexes.ToDictionary(kvp => kvp.Key, kvp => (kvp.Value.Item1, kvp.Value.Item2 + 1));
 
                 sheet = package.Workbook.Worksheets[0];
                 string firstSheetIndex = sheet.Name.Split(" ")[1];
