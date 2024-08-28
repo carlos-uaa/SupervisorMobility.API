@@ -28,6 +28,10 @@ namespace SupervisorMobility.API.DataAccess.Services.ExportationServices
                     sheetName = "DataAccess/Templates/Analysis Extra Template.xlsx";
                     sheetWN = "Analysis " + GetNextCombination(currentIdx);
                     break;
+                case 2:
+                    sheetName = "DataAccess/Templates/Sequence Extra Template.xlsx";
+                    sheetName = "Sequence " + GetNextCombination(currentIdx);
+                    break;
             }
 
             MemoryStream ms = new MemoryStream();
@@ -53,7 +57,7 @@ namespace SupervisorMobility.API.DataAccess.Services.ExportationServices
 
         public void GenerateAnalysisRows(ExcelWorksheet worksheet, ref double rowHeight, ref int idx, double ChangeHeight, double DefaultRowH)
         {
-            _stylesService.ChangeLastRowStyle(worksheet, idx, false);
+            _stylesService.ChangeLastRowStyleAnalysis(worksheet, idx, false);
 
             if (rowHeight == 0)
                 rowHeight = DefaultRowH;
@@ -69,7 +73,31 @@ namespace SupervisorMobility.API.DataAccess.Services.ExportationServices
                 }
                 else
                 {
-                    _stylesService.ChangeLastRowStyle(worksheet, idx, true);
+                    _stylesService.ChangeLastRowStyleAnalysis(worksheet, idx, true);
+                    break;
+                }
+            }
+        }
+
+        public void GenerateSequenceRows(ExcelWorksheet worksheet, ref double rowHeight, ref int idx, double ChangeHeight, double DefaultRowH)
+        {
+            _stylesService.ChangeLastRowStyleSequence(worksheet, idx, false);
+
+            if (rowHeight == 0)
+                rowHeight = DefaultRowH;
+
+            while (rowHeight < ChangeHeight)
+            {
+                double doitFit = (rowHeight) * 100 / ChangeHeight;
+                if (doitFit < 95)
+                {
+                    worksheet.InsertRow(++idx, 1);
+                    _stylesService.ApplySequenceStyles(worksheet, idx, false);
+                    rowHeight += 20;
+                }
+                else
+                {
+                    _stylesService.ChangeLastRowStyleSequence(worksheet, idx, true);
                     break;
                 }
             }

@@ -3,6 +3,8 @@ using OfficeOpenXml.Style;
 using OfficeOpenXml;
 using System.Drawing;
 using DocumentFormat.OpenXml.Spreadsheet;
+using DocumentFormat.OpenXml.Bibliography;
+using DocumentFormat.OpenXml.Office2016.Excel;
 
 namespace SupervisorMobility.API.DataAccess.Services.ExportationServices
 {
@@ -63,7 +65,46 @@ namespace SupervisorMobility.API.DataAccess.Services.ExportationServices
             sheet.Cells[$"J{rownumber}:L{rownumber}"].Style.HorizontalAlignment = ExcelHorizontalAlignment.Left;
         }
 
-        public void ChangeLastRowStyle(ExcelWorksheet sheet, int rownumber, bool last)
+        public void ApplySequenceStyles(ExcelWorksheet sheet, int rownumber, bool last)
+        {
+            sheet.Rows[rownumber].Height = 20;
+
+            sheet.Cells[$"B{rownumber}"].Style.Border.Left.Style = ExcelBorderStyle.Medium;
+            sheet.Cells[$"B{rownumber}"].Style.Border.Right.Style = ExcelBorderStyle.Thin;
+            sheet.Cells[$"B{rownumber}"].Style.Border.Bottom.Style = !last ? ExcelBorderStyle.Dashed : ExcelBorderStyle.Medium;
+            sheet.Cells[$"B{rownumber}"].Style.VerticalAlignment = ExcelVerticalAlignment.Center;
+            sheet.Cells[$"B{rownumber}"].Style.HorizontalAlignment = ExcelHorizontalAlignment.Center;
+
+            sheet.Cells[$"C{rownumber}:G{rownumber}"].Merge = true;
+            sheet.Cells[$"C{rownumber}:G{rownumber}"].Style.WrapText = true;
+            sheet.Cells[$"C{rownumber}:G{rownumber}"].Style.Border.Left.Style = ExcelBorderStyle.Thin;
+            sheet.Cells[$"C{rownumber}:G{rownumber}"].Style.Border.Right.Style = ExcelBorderStyle.Thin;
+            sheet.Cells[$"C{rownumber}:G{rownumber}"].Style.Border.Bottom.Style = !last ? ExcelBorderStyle.Dashed : ExcelBorderStyle.Medium;
+            sheet.Cells[$"C{rownumber}:G{rownumber}"].Style.VerticalAlignment = ExcelVerticalAlignment.Center;
+            sheet.Cells[$"C{rownumber}:G{rownumber}"].Style.HorizontalAlignment = ExcelHorizontalAlignment.Left;
+
+            sheet.Cells[$"H{rownumber}"].Style.Border.Left.Style = ExcelBorderStyle.Thin;
+            sheet.Cells[$"H{rownumber}"].Style.Border.Right.Style = ExcelBorderStyle.Dashed;
+            sheet.Cells[$"H{rownumber}"].Style.Border.Bottom.Style = !last ? ExcelBorderStyle.Dashed : ExcelBorderStyle.Medium;
+            sheet.Cells[$"H{rownumber}"].Style.VerticalAlignment = ExcelVerticalAlignment.Center;
+            sheet.Cells[$"H{rownumber}"].Style.HorizontalAlignment = ExcelHorizontalAlignment.Center;
+
+            sheet.Cells[$"I{rownumber}"].Style.Border.Left.Style = ExcelBorderStyle.Dashed;
+            sheet.Cells[$"I{rownumber}"].Style.Border.Right.Style = ExcelBorderStyle.Thin;
+            sheet.Cells[$"I{rownumber}"].Style.Border.Bottom.Style = !last ? ExcelBorderStyle.Dashed : ExcelBorderStyle.Medium;
+            sheet.Cells[$"I{rownumber}"].Style.VerticalAlignment = ExcelVerticalAlignment.Center;
+            sheet.Cells[$"I{rownumber}"].Style.HorizontalAlignment = ExcelHorizontalAlignment.Center;
+
+            sheet.Cells[$"J{rownumber}:L{rownumber}"].Merge = true;
+            sheet.Cells[$"J{rownumber}:L{rownumber}"].Style.WrapText = true;
+            sheet.Cells[$"J{rownumber}:L{rownumber}"].Style.Border.Left.Style = ExcelBorderStyle.Thin;
+            sheet.Cells[$"J{rownumber}:L{rownumber}"].Style.Border.Right.Style = ExcelBorderStyle.Medium;
+            sheet.Cells[$"J{rownumber}:L{rownumber}"].Style.Border.Bottom.Style = !last ? ExcelBorderStyle.Dashed : ExcelBorderStyle.Medium;
+            sheet.Cells[$"J{rownumber}:L{rownumber}"].Style.VerticalAlignment = ExcelVerticalAlignment.Center;
+            sheet.Cells[$"J{rownumber}:L{rownumber}"].Style.HorizontalAlignment = ExcelHorizontalAlignment.Left;
+        }
+
+        public void ChangeLastRowStyleAnalysis(ExcelWorksheet sheet, int rownumber, bool last)
         {
             sheet.Cells[$"B{rownumber}"].Style.Border.Bottom.Style = !last ? ExcelBorderStyle.Dashed : ExcelBorderStyle.Thin;
 
@@ -72,6 +113,19 @@ namespace SupervisorMobility.API.DataAccess.Services.ExportationServices
             sheet.Cells[$"E{rownumber}"].Style.Border.Bottom.Style = !last ? ExcelBorderStyle.Dashed : ExcelBorderStyle.Thin;
 
             sheet.Cells[$"F{rownumber}:G{rownumber}"].Style.Border.Bottom.Style = !last ? ExcelBorderStyle.Dashed : ExcelBorderStyle.Thin;
+
+            sheet.Cells[$"H{rownumber}"].Style.Border.Bottom.Style = !last ? ExcelBorderStyle.Dashed : ExcelBorderStyle.Thin;
+
+            sheet.Cells[$"I{rownumber}"].Style.Border.Bottom.Style = !last ? ExcelBorderStyle.Dashed : ExcelBorderStyle.Thin;
+
+            sheet.Cells[$"J{rownumber}:L{rownumber}"].Style.Border.Bottom.Style = !last ? ExcelBorderStyle.Dashed : ExcelBorderStyle.Thin;
+        }
+
+        public void ChangeLastRowStyleSequence(ExcelWorksheet sheet, int rownumber, bool last)
+        {
+            sheet.Cells[$"B{rownumber}"].Style.Border.Bottom.Style = !last ? ExcelBorderStyle.Dashed : ExcelBorderStyle.Thin;
+
+            sheet.Cells[$"C{rownumber}:G{rownumber}"].Style.Border.Bottom.Style = !last ? ExcelBorderStyle.Dashed : ExcelBorderStyle.Thin;
 
             sheet.Cells[$"H{rownumber}"].Style.Border.Bottom.Style = !last ? ExcelBorderStyle.Dashed : ExcelBorderStyle.Thin;
 
