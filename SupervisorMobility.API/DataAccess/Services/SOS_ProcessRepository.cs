@@ -18,14 +18,17 @@ using SupervisorMobility.API.Models.SOS.EquipmentDtos;
 using SupervisorMobility.API.Models.SOS.MaterialDtos;
 using SupervisorMobility.API.Models.SOS.SOSAnalysisDtos;
 using SupervisorMobility.API.Models.SOS.SOSAnalysisLogbookDtos;
+using SupervisorMobility.API.Models.SOS.SOSCombinationDtos;
 using SupervisorMobility.API.Models.SOS.SOSDistributionDtos;
 using SupervisorMobility.API.Models.SOS.SOSHubDtos;
 using SupervisorMobility.API.Models.SOS.SOSHubDtos.AnalysisBkupDtos;
 using SupervisorMobility.API.Models.SOS.SOSHubDtos.AnalysisDtos;
 using SupervisorMobility.API.Models.SOS.SOSHubDtos.SectionDtos;
 using SupervisorMobility.API.Models.SOS.SOSSequenceDtos;
+using SupervisorMobility.API.Models.SOS.SOSTimeDtos;
 using SupervisorMobility.API.Models.SOS.ToolDtos;
 using SupervisorMobility.API.Models.SOS.ToolsUsedDtos;
+using SupervisorMobility.API.Models.SOS.TurnDtos;
 using System.Diagnostics;
 using System.Runtime.CompilerServices;
 using System.Xml.Linq;
@@ -1764,7 +1767,427 @@ namespace SupervisorMobility.API.DataAccess.Services
         }
 
         #endregion
+        #region SosTime
+        public async Task<SOSTime> GetSOSTimeById(int id)
+        {
+            return await _context.SOSTimes.AsNoTracking().Where(t => t.SOSTimeId == id && t.IsActive == true).FirstOrDefaultAsync();
+        }
+        public async Task<int> UpdateTime(SOSTimeForUpdateDto timeForUpdate)
+        {
+            try
+            {
+                var query = _context.SOSTimes
+                                    .Where(t => t.SOSTimeId == timeForUpdate.SOSTimeId);
 
+                SOSTime time = await query.FirstOrDefaultAsync();
+
+                if (time == null)
+                {
+                    throw new InvalidOperationException("Time not found or is not active.");
+                }
+
+                var localEntry = _context.SOSTimes.Local.FirstOrDefault(entry => entry.SOSTimeId == timeForUpdate.SOSTimeId);
+                if (localEntry != null)
+                {
+                    _context.Entry(localEntry).CurrentValues.SetValues(timeForUpdate);
+                }
+                else
+                {
+                    if (_context.Entry(time).State == EntityState.Detached)
+                    {
+                        _context.SOSTimes.Attach(time);
+                    }
+
+                    _mapper.Map(timeForUpdate, time);
+                    _context.SOSTimes.Update(time);
+                }
+
+                return await _context.SaveChangesAsync();
+            }
+            catch (Exception ex)
+            {
+                Debug.WriteLine("An error occurred while updating the Time: " + ex.Message);
+                return 0;
+            }
+        }
+        public async Task<List<SOSTime>> AddRangeSOSTimes(List<SOSTime> SOSTimesToAdd)
+        {
+            _context.SOSTimes.AddRange(SOSTimesToAdd);
+
+            await _context.SaveChangesAsync();
+
+            // Desvincular las nuevas AnalysisLogbook del contexto
+            foreach (var time in SOSTimesToAdd)
+            {
+                _context.Entry(time).State = EntityState.Detached;
+            }
+
+            return SOSTimesToAdd;
+        }
+
+        public async Task<AsyncVoidMethodBuilder> AddSOSTimeToSOSAnalysis(SOSAnalysis master, SOSTime slave)
+        {
+            try
+            {
+                // Verificar si el master ya está siendo rastreado en el contexto
+                var localMasterEntry = _context.SOSAnalyses.Local.FirstOrDefault(entry => entry.SOSAnalysisId == master.SOSAnalysisId);
+                if (localMasterEntry != null)
+                {
+                    master = localMasterEntry;
+                }
+                else
+                {
+                    if (_context.Entry(master).State == EntityState.Detached)
+                    {
+                        _context.SOSAnalyses.Attach(master);
+                    }
+                }
+
+                // Verificar si el slave ya está siendo rastreado en el contexto
+                var localSlaveEntry = _context.SOSTimes.Local.FirstOrDefault(entry => entry.SOSTimeId == slave.SOSTimeId);
+                if (localSlaveEntry != null)
+                {
+                    slave = localSlaveEntry;
+                }
+                else
+                {
+                    if (_context.Entry(slave).State == EntityState.Detached)
+                    {
+                        _context.SOSTimes.Attach(slave);
+                    }
+                }
+
+                // Añadir el comentario a la colección de ProcessSheetCommentary del master
+                if (master.Times == null)
+                {
+                    master.Times = new List<SOSTime>();
+                }
+
+                // Verificar si el comentario ya está en la colección
+                if (!master.Times.Any(c => c.SOSTimeId == slave.SOSTimeId))
+                {
+                    master.Times.Add(slave);
+                }
+
+                // Guardar los cambios
+                await _context.SaveChangesAsync();
+            }
+            catch (Exception ex)
+            {
+                // Manejar el error apropiadamente, puedes loguearlo o lanzar una excepción personalizada
+                Debug.WriteLine("An error occurred while updating the SOSHub: " + ex.Message);
+            }
+            return new AsyncVoidMethodBuilder();
+        }
+        public async Task<AsyncVoidMethodBuilder> AddSOSTimeToSOSSequence(SOSSequence master, SOSTime slave)
+        {
+            try
+            {
+                // Verificar si el master ya está siendo rastreado en el contexto
+                var localMasterEntry = _context.SOSSequences.Local.FirstOrDefault(entry => entry.SOSSequenceId == master.SOSSequenceId);
+                if (localMasterEntry != null)
+                {
+                    master = localMasterEntry;
+                }
+                else
+                {
+                    if (_context.Entry(master).State == EntityState.Detached)
+                    {
+                        _context.SOSSequences.Attach(master);
+                    }
+                }
+
+                // Verificar si el slave ya está siendo rastreado en el contexto
+                var localSlaveEntry = _context.SOSTimes.Local.FirstOrDefault(entry => entry.SOSTimeId == slave.SOSTimeId);
+                if (localSlaveEntry != null)
+                {
+                    slave = localSlaveEntry;
+                }
+                else
+                {
+                    if (_context.Entry(slave).State == EntityState.Detached)
+                    {
+                        _context.SOSTimes.Attach(slave);
+                    }
+                }
+
+                // Añadir el comentario a la colección de ProcessSheetCommentary del master
+                if (master.Times == null)
+                {
+                    master.Times = new List<SOSTime>();
+                }
+
+                // Verificar si el comentario ya está en la colección
+                if (!master.Times.Any(c => c.SOSTimeId == slave.SOSTimeId))
+                {
+                    master.Times.Add(slave);
+                }
+
+                // Guardar los cambios
+                await _context.SaveChangesAsync();
+            }
+            catch (Exception ex)
+            {
+                // Manejar el error apropiadamente, puedes loguearlo o lanzar una excepción personalizada
+                Debug.WriteLine("An error occurred while updating the SOSHub: " + ex.Message);
+            }
+            return new AsyncVoidMethodBuilder();
+        }
+        public async Task<AsyncVoidMethodBuilder> AddSOSTimeToSOSDistribution(SOSDistribution master, SOSTime slave)
+        {
+            try
+            {
+                // Verificar si el master ya está siendo rastreado en el contexto
+                var localMasterEntry = _context.SOSDistributions.Local.FirstOrDefault(entry => entry.SOSDistributionId == master.SOSDistributionId);
+                if (localMasterEntry != null)
+                {
+                    master = localMasterEntry;
+                }
+                else
+                {
+                    if (_context.Entry(master).State == EntityState.Detached)
+                    {
+                        _context.SOSDistributions.Attach(master);
+                    }
+                }
+
+                // Verificar si el slave ya está siendo rastreado en el contexto
+                var localSlaveEntry = _context.SOSTimes.Local.FirstOrDefault(entry => entry.SOSTimeId == slave.SOSTimeId);
+                if (localSlaveEntry != null)
+                {
+                    slave = localSlaveEntry;
+                }
+                else
+                {
+                    if (_context.Entry(slave).State == EntityState.Detached)
+                    {
+                        _context.SOSTimes.Attach(slave);
+                    }
+                }
+
+                // Añadir el comentario a la colección de ProcessSheetCommentary del master
+                if (master.Times == null)
+                {
+                    master.Times = new List<SOSTime>();
+                }
+
+                // Verificar si el comentario ya está en la colección
+                if (!master.Times.Any(c => c.SOSTimeId == slave.SOSTimeId))
+                {
+                    master.Times.Add(slave);
+                }
+
+                // Guardar los cambios
+                await _context.SaveChangesAsync();
+            }
+            catch (Exception ex)
+            {
+                // Manejar el error apropiadamente, puedes loguearlo o lanzar una excepción personalizada
+                Debug.WriteLine("An error occurred while updating the SOSHub: " + ex.Message);
+            }
+            return new AsyncVoidMethodBuilder();
+        }
+
+        public async Task<AsyncVoidMethodBuilder> RemoveAllTimesFromSOSAnalysis(SOSAnalysis Master)
+        {
+            Master.Times?.Clear();
+            _context.SaveChanges();
+            return new AsyncVoidMethodBuilder();
+        }
+        public async Task<AsyncVoidMethodBuilder> RemoveAllTimesFromSOSDistribution(SOSDistribution Master)
+        {
+            Master.Times?.Clear();
+            _context.SaveChanges();
+            return new AsyncVoidMethodBuilder();
+        }
+        public async Task<AsyncVoidMethodBuilder> RemoveAllTimesFromSOSSequence(SOSSequence Master)
+        {
+            Master.Times?.Clear();
+            _context.SaveChanges();
+            return new AsyncVoidMethodBuilder();
+        }
+        #endregion
+        #region Turn
+        public async Task<Turn> GetTurnById(int id)
+        {
+            return await _context.Turns.AsNoTracking().Where(t => t.TurnId == id).FirstOrDefaultAsync();
+        }
+
+        public async Task<int> UpdateTurn(TurnForUpdateDto TurnForUpdate)
+        {
+            try
+            {
+                var query = _context.Turns
+                                    .Where(t => t.TurnId == TurnForUpdate.TurnId);
+
+                Turn Turn = await query.FirstOrDefaultAsync();
+
+                if (Turn == null)
+                {
+                    throw new InvalidOperationException("Turn not found or is not active.");
+                }
+
+                var localEntry = _context.Turns.Local.FirstOrDefault(entry => entry.TurnId == TurnForUpdate.TurnId);
+                if (localEntry != null)
+                {
+                    _context.Entry(localEntry).CurrentValues.SetValues(TurnForUpdate);
+                }
+                else
+                {
+                    if (_context.Entry(Turn).State == EntityState.Detached)
+                    {
+                        _context.Turns.Attach(Turn);
+                    }
+
+                    _mapper.Map(TurnForUpdate, Turn);
+                    _context.Turns.Update(Turn);
+                }
+
+                return await _context.SaveChangesAsync();
+            }
+            catch (Exception ex)
+            {
+                Debug.WriteLine("An error occurred while updating the Turn: " + ex.Message);
+                return 0;
+            }
+        }
+        public async Task<List<Turn>> AddRangeTurns(List<Turn> TurnsToAdd)
+        {
+            _context.Turns.AddRange(TurnsToAdd);
+
+            await _context.SaveChangesAsync();
+
+            // Desvincular las nuevas AnalysisLogbook del contexto
+            foreach (var Turn in TurnsToAdd)
+            {
+                _context.Entry(Turn).State = EntityState.Detached;
+            }
+
+            return TurnsToAdd;
+        }
+
+        public async Task<AsyncVoidMethodBuilder> AddTurnToSOSCombination(SOSCombination master, Turn slave)
+        {
+            try
+            {
+                // Verificar si el master ya está siendo rastreado en el contexto
+                var localMasterEntry = _context.SOSCombinations.Local.FirstOrDefault(entry => entry.SOSCombinationId == master.SOSCombinationId);
+                if (localMasterEntry != null)
+                {
+                    master = localMasterEntry;
+                }
+                else
+                {
+                    if (_context.Entry(master).State == EntityState.Detached)
+                    {
+                        _context.SOSCombinations.Attach(master);
+                    }
+                }
+
+                // Verificar si el slave ya está siendo rastreado en el contexto
+                var localSlaveEntry = _context.Turns.Local.FirstOrDefault(entry => entry.TurnId == slave.TurnId);
+                if (localSlaveEntry != null)
+                {
+                    slave = localSlaveEntry;
+                }
+                else
+                {
+                    if (_context.Entry(slave).State == EntityState.Detached)
+                    {
+                        _context.Turns.Attach(slave);
+                    }
+                }
+
+                // Añadir el comentario a la colección de ProcessSheetCommentary del master
+                if (master.Turns == null)
+                {
+                    master.Turns = new List<Turn>();
+                }
+
+                // Verificar si el comentario ya está en la colección
+                if (!master.Turns.Any(c => c.TurnId == slave.TurnId))
+                {
+                    master.Turns.Add(slave);
+                }
+
+                // Guardar los cambios
+                await _context.SaveChangesAsync();
+            }
+            catch (Exception ex)
+            {
+                // Manejar el error apropiadamente, puedes loguearlo o lanzar una excepción personalizada
+                Debug.WriteLine("An error occurred while updating the SOSHub: " + ex.Message);
+            }
+            return new AsyncVoidMethodBuilder();
+        }
+        public async Task<AsyncVoidMethodBuilder> AddTurnToSOSDistribution(SOSDistribution master, Turn slave)
+        {
+            try
+            {
+                // Verificar si el master ya está siendo rastreado en el contexto
+                var localMasterEntry = _context.SOSDistributions.Local.FirstOrDefault(entry => entry.SOSDistributionId == master.SOSDistributionId);
+                if (localMasterEntry != null)
+                {
+                    master = localMasterEntry;
+                }
+                else
+                {
+                    if (_context.Entry(master).State == EntityState.Detached)
+                    {
+                        _context.SOSDistributions.Attach(master);
+                    }
+                }
+
+                // Verificar si el slave ya está siendo rastreado en el contexto
+                var localSlaveEntry = _context.Turns.Local.FirstOrDefault(entry => entry.TurnId == slave.TurnId);
+                if (localSlaveEntry != null)
+                {
+                    slave = localSlaveEntry;
+                }
+                else
+                {
+                    if (_context.Entry(slave).State == EntityState.Detached)
+                    {
+                        _context.Turns.Attach(slave);
+                    }
+                }
+
+                // Añadir el comentario a la colección de ProcessSheetCommentary del master
+                if (master.Turns == null)
+                {
+                    master.Turns = new List<Turn>();
+                }
+
+                // Verificar si el comentario ya está en la colección
+                if (!master.Turns.Any(c => c.TurnId == slave.TurnId))
+                {
+                    master.Turns.Add(slave);
+                }
+
+                // Guardar los cambios
+                await _context.SaveChangesAsync();
+            }
+            catch (Exception ex)
+            {
+                // Manejar el error apropiadamente, puedes loguearlo o lanzar una excepción personalizada
+                Debug.WriteLine("An error occurred while updating the SOSHub: " + ex.Message);
+            }
+            return new AsyncVoidMethodBuilder();
+        }
+
+        public async Task<AsyncVoidMethodBuilder> RemoveAllTurnsFromSOSDistribution(SOSDistribution Master)
+        {
+            Master.Turns?.Clear();
+            _context.SaveChanges();
+            return new AsyncVoidMethodBuilder();
+        }
+        public async Task<AsyncVoidMethodBuilder> RemoveAllTurnsFromSOSCombination(SOSCombination Master)
+        {
+            Master.Turns?.Clear();
+            _context.SaveChanges();
+            return new AsyncVoidMethodBuilder();
+        }
+        #endregion
         #region SOSAnalysis
         public async Task<int> CreateSOSAnalysis(SOSAnalysis SOS_AnalysisToCreate)
         {
@@ -1796,11 +2219,14 @@ namespace SupervisorMobility.API.DataAccess.Services
 
             if (includeSOS)
             {
+                query = query.Include(m => m.SOSHub);
                 query = query.Include(m => m.SOSHub).ThenInclude(s => s.Sections).ThenInclude(a => a.Analyses);
                 query = query.Include(m => m.SOSHub).ThenInclude(s => s.AppliedModel);
                 query = query.Include(m => m.SOSHub).ThenInclude(s => s.ToolsUsed).ThenInclude(t => t.Tool);
                 query = query.Include(m => m.SOSHub).ThenInclude(s => s.MaterialsUsed).ThenInclude(m => m.Material);
                 query = query.Include(m => m.SOSHub).ThenInclude(s => s.SafetyEquipment);
+
+                query = query.Include(m => m.Times);
             }
 
             if (includeImagesSOS)
@@ -1973,10 +2399,19 @@ namespace SupervisorMobility.API.DataAccess.Services
         #endregion
         #region Add Range SOS Analysis
   
-        public async Task<int> AddRangeSOSAnalysisLogbook(List<SOSAnalysisLogbook> SOSAnalysisLogbooksToAdd)
+        public async Task<List<SOSAnalysisLogbook>> AddRangeSOSAnalysisLogbook(List<SOSAnalysisLogbook> SOSAnalysisLogbooksToAdd)
         {
             _context.SOSAnalysisLogbooks.AddRange(SOSAnalysisLogbooksToAdd);
-            return await _context.SaveChangesAsync();
+
+            await _context.SaveChangesAsync();
+
+            // Desvincular las nuevas AnalysisLogbook del contexto
+            foreach (var analysislogbook in SOSAnalysisLogbooksToAdd)
+            {
+                _context.Entry(analysislogbook).State = EntityState.Detached;
+            }
+
+            return SOSAnalysisLogbooksToAdd;
         }
         #endregion
         #region Add To Sos Analysis
@@ -2194,6 +2629,7 @@ namespace SupervisorMobility.API.DataAccess.Services
                 query = query.Include(m => m.SOSHub).ThenInclude(s => s.ToolsUsed).ThenInclude(t => t.Tool);
                 query = query.Include(m => m.SOSHub).ThenInclude(s => s.MaterialsUsed).ThenInclude(m => m.Material);
                 query = query.Include(m => m.SOSHub).ThenInclude(s => s.SafetyEquipment);
+                query = query.Include(m => m.Times);
             }
 
             if (includeImagesSOS)
@@ -2366,10 +2802,18 @@ namespace SupervisorMobility.API.DataAccess.Services
         #endregion
         #region Add Range SOS Sequence
 
-        public async Task<int> AddRangeSOSSequenceLogbook(List<SOSSequenceLogbook> SOSSequenceLogbooksToAdd)
+        public async Task<List<SOSSequenceLogbook>> AddRangeSOSSequenceLogbook(List<SOSSequenceLogbook> SOSSequenceLogbooksToAdd)
         {
             _context.SOSSequenceLogbooks.AddRange(SOSSequenceLogbooksToAdd);
-            return await _context.SaveChangesAsync();
+            await _context.SaveChangesAsync();
+
+            // Desvincular las nuevas AnalysisLogbook del contexto
+            foreach (var sequencelogbook in SOSSequenceLogbooksToAdd)
+            {
+                _context.Entry(sequencelogbook).State = EntityState.Detached;
+            }
+
+            return SOSSequenceLogbooksToAdd;
         }
         #endregion
         #region Add To Sos Sequence
@@ -2548,6 +2992,8 @@ namespace SupervisorMobility.API.DataAccess.Services
                 query = query.Include(m => m.SOSHub).ThenInclude(s => s.ToolsUsed).ThenInclude(t => t.Tool);
                 query = query.Include(m => m.SOSHub).ThenInclude(s => s.MaterialsUsed).ThenInclude(m => m.Material);
                 query = query.Include(m => m.SOSHub).ThenInclude(s => s.SafetyEquipment);
+                query = query.Include(m => m.Times);
+
             }
 
             if (includeImagesSOS)
@@ -2720,10 +3166,19 @@ namespace SupervisorMobility.API.DataAccess.Services
         #endregion
         #region Add Range SOS Distribution
 
-        public async Task<int> AddRangeSOSDistributionLogbook(List<SOSDistributionLogbook> SOSDistributionLogbooksToAdd)
+        public async Task<List<SOSDistributionLogbook>> AddRangeSOSDistributionLogbook(List<SOSDistributionLogbook> SOSDistributionLogbooksToAdd)
         {
             _context.SOSDistributionLogbooks.AddRange(SOSDistributionLogbooksToAdd);
-            return await _context.SaveChangesAsync();
+
+            await _context.SaveChangesAsync();
+
+            // Desvincular las nuevas distributionlogbook del contexto
+            foreach (var distributionlogbook in SOSDistributionLogbooksToAdd)
+            {
+                _context.Entry(distributionlogbook).State = EntityState.Detached;
+            }
+
+            return SOSDistributionLogbooksToAdd;
         }
         #endregion
         #region Add To Sos Distribution
@@ -2862,6 +3317,368 @@ namespace SupervisorMobility.API.DataAccess.Services
         public async Task<int> CreateSOSDistributionLogbook(SOSDistributionLogbook LogBook_ToCreate)
         {
             _context.SOSDistributionLogbooks.Add(LogBook_ToCreate);
+            return await _context.SaveChangesAsync();
+        }
+        #endregion
+        //Combination
+        #region SOSCombination
+        public async Task<int> CreateSOSCombination(SOSCombination SOS_CombinationToCreate)
+        {
+            _context.SOSCombinations.Add(SOS_CombinationToCreate);
+            return _context.SaveChanges();
+        }
+
+        public async Task<SOSCombination> GetSOSCombination(int SOSCombinationId, bool includeImages = false, bool includeNotes = false, bool includeLogbooks = false, bool includeSOS = false, bool includeImagesSOS = false)
+        {
+            var query = _context.SOSCombinations.AsNoTracking().Where(SOS => SOS.SOSCombinationId == SOSCombinationId && SOS.IsActive == true);
+
+            if (includeImages)
+            {
+                query = query.Include(i => i.Illustrations);
+            }
+
+            //if (includeNotes)
+            //{
+            //    query = query.Include(query => query.Notes);
+            //}
+
+            if (includeLogbooks)
+            {
+                query = query.Include(t => t.CombinationLogbooks).ThenInclude(l => l.Approver);
+                query = query.Include(t => t.CombinationLogbooks).ThenInclude(l => l.Reviewer);
+            }
+
+
+
+            if (includeSOS)
+            {
+                query = query.Include(m => m.SOSHub).ThenInclude(s => s.Sections).ThenInclude(a => a.Analyses);
+                query = query.Include(m => m.SOSHub).ThenInclude(s => s.AppliedModel);
+                query = query.Include(m => m.SOSHub).ThenInclude(s => s.ToolsUsed).ThenInclude(t => t.Tool);
+                query = query.Include(m => m.SOSHub).ThenInclude(s => s.MaterialsUsed).ThenInclude(m => m.Material);
+                query = query.Include(m => m.SOSHub).ThenInclude(s => s.SafetyEquipment);
+            }
+
+            if (includeImagesSOS)
+            {
+                query = query.Include(m => m.SOSHub).ThenInclude(s => s.Images);
+            }
+
+
+            var sosHub = await query.FirstOrDefaultAsync();
+
+            if (sosHub == null)
+                return null;
+
+            //Filtrar los subobjetos manualmente después de la carga inicial
+            if (includeImages)
+            {
+                sosHub.Illustrations = sosHub.Illustrations.Where(i => i.IsActive == true).ToList();
+            }
+
+            //if (includeNotes)
+            //{
+            //    sosHub.Notes = sosHub.Notes.Where(v => v.IsActive == true).ToList();
+            //}
+
+            if (includeLogbooks)
+            {
+                sosHub.CombinationLogbooks = sosHub.CombinationLogbooks.Where(t => t.IsActive == true).ToList();
+            }
+
+
+
+            return sosHub;
+        }
+
+        public async Task<IEnumerable<SOSCombination>> GetAllSOSCombination(bool includeImages = false, bool includeNotes = false, bool includeLogbooks = false, bool includeSOS = false)
+        {
+            var query = _context.SOSCombinations.AsNoTracking().Where(SOS => SOS.IsActive == true);
+
+            if (includeImages)
+            {
+                query = query.Include(i => i.Illustrations);
+            }
+
+            //if (includeNotes)
+            //{
+            //    query = query.Include(query => query.Notes);
+            //}
+
+            if (includeLogbooks)
+            {
+                query = query.Include(t => t.CombinationLogbooks);
+            }
+
+
+
+            if (includeSOS)
+            {
+                query = query.Include(m => m.SOSHub);
+            }
+
+            var sosCombinations = await query.OrderBy(s => s.SOSHubId).ToListAsync();
+
+            if (includeImages)
+            {
+                foreach (var SOSCombination in sosCombinations)
+                {
+                    SOSCombination.Illustrations = SOSCombination.Illustrations.Where(i => i.IsActive == true).ToList();
+                }
+            }
+
+            //if (includeNotes)
+            //{
+            //    foreach (var SOSCombination in sosCombinations)
+            //    {
+            //        SOSCombination.Notes = SOSCombination.Notes.Where(v => v.IsActive == true).ToList();
+            //    }
+            //}
+
+            if (includeLogbooks)
+            {
+                foreach (var SOSCombination in sosCombinations)
+                {
+                    SOSCombination.CombinationLogbooks = SOSCombination.CombinationLogbooks.Where(t => t.IsActive == true).ToList();
+                }
+            }
+
+
+
+            return sosCombinations;
+        }
+
+        public async Task<int> UpdateSOSCombination(SOSCombinationForUpdateDto CombinationUpdate, SOSCombination CombinationEntity)
+        {
+            try
+            {
+                // Adjunta la entidad al contexto si no está ya adjunta
+                if (_context.Entry(CombinationEntity).State == EntityState.Detached)
+                {
+                    _context.SOSCombinations.Attach(CombinationEntity);
+                }
+
+                var localEntry = _context.SOSCombinations.Local.FirstOrDefault(entry => entry.SOSCombinationId == CombinationEntity.SOSCombinationId);
+                if (localEntry != null)
+                {
+                    _context.Entry(localEntry).CurrentValues.SetValues(CombinationUpdate);
+                }
+                else
+                {
+                    _mapper.Map(CombinationUpdate, CombinationEntity);
+                    _context.SOSCombinations.Update(CombinationEntity);
+                }
+
+                return await _context.SaveChangesAsync();
+            }
+            catch (Exception ex)
+            {
+                // Manejar el error apropiadamente, puedes loguearlo o lanzar una excepción personalizada
+                Debug.WriteLine("An error occurred while updating the Commentary.", ex.Message);
+                return 0;
+
+            }
+        }
+
+        public async Task<int> RemoveSOSCombination(int SOS_Combination_id)
+        {
+            var SOS_CombinationEntity = await GetSOSCombination(SOS_Combination_id);
+            SOS_CombinationEntity.IsActive = false;
+            _context.SOSCombinations.Update(SOS_CombinationEntity);
+            return await _context.SaveChangesAsync();
+        }
+
+        public async Task AddIlustrationToSOSCombination(int SOS_Combination_id, FileUpload evidence)
+        {
+            var SosHubEntity = await GetSOSCombination(SOS_Combination_id, includeImages: true);
+            if (_context.Entry(SosHubEntity).State == EntityState.Detached)
+            {
+                _context.SOSCombinations.Attach(SosHubEntity);
+            }
+            if (SosHubEntity != null)
+            {
+
+                if (SosHubEntity.Illustrations != null)
+                {
+                    SosHubEntity.Illustrations.Add(evidence);
+                }
+                else
+                {
+                    SosHubEntity.Illustrations = new List<FileUpload>
+                    {
+                        evidence
+                    };
+                }
+            }
+        }
+
+        public async Task<int> RemoveIlustrationFromSOSCombination(int SOS_Combination_id, int ImageFile_id)
+        {
+            var SOSCombinationEntity = await GetSOSCombination(SOS_Combination_id, includeImages: true);
+
+            var Sketch = SOSCombinationEntity.Illustrations.ToList().Find(i => i.FileUploadId == ImageFile_id);
+            if (Sketch != null)
+            {
+                Sketch.IsActive = false;
+            }
+
+            _context.SOSCombinations.Update(SOSCombinationEntity);
+
+            return await _context.SaveChangesAsync();
+        }
+        #endregion
+        #region Add Range SOS Combination
+
+        public async Task<List<SOSCombinationLogbook>> AddRangeSOSCombinationLogbook(List<SOSCombinationLogbook> SOSCombinationLogbooksToAdd)
+        {
+            _context.SOSCombinationLogbooks.AddRange(SOSCombinationLogbooksToAdd);
+            await _context.SaveChangesAsync();
+
+            // Desvincular las nuevas combinationlogbook del contexto
+            foreach (var combinationlogbook in SOSCombinationLogbooksToAdd)
+            {
+                _context.Entry(combinationlogbook).State = EntityState.Detached;
+            }
+
+            return SOSCombinationLogbooksToAdd;
+        }
+        #endregion
+        #region Add To Sos Combination
+        //public async Task<AsyncVoidMethodBuilder> AddNoteToSOSCombination(SOSCombination master, Commentary slave)
+        //{
+        //    try
+        //    {
+        //        // Verificar si el master ya está siendo rastreado en el contexto
+        //        var localMasterEntry = _context.SOSCombinations.Local.FirstOrDefault(entry => entry.SOSCombinationId == master.SOSCombinationId);
+        //        if (localMasterEntry != null)
+        //        {
+        //            master = localMasterEntry;
+        //        }
+        //        else
+        //        {
+        //            if (_context.Entry(master).State == EntityState.Detached)
+        //            {
+        //                _context.SOSCombinations.Attach(master);
+        //            }
+        //        }
+
+        //        // Verificar si el slave ya está siendo rastreado en el contexto
+        //        var localSlaveEntry = _context.Commentaries.Local.FirstOrDefault(entry => entry.CommentaryId == slave.CommentaryId);
+        //        if (localSlaveEntry != null)
+        //        {
+        //            slave = localSlaveEntry;
+        //        }
+        //        else
+        //        {
+        //            if (_context.Entry(slave).State == EntityState.Detached)
+        //            {
+        //                _context.Commentaries.Attach(slave);
+        //            }
+        //        }
+
+        //        // Añadir el comentario a la colección de ProcessSheetCommentary del master
+        //        if (master.Notes == null)
+        //        {
+        //            master.Notes = new List<Commentary>();
+        //        }
+
+        //        // Verificar si el comentario ya está en la colección
+        //        if (!master.Notes.Any(c => c.CommentaryId == slave.CommentaryId))
+        //        {
+        //            master.Notes.Add(slave);
+        //        }
+
+        //        // Guardar los cambios
+        //        await _context.SaveChangesAsync();
+        //    }
+        //    catch (Exception ex)
+        //    {
+        //        // Manejar el error apropiadamente, puedes loguearlo o lanzar una excepción personalizada
+        //        Debug.WriteLine("An error occurred while updating the SOSHub: " + ex.Message);
+        //    }
+        //    return new AsyncVoidMethodBuilder();
+        //}
+
+        public async Task<AsyncVoidMethodBuilder> AddSOSCombinationLogbookToSOSCombination(SOSCombination master, SOSCombinationLogbook slave)
+        {
+            try
+            {
+                // Verificar si el master ya está siendo rastreado en el contexto
+                var localMasterEntry = _context.SOSCombinations.Local.FirstOrDefault(entry => entry.SOSHubId == master.SOSHubId);
+                if (localMasterEntry != null)
+                {
+                    master = localMasterEntry;
+                }
+                else
+                {
+                    if (_context.Entry(master).State == EntityState.Detached)
+                    {
+                        _context.SOSCombinations.Attach(master);
+                    }
+                }
+
+                // Verificar si el slave ya está siendo rastreado en el contexto
+                var localSlaveEntry = _context.SOSCombinationLogbooks.Local.FirstOrDefault(entry => entry.SOSCombinationLogbookId == slave.SOSCombinationLogbookId);
+                if (localSlaveEntry != null)
+                {
+                    slave = localSlaveEntry;
+                }
+                else
+                {
+                    if (_context.Entry(slave).State == EntityState.Detached)
+                    {
+                        _context.SOSCombinationLogbooks.Attach(slave);
+                    }
+                }
+
+                // Añadir el comentario a la colección de ProcessSheetCommentary del master
+                if (master.CombinationLogbooks == null)
+                {
+                    master.CombinationLogbooks = new List<SOSCombinationLogbook>();
+                }
+
+                // Verificar si el comentario ya está en la colección
+                if (!master.CombinationLogbooks.Any(c => c.SOSCombinationLogbookId == slave.SOSCombinationLogbookId))
+                {
+                    master.CombinationLogbooks.Add(slave);
+                }
+
+                // Guardar los cambios
+                await _context.SaveChangesAsync();
+            }
+            catch (Exception ex)
+            {
+                // Manejar el error apropiadamente, puedes loguearlo o lanzar una excepción personalizada
+                Debug.WriteLine("An error occurred while updating the SOSHub: " + ex.Message);
+            }
+            return new AsyncVoidMethodBuilder();
+        }
+        #endregion
+        #region Remove from SOSCombination
+
+        public async Task<AsyncVoidMethodBuilder> SOSDataRemoveAllSOSCombinationLogbookFromSOSCombination(SOSCombination Master)
+        {
+            Master.CombinationLogbooks?.Clear();
+            _context.SaveChanges();
+            return new AsyncVoidMethodBuilder();
+        }
+        //public async Task<AsyncVoidMethodBuilder> SOSDataRemoveAllNotesFromSOSCombination(SOSCombination Master)
+        //{
+        //    Master.Notes?.Clear();
+        //    _context.SaveChanges();
+        //    return new AsyncVoidMethodBuilder();
+        //}
+
+        #endregion
+        #region SOSCombinationLogbook
+        public async Task<SOSCombinationLogbook> GetSOSCombinationLogbookById(int id)
+        {
+            return await _context.SOSCombinationLogbooks.AsNoTracking().Where(t => t.SOSCombinationLogbookId == id && t.IsActive == true).FirstOrDefaultAsync();
+        }
+
+        public async Task<int> CreateSOSCombinationLogbook(SOSCombinationLogbook LogBook_ToCreate)
+        {
+            _context.SOSCombinationLogbooks.Add(LogBook_ToCreate);
             return await _context.SaveChangesAsync();
         }
         #endregion

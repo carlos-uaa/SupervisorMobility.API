@@ -7,6 +7,7 @@ using SupervisorMobility.API.Models.CommentaryDtos;
 using SupervisorMobility.API.Models.FileUploadDto;
 using SupervisorMobility.API.Models.SOS.SOSSequenceDtos;
 using SupervisorMobility.API.Models.SOS.SOSSequenceLogbookDtos;
+using SupervisorMobility.API.Models.SOS.SOSTimeDtos;
 using System.Diagnostics;
 
 namespace SupervisorMobility.API.Controllers.SOS_Controllers
@@ -26,7 +27,6 @@ namespace SupervisorMobility.API.Controllers.SOS_Controllers
             _env = env ?? throw new ArgumentNullException(nameof(env));
         }
 
-
         [HttpPost]
         public async Task<ActionResult<SOSSequenceDto>> GenerateSequence(SOSSequenceForCreateDto sOSSequenceToCreate, int SOSHubCollection_Id)
         {
@@ -34,9 +34,7 @@ namespace SupervisorMobility.API.Controllers.SOS_Controllers
 
             if (sOSSequenceToCreate.SOSSequenceId == 0)
             {
-                //Nombre del documento GOS o processShet
-                //sOSSequenceToCreate.InternalControlNumber = SOSEntity.Folio;
-                //sOSSequenceToCreate.ProcessName = SOSEntity.ProcessSheet;
+               
 
                 sOSSequenceToCreate.CreatedDate = DateTime.Now;
                 sOSSequenceToCreate.IsActive = true;
@@ -115,11 +113,14 @@ namespace SupervisorMobility.API.Controllers.SOS_Controllers
 
             List<Commentary> Bkup_Notes = new List<Commentary>();
             List<SOSSequenceLogbook> Bkup_SequenceLogbook = new List<SOSSequenceLogbook>();
+            List<SOSTime> Bkup_Times = new List<SOSTime>();
 
             // Filtrar nuevos Comentarios
             List<UpdateCommentaryDto> filteredCommentaryList = sosUpdateEntity.Notes.Where(t => t.CommentaryId <= 0).ToList();
             // Filtrar nuevos SequenceLogbooks
             List<SOSSequenceLogbookForUpdateDto> filteredSequenceLogbooksList = sosUpdateEntity.SequenceLogbooks.Where(t => t.SOSSequenceLogbookId <= 0).ToList();
+            // Filtrar nuevos Tiempos
+            List<SOSTimeForUpdateDto> filteredTimesList = sosUpdateEntity.Times.Where(t => t.SOSTimeId <= 0).ToList();
 
 
             // Remover nuevos Comentarios de la lista principal para evitar duplicados
@@ -167,14 +168,45 @@ namespace SupervisorMobility.API.Controllers.SOS_Controllers
 
                 var resultAddSOSSequenceLogbook = await _ProcessRepository.AddRangeSOSSequenceLogbook(newSOSSequenceLogbook);
 
-                if (resultAddSOSSequenceLogbook > 0)
+                if (resultAddSOSSequenceLogbook != null)
                 {
-                    Debug.WriteLine("SOSSequenceLogbook añadidos con exitop");
+                    Debug.WriteLine("AnalysisLogbook añadidos con exitop");
+                    Bkup_SequenceLogbook.AddRange(resultAddSOSSequenceLogbook);
+                }
+                else
+                {
+                    Debug.WriteLine("Error AnalysisLogbook añadidos");
+                }
+            }
+
+            //aqui añadir Tiempos
+            if (filteredTimesList.Any())
+            {
+                sosUpdateEntity.Times.RemoveAll(t => t.SOSTimeId == null || t.SOSTimeId <= 0);
+
+                // Mapear nuevas tiempos
+                List<SOSTime> newSOSTime = _mapper.Map<List<SOSTime>>(filteredTimesList);
+
+                foreach (var time in newSOSTime)
+                {
+                    time.SOSTimeId = 0;
+                    time.IsActive = true;
                 }
 
-                List<SOSSequenceLogbookForUpdateDto> newSOSSequenceLogbookCreated = _mapper.Map<List<SOSSequenceLogbookForUpdateDto>>(newSOSSequenceLogbook);
-                sosUpdateEntity.SequenceLogbooks.ToList().AddRange(newSOSSequenceLogbookCreated);
+                var resultAddSOSTime = await _ProcessRepository.AddRangeSOSTimes(newSOSTime);
+
+
+                if (resultAddSOSTime != null)
+                {
+                    Debug.WriteLine("Add SOSTime añadidos con exitop");
+                    Bkup_Times.AddRange(resultAddSOSTime);
+                }
+                else
+                {
+                    Debug.WriteLine("Error Add SOSTime añadidos");
+                }
             }
+
 
             SOSSequence _sosSequence = await _ProcessRepository.GetSOSSequence(sosSequence_Id, true, true, true, true);
 
@@ -209,13 +241,22 @@ namespace SupervisorMobility.API.Controllers.SOS_Controllers
                 Bkup_SequenceLogbook.Add(SequenceBkaux);
             }
 
+            foreach (var time in sosUpdateEntity.Times)
+            {
+                var timeUpdate = await _ProcessRepository.UpdateTime(time);
+                SOSTime timeBkaux = await _ProcessRepository.GetSOSTimeById(time.SOSTimeId);
+                Bkup_Times.Add(timeBkaux);
+            }
 
             //Nulleamos el update para evitar errores
             sosUpdateEntity.Notes = null;
+            sosUpdateEntity.Times = null;
             sosUpdateEntity.SequenceLogbooks = null;
 
             await _ProcessRepository.SOSDataRemoveAllNotesFromSOSSequence(_sosSequence);
             await _ProcessRepository.SOSDataRemoveAllSOSSequenceLogbookFromSOSSequence(_sosSequence);
+            await _ProcessRepository.RemoveAllTimesFromSOSSequence(_sosSequence);
+
 
             var result = await _ProcessRepository.UpdateSOSSequence(sosUpdateEntity, _sosSequence);
 
@@ -237,6 +278,14 @@ namespace SupervisorMobility.API.Controllers.SOS_Controllers
                 }
             }
 
+            //Times
+            if (Bkup_Times.Any())
+            {
+                foreach (SOSTime time in Bkup_Times)
+                {
+                    await _ProcessRepository.AddSOSTimeToSOSSequence(_sosSequence, time);
+                }
+            }
 
 
             if (result != null)

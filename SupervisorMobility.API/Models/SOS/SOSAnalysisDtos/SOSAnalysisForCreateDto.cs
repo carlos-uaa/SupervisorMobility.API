@@ -2,6 +2,7 @@
 using SupervisorMobility.API.Models.FileUploadDto;
 using SupervisorMobility.API.Models.CommentaryDtos;
 using SupervisorMobility.API.Models.SOS.SOSHubDtos;
+using SupervisorMobility.API.Models.SOS.SOSTimeDtos;
 
 namespace SupervisorMobility.API.Models.SOS.SOSAnalysisDtos
 {
@@ -13,6 +14,7 @@ namespace SupervisorMobility.API.Models.SOS.SOSAnalysisDtos
         public string? ProcessName { get; set; }
         public ICollection<SOSAnalysisLogbookDto>? AnalysisLogbooks { get; set; } = new List<SOSAnalysisLogbookDto>();
         public ICollection<CreateCommentaryDto>? Notes { get; set; } = new List<CreateCommentaryDto>();
+        public List<SOSTimeForCreateDto>? Times { get; set; } = new List<SOSTimeForCreateDto>();
 
         public DateTime? CreatedDate { get; set; }
 

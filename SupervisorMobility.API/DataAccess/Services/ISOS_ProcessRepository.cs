@@ -9,13 +9,16 @@ using SupervisorMobility.API.Models.SOS.EquipmentDtos;
 using SupervisorMobility.API.Models.SOS.MaterialDtos;
 using SupervisorMobility.API.Models.SOS.SOSAnalysisDtos;
 using SupervisorMobility.API.Models.SOS.SOSAnalysisLogbookDtos;
+using SupervisorMobility.API.Models.SOS.SOSCombinationDtos;
 using SupervisorMobility.API.Models.SOS.SOSDistributionDtos;
 using SupervisorMobility.API.Models.SOS.SOSHubDtos;
 using SupervisorMobility.API.Models.SOS.SOSHubDtos.AnalysisBkupDtos;
 using SupervisorMobility.API.Models.SOS.SOSHubDtos.SectionDtos;
 using SupervisorMobility.API.Models.SOS.SOSSequenceDtos;
+using SupervisorMobility.API.Models.SOS.SOSTimeDtos;
 using SupervisorMobility.API.Models.SOS.ToolDtos;
 using SupervisorMobility.API.Models.SOS.ToolsUsedDtos;
+using SupervisorMobility.API.Models.SOS.TurnDtos;
 using System.Diagnostics;
 using System.Runtime.CompilerServices;
 
@@ -118,7 +121,32 @@ namespace SupervisorMobility.API.DataAccess.Services
         Task<int> UpdateSection(SectionForUpdateDto sectionForUpdate);
 
         #endregion
+        #region SosTime
+        Task<SOSTime> GetSOSTimeById(int id);
+        Task<int> UpdateTime(SOSTimeForUpdateDto timeForUpdate);
 
+        Task<List<SOSTime>> AddRangeSOSTimes(List<SOSTime> SOSTimesToAdd);
+
+        Task<AsyncVoidMethodBuilder> AddSOSTimeToSOSAnalysis(SOSAnalysis Master, SOSTime Slave);
+        Task<AsyncVoidMethodBuilder> AddSOSTimeToSOSSequence(SOSSequence Master, SOSTime Slave);
+        Task<AsyncVoidMethodBuilder> AddSOSTimeToSOSDistribution(SOSDistribution Master, SOSTime Slave);
+
+        Task<AsyncVoidMethodBuilder> RemoveAllTimesFromSOSAnalysis(SOSAnalysis Master);
+        Task<AsyncVoidMethodBuilder> RemoveAllTimesFromSOSDistribution(SOSDistribution Master);
+        Task<AsyncVoidMethodBuilder> RemoveAllTimesFromSOSSequence(SOSSequence Master);
+        #endregion
+        #region Turn
+        Task<Turn> GetTurnById(int id);
+        Task<int> UpdateTurn(TurnForUpdateDto TurnForUpdate);
+
+        Task<List<Turn>> AddRangeTurns(List<Turn> TurnsToAdd);
+        Task<AsyncVoidMethodBuilder> AddTurnToSOSCombination(SOSCombination Master, Turn Slave);
+        Task<AsyncVoidMethodBuilder> AddTurnToSOSDistribution(SOSDistribution Master, Turn Slave);
+
+        Task<AsyncVoidMethodBuilder> RemoveAllTurnsFromSOSCombination(SOSCombination Master);
+        Task<AsyncVoidMethodBuilder> RemoveAllTurnsFromSOSDistribution(SOSDistribution Master);
+        #endregion
+        //Analysis
         #region SOSAnalysis
         Task<int> CreateSOSAnalysis(SOSAnalysis SOS_AnalysisToCreate);
         Task<SOSAnalysis> GetSOSAnalysis(int SOSAnalysisId, bool includeImages = false, bool includeNotes = false, bool includeLogbooks = false, bool includeSpecialCases = false, bool includeSOS = false, bool includeImagesSOS = false);
@@ -132,7 +160,7 @@ namespace SupervisorMobility.API.DataAccess.Services
 
         #endregion
         #region Add Range SOS Analysis
-        Task<int> AddRangeSOSAnalysisLogbook(List<SOSAnalysisLogbook> SOSAnalysisLogbooksToAdd);
+        Task<List<SOSAnalysisLogbook>> AddRangeSOSAnalysisLogbook(List<SOSAnalysisLogbook> SOSAnalysisLogbooksToAdd);
         #endregion
         #region Add To Sos Analysis
         Task<AsyncVoidMethodBuilder> AddSOSAnalysisLogbookToSOSAnalysis(SOSAnalysis Master, SOSAnalysisLogbook Slave);
@@ -148,7 +176,7 @@ namespace SupervisorMobility.API.DataAccess.Services
         Task<int> CreateSOSAnalysisLogbook(SOSAnalysisLogbook LogBook_ToCreate);
         Task<int> UpdateAnalysisLogbook(SOSAnalysisLogbookForUpdateDto analysisForUpdate);
         #endregion
-
+        //Sequence
         #region SOSSequence
         Task<int> CreateSOSSequence(SOSSequence SOS_SequenceToCreate);
         Task<SOSSequence> GetSOSSequence(int SOSSequenceId, bool includeImages = false, bool includeNotes = false, bool includeLogbooks = false, bool includeSpecialCases = false, bool includeSOS = false, bool includeImagesSOS = false);
@@ -162,7 +190,7 @@ namespace SupervisorMobility.API.DataAccess.Services
 
         #endregion
         #region Add Range SOS Sequence
-        Task<int> AddRangeSOSSequenceLogbook(List<SOSSequenceLogbook> SOSSequenceLogbooksToAdd);
+        Task<List<SOSSequenceLogbook>> AddRangeSOSSequenceLogbook(List<SOSSequenceLogbook> SOSSequenceLogbooksToAdd);
         #endregion
         #region Add To Sos Sequence
         Task<AsyncVoidMethodBuilder> AddSOSSequenceLogbookToSOSSequence(SOSSequence Master, SOSSequenceLogbook Slave);
@@ -191,7 +219,7 @@ namespace SupervisorMobility.API.DataAccess.Services
 
         #endregion
         #region Add Range SOS Distribution
-        Task<int> AddRangeSOSDistributionLogbook(List<SOSDistributionLogbook> SOSDistributionLogbooksToAdd);
+        Task<List<SOSDistributionLogbook>> AddRangeSOSDistributionLogbook(List<SOSDistributionLogbook> SOSDistributionLogbooksToAdd);
         #endregion
         #region Add To Sos Distribution
         Task<AsyncVoidMethodBuilder> AddSOSDistributionLogbookToSOSDistribution(SOSDistribution Master, SOSDistributionLogbook Slave);
@@ -205,6 +233,36 @@ namespace SupervisorMobility.API.DataAccess.Services
         #region SOSDistributionLogbook
         Task<SOSDistributionLogbook> GetSOSDistributionLogbookById(int id);
         Task<int> CreateSOSDistributionLogbook(SOSDistributionLogbook LogBook_ToCreate);
+        #endregion
+
+        //Combination
+        #region SOSCombination
+        Task<int> CreateSOSCombination(SOSCombination SOS_CombinationToCreate);
+        Task<SOSCombination> GetSOSCombination(int SOSCombinationId, bool includeImages = false, bool includeNotes = false, bool includeLogbooks = false, bool includeSOS = false, bool includeImagesSOS = false);
+        Task<IEnumerable<SOSCombination>> GetAllSOSCombination(bool includeImages = false, bool includeNotes = false, bool includeLogbooks = false, bool includeSOS = false);
+
+        Task<int> UpdateSOSCombination(SOSCombinationForUpdateDto CombinationUpdate, SOSCombination CombinationEntity);
+        Task<int> RemoveSOSCombination(int SOS_Combination_id);
+
+
+        #endregion
+        #region Add Range SOS Combination
+        Task<List<SOSCombinationLogbook>> AddRangeSOSCombinationLogbook(List<SOSCombinationLogbook> SOSCombinationLogbooksToAdd);
+        #endregion
+        #region Add To Sos Combination
+        Task<AsyncVoidMethodBuilder> AddSOSCombinationLogbookToSOSCombination(SOSCombination Master, SOSCombinationLogbook Slave);
+        Task AddIlustrationToSOSCombination(int SOS_Combination_id, FileUpload evidence);
+        //Task<AsyncVoidMethodBuilder> AddNoteToSOSCombination(SOSCombination Master, Commentary Slave);
+
+        #endregion
+        #region Remove from SosCombination
+        Task<AsyncVoidMethodBuilder> SOSDataRemoveAllSOSCombinationLogbookFromSOSCombination(SOSCombination Master);
+        //Task<AsyncVoidMethodBuilder> SOSDataRemoveAllNotesFromSOSCombination(SOSCombination Master);
+        Task<int> RemoveIlustrationFromSOSCombination(int SOS_Combination_id, int ImageFile_id);
+        #endregion
+        #region SOSCombinationLogbook
+        Task<SOSCombinationLogbook> GetSOSCombinationLogbookById(int id);
+        Task<int> CreateSOSCombinationLogbook(SOSCombinationLogbook LogBook_ToCreate);
         #endregion
 
         #region commonOperations

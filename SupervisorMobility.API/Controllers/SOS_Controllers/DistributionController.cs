@@ -7,6 +7,8 @@ using SupervisorMobility.API.Models.CommentaryDtos;
 using SupervisorMobility.API.Models.FileUploadDto;
 using SupervisorMobility.API.Models.SOS.SOSDistributionDtos;
 using SupervisorMobility.API.Models.SOS.SOSDistributionLogbookDtos;
+using SupervisorMobility.API.Models.SOS.SOSTimeDtos;
+using SupervisorMobility.API.Models.SOS.TurnDtos;
 using System.Diagnostics;
 
 namespace SupervisorMobility.API.Controllers.SOS_Controllers
@@ -110,15 +112,19 @@ namespace SupervisorMobility.API.Controllers.SOS_Controllers
         [HttpPut("{sosDistribution_Id}")]
         public async Task<ActionResult> UpdateSOSDistribution(int sosDistribution_Id, SOSDistributionForUpdateDto sosUpdateEntity)
         {
-
-
             List<Commentary> Bkup_Notes = new List<Commentary>();
+            List<Turn> Bkup_Turn = new List<Turn>();
             List<SOSDistributionLogbook> Bkup_DistributionLogbook = new List<SOSDistributionLogbook>();
+            List<SOSTime> Bkup_Times = new List<SOSTime>();
 
             // Filtrar nuevos Comentarios
             List<UpdateCommentaryDto> filteredCommentaryList = sosUpdateEntity.Notes.Where(t => t.CommentaryId <= 0).ToList();
             // Filtrar nuevos DistributionLogbooks
             List<SOSDistributionLogbookForUpdateDto> filteredDistributionLogbooksList = sosUpdateEntity.DistributionLogbooks.Where(t => t.SOSDistributionLogbookId <= 0).ToList();
+            // Filtrar nuevos Tiempos
+            List<SOSTimeForUpdateDto> filteredTimesList = sosUpdateEntity.AplicationModelsTimes.Where(t => t.SOSTimeId <= 0).ToList();
+             // Filtrar nuevos Turnos
+            List<TurnForUpdateDto> filteredTurnList = sosUpdateEntity.Turns.Where(t => t.TurnId <= 0).ToList();
 
 
             // Remover nuevos Comentarios de la lista principal para evitar duplicados
@@ -166,14 +172,72 @@ namespace SupervisorMobility.API.Controllers.SOS_Controllers
 
                 var resultAddSOSDistributionLogbook = await _ProcessRepository.AddRangeSOSDistributionLogbook(newSOSDistributionLogbook);
 
-                if (resultAddSOSDistributionLogbook > 0)
+                if (resultAddSOSDistributionLogbook != null)
                 {
-                    Debug.WriteLine("SOSDistributionLogbook añadidos con exitop");
+                    Debug.WriteLine("DistributionLogbooks añadidos con exitop");
+                    Bkup_DistributionLogbook.AddRange(resultAddSOSDistributionLogbook);
+                }
+                else
+                {
+                    Debug.WriteLine("Error DistributionLogbooks añadidos");
+                }
+            }
+
+            //aqui añadir Tiempos
+            if (filteredTimesList.Any())
+            {
+                sosUpdateEntity.AplicationModelsTimes.RemoveAll(t => t.SOSTimeId == null || t.SOSTimeId <= 0);
+
+                // Mapear nuevas tiempos
+                List<SOSTime> newSOSTime = _mapper.Map<List<SOSTime>>(filteredTimesList);
+
+                foreach (var time in newSOSTime)
+                {
+                    time.SOSTimeId = 0;
+                    time.IsActive = true;
                 }
 
-                List<SOSDistributionLogbookForUpdateDto> newSOSDistributionLogbookCreated = _mapper.Map<List<SOSDistributionLogbookForUpdateDto>>(newSOSDistributionLogbook);
-                sosUpdateEntity.DistributionLogbooks.ToList().AddRange(newSOSDistributionLogbookCreated);
+                var resultAddSOSTime = await _ProcessRepository.AddRangeSOSTimes(newSOSTime);
+
+
+                if (resultAddSOSTime != null)
+                {
+                    Debug.WriteLine("Add SOSTime añadidos con exitop");
+                    Bkup_Times.AddRange(resultAddSOSTime);
+                }
+                else
+                {
+                    Debug.WriteLine("Error Add SOSTime añadidos");
+                }
             }
+
+            //Turnos
+            if (filteredTurnList.Any())
+            {
+                sosUpdateEntity.Turns.RemoveAll(t => t.TurnId == null || t.TurnId <= 0);
+
+                // Mapear nuevas tiempos
+                List<Turn> newTurn = _mapper.Map<List<Turn>>(filteredTurnList);
+
+                foreach (var time in newTurn)
+                {
+                    time.TurnId = 0;
+                    //time.IsActive = true;
+                }
+
+                var resultAddTurn = await _ProcessRepository.AddRangeTurns(newTurn);
+
+                if (resultAddTurn != null)
+                {
+                    Debug.WriteLine("Add Turn añadidos con exito");
+                    Bkup_Turn.AddRange(resultAddTurn);
+                }
+                else
+                {
+                    Debug.WriteLine("Error Add Turn añadidos");
+                }
+            }
+
 
             SOSDistribution _sosDistribution = await _ProcessRepository.GetSOSDistribution(sosDistribution_Id, true, true, true, true);
 
@@ -208,11 +272,28 @@ namespace SupervisorMobility.API.Controllers.SOS_Controllers
                 Bkup_DistributionLogbook.Add(DistributionBkaux);
             }
 
+            foreach (var time in sosUpdateEntity.AplicationModelsTimes)
+            {
+                var timeUpdate = await _ProcessRepository.UpdateTime(time);
+                SOSTime timeBkaux = await _ProcessRepository.GetSOSTimeById(time.SOSTimeId);
+                Bkup_Times.Add(timeBkaux);
+            }
+
+            foreach (var turn in sosUpdateEntity.Turns)
+            {
+                var turnUpdate = await _ProcessRepository.UpdateTurn(turn);
+                Turn turnBkaux = await _ProcessRepository.GetTurnById(turn.TurnId);
+                Bkup_Turn.Add(turnBkaux);
+            }
 
             //Nulleamos el update para evitar errores
             sosUpdateEntity.Notes = null;
+            sosUpdateEntity.Turns = null;
             sosUpdateEntity.DistributionLogbooks = null;
+            sosUpdateEntity.AplicationModelsTimes= null;
 
+            await _ProcessRepository.RemoveAllTimesFromSOSDistribution(_sosDistribution);
+            await _ProcessRepository.RemoveAllTurnsFromSOSDistribution(_sosDistribution);
             await _ProcessRepository.SOSDataRemoveAllNotesFromSOSDistribution(_sosDistribution);
             await _ProcessRepository.SOSDataRemoveAllSOSDistributionLogbookFromSOSDistribution(_sosDistribution);
 
@@ -236,7 +317,23 @@ namespace SupervisorMobility.API.Controllers.SOS_Controllers
                 }
             }
 
+            //Times
+            if (Bkup_Times.Any())
+            {
+                foreach (SOSTime time in Bkup_Times)
+                {
+                    await _ProcessRepository.AddSOSTimeToSOSDistribution(_sosDistribution, time);
+                }
+            }
 
+            //turns
+            if (Bkup_Turn.Any())
+            {
+                foreach (Turn turn in Bkup_Turn)
+                {
+                    await _ProcessRepository.AddTurnToSOSDistribution(_sosDistribution, turn);
+                }
+            }
 
             if (result != null)
             {
