@@ -174,10 +174,14 @@ namespace SupervisorMobility.API.Controllers
 
                             //if (!string.IsNullOrEmpty(section.Time))
                             //{
-                            //    string[] times = section.Time.Split('.');
-                            //    sheet.Cells[$"H{rowindex}"].Value = times[0];
+                            //   string[] times = section.Time.Split('.');
+                            //    double minutes = double.Parse(times[0])/ 60;
+                            //    sheet.Cells[$"H{rowindex}"].Style.Numberformat.Format = "0.##";
+                            //    sheet.Cells[$"I{rowindex}"].Style.Numberformat.Format = "0.###";
+
+                            //   sheet.Cells[$"H{rowindex}"].Value = minutes;
                             //    if(times.Length > 1)
-                            //        sheet.Cells[$"I{rowindex}"].Value = times[1];
+                            //        sheet.Cells[$"I{rowindex}"].Value = double.Parse(times[1])/100;
                             //}
                         }
 
