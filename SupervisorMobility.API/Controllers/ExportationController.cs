@@ -171,13 +171,14 @@ namespace SupervisorMobility.API.Controllers
                         {
                             sheet.Cells[$"E{rowindex}"].Value = indexSection;
                             sheet.Cells[$"F{rowindex}"].Value = section.Step;
-                            if (!string.IsNullOrEmpty(section.Time))
-                            {
-                                string[] times = section.Time.Split('.');
-                                sheet.Cells[$"H{rowindex}"].Value = times[0];
-                                if(times.Length > 1)
-                                    sheet.Cells[$"I{rowindex}"].Value = times[1];
-                            }
+
+                            //if (!string.IsNullOrEmpty(section.Time))
+                            //{
+                            //    string[] times = section.Time.Split('.');
+                            //    sheet.Cells[$"H{rowindex}"].Value = times[0];
+                            //    if(times.Length > 1)
+                            //        sheet.Cells[$"I{rowindex}"].Value = times[1];
+                            //}
                         }
 
                         string fullText = string.Empty;

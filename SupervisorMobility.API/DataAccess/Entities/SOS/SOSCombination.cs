@@ -24,12 +24,13 @@ namespace SupervisorMobility.API.DataAccess.Entities.SOS
         public FileUpload? ApproverSignatureImage { get; set; } = new();
 
         public ICollection<Turn>? Turns { get; set; }
-
         public DateTime? ApplicationMonth { get; set; }
 
         public string? ProductionVolumePerShift { get; set; }
+        public string? TackTime { get; set; }
         public string? ControlNumber { get; set; }
         public ICollection<SOSCombinationLogbook>? CombinationLogbooks { get; set; } = new List<SOSCombinationLogbook>();
+        public ICollection<FileUpload>? Illustrations { get; set; } = new List<FileUpload>();
 
 
         public int SOSHubId { get; set; }

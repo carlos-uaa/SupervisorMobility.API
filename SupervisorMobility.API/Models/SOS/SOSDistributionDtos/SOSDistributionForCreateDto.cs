@@ -1,6 +1,6 @@
 ﻿
 using SupervisorMobility.API.Models.SOS.TurnDtos;
-using SupervisorMobility.API.Models.SOS.ModelTimeStepDtos;
+using SupervisorMobility.API.Models.SOS.SOSTimeDtos;
 using SupervisorMobility.API.Models.CommentaryDtos;
 using SupervisorMobility.API.Models.FileUploadDto;
 using SupervisorMobility.API.Models.SOS.SOSDistributionLogbookDtos;
@@ -21,7 +21,7 @@ namespace SupervisorMobility.API.Models.SOS.SOSDistributionDtos
 
         public ICollection<TurnForCreateDto>? Turns { get; set; }
         public string? AplicationModels { get; set; } = "§§§§";
-        public ICollection<ModelTimeStepForCreateDto>? AplicationModelsTimes { get; set; }
+        public ICollection<SOSTimeForCreateDto>? AplicationModelsTimes { get; set; }
 
         public ICollection<SOSDistributionLogbookForCreateDto>? DistributionLogbooks { get; set; } = new List<SOSDistributionLogbookForCreateDto>();
         public ICollection<FileUploadGeneralDto>? Illustrations { get; set; } = new List<FileUploadGeneralDto>();

@@ -8,7 +8,6 @@ namespace SupervisorMobility.API.Models.SOS.SOSHubDtos.SectionDtos
         public int SectionId { get; set; }
         public ICollection<AnalysisForUpdateDto> Analyses { get; set; } = new List<AnalysisForUpdateDto>();
         public string Step { get; set; } = "";
-        public string Time { get; set; } = "";
         public bool? IsActive { get; set; }
     }
 }
