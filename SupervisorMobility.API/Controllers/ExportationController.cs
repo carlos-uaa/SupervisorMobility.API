@@ -192,17 +192,18 @@ namespace SupervisorMobility.API.Controllers
                         {
                             sheet.Cells[$"E{rowindex}"].Value = indexSection;
                             sheet.Cells[$"F{rowindex}"].Value = section.Step;
-                            if (!string.IsNullOrEmpty(section.Time))
-                            {
-                                string[] times = section.Time.Split('.');
-                                double minutes = double.Parse(times[0])/ 60;
-                                sheet.Cells[$"H{rowindex}"].Style.Numberformat.Format = "0.##";
-                                sheet.Cells[$"I{rowindex}"].Style.Numberformat.Format = "0.###";
+                            //if (!string.IsNullOrEmpty(section.Time))
+                            //{
+                            //   string[] times = section.Time.Split('.');
+                            //    double minutes = double.Parse(times[0])/ 60;
+                            //    sheet.Cells[$"H{rowindex}"].Style.Numberformat.Format = "0.##";
+                            //    sheet.Cells[$"I{rowindex}"].Style.Numberformat.Format = "0.###";
 
-                                sheet.Cells[$"H{rowindex}"].Value = minutes;
-                                if(times.Length > 1)
-                                    sheet.Cells[$"I{rowindex}"].Value = double.Parse(times[1])/100;
-                            }
+                            //   sheet.Cells[$"H{rowindex}"].Value = minutes;
+                            //    if(times.Length > 1)
+                            //        sheet.Cells[$"I{rowindex}"].Value = double.Parse(times[1])/100;
+                            //}
+                            
                         }
 
                         string fullText = string.Empty;
