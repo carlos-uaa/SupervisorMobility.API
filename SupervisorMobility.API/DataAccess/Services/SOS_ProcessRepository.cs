@@ -54,7 +54,7 @@ namespace SupervisorMobility.API.DataAccess.Services
             _context.SOSHubs.Add(SOS_EntityToCreate);
             return await _context.SaveChangesAsync();
         }
-        public async Task<SOSHub> GetSOSHub(int HubId, bool includeAnalysesBkup = false, bool includeSections = false, bool includeImages = false, bool includeVideos = false, bool includeCommentaries = false, bool includeTools = false, bool includeEquipments = false, bool includeMaterials = false, bool includeInformation = false, bool includePeople = false, bool includeDocuments = false, bool includeModel = false, bool includeHistory = false, bool includeDeleteds = false, bool includeCollections = false)
+        public async Task<SOSHub> GetSOSHub(int HubId, bool includeAnalysesBkup = false, bool includeSections = false, bool includeImages = false, bool includeVideos = false, bool includeCommentaries = false, bool includeTools = false, bool includeEquipments = false, bool includeMaterials = false, bool includeInformation = false, bool includePeople = false, bool includeDocuments = false, bool includeModel = false, bool includeHistory = false, bool includeDeleteds = false, bool includeCollections = false, bool includePeopleCollections = false)
         {
             var query = _context.SOSHubs.AsNoTracking().Where(SOS => SOS.SOSHubId == HubId && SOS.IsActive == true);
 
@@ -127,13 +127,35 @@ namespace SupervisorMobility.API.DataAccess.Services
 
             if (includeCollections)
             {
-                query = query.Include(a => a.SOSAnalysis).ThenInclude(aa=> aa.AnalysisLogbooks)
+                query = query.Include(a => a.SOSAnalysis).ThenInclude(aa => aa.AnalysisLogbooks).ThenInclude(al => al.Approver)
                             .Include(c => c.SOSCombination).ThenInclude(aa => aa.CombinationLogbooks)
                             .Include(c => c.SOSCombination).ThenInclude(aa => aa.Turns)
                             .Include(d => d.SOSDistribution).ThenInclude(aa => aa.DistributionLogbooks)
                             .Include(d => d.SOSDistribution).ThenInclude(aa => aa.Turns)
                             .Include(f => f.SOSFlow).ThenInclude(aa => aa.FlowLogbooks)
                             .Include(s => s.SOSSequence).ThenInclude(aa => aa.SequenceLogbooks);
+            }
+
+            if (includePeopleCollections)
+            {
+                query = query.Include(a => a.SOSAnalysis).ThenInclude(aa => aa.AnalysisLogbooks).ThenInclude(al => al.Approver)
+                            .Include(a => a.SOSAnalysis).ThenInclude(aa => aa.AnalysisLogbooks).ThenInclude(al => al.Reviewer)
+                            .Include(c => c.SOSCombination).ThenInclude(al => al.Approver)
+                            .Include(c => c.SOSCombination).ThenInclude(al => al.Reviewer)
+                            .Include(c => c.SOSCombination).ThenInclude(al => al.ReviewerHS)
+                            .Include(c => c.SOSCombination).ThenInclude(aa => aa.CombinationLogbooks).ThenInclude(al => al.Approver)
+                            .Include(c => c.SOSCombination).ThenInclude(aa => aa.CombinationLogbooks).ThenInclude(al => al.Reviewer)
+                            .Include(d => d.SOSDistribution).ThenInclude(al => al.Approver)
+                            .Include(d => d.SOSDistribution).ThenInclude(al => al.Reviewer)
+                            .Include(d => d.SOSDistribution).ThenInclude(aa => aa.DistributionLogbooks).ThenInclude(al => al.Approver)
+                            .Include(d => d.SOSDistribution).ThenInclude(aa => aa.DistributionLogbooks).ThenInclude(al => al.Reviewer)
+                            .Include(c => c.SOSFlow).ThenInclude(al => al.Approver)
+                            .Include(c => c.SOSFlow).ThenInclude(al => al.Reviewer)
+                            .Include(c => c.SOSFlow).ThenInclude(al => al.ReviewerHS)
+                            .Include(f => f.SOSFlow).ThenInclude(aa => aa.FlowLogbooks).ThenInclude(al => al.Approver)
+                            .Include(f => f.SOSFlow).ThenInclude(aa => aa.FlowLogbooks).ThenInclude(al => al.Reviewer)
+                            .Include(s => s.SOSSequence).ThenInclude(aa => aa.SequenceLogbooks).ThenInclude(al => al.Approver)
+                            .Include(s => s.SOSSequence).ThenInclude(aa => aa.SequenceLogbooks).ThenInclude(al => al.Reviewer);
             }
 
             var sosHub = await query.FirstOrDefaultAsync();
