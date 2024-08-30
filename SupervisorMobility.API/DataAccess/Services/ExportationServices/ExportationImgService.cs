@@ -3,13 +3,13 @@ using System.Drawing;
 using System.Drawing.Drawing2D;
 using System.Drawing.Imaging;
 
-namespace SupervisorMobility.API.DataAccess.Services
+namespace SupervisorMobility.API.DataAccess.Services.ExportationServices
 {
     public class ExportationImgService
     {
         public ExportationImgService() { }
 
-        
+
         public Image ResizeImage(Image image, int width, int height)
         {
             var destRect = new Rectangle(0, 0, width, height);
@@ -35,7 +35,7 @@ namespace SupervisorMobility.API.DataAccess.Services
             return destImage;
         }
 
-        
+
         public Image ResizeImageMaintainingAspectRatio(Image image, int size, bool isWidth)
         {
             int width, height;
