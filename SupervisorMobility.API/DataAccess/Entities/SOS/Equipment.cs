@@ -1,5 +1,6 @@
 ﻿using System.ComponentModel.DataAnnotations.Schema;
 using System.ComponentModel.DataAnnotations;
+using SupervisorMobility.API.DataAccess.Entities.SOS.History;
 
 namespace SupervisorMobility.API.DataAccess.Entities.SOS
 {
@@ -12,5 +13,6 @@ namespace SupervisorMobility.API.DataAccess.Entities.SOS
         public string EquipmentName { get; set; }
         public bool? IsActive { get; set; }
         public ICollection<SOSHub>? SafetyEquipment { get; set; } = new List<SOSHub>();
+        public ICollection<SOSHubHistory>? SafetyEquipmentHistory { get; set; } = new List<SOSHubHistory>();
     }
 }

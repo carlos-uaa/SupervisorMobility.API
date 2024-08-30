@@ -28,10 +28,10 @@ builder.Services.AddCors(policy =>
  );
 });
 
-builder.Services.AddDbContextFactory<SupervisorMobilityContext>(options =>
-{
-    options.UseSqlServer(builder.Configuration.GetConnectionString("SupervisorMobilityDBConnectionString"));
-}, ServiceLifetime.Singleton);
+//builder.Services.AddDbContextFactory<SupervisorMobilityContext>(options =>
+//{
+//    options.UseSqlServer(builder.Configuration.GetConnectionString("SupervisorMobilityDBConnectionString"));
+//}, ServiceLifetime.Singleton);
 
 
 var env = builder.Environment;

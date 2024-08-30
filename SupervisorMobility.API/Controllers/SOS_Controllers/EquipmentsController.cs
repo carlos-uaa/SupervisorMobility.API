@@ -10,10 +10,10 @@ namespace SupervisorMobility.API.Controllers.SOS_Controllers
     [ApiController]
     public class EquipmentsController : Controller
     {
-        private readonly ISOSAnalysis_ProcessRepository _EquipmentService;
+        private readonly ISOS_ProcessRepository _EquipmentService;
         private readonly IMapper _mapper;
         private readonly IWebHostEnvironment _env;
-        public EquipmentsController(ISOSAnalysis_ProcessRepository Equipments, IWebHostEnvironment env, IMapper mapper)
+        public EquipmentsController(ISOS_ProcessRepository Equipments, IWebHostEnvironment env, IMapper mapper)
         {
             _EquipmentService = Equipments ??
                   throw new ArgumentNullException(nameof(Equipments));

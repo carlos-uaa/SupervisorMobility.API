@@ -6,11 +6,21 @@
 		<ImplicitUsings>enable</ImplicitUsings>
 	</PropertyGroup>
 
+	<PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Release|AnyCPU'">
+	  <Optimize>False</Optimize>
+	</PropertyGroup>
+
+	<PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Debug|AnyCPU'">
+	  <Optimize>True</Optimize>
+	</PropertyGroup>
+
 	<ItemGroup>
 		<PackageReference Include="AutoMapper.Extensions.Microsoft.DependencyInjection" Version="12.0.0" />
 		<PackageReference Include="ClosedXML" Version="0.102.2" />
+		<PackageReference Include="CompareNETObjects" Version="4.83.0" />
 		<PackageReference Include="CsvHelper" Version="30.0.1" />
 		<PackageReference Include="DuoVia.FuzzyStrings" Version="2.1.0" />
+		<PackageReference Include="EPPlus" Version="7.1.2" />
 		<PackageReference Include="FuzzyString" Version="1.0.0" />
 		<PackageReference Include="MailKit" Version="3.6.0" />
 		<PackageReference Include="Microsoft.AspNetCore.Mvc.NewtonsoftJson" Version="6.0.16" />
@@ -36,11 +46,13 @@
 	</ItemGroup>
 
 	<ItemGroup>
+		<Folder Include="DataAccess\Templates\" />
 		<Folder Include="downloads\CCP\" />
 		<Folder Include="downloads\GOS\" />
 		<Folder Include="downloads\HOE\" />
 		<Folder Include="Migrations\" />
 		<Folder Include="Documents\" />
+		<Folder Include="Temp\" />
 		<Folder Include="uploads\assycharts\" />
 		<Folder Include="uploads\attendance\" />
 		<Folder Include="uploads\evidence\" />

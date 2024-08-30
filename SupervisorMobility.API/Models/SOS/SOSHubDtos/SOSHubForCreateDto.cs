@@ -7,6 +7,7 @@ using SupervisorMobility.API.Models.SOS.MaterialDtos;
 using SupervisorMobility.API.Models.SOS.SOSHubDtos.AnalysisBkupDtos;
 using SupervisorMobility.API.Models.SOS.SOSHubDtos.SectionDtos;
 using SupervisorMobility.API.Models.SOS.ToolDtos;
+using SupervisorMobility.API.Models.SOS.ToolsUsedDtos;
 
 namespace SupervisorMobility.API.Models.SOS.SOSHubDtos
 {
@@ -17,7 +18,8 @@ namespace SupervisorMobility.API.Models.SOS.SOSHubDtos
         public ICollection<SectionForCreateDto> Sections { get; set; } = new List<SectionForCreateDto>();
         public string ProcessSheet { get; set; }
         public ICollection<CreateCommentaryDto>? ProcessSheetCommentary { get; set; } = new List<CreateCommentaryDto>();
-        
+        public ICollection<CommonDirectionDto>? CommonDirection { get; set; } = new List<CommonDirectionDto>();
+
         public int? AppliedModelId { get; set; }
 
 
@@ -25,14 +27,15 @@ namespace SupervisorMobility.API.Models.SOS.SOSHubDtos
 
         public string? TrainingTime { get; set; }
         public ICollection<EquipmentDto>? SafetyEquipment { get; set; } = new List<EquipmentDto>();
-        public ICollection<ToolDto>? ToolsUsed { get; set; } = new List<ToolDto>();
-        public ICollection<MaterialDto>? MaterialsUsed { get; set; } = new List<MaterialDto>();
+        public ICollection<ToolUsedForCreateDto>? ToolsUsed { get; set; } = new List<ToolUsedForCreateDto>();
+        public ICollection<MaterialsUsedForCreateDto>? MaterialsUsed { get; set; } = new List<MaterialsUsedForCreateDto>();
         public string OtherInformation { get; set; }
 
         public int? PlantId { get; set; }
         public int? AreaId { get; set; }
         public int? DistributionId { get; set; }
         public int? DepartmentId { get; set; }
+        public int? StationId { get; set; }
 
         public int? OwnerId { get; set; }
 

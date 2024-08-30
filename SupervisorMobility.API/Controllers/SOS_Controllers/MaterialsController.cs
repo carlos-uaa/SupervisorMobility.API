@@ -10,10 +10,10 @@ namespace SupervisorMobility.API.Controllers.SOS_Controllers
     [ApiController]
     public class MaterialsController : Controller
     {
-        private readonly ISOSAnalysis_ProcessRepository _MaterialService;
+        private readonly ISOS_ProcessRepository _MaterialService;
         private readonly IMapper _mapper;
         private readonly IWebHostEnvironment _env;
-        public MaterialsController(ISOSAnalysis_ProcessRepository Materials, IWebHostEnvironment env, IMapper mapper)
+        public MaterialsController(ISOS_ProcessRepository Materials, IWebHostEnvironment env, IMapper mapper)
         {
             _MaterialService = Materials ??
                   throw new ArgumentNullException(nameof(Materials));

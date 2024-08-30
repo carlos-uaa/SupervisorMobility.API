@@ -13,18 +13,24 @@ using SupervisorMobility.API.DataAccess.Entities.SOS;
 using SupervisorMobility.API.Models.SOS.SOSHubDtos.AnalysisBkupDtos;
 using SupervisorMobility.API.Models.SOS.SOSHubDtos.SectionDtos;
 using SupervisorMobility.API.Models.DistributionDtos;
+using SupervisorMobility.API.Models.StationDtos;
+using SupervisorMobility.API.Models.SOS.ToolsUsedDtos;
+using SupervisorMobility.API.DataAccess.Entities.SOS.History;
+using SupervisorMobility.API.Models.SOS.SOSAnalysisDtos;
 
 namespace SupervisorMobility.API.Models.SOS.SOSHubDtos
 {
     public class SOSHubDto
     {
+        public int SOSHubHistoryId { get; set; }
+
         public int SOSHubId { get; set; }
         public string? Folio { get; set; }
         public ICollection<AnalysisBkupDto> AnalysesBkup { get; set; } = new List<AnalysisBkupDto>();
         public ICollection<SectionDto> Sections { get; set; } = new List<SectionDto>();
         public string ProcessSheet { get; set; }
         public ICollection<CommentaryDto>? ProcessSheetCommentary { get; set; } = new List<CommentaryDto>();
-        public ICollection<FileUploadGeneralDto>? CommonDirection { get; set; } = new List<FileUploadGeneralDto>();
+        public ICollection<CommonDirectionDto>? CommonDirection { get; set; } = new List<CommonDirectionDto>();
         public int? AppliedModelId { get; set; }
         public ProductDto? AppliedModel { get; set; }
 
@@ -35,8 +41,8 @@ namespace SupervisorMobility.API.Models.SOS.SOSHubDtos
 
         public string? TrainingTime { get; set; }
         public ICollection<EquipmentDto>? SafetyEquipment { get; set; } = new List<EquipmentDto>();
-        public ICollection<ToolDto>? ToolsUsed { get; set; } = new List<ToolDto>();
-        public ICollection<MaterialDto>? MaterialsUsed { get; set; } = new List<MaterialDto>();
+        public ICollection<ToolUsedDto>? ToolsUsed { get; set; } = new List<ToolUsedDto>();
+        public ICollection<MaterialsUsedDto>? MaterialsUsed { get; set; } = new List<MaterialsUsedDto>();
         public string OtherInformation { get; set; }
 
         public int? PlantId { get; set; }
@@ -47,7 +53,8 @@ namespace SupervisorMobility.API.Models.SOS.SOSHubDtos
         public DistributionWithoutNavigationPropertiesDto? Distribution { get; set; }
         public int? DepartmentId { get; set; }
         public DepartmentDto? Department { get; set; }
-
+        public int? StationId { get; set; }
+        public StationDto? Station { get; set; }
         public int? OwnerId { get; set; }
         public UsersWithoutPeopleWithNavigation? Owner { get; set; }
 
@@ -64,6 +71,14 @@ namespace SupervisorMobility.API.Models.SOS.SOSHubDtos
         public string SourcePlan { get; set; }
         public string Status { get; set; }
 
+        public string? VersionChanges { get; set; }
+
+        public ICollection<SOSAnalysisDto>? SOSAnalysis { get; set; } = new List<SOSAnalysisDto>();
+        public ICollection<SOSCombination>? SOSCombination { get; set; } = new List<SOSCombination>();
+        public ICollection<SOSDistribution>? SOSDistribution { get; set; } = new List<SOSDistribution>();
+        public ICollection<SOSFlow>? SOSFlow { get; set; } = new List<SOSFlow>();
+        public ICollection<SOSSequence>? SOSSequence { get; set; } = new List<SOSSequence>();
+        public ICollection<SOSHubHistory>? History { get; set; } = new List<SOSHubHistory>();
 
         public bool? IsActive { get; set; }
     }

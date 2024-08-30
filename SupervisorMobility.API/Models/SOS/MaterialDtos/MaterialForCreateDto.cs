@@ -2,8 +2,9 @@
 {
     public class MaterialForCreateDto
     {
-        public string MaterialCode { get; set; }
-        public string MaterialName { get; set; }
+        public string? key { get; set; }
+        public string? PartName { get; set; }
+        public string? PartNumber { get; set; }
         public bool? IsActive { get; set; }
     }
 }

@@ -9,5 +9,7 @@ namespace SupervisorMobility.API.DataAccess.Entities.SOS
         public int AnalysisBkupId { get; set; }
         public string Text { get; set; }
         public bool? IsActive { get; set; }
+        public ICollection<SOSHub>? AnalysisBkups { get; set; } = new List<SOSHub>();
+
     }
 }

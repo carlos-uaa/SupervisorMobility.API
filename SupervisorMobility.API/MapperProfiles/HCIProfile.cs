@@ -1,5 +1,6 @@
 ﻿using AutoMapper;
 using SupervisorMobility.API.DataAccess.Entities;
+using SupervisorMobility.API.DataAccess.Entities.SOS;
 
 namespace SupervisorMobility.API.MapperProfiles
 {
@@ -16,7 +17,10 @@ namespace SupervisorMobility.API.MapperProfiles
             CreateMap<HCICategory, Models.HCICategoryDtos.HCICategoryDto>().ReverseMap();
             CreateMap<HCICategory, Models.HCICategoryDtos.CreateHCICategoryDto>().ReverseMap();
             CreateMap<HCICategory, Models.HCICategoryDtos.UpdateHCICategoryDto>().ReverseMap();
+
             CreateMap<Commentary, Models.CommentaryDtos.CommentaryDto>().ReverseMap();
+            CreateMap<Commentary, CommentaryHistory>().ReverseMap();
+            CreateMap<CommentaryHistory, Models.CommentaryDtos.CommentaryDto>().ReverseMap();
             CreateMap<Commentary, Models.CommentaryDtos.CreateCommentaryDto>().ReverseMap();
             CreateMap<Commentary, Models.CommentaryDtos.UpdateCommentaryDto>().ReverseMap();
         }

@@ -2,6 +2,7 @@
 using System.ComponentModel.DataAnnotations;
 using Microsoft.Identity.Client;
 using SupervisorMobility.API.Entities;
+using SupervisorMobility.API.DataAccess.Entities.SOS.History;
 
 namespace SupervisorMobility.API.DataAccess.Entities.SOS
 {
@@ -18,7 +19,7 @@ namespace SupervisorMobility.API.DataAccess.Entities.SOS
 
         public string ProcessSheet { get; set; }
         public ICollection<Commentary>? ProcessSheetCommentary { get; set; } = new List<Commentary>();
-        public ICollection<FileUpload>? CommonDirection { get; set; } = new List<FileUpload>();
+        public ICollection<CommonDirection>? CommonDirection { get; set; } = new List<CommonDirection>();
         public int? AppliedModelId { get; set; }
         public Product? AppliedModel { get; set; }
         
@@ -31,8 +32,8 @@ namespace SupervisorMobility.API.DataAccess.Entities.SOS
 
         public string? TrainingTime { get; set; }
         public ICollection<Equipment>? SafetyEquipment { get; set; } = new List<Equipment>();
-        public ICollection<Tool>? ToolsUsed { get; set; } = new List<Tool>();
-        public ICollection<Material>? MaterialsUsed { get; set; } = new List<Material>();
+        public ICollection<ToolUsed>? ToolsUsed { get; set; } = new List<ToolUsed>();
+        public ICollection<MaterialUsed>? MaterialsUsed { get; set; } = new List<MaterialUsed>();
         public string OtherInformation { get; set; }
 
         public int? PlantId { get; set; }
@@ -45,16 +46,17 @@ namespace SupervisorMobility.API.DataAccess.Entities.SOS
         public int? DepartmentId { get; set; }
         public Department? Department{ get; set; }
 
+        public int? StationId { get; set; }
+        public Station? Station { get; set; }
+
         public int? OwnerId { get; set; }
         public User? Owner { get; set; }
 
-        [Column(TypeName = "Date")]
         public DateTime? CreatedDate { get; set; }
         
         public int? EditorId { get; set; }
         public User? Editor { get; set; }
 
-        [Column(TypeName = "Date")]
         public DateTime? ModifiedDate { get; set; }
 
 
@@ -69,6 +71,7 @@ namespace SupervisorMobility.API.DataAccess.Entities.SOS
         public ICollection<SOSDistribution>? SOSDistribution { get; set; } = new List<SOSDistribution>();
         public ICollection<SOSFlow>? SOSFlow { get; set; } = new List<SOSFlow>();
         public ICollection<SOSSequence>? SOSSequence { get; set; } = new List<SOSSequence>();
+        public ICollection<SOSHubHistory>? History { get; set; } = new List<SOSHubHistory>();
 
         public bool? IsActive { get; set; }
     }

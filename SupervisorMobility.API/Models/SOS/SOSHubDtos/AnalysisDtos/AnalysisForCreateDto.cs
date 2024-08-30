@@ -3,8 +3,8 @@
     public class AnalysisForCreateDto
     {
         public string? Text { get; set; }
-        public string? CriticalPoint { get; set; } = string.Empty;
-        public string? Reason { get; set; }
+        public List<string>? CriticalPoints { get; set; } = new List<string>();
+        public List<string>? Reasons { get; set; } = new List<string>();
         public bool? IsActive { get; set; }
     }
 }

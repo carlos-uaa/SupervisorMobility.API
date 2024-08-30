@@ -1,4 +1,6 @@
 ﻿using Microsoft.EntityFrameworkCore;
+using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
+using Newtonsoft.Json;
 using SupervisorMobility.API.DataAccess.Entities;
 using SupervisorMobility.API.DataAccess.Entities.ILU;
 using SupervisorMobility.API.DataAccess.Entities.IS;
@@ -6,6 +8,7 @@ using SupervisorMobility.API.DataAccess.Entities.Logger;
 using SupervisorMobility.API.DataAccess.Entities.LUP;
 using SupervisorMobility.API.DataAccess.Entities.Paths;
 using SupervisorMobility.API.DataAccess.Entities.SOS;
+using SupervisorMobility.API.DataAccess.Entities.SOS.History;
 using SupervisorMobility.API.DataAccess.Entities.SOS_Review;
 using SupervisorMobility.API.Entities;
 using System.Globalization;
@@ -27,6 +30,7 @@ namespace SupervisorMobility.API.Context
         public DbSet<Pillar> Pillars { get; set; }
         public DbSet<Glosary> Glosary { get; set; }
         public DbSet<Department> Departments { get; set; }
+        public DbSet<Station> Stations { get; set; }
         public DbSet<Plant> Plants { get; set; }
         public DbSet<Area> Areas { get; set; }
         public DbSet<Distribution> Distributions { get; set; }
@@ -57,7 +61,7 @@ namespace SupervisorMobility.API.Context
         public DbSet<SOSRegisterJobObservation> SOSRegisters { get; set; }
         public DbSet<SOSRegUserOperation> SOSRegsUserOperation { get; set; }
         public DbSet<HCI> HCIs { get; set; }
-        public DbSet<Commentary> Comments { get; set; }
+        public DbSet<Commentary> Commentaries { get; set; }
         public DbSet<HCITransaction> HCITransactions { get; set; }
         public DbSet<HCICategory> HCICategories { get; set; }
         public DbSet<HCIILU> HCIILUs { get; set; }
@@ -88,28 +92,43 @@ namespace SupervisorMobility.API.Context
         public DbSet<Section> Sections { get; set; }
         public DbSet<Analysis> Analyses { get; set; }
         public DbSet<AnalysisBkup> AnalysisBkups { get; set; }
+        public DbSet<CommonDirection> CommonDirections { get; set; }
 
+        public DbSet<SOSHubHistory> SOSHubsHistory { get; set; }
+        public DbSet<CommentaryHistory> CommentaryHistorys { get; set; }
+        public DbSet<SectionHistory> SectionsHistory { get; set; }
+        public DbSet<AnalysisHistory> AnalysesHistory { get; set; }
+        public DbSet<AnalysisBkupHistory> AnalysisBkupsHistory { get; set; }
+
+        public DbSet<MaterialUsed> MaterialsUsed { get; set; }
         public DbSet<Material> Materials { get; set; }
+        public DbSet<ToolUsed> ToolsUsed { get; set; }
         public DbSet<Tool> Tools { get; set; }
         public DbSet<Equipment> Equipments { get; set; }
 
 
 
         public DbSet<SOSAnalysis> SOSAnalyses { get; set; }
-        public DbSet<SpecialCaseAbnormalSituation> SpecialCasesAbnormalSituations { get; set; }
+        //public DbSet<SpecialCaseAbnormalSituation> SpecialCasesAbnormalSituations { get; set; }
+        public DbSet<SOSAnalysisLogbook> SOSAnalysisLogbooks { get; set; }
         public DbSet<SOSCombination> SOSCombinations { get; set; }
+        public DbSet<SOSCombinationLogbook> SOSCombinationLogbooks { get; set; }
         public DbSet<SOSDistribution> SOSDistributions { get; set; }
+        public DbSet<SOSDistributionLogbook> SOSDistributionLogbooks { get; set; }
+        public DbSet<Turn> Turns { get; set; }
+        public DbSet<SOSTime> SOSTimes { get; set; }
+
         public DbSet<SOSFlow> SOSFlows { get; set; }
+        public DbSet<SOSFlowLogbook> SOSFlowLogbooks { get; set; }
         public DbSet<SOSSequence> SOSSequences { get; set; }
+        public DbSet<SOSSequenceLogbook> SOSSequenceLogbooks { get; set; }
 
         #endregion
 
         public SupervisorMobilityContext(DbContextOptions<SupervisorMobilityContext> options)
             : base(options)
         {
-
         }
-
 
         protected override void OnModelCreating(ModelBuilder modelBuilder)
         {
@@ -171,6 +190,10 @@ namespace SupervisorMobility.API.Context
                 .HasDefaultValue(true);
 
             modelBuilder.Entity<Department>()
+                .Property(p => p.IsActive)
+                .HasDefaultValue(true);
+
+                 modelBuilder.Entity<Station>()
                 .Property(p => p.IsActive)
                 .HasDefaultValue(true);
 
@@ -345,7 +368,64 @@ namespace SupervisorMobility.API.Context
                 .Property(p => p.IsActive)
                 .HasDefaultValue(true);
 
+            var jsonListConverter = new ValueConverter<List<string>, string>(
+          v => JsonConvert.SerializeObject(v), // Convert List<string> to JSON string
+          v => JsonConvert.DeserializeObject<List<string>>(v)); // Convert JSON string to List<string>
+
+            modelBuilder.Entity<Analysis>()
+                .Property(e => e.CriticalPoints)
+                .HasConversion(jsonListConverter);
+
+            modelBuilder.Entity<Analysis>()
+                .Property(e => e.Reasons)
+                .HasConversion(jsonListConverter);
+
             modelBuilder.Entity<AnalysisBkup>()
+                .Property(p => p.IsActive)
+                .HasDefaultValue(true);
+
+            modelBuilder.Entity<SOSHub>(p => {
+                p.HasMany(p => p.CommonDirection)
+                .WithMany("SOSHubId")
+                .UsingEntity<Dictionary<string, object>>(
+                    "SOSHubCommons",
+                    x => x.HasOne<CommonDirection>().WithMany().OnDelete(DeleteBehavior.Cascade),
+                    x => x.HasOne<SOSHub>().WithMany().OnDelete(DeleteBehavior.Cascade)
+                    );
+            });
+
+            //Sos hub History
+
+            modelBuilder.Entity<SOSHubHistory>()
+                .Property(p => p.IsActive)
+                .HasDefaultValue(true);
+
+            modelBuilder.Entity<SectionHistory>()
+                .Property(p => p.IsActive)
+                .HasDefaultValue(true);
+
+            modelBuilder.Entity<CommentaryHistory>()
+                .Property(p => p.IsActive)
+                .HasDefaultValue(true);
+
+            modelBuilder.Entity<AnalysisHistory>()
+                .Property(p => p.IsActive)
+                .HasDefaultValue(true);
+
+            modelBuilder.Entity<AnalysisHistory>()
+                .Property(e => e.CriticalPoints)
+                .HasConversion(jsonListConverter);
+
+            modelBuilder.Entity<AnalysisHistory>()
+                .Property(e => e.Reasons)
+                .HasConversion(jsonListConverter);
+
+            modelBuilder.Entity<AnalysisBkupHistory>()
+                .Property(p => p.IsActive)
+                .HasDefaultValue(true);
+            //Sos hub history end
+
+            modelBuilder.Entity<MaterialUsed>()
                 .Property(p => p.IsActive)
                 .HasDefaultValue(true);
 
@@ -364,10 +444,8 @@ namespace SupervisorMobility.API.Context
             modelBuilder.Entity<SOSAnalysis>()
                 .Property(p => p.IsActive)
                 .HasDefaultValue(true); 
-            
-            modelBuilder.Entity<SpecialCaseAbnormalSituation>()
-                .Property(p => p.IsActive)
-                .HasDefaultValue(true);
+
+      
 
             modelBuilder.Entity<SOSCombination>()
                 .Property(p => p.IsActive)
@@ -381,9 +459,17 @@ namespace SupervisorMobility.API.Context
                 .Property(p => p.IsActive)
                 .HasDefaultValue(true);
 
+            modelBuilder.Entity<SOSFlowLogbook>()
+            .Property(p => p.IsActive)
+            .HasDefaultValue(true);
+
             modelBuilder.Entity<SOSSequence>()
                 .Property(p => p.IsActive)
                 .HasDefaultValue(true);
+
+
+      
+
 
             //Constraints
             modelBuilder.Entity<JobCategoryStructure>()
