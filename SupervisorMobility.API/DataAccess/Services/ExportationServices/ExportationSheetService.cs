@@ -135,5 +135,22 @@ namespace SupervisorMobility.API.DataAccess.Services.ExportationServices
 
             return new string('A', length + 1);
         }
+
+        public void SetPrintingOptions(ExcelWorkbook workbook)
+        {
+            foreach (ExcelWorksheet worksheet in workbook.Worksheets)
+            {
+                worksheet.PrinterSettings.PaperSize = ePaperSize.Tabloid;
+                worksheet.PrinterSettings.Orientation = eOrientation.Landscape;
+                worksheet.PrinterSettings.TopMargin = 0.5m;
+                worksheet.PrinterSettings.BottomMargin = 0.5m;
+                worksheet.PrinterSettings.LeftMargin = 0.5m;
+                worksheet.PrinterSettings.RightMargin = 0.5m;
+                worksheet.PrinterSettings.FitToPage = true;
+                worksheet.PrinterSettings.FitToWidth = 1;
+                worksheet.PrinterSettings.FitToHeight = 1;
+                worksheet.PrinterSettings.HorizontalCentered = true;
+            }
+        }
     }
 }

@@ -206,7 +206,8 @@ namespace SupervisorMobility.API.DataAccess.Services.ExportationServices
             switch (currentChar) //To check where in the template sheet is the row to start merging cells
             {
                 case "A":
-                    templateRow = 13;
+                    bool AnalOSequ = worksheet.Name.Contains("Analysis");
+                    templateRow = AnalOSequ ? 13 : 15;
 
                     worksheet.Cells[$"M{templateRow}:P{rowIndex}"].Merge = true;
                     worksheet.Cells[$"M{templateRow}:P{rowIndex}"].Style.Border.Right.Style = ExcelBorderStyle.Medium;
