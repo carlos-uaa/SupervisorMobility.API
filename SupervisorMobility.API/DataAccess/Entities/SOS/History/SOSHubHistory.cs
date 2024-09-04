@@ -46,14 +46,16 @@ namespace SupervisorMobility.API.DataAccess.Entities.SOS.History
         public int? StationId { get; set; }
         public Station? Station { get; set; }
 
-        public int? OwnerId { get; set; }
-        public User? Owner { get; set; }
+        //public int? ApproverOwnerId { get; set; }
+        //public User? ApproverOwner { get; set; }
+        public List<User>? ApproverOwners { get; set; }
 
         [Column(TypeName = "Date")]
         public DateTime? CreatedDate { get; set; }
 
-        public int? EditorId { get; set; }
-        public User? Editor { get; set; }
+        //public int? ReviewerEditorId { get; set; }
+        //public User? ReviewerEditor { get; set; }
+        public List<User>? ReviewerEditors { get; set; }
 
         [Column(TypeName = "Date")]
         public DateTime? ModifiedDate { get; set; }

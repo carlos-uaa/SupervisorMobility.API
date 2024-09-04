@@ -104,10 +104,10 @@ namespace SupervisorMobility.API.DataAccess.Services
 
             if (includePeople)
             {
-                query = query.Include(o => o.Owner).ThenInclude(o => o.Areas);
-                query = query.Include(o => o.Owner).ThenInclude(o => o.Subordinates);
+                query = query.Include(o => o.ApproverOwner).ThenInclude(o => o.Areas);
+                query = query.Include(o => o.ApproverOwner).ThenInclude(o => o.Subordinates);
 
-                query = query.Include(e => e.Editor);
+                query = query.Include(e => e.ReviewerEditor);
             }
 
             if (includeDocuments)
@@ -140,17 +140,11 @@ namespace SupervisorMobility.API.DataAccess.Services
             {
                 query = query.Include(a => a.SOSAnalysis).ThenInclude(aa => aa.AnalysisLogbooks).ThenInclude(al => al.Approver)
                             .Include(a => a.SOSAnalysis).ThenInclude(aa => aa.AnalysisLogbooks).ThenInclude(al => al.Reviewer)
-                            .Include(c => c.SOSCombination).ThenInclude(al => al.Approver)
-                            .Include(c => c.SOSCombination).ThenInclude(al => al.Reviewer)
                             .Include(c => c.SOSCombination).ThenInclude(al => al.ReviewerHS)
                             .Include(c => c.SOSCombination).ThenInclude(aa => aa.CombinationLogbooks).ThenInclude(al => al.Approver)
                             .Include(c => c.SOSCombination).ThenInclude(aa => aa.CombinationLogbooks).ThenInclude(al => al.Reviewer)
-                            .Include(d => d.SOSDistribution).ThenInclude(al => al.Approver)
-                            .Include(d => d.SOSDistribution).ThenInclude(al => al.Reviewer)
                             .Include(d => d.SOSDistribution).ThenInclude(aa => aa.DistributionLogbooks).ThenInclude(al => al.Approver)
                             .Include(d => d.SOSDistribution).ThenInclude(aa => aa.DistributionLogbooks).ThenInclude(al => al.Reviewer)
-                            .Include(c => c.SOSFlow).ThenInclude(al => al.Approver)
-                            .Include(c => c.SOSFlow).ThenInclude(al => al.Reviewer)
                             .Include(c => c.SOSFlow).ThenInclude(al => al.ReviewerHS)
                             .Include(f => f.SOSFlow).ThenInclude(aa => aa.FlowLogbooks).ThenInclude(al => al.Approver)
                             .Include(f => f.SOSFlow).ThenInclude(aa => aa.FlowLogbooks).ThenInclude(al => al.Reviewer)
@@ -263,7 +257,7 @@ namespace SupervisorMobility.API.DataAccess.Services
 
             if (includePeople)
             {
-                query = query.Include(o => o.Owner).Include(e => e.Editor);
+                query = query.Include(o => o.ApproverOwner).Include(e => e.ReviewerEditor);
             }
 
             var sosHubs = await query.OrderBy(s => s.SOSHubId).ToListAsync();
@@ -410,7 +404,7 @@ namespace SupervisorMobility.API.DataAccess.Services
 
             if (includePeople)
             {
-                query = query.Include(o => o.Owner).Include(e => e.Editor);
+                query = query.Include(o => o.ApproverOwners).Include(e => e.ReviewerEditors);
             }
 
             var sosHubs = await query.OrderBy(s => s.SOSHubId).ToListAsync();

@@ -63,13 +63,13 @@ namespace SupervisorMobility.API.Controllers.SOS_Controllers
 
             _mapper.Map(SOSHubForCreate, SOSEntity);
 
-            if (SOSEntity.OwnerId <= 0)
+            if (SOSEntity.ApproverOwnerId <= 0)
             {
-                SOSEntity.OwnerId = null;
+                SOSEntity.ApproverOwnerId = null;
             }
-            if (SOSEntity.EditorId <= 0)
+            if (SOSEntity.ReviewerEditorId <= 0)
             {
-                SOSEntity.EditorId = null;
+                SOSEntity.ReviewerEditorId = null;
             }
 
             var createdResult = await _AnalysisProcessRepository.CreateSOScollection(SOSEntity);
@@ -480,14 +480,14 @@ namespace SupervisorMobility.API.Controllers.SOS_Controllers
             _SOSHubForUpdate.SafetyEquipment = null;
             _SOSHubForUpdate.CommonDirection = null;
 
-            if (_SOSHubForUpdate.OwnerId <= 0)
-            {
-                _SOSHubForUpdate.OwnerId = null;
-            }
-            if (_SOSHubForUpdate.EditorId <= 0)
-            {
-                _SOSHubForUpdate.EditorId = null;
-            }
+            //if (_SOSHubForUpdate.ApproverOwnerId <= 0)
+            //{
+            //    _SOSHubForUpdate.ApproverOwnerId = null;
+            //}
+            //if (_SOSHubForUpdate.ReviewerEditorId <= 0)
+            //{
+            //    _SOSHubForUpdate.ReviewerEditorId = null;
+            //}
             //update base entity
             var result = await _AnalysisProcessRepository.UpdateSOSHub(_SOSHubForUpdate, entitySOSHub);
 
