@@ -164,7 +164,67 @@ namespace SupervisorMobility.API.Controllers
                         double analysisHeight, StepHeight, CriticalHeight;
                         indexAnalysis++;
                         rowindex = sheetStartRow + tableIndexAnalysis++;
-                        if (analysis != SosAnalysis.SOSHub.Sections.First().Analyses.First() && analysis != SosAnalysis.SOSHub.Sections.Last().Analyses.Last())
+
+                        string fullText = string.Empty;
+                        if (analysis.CriticalPoints != null && analysis.CriticalPoints.Any())
+                        {
+                            foreach (var (cp, cpIndex) in analysis.CriticalPoints.Select((cp, cpIndex) => (cp, cpIndex)))
+                            {
+                                string indexString = $"{indexAnalysis}.{cpIndex + 1}- ";
+                                string critString = $"{cp}\r\n";
+                                string reasonString = $"( {analysis.Reasons[cpIndex]} )";
+                                if (cp != analysis.CriticalPoints.Last())
+                                {
+                                    reasonString += "\r\n";
+                                }
+
+                                //sheet.Cells[$"J{rowindex}"].RichText.Add(indexString);
+                                //sheet.Cells[$"J{rowindex}"].RichText.Add(critString);
+                                //sheet.Cells[$"J{rowindex}"].RichText.Add(reasonString);
+
+                                fullText += $"{indexString}{critString}{reasonString}";
+                            }
+                        }
+
+                        analysisHeight = stylesService.CalculateRowHeight(analysis.Text, sheet.Columns[3].Width + sheet.Columns[4].Width, sheet.Cells["B14"].Style.Font.Size);
+                        StepHeight = stylesService.CalculateRowHeight(section.Step, (sheet.Columns[6].Width + sheet.Columns[7].Width), sheet.Cells["F14"].Style.Font.Size);
+                        CriticalHeight = stylesService.CalculateRowHeight(fullText, (sheet.Columns[10].Width + sheet.Columns[11].Width + sheet.Columns[12].Width), sheet.Cells["J14"].Style.Font.Size);
+
+                        var rowheight = Math.Max(20, Math.Max(analysisHeight, Math.Max(StepHeight, CriticalHeight)));
+
+                        var chHeightP = (TotalRowHeight + rowheight) * 100 / ChangeHeight;
+
+                        if(chHeightP > 100)
+                        {
+                            sheet.DeleteRow(rowindex);
+                            rowindex--;
+                            //stylesService.ChangeLastRowStyleAnalysis(sheet, rowindex, true);
+
+                            ChangeHeight = ChangeHeightExtraTemplates;
+                            string currentChar = sheet.Name.Split(" ")[1];
+                            string nextPage = sheetService.GetNextCombination(currentChar);
+
+                            sheet = package.Workbook.Worksheets[$"Analysis {nextPage}"];
+
+                            if (sheet == null)
+                            {
+                                sheetService.AddSheet(package, 1, currentChar);
+                                sheet = package.Workbook.Worksheets[$"Analysis {nextPage}"];
+                                sheet.Cells["B3"].Value += nextPage;
+                                rowHeights.Add(nextPage, 0);
+                                rowIndexes.Add(nextPage, (7, 8));
+                            }
+
+                            rowHeights[currentChar] += TotalRowHeight;
+                            TotalRowHeight = 0;
+                            rowIndexes[currentChar] = (rowIndexes[currentChar].Item1, rowindex);
+
+                            sheetStartRow = rowindex = rowIndexes[nextPage].Item1;
+                            tableIndexAnalysis = 1;
+                        }
+
+                        //if (analysis != SosAnalysis.SOSHub.Sections.First().Analyses.First() && analysis != SosAnalysis.SOSHub.Sections.Last().Analyses.Last())
+                        if (tableIndexAnalysis - 1 != 0 && analysis != SosAnalysis.SOSHub.Sections.Last().Analyses.Last())
                         {
                             sheet.InsertRow(rowindex, 1);
                             bool last = analysis == section.Analyses.Last();
@@ -206,61 +266,13 @@ namespace SupervisorMobility.API.Controllers
                             
                         }
 
-                        string fullText = string.Empty;
-                        if (analysis.CriticalPoints != null && analysis.CriticalPoints.Any())
-                        {
-                            foreach (var (cp, cpIndex) in analysis.CriticalPoints.Select((cp, cpIndex) => (cp, cpIndex)))
-                            {
-                                string indexString = $"{indexAnalysis}.{cpIndex + 1}- ";
-                                string critString = $"{cp}\r\n";
-                                string reasonString = $"( {analysis.Reasons[cpIndex]} )";
-                                if (cp != analysis.CriticalPoints.Last())
-                                {
-                                    reasonString += "\r\n";
-                                }
+                        sheet.Cells[$"J{rowindex}"].RichText.Add(fullText);
 
-                                sheet.Cells[$"J{rowindex}"].RichText.Add(indexString);
-                                sheet.Cells[$"J{rowindex}"].RichText.Add(critString);
-                                sheet.Cells[$"J{rowindex}"].RichText.Add(reasonString);
-
-                                fullText += $"{indexString}{critString}{reasonString}";
-                            }
-                        }
-
-                        analysisHeight = stylesService.CalculateRowHeight(analysis.Text, sheet.Columns[3].Width + sheet.Columns[4].Width, sheet.Cells["B14"].Style.Font.Size);
-                        StepHeight = stylesService.CalculateRowHeight(section.Step, (sheet.Columns[6].Width + sheet.Columns[7].Width), sheet.Cells["F14"].Style.Font.Size);
-                        CriticalHeight = stylesService.CalculateRowHeight(fullText, (sheet.Columns[10].Width + sheet.Columns[11].Width + sheet.Columns[12].Width), sheet.Cells["J14"].Style.Font.Size);
-
-                        var rowheight = Math.Max(20, Math.Max(analysisHeight,Math.Max( StepHeight, CriticalHeight)));
+                        //var rowheight = Math.Max(20, Math.Max(analysisHeight,Math.Max( StepHeight, CriticalHeight)));
 
                         TotalRowHeight += rowheight;
 
                         sheet.Rows[rowindex].Height = rowheight;
-
-                        if(TotalRowHeight >= ChangeHeight && analysis != SosAnalysis.SOSHub.Sections.Last().Analyses.Last())
-                        {
-                            ChangeHeight = ChangeHeightExtraTemplates;
-                            string currentChar = sheet.Name.Split(" ")[1];
-                            string nextPage = sheetService.GetNextCombination(currentChar);
-
-                            sheet = package.Workbook.Worksheets[$"Analysis {nextPage}"];
-
-                            if (sheet == null)
-                            {
-                                sheetService.AddSheet(package, 1, currentChar);
-                                sheet = package.Workbook.Worksheets[$"Analysis {nextPage}"];
-                                sheet.Cells["B3"].Value += nextPage;
-                                rowHeights.Add(nextPage, 0);
-                                rowIndexes.Add(nextPage, (7, 8));
-                            }
-
-                            rowHeights[currentChar] += TotalRowHeight;
-                            TotalRowHeight = 0;
-                            rowIndexes[currentChar] = (rowIndexes[currentChar].Item1, rowindex);
-
-                            sheetStartRow = rowindex = rowIndexes[nextPage].Item1;
-                            tableIndexAnalysis = 0;
-                        }
                     }
                 }
 
@@ -293,11 +305,11 @@ namespace SupervisorMobility.API.Controllers
                     rowHeights[currentChar] += templateExtrahight;
 
                     //string currentSheet = worksheet.Name.Split(" ")[1];
-                    sheet.Cells[$"H{rowIndexes[currentChar].Item2}"].Style.Numberformat.Format = "0.0#";
-                    sheet.Cells[$"I{rowIndexes[currentChar].Item2}"].Style.Numberformat.Format = "0.0##";
+                    worksheet.Cells[$"H{rowIndexes[currentChar].Item2}"].Style.Numberformat.Format = "0.0#";
+                    worksheet.Cells[$"I{rowIndexes[currentChar].Item2}"].Style.Numberformat.Format = "0.0##";
 
-                    sheet.Cells[$"H{rowIndexes[currentChar].Item2}"].Formula = $"SUM(H{rowIndexes[currentChar].Item1}:H{rowIndexes[currentChar].Item2 - 1})";
-                    sheet.Cells[$"I{rowIndexes[currentChar].Item2}"].Formula = $"SUM(I{rowIndexes[currentChar].Item1}:I{rowIndexes[currentChar].Item2 - 1})";
+                    worksheet.Cells[$"H{rowIndexes[currentChar].Item2}"].Formula = $"SUM(H{rowIndexes[currentChar].Item1}:H{rowIndexes[currentChar].Item2 - 1})";
+                    worksheet.Cells[$"I{rowIndexes[currentChar].Item2}"].Formula = $"SUM(I{rowIndexes[currentChar].Item1}:I{rowIndexes[currentChar].Item2 - 1})";
                 }
 
                 //rowHeights = rowHeights.ToDictionary(kvp => kvp.Key, kvp => (kvp.Value + templateExtrahight));
@@ -658,6 +670,8 @@ namespace SupervisorMobility.API.Controllers
                 // Save to file
                 //package.Workbook.Calculate();
 
+                sheetService.SetPrintingOptions(package.Workbook);
+
                 sheet.Protection.IsProtected = true;
                 package.SaveAs(ms);
             }
@@ -779,10 +793,75 @@ namespace SupervisorMobility.API.Controllers
 
                 foreach (var section in SosSequence.SOSHub.Sections)
                 {
-                    double StepHeight, CriticalHeight = 0;
+                    double StepHeight = 0, CriticalHeight = 0;
 
                     rowindex = sheetStartRow + indexSection++;
-                    if (section != SosSequence.SOSHub.Sections.First() && section != SosSequence.SOSHub.Sections.Last())
+
+                    string fullText = string.Empty;
+
+                    foreach (var (analysis, index) in section.Analyses.Select((analysis, index) => (analysis, index)))
+                    {
+                        int criticalIndex = 0;
+                        if (analysis.CriticalPoints != null && analysis.CriticalPoints.Any())
+                        {
+                            foreach (var (cp, cpIndex) in analysis.CriticalPoints.Select((cp, cpIndex) => (cp, cpIndex)))
+                            {
+                                criticalIndex++;
+                                string indexString = $"{criticalIndex}.- ";
+                                string critString = $"{cp}\r\n";
+                                string reasonString = $"( {analysis.Reasons[cpIndex]} )";
+                                if (cp != analysis.CriticalPoints.Last())
+                                {
+                                    reasonString += "\r\n";
+                                }
+
+                                //sheet.Cells[$"J{rowindex}"].RichText.Add(indexString);
+                                //sheet.Cells[$"J{rowindex}"].RichText.Add(critString);
+                                //sheet.Cells[$"J{rowindex}"].RichText.Add(reasonString);
+
+                                fullText += $"{indexString}{critString}{reasonString}";
+                            }
+                        }
+
+                        CriticalHeight += stylesService.CalculateRowHeight(fullText, (sheet.Columns[10].Width + sheet.Columns[11].Width + sheet.Columns[12].Width), sheet.Cells["J16"].Style.Font.Size);
+
+                    }
+
+                    StepHeight = stylesService.CalculateRowHeight(section.Step, (sheet.Columns[3].Width + sheet.Columns[4].Width + sheet.Columns[5].Width + sheet.Columns[6].Width + sheet.Columns[7].Width), sheet.Cells["B16"].Style.Font.Size);
+                    var rowheight = Math.Max(20, Math.Max(StepHeight, CriticalHeight));
+
+                    var chHeightP = (TotalRowHeight + rowheight) * 100 / ChangeHeight;
+
+                    if (chHeightP > 100)
+                    {
+                        sheet.DeleteRow(rowindex);
+                        rowindex--;
+                        //stylesService.ChangeLastRowStyleAnalysis(sheet, rowindex, true);
+
+                        ChangeHeight = ChangeHeightExtraTemplates;
+                        string currentChar = sheet.Name.Split(" ")[1];
+                        string nextPage = sheetService.GetNextCombination(currentChar);
+
+                        sheet = package.Workbook.Worksheets[$"Analysis {nextPage}"];
+
+                        if (sheet == null)
+                        {
+                            sheetService.AddSheet(package, 1, currentChar);
+                            sheet = package.Workbook.Worksheets[$"Analysis {nextPage}"];
+                            sheet.Cells["B3"].Value += nextPage;
+                            rowHeights.Add(nextPage, 0);
+                            rowIndexes.Add(nextPage, (7, 8));
+                        }
+
+                        rowHeights[currentChar] += TotalRowHeight;
+                        TotalRowHeight = 0;
+                        rowIndexes[currentChar] = (rowIndexes[currentChar].Item1, rowindex);
+
+                        sheetStartRow = rowindex = rowIndexes[nextPage].Item1;
+                        indexSection = 1;
+                    }
+
+                    if (indexSection - 1 != 0 && section != SosSequence.SOSHub.Sections.Last())
                     {
                         sheet.InsertRow(rowindex, 1);
                         bool last = section == SosSequence.SOSHub.Sections.Last();
@@ -804,64 +883,12 @@ namespace SupervisorMobility.API.Controllers
                     //        sheet.Cells[$"I{rowindex}"].Value = double.Parse(times[1]) / 100;
                     //}
 
-                    foreach (var (analysis, index) in section.Analyses.Select((analysis, index) => (analysis, index)))
-                    {
-                        int criticalIndex = 0;
-                        string fullText = string.Empty;
-                        if (analysis.CriticalPoints != null && analysis.CriticalPoints.Any())
-                        {
-                            foreach (var (cp, cpIndex) in analysis.CriticalPoints.Select((cp, cpIndex) => (cp, cpIndex)))
-                            {
-                                criticalIndex++;
-                                string indexString = $"{criticalIndex}.- ";
-                                string critString = $"{cp}\r\n";
-                                string reasonString = $"( {analysis.Reasons[cpIndex]} )";
-                                if (cp != analysis.CriticalPoints.Last())
-                                {
-                                    reasonString += "\r\n";
-                                }
-
-                                sheet.Cells[$"J{rowindex}"].RichText.Add(indexString);
-                                sheet.Cells[$"J{rowindex}"].RichText.Add(critString);
-                                sheet.Cells[$"J{rowindex}"].RichText.Add(reasonString);
-
-                                fullText += $"{indexString}{critString}{reasonString}";
-                            }
-                        }
-
-                        CriticalHeight += stylesService.CalculateRowHeight(fullText, (sheet.Columns[10].Width + sheet.Columns[11].Width + sheet.Columns[12].Width), sheet.Cells["J16"].Style.Font.Size);
-
-                    }
-                    StepHeight = stylesService.CalculateRowHeight(section.Step, (sheet.Columns[3].Width + sheet.Columns[4].Width + sheet.Columns[5].Width + sheet.Columns[6].Width + sheet.Columns[7].Width), sheet.Cells["B16"].Style.Font.Size);
-                    var rowheight = Math.Max(20, Math.Max(StepHeight, CriticalHeight));
+                    sheet.Cells[$"J{rowindex}"].RichText.Add(fullText);
 
                     TotalRowHeight += rowheight;
 
                     sheet.Rows[rowindex].Height = rowheight;
 
-                    if (TotalRowHeight >= ChangeHeight && section != SosSequence.SOSHub.Sections.Last())
-                    {
-                        ChangeHeight = ChangeHeightExtraTemplates;
-                        string currentChar = sheet.Name.Split(" ")[1];
-                        string nextPage = sheetService.GetNextCombination(currentChar);
-
-                        sheet = package.Workbook.Worksheets[$"Sequence {nextPage}"];
-
-                        if (sheet == null)
-                        {
-                            sheetService.AddSheet(package, 2, currentChar);
-                            sheet = package.Workbook.Worksheets[$"Sequence {nextPage}"];
-                            sheet.Cells["B3"].Value += nextPage;
-                            rowHeights.Add(nextPage, 0);
-                            rowIndexes.Add(nextPage, (7, 8));
-                        }
-
-                        rowHeights[currentChar] += TotalRowHeight;
-                        TotalRowHeight = 0;
-                        rowIndexes[currentChar] = (rowIndexes[currentChar].Item1, rowindex);
-
-                        sheetStartRow = rowindex = rowIndexes[nextPage].Item1;
-                    }
                 }
 
                 const double DefaultRowH = 40;
@@ -883,7 +910,7 @@ namespace SupervisorMobility.API.Controllers
                         var idx = rowIndexes[currentChar].Item2;
                         var height = rowHeights[currentChar];
 
-                        sheetService.GenerateAnalysisRows(worksheet, ref height, ref idx, ChangeHeight, DefaultRowH);
+                        sheetService.GenerateSequenceRows(worksheet, ref height, ref idx, ChangeHeight, DefaultRowH);
 
                         rowIndexes[currentChar] = (rowIndexes[currentChar].Item1, idx);
                         rowHeights[currentChar] = height;
@@ -1028,8 +1055,8 @@ namespace SupervisorMobility.API.Controllers
                 int offsetY = 2;
 
                 //if anything is moved in template this needs to be updated
-                double globalXoffsetA = imgService.WidthToPixels(175.39) + 23/*169.39*/, globalYoffsetA = imgService.HeightToPixels(295.2) + 20/*280.2*/;
-                double globalXoffsetB = imgService.WidthToPixels(175.89) + 27/*169.89*/, globalYoffsetB = imgService.HeightToPixels(60.6) + 22/*90.6*/;
+                double globalXoffsetA = imgService.WidthToPixels(211.49) + 65/*169.39*/, globalYoffsetA = imgService.HeightToPixels(370.3) + 20/*280.2*/;
+                double globalXoffsetB = imgService.WidthToPixels(211.49) + 27/*169.89*/, globalYoffsetB = imgService.HeightToPixels(77.4) + 22/*90.6*/;
 
                 //sheet = package.Workbook.Worksheets["Analysis A"];
 
@@ -1250,6 +1277,7 @@ namespace SupervisorMobility.API.Controllers
 
                 // Save to file
                 //package.Workbook.Calculate();
+                sheetService.SetPrintingOptions(package.Workbook);
 
                 sheet.Protection.IsProtected = true;
                 package.SaveAs(ms);
@@ -1257,7 +1285,7 @@ namespace SupervisorMobility.API.Controllers
 
             ms.Position = 0;
 
-            var res = File(ms, "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet", !string.IsNullOrEmpty(SosSequence.InternalControlNumber) ? $"{SosSequence.InternalControlNumber} Analysis Report.xlsx" : "Analysis Report.xlsx");
+            var res = File(ms, "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet", !string.IsNullOrEmpty(SosSequence.InternalControlNumber) ? $"{SosSequence.InternalControlNumber} Sequence Report.xlsx" : "Sequence Report.xlsx");
             res.EnableRangeProcessing = true;
             return res;
         }
