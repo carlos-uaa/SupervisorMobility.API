@@ -4,6 +4,7 @@ using DocumentFormat.OpenXml.ExtendedProperties;
 using DocumentFormat.OpenXml.InkML;
 using DocumentFormat.OpenXml.Office2010.Excel;
 using DocumentFormat.OpenXml.Office2021.PowerPoint.Tasks;
+using DocumentFormat.OpenXml.Spreadsheet;
 using DuoVia.FuzzyStrings;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Query;
@@ -49,164 +50,225 @@ namespace SupervisorMobility.API.DataAccess.Services
         }
 
         #region SOS_DataPool
-        public async Task<int> CreateSOScollection(SOSHub SOS_EntityToCreate)
+        public async Task<SOSHub> CreateSOScollection(SOSHub SOS_EntityToCreate)
         {
             _context.SOSHubs.Add(SOS_EntityToCreate);
-            return await _context.SaveChangesAsync();
+            await _context.SaveChangesAsync();
+
+            return SOS_EntityToCreate;
         }
         public async Task<SOSHub> GetSOSHub(int HubId, bool includeAnalysesBkup = false, bool includeSections = false, bool includeImages = false, bool includeVideos = false, bool includeCommentaries = false, bool includeTools = false, bool includeEquipments = false, bool includeMaterials = false, bool includeInformation = false, bool includePeople = false, bool includeDocuments = false, bool includeModel = false, bool includeHistory = false, bool includeDeleteds = false, bool includeCollections = false, bool includePeopleCollections = false)
         {
             var query = _context.SOSHubs.AsNoTracking().Where(SOS => SOS.SOSHubId == HubId && SOS.IsActive == true);
 
-            if (includeAnalysesBkup)
-            {
-                query = query.Include(i => i.AnalysesBkup);
-            }
+            var sosHub = await _context.SOSHubs.Where(SOS => SOS.SOSHubId == HubId && SOS.IsActive == true)
+                                     .FirstOrDefaultAsync();
 
-            if (includeSections)
-            {
-                query = query.Include(i => i.Sections).ThenInclude(s => s.Analyses);
-            }
-
-            if (includeImages)
-            {
-                query = query.Include(i => i.Images);
-            }
-
-            if (includeVideos)
-            {
-                query = query.Include(query => query.Videos);
-            }
-            if (includeCommentaries)
-            {
-                query = query.Include(query => query.ProcessSheetCommentary);
-            }
-
-            if (includeTools)
-            {
-                query = query.Include(t => t.ToolsUsed).ThenInclude(t => t.Tool);
-            }
-
-            if (includeEquipments)
-            {
-                query = query.Include(e => e.SafetyEquipment);
-            }
-
-            if (includeMaterials)
-            {
-                query = query.Include(m => m.MaterialsUsed).ThenInclude(m => m.Material);
-            }
-
-            if (includeInformation)
-            {
-                query = query.Include(i => i.Plant).Include(t => t.Area).Include(d => d.Distribution).Include(d => d.Department);
-            }
-
-            if (includePeople)
-            {
-                query = query.Include(o => o.ApproverOwner).ThenInclude(o => o.Areas);
-                query = query.Include(o => o.ApproverOwner).ThenInclude(o => o.Subordinates);
-
-                query = query.Include(e => e.ReviewerEditor);
-            }
-
-            if (includeDocuments)
-            {
-                query = query.Include(o => o.CommonDirection);
-            }
-
-            if (includeModel)
-            {
-                query = query.Include(m => m.AppliedModel);
-            }
-
-            if (includeHistory)
-            {
-                query = query.Include(m => m.History);
-            }
-
-            if (includeCollections)
-            {
-                query = query.Include(a => a.SOSAnalysis).ThenInclude(aa => aa.AnalysisLogbooks).ThenInclude(al => al.Approver)
-                            .Include(c => c.SOSCombination).ThenInclude(aa => aa.CombinationLogbooks)
-                            .Include(c => c.SOSCombination).ThenInclude(aa => aa.Turns)
-                            .Include(d => d.SOSDistribution).ThenInclude(aa => aa.DistributionLogbooks)
-                            .Include(d => d.SOSDistribution).ThenInclude(aa => aa.Turns)
-                            .Include(f => f.SOSFlow).ThenInclude(aa => aa.FlowLogbooks)
-                            .Include(s => s.SOSSequence).ThenInclude(aa => aa.SequenceLogbooks);
-            }
-
-            if (includePeopleCollections)
-            {
-                query = query.Include(a => a.SOSAnalysis).ThenInclude(aa => aa.AnalysisLogbooks).ThenInclude(al => al.Approver)
-                            .Include(a => a.SOSAnalysis).ThenInclude(aa => aa.AnalysisLogbooks).ThenInclude(al => al.Reviewer)
-                            .Include(c => c.SOSCombination).ThenInclude(al => al.ReviewerHS)
-                            .Include(c => c.SOSCombination).ThenInclude(aa => aa.CombinationLogbooks).ThenInclude(al => al.Approver)
-                            .Include(c => c.SOSCombination).ThenInclude(aa => aa.CombinationLogbooks).ThenInclude(al => al.Reviewer)
-                            .Include(d => d.SOSDistribution).ThenInclude(aa => aa.DistributionLogbooks).ThenInclude(al => al.Approver)
-                            .Include(d => d.SOSDistribution).ThenInclude(aa => aa.DistributionLogbooks).ThenInclude(al => al.Reviewer)
-                            .Include(c => c.SOSFlow).ThenInclude(al => al.ReviewerHS)
-                            .Include(f => f.SOSFlow).ThenInclude(aa => aa.FlowLogbooks).ThenInclude(al => al.Approver)
-                            .Include(f => f.SOSFlow).ThenInclude(aa => aa.FlowLogbooks).ThenInclude(al => al.Reviewer)
-                            .Include(s => s.SOSSequence).ThenInclude(aa => aa.SequenceLogbooks).ThenInclude(al => al.Approver)
-                            .Include(s => s.SOSSequence).ThenInclude(aa => aa.SequenceLogbooks).ThenInclude(al => al.Reviewer);
-            }
-
-            var sosHub = await query.FirstOrDefaultAsync();
-
-            if (sosHub == null)
-                return null;
-
-            // Filtrar los subobjetos manualmente después de la carga inicial
-            if (!includeDeleteds)
+            // Verificar si sosHub no es nulo antes de cargar las colecciones relacionadas
+            if (sosHub != null)
             {
                 if (includeAnalysesBkup)
                 {
-                    sosHub.AnalysesBkup = sosHub.AnalysesBkup.Where(i => i.IsActive == true).ToList();
+                    await _context.Entry(sosHub).Collection(s => s.AnalysesBkup).LoadAsync();
                 }
 
                 if (includeSections)
                 {
-                    sosHub.Sections = sosHub.Sections.Where(i => i.IsActive == true).ToList();
+                    await _context.Entry(sosHub).Collection(s => s.Sections).LoadAsync();
+                    // Cargar también los análisis dentro de Sections
+                    foreach (var section in sosHub.Sections)
+                    {
+                        await _context.Entry(section).Collection(s => s.Analyses).LoadAsync();
+                    }
                 }
 
                 if (includeImages)
                 {
-                    sosHub.Images = sosHub.Images.Where(i => i.IsActive == true).ToList();
+                    await _context.Entry(sosHub).Collection(s => s.Images).LoadAsync();
                 }
 
                 if (includeVideos)
                 {
-                    sosHub.Videos = sosHub.Videos.Where(v => v.IsActive == true).ToList();
+                    await _context.Entry(sosHub).Collection(s => s.Videos).LoadAsync();
                 }
 
                 if (includeCommentaries)
                 {
-                    sosHub.ProcessSheetCommentary = sosHub.ProcessSheetCommentary.Where(t => t.IsActive == true).ToList();
+                    await _context.Entry(sosHub).Collection(s => s.ProcessSheetCommentary).LoadAsync();
                 }
+
                 if (includeTools)
                 {
-                    sosHub.ToolsUsed = sosHub.ToolsUsed.Where(t => t.IsActive == true).ToList();
+                    await _context.Entry(sosHub).Collection(s => s.ToolsUsed).LoadAsync();
+                    // Cargar los Tool dentro de ToolsUsed
+                    foreach (var toolUsed in sosHub.ToolsUsed)
+                    {
+                        await _context.Entry(toolUsed).Reference(t => t.Tool).LoadAsync();
+                    }
                 }
 
                 if (includeEquipments)
                 {
-                    sosHub.SafetyEquipment = sosHub.SafetyEquipment.Where(e => e.IsActive == true).ToList();
+                    await _context.Entry(sosHub).Collection(s => s.SafetyEquipment).LoadAsync();
                 }
 
                 if (includeMaterials)
                 {
-                    sosHub.MaterialsUsed = sosHub.MaterialsUsed.Where(m => m.IsActive == true).ToList();
+                    await _context.Entry(sosHub).Collection(s => s.MaterialsUsed).LoadAsync();
+                    // Cargar Material en cada MaterialsUsed
+                    foreach (var materialUsed in sosHub.MaterialsUsed)
+                    {
+                        await _context.Entry(materialUsed).Reference(m => m.Material).LoadAsync();
+                    }
+                }
+
+                if (includeInformation)
+                {
+                    await _context.Entry(sosHub).Reference(i => i.Plant).LoadAsync();
+                    await _context.Entry(sosHub).Reference(i => i.Area).LoadAsync();
+                    await _context.Entry(sosHub).Reference(i => i.Distribution).LoadAsync();
+                    await _context.Entry(sosHub).Reference(i => i.Department).LoadAsync();
+                }
+
+                if (includePeople)
+                {
+                    await _context.Entry(sosHub).Collection(o => o.ApproverOwners).LoadAsync();
+                    foreach (var approverOwner in sosHub.ApproverOwners)
+                    {
+                        await _context.Entry(approverOwner).Collection(o => o.Areas).LoadAsync();
+                    }
+
+                    await _context.Entry(sosHub).Collection(e => e.ReviewerEditors).LoadAsync();
+                    foreach (var reviewerEditor in sosHub.ReviewerEditors)
+                    {
+                        await _context.Entry(reviewerEditor).Reference(o => o.Area).LoadAsync();
+                    }
                 }
 
                 if (includeDocuments)
                 {
-                    sosHub.CommonDirection = sosHub.CommonDirection.Where(i => i.IsActive == true).ToList();
+                    await _context.Entry(sosHub).Collection(o => o.CommonDirection).LoadAsync();
+                }
+
+                if (includeModel)
+                {
+                    await _context.Entry(sosHub).Reference(m => m.AppliedModel).LoadAsync();
+                }
+
+                if (includeHistory)
+                {
+                    await _context.Entry(sosHub).Collection(m => m.History).LoadAsync();
+                }
+
+                if (includeCollections)
+                {
+                    await _context.Entry(sosHub).Collection(a => a.SOSAnalysis).LoadAsync();
+                    foreach (var analysis in sosHub.SOSAnalysis)
+                    {
+                        await _context.Entry(analysis).Collection(aa => aa.AnalysisLogbooks).LoadAsync();
+                        foreach (var logbook in analysis.AnalysisLogbooks)
+                        {
+                            await _context.Entry(logbook).Reference(al => al.Approver).LoadAsync();
+                        }
+                    }
+
+                    await _context.Entry(sosHub).Collection(c => c.SOSCombination).LoadAsync();
+                    foreach (var combination in sosHub.SOSCombination)
+                    {
+                        await _context.Entry(combination).Collection(aa => aa.CombinationLogbooks).LoadAsync();
+                        await _context.Entry(combination).Collection(aa => aa.Turns).LoadAsync();
+                    }
+
+                    await _context.Entry(sosHub).Collection(d => d.SOSDistribution).LoadAsync();
+                    foreach (var distribution in sosHub.SOSDistribution)
+                    {
+                        await _context.Entry(distribution).Collection(aa => aa.DistributionLogbooks).LoadAsync();
+                        await _context.Entry(distribution).Collection(aa => aa.Turns).LoadAsync();
+                    }
+
+                    await _context.Entry(sosHub).Collection(f => f.SOSFlow).LoadAsync();
+                    foreach (var flow in sosHub.SOSFlow)
+                    {
+                        await _context.Entry(flow).Collection(aa => aa.FlowLogbooks).LoadAsync();
+                    }
+
+                    await _context.Entry(sosHub).Collection(s => s.SOSSequence).LoadAsync();
+                    foreach (var sequence in sosHub.SOSSequence)
+                    {
+                        await _context.Entry(sequence).Collection(aa => aa.SequenceLogbooks).LoadAsync();
+                    }
+                }
+                if (includePeopleCollections)
+                {
+                    await _context.Entry(sosHub).Collection(a => a.SOSAnalysis).LoadAsync();
+                    foreach (var analysis in sosHub.SOSAnalysis)
+                    {
+                        // Cargar AnalysisLogbooks y sus relaciones
+                        await _context.Entry(analysis).Collection(aa => aa.AnalysisLogbooks).LoadAsync();
+                        foreach (var logbook in analysis.AnalysisLogbooks)
+                        {
+                            await _context.Entry(logbook).Reference(al => al.Approver).LoadAsync();
+                            await _context.Entry(logbook).Reference(al => al.Reviewer).LoadAsync();
+                        }
+                    }
+
+                    await _context.Entry(sosHub).Collection(c => c.SOSCombination).LoadAsync();
+                    foreach (var combination in sosHub.SOSCombination)
+                    {
+                        // Cargar CombinationLogbooks y sus relaciones
+                        await _context.Entry(combination).Collection(al => al.CombinationLogbooks).LoadAsync();
+                        foreach (var logbook in combination.CombinationLogbooks)
+                        {
+                            await _context.Entry(logbook).Reference(al => al.Approver).LoadAsync();
+                            await _context.Entry(logbook).Reference(al => al.Reviewer).LoadAsync();
+                        }
+
+                        await _context.Entry(combination).Reference(al => al.ReviewerHS).LoadAsync();
+                    }
+
+                    await _context.Entry(sosHub).Collection(d => d.SOSDistribution).LoadAsync();
+                    foreach (var distribution in sosHub.SOSDistribution)
+                    {
+                        // Cargar DistributionLogbooks y sus relaciones
+                        await _context.Entry(distribution).Collection(aa => aa.DistributionLogbooks).LoadAsync();
+                        foreach (var logbook in distribution.DistributionLogbooks)
+                        {
+                            await _context.Entry(logbook).Reference(al => al.Approver).LoadAsync();
+                            await _context.Entry(logbook).Reference(al => al.Reviewer).LoadAsync();
+                        }
+                    }
+
+                    await _context.Entry(sosHub).Collection(f => f.SOSFlow).LoadAsync();
+                    foreach (var flow in sosHub.SOSFlow)
+                    {
+                        // Cargar FlowLogbooks y sus relaciones
+                        await _context.Entry(flow).Collection(aa => aa.FlowLogbooks).LoadAsync();
+                        foreach (var logbook in flow.FlowLogbooks)
+                        {
+                            await _context.Entry(logbook).Reference(al => al.Approver).LoadAsync();
+                            await _context.Entry(logbook).Reference(al => al.Reviewer).LoadAsync();
+                        }
+
+                        await _context.Entry(flow).Reference(al => al.ReviewerHS).LoadAsync();
+                    }
+
+                    await _context.Entry(sosHub).Collection(s => s.SOSSequence).LoadAsync();
+                    foreach (var sequence in sosHub.SOSSequence)
+                    {
+                        // Cargar SequenceLogbooks y sus relaciones
+                        await _context.Entry(sequence).Collection(aa => aa.SequenceLogbooks).LoadAsync();
+                        foreach (var logbook in sequence.SequenceLogbooks)
+                        {
+                            await _context.Entry(logbook).Reference(al => al.Approver).LoadAsync();
+                            await _context.Entry(logbook).Reference(al => al.Reviewer).LoadAsync();
+                        }
+                    }
                 }
             }
 
             return sosHub;
         }
+
         public async Task<IEnumerable<SOSHub>> GetAllSOSHub(bool includeAnalysesBkup = false, bool includeSections = false, bool includeImages = false, bool includeVideos = false, bool includeCommentaries = false, bool includeTools = false, bool includeEquipments = false, bool includeMaterials = false, bool includeInformation = false, bool includePeople = false, bool includeDocuments = false)
         {
             var query = _context.SOSHubs.AsNoTracking().Where(h => h.IsActive == true);
@@ -237,7 +299,7 @@ namespace SupervisorMobility.API.DataAccess.Services
             }
             if (includeTools)
             {
-                query = query.Include(t => t.ToolsUsed).ThenInclude(p=>p.Tool);
+                query = query.Include(t => t.ToolsUsed).ThenInclude(p => p.Tool);
             }
 
             if (includeEquipments)
@@ -247,7 +309,7 @@ namespace SupervisorMobility.API.DataAccess.Services
 
             if (includeMaterials)
             {
-                query = query.Include(m => m.MaterialsUsed).ThenInclude(p=>p.Material);
+                query = query.Include(m => m.MaterialsUsed).ThenInclude(p => p.Material);
             }
 
             if (includeInformation)
@@ -257,7 +319,7 @@ namespace SupervisorMobility.API.DataAccess.Services
 
             if (includePeople)
             {
-                query = query.Include(o => o.ApproverOwner).Include(e => e.ReviewerEditor);
+                query = query.Include(o => o.ApproverOwners).Include(e => e.ReviewerEditors);
             }
 
             var sosHubs = await query.OrderBy(s => s.SOSHubId).ToListAsync();
@@ -333,6 +395,14 @@ namespace SupervisorMobility.API.DataAccess.Services
 
             // Marca la entidad como modificada
             _context.Entry(SosEntity).State = EntityState.Modified;
+
+            return await _context.SaveChangesAsync();
+        }
+
+        public async Task<int> UpdateSOSHub(SOSHub SosEntity)
+        {
+
+            _context.SOSHubs.Update(SosEntity);
 
             return await _context.SaveChangesAsync();
         }
@@ -717,7 +787,7 @@ namespace SupervisorMobility.API.DataAccess.Services
         }
 
         public async Task<AsyncVoidMethodBuilder> AddEquipmentToSOSCollection(SOSHub master, Equipment slave)
-        
+
         {
             try
             {
@@ -838,6 +908,161 @@ namespace SupervisorMobility.API.DataAccess.Services
                 Debug.WriteLine("An error occurred while updating the SOSHub: " + ex.Message);
             }
 
+            return new AsyncVoidMethodBuilder();
+        }
+
+        public async Task<AsyncVoidMethodBuilder> AddReviewerEditorToSOSCollection(SOSHub master, User slave)
+        {
+            try
+            {
+                // Verifica si el master ya está siendo rastreado en el contexto
+                var localMasterEntry = _context.SOSHubs.Local.FirstOrDefault(entry => entry.SOSHubId == master.SOSHubId);
+                if (localMasterEntry == null)
+                {
+                    // Si no está rastreado, adjunta el master al contexto
+                    if (_context.Entry(master).State == EntityState.Detached)
+                    {
+                        _context.SOSHubs.Attach(master);
+                    }
+                }
+                else
+                {
+                    master = localMasterEntry;
+                }
+
+
+                // Verifica si el slave ya está siendo rastreado en el contexto
+                var localSlaveEntry = _context.Users.Local.FirstOrDefault(entry => entry.UserId == slave.UserId);
+                if (localSlaveEntry == null)
+                {
+                    // Si no está rastreado, adjunta el slave al contexto
+                    if (_context.Entry(slave).State == EntityState.Detached)
+                    {
+                        _context.Users.Attach(slave);
+                    }
+
+                    // Agrega el slave a la colección del master
+                    if (master.ReviewerEditors == null)
+                    {
+                        master.ReviewerEditors = new List<User>();
+                    }
+
+                    if (!master.ReviewerEditors.Any(cd => cd.UserId == slave.UserId))
+                    {
+                        master.ReviewerEditors.Add(slave);
+                    }
+                }
+                else
+                {
+                    // Agrega el localSlaveEntry a la colección del master
+                    if (master.ReviewerEditors == null)
+                    {
+                        master.ReviewerEditors = new List<User>();
+                    }
+
+                    if (!master.ReviewerEditors.Any(cd => cd.UserId == localSlaveEntry.UserId))
+                    {
+                        master.ReviewerEditors.Add(localSlaveEntry);
+                    }
+                }
+
+                await _context.SaveChangesAsync();
+
+                //if (Master.ReviewerEditors != null)
+                //{
+                //    Master.ReviewerEditors.Add(Slave);
+                //}
+                //else
+                //{
+                //    Master.ReviewerEditors = new List<User>();
+                //    Master.ReviewerEditors.Add(Slave);
+                //}
+
+                //_context.SaveChanges();
+
+            }
+            catch (Exception ex)
+            {
+                // Manejar el error apropiadamente, puedes loguearlo o lanzar una excepción personalizada
+                Debug.WriteLine("An error occurred while updating the SOSHub: " + ex.Message);
+                Console.WriteLine("An error occurred while updating the SOSHub: " + ex.Message);
+            }
+            return new AsyncVoidMethodBuilder();
+        }
+
+        public async Task<AsyncVoidMethodBuilder> AddApproverOwnersToSOSCollection(SOSHub master, User slave)
+        {
+            try
+            {
+                // Verifica si el master ya está siendo rastreado en el contexto
+                var localMasterEntry = _context.SOSHubs.Local.FirstOrDefault(entry => entry.SOSHubId == master.SOSHubId);
+                if (localMasterEntry == null)
+                {
+                    // Si no está rastreado, adjunta el master al contexto
+                    if (_context.Entry(master).State == EntityState.Detached)
+                    {
+                        _context.SOSHubs.Attach(master);
+                    }
+                }
+                else
+                {
+                    master = localMasterEntry;
+                }
+
+                // Verifica si el slave ya está siendo rastreado en el contexto
+                var localSlaveEntry = _context.Users.Local.FirstOrDefault(entry => entry.UserId == slave.UserId);
+                if (localSlaveEntry == null)
+                {
+                    // Si no está rastreado, adjunta el slave al contexto
+                    if (_context.Entry(slave).State == EntityState.Detached)
+                    {
+                        _context.Users.Attach(slave);
+                    }
+
+                    // Agrega el slave a la colección del master
+                    if (master.ApproverOwners == null)
+                    {
+                        master.ApproverOwners = new List<User>();
+                    }
+
+                    if (!master.ApproverOwners.Any(cd => cd.UserId == slave.UserId))
+                    {
+                        master.ApproverOwners.Add(slave);
+                    }
+                }
+                else
+                {
+                    // Agrega el localSlaveEntry a la colección del master
+                    if (master.ApproverOwners == null)
+                    {
+                        master.ApproverOwners = new List<User>();
+                    }
+
+                    if (!master.ApproverOwners.Any(cd => cd.UserId == localSlaveEntry.UserId))
+                    {
+                        master.ApproverOwners.Add(localSlaveEntry);
+                    }
+                }
+
+                await _context.SaveChangesAsync();
+
+                //if (Master.ApproverOwners != null)
+                //{
+                //    Master.ApproverOwners.Add(Slave);
+                //}
+                //else
+                //{
+                //    Master.ApproverOwners = new List<User>();
+                //    Master.ApproverOwners.Add(Slave);
+                //}
+                //_context.SaveChanges();
+            }
+            catch (Exception ex)
+            {
+                // Manejar el error apropiadamente, puedes loguearlo o lanzar una excepción personalizada
+                Debug.WriteLine("An error occurred while updating the SOSHub: " + ex.Message);
+                Console.WriteLine("An error occurred while updating the SOSHub: " + ex.Message);
+            }
             return new AsyncVoidMethodBuilder();
         }
 
@@ -1167,6 +1392,67 @@ namespace SupervisorMobility.API.DataAccess.Services
             return new AsyncVoidMethodBuilder();
 
         }
+        public async Task<AsyncVoidMethodBuilder> SOSDataRemoveAllReviewerEditors(SOSHub Master)
+        {
+            if (_context.Entry(Master).State == EntityState.Detached)
+            {
+                _context.SOSHubs.Attach(Master);
+            }
+
+            if (Master.ReviewerEditors?.Count > 0)
+            {
+                Master.ReviewerEditors.Clear();
+
+                try
+                {
+                    await _context.SaveChangesAsync();
+
+                }
+                catch (DbUpdateException ex)
+                {
+                    // Manejar las excepciones relacionadas con la actualización de la base de datos
+                    Console.WriteLine($"DbUpdateException [ReviewerEditors]: {ex.Message}");
+                }
+                catch (Exception ex)
+                {
+                    // Manejar cualquier otra excepción que pueda ocurrir
+                    Console.WriteLine($"Exception: {ex.Message}");
+                }
+            }
+            return new AsyncVoidMethodBuilder();
+
+        }
+
+        public async Task<AsyncVoidMethodBuilder> SOSDataRemoveAllApproverOwners(SOSHub Master)
+        {
+            if (_context.Entry(Master).State == EntityState.Detached)
+            {
+                _context.SOSHubs.Attach(Master);
+            }
+
+            if (Master.ApproverOwners?.Count > 0)
+            {
+                Master.ApproverOwners.Clear();
+
+                try
+                {
+                    await _context.SaveChangesAsync();
+
+                }
+                catch (DbUpdateException ex)
+                {
+                    // Manejar las excepciones relacionadas con la actualización de la base de datos
+                    Console.WriteLine($"DbUpdateException [ApproverOwners]: {ex.Message}");
+                }
+                catch (Exception ex)
+                {
+                    // Manejar cualquier otra excepción que pueda ocurrir
+                    Console.WriteLine($"Exception: {ex.Message}");
+                }
+            }
+            return new AsyncVoidMethodBuilder();
+
+        }
 
 
         public async Task<int> RemoveImageFromSOSData(int SOS_DataPool_id, int ImageFile_id)
@@ -1279,7 +1565,13 @@ namespace SupervisorMobility.API.DataAccess.Services
         }
 
         #endregion
+        #region Users
+        public async Task<User> GetUserById(int id)
+        {
+            return await _context.Users.Where(p => p.UserId == id).FirstOrDefaultAsync();
+        }
 
+        #endregion
         #region Tool
         public async Task<int> AddRangeTool(List<Tool> ToolsToAdd)
         {
@@ -1403,10 +1695,10 @@ namespace SupervisorMobility.API.DataAccess.Services
         }
         public async Task<MaterialUsed> GetMaterialUsedById(int id)
         {
-            var Material = await _context.MaterialsUsed.AsNoTracking().Where(t => t.MaterialUsedId == id ).FirstOrDefaultAsync();
+            var Material = await _context.MaterialsUsed.AsNoTracking().Where(t => t.MaterialUsedId == id).FirstOrDefaultAsync();
             return Material;
         }
-        
+
         public async Task<IEnumerable<Material>> GetAllMaterials()
         {
             var Materials = _context.Materials.AsNoTracking().Where(t => t.IsActive == true);
@@ -2414,7 +2706,7 @@ namespace SupervisorMobility.API.DataAccess.Services
         }
         #endregion
         #region Add Range SOS Analysis
-  
+
         public async Task<List<SOSAnalysisLogbook>> AddRangeSOSAnalysisLogbook(List<SOSAnalysisLogbook> SOSAnalysisLogbooksToAdd)
         {
             _context.SOSAnalysisLogbooks.AddRange(SOSAnalysisLogbooksToAdd);
@@ -2485,7 +2777,7 @@ namespace SupervisorMobility.API.DataAccess.Services
             }
             return new AsyncVoidMethodBuilder();
         }
-        
+
         public async Task<AsyncVoidMethodBuilder> AddSOSAnalysisLogbookToSOSAnalysis(SOSAnalysis master, SOSAnalysisLogbook slave)
         {
             try
@@ -2887,7 +3179,7 @@ namespace SupervisorMobility.API.DataAccess.Services
             }
             return new AsyncVoidMethodBuilder();
         }
-      
+
         public async Task<AsyncVoidMethodBuilder> AddSOSSequenceLogbookToSOSSequence(SOSSequence master, SOSSequenceLogbook slave)
         {
             try
@@ -2979,7 +3271,7 @@ namespace SupervisorMobility.API.DataAccess.Services
             return _context.SaveChanges();
         }
 
-        public async Task<SOSDistribution> GetSOSDistribution(int SOSDistributionId, bool includeImages = false, bool includeNotes = false, bool includeLogbooks = false,bool includeSOS = false, bool includeImagesSOS = false)
+        public async Task<SOSDistribution> GetSOSDistribution(int SOSDistributionId, bool includeImages = false, bool includeNotes = false, bool includeLogbooks = false, bool includeSOS = false, bool includeImagesSOS = false)
         {
             var query = _context.SOSDistributions.AsNoTracking().Where(SOS => SOS.SOSDistributionId == SOSDistributionId && SOS.IsActive == true);
 
@@ -3714,13 +4006,26 @@ namespace SupervisorMobility.API.DataAccess.Services
         }
         public async Task<bool> SaveChangesAsync()
         {
-            return (await _context.SaveChangesAsync() >= 0);
+            try
+            {
+                return (await _context.SaveChangesAsync() >= 0);
+            }
+            catch (DbUpdateException ex)
+            {
+                Console.WriteLine($"DbUpdateException: {ex.Message}");
+                return false;
+            }
+            catch (Exception ex)
+            {
+                Console.WriteLine($"Exception: {ex.Message}");
+                return false;
+            }
         }
         public async Task<bool> SaveChanges()
         {
             try
             {
-                return (await _context.SaveChangesAsync() >= 0);
+                return (_context.SaveChanges() >= 0);
             }
             catch (DbUpdateException ex)
             {

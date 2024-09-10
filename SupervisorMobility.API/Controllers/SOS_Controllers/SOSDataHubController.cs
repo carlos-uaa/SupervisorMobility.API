@@ -7,6 +7,7 @@ using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore.Query;
 using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 using Newtonsoft.Json;
+using Org.BouncyCastle.Bcpg;
 using SupervisorMobility.API.Context;
 using SupervisorMobility.API.DataAccess.Entities;
 using SupervisorMobility.API.DataAccess.Entities.IS;
@@ -50,6 +51,8 @@ namespace SupervisorMobility.API.Controllers.SOS_Controllers
         public async Task<ActionResult<SOSHubDto>> CreateSOSHub(SOSHubForCreateDto SOSHubForCreate)
         {
             List<Equipment> equipments = new List<Equipment>();
+            List<User> usersApproverOwners = new List<User>();
+            List<User> usersReviewerEditors = new List<User>();
 
             foreach (var equipment in SOSHubForCreate.SafetyEquipment)
             {
@@ -57,36 +60,57 @@ namespace SupervisorMobility.API.Controllers.SOS_Controllers
                 equipments.Add(equipmentaux);
             }
 
+            foreach (var user in SOSHubForCreate.ApproverOwners)
+            {
+                User useraux = await _AnalysisProcessRepository.GetUserById(user.UserId);
+                usersApproverOwners.Add(useraux);
+            }
+
+            foreach (var user in SOSHubForCreate.ReviewerEditors)
+            {
+                User useraux = await _AnalysisProcessRepository.GetUserById(user.UserId);
+                usersReviewerEditors.Add(useraux);
+            }
+
             SOSHubForCreate.SafetyEquipment = null;
+            SOSHubForCreate.ApproverOwners = null;
+            SOSHubForCreate.ReviewerEditors = null;
 
             SOSHub SOSEntity = new SOSHub();
 
             _mapper.Map(SOSHubForCreate, SOSEntity);
 
-            if (SOSEntity.ApproverOwnerId <= 0)
-            {
-                SOSEntity.ApproverOwnerId = null;
-            }
-            if (SOSEntity.ReviewerEditorId <= 0)
-            {
-                SOSEntity.ReviewerEditorId = null;
-            }
-
-            var createdResult = await _AnalysisProcessRepository.CreateSOScollection(SOSEntity);
+            SOSHub createdResult = await _AnalysisProcessRepository.CreateSOScollection(SOSEntity);
 
 
             if (equipments.Any())
             {
                 foreach (Equipment equipment in equipments)
                 {
-                    await _AnalysisProcessRepository.AddEquipmentToSOSCollection(SOSEntity, equipment);
+                    await _AnalysisProcessRepository.AddEquipmentToSOSCollection(createdResult, equipment);
+                }
+            }
+
+            if (usersApproverOwners.Any())
+            {
+                foreach (User userApprover in usersApproverOwners)
+                {
+                  await  _AnalysisProcessRepository.AddApproverOwnersToSOSCollection(createdResult, userApprover);
+                }
+            }
+
+            if (usersReviewerEditors.Any())
+            {
+                foreach (User userReviewer in usersReviewerEditors)
+                {
+                 await   _AnalysisProcessRepository.AddReviewerEditorToSOSCollection(createdResult, userReviewer);
                 }
             }
 
 
             if (createdResult != null)
             {
-                return Ok(SOSEntity);
+                return Ok(_mapper.Map<SOSHubDto>(createdResult));
             }
             else
                 return BadRequest();
@@ -134,9 +158,10 @@ namespace SupervisorMobility.API.Controllers.SOS_Controllers
             List<MaterialUsed> materials = new List<MaterialUsed>();
             List<Equipment> equipments = new List<Equipment>();
             List<CommonDirection> commons = new List<CommonDirection>();
+            List<User> usersApproverOwners = new List<User>();
+            List<User> usersReviewerEditors = new List<User>();
 
             //Commmon direction 
-
             List<CommonDirectionDto> filteredCommonDirectionList = _SOSHubForUpdate.CommonDirection
            .Where(t => t.CommonDirectionId <= 0).ToList();
 
@@ -385,6 +410,7 @@ namespace SupervisorMobility.API.Controllers.SOS_Controllers
             }
 
 
+
             //var auxEntity = ObjectCloner.ObjectCloner.DeepClone(entitySOSHub);
             //Compare objects
             //string jsonResult = CompareAndGenerateJson(_mapper.Map<SOSHubForUpdateDto>(entitySOSHub), _SOSHubForUpdate);
@@ -415,6 +441,8 @@ namespace SupervisorMobility.API.Controllers.SOS_Controllers
             await _AnalysisProcessRepository.SOSDataRemoveAllCommonDirections(entitySOSHub);
             await _AnalysisProcessRepository.SOSDataRemoveAllAnalysisBkups(entitySOSHub);
             await _AnalysisProcessRepository.SOSDataRemoveAllToolsEquipmentMaterial(entitySOSHub);
+            await _AnalysisProcessRepository.SOSDataRemoveAllApproverOwners(entitySOSHub);
+            await _AnalysisProcessRepository.SOSDataRemoveAllReviewerEditors(entitySOSHub);
 
             //almacenar y actualizar informacion de relaciones
             foreach (var commonD in _SOSHubForUpdate.CommonDirection)
@@ -472,6 +500,18 @@ namespace SupervisorMobility.API.Controllers.SOS_Controllers
                 equipments.Add(equipmentaux);
             }
 
+            foreach (var user in _SOSHubForUpdate.ApproverOwners)
+            {
+                User useraux = await _AnalysisProcessRepository.GetUserById(user.UserId);
+                usersApproverOwners.Add(useraux);
+            }
+
+            foreach (var user in _SOSHubForUpdate.ReviewerEditors)
+            {
+                User useraux = await _AnalysisProcessRepository.GetUserById(user.UserId);
+                usersReviewerEditors.Add(useraux);
+            }
+
             _SOSHubForUpdate.ProcessSheetCommentary = null;
             _SOSHubForUpdate.AnalysesBkup = null;
             _SOSHubForUpdate.Sections = null;
@@ -479,6 +519,8 @@ namespace SupervisorMobility.API.Controllers.SOS_Controllers
             _SOSHubForUpdate.MaterialsUsed = null;
             _SOSHubForUpdate.SafetyEquipment = null;
             _SOSHubForUpdate.CommonDirection = null;
+            _SOSHubForUpdate.ApproverOwners = null;
+            _SOSHubForUpdate.ReviewerEditors= null;
 
             //if (_SOSHubForUpdate.ApproverOwnerId <= 0)
             //{
@@ -549,6 +591,24 @@ namespace SupervisorMobility.API.Controllers.SOS_Controllers
             if (commons.Any())
             {
                 await _AnalysisProcessRepository.AddCommonDirectionsToSOSCollection(entitySOSHub, commons);
+            }
+
+            //Common usersApproverOwners
+
+            if (usersApproverOwners.Any())
+            {
+                foreach (User userApprover in usersApproverOwners)
+                {
+                    await _AnalysisProcessRepository.AddApproverOwnersToSOSCollection(entitySOSHub, userApprover);
+                }
+            }
+            //Common usersReviewerEditors
+            if (usersReviewerEditors.Any())
+            {
+                foreach (User userReviewer in usersReviewerEditors)
+                {
+                    await _AnalysisProcessRepository.AddReviewerEditorToSOSCollection(entitySOSHub, userReviewer);
+                }
             }
 
             //await _AnalysisProcessRepository.AddHistoryToSOSCollection(entitySOSHub, sOSHubHistory);

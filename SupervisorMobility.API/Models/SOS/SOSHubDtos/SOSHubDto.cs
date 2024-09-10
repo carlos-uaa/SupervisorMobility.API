@@ -37,13 +37,13 @@ namespace SupervisorMobility.API.Models.SOS.SOSHubDtos
 
         public ICollection<FileUploadGeneralDto>? Images { get; set; } = new List<FileUploadGeneralDto>();
         public ICollection<FileUploadGeneralDto>? Videos { get; set; } = new List<FileUploadGeneralDto>();
-        public string RevisedItems { get; set; }
+        public string? RevisedItems { get; set; }
 
         public string? TrainingTime { get; set; }
         public ICollection<EquipmentDto>? SafetyEquipment { get; set; } = new List<EquipmentDto>();
         public ICollection<ToolUsedDto>? ToolsUsed { get; set; } = new List<ToolUsedDto>();
         public ICollection<MaterialsUsedDto>? MaterialsUsed { get; set; } = new List<MaterialsUsedDto>();
-        public string OtherInformation { get; set; }
+        public string? OtherInformation { get; set; }
 
         public int? PlantId { get; set; }
         public PlantDto? Plant { get; set; }

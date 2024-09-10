@@ -14,42 +14,39 @@ namespace SupervisorMobility.API.Models.SOS.SOSHubDtos
 {
     public class SOSHubForCreateDto
     {
-        public string Folio { get; set; }
+        public string? Folio { get; set; }
         public ICollection<AnalysisBkupForCreateDto> AnalysesBkup { get; set; } = new List<AnalysisBkupForCreateDto>();
         public ICollection<SectionForCreateDto> Sections { get; set; } = new List<SectionForCreateDto>();
-        public string ProcessSheet { get; set; }
+        public string? ProcessSheet { get; set; }
         public ICollection<CreateCommentaryDto>? ProcessSheetCommentary { get; set; } = new List<CreateCommentaryDto>();
         public ICollection<CommonDirectionDto>? CommonDirection { get; set; } = new List<CommonDirectionDto>();
 
         public int? AppliedModelId { get; set; }
-
-
-        public string RevisedItems { get; set; }
+        public string? RevisedItems { get; set; }
 
         public string? TrainingTime { get; set; }
         public ICollection<EquipmentDto>? SafetyEquipment { get; set; } = new List<EquipmentDto>();
         public ICollection<ToolUsedForCreateDto>? ToolsUsed { get; set; } = new List<ToolUsedForCreateDto>();
         public ICollection<MaterialsUsedForCreateDto>? MaterialsUsed { get; set; } = new List<MaterialsUsedForCreateDto>();
-        public string OtherInformation { get; set; }
+        public string? OtherInformation { get; set; }
 
         public int? PlantId { get; set; }
         public int? AreaId { get; set; }
         public int? DistributionId { get; set; }
+
         public int? DepartmentId { get; set; }
         public int? StationId { get; set; }
 
-       //public int? ApproverOwnerId { get; set; }
-
         public DateTime? CreatedDate { get; set; }
 
-        //public int? ReviewerEditorId { get; set; }
-        public List<UsersWithoutPeopleWithNavigation>? ApproverOwners { get; set; }
-        public List<UsersWithoutPeopleWithNavigation>? ReviewerEditors { get; set; }
+        public List<UsersWithoutNavigationWithoutPeopleDetails>? ApproverOwners { get; set; }
+        public List<UsersWithoutNavigationWithoutPeopleDetails>? ReviewerEditors { get; set; }
+        
         public DateTime? ModifiedDate { get; set; }
 
-        public string Plan { get; set; }
-        public string SourcePlan { get; set; }
-        public string Status { get; set; }
+        public string? Plan { get; set; }
+        public string? SourcePlan { get; set; }
+        public string? Status { get; set; }
 
 
         public bool? IsActive { get; set; }
