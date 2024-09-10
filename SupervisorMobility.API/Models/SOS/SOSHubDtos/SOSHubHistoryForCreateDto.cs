@@ -7,6 +7,7 @@ using SupervisorMobility.API.Models.SOS.MaterialDtos;
 using SupervisorMobility.API.Models.SOS.SOSHubDtos.AnalysisBkupDtos;
 using SupervisorMobility.API.Models.SOS.SOSHubDtos.SectionDtos;
 using SupervisorMobility.API.Models.SOS.ToolDtos;
+using SupervisorMobility.API.Models.Users;
 
 namespace SupervisorMobility.API.Models.SOS.SOSHubDtos
 {
@@ -34,11 +35,13 @@ namespace SupervisorMobility.API.Models.SOS.SOSHubDtos
         public int? DepartmentId { get; set; }
         public int? StationId { get; set; }
 
-        public int? OwnerId { get; set; }
+        //public int? ApproverOwner { get; set; }
+        public List<UsersWithoutNavigationWithoutPeopleDetails>? ApproversOwners { get; set; }
 
         public DateTime? CreatedDate { get; set; }
 
-        public int? EditorId { get; set; }
+        public List<UsersWithoutNavigationWithoutPeopleDetails>? ReviewerEditors { get; set; }
+        //public int? ReviewerEditorId { get; set; }
 
         public DateTime? ModifiedDate { get; set; }
 

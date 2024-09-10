@@ -17,7 +17,15 @@ namespace SupervisorMobility.API.Controllers
         public void sendemail(string email, string subject, string body)
         {
             var emailMessage = _email.CreateEmailMessage(email, subject, body);
-            _email.Send(emailMessage);
+
+            if (!subject.Contains("compasdcpcs.local"))
+            {
+                _email.Send(emailMessage);
+            }
+            else
+            {
+                //simulacion de email enviado
+            }
         }
 
 
