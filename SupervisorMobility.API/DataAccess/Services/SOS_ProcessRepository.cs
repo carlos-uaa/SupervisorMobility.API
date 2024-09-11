@@ -3014,15 +3014,20 @@ namespace SupervisorMobility.API.DataAccess.Services
                 query = query.Include(m => m.SOSHub).ThenInclude(s => s.ToolsUsed).ThenInclude(t => t.Tool);
                 query = query.Include(m => m.SOSHub).ThenInclude(s => s.MaterialsUsed).ThenInclude(m => m.Material);
                 query = query.Include(m => m.SOSHub).ThenInclude(s => s.SafetyEquipment);
+                query = query.Include(m => m.SOSHub).ThenInclude(s => s.Plant);
+                query = query.Include(m => m.SOSHub).ThenInclude(s => s.Department);
+                query = query.Include(m => m.SOSHub).ThenInclude(s => s.Owner);
                 query = query.Include(m => m.Times);
-
+                query = query.Include(d => d.Approver);
+                query = query.Include(m => m.Reviewer);
+                query = query.Include(m => m.Turns).ThenInclude(t => t.Operator);
+                query = query.Include(m => m.Turns).ThenInclude(t => t.Supervisor);
             }
 
             if (includeImagesSOS)
             {
                 query = query.Include(m => m.SOSHub).ThenInclude(s => s.Images);
             }
-
 
             var sosHub = await query.FirstOrDefaultAsync();
 
