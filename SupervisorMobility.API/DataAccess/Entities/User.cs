@@ -1,5 +1,7 @@
 ﻿using DocumentFormat.OpenXml.Drawing.Charts;
 using SupervisorMobility.API.DataAccess.Entities.ILU;
+using SupervisorMobility.API.DataAccess.Entities.SOS;
+using SupervisorMobility.API.DataAccess.Entities.SOS.History;
 using SupervisorMobility.API.DataAccess.Entities.SOS_Review;
 using SupervisorMobility.API.Entities;
 using System.ComponentModel.DataAnnotations;
@@ -78,6 +80,13 @@ namespace SupervisorMobility.API.DataAccess.Entities
 
         public int? GroupId { get; set; }
         public Group? Group { get; set; }
+        public ICollection<SOSHub> SosHubsApproverOwners { get; set; }
+
+        public ICollection<SOSHub> SosHubsReviewerEditors { get; set; }
+
+        public ICollection<SOSHubHistory> SOSHubHistoriesApproverOwners { get; set; }
+
+        public ICollection<SOSHubHistory> SOSHubHistoriesReviewerEditors { get; set; }
 
         public override bool Equals(object obj)
         {

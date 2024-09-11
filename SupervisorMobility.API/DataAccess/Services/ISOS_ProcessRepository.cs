@@ -27,10 +27,11 @@ namespace SupervisorMobility.API.DataAccess.Services
     public interface ISOS_ProcessRepository
     {
         #region SOS_DataPool
-        Task<int> CreateSOScollection(SOSHub SOS_EntityToCreate);
+        Task<SOSHub> CreateSOScollection(SOSHub SOS_EntityToCreate);
         Task<SOSHub> GetSOSHub(int HubId, bool includeAnalysesBkup = false, bool includeSections = false, bool includeImages = false, bool includeVideos = false, bool includeCommentaries = false, bool includeTools = false, bool includeEquipments = false, bool includeMaterials = false, bool includeInformation = false, bool includePeople = false, bool includeDocuments = false, bool includeModel = false, bool includeHistory = false, bool includeDeleteds = false, bool includeCollections = false, bool includePeopleCollections = false);
         Task<IEnumerable<SOSHub>> GetAllSOSHub(bool includeAnalysesBkup = false, bool includeSections = false, bool includeImages = false, bool includeVideos = false, bool includeCommentaries = false, bool includeTools = false, bool includeEquipments = false, bool includeMaterials = false, bool includeInformation = false, bool includePeople = false, bool includeDocuments = false);
         Task<int> UpdateSOSHub(SOSHubForUpdateDto HubUpdate, SOSHub SosEntity);
+        Task<int> UpdateSOSHub(SOSHub SosEntity);
         Task<int> RemoveSOSHub(int SOS_DataPool_id);
         #endregion
         #region History Hub Collection
@@ -49,12 +50,17 @@ namespace SupervisorMobility.API.DataAccess.Services
         Task<AsyncVoidMethodBuilder> AddCommonDirectionsToSOSCollection(SOSHub Master, List<CommonDirection> Slave);
         Task AddImageToSOSData(int SOS_DataPool_id, FileUpload evidence);
         Task AddVideoToSOSData(int SOS_DataPool_id, FileUpload evidence);
+        Task<AsyncVoidMethodBuilder> AddReviewerEditorToSOSCollection(SOSHub Master, User Slave);
+        Task<AsyncVoidMethodBuilder> AddApproverOwnersToSOSCollection(SOSHub Master, User Slave);
+
         #endregion
         #region Remove from Sos Hub
         Task<int> RemoveImageFromSOSData(int SOS_DataPool_id, int ImageFile_id);
         Task<int> RemoveVideoFromSOSData(int SOS_DataPool_id, int VideoFile_id);
         Task<int> RemoveCDFromSOSData(int SOS_DataPool_id, int File_id);
         Task<AsyncVoidMethodBuilder> SOSDataRemoveAllToolsEquipmentMaterial(SOSHub Master);
+        Task<AsyncVoidMethodBuilder> SOSDataRemoveAllReviewerEditors(SOSHub Master);
+        Task<AsyncVoidMethodBuilder> SOSDataRemoveAllApproverOwners(SOSHub Master);
         Task<AsyncVoidMethodBuilder> SOSDataRemoveAllAnalysisBkups(SOSHub Master);
         Task<AsyncVoidMethodBuilder> SOSDataRemoveAllSections(SOSHub Master);
         Task<AsyncVoidMethodBuilder> SOSDataRemoveAllProcessSheetCommentary(SOSHub Master);
@@ -104,7 +110,10 @@ namespace SupervisorMobility.API.DataAccess.Services
         Task<int> UpdateCommentary(UpdateCommentaryDto CommentaryForUpdate);
 
         #endregion
-       
+        #region Users
+        Task<User> GetUserById(int id);
+
+        #endregion
         #region CommonDirection
         Task<CommonDirection> GetCommonDirectionById(int id);
         Task<int> UpdateCommonDirection(CommonDirectionDto commonDirectionForUpdate);

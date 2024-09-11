@@ -13,9 +13,7 @@ namespace SupervisorMobility.API.Models.SOS.SOSDistributionDtos
         public string? InternalControlNumber { get; set; }
         public string? OperationName { get; set; }
         public string? ProcessName { get; set; }
-        public int? ReviewerId { get; set; }
 
-        public int? ApproverId { get; set; }
 
         public string? TackTime { get; set; }
 
