@@ -37,13 +37,13 @@ namespace SupervisorMobility.API.Models.SOS.SOSHubDtos
 
         public ICollection<FileUploadGeneralDto>? Images { get; set; } = new List<FileUploadGeneralDto>();
         public ICollection<FileUploadGeneralDto>? Videos { get; set; } = new List<FileUploadGeneralDto>();
-        public string RevisedItems { get; set; }
+        public string? RevisedItems { get; set; }
 
         public string? TrainingTime { get; set; }
         public ICollection<EquipmentDto>? SafetyEquipment { get; set; } = new List<EquipmentDto>();
         public ICollection<ToolUsedDto>? ToolsUsed { get; set; } = new List<ToolUsedDto>();
         public ICollection<MaterialsUsedDto>? MaterialsUsed { get; set; } = new List<MaterialsUsedDto>();
-        public string OtherInformation { get; set; }
+        public string? OtherInformation { get; set; }
 
         public int? PlantId { get; set; }
         public PlantDto? Plant { get; set; }
@@ -55,15 +55,20 @@ namespace SupervisorMobility.API.Models.SOS.SOSHubDtos
         public DepartmentDto? Department { get; set; }
         public int? StationId { get; set; }
         public StationDto? Station { get; set; }
-        public int? OwnerId { get; set; }
-        public UsersWithoutPeopleWithNavigation? Owner { get; set; }
+        //public int? OwnerId { get; set; }
+        //public int? ApproverOwnerId { get; set; }
+        //public UsersWithoutPeopleWithNavigation? ApproverOwner { get; set; }
+
 
         public DateTime? CreatedDate { get; set; }
 
-        public int? EditorId { get; set; }
-        public UsersWithoutPeopleWithNavigation? Editor { get; set; }
+        //public int? ReviewerEditorId { get; set; }
+        //public UsersWithoutPeopleWithNavigation? ReviewerEditor { get; set; }
+        public List<UsersWithoutPeopleWithNavigation>? ApproverOwners { get; set; }
+        public List<UsersWithoutPeopleWithNavigation>? ReviewerEditors { get; set; }
 
         public DateTime? ModifiedDate { get; set; }
+
 
 
         //estos 3 podrian ser una entidad (pero la flojera)

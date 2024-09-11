@@ -74,18 +74,18 @@ if (app.Environment.IsDevelopment() || app.Environment.IsProduction())
     app.UseSwaggerUI();
 }
 
-app.Use(async (context, next) =>
-{
-    // Capturar la respuesta después de que se haya completado
-    await next();
+//app.Use(async (context, next) =>
+//{
+//    // Capturar la respuesta después de que se haya completado
+//    await next();
 
-    // Registrar los headers de la respuesta
-    foreach (var header in context.Response.Headers)
-    {
-        Console.WriteLine($"Response Header: {header.Key} = {string.Join(",", header.Value)}");
-        Debug.WriteLine($"Response Header: {header.Key} = {string.Join(",", header.Value)}");
-    }
-});
+//    // Registrar los headers de la respuesta
+//    foreach (var header in context.Response.Headers)
+//    {
+//        Console.WriteLine($"Response Header: {header.Key} = {string.Join(",", header.Value)}");
+//        Debug.WriteLine($"Response Header: {header.Key} = {string.Join(",", header.Value)}");
+//    }
+//});
 
 //app.UseHttpsRedirection();
 app.UseStaticFiles();

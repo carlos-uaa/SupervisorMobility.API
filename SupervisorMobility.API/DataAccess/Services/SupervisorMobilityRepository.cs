@@ -2050,6 +2050,29 @@ namespace SupervisorMobility.API.Services
             return await query.FirstOrDefaultAsync();
         }
 
+        public async Task<SOSReviewProgram?> FindSOSasync(int plantId, int areaId, int year, bool includeNavigation = false, bool includeUsers = false, bool includeSuggestions = false)
+        {
+            var query = _context.SOSReviews.Where(p => p.PlantId == plantId && p.AreaId == areaId && p.AplicationYear == year);
+
+            if (includeNavigation)
+            {
+                query = query.Include(p => p.Plant)
+                    .Include(a => a.Area);
+            }
+
+            if (includeSuggestions)
+            {
+                query = query.Include(r => r.Suggestions);
+            }
+
+            if (includeUsers)
+            {
+                query = query.Include(s => s.Supervisors);
+            }
+
+
+            return await query.FirstOrDefaultAsync();
+        }
 
 
 

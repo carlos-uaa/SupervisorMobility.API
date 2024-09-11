@@ -73,9 +73,26 @@ namespace SupervisorMobility.API.Controllers
             return Ok(_mapper.Map<SOSReviewWithOutDataDto>(SOS_Review));
         }//end get one
 
+        [HttpGet("find")]
+        public async Task<ActionResult<SOSReviewWithAllDto>> FindSos(int plantId, int areaId, int year, bool includeNavigation = false, bool includeUsers = false, bool includeSuggestions = false)
+        {
+
+            var SOS_Review = await _supervisorMobilityRepository.FindSOSasync(plantId, areaId, year, includeNavigation, includeUsers, includeSuggestions);
+
+            if (SOS_Review == null)
+            {
+                return NotFound();
+            }
+
+            if (includeNavigation || includeUsers || includeSuggestions)
+            {
+                return Ok(_mapper.Map<SOSReviewWithAllDto>(SOS_Review));
+            }
+            return Ok(_mapper.Map<SOSReviewWithOutDataDto>(SOS_Review));
+        }//end get one
+
         [HttpPost]
-        public async Task<ActionResult<SOSReviewWithAllDto>> CreateSOSReview(
-           SOSReviewForCreateDto SOSentity)
+        public async Task<ActionResult<SOSReviewWithAllDto>> CreateSOSReview(SOSReviewForCreateDto SOSentity)
         {
             List<User> Users = new List<User>();
             bool haveUsers = false;
@@ -143,8 +160,7 @@ namespace SupervisorMobility.API.Controllers
         }//end post create 
      
         [HttpPut("{SOSid}")]
-        public async Task<ActionResult> UpdateSosReview(int SOSid,
-            SOSReviewForUpdateDto sosUpdateEntity)
+        public async Task<ActionResult> UpdateSosReview(int SOSid, SOSReviewForUpdateDto sosUpdateEntity)
         {
 
             var SOS_Entity = await _supervisorMobilityRepository

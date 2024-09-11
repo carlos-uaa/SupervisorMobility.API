@@ -193,9 +193,9 @@ namespace SupervisorMobility.API.Context
                 .Property(p => p.IsActive)
                 .HasDefaultValue(true);
 
-                 modelBuilder.Entity<Station>()
-                .Property(p => p.IsActive)
-                .HasDefaultValue(true);
+            modelBuilder.Entity<Station>()
+           .Property(p => p.IsActive)
+           .HasDefaultValue(true);
 
             modelBuilder.Entity<Lup>()
                 .Property(p => p.IsActive)
@@ -359,11 +359,33 @@ namespace SupervisorMobility.API.Context
             modelBuilder.Entity<SOSHub>()
                 .Property(p => p.IsActive)
                 .HasDefaultValue(true);
+        
+            modelBuilder.Entity<SOSHub>()
+                .HasMany(s => s.ApproverOwners)  // SOSHub tiene muchos ApproverOwners
+                .WithMany(u => u.SosHubsApproverOwners)  // Usuario puede estar en múltiples SOSHub como ApproverOwners
+                .UsingEntity(join => join.ToTable("SOSHubApproverOwners")); // Nombre de la tabla intermedia
+
+            // Configurar la relación entre SOSHub y User para ReviewerEditors
+            modelBuilder.Entity<SOSHub>()
+                .HasMany(s => s.ReviewerEditors)  // SOSHub tiene muchos ReviewerEditors
+                .WithMany(u => u.SosHubsReviewerEditors)  // Usuario puede estar en múltiples SOSHub como ReviewerEditors
+                .UsingEntity(join => join.ToTable("SOSHubReviewerEditors")); // Nombre de la tabla intermedia
+
+            // Si tienes relaciones similares con SOSHubHistory, también necesitas configurarlas
+            modelBuilder.Entity<SOSHubHistory>()
+                .HasMany(sh => sh.ApproverOwners)
+                .WithMany(u => u.SOSHubHistoriesApproverOwners)
+                .UsingEntity(join => join.ToTable("SOSHubHistoryApproverOwners"));
+
+            modelBuilder.Entity<SOSHubHistory>()
+                .HasMany(sh => sh.ReviewerEditors)
+                .WithMany(u => u.SOSHubHistoriesReviewerEditors)
+                .UsingEntity(join => join.ToTable("SOSHubHistoryReviewerEditors"));
 
             modelBuilder.Entity<Section>()
                 .Property(p => p.IsActive)
                 .HasDefaultValue(true);
-            
+
             modelBuilder.Entity<Analysis>()
                 .Property(p => p.IsActive)
                 .HasDefaultValue(true);
@@ -384,7 +406,8 @@ namespace SupervisorMobility.API.Context
                 .Property(p => p.IsActive)
                 .HasDefaultValue(true);
 
-            modelBuilder.Entity<SOSHub>(p => {
+            modelBuilder.Entity<SOSHub>(p =>
+            {
                 p.HasMany(p => p.CommonDirection)
                 .WithMany("SOSHubId")
                 .UsingEntity<Dictionary<string, object>>(
@@ -443,9 +466,9 @@ namespace SupervisorMobility.API.Context
 
             modelBuilder.Entity<SOSAnalysis>()
                 .Property(p => p.IsActive)
-                .HasDefaultValue(true); 
+                .HasDefaultValue(true);
 
-      
+
 
             modelBuilder.Entity<SOSCombination>()
                 .Property(p => p.IsActive)
@@ -468,7 +491,7 @@ namespace SupervisorMobility.API.Context
                 .HasDefaultValue(true);
 
 
-      
+
 
 
             //Constraints
