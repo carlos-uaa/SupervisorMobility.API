@@ -8,8 +8,8 @@ using SupervisorMobility.API.Models.FileUploadDto;
 using SupervisorMobility.API.Models.SOS.SOSAnalysisDtos;
 using SupervisorMobility.API.Models.SOS.SOSCombinationDtos;
 using SupervisorMobility.API.Models.SOS.SOSCombinationLogbookDtos;
-using SupervisorMobility.API.Models.SOS.SOSDistributionDtos;
-using SupervisorMobility.API.Models.SOS.SOSDistributionLogbookDtos;
+using SupervisorMobility.API.Models.SOS.SOSFlowDtos;
+using SupervisorMobility.API.Models.SOS.SOSFlowLogbookDtos;
 using SupervisorMobility.API.Models.SOS.SOSTimeDtos;
 using SupervisorMobility.API.Models.SOS.TurnDtos;
 using System.Diagnostics;
@@ -246,12 +246,12 @@ namespace SupervisorMobility.API.Controllers.SOS_Controllers
 
 
 
-        [HttpDelete("{SOSAnaysisId}")]
-        public async Task<ActionResult<int>> RemoveSOSHub(int SOSAnaysisId)
+        [HttpDelete("{SOSCombinationId}")]
+        public async Task<ActionResult<int>> RemoveSOSHub(int SOSCombinationId)
         {
-            var result = await _ProcessRepository.RemoveSOSDistribution(SOSAnaysisId);
+            var result = await _ProcessRepository.RemoveSOSCombination(SOSCombinationId);
 
-            var SOSHub = await _ProcessRepository.GetSOSHub(SOSAnaysisId);
+            var SOSHub = await _ProcessRepository.GetSOSCombination(SOSCombinationId);
 
             if (result > 0)
                 return Ok(SOSHub);

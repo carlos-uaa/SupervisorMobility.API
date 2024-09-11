@@ -21,6 +21,7 @@ namespace SupervisorMobility.API.Models.SOS.SOSFlowDtos
         public FileUploadGeneralDto? ReviewerHSSignatureImage { get; set; } = new();
 
      
+        public DateTime? CreatedAt { get; set; }
         public string? TargetTime { get; set; }
 
         public ICollection<SOSFlowLogbookDto>? FlowLogbooks { get; set; } = new List<SOSFlowLogbookDto>();
