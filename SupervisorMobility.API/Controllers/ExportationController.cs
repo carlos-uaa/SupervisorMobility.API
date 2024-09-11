@@ -252,18 +252,21 @@ namespace SupervisorMobility.API.Controllers
                         {
                             sheet.Cells[$"E{rowindex}"].Value = indexSection;
                             sheet.Cells[$"F{rowindex}"].Value = section.Step;
-                            //if (!string.IsNullOrEmpty(section.Time))
-                            //{
-                            //   string[] times = section.Time.Split('.');
-                            //    double minutes = double.Parse(times[0])/ 60;
-                            //    sheet.Cells[$"H{rowindex}"].Style.Numberformat.Format = "0.##";
-                            //    sheet.Cells[$"I{rowindex}"].Style.Numberformat.Format = "0.###";
 
-                            //   sheet.Cells[$"H{rowindex}"].Value = minutes;
-                            //    if(times.Length > 1)
-                            //        sheet.Cells[$"I{rowindex}"].Value = double.Parse(times[1])/100;
-                            //}
-                            
+                            var timeText = SosAnalysis.Times.FirstOrDefault(p=>p.SectionId == section.SectionId).Time;
+
+                            if (!string.IsNullOrEmpty(timeText))
+                            {
+                                string[] times = timeText.Split('.');
+                                double minutes = double.Parse(times[0]) / 60;
+                                sheet.Cells[$"H{rowindex}"].Style.Numberformat.Format = "0.##";
+                                sheet.Cells[$"I{rowindex}"].Style.Numberformat.Format = "0.###";
+
+                                sheet.Cells[$"H{rowindex}"].Value = minutes;
+                                if (times.Length > 1)
+                                    sheet.Cells[$"I{rowindex}"].Value = double.Parse(times[1]) / 100;
+                            }
+
                         }
 
                         sheet.Cells[$"J{rowindex}"].RichText.Add(fullText);
@@ -871,17 +874,20 @@ namespace SupervisorMobility.API.Controllers
                     sheet.Cells[$"B{rowindex}"].Value = indexSection;
 
                     sheet.Cells[$"C{rowindex}"].Value = section.Step;
-                    //if (!string.IsNullOrEmpty(section.Time))
-                    //{
-                    //    string[] times = section.Time.Split('.');
-                        //double minutes = double.Parse(times[0]) / 60;
-                        //sheet.Cells[$"H{rowindex}"].Style.Numberformat.Format = "0.##";
-                        //sheet.Cells[$"I{rowindex}"].Style.Numberformat.Format = "0.###";
 
-                    //    sheet.Cells[$"H{rowindex}"].Value = minutes;
-                    //    if (times.Length > 1)
-                    //        sheet.Cells[$"I{rowindex}"].Value = double.Parse(times[1]) / 100;
-                    //}
+                    var timeText = SosSequence.Times.FirstOrDefault(p => p.SectionId == section.SectionId).Time;
+
+                    if (!string.IsNullOrEmpty(timeText))
+                    {
+                        string[] times = timeText.Split('.');
+                        double minutes = double.Parse(times[0]) / 60;
+                        sheet.Cells[$"H{rowindex}"].Style.Numberformat.Format = "0.##";
+                        sheet.Cells[$"I{rowindex}"].Style.Numberformat.Format = "0.###";
+
+                        sheet.Cells[$"H{rowindex}"].Value = minutes;
+                        if (times.Length > 1)
+                            sheet.Cells[$"I{rowindex}"].Value = double.Parse(times[1]) / 100;
+                    }
 
                     sheet.Cells[$"J{rowindex}"].RichText.Add(fullText);
 
@@ -1286,6 +1292,584 @@ namespace SupervisorMobility.API.Controllers
             ms.Position = 0;
 
             var res = File(ms, "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet", !string.IsNullOrEmpty(SosSequence.InternalControlNumber) ? $"{SosSequence.InternalControlNumber} Sequence Report.xlsx" : "Sequence Report.xlsx");
+            res.EnableRangeProcessing = true;
+            return res;
+        }
+
+
+        [HttpGet("Excel/Distribution/{DistributionId}")]
+        public async Task<IActionResult> DistributionExcelExport(int DistributionId)
+        {
+            var SosDistribution = await _AnalysisProcessRepository.GetSOSDistribution(DistributionId, true, true, true, true, includePeople:true, includeTurns: true);
+
+            string templateName = "DataAccess/Templates/Distribution Template.xlsx";
+            MemoryStream ms = new MemoryStream();
+
+            using var templateStream = System.IO.File.OpenRead(templateName);
+
+            using (var package = new ExcelPackage(templateStream))
+            {
+                package.Workbook.CalcMode = ExcelCalcMode.Automatic;
+                var sheet = package.Workbook.Worksheets.First();
+
+                #region information table
+
+                sheet.Cells["B8"].Value = SosDistribution.ProcessName;
+                sheet.Cells["G8"].Value = SosDistribution.InternalControlNumber;
+
+                sheet.Cells["B10"].Value = SosDistribution.DistributionLogbooks.First().Approver;
+                sheet.Cells["E10"].Value = SosDistribution.SOSHub.Editor.Name;
+                sheet.Cells["G10"].Value = SosDistribution.SOSHub.Owner.Name;
+
+                sheet.Cells["B12"].Value = SosDistribution.CreatedAt?.ToString("dd-MMM-yyyy").Replace(".", ""); ;
+                sheet.Cells["D12"].Value = SosDistribution.ApplicationMonth;
+                sheet.Cells["G12"].Value = SosDistribution.SOSHub.AppliedModel.Code;
+                sheet.Cells["I12"].Value = SosDistribution.TackTime;
+                sheet.Cells["J12"].Value = SosDistribution.CycleTime;
+                sheet.Cells["P12"].Value = SosDistribution.SOSHub.Plant.Code;
+                sheet.Cells["U12"].Value = SosDistribution.SOSHub.Department.Code;
+
+                int i = 0;
+                int base_row = 8;
+
+                do
+                {
+                    base_row += i;
+                    var turn = SosDistribution.Turns.ElementAt(i);
+                    sheet.Cells[$"K{base_row}"].Value = turn.TurnType;
+                    sheet.Cells[$"M{base_row}"].Value = turn.Operator.Name;
+                    sheet.Cells[$"V{base_row}"].Value = turn.Supervisor.Name;
+                    i++;
+                } while (i < 3);
+
+                #endregion
+
+                #region distribution
+
+                double TotalRowHeight = 0;//to be able to know when to jump to next sheet
+
+                Dictionary<string, double> rowHeights = new Dictionary<string, double> { { "DISTRIBUTION", 0 } };//page index, total rows height
+
+                const double ChangeHeightDefaultTemplate = 1068.2;//Total row height from an empty template to change sheet
+                const double ChangeHeightExtraTemplates = 1308; //+ 340.3 - 77.4; //default table height + information table height in default template - heght to where the table starts
+
+                double ChangeHeight = ChangeHeightDefaultTemplate;
+
+                Dictionary<string, (int, int)> rowIndexes = new Dictionary<string, (int, int)> { { "DISTRIBUTION", (16, 17) } }; //page index, start index, final row index
+                                                                                                                      //int startingRow = 14;//the row where the analyses start in an empty template
+                                                                                                                      //int startingRowB = 7;
+
+                int sheetStartRow = rowIndexes["DISTRIBUTION"].Item1;
+
+                int rowindex = 0;//to get where the final row ended
+
+                int indexSection = 0;
+
+                var ValuesFont = sheet.Cells["D6"].Style.Font;
+
+                foreach (var section in SosDistribution.SOSHub.Sections)
+                {
+                    double StepHeight = 0, CriticalHeight = 0;
+
+                    rowindex = sheetStartRow + indexSection++;
+
+                    string fullText = string.Empty;
+
+                    foreach (var (analysis, index) in section.Analyses.Select((analysis, index) => (analysis, index)))
+                    {
+                        int criticalIndex = 0;
+                        if (analysis.CriticalPoints != null && analysis.CriticalPoints.Any())
+                        {
+                            foreach (var (cp, cpIndex) in analysis.CriticalPoints.Select((cp, cpIndex) => (cp, cpIndex)))
+                            {
+                                criticalIndex++;
+                                string indexString = $"{criticalIndex}.- ";
+                                string critString = $"{cp}\r\n";
+                                string reasonString = $"( {analysis.Reasons[cpIndex]} )";
+                                if (cp != analysis.CriticalPoints.Last())
+                                {
+                                    reasonString += "\r\n";
+                                }
+
+                                //sheet.Cells[$"J{rowindex}"].RichText.Add(indexString);
+                                //sheet.Cells[$"J{rowindex}"].RichText.Add(critString);
+                                //sheet.Cells[$"J{rowindex}"].RichText.Add(reasonString);
+
+                                fullText += $"{indexString}{critString}{reasonString}";
+                            }
+                        }
+
+                        CriticalHeight += stylesService.CalculateRowHeight(fullText, (sheet.Columns[10].Width + sheet.Columns[11].Width + sheet.Columns[12].Width), sheet.Cells["J16"].Style.Font.Size);
+
+                    }
+
+                    StepHeight = stylesService.CalculateRowHeight(section.Step, (sheet.Columns[3].Width + sheet.Columns[4].Width + sheet.Columns[5].Width + sheet.Columns[6].Width + sheet.Columns[7].Width), sheet.Cells["B16"].Style.Font.Size);
+                    var rowheight = Math.Max(20, Math.Max(StepHeight, CriticalHeight));
+
+                    var chHeightP = (TotalRowHeight + rowheight) * 100 / ChangeHeight;
+
+                    if (chHeightP > 100)
+                    {
+                        //Shift last row since it cant be deleted due to format design 
+                        sheetService.MoveRowValuesDistribution(sheet, rowindex, sheet == package.Workbook.Worksheets.First());
+                        rowindex--;
+                        sheet.DeleteRow(rowindex);
+
+                        ChangeHeight = ChangeHeightExtraTemplates;
+
+                        string currentPIdx = sheet.Name.Split(" ", 2)[1];
+                        int nextPage = sheetService.GetNextIndex(currentPIdx);
+
+                        string pageName = $"HOE DISTRIBUTION ({nextPage})";
+                        string nextPIdx = pageName.Split(" ", 2)[1];
+
+                        sheet = package.Workbook.Worksheets[$"Analysis {nextPage}"];
+
+                        if (sheet == null)
+                        {
+                            sheetService.AddSheet(package, 3, currentPIdx);
+                            sheet = package.Workbook.Worksheets[pageName];
+                            rowHeights.Add(nextPIdx, 0);
+                            rowIndexes.Add(nextPIdx, (9, 10));
+                        }
+
+                        rowHeights[currentPIdx] += TotalRowHeight;
+                        TotalRowHeight = 0;
+                        rowIndexes[currentPIdx] = (rowIndexes[currentPIdx].Item1, rowindex);
+
+                        sheetStartRow = rowindex = rowIndexes[nextPIdx].Item1;
+                        indexSection = 1;
+                    }
+
+                    if (indexSection - 1 != 0 && section != SosDistribution.SOSHub.Sections.Last())
+                    {
+                        sheet.InsertRow(rowindex, 1);
+                        bool last = section == SosDistribution.SOSHub.Sections.Last();
+                        stylesService.ApplySequenceStyles(sheet, rowindex, last);
+                    }
+
+                    sheet.Cells[$"B{rowindex}"].Value = indexSection;
+
+                    sheet.Cells[$"C{rowindex}"].Value = section.Step;
+
+                    var timeText = SosDistribution.Times.FirstOrDefault(p => p.SectionId == section.SectionId).Time;
+
+                    if (!string.IsNullOrEmpty(timeText))
+                    {
+                        string[] times = timeText.Split('.');
+                        double minutes = double.Parse(times[0]) / 60;
+                        sheet.Cells[$"H{rowindex}"].Style.Numberformat.Format = "0.##";
+                        sheet.Cells[$"I{rowindex}"].Style.Numberformat.Format = "0.###";
+
+                        sheet.Cells[$"H{rowindex}"].Value = minutes;
+                        if (times.Length > 1)
+                            sheet.Cells[$"I{rowindex}"].Value = double.Parse(times[1]) / 100;
+                    }
+
+                    sheet.Cells[$"J{rowindex}"].RichText.Add(fullText);
+
+                    TotalRowHeight += rowheight;
+
+                    sheet.Rows[rowindex].Height = rowheight;
+
+                }
+
+                const double DefaultRowH = 40;
+
+
+                double templateExtrahight = 26.3 + 8.3 + 17.3 + 20.3; //Time row height + whitespace + abnormalities headers + second row in analysis headers
+
+                string currentWorkingIndex = sheet.Name.Split(" ")[1];
+
+                rowHeights[currentWorkingIndex] += TotalRowHeight;
+                rowIndexes[currentWorkingIndex] = (rowIndexes[currentWorkingIndex].Item1, rowindex);
+
+                foreach (var worksheet in package.Workbook.Worksheets.Where(ws => ws.Name.Contains("Sequence")))
+                {
+                    string currentChar = worksheet.Name.Split(" ")[1];
+                    ChangeHeight = currentChar == "A" ? ChangeHeightDefaultTemplate : ChangeHeightExtraTemplates;
+                    if (rowHeights[currentChar] < ChangeHeight)
+                    {
+                        var idx = rowIndexes[currentChar].Item2;
+                        var height = rowHeights[currentChar];
+
+                        sheetService.GenerateSequenceRows(worksheet, ref height, ref idx, ChangeHeight, DefaultRowH);
+
+                        rowIndexes[currentChar] = (rowIndexes[currentChar].Item1, idx);
+                        rowHeights[currentChar] = height;
+                    }
+
+                    rowIndexes[currentChar] = (rowIndexes[currentChar].Item1, rowIndexes[currentChar].Item2 + 1);
+                    rowHeights[currentChar] += templateExtrahight;
+
+                    sheet.Cells[$"H{rowIndexes[currentChar].Item2}"].Formula = $"SUM(H{rowIndexes[currentChar].Item1}:H{rowIndexes[currentChar].Item2 - 1})";
+                    sheet.Cells[$"I{rowIndexes[currentChar].Item2}"].Formula = $"SUM(I{rowIndexes[currentChar].Item1}:I{rowIndexes[currentChar].Item2 - 1})";
+                }
+
+                sheet = package.Workbook.Worksheets[0];
+                string firstSheetIndex = sheet.Name.Split(" ")[1];
+
+                #endregion
+
+                #region Abnormal cases
+
+                ChangeHeight = ChangeHeightExtraTemplates;
+
+                rowIndexes = rowIndexes.ToDictionary(kvp => kvp.Key, kvp => (kvp.Value.Item1, kvp.Value.Item2 + 3));
+
+                int specialTotalHeight = 0, startingAbnormalRow = 0;
+
+                rowindex = startingAbnormalRow = rowIndexes[firstSheetIndex].Item2;
+
+                Dictionary<string, int> abnormalStarts = rowIndexes.ToDictionary(kpv => kpv.Key, kpv => kpv.Value.Item2);
+
+                if (SosDistribution.SOSHub.MaterialsUsed != null && SosDistribution.SOSHub.MaterialsUsed.Any())
+                {
+                    foreach (var item in SosDistribution.SOSHub.MaterialsUsed)
+                    {
+                        sheet.InsertRow(rowindex, 1);
+                        specialTotalHeight += 20;
+                        //bool last = item == SosAnalysis.SOSHub.MaterialsUsed.Last();
+                        bool last = rowindex - startingAbnormalRow >= 7;
+                        stylesService.ApplySpecialCasesRowStyle(sheet, rowindex, last);
+
+                        sheet.Cells[$"E{rowindex}"].Value = item.Material.key;
+                        sheet.Cells[$"F{rowindex}"].Value = item.Material.PartName;
+                        sheet.Cells[$"I{rowindex}"].Value = item.Material.PartNumber;
+                        sheet.Cells[$"L{rowindex}"].Value = item.Quantity;
+
+                        rowindex++;
+
+                        if (rowindex - startingAbnormalRow >= 8 && item != SosDistribution.SOSHub.MaterialsUsed.Last())
+                        {
+                            string currentPIdx = sheet.Name.Split(" ",2)[1];
+                            int nextPage = sheetService.GetNextIndex(currentPIdx);
+
+                            string pageName = $"HOE DISTRIBUTION ({nextPage})";
+                            string nextPIdx = pageName.Split(" ", 2)[1];
+
+                            sheet = package.Workbook.Worksheets[pageName];
+
+                            if (sheet == null)
+                            {
+                                sheetService.AddSheet(package, 3, currentPIdx);
+                                sheet = package.Workbook.Worksheets[pageName];
+
+                                rowHeights.Add(nextPIdx, 0);
+                                rowIndexes.Add(nextPIdx, (9, 10));
+
+
+                                var idx = rowIndexes[nextPIdx].Item2;
+                                var height = rowHeights[nextPIdx];
+
+                                sheetService.GenerateSequenceRows(sheet, ref height, ref idx, ChangeHeight, DefaultRowH);
+
+                                rowIndexes[nextPIdx] = (rowIndexes[nextPIdx].Item1, idx + 4);
+                                rowHeights[nextPIdx] = height;
+
+                                abnormalStarts.Add(nextPIdx, idx + 4);
+                            }
+                            rowIndexes[currentPIdx] = (rowIndexes[currentPIdx].Item1, rowindex - 1);
+                            rowHeights[currentPIdx] += specialTotalHeight;
+
+                            specialTotalHeight = 0;
+
+                            rowindex = startingAbnormalRow = abnormalStarts[nextPIdx];
+                        }
+                    }
+                    //last page assignments
+                    string lastPage = sheet.Name.Split(" ")[1];
+                    rowIndexes[lastPage] = (rowIndexes[lastPage].Item1, rowindex - 1);
+                    rowHeights[lastPage] += specialTotalHeight;
+
+                    foreach (var item in package.Workbook.Worksheets.Where(ws => ws.Name.Contains("Sequence")))
+                    {
+                        string currentChar = item.Name.Split(" ")[1];
+                        if (rowIndexes[currentChar].Item2 - abnormalStarts[currentChar] >= 8)
+                            continue;
+                        else
+                        {
+                            int i = rowIndexes[currentChar].Item2;
+                            double height = rowHeights[currentChar];
+                            sheetService.GenerateAbnormalRows(item, ref height, ref i, abnormalStarts[currentChar]);
+                            rowIndexes[currentChar] = (rowIndexes[currentChar].Item1, i);
+                            rowHeights[currentChar] = height;
+                        }
+                    }
+                }
+                else
+                {
+                    foreach (var item in package.Workbook.Worksheets.Where(ws => ws.Name.Contains("Sequence")))
+                    {
+                        string currentChar = item.Name.Split(" ")[1];
+                        int i = rowIndexes[currentChar].Item2;
+                        double height = rowHeights[currentChar];
+                        sheetService.GenerateAbnormalRows(item, ref height, ref i, abnormalStarts[currentChar]);
+                        rowIndexes[currentChar] = (rowIndexes[currentChar].Item1, i);
+                        rowHeights[currentChar] = height;
+                    }
+                }
+
+                foreach (var item in package.Workbook.Worksheets.Where(ws => ws.Name.Contains("Sequence")))
+                {
+                    string currentChar = item.Name.Split(" ")[1];
+
+                    stylesService.SetAbnormalsAndImgsStyles(item, abnormalStarts[currentChar], rowIndexes[currentChar].Item2, currentChar);
+                }
+
+                sheet = package.Workbook.Worksheets.First();
+
+                #region images and notes
+
+                double imgCellWidthDefTmplt = sheet.Columns[13].Width + sheet.Columns[14].Width + sheet.Columns[15].Width + sheet.Columns[16].Width;
+
+                double imgCellWidthExtTmplt = 0;
+                if (package.Workbook.Worksheets.Count > 1)
+                {
+                    if (package.Workbook.Worksheets[1].Name.Contains("Sequence"))
+                    {
+                        imgCellWidthExtTmplt = package.Workbook.Worksheets[1].Columns[13].Width;
+                    }
+                }
+
+                double changeHeightP = imgService.HeightToPixels(rowHeights["A"]);
+
+                int currentSheetColumnWidth = imgService.WidthToPixels(imgCellWidthDefTmplt);
+
+                int offsetY = 2;
+
+                //if anything is moved in template this needs to be updated
+                double globalXoffsetA = imgService.WidthToPixels(211.49) + 65/*169.39*/, globalYoffsetA = imgService.HeightToPixels(370.3) + 20/*280.2*/;
+                double globalXoffsetB = imgService.WidthToPixels(211.49) + 27/*169.89*/, globalYoffsetB = imgService.HeightToPixels(77.4) + 22/*90.6*/;
+
+                //sheet = package.Workbook.Worksheets["Analysis A"];
+
+                if (SosDistribution.Illustrations != null && SosDistribution.Illustrations.Any())
+                {
+
+                    string[] imgPath = { $"uploads/SOSSequence/Ilustrations/", "" };
+
+                    int _case = SosDistribution.Illustrations.Count > 2 ? 1 : 0;
+
+                    bool add2ndImg = false;
+
+                    double globalXoffset = globalXoffsetA, globalYoffset = globalYoffsetA;
+
+                    int tempindex = 0;
+                    int spacing = 5;
+                    foreach (var image in SosDistribution.Illustrations)
+                    {
+                        bool changedSheet = true;
+                        imgPath[1] = image.StorageFileName;
+                        int horizontalOffset = 0;
+                        using (FileStream stream = System.IO.File.OpenRead($"{imgPath[0]}{imgPath[1]}"))
+                        {
+                            Image imgObj = Image.FromStream(stream);
+
+                            int w = imgObj.Width, h = imgObj.Height;
+
+                            switch (_case)
+                            {
+                                case 0:
+                                    int changeableW = currentSheetColumnWidth, changeableH = (int)changeHeightP;
+                                    int changeableOff = offsetY;
+                                    do
+                                    {
+                                        if (w > changeableW)
+                                        {
+                                            (h, w) = imgService.GetResizeMagnitudesMaintainingAspectRatio(w, h, changeableW, true);
+                                        }
+                                        else if (h + changeableOff > changeableH)
+                                        {
+                                            double overflow = (h + changeableOff) - changeableH;
+                                            double percent = overflow * 100 / changeableH;
+                                            if (tempindex != 0 && percent > 10)
+                                            {
+                                                string currentChar = sheet.Name.Split(" ")[1];
+                                                string nextPage = sheetService.GetNextCombination(currentChar);
+
+                                                sheet = package.Workbook.Worksheets[$"Sequence {nextPage}"];
+
+                                                if (sheet == null)
+                                                {
+                                                    sheetService.AddSheet(package, 1, currentChar);
+                                                    sheet = package.Workbook.Worksheets[$"Sequence {nextPage}"];
+
+                                                    sheet.Cells["B3"].Value += nextPage;
+
+                                                    rowHeights.Add(nextPage, 0);
+                                                    rowIndexes.Add(nextPage, (7, 8));
+
+
+                                                    var idx = rowIndexes[nextPage].Item2;
+                                                    var height = rowHeights[nextPage];
+
+                                                    sheetService.GenerateSequenceRows(sheet, ref height, ref idx, ChangeHeight, DefaultRowH);
+
+                                                    idx += 4;
+                                                    abnormalStarts.Add(nextPage, idx);
+
+                                                    sheetService.GenerateAbnormalRows(sheet, ref height, ref idx, abnormalStarts[nextPage], true);
+
+                                                    rowIndexes[nextPage] = (rowIndexes[nextPage].Item1, idx);
+                                                    rowHeights[nextPage] = height;
+
+                                                    stylesService.SetAbnormalsAndImgsStyles(sheet, abnormalStarts[nextPage], rowIndexes[nextPage].Item2, nextPage);
+
+                                                    imgCellWidthExtTmplt = sheet.Columns[13].Width;
+                                                    changedSheet = false;
+                                                }
+
+                                                changeHeightP = changeableH = imgService.HeightToPixels(rowHeights[nextPage]);
+                                                currentSheetColumnWidth = changeableW = imgService.WidthToPixels(imgCellWidthExtTmplt);
+                                                offsetY = changeableOff = 2;
+
+                                                globalXoffset = globalXoffsetB;
+                                                globalYoffset = globalYoffsetB;
+
+                                            }
+                                            (h, w) = imgService.GetResizeMagnitudesMaintainingAspectRatio(w, h, changeableH - changeableOff, false);
+                                        }
+                                        else
+                                        {
+                                            break;
+                                        }
+                                    } while (true);
+
+                                    horizontalOffset = (int)((changeableW - w) / 2);
+                                    break;
+                                case 1:
+                                    (w, h) = (currentSheetColumnWidth / 2 - 20, 160);
+                                    if (!add2ndImg)
+                                    {
+                                        horizontalOffset = 5;
+                                        add2ndImg = true;
+                                    }
+                                    else
+                                    {
+                                        horizontalOffset = currentSheetColumnWidth - w - 5;
+                                        add2ndImg = false;
+                                    }
+                                    break;
+                            }
+
+                            if (offsetY + h > changeHeightP && changedSheet)
+                            {
+                                string currentChar = sheet.Name.Split(" ")[1];
+                                string nextPage = sheetService.GetNextCombination(currentChar);
+
+                                sheet = package.Workbook.Worksheets[$"Sequence {nextPage}"];
+
+                                if (sheet == null)
+                                {
+                                    sheetService.AddSheet(package, 1, currentChar);
+                                    sheet = package.Workbook.Worksheets[$"Sequence {nextPage}"];
+
+                                    sheet.Cells["B3"].Value += nextPage;
+
+                                    rowHeights.Add(nextPage, 0);
+                                    rowIndexes.Add(nextPage, (7, 8));
+
+                                    var idx = rowIndexes[nextPage].Item2;
+                                    var height = rowHeights[nextPage];
+
+                                    sheetService.GenerateAnalysisRows(sheet, ref height, ref idx, ChangeHeight, DefaultRowH);
+
+                                    idx += 4;
+                                    abnormalStarts.Add(nextPage, idx);
+
+                                    sheetService.GenerateAbnormalRows(sheet, ref height, ref idx, abnormalStarts[nextPage], true);
+
+                                    rowIndexes[nextPage] = (rowIndexes[nextPage].Item1, idx);
+                                    rowHeights[nextPage] = height;
+
+                                    stylesService.SetAbnormalsAndImgsStyles(sheet, abnormalStarts[nextPage], rowIndexes[nextPage].Item2, nextPage);
+
+                                    imgCellWidthExtTmplt = sheet.Columns[13].Width;
+                                }
+
+                                changeHeightP = imgService.HeightToPixels(rowHeights[nextPage]);
+                                currentSheetColumnWidth = imgService.WidthToPixels(imgCellWidthExtTmplt);
+
+                                globalXoffset = globalXoffsetB;
+                                globalYoffset = globalYoffsetB;
+
+                                offsetY = 2;
+
+                                changedSheet = true;
+                                //spacing = 10;
+                            }
+
+                            string pictureName = image.FileName.Split(".")[0];
+                            var picture = sheet.Drawings.AddPicture($"{pictureName}{tempindex}.png", stream);
+                            picture.SetSize(w, h);
+
+                            picture.SetPosition((int)globalYoffset + offsetY, (int)globalXoffset + horizontalOffset);
+
+                            if (_case == 0)
+                            {
+                                offsetY += h;
+                            }
+                            else if (!add2ndImg)
+                            {
+                                offsetY += h + spacing;
+                            }
+
+                            tempindex++;
+                        }
+                    }
+
+                }
+
+                //if (changedAnalysis || changedSheet || changedImgSheet)
+                //{
+                //    sheet = package.Workbook.Worksheets["Analysis B"];
+                //    double specialHeight = stylesService.CalculateRowHeight(SosAnalysis.SOSHub.OtherInformation, (sheet.Columns[2].Width + sheet.Columns[3].Width + sheet.Columns[4].Width), sheet.Cells[$"B{startingAbnormalRowB}"].Style.Font.Size);
+                //    int rows = leftoffrow - startingAbnormalRowB + 1;
+                //    int size = 20 * rows;
+                //    if (specialHeight > size)
+                //    {
+                //        double nRowH = (specialHeight - size) / rows;
+                //        for (int i = startingAbnormalRowB; i <= leftoffrow; i++)
+                //        {
+                //            sheet.Rows[i].Height += nRowH;
+                //        }
+                //    }
+                //    sheet.Cells[$"B{startingAbnormalRowB}"].Value = SosAnalysis.SOSHub.OtherInformation;
+                //}
+                //if (sheet.Name == "Analysis B")
+                //    sheet = package.Workbook.Worksheets["Analysis A"];
+
+                //double spHeight = stylesService.CalculateRowHeight(SosAnalysis.SOSHub.OtherInformation, (sheet.Columns[2].Width + sheet.Columns[3].Width + sheet.Columns[4].Width), sheet.Cells[$"B{startingAbnormalRow}"].Style.Font.Size);
+                //int spRows = leftoffrow - startingAbnormalRowB + 1;
+                //int tSize = 20 * spRows;
+                //if (spHeight > tSize)
+                //{
+                //    double nRowH = (spHeight - tSize) / spRows;
+                //    for (int i = startingAbnormalRow; i <= rowindex; i++)
+                //    {
+                //        sheet.Rows[i].Height += nRowH;
+                //    }
+                //}
+                //sheet.Cells[$"B{startingAbnormalRow}"].Value = SosAnalysis.SOSHub.OtherInformation;
+
+                package.Workbook.Worksheets.First().Select();
+
+                #endregion
+
+                #endregion
+
+                // Save to file
+                //package.Workbook.Calculate();
+                sheetService.SetPrintingOptions(package.Workbook);
+
+                sheet.Protection.IsProtected = true;
+                package.SaveAs(ms);
+            }
+
+            ms.Position = 0;
+
+            var res = File(ms, "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet", !string.IsNullOrEmpty(SosDistribution.InternalControlNumber) ? $"{SosDistribution.InternalControlNumber} Sequence Report.xlsx" : "Sequence Report.xlsx");
             res.EnableRangeProcessing = true;
             return res;
         }

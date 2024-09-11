@@ -3,6 +3,7 @@ using DocumentFormat.OpenXml.Drawing;
 using DocumentFormat.OpenXml.Spreadsheet;
 using DocumentFormat.OpenXml.Wordprocessing;
 using OfficeOpenXml;
+using System.Text.RegularExpressions;
 
 namespace SupervisorMobility.API.DataAccess.Services.ExportationServices
 {
@@ -30,7 +31,11 @@ namespace SupervisorMobility.API.DataAccess.Services.ExportationServices
                     break;
                 case 2:
                     sheetName = "DataAccess/Templates/Sequence Extra Template.xlsx";
-                    sheetName = "Sequence " + GetNextCombination(currentIdx);
+                    sheetWN = "Sequence " + GetNextCombination(currentIdx);
+                    break;
+                case 3:
+                    sheetName = "DataAccess/Templates/Distribution Extra Template.xlsx";
+                    sheetWN = "HOE DISTRIBUTION (" + GetNextIndex(currentIdx) + ")";
                     break;
             }
 
@@ -134,6 +139,42 @@ namespace SupervisorMobility.API.DataAccess.Services.ExportationServices
             }
 
             return new string('A', length + 1);
+        }
+
+        public int GetNextIndex(string input)
+        {
+            string pattern = @"\d+";
+            Match match = Regex.Match(input, pattern);
+
+            if (match.Success)
+            {
+                int number = int.Parse(match.Value) + 1;
+                return number;
+            }
+            else
+            {
+                return 2;
+            }
+        }
+
+        public void MoveRowValuesDistribution(ExcelWorksheet sheet, int rowindex, bool isFirst)
+        {
+            sheet.Rows[rowindex].Height = sheet.Rows[rowindex - 1].Height;
+            sheet.Cells[$"B{rowindex}"].Value = sheet.Cells[$"B{rowindex - 1}"].Value;
+            sheet.Cells[$"C{rowindex}"].Value = sheet.Cells[$"C{rowindex - 1}"].Value;
+            sheet.Cells[$"H{rowindex}"].Value = sheet.Cells[$"H{rowindex - 1}"].Value;
+            sheet.Cells[$"L{rowindex}"].Value = sheet.Cells[$"L{rowindex - 1}"].Value;
+            sheet.Cells[$"M{rowindex}"].Value = sheet.Cells[$"M{rowindex - 1}"].Value;
+            sheet.Cells[$"N{rowindex}"].Value = sheet.Cells[$"N{rowindex - 1}"].Value;
+            sheet.Cells[$"O{rowindex}"].Value = sheet.Cells[$"O{rowindex - 1}"].Value;
+            if (isFirst)
+            {
+                sheet.Cells[$"Q{rowindex}"].Value = sheet.Cells[$"Q{rowindex - 1}"].Value;
+            }
+            else
+            {
+                sheet.Cells[$"P{rowindex}"].Value = sheet.Cells[$"P{rowindex - 1}"].Value;
+            }
         }
 
         public void SetPrintingOptions(ExcelWorkbook workbook)

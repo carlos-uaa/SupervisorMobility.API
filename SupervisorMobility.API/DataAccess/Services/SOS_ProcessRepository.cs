@@ -2985,7 +2985,7 @@ namespace SupervisorMobility.API.DataAccess.Services
             return _context.SaveChanges();
         }
 
-        public async Task<SOSDistribution> GetSOSDistribution(int SOSDistributionId, bool includeImages = false, bool includeNotes = false, bool includeLogbooks = false,bool includeSOS = false, bool includeImagesSOS = false)
+        public async Task<SOSDistribution> GetSOSDistribution(int SOSDistributionId, bool includeImages = false, bool includeNotes = false, bool includeLogbooks = false,bool includeSOS = false, bool includeImagesSOS = false, bool includePeople = false, bool includeTurns = false)
         {
             var query = _context.SOSDistributions.AsNoTracking().Where(SOS => SOS.SOSDistributionId == SOSDistributionId && SOS.IsActive == true);
 
@@ -3005,7 +3005,17 @@ namespace SupervisorMobility.API.DataAccess.Services
                 query = query.Include(t => t.DistributionLogbooks).ThenInclude(l => l.Reviewer);
             }
 
+            if (includePeople)
+            {
+                query = query.Include(p => p.Approver);
+                query = query.Include(p => p.Reviewer);
+            }
 
+            if (includeTurns)
+            {
+                query = query.Include(t => t.Turns).ThenInclude(t => t.Supervisor);
+                query = query.Include(t => t.Turns).ThenInclude(t => t.Operator);
+            }
 
             if (includeSOS)
             {
@@ -3014,6 +3024,9 @@ namespace SupervisorMobility.API.DataAccess.Services
                 query = query.Include(m => m.SOSHub).ThenInclude(s => s.ToolsUsed).ThenInclude(t => t.Tool);
                 query = query.Include(m => m.SOSHub).ThenInclude(s => s.MaterialsUsed).ThenInclude(m => m.Material);
                 query = query.Include(m => m.SOSHub).ThenInclude(s => s.SafetyEquipment);
+                query = query.Include(m => m.SOSHub).ThenInclude(s => s.Owner);
+                query = query.Include(m => m.SOSHub).ThenInclude(s => s.Plant);
+                query = query.Include(m => m.SOSHub).ThenInclude(s => s.Department);
                 query = query.Include(m => m.Times);
 
             }
