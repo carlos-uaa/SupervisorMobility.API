@@ -108,6 +108,27 @@ namespace SupervisorMobility.API.DataAccess.Services.ExportationServices
             }
         }
 
+        public void GenerateDistributionsRows(ExcelWorksheet worksheet, ref double rowHeight, ref int idx, double ChangeHeight, double DefaultRowH)
+        {
+            if (rowHeight == 0)
+                rowHeight = DefaultRowH;
+
+            while (rowHeight < ChangeHeight)
+            {
+                double doitFit = (rowHeight) * 100 / ChangeHeight;
+                if (doitFit < 95)
+                {
+                    worksheet.InsertRow(++idx, 1);
+                    _stylesService.ApplyDistributionStyles(worksheet, idx, false);
+                    rowHeight += 21.8;
+                }
+                else
+                {
+                    break;
+                }
+            }
+        }
+
         public void GenerateAbnormalRows(ExcelWorksheet worksheet, ref double rowHeight, ref int idx, int startIdx, bool empty = false)
         {
             if(empty)

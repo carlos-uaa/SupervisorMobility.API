@@ -104,6 +104,77 @@ namespace SupervisorMobility.API.DataAccess.Services.ExportationServices
             sheet.Cells[$"J{rownumber}:L{rownumber}"].Style.HorizontalAlignment = ExcelHorizontalAlignment.Left;
         }
 
+        public void ApplyDistributionStyles(ExcelWorksheet sheet, int rownumber, bool firstPage)
+        {
+            sheet.Rows[rownumber].Height = 21.8;
+
+            sheet.Cells[$"B{rownumber}"].Style.Border.Left.Style = ExcelBorderStyle.Medium;
+            sheet.Cells[$"B{rownumber}"].Style.Border.Right.Style = ExcelBorderStyle.Thin;
+            sheet.Cells[$"B{rownumber}"].Style.Border.Bottom.Style = /*!last ? ExcelBorderStyle.Dashed :*/ ExcelBorderStyle.Thin;
+            sheet.Cells[$"B{rownumber}"].Style.VerticalAlignment = ExcelVerticalAlignment.Center;
+
+            sheet.Cells[$"C{rownumber}:G{rownumber}"].Merge = true;
+            sheet.Cells[$"C{rownumber}:G{rownumber}"].Style.WrapText = true;
+            sheet.Cells[$"C{rownumber}:G{rownumber}"].Style.Border.Left.Style = ExcelBorderStyle.Thin;
+            sheet.Cells[$"C{rownumber}:G{rownumber}"].Style.Border.Right.Style = ExcelBorderStyle.Thin;
+            sheet.Cells[$"C{rownumber}:G{rownumber}"].Style.Border.Bottom.Style = /*!last ? ExcelBorderStyle.Dashed :*/ ExcelBorderStyle.Thin;
+            sheet.Cells[$"C{rownumber}:G{rownumber}"].Style.VerticalAlignment = ExcelVerticalAlignment.Center;
+
+            sheet.Cells[$"H{rownumber}:K{rownumber}"].Merge = true;
+            sheet.Cells[$"H{rownumber}:K{rownumber}"].Style.Border.Left.Style = ExcelBorderStyle.Thin;
+            sheet.Cells[$"H{rownumber}:K{rownumber}"].Style.Border.Right.Style = ExcelBorderStyle.Thin;
+            sheet.Cells[$"H{rownumber}:K{rownumber}"].Style.Border.Bottom.Style = /*!last ? ExcelBorderStyle.Dashed :*/ ExcelBorderStyle.Medium;
+            sheet.Cells[$"H{rownumber}:K{rownumber}"].Style.VerticalAlignment = ExcelVerticalAlignment.Center;
+
+            sheet.Cells[$"L{rownumber}"].Style.Border.Left.Style = ExcelBorderStyle.Thin;
+            sheet.Cells[$"L{rownumber}"].Style.Border.Right.Style = ExcelBorderStyle.Thin;
+            sheet.Cells[$"L{rownumber}"].Style.Border.Bottom.Style = /*!last ? ExcelBorderStyle.Dashed :*/ ExcelBorderStyle.Thin;
+            sheet.Cells[$"L{rownumber}"].Style.VerticalAlignment = ExcelVerticalAlignment.Center;
+            sheet.Cells[$"L{rownumber}"].Style.HorizontalAlignment = ExcelHorizontalAlignment.Center;
+
+            sheet.Cells[$"M{rownumber}"].Style.Border.Left.Style = ExcelBorderStyle.Thin;
+            sheet.Cells[$"M{rownumber}"].Style.Border.Right.Style = ExcelBorderStyle.Thin;
+            sheet.Cells[$"M{rownumber}"].Style.Border.Bottom.Style = /*!last ? ExcelBorderStyle.Dashed :*/ ExcelBorderStyle.Thin;
+            sheet.Cells[$"M{rownumber}"].Style.VerticalAlignment = ExcelVerticalAlignment.Center;
+            sheet.Cells[$"M{rownumber}"].Style.HorizontalAlignment = ExcelHorizontalAlignment.Center;
+
+            sheet.Cells[$"N{rownumber}"].Style.Border.Left.Style = ExcelBorderStyle.Thin;
+            sheet.Cells[$"N{rownumber}"].Style.Border.Right.Style = ExcelBorderStyle.Thin;
+            sheet.Cells[$"N{rownumber}"].Style.Border.Bottom.Style = /*!last ? ExcelBorderStyle.Dashed :*/ ExcelBorderStyle.Thin;
+            sheet.Cells[$"N{rownumber}"].Style.VerticalAlignment = ExcelVerticalAlignment.Center;
+            sheet.Cells[$"N{rownumber}"].Style.HorizontalAlignment = ExcelHorizontalAlignment.Center;
+
+            if (firstPage)
+            {
+                sheet.Cells[$"O{rownumber}:P{rownumber}"].Merge = true;
+                sheet.Cells[$"O{rownumber}:P{rownumber}"].Style.Border.Left.Style = ExcelBorderStyle.Thin;
+                sheet.Cells[$"O{rownumber}:P{rownumber}"].Style.Border.Right.Style = ExcelBorderStyle.Thin;
+                sheet.Cells[$"O{rownumber}:P{rownumber}"].Style.Border.Bottom.Style = /*!last ? ExcelBorderStyle.Dashed :*/ ExcelBorderStyle.Thin;
+                sheet.Cells[$"O{rownumber}:P{rownumber}"].Style.VerticalAlignment = ExcelVerticalAlignment.Center;
+                sheet.Cells[$"O{rownumber}:P{rownumber}"].Style.HorizontalAlignment = ExcelHorizontalAlignment.Center;
+
+                sheet.Cells[$"Q{rownumber}"].Style.Border.Left.Style = ExcelBorderStyle.Thin;
+                sheet.Cells[$"Q{rownumber}"].Style.Border.Right.Style = ExcelBorderStyle.Thin;
+                sheet.Cells[$"Q{rownumber}"].Style.Border.Bottom.Style = /*!last ? ExcelBorderStyle.Dashed :*/ ExcelBorderStyle.Thin;
+                sheet.Cells[$"Q{rownumber}"].Style.VerticalAlignment = ExcelVerticalAlignment.Center;
+                sheet.Cells[$"Q{rownumber}"].Style.HorizontalAlignment = ExcelHorizontalAlignment.Center;
+            }
+            else
+            {
+                sheet.Cells[$"O{rownumber}:P{rownumber}"].Style.Border.Left.Style = ExcelBorderStyle.Thin;
+                sheet.Cells[$"O{rownumber}:P{rownumber}"].Style.Border.Right.Style = ExcelBorderStyle.Thin;
+                sheet.Cells[$"O{rownumber}:P{rownumber}"].Style.Border.Bottom.Style = /*!last ? ExcelBorderStyle.Dashed :*/ ExcelBorderStyle.Thin;
+                sheet.Cells[$"O{rownumber}:P{rownumber}"].Style.VerticalAlignment = ExcelVerticalAlignment.Center;
+                sheet.Cells[$"O{rownumber}:P{rownumber}"].Style.HorizontalAlignment = ExcelHorizontalAlignment.Center;
+
+                sheet.Cells[$"P{rownumber}"].Style.Border.Left.Style = ExcelBorderStyle.Thin;
+                sheet.Cells[$"P{rownumber}"].Style.Border.Right.Style = ExcelBorderStyle.Thin;
+                sheet.Cells[$"P{rownumber}"].Style.Border.Bottom.Style = /*!last ? ExcelBorderStyle.Dashed :*/ ExcelBorderStyle.Thin;
+                sheet.Cells[$"P{rownumber}"].Style.VerticalAlignment = ExcelVerticalAlignment.Center;
+                sheet.Cells[$"P{rownumber}"].Style.HorizontalAlignment = ExcelHorizontalAlignment.Center;
+            }
+        }
+
         public void ChangeLastRowStyleAnalysis(ExcelWorksheet sheet, int rownumber, bool last)
         {
             sheet.Cells[$"B{rownumber}"].Style.Border.Bottom.Style = !last ? ExcelBorderStyle.Dashed : ExcelBorderStyle.Thin;
@@ -220,6 +291,22 @@ namespace SupervisorMobility.API.DataAccess.Services.ExportationServices
                     worksheet.Cells[$"M{templateRow}:M{rowIndex}"].Style.Border.Right.Style = ExcelBorderStyle.Medium;
                     worksheet.Cells[$"M{templateRow}:M{rowIndex}"].Style.Border.Bottom.Style = ExcelBorderStyle.Medium;
                     break;
+            }
+        }
+
+        public void SetDistributionImgsStyles(ExcelWorksheet worksheet, int startingrow, int rowIndex, bool isFirst = false)
+        {
+            if (isFirst) //To check where in the template sheet is the row to start merging cells
+            {
+                worksheet.Cells[$"R{startingrow}:Z{rowIndex}"].Merge = true;
+                worksheet.Cells[$"R{startingrow}:Z{rowIndex}"].Style.Border.Right.Style = ExcelBorderStyle.Medium;
+                //worksheet.Cells[$"M{startingrow}:P{rowIndex}"].Style.Border.Bottom.Style = ExcelBorderStyle.Medium;
+            }
+            else
+            {
+                worksheet.Cells[$"Q{startingrow}:W{rowIndex}"].Merge = true;
+                worksheet.Cells[$"Q{startingrow}:W{rowIndex}"].Style.Border.Right.Style = ExcelBorderStyle.Medium;
+                //worksheet.Cells[$"M{startingrow}:M{rowIndex}"].Style.Border.Bottom.Style = ExcelBorderStyle.Medium;
             }
         }
 
