@@ -17,6 +17,7 @@ namespace SupervisorMobility.API.DataAccess.Entities.SOS
         public User? ReviewerHS { get; set; }
         public FileUpload? ReviewerHSSignatureImage { get; set; } = new();
 
+        public DateTime? CreatedAt { get; set; }
         public string? TargetTime { get; set; }
 
         public ICollection<SOSFlowLogbook>? FlowLogbooks { get; set; } = new List<SOSFlowLogbook>();
