@@ -11,6 +11,7 @@ using SupervisorMobility.API.Models.SOS.SOSAnalysisDtos;
 using SupervisorMobility.API.Models.SOS.SOSAnalysisLogbookDtos;
 using SupervisorMobility.API.Models.SOS.SOSCombinationDtos;
 using SupervisorMobility.API.Models.SOS.SOSDistributionDtos;
+using SupervisorMobility.API.Models.SOS.SOSFlowDtos;
 using SupervisorMobility.API.Models.SOS.SOSHubDtos;
 using SupervisorMobility.API.Models.SOS.SOSHubDtos.AnalysisBkupDtos;
 using SupervisorMobility.API.Models.SOS.SOSHubDtos.SectionDtos;
@@ -272,6 +273,36 @@ namespace SupervisorMobility.API.DataAccess.Services
         #region SOSCombinationLogbook
         Task<SOSCombinationLogbook> GetSOSCombinationLogbookById(int id);
         Task<int> CreateSOSCombinationLogbook(SOSCombinationLogbook LogBook_ToCreate);
+        #endregion
+
+
+        //Flow
+        #region SOSFlow
+        Task<int> CreateSOSFlow(SOSFlow SOS_FlowToCreate);
+        Task<SOSFlow> GetSOSFlow(int SOSFlowId, bool includeImages = false, bool includeNotes = false, bool includeLogbooks = false, bool includeSOS = false, bool includeImagesSOS = false);
+        Task<IEnumerable<SOSFlow>> GetAllSOSFlow(bool includeImages = false, bool includeNotes = false, bool includeLogbooks = false, bool includeSOS = false);
+
+        Task<int> UpdateSOSFlow(SOSFlowForUpdateDto FlowUpdate, SOSFlow FlowEntity);
+        Task<int> RemoveSOSFlow(int SOS_Flow_id);
+
+
+        #endregion
+        #region Add Range SOS Flow
+        Task<List<SOSFlowLogbook>> AddRangeSOSFlowLogbook(List<SOSFlowLogbook> SOSFlowLogbooksToAdd);
+        #endregion
+        #region Add To Sos Flow
+        Task<AsyncVoidMethodBuilder> AddSOSFlowLogbookToSOSFlow(SOSFlow Master, SOSFlowLogbook Slave);
+        //Task AddIlustrationToSOSFlow(int SOS_Flow_id, FileUpload evidence);
+
+        #endregion
+        #region Remove from SosFlow
+        Task<AsyncVoidMethodBuilder> SOSDataRemoveAllSOSFlowLogbookFromSOSFlow(SOSFlow Master);
+        //Task<int> RemoveIlustrationFromSOSFlow(int SOS_Flow_id, int ImageFile_id);
+
+        #endregion
+        #region SOSFlowLogbook
+        Task<SOSFlowLogbook> GetSOSFlowLogbookById(int id);
+        Task<int> CreateSOSFlowLogbook(SOSFlowLogbook LogBook_ToCreate);
         #endregion
 
         #region commonOperations
