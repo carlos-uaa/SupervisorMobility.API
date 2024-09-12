@@ -9,6 +9,7 @@ using Microsoft.IdentityModel.Tokens;
 using OfficeOpenXml;
 using OfficeOpenXml.Drawing;
 using OfficeOpenXml.Style;
+using Org.BouncyCastle.Utilities;
 using SupervisorMobility.API.DataAccess.Entities.SOS;
 using SupervisorMobility.API.DataAccess.Services;
 using SupervisorMobility.API.DataAccess.Services.ExportationServices;
@@ -1317,7 +1318,7 @@ namespace SupervisorMobility.API.Controllers
                 sheet.Cells["B8"].Value = SosDistribution.ProcessName;
                 sheet.Cells["G8"].Value = SosDistribution.InternalControlNumber;
 
-                sheet.Cells["B10"].Value = SosDistribution.DistributionLogbooks.First().Approver;
+                sheet.Cells["B10"].Value = SosDistribution.DistributionLogbooks.First().Approver.Name;
                 sheet.Cells["E10"].Value = SosDistribution.SOSHub.ReviewerEditors.First().Name;
                 sheet.Cells["G10"].Value = SosDistribution.SOSHub.ApproverOwners.First().Name;
 
@@ -1325,22 +1326,26 @@ namespace SupervisorMobility.API.Controllers
                 sheet.Cells["D12"].Value = SosDistribution.ApplicationMonth;
                 sheet.Cells["G12"].Value = SosDistribution.SOSHub.AppliedModel.Code;
                 sheet.Cells["I12"].Value = SosDistribution.TackTime;
-                sheet.Cells["J12"].Value = SosDistribution.CycleTime;
+                sheet.Cells["J12"].Value = SosDistribution.SOSHub.TrainingTime;
                 sheet.Cells["P12"].Value = SosDistribution.SOSHub.Plant.Code;
                 sheet.Cells["U12"].Value = SosDistribution.SOSHub.Department.Code;
 
-                int i = 0;
-                int base_row = 8;
-
-                do
+                if (SosDistribution.Turns != null && SosDistribution.Turns.Any())
                 {
-                    base_row += i;
-                    var turn = SosDistribution.Turns.ElementAt(i);
-                    sheet.Cells[$"K{base_row}"].Value = turn.TurnType;
-                    sheet.Cells[$"M{base_row}"].Value = turn.Operator.Name;
-                    sheet.Cells[$"V{base_row}"].Value = turn.Supervisor.Name;
-                    i++;
-                } while (i < 3);
+                    int i = 0;
+                    int base_row = 8;
+                    int max = Math.Min(3, SosDistribution.Turns.Count);
+
+                    do
+                    {
+                        base_row += i;
+                        var turn = SosDistribution.Turns.ElementAt(i);
+                        sheet.Cells[$"K{base_row}"].Value = turn.TurnType;
+                        sheet.Cells[$"M{base_row}"].Value = turn.Operator.Name;
+                        sheet.Cells[$"V{base_row}"].Value = turn.Supervisor.Name;
+                        i++;
+                    } while (i < max);
+                }
 
                 string[] models = SosDistribution.AplicationModels.Split("§");
                 if (models.Any())
@@ -1458,43 +1463,46 @@ namespace SupervisorMobility.API.Controllers
                     if (indexSection - 1 != 0)
                     {
                         sheet.InsertRow(rowindex, 1);
-                        stylesService.ApplySequenceStyles(sheet, rowindex, firstPage);
+                        stylesService.ApplyDistributionStyles(sheet, rowindex, firstPage);
                     }
 
                     sheet.Cells[$"B{rowindex}"].Value = indexSection;
 
                     sheet.Cells[$"C{rowindex}"].Value = section.Step;
 
-                    var timeText = SosDistribution.Times.FirstOrDefault(p => p.SectionId == section.SectionId).Time;
-
-                    if (!string.IsNullOrEmpty(timeText))
+                    if (SosDistribution.Times != null && SosDistribution.Times.Any())
                     {
-                        double[] times = Array.ConvertAll(timeText.Split("§"), s => string.IsNullOrEmpty(s) ? 0.0 : Double.Parse(s));
+                        var timeText = SosDistribution.Times.FirstOrDefault(p => p.SectionId == section.SectionId).Time;
 
-                        char col = 'L';
-                        for (int j = 0; j < 5; j++)
+                        if (!string.IsNullOrEmpty(timeText))
                         {
-                            col = (char)(col + j);
-                            if (times[j] == 0) 
+                            double[] times = Array.ConvertAll(timeText.Split("§"), s => string.IsNullOrEmpty(s) ? 0.0 : Double.Parse(s));
+
+                            char col = 'L';
+                            for (int j = 0; j < 5; j++)
                             {
-                                //sheet.Cells[$"H{rowindex}"].Style.Numberformat.Format = "0.##";
-                                //sheet.Cells[$"I{rowindex}"].Style.Numberformat.Format = "0.###";
-                                if (firstPage && col == 'O')
+                                col = (char)(col + j);
+                                if (times[j] == 0)
                                 {
-                                    sheet.Cells[$"{col}{rowindex}:P{rowindex}"].Style.Border.Diagonal.Style = ExcelBorderStyle.Thin;
-                                    sheet.Cells[$"{col}{rowindex}:P{rowindex}"].Style.Border.DiagonalUp = true;
-                                    col = 'P';
+                                    //sheet.Cells[$"H{rowindex}"].Style.Numberformat.Format = "0.##";
+                                    //sheet.Cells[$"I{rowindex}"].Style.Numberformat.Format = "0.###";
+                                    if (firstPage && col == 'O')
+                                    {
+                                        sheet.Cells[$"{col}{rowindex}:P{rowindex}"].Style.Border.Diagonal.Style = ExcelBorderStyle.Thin;
+                                        sheet.Cells[$"{col}{rowindex}:P{rowindex}"].Style.Border.DiagonalUp = true;
+                                        col = 'P';
+                                    }
+                                    else
+                                    {
+                                        sheet.Cells[$"{col}{rowindex}"].Style.Border.Diagonal.Style = ExcelBorderStyle.Thin;
+                                        sheet.Cells[$"{col}{rowindex}"].Style.Border.DiagonalUp = true;
+                                    }
                                 }
                                 else
                                 {
-                                    sheet.Cells[$"{col}{rowindex}"].Style.Border.Diagonal.Style = ExcelBorderStyle.Thin;
-                                    sheet.Cells[$"{col}{rowindex}"].Style.Border.DiagonalUp = true;
+                                    sheet.Cells[$"{col}{rowindex}"].Value = times[j];
+                                    if (firstPage && col == 'O') col = 'P';
                                 }
-                            }
-                            else
-                            {
-                                sheet.Cells[$"{col}{rowindex}"].Value = times[j];
-                                if (firstPage && col == 'O') col = 'P';
                             }
                         }
                     }
@@ -1512,7 +1520,7 @@ namespace SupervisorMobility.API.Controllers
                 string currentWorkingIndex = sheet.Name.Split(" ", 2)[1];
 
                 rowHeights[currentWorkingIndex] += TotalRowHeight + 21.8; // + 21.8 due to last row
-                rowIndexes[currentWorkingIndex] = (rowIndexes[currentWorkingIndex].Item1, rowindex+1);
+                rowIndexes[currentWorkingIndex] = (rowIndexes[currentWorkingIndex].Item1, rowindex);
 
                 foreach (var worksheet in package.Workbook.Worksheets.Where(ws => ws.Name.Contains("DISTRIBUTION")))
                 {
@@ -1525,9 +1533,9 @@ namespace SupervisorMobility.API.Controllers
                         var idx = rowIndexes[currentChar].Item2;
                         var height = rowHeights[currentChar];
 
-                        sheetService.GenerateSequenceRows(worksheet, ref height, ref idx, ChangeHeight, DefaultRowH);
+                        sheetService.GenerateDistributionsRows(worksheet, ref height, ref idx, ChangeHeight, DefaultRowH, isFirst);
 
-                        rowIndexes[currentChar] = (rowIndexes[currentChar].Item1, idx);
+                        rowIndexes[currentChar] = (rowIndexes[currentChar].Item1, idx+1);
                         rowHeights[currentChar] = height;
                     }
 
@@ -1556,9 +1564,9 @@ namespace SupervisorMobility.API.Controllers
 
                         var cell = sheet.Cells[$"{column}{rowIndexes[currentChar].Item2}"];
 
-                        cell.Formula = $"SUM({column}{rowIndexes[currentChar].Item1}:{column}{rowIndexes[currentChar].Item2})";
+                        cell.Formula = $"SUM({column}{rowIndexes[currentChar].Item1}:{column}{rowIndexes[currentChar].Item2-1})";
                         cell.Calculate();
-                        if(cell.Value == null || string.IsNullOrWhiteSpace(cell.Text))
+                        if(cell.Value == null || string.IsNullOrWhiteSpace(cell.Text) || cell.Text == "0")
                         {
                             cell.Value = string.Empty;
                         }
@@ -1601,7 +1609,7 @@ namespace SupervisorMobility.API.Controllers
                 if (SosDistribution.Illustrations != null && SosDistribution.Illustrations.Any())
                 {
 
-                    string[] imgPath = { $"uploads/SOSSequence/Ilustrations/", "" };
+                    string[] imgPath = { $"uploads/SOSDistribution/Ilustrations/", "" };
 
                     double globalXoffset = globalXoffsetA, globalYoffset = globalYoffsetA;
 
@@ -1652,7 +1660,7 @@ namespace SupervisorMobility.API.Controllers
                                             var idx = rowIndexes[nextPIdx].Item2;
                                             var height = rowHeights[nextPIdx];
 
-                                            sheetService.GenerateDistributionsRows(sheet, ref height, ref idx, ChangeHeight, DefaultRowH);
+                                            sheetService.GenerateDistributionsRows(sheet, ref height, ref idx, ChangeHeight, DefaultRowH, false);
 
                                             rowIndexes[nextPIdx] = (rowIndexes[nextPIdx].Item1, idx);
                                             rowHeights[nextPIdx] = height;
@@ -1739,6 +1747,16 @@ namespace SupervisorMobility.API.Controllers
 
                 }
 
+                sheet = package.Workbook.Worksheets.First();
+                int sheetTotal = package.Workbook.Worksheets.Where(p => p.Name.Contains("DISTRIBUTION")).Count();
+
+                sheet.Cells["X12"].Value = 1;
+                sheet.Cells["Z12"].Value = sheetTotal;
+                foreach (var (item,index) in package.Workbook.Worksheets.Where(p=>p.Name.Contains("DISTRIBUTION")).Skip(1).Select((item, index)=>(item,index)))
+                {
+                    item.Cells["U6"].Value = index+2;
+                    item.Cells["W6"].Value = sheetTotal;
+                }
 
                 package.Workbook.Worksheets.First().Select();
 

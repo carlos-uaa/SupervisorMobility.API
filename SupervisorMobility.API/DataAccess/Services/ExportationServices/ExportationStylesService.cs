@@ -123,7 +123,7 @@ namespace SupervisorMobility.API.DataAccess.Services.ExportationServices
             sheet.Cells[$"H{rownumber}:K{rownumber}"].Merge = true;
             sheet.Cells[$"H{rownumber}:K{rownumber}"].Style.Border.Left.Style = ExcelBorderStyle.Thin;
             sheet.Cells[$"H{rownumber}:K{rownumber}"].Style.Border.Right.Style = ExcelBorderStyle.Thin;
-            sheet.Cells[$"H{rownumber}:K{rownumber}"].Style.Border.Bottom.Style = /*!last ? ExcelBorderStyle.Dashed :*/ ExcelBorderStyle.Medium;
+            sheet.Cells[$"H{rownumber}:K{rownumber}"].Style.Border.Bottom.Style = /*!last ? ExcelBorderStyle.Dashed :*/ ExcelBorderStyle.Thin;
             sheet.Cells[$"H{rownumber}:K{rownumber}"].Style.VerticalAlignment = ExcelVerticalAlignment.Center;
 
             sheet.Cells[$"L{rownumber}"].Style.Border.Left.Style = ExcelBorderStyle.Thin;

@@ -108,7 +108,7 @@ namespace SupervisorMobility.API.DataAccess.Services.ExportationServices
             }
         }
 
-        public void GenerateDistributionsRows(ExcelWorksheet worksheet, ref double rowHeight, ref int idx, double ChangeHeight, double DefaultRowH)
+        public void GenerateDistributionsRows(ExcelWorksheet worksheet, ref double rowHeight, ref int idx, double ChangeHeight, double DefaultRowH, bool isFirst)
         {
             if (rowHeight == 0)
                 rowHeight = DefaultRowH;
@@ -119,7 +119,7 @@ namespace SupervisorMobility.API.DataAccess.Services.ExportationServices
                 if (doitFit < 95)
                 {
                     worksheet.InsertRow(++idx, 1);
-                    _stylesService.ApplyDistributionStyles(worksheet, idx, false);
+                    _stylesService.ApplyDistributionStyles(worksheet, idx, isFirst);
                     rowHeight += 21.8;
                 }
                 else
