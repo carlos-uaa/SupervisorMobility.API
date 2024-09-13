@@ -802,10 +802,10 @@ namespace SupervisorMobility.API.Controllers
                     rowindex = sheetStartRow + indexSection++;
 
                     string fullText = string.Empty;
+                    int criticalIndex = 0;
 
                     foreach (var (analysis, index) in section.Analyses.Select((analysis, index) => (analysis, index)))
                     {
-                        int criticalIndex = 0;
                         if (analysis.CriticalPoints != null && analysis.CriticalPoints.Any())
                         {
                             foreach (var (cp, cpIndex) in analysis.CriticalPoints.Select((cp, cpIndex) => (cp, cpIndex)))
@@ -814,7 +814,7 @@ namespace SupervisorMobility.API.Controllers
                                 string indexString = $"{criticalIndex}.- ";
                                 string critString = $"{cp}\r\n";
                                 string reasonString = $"( {analysis.Reasons[cpIndex]} )";
-                                if (cp != analysis.CriticalPoints.Last())
+                                if (cp != section.Analyses.Last().CriticalPoints.Last())
                                 {
                                     reasonString += "\r\n";
                                 }
@@ -826,10 +826,8 @@ namespace SupervisorMobility.API.Controllers
                                 fullText += $"{indexString}{critString}{reasonString}";
                             }
                         }
-
-                        CriticalHeight += stylesService.CalculateRowHeight(fullText, (sheet.Columns[10].Width + sheet.Columns[11].Width + sheet.Columns[12].Width), sheet.Cells["J16"].Style.Font.Size);
-
                     }
+                    CriticalHeight = stylesService.CalculateRowHeight(fullText, (sheet.Columns[10].Width + sheet.Columns[11].Width + sheet.Columns[12].Width), sheet.Cells["J16"].Style.Font.Size);
 
                     StepHeight = stylesService.CalculateRowHeight(section.Step, (sheet.Columns[3].Width + sheet.Columns[4].Width + sheet.Columns[5].Width + sheet.Columns[6].Width + sheet.Columns[7].Width), sheet.Cells["B16"].Style.Font.Size);
                     var rowheight = Math.Max(20, Math.Max(StepHeight, CriticalHeight));
@@ -1392,10 +1390,10 @@ namespace SupervisorMobility.API.Controllers
                     rowindex = sheetStartRow + indexSection++;
 
                     string fullText = string.Empty;
+                    int criticalIndex = 0;
 
                     foreach (var (analysis, index) in section.Analyses.Select((analysis, index) => (analysis, index)))
                     {
-                        int criticalIndex = 0;
                         if (analysis.CriticalPoints != null && analysis.CriticalPoints.Any())
                         {
                             foreach (var (cp, cpIndex) in analysis.CriticalPoints.Select((cp, cpIndex) => (cp, cpIndex)))
@@ -1404,7 +1402,7 @@ namespace SupervisorMobility.API.Controllers
                                 string indexString = $"{criticalIndex}.- ";
                                 string critString = $"{cp}\r\n";
                                 string reasonString = $"( {analysis.Reasons[cpIndex]} )";
-                                if (cp != analysis.CriticalPoints.Last())
+                                if (cp != section.Analyses.Last().CriticalPoints.Last())
                                 {
                                     reasonString += "\r\n";
                                 }
@@ -1417,9 +1415,9 @@ namespace SupervisorMobility.API.Controllers
                             }
                         }
 
-                        CriticalHeight += stylesService.CalculateRowHeight(fullText, (sheet.Columns[8].Width + sheet.Columns[9].Width + sheet.Columns[10].Width + sheet.Columns[11].Width), ValuesFont.Size);
-
                     }
+
+                    CriticalHeight = stylesService.CalculateRowHeight(fullText, (sheet.Columns[8].Width + sheet.Columns[9].Width + sheet.Columns[10].Width + sheet.Columns[11].Width), ValuesFont.Size);
 
                     StepHeight = stylesService.CalculateRowHeight(section.Step, (sheet.Columns[3].Width + sheet.Columns[4].Width + sheet.Columns[5].Width + sheet.Columns[6].Width + sheet.Columns[7].Width), ValuesFont.Size);
                     var rowheight = Math.Max(21.8, Math.Max(StepHeight, CriticalHeight));

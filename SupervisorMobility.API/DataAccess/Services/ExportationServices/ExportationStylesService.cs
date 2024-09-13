@@ -106,12 +106,15 @@ namespace SupervisorMobility.API.DataAccess.Services.ExportationServices
 
         public void ApplyDistributionStyles(ExcelWorksheet sheet, int rownumber, bool firstPage)
         {
+            var usedFont = sheet.Cells[$"B{rownumber - 1}"].Style.Font;
             sheet.Rows[rownumber].Height = 21.8;
 
             sheet.Cells[$"B{rownumber}"].Style.Border.Left.Style = ExcelBorderStyle.Medium;
             sheet.Cells[$"B{rownumber}"].Style.Border.Right.Style = ExcelBorderStyle.Thin;
             sheet.Cells[$"B{rownumber}"].Style.Border.Bottom.Style = /*!last ? ExcelBorderStyle.Dashed :*/ ExcelBorderStyle.Thin;
             sheet.Cells[$"B{rownumber}"].Style.VerticalAlignment = ExcelVerticalAlignment.Center;
+            sheet.Cells[$"B{rownumber}"].Style.HorizontalAlignment = ExcelHorizontalAlignment.Center;
+            sheet.Cells[$"B{rownumber}"].Style.Font = usedFont;
 
             sheet.Cells[$"C{rownumber}:G{rownumber}"].Merge = true;
             sheet.Cells[$"C{rownumber}:G{rownumber}"].Style.WrapText = true;
@@ -119,30 +122,38 @@ namespace SupervisorMobility.API.DataAccess.Services.ExportationServices
             sheet.Cells[$"C{rownumber}:G{rownumber}"].Style.Border.Right.Style = ExcelBorderStyle.Thin;
             sheet.Cells[$"C{rownumber}:G{rownumber}"].Style.Border.Bottom.Style = /*!last ? ExcelBorderStyle.Dashed :*/ ExcelBorderStyle.Thin;
             sheet.Cells[$"C{rownumber}:G{rownumber}"].Style.VerticalAlignment = ExcelVerticalAlignment.Center;
+            sheet.Cells[$"C{rownumber}:G{rownumber}"].Style.HorizontalAlignment = ExcelHorizontalAlignment.Left;
+            sheet.Cells[$"C{rownumber}:G{rownumber}"].Style.Font = usedFont; ;
 
             sheet.Cells[$"H{rownumber}:K{rownumber}"].Merge = true;
+            sheet.Cells[$"H{rownumber}:K{rownumber}"].Style.WrapText = true;
             sheet.Cells[$"H{rownumber}:K{rownumber}"].Style.Border.Left.Style = ExcelBorderStyle.Thin;
             sheet.Cells[$"H{rownumber}:K{rownumber}"].Style.Border.Right.Style = ExcelBorderStyle.Thin;
             sheet.Cells[$"H{rownumber}:K{rownumber}"].Style.Border.Bottom.Style = /*!last ? ExcelBorderStyle.Dashed :*/ ExcelBorderStyle.Thin;
             sheet.Cells[$"H{rownumber}:K{rownumber}"].Style.VerticalAlignment = ExcelVerticalAlignment.Center;
+            sheet.Cells[$"H{rownumber}:K{rownumber}"].Style.HorizontalAlignment = ExcelHorizontalAlignment.Left;
+            sheet.Cells[$"H{rownumber}:K{rownumber}"].Style.Font = usedFont; ;
 
             sheet.Cells[$"L{rownumber}"].Style.Border.Left.Style = ExcelBorderStyle.Thin;
             sheet.Cells[$"L{rownumber}"].Style.Border.Right.Style = ExcelBorderStyle.Thin;
             sheet.Cells[$"L{rownumber}"].Style.Border.Bottom.Style = /*!last ? ExcelBorderStyle.Dashed :*/ ExcelBorderStyle.Thin;
             sheet.Cells[$"L{rownumber}"].Style.VerticalAlignment = ExcelVerticalAlignment.Center;
             sheet.Cells[$"L{rownumber}"].Style.HorizontalAlignment = ExcelHorizontalAlignment.Center;
+            sheet.Cells[$"L{rownumber}"].Style.Font = usedFont; ;
 
             sheet.Cells[$"M{rownumber}"].Style.Border.Left.Style = ExcelBorderStyle.Thin;
             sheet.Cells[$"M{rownumber}"].Style.Border.Right.Style = ExcelBorderStyle.Thin;
             sheet.Cells[$"M{rownumber}"].Style.Border.Bottom.Style = /*!last ? ExcelBorderStyle.Dashed :*/ ExcelBorderStyle.Thin;
             sheet.Cells[$"M{rownumber}"].Style.VerticalAlignment = ExcelVerticalAlignment.Center;
             sheet.Cells[$"M{rownumber}"].Style.HorizontalAlignment = ExcelHorizontalAlignment.Center;
+            sheet.Cells[$"M{rownumber}"].Style.Font = usedFont; ;
 
             sheet.Cells[$"N{rownumber}"].Style.Border.Left.Style = ExcelBorderStyle.Thin;
             sheet.Cells[$"N{rownumber}"].Style.Border.Right.Style = ExcelBorderStyle.Thin;
             sheet.Cells[$"N{rownumber}"].Style.Border.Bottom.Style = /*!last ? ExcelBorderStyle.Dashed :*/ ExcelBorderStyle.Thin;
             sheet.Cells[$"N{rownumber}"].Style.VerticalAlignment = ExcelVerticalAlignment.Center;
             sheet.Cells[$"N{rownumber}"].Style.HorizontalAlignment = ExcelHorizontalAlignment.Center;
+            sheet.Cells[$"N{rownumber}"].Style.Font = usedFont;
 
             if (firstPage)
             {
@@ -152,12 +163,14 @@ namespace SupervisorMobility.API.DataAccess.Services.ExportationServices
                 sheet.Cells[$"O{rownumber}:P{rownumber}"].Style.Border.Bottom.Style = /*!last ? ExcelBorderStyle.Dashed :*/ ExcelBorderStyle.Thin;
                 sheet.Cells[$"O{rownumber}:P{rownumber}"].Style.VerticalAlignment = ExcelVerticalAlignment.Center;
                 sheet.Cells[$"O{rownumber}:P{rownumber}"].Style.HorizontalAlignment = ExcelHorizontalAlignment.Center;
+                sheet.Cells[$"O{rownumber}:P{rownumber}"].Style.Font = usedFont;
 
                 sheet.Cells[$"Q{rownumber}"].Style.Border.Left.Style = ExcelBorderStyle.Thin;
                 sheet.Cells[$"Q{rownumber}"].Style.Border.Right.Style = ExcelBorderStyle.Thin;
                 sheet.Cells[$"Q{rownumber}"].Style.Border.Bottom.Style = /*!last ? ExcelBorderStyle.Dashed :*/ ExcelBorderStyle.Thin;
                 sheet.Cells[$"Q{rownumber}"].Style.VerticalAlignment = ExcelVerticalAlignment.Center;
                 sheet.Cells[$"Q{rownumber}"].Style.HorizontalAlignment = ExcelHorizontalAlignment.Center;
+                sheet.Cells[$"Q{rownumber}"].Style.Font = usedFont;
             }
             else
             {
@@ -166,12 +179,14 @@ namespace SupervisorMobility.API.DataAccess.Services.ExportationServices
                 sheet.Cells[$"O{rownumber}:P{rownumber}"].Style.Border.Bottom.Style = /*!last ? ExcelBorderStyle.Dashed :*/ ExcelBorderStyle.Thin;
                 sheet.Cells[$"O{rownumber}:P{rownumber}"].Style.VerticalAlignment = ExcelVerticalAlignment.Center;
                 sheet.Cells[$"O{rownumber}:P{rownumber}"].Style.HorizontalAlignment = ExcelHorizontalAlignment.Center;
+                sheet.Cells[$"O{rownumber}:P{rownumber}"].Style.Font = usedFont;
 
                 sheet.Cells[$"P{rownumber}"].Style.Border.Left.Style = ExcelBorderStyle.Thin;
                 sheet.Cells[$"P{rownumber}"].Style.Border.Right.Style = ExcelBorderStyle.Thin;
                 sheet.Cells[$"P{rownumber}"].Style.Border.Bottom.Style = /*!last ? ExcelBorderStyle.Dashed :*/ ExcelBorderStyle.Thin;
                 sheet.Cells[$"P{rownumber}"].Style.VerticalAlignment = ExcelVerticalAlignment.Center;
                 sheet.Cells[$"P{rownumber}"].Style.HorizontalAlignment = ExcelHorizontalAlignment.Center;
+                sheet.Cells[$"P{rownumber}"].Style.Font = usedFont;
             }
         }
 
