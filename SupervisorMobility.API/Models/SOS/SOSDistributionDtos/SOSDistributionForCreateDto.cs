@@ -19,7 +19,7 @@ namespace SupervisorMobility.API.Models.SOS.SOSDistributionDtos
 
         public ICollection<TurnForCreateDto>? Turns { get; set; }
         public string? AplicationModels { get; set; } = "§§§§";
-        public ICollection<SOSTimeForCreateDto>? AplicationModelsTimes { get; set; }
+        public ICollection<SOSTimeForCreateDto>? Times { get; set; }
 
         public ICollection<SOSDistributionLogbookForCreateDto>? DistributionLogbooks { get; set; } = new List<SOSDistributionLogbookForCreateDto>();
         public ICollection<FileUploadGeneralDto>? Illustrations { get; set; } = new List<FileUploadGeneralDto>();
