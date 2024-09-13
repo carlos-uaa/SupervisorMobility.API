@@ -122,7 +122,7 @@ namespace SupervisorMobility.API.Controllers.SOS_Controllers
             // Filtrar nuevos DistributionLogbooks
             List<SOSDistributionLogbookForUpdateDto> filteredDistributionLogbooksList = sosUpdateEntity.DistributionLogbooks.Where(t => t.SOSDistributionLogbookId <= 0).ToList();
             // Filtrar nuevos Tiempos
-            List<SOSTimeForUpdateDto> filteredTimesList = sosUpdateEntity.AplicationModelsTimes.Where(t => t.SOSTimeId <= 0).ToList();
+            List<SOSTimeForUpdateDto> filteredTimesList = sosUpdateEntity.Times.Where(t => t.SOSTimeId <= 0).ToList();
              // Filtrar nuevos Turnos
             List<TurnForUpdateDto> filteredTurnList = sosUpdateEntity.Turns.Where(t => t.TurnId <= 0).ToList();
 
@@ -186,7 +186,7 @@ namespace SupervisorMobility.API.Controllers.SOS_Controllers
             //aqui añadir Tiempos
             if (filteredTimesList.Any())
             {
-                sosUpdateEntity.AplicationModelsTimes.RemoveAll(t => t.SOSTimeId == null || t.SOSTimeId <= 0);
+                sosUpdateEntity.Times.RemoveAll(t => t.SOSTimeId == null || t.SOSTimeId <= 0);
 
                 // Mapear nuevas tiempos
                 List<SOSTime> newSOSTime = _mapper.Map<List<SOSTime>>(filteredTimesList);
@@ -272,7 +272,7 @@ namespace SupervisorMobility.API.Controllers.SOS_Controllers
                 Bkup_DistributionLogbook.Add(DistributionBkaux);
             }
 
-            foreach (var time in sosUpdateEntity.AplicationModelsTimes)
+            foreach (var time in sosUpdateEntity.Times)
             {
                 var timeUpdate = await _ProcessRepository.UpdateTime(time);
                 SOSTime timeBkaux = await _ProcessRepository.GetSOSTimeById(time.SOSTimeId);
@@ -290,7 +290,7 @@ namespace SupervisorMobility.API.Controllers.SOS_Controllers
             sosUpdateEntity.Notes = null;
             sosUpdateEntity.Turns = null;
             sosUpdateEntity.DistributionLogbooks = null;
-            sosUpdateEntity.AplicationModelsTimes= null;
+            sosUpdateEntity.Times= null;
 
             await _ProcessRepository.RemoveAllTimesFromSOSDistribution(_sosDistribution);
             await _ProcessRepository.RemoveAllTurnsFromSOSDistribution(_sosDistribution);
