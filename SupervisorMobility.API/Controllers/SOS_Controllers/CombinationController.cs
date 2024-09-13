@@ -45,6 +45,11 @@ namespace SupervisorMobility.API.Controllers.SOS_Controllers
 
                 SOSCombination CombinationToCreate = _mapper.Map<SOSCombination>(sOSCombinationToCreate);
 
+                if (CombinationToCreate.ReviewerHSId <= 0)
+                {
+                    CombinationToCreate.ReviewerHSId = null;
+                }
+
                 var createdResult = await _ProcessRepository.CreateSOSCombination(CombinationToCreate);
                 if (createdResult != null)
                     return Ok(CombinationToCreate);
@@ -55,6 +60,14 @@ namespace SupervisorMobility.API.Controllers.SOS_Controllers
             {
                 //only add revision
                 SOSCombination _sosCombination = await _ProcessRepository.GetSOSCombination(sOSCombinationToCreate.SOSCombinationId, true, true, true, true );
+
+                if (sOSCombinationToCreate.ReviewerHSId <= 0)
+                {
+                    sOSCombinationToCreate.ReviewerHSId = null;
+                }else if(sOSCombinationToCreate.ReviewerHSId != _sosCombination.ReviewerHSId) {
+                    //update
+                }
+
 
                 SOSCombinationLogbook _logbookToCreate = _mapper.Map<SOSCombinationLogbook>(sOSCombinationToCreate.CombinationLogbooks?.Last());
                 _logbookToCreate.SOSCombinationId = _sosCombination.SOSCombinationId;
