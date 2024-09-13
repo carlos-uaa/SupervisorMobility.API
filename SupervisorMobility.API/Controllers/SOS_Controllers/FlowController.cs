@@ -40,6 +40,12 @@ namespace SupervisorMobility.API.Controllers.SOS_Controllers
 
                 SOSFlow FlowToCreate = _mapper.Map<SOSFlow>(sOSFlowToCreate);
 
+                if (FlowToCreate.ReviewerHSId <= 0)
+                {
+                    FlowToCreate.ReviewerHSId = null;
+                }
+
+
                 var createdResult = await _ProcessRepository.CreateSOSFlow(FlowToCreate);
                 if (createdResult != null)
                     return Ok(FlowToCreate);
@@ -50,6 +56,17 @@ namespace SupervisorMobility.API.Controllers.SOS_Controllers
             {
                 //only add revision
                 SOSFlow _sosFlow = await _ProcessRepository.GetSOSFlow(sOSFlowToCreate.SOSFlowId, true, true, true, true);
+
+                // si el hys anterior es diferente update
+                // si el anterior es null y hay un id actualizar
+                if (sOSFlowToCreate.ReviewerHSId <= 0)
+                {
+                    sOSFlowToCreate.ReviewerHSId = null;
+                }
+                else if (sOSFlowToCreate.ReviewerHSId != _sosFlow.ReviewerHSId)
+                {
+                    //update
+                }
 
                 SOSFlowLogbook _logbookToCreate = _mapper.Map<SOSFlowLogbook>(sOSFlowToCreate.FlowLogbooks?.Last());
                 _logbookToCreate.SOSFlowId = _sosFlow.SOSFlowId;
