@@ -2,6 +2,7 @@
 using SupervisorMobility.API.DataAccess.Entities.SOS;
 using SupervisorMobility.API.Models.CommentaryDtos;
 using SupervisorMobility.API.Models.DistributionDtos;
+using SupervisorMobility.API.Models.ProductDtos;
 using SupervisorMobility.API.Models.SOS.EquipmentDtos;
 using SupervisorMobility.API.Models.SOS.MaterialDtos;
 using SupervisorMobility.API.Models.SOS.SOSHubDtos.AnalysisBkupDtos;
@@ -22,9 +23,10 @@ namespace SupervisorMobility.API.Models.SOS.SOSHubDtos
         public List<UpdateCommentaryDto>? ProcessSheetCommentary { get; set; } = new List<UpdateCommentaryDto>();
         public List<CommonDirectionDto>? CommonDirection { get; set; } = new List<CommonDirectionDto>();
 
-        public int? AppliedModelId { get; set; }
+        public ICollection<ProductDto>? AppliedModels { get; set; } = new List<ProductDto>();
 
-        
+
+
         public string? TrainingTime { get; set; }
         public string? RevisedItems { get; set; }
         public string? OtherInformation { get; set; }

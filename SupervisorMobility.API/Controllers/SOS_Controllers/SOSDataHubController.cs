@@ -51,6 +51,7 @@ namespace SupervisorMobility.API.Controllers.SOS_Controllers
         public async Task<ActionResult<SOSHubDto>> CreateSOSHub(SOSHubForCreateDto SOSHubForCreate)
         {
             List<Equipment> equipments = new List<Equipment>();
+            List<Product> applyModels = new List<Product>();
             List<User> usersApproverOwners = new List<User>();
             List<User> usersReviewerEditors = new List<User>();
 
@@ -72,9 +73,16 @@ namespace SupervisorMobility.API.Controllers.SOS_Controllers
                 usersReviewerEditors.Add(useraux);
             }
 
+            foreach (var applymodel in SOSHubForCreate.AppliedModels)
+            {
+                Product productaux = await _AnalysisProcessRepository.GetProductById(applymodel.ProductId);
+                applyModels.Add(productaux);
+            }
+
             SOSHubForCreate.SafetyEquipment = null;
             SOSHubForCreate.ApproverOwners = null;
             SOSHubForCreate.ReviewerEditors = null;
+            SOSHubForCreate.AppliedModels = null;
 
             SOSHub SOSEntity = new SOSHub();
 
@@ -107,6 +115,13 @@ namespace SupervisorMobility.API.Controllers.SOS_Controllers
                 }
             }
 
+            if (applyModels.Any())
+            {
+                foreach (Product applymodel in applyModels)
+                {
+                    await _AnalysisProcessRepository.AddProductToSOSCollection(createdResult, applymodel);
+                }
+            }
 
             if (createdResult != null)
             {
@@ -160,6 +175,7 @@ namespace SupervisorMobility.API.Controllers.SOS_Controllers
             List<CommonDirection> commons = new List<CommonDirection>();
             List<User> usersApproverOwners = new List<User>();
             List<User> usersReviewerEditors = new List<User>();
+            List<Product> applyModels = new List<Product>();
 
             //Commmon direction 
             List<CommonDirectionDto> filteredCommonDirectionList = _SOSHubForUpdate.CommonDirection
@@ -443,6 +459,7 @@ namespace SupervisorMobility.API.Controllers.SOS_Controllers
             await _AnalysisProcessRepository.SOSDataRemoveAllToolsEquipmentMaterial(entitySOSHub);
             await _AnalysisProcessRepository.SOSDataRemoveAllApproverOwners(entitySOSHub);
             await _AnalysisProcessRepository.SOSDataRemoveAllReviewerEditors(entitySOSHub);
+            await _AnalysisProcessRepository.SOSDataRemoveAllProducts(entitySOSHub);
 
             //almacenar y actualizar informacion de relaciones
             foreach (var commonD in _SOSHubForUpdate.CommonDirection)
@@ -512,6 +529,12 @@ namespace SupervisorMobility.API.Controllers.SOS_Controllers
                 usersReviewerEditors.Add(useraux);
             }
 
+            foreach (var model in _SOSHubForUpdate.AppliedModels)
+            {
+                Product modelaux = await _AnalysisProcessRepository.GetProductById(model.ProductId);
+                applyModels.Add(modelaux);
+            }
+
             _SOSHubForUpdate.ProcessSheetCommentary = null;
             _SOSHubForUpdate.AnalysesBkup = null;
             _SOSHubForUpdate.Sections = null;
@@ -521,6 +544,7 @@ namespace SupervisorMobility.API.Controllers.SOS_Controllers
             _SOSHubForUpdate.CommonDirection = null;
             _SOSHubForUpdate.ApproverOwners = null;
             _SOSHubForUpdate.ReviewerEditors= null;
+            _SOSHubForUpdate.AppliedModels = null;
 
             //if (_SOSHubForUpdate.ApproverOwnerId <= 0)
             //{
@@ -608,6 +632,14 @@ namespace SupervisorMobility.API.Controllers.SOS_Controllers
                 foreach (User userReviewer in usersReviewerEditors)
                 {
                     await _AnalysisProcessRepository.AddReviewerEditorToSOSCollection(entitySOSHub, userReviewer);
+                }
+            }
+            //ApplyModels
+            if (applyModels.Any())
+            {
+                foreach (Product model in applyModels)
+                {
+                    await _AnalysisProcessRepository.AddProductToSOSCollection(entitySOSHub, model);
                 }
             }
 

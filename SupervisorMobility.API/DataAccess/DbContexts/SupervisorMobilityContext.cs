@@ -371,6 +371,13 @@ namespace SupervisorMobility.API.Context
                 .WithMany(u => u.SosHubsReviewerEditors)  // Usuario puede estar en múltiples SOSHub como ReviewerEditors
                 .UsingEntity(join => join.ToTable("SOSHubReviewerEditors")); // Nombre de la tabla intermedia
 
+            
+            // Configurar la relación entre SOSHub y Products
+            modelBuilder.Entity<SOSHub>()
+                .HasMany(s => s.AppliedModels)  
+                .WithMany(u => u.SOSHubs)  
+                .UsingEntity(join => join.ToTable("SOSHubProducts"));
+
             // Si tienes relaciones similares con SOSHubHistory, también necesitas configurarlas
             modelBuilder.Entity<SOSHubHistory>()
                 .HasMany(sh => sh.ApproverOwners)
