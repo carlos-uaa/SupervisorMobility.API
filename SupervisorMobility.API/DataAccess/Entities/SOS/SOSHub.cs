@@ -20,9 +20,11 @@ namespace SupervisorMobility.API.DataAccess.Entities.SOS
         public string? ProcessSheet { get; set; }
         public ICollection<Commentary>? ProcessSheetCommentary { get; set; } = new List<Commentary>();
         public ICollection<CommonDirection>? CommonDirection { get; set; } = new List<CommonDirection>();
+
+
+        public ICollection<Product>? AppliedModels { get; set; } = new List<Product>();
        
-        public int? AppliedModelId { get; set; }
-        public Product? AppliedModel { get; set; }
+     
      
 
         public ICollection<FileUpload>? Images { get; set; } = new List<FileUpload>();

@@ -1,16 +1,10 @@
 ﻿using AutoMapper;
 using CsvHelper;
-using DocumentFormat.OpenXml.ExtendedProperties;
-using DocumentFormat.OpenXml.InkML;
-using DocumentFormat.OpenXml.Office2010.Excel;
-using DocumentFormat.OpenXml.Office2021.PowerPoint.Tasks;
-using DocumentFormat.OpenXml.Spreadsheet;
+
 using DuoVia.FuzzyStrings;
 using Microsoft.EntityFrameworkCore;
-using Microsoft.EntityFrameworkCore.Query;
 using SupervisorMobility.API.Context;
 using SupervisorMobility.API.DataAccess.Entities;
-using SupervisorMobility.API.DataAccess.Entities.IS;
 using SupervisorMobility.API.DataAccess.Entities.SOS;
 using SupervisorMobility.API.DataAccess.Entities.SOS.History;
 using SupervisorMobility.API.Models.CommentaryDtos;
@@ -33,8 +27,6 @@ using SupervisorMobility.API.Models.SOS.ToolsUsedDtos;
 using SupervisorMobility.API.Models.SOS.TurnDtos;
 using System.Diagnostics;
 using System.Runtime.CompilerServices;
-using System.Xml.Linq;
-using Tavis.UriTemplates;
 
 namespace SupervisorMobility.API.DataAccess.Services
 {
@@ -153,7 +145,7 @@ namespace SupervisorMobility.API.DataAccess.Services
 
                 if (includeModel)
                 {
-                    await _context.Entry(sosHub).Reference(m => m.AppliedModel).LoadAsync();
+                    await _context.Entry(sosHub).Reference(m => m.AppliedModels).LoadAsync();
                 }
 
                 if (includeHistory)
@@ -969,17 +961,6 @@ namespace SupervisorMobility.API.DataAccess.Services
 
                 await _context.SaveChangesAsync();
 
-                //if (Master.ReviewerEditors != null)
-                //{
-                //    Master.ReviewerEditors.Add(Slave);
-                //}
-                //else
-                //{
-                //    Master.ReviewerEditors = new List<User>();
-                //    Master.ReviewerEditors.Add(Slave);
-                //}
-
-                //_context.SaveChanges();
 
             }
             catch (Exception ex)
@@ -1047,16 +1028,6 @@ namespace SupervisorMobility.API.DataAccess.Services
 
                 await _context.SaveChangesAsync();
 
-                //if (Master.ApproverOwners != null)
-                //{
-                //    Master.ApproverOwners.Add(Slave);
-                //}
-                //else
-                //{
-                //    Master.ApproverOwners = new List<User>();
-                //    Master.ApproverOwners.Add(Slave);
-                //}
-                //_context.SaveChanges();
             }
             catch (Exception ex)
             {
@@ -1109,6 +1080,61 @@ namespace SupervisorMobility.API.DataAccess.Services
                 if (!master.MaterialsUsed.Any(t => t.MaterialId == slave.MaterialId))
                 {
                     master.MaterialsUsed.Add(slave);
+                }
+
+                // Guardar los cambios
+                await _context.SaveChangesAsync();
+            }
+            catch (Exception ex)
+            {
+                // Manejar el error apropiadamente, puedes loguearlo o lanzar una excepción personalizada
+                Debug.WriteLine("An error occurred while updating the SOSHub: " + ex.Message);
+            }
+            return new AsyncVoidMethodBuilder();
+        }
+
+        public async Task<AsyncVoidMethodBuilder> AddProductToSOSCollection(SOSHub master, Product slave)
+        {
+            try
+            {
+                // Verificar si el master ya está siendo rastreado en el contexto
+                var localMasterEntry = _context.SOSHubs.Local.FirstOrDefault(entry => entry.SOSHubId == master.SOSHubId);
+                if (localMasterEntry != null)
+                {
+                    master = localMasterEntry;
+                }
+                else
+                {
+                    if (_context.Entry(master).State == EntityState.Detached)
+                    {
+                        _context.SOSHubs.Attach(master);
+                    }
+                }
+
+                // Verificar si el AppliedModel slave ya está siendo rastreado en el contexto
+                var localSlaveEntry = _context.Products.Local.FirstOrDefault(entry => entry.ProductId == slave.ProductId);
+                if (localSlaveEntry != null)
+                {
+                    slave = localSlaveEntry;
+                }
+                else
+                {
+                    if (_context.Entry(slave).State == EntityState.Detached)
+                    {
+                        _context.Products.Attach(slave);
+                    }
+                }
+
+                // Añadir el producto a la colección de AppliedModels del master
+                if (master.AppliedModels == null)
+                {
+                    master.AppliedModels = new List<Product>();
+                }
+
+                // Verificar si la Prodcut ya está en la colección
+                if (!master.AppliedModels.Any(t => t.ProductId == slave.ProductId))
+                {
+                    master.AppliedModels.Add(slave);
                 }
 
                 // Guardar los cambios
@@ -1455,6 +1481,36 @@ namespace SupervisorMobility.API.DataAccess.Services
 
         }
 
+        public async Task<AsyncVoidMethodBuilder> SOSDataRemoveAllProducts(SOSHub Master)
+        {
+            if (_context.Entry(Master).State == EntityState.Detached)
+            {
+                _context.SOSHubs.Attach(Master);
+            }
+
+            if (Master.AppliedModels?.Count > 0)
+            {
+                Master.AppliedModels.Clear();
+
+                try
+                {
+                    await _context.SaveChangesAsync();
+                }
+                catch (DbUpdateException ex)
+                {
+                    // Manejar las excepciones relacionadas con la actualización de la base de datos
+                    Console.WriteLine($"DbUpdateException [AppliedModels]: {ex.Message}");
+                }
+                catch (Exception ex)
+                {
+                    // Manejar cualquier otra excepción que pueda ocurrir
+                    Console.WriteLine($"Exception: {ex.Message}");
+                }
+            }
+            return new AsyncVoidMethodBuilder();
+
+        }
+
 
         public async Task<int> RemoveImageFromSOSData(int SOS_DataPool_id, int ImageFile_id)
         {
@@ -1502,74 +1558,18 @@ namespace SupervisorMobility.API.DataAccess.Services
         }
         #endregion
 
-        #region AddTo Ranges
-        public async Task<List<Section>> AddRangeSections(List<Section> SectionsToAdd)
-        {
-            _context.Sections.AddRange(SectionsToAdd);
-
-            await _context.SaveChangesAsync();
-
-            // Desvincular las nuevas secciones del contexto
-            foreach (var section in SectionsToAdd)
-            {
-                _context.Entry(section).State = EntityState.Detached;
-                foreach (var analysis in section.Analyses)
-                {
-                    _context.Entry(analysis).State = EntityState.Detached;
-                }
-            }
-
-            return SectionsToAdd;
-        }
-        public async Task<List<Commentary>> AddRangeCommentary(List<Commentary> commentariesToAdd)
-        {
-            _context.Commentaries.AddRange(commentariesToAdd);
-
-            await _context.SaveChangesAsync();
-
-            // Desvincular las nuevas secciones del contexto
-            foreach (var section in commentariesToAdd)
-            {
-                _context.Entry(section).State = EntityState.Detached;
-            }
-
-            return commentariesToAdd;
-        }
-        public async Task<List<MaterialUsed>> AddRangeMaterialUsed(List<MaterialUsed> MaterialsUsedToAdd)
-        {
-            _context.MaterialsUsed.AddRange(MaterialsUsedToAdd);
-
-            await _context.SaveChangesAsync();
-
-            // Desvincular las nuevas secciones del contexto
-            foreach (var materialuse in MaterialsUsedToAdd)
-            {
-                _context.Entry(materialuse).State = EntityState.Detached;
-            }
-
-            return MaterialsUsedToAdd;
-        }
-
-        public async Task<List<AnalysisBkup>> AddRangeAnalysisBkup(List<AnalysisBkup> analysisBkupsToAdd)
-        {
-            _context.AnalysisBkups.AddRange(analysisBkupsToAdd);
-
-            await _context.SaveChangesAsync();
-
-            // Desvincular las nuevas secciones del contexto
-            foreach (var section in analysisBkupsToAdd)
-            {
-                _context.Entry(section).State = EntityState.Detached;
-            }
-
-            return analysisBkupsToAdd;
-        }
-
-        #endregion
         #region Users
         public async Task<User> GetUserById(int id)
         {
             return await _context.Users.Where(p => p.UserId == id).FirstOrDefaultAsync();
+        }
+
+        #endregion
+
+        #region Products
+        public async Task<Product> GetProductById(int id)
+        {
+            return await _context.Products.Where(p => p.ProductId == id).FirstOrDefaultAsync();
         }
 
         #endregion
@@ -1675,12 +1675,25 @@ namespace SupervisorMobility.API.DataAccess.Services
             return await _context.SaveChangesAsync();
         }
         #endregion
-
         #region Material
         public async Task<int> AddRangeMaterial(List<Material> MaterialsToAdd)
         {
             _context.Materials.AddRange(MaterialsToAdd);
             return await _context.SaveChangesAsync();
+        }
+        public async Task<List<MaterialUsed>> AddRangeMaterialUsed(List<MaterialUsed> MaterialsUsedToAdd)
+        {
+            _context.MaterialsUsed.AddRange(MaterialsUsedToAdd);
+
+            await _context.SaveChangesAsync();
+
+            // Desvincular las nuevas secciones del contexto
+            foreach (var materialuse in MaterialsUsedToAdd)
+            {
+                _context.Entry(materialuse).State = EntityState.Detached;
+            }
+
+            return MaterialsUsedToAdd;
         }
         public async Task<Material> CreateNewMaterial(Material MaterialtoCreate)
         {
@@ -1763,7 +1776,6 @@ namespace SupervisorMobility.API.DataAccess.Services
             return await _context.SaveChangesAsync();
         }
         #endregion
-
         #region Equipment
         public async Task<int> AddRangeEquipment(List<Equipment> EquipmentsToAdd)
         {
@@ -1807,12 +1819,25 @@ namespace SupervisorMobility.API.DataAccess.Services
             return await _context.SaveChangesAsync();
         }
         #endregion
-
         #region Analysis Bkup
         public async Task<AnalysisBkup> GetAnalysisBkupId(int id)
         {
             var bkup = await _context.AnalysisBkups.AsNoTracking().Where(t => t.AnalysisBkupId == id).FirstOrDefaultAsync();
             return bkup;
+        }
+        public async Task<List<AnalysisBkup>> AddRangeAnalysisBkup(List<AnalysisBkup> analysisBkupsToAdd)
+        {
+            _context.AnalysisBkups.AddRange(analysisBkupsToAdd);
+
+            await _context.SaveChangesAsync();
+
+            // Desvincular las nuevas secciones del contexto
+            foreach (var section in analysisBkupsToAdd)
+            {
+                _context.Entry(section).State = EntityState.Detached;
+            }
+
+            return analysisBkupsToAdd;
         }
 
         public async Task<int> UpdateAnalysisBkup(AnalysisBkupForUpdateDto analysisBkupForUpdate)
@@ -1858,7 +1883,6 @@ namespace SupervisorMobility.API.DataAccess.Services
             }
         }
         #endregion
-
         #region Section
         public async Task<Section> GetSectionById(int id)
         {
@@ -1866,6 +1890,25 @@ namespace SupervisorMobility.API.DataAccess.Services
 
             query = query.Include(s => s.Analyses);
             return await query.FirstOrDefaultAsync();
+        }
+
+        public async Task<List<Section>> AddRangeSections(List<Section> SectionsToAdd)
+        {
+            _context.Sections.AddRange(SectionsToAdd);
+
+            await _context.SaveChangesAsync();
+
+            // Desvincular las nuevas secciones del contexto
+            foreach (var section in SectionsToAdd)
+            {
+                _context.Entry(section).State = EntityState.Detached;
+                foreach (var analysis in section.Analyses)
+                {
+                    _context.Entry(analysis).State = EntityState.Detached;
+                }
+            }
+
+            return SectionsToAdd;
         }
         public async Task<int> UpdateSection(SectionForUpdateDto sectionForUpdate)
         {
@@ -1937,13 +1980,25 @@ namespace SupervisorMobility.API.DataAccess.Services
 
 
         #endregion
-
         #region Commentary
         public async Task<Commentary> GetCommentaryById(int Id)
         {
             return await _context.Commentaries.AsNoTracking().Where(t => t.CommentaryId == Id).FirstOrDefaultAsync();
         }
+        public async Task<List<Commentary>> AddRangeCommentary(List<Commentary> commentariesToAdd)
+        {
+            _context.Commentaries.AddRange(commentariesToAdd);
 
+            await _context.SaveChangesAsync();
+
+            // Desvincular las nuevas secciones del contexto
+            foreach (var section in commentariesToAdd)
+            {
+                _context.Entry(section).State = EntityState.Detached;
+            }
+
+            return commentariesToAdd;
+        }
         public async Task<int> UpdateCommentary(UpdateCommentaryDto CommentaryForUpdate)
         {
             try
@@ -2530,7 +2585,7 @@ namespace SupervisorMobility.API.DataAccess.Services
             {
                 query = query.Include(m => m.SOSHub);
                 query = query.Include(m => m.SOSHub).ThenInclude(s => s.Sections).ThenInclude(a => a.Analyses);
-                query = query.Include(m => m.SOSHub).ThenInclude(s => s.AppliedModel);
+                query = query.Include(m => m.SOSHub).ThenInclude(s => s.AppliedModels);
                 query = query.Include(m => m.SOSHub).ThenInclude(s => s.ToolsUsed).ThenInclude(t => t.Tool);
                 query = query.Include(m => m.SOSHub).ThenInclude(s => s.MaterialsUsed).ThenInclude(m => m.Material);
                 query = query.Include(m => m.SOSHub).ThenInclude(s => s.SafetyEquipment);
@@ -2934,7 +2989,7 @@ namespace SupervisorMobility.API.DataAccess.Services
             if (includeSOS)
             {
                 query = query.Include(m => m.SOSHub).ThenInclude(s => s.Sections).ThenInclude(a => a.Analyses);
-                query = query.Include(m => m.SOSHub).ThenInclude(s => s.AppliedModel);
+                query = query.Include(m => m.SOSHub).ThenInclude(s => s.AppliedModels);
                 query = query.Include(m => m.SOSHub).ThenInclude(s => s.ToolsUsed).ThenInclude(t => t.Tool);
                 query = query.Include(m => m.SOSHub).ThenInclude(s => s.MaterialsUsed).ThenInclude(m => m.Material);
                 query = query.Include(m => m.SOSHub).ThenInclude(s => s.SafetyEquipment);
@@ -3301,7 +3356,7 @@ namespace SupervisorMobility.API.DataAccess.Services
             if (includeSOS)
             {
                 query = query.Include(m => m.SOSHub).ThenInclude(s => s.Sections).ThenInclude(a => a.Analyses);
-                query = query.Include(m => m.SOSHub).ThenInclude(s => s.AppliedModel);
+                query = query.Include(m => m.SOSHub).ThenInclude(s => s.AppliedModels);
                 query = query.Include(m => m.SOSHub).ThenInclude(s => s.ToolsUsed).ThenInclude(t => t.Tool);
                 query = query.Include(m => m.SOSHub).ThenInclude(s => s.MaterialsUsed).ThenInclude(m => m.Material);
                 query = query.Include(m => m.SOSHub).ThenInclude(s => s.SafetyEquipment);
@@ -3670,7 +3725,7 @@ namespace SupervisorMobility.API.DataAccess.Services
             if (includeSOS)
             {
                 query = query.Include(m => m.SOSHub).ThenInclude(s => s.Sections).ThenInclude(a => a.Analyses);
-                query = query.Include(m => m.SOSHub).ThenInclude(s => s.AppliedModel);
+                query = query.Include(m => m.SOSHub).ThenInclude(s => s.AppliedModels);
                 query = query.Include(m => m.SOSHub).ThenInclude(s => s.ToolsUsed).ThenInclude(t => t.Tool);
                 query = query.Include(m => m.SOSHub).ThenInclude(s => s.MaterialsUsed).ThenInclude(m => m.Material);
                 query = query.Include(m => m.SOSHub).ThenInclude(s => s.SafetyEquipment);
@@ -4033,7 +4088,7 @@ namespace SupervisorMobility.API.DataAccess.Services
             if (includeSOS)
             {
                 query = query.Include(m => m.SOSHub).ThenInclude(s => s.Sections).ThenInclude(a => a.Analyses);
-                query = query.Include(m => m.SOSHub).ThenInclude(s => s.AppliedModel);
+                query = query.Include(m => m.SOSHub).ThenInclude(s => s.AppliedModels);
                 query = query.Include(m => m.SOSHub).ThenInclude(s => s.ToolsUsed).ThenInclude(t => t.Tool);
                 query = query.Include(m => m.SOSHub).ThenInclude(s => s.MaterialsUsed).ThenInclude(m => m.Material);
                 query = query.Include(m => m.SOSHub).ThenInclude(s => s.SafetyEquipment);

@@ -72,7 +72,7 @@ namespace SupervisorMobility.API.Controllers
                     Tools = string.Join(", ", SosAnalysis.SOSHub.ToolsUsed.Select(tu => $"{tu.Tool.ToolName} ({tu.Quantity})"));
                 }
                 sheet.Cells["D8"].Value = Tools;
-                sheet.Cells["D9"].Value = SosAnalysis.SOSHub.AppliedModel?.Description;
+                //sheet.Cells["D9"].Value = SosAnalysis.SOSHub.AppliedModel?.Description;
                 sheet.Cells["D10"].Value = SosAnalysis.SOSHub.TrainingTime;
 
                 #region revitions
@@ -719,7 +719,7 @@ namespace SupervisorMobility.API.Controllers
                     Tools = string.Join(", ", SosSequence.SOSHub.ToolsUsed.Select(tu => $"{tu.Tool.ToolName} ({tu.Quantity})"));
                 }
                 sheet.Cells["D10"].Value = Tools;
-                sheet.Cells["D11"].Value = SosSequence.SOSHub.AppliedModel?.Description;
+                //sheet.Cells["D11"].Value = SosSequence.SOSHub.AppliedModel?.Description;
                 sheet.Cells["D12"].Value = SosSequence.SOSHub.TrainingTime;
 
                 #region revitions
@@ -1322,7 +1322,7 @@ namespace SupervisorMobility.API.Controllers
 
                 sheet.Cells["B12"].Value = SosDistribution.CreatedAt?.ToString("dd-MMM-yyyy").Replace(".", ""); ;
                 sheet.Cells["D12"].Value = SosDistribution.ApplicationMonth;
-                sheet.Cells["G12"].Value = SosDistribution.SOSHub.AppliedModel.Code;
+                //sheet.Cells["G12"].Value = SosDistribution.SOSHub.AppliedModel.Code;
                 sheet.Cells["I12"].Value = SosDistribution.TackTime;
                 sheet.Cells["J12"].Value = SosDistribution.SOSHub.TrainingTime;
                 sheet.Cells["P12"].Value = SosDistribution.SOSHub.Plant.Code;
