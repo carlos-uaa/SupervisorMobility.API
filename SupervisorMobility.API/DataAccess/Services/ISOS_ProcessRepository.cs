@@ -10,12 +10,15 @@ using SupervisorMobility.API.Models.SOS.MaterialDtos;
 using SupervisorMobility.API.Models.SOS.SOSAnalysisDtos;
 using SupervisorMobility.API.Models.SOS.SOSAnalysisLogbookDtos;
 using SupervisorMobility.API.Models.SOS.SOSCombinationDtos;
+using SupervisorMobility.API.Models.SOS.SOSCombinationLogbookDtos;
 using SupervisorMobility.API.Models.SOS.SOSDistributionDtos;
 using SupervisorMobility.API.Models.SOS.SOSFlowDtos;
+using SupervisorMobility.API.Models.SOS.SOSFlowLogbookDtos;
 using SupervisorMobility.API.Models.SOS.SOSHubDtos;
 using SupervisorMobility.API.Models.SOS.SOSHubDtos.AnalysisBkupDtos;
 using SupervisorMobility.API.Models.SOS.SOSHubDtos.SectionDtos;
 using SupervisorMobility.API.Models.SOS.SOSSequenceDtos;
+using SupervisorMobility.API.Models.SOS.SOSSequenceLogbookDtos;
 using SupervisorMobility.API.Models.SOS.SOSTimeDtos;
 using SupervisorMobility.API.Models.SOS.ToolDtos;
 using SupervisorMobility.API.Models.SOS.ToolsUsedDtos;
@@ -158,7 +161,7 @@ namespace SupervisorMobility.API.DataAccess.Services
         #endregion
        
 
-        #region History Hub Collection
+        #region HistoryHubCollection
         Task<int> CreateHistorySOScollection(SOSHubHistory SOS_EntityToCreate);
         Task<IEnumerable<SOSHubHistory>> GetAllHistorySOSHub(int HubId, bool includeAnalysesBkup = false, bool includeSections = false, bool includeImages = false, bool includeVideos = false, bool includeCommentaries = false, bool includeTools = false, bool includeEquipments = false, bool includeMaterials = false, bool includeInformation = false, bool includePeople = false, bool includeDocuments = false);
         Task<AsyncVoidMethodBuilder> AddHistoryToSOSCollection(SOSHub Master, SOSHubHistory Slave);
@@ -223,6 +226,7 @@ namespace SupervisorMobility.API.DataAccess.Services
         #region SOSSequenceLogbook
         Task<SOSSequenceLogbook> GetSOSSequenceLogbookById(int id);
         Task<int> CreateSOSSequenceLogbook(SOSSequenceLogbook LogBook_ToCreate);
+        Task<int> UpdateSequenceLogbook(SOSSequenceLogbookForUpdateDto SequenceForUpdate);
         #endregion
         //SOS Distribution
         #region SOSDistribution
@@ -281,6 +285,7 @@ namespace SupervisorMobility.API.DataAccess.Services
         #endregion
         #region SOSCombinationLogbook
         Task<SOSCombinationLogbook> GetSOSCombinationLogbookById(int id);
+        Task<int> UpdateCombinationLogbook(SOSCombinationLogbookForUpdateDto CombinationForUpdate);
         Task<int> CreateSOSCombinationLogbook(SOSCombinationLogbook LogBook_ToCreate);
         #endregion
 
@@ -310,6 +315,7 @@ namespace SupervisorMobility.API.DataAccess.Services
         #endregion
         #region SOSFlowLogbook
         Task<SOSFlowLogbook> GetSOSFlowLogbookById(int id);
+        Task<int> UpdateFlowLogbook(SOSFlowLogbookForUpdateDto flowForUpdate);
         Task<int> CreateSOSFlowLogbook(SOSFlowLogbook LogBook_ToCreate);
         #endregion
 
