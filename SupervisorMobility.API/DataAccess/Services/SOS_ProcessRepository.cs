@@ -14,13 +14,17 @@ using SupervisorMobility.API.Models.SOS.MaterialDtos;
 using SupervisorMobility.API.Models.SOS.SOSAnalysisDtos;
 using SupervisorMobility.API.Models.SOS.SOSAnalysisLogbookDtos;
 using SupervisorMobility.API.Models.SOS.SOSCombinationDtos;
+using SupervisorMobility.API.Models.SOS.SOSCombinationLogbookDtos;
 using SupervisorMobility.API.Models.SOS.SOSDistributionDtos;
+using SupervisorMobility.API.Models.SOS.SOSDistributionLogbookDtos;
 using SupervisorMobility.API.Models.SOS.SOSFlowDtos;
+using SupervisorMobility.API.Models.SOS.SOSFlowLogbookDtos;
 using SupervisorMobility.API.Models.SOS.SOSHubDtos;
 using SupervisorMobility.API.Models.SOS.SOSHubDtos.AnalysisBkupDtos;
 using SupervisorMobility.API.Models.SOS.SOSHubDtos.AnalysisDtos;
 using SupervisorMobility.API.Models.SOS.SOSHubDtos.SectionDtos;
 using SupervisorMobility.API.Models.SOS.SOSSequenceDtos;
+using SupervisorMobility.API.Models.SOS.SOSSequenceLogbookDtos;
 using SupervisorMobility.API.Models.SOS.SOSTimeDtos;
 using SupervisorMobility.API.Models.SOS.ToolDtos;
 using SupervisorMobility.API.Models.SOS.ToolsUsedDtos;
@@ -145,7 +149,7 @@ namespace SupervisorMobility.API.DataAccess.Services
 
                 if (includeModel)
                 {
-                    await _context.Entry(sosHub).Reference(m => m.AppliedModels).LoadAsync();
+                    await _context.Entry(sosHub).Collection(s => s.AppliedModels).LoadAsync();
                 }
 
                 if (includeHistory)
@@ -3313,6 +3317,44 @@ namespace SupervisorMobility.API.DataAccess.Services
             return await _context.SOSSequenceLogbooks.AsNoTracking().Where(t => t.SOSSequenceLogbookId == id && t.IsActive == true).FirstOrDefaultAsync();
         }
 
+        public async Task<int> UpdateSequenceLogbook(SOSSequenceLogbookForUpdateDto SequenceForUpdate)
+        {
+            try
+            {
+                var query = _context.SOSSequenceLogbooks
+                                    .Where(t => t.SOSSequenceLogbookId == SequenceForUpdate.SOSSequenceLogbookId);
+
+                SOSSequenceLogbook SequenceLogbook = await query.FirstOrDefaultAsync();
+
+                if (SequenceLogbook == null)
+                {
+                    throw new InvalidOperationException("Sequence Logbook not found or is not active.");
+                }
+
+                var localEntry = _context.SOSSequenceLogbooks.Local.FirstOrDefault(entry => entry.SOSSequenceLogbookId == SequenceForUpdate.SOSSequenceLogbookId);
+                if (localEntry != null)
+                {
+                    _context.Entry(localEntry).CurrentValues.SetValues(SequenceForUpdate);
+                }
+                else
+                {
+                    if (_context.Entry(SequenceLogbook).State == EntityState.Detached)
+                    {
+                        _context.SOSSequenceLogbooks.Attach(SequenceLogbook);
+                    }
+
+                    _mapper.Map(SequenceForUpdate, SequenceLogbook);
+                    _context.SOSSequenceLogbooks.Update(SequenceLogbook);
+                }
+
+                return await _context.SaveChangesAsync();
+            }
+            catch (Exception ex)
+            {
+                Debug.WriteLine("An error occurred while updating the Sequence Logbook: " + ex.Message);
+                return 0;
+            }
+        }
         public async Task<int> CreateSOSSequenceLogbook(SOSSequenceLogbook LogBook_ToCreate)
         {
             _context.SOSSequenceLogbooks.Add(LogBook_ToCreate);
@@ -3686,6 +3728,44 @@ namespace SupervisorMobility.API.DataAccess.Services
             return await _context.SOSDistributionLogbooks.AsNoTracking().Where(t => t.SOSDistributionLogbookId == id && t.IsActive == true).FirstOrDefaultAsync();
         }
 
+        public async Task<int> UpdateDistributionLogbook(SOSDistributionLogbookForUpdateDto DistributionForUpdate)
+        {
+            try
+            {
+                var query = _context.SOSDistributionLogbooks
+                                    .Where(t => t.SOSDistributionLogbookId == DistributionForUpdate.SOSDistributionLogbookId);
+
+                SOSDistributionLogbook DistributionLogbook = await query.FirstOrDefaultAsync();
+
+                if (DistributionLogbook == null)
+                {
+                    throw new InvalidOperationException("Distribution Logbook not found or is not active.");
+                }
+
+                var localEntry = _context.SOSDistributionLogbooks.Local.FirstOrDefault(entry => entry.SOSDistributionLogbookId == DistributionForUpdate.SOSDistributionLogbookId);
+                if (localEntry != null)
+                {
+                    _context.Entry(localEntry).CurrentValues.SetValues(DistributionForUpdate);
+                }
+                else
+                {
+                    if (_context.Entry(DistributionLogbook).State == EntityState.Detached)
+                    {
+                        _context.SOSDistributionLogbooks.Attach(DistributionLogbook);
+                    }
+
+                    _mapper.Map(DistributionForUpdate, DistributionLogbook);
+                    _context.SOSDistributionLogbooks.Update(DistributionLogbook);
+                }
+
+                return await _context.SaveChangesAsync();
+            }
+            catch (Exception ex)
+            {
+                Debug.WriteLine("An error occurred while updating the Distribution Logbook: " + ex.Message);
+                return 0;
+            }
+        }
         public async Task<int> CreateSOSDistributionLogbook(SOSDistributionLogbook LogBook_ToCreate)
         {
             _context.SOSDistributionLogbooks.Add(LogBook_ToCreate);
@@ -4047,7 +4127,44 @@ namespace SupervisorMobility.API.DataAccess.Services
         {
             return await _context.SOSCombinationLogbooks.AsNoTracking().Where(t => t.SOSCombinationLogbookId == id && t.IsActive == true).FirstOrDefaultAsync();
         }
+        public async Task<int> UpdateCombinationLogbook(SOSCombinationLogbookForUpdateDto CombinationForUpdate)
+        {
+            try
+            {
+                var query = _context.SOSCombinationLogbooks
+                                    .Where(t => t.SOSCombinationLogbookId == CombinationForUpdate.SOSCombinationLogbookId);
 
+                SOSCombinationLogbook CombinationLogbook = await query.FirstOrDefaultAsync();
+
+                if (CombinationLogbook == null)
+                {
+                    throw new InvalidOperationException("Combination Logbook not found or is not active.");
+                }
+
+                var localEntry = _context.SOSCombinationLogbooks.Local.FirstOrDefault(entry => entry.SOSCombinationLogbookId == CombinationForUpdate.SOSCombinationLogbookId);
+                if (localEntry != null)
+                {
+                    _context.Entry(localEntry).CurrentValues.SetValues(CombinationForUpdate);
+                }
+                else
+                {
+                    if (_context.Entry(CombinationLogbook).State == EntityState.Detached)
+                    {
+                        _context.SOSCombinationLogbooks.Attach(CombinationLogbook);
+                    }
+
+                    _mapper.Map(CombinationForUpdate, CombinationLogbook);
+                    _context.SOSCombinationLogbooks.Update(CombinationLogbook);
+                }
+
+                return await _context.SaveChangesAsync();
+            }
+            catch (Exception ex)
+            {
+                Debug.WriteLine("An error occurred while updating the Combination Logbook: " + ex.Message);
+                return 0;
+            }
+        }
         public async Task<int> CreateSOSCombinationLogbook(SOSCombinationLogbook LogBook_ToCreate)
         {
             _context.SOSCombinationLogbooks.Add(LogBook_ToCreate);
@@ -4087,17 +4204,20 @@ namespace SupervisorMobility.API.DataAccess.Services
 
             if (includeSOS)
             {
+                query = query.Include(m => m.SOSHub).ThenInclude(o => o.ApproverOwners);
+                query = query.Include(m => m.SOSHub).ThenInclude(r => r.ReviewerEditors);
+
                 query = query.Include(m => m.SOSHub).ThenInclude(s => s.Sections).ThenInclude(a => a.Analyses);
                 query = query.Include(m => m.SOSHub).ThenInclude(s => s.AppliedModels);
                 query = query.Include(m => m.SOSHub).ThenInclude(s => s.ToolsUsed).ThenInclude(t => t.Tool);
                 query = query.Include(m => m.SOSHub).ThenInclude(s => s.MaterialsUsed).ThenInclude(m => m.Material);
                 query = query.Include(m => m.SOSHub).ThenInclude(s => s.SafetyEquipment);
+                query = query.Include(m => m.SOSHub).ThenInclude(p => p.Plant);
+                query = query.Include(m => m.SOSHub).ThenInclude(d => d.Department );
+                query = query.Include(m => m.SOSHub).ThenInclude(d => d.Distribution);
             }
 
-            if (includeImagesSOS)
-            {
-                query = query.Include(m => m.SOSHub).ThenInclude(s => s.Images);
-            }
+           
 
 
             var sosHub = await query.FirstOrDefaultAsync();
@@ -4105,16 +4225,6 @@ namespace SupervisorMobility.API.DataAccess.Services
             if (sosHub == null)
                 return null;
 
-            //Filtrar los subobjetos manualmente después de la carga inicial
-            //if (includeImages)
-            //{
-            //    sosHub.Illustrations = sosHub.Illustrations.Where(i => i.IsActive == true).ToList();
-            //}
-
-            //if (includeNotes)
-            //{
-            //    sosHub.Notes = sosHub.Notes.Where(v => v.IsActive == true).ToList();
-            //}
 
             if (includeLogbooks)
             {
@@ -4411,7 +4521,44 @@ namespace SupervisorMobility.API.DataAccess.Services
         {
             return await _context.SOSFlowLogbooks.AsNoTracking().Where(t => t.SOSFlowLogbookId == id && t.IsActive == true).FirstOrDefaultAsync();
         }
+        public async Task<int> UpdateFlowLogbook(SOSFlowLogbookForUpdateDto FlowForUpdate)
+        {
+            try
+            {
+                var query = _context.SOSFlowLogbooks
+                                    .Where(t => t.SOSFlowLogbookId == FlowForUpdate.SOSFlowLogbookId);
 
+                SOSFlowLogbook FlowLogbook = await query.FirstOrDefaultAsync();
+
+                if (FlowLogbook == null)
+                {
+                    throw new InvalidOperationException("Flow Logbook not found or is not active.");
+                }
+
+                var localEntry = _context.SOSFlowLogbooks.Local.FirstOrDefault(entry => entry.SOSFlowLogbookId == FlowForUpdate.SOSFlowLogbookId);
+                if (localEntry != null)
+                {
+                    _context.Entry(localEntry).CurrentValues.SetValues(FlowForUpdate);
+                }
+                else
+                {
+                    if (_context.Entry(FlowLogbook).State == EntityState.Detached)
+                    {
+                        _context.SOSFlowLogbooks.Attach(FlowLogbook);
+                    }
+
+                    _mapper.Map(FlowForUpdate, FlowLogbook);
+                    _context.SOSFlowLogbooks.Update(FlowLogbook);
+                }
+
+                return await _context.SaveChangesAsync();
+            }
+            catch (Exception ex)
+            {
+                Debug.WriteLine("An error occurred while updating the Flow Logbook: " + ex.Message);
+                return 0;
+            }
+        }
         public async Task<int> CreateSOSFlowLogbook(SOSFlowLogbook LogBook_ToCreate)
         {
             _context.SOSFlowLogbooks.Add(LogBook_ToCreate);

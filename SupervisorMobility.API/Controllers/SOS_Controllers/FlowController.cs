@@ -176,13 +176,11 @@ namespace SupervisorMobility.API.Controllers.SOS_Controllers
 
 
 
-            //Crear bkup de datos relacionados
-
             foreach (var logbook in sosUpdateEntity.FlowLogbooks)
             {
-                SOSFlowLogbook FlowBkaux = await _ProcessRepository.GetSOSFlowLogbookById(logbook.SOSFlowLogbookId);
-                _mapper.Map(logbook, FlowBkaux);
-                Bkup_FlowLogbook.Add(FlowBkaux);
+                var flowUpdate = await _ProcessRepository.UpdateFlowLogbook(logbook);
+                SOSFlowLogbook flowBkaux = await _ProcessRepository.GetSOSFlowLogbookById(logbook.SOSFlowLogbookId);
+                Bkup_FlowLogbook.Add(flowBkaux);
             }
 
 
