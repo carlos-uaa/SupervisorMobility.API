@@ -1,5 +1,6 @@
 ﻿using System.ComponentModel.DataAnnotations.Schema;
 using System.ComponentModel.DataAnnotations;
+using SupervisorMobility.API.Entities;
 
 namespace SupervisorMobility.API.DataAccess.Entities.SOS
 {
@@ -27,6 +28,9 @@ namespace SupervisorMobility.API.DataAccess.Entities.SOS
         public ICollection<Commentary>? Notes { get; set; } = new List<Commentary>();
         public DateTime? CreatedAt { get; set; }
         public DateTime? ApplicationMonth { get; set; }
+
+        public int? SOSDistributionAdditionalTimeId { get; set; }
+        public SOSDistributionAdditionalTime? SOSDistributionAdditionalTime { get; set; }
 
         public bool? IsActive { get; set; }
         public int SOSHubId { get; set; }

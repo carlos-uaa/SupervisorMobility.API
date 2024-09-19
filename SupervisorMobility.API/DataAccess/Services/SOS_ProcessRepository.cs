@@ -3345,6 +3345,7 @@ namespace SupervisorMobility.API.DataAccess.Services
             {
                 query = query.Include(t => t.DistributionLogbooks).ThenInclude(l => l.Approver);
                 query = query.Include(t => t.DistributionLogbooks).ThenInclude(l => l.Reviewer);
+                query = query.Include(t => t.SOSDistributionAdditionalTime);
             }
 
             if (includeTurns)

@@ -44,6 +44,19 @@ namespace SupervisorMobility.API.Controllers.SOS_Controllers
 
                 sOSDistributionToCreate.SOSHubId = SOSHubCollection_Id;
 
+                if (sOSDistributionToCreate.SOSDistributionAdditionalTime == null)
+                {
+                    sOSDistributionToCreate.SOSDistributionAdditionalTime = new SOSDistributionAdditionalTime
+                    {
+                        TakeQuantity = "§§§§",
+                        TakeTime = "§§§§§",
+                        LeaveQuantity = "§§§§",
+                        LeaveTime = "§§§§§",
+                        StepsQuantity = "§§§§",
+                        StepsTime = "§§§§§",
+                        IsActive = true
+                    };
+                }
 
                 SOSDistribution DistributionToCreate = _mapper.Map<SOSDistribution>(sOSDistributionToCreate);
 
