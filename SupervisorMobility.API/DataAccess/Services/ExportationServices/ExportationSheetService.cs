@@ -3,6 +3,7 @@ using DocumentFormat.OpenXml.Drawing;
 using DocumentFormat.OpenXml.Spreadsheet;
 using DocumentFormat.OpenXml.Wordprocessing;
 using OfficeOpenXml;
+using OfficeOpenXml.Drawing;
 using System.Text.RegularExpressions;
 
 namespace SupervisorMobility.API.DataAccess.Services.ExportationServices
@@ -46,11 +47,20 @@ namespace SupervisorMobility.API.DataAccess.Services.ExportationServices
             using (var ExtraTemplate = new ExcelPackage(templateStream))
             {
                 ExcelWorksheet sourceSheet = ExtraTemplate.Workbook.Worksheets[0];
-                ExcelWorksheet newSheet = package.Workbook.Worksheets.Add(sheetWN, sourceSheet);
-                if (type >= 1 && type <= 2)
+
+                package.Workbook.Worksheets.Add(sheetWN, sourceSheet);
+
+                switch (type)
                 {
-                    if (package.Workbook.Worksheets.Any(ws => ws.Name == "Backup"))
-                        package.Workbook.Worksheets.MoveBefore(sheetWN, "Backup");
+                    case 1:
+                    case 2:
+                        if (package.Workbook.Worksheets.Any(ws => ws.Name == "Backup"))
+                            package.Workbook.Worksheets.MoveBefore(sheetWN, "Backup");
+                        break;
+                    case 3:
+                        //var drawing = package.Workbook.Worksheets[sheetWN].Drawings.First(p=>p.Name == "Picture 2");
+                        //drawing.SetSize(-50);
+                        break;
                 }
             }
 
@@ -212,6 +222,7 @@ namespace SupervisorMobility.API.DataAccess.Services.ExportationServices
                 worksheet.PrinterSettings.FitToWidth = 1;
                 worksheet.PrinterSettings.FitToHeight = 1;
                 worksheet.PrinterSettings.HorizontalCentered = true;
+                worksheet.Protection.IsProtected = true;
             }
         }
     }

@@ -1,10 +1,12 @@
 ﻿using AutoMapper;
 using DocumentFormat.OpenXml.Bibliography;
+using DocumentFormat.OpenXml.Drawing;
 using DocumentFormat.OpenXml.Drawing.Spreadsheet;
 using DocumentFormat.OpenXml.Math;
 using DocumentFormat.OpenXml.Office2010.Excel;
 using DocumentFormat.OpenXml.Spreadsheet;
 using Microsoft.AspNetCore.Mvc;
+using Microsoft.AspNetCore.Mvc.RazorPages;
 using Microsoft.IdentityModel.Tokens;
 using OfficeOpenXml;
 using OfficeOpenXml.Drawing;
@@ -254,16 +256,18 @@ namespace SupervisorMobility.API.Controllers
                             sheet.Cells[$"E{rowindex}"].Value = indexSection;
                             sheet.Cells[$"F{rowindex}"].Value = section.Step;
 
-                            var timeText = SosAnalysis.Times.FirstOrDefault(p=>p.SectionId == section.SectionId).Time;
+                            var timeText = SosAnalysis.Times.FirstOrDefault(p=>p.SectionId == section.SectionId)?.Time;
 
                             if (!string.IsNullOrEmpty(timeText))
                             {
                                 string[] times = timeText.Split('.');
                                 double minutes = double.Parse(times[0]) / 60;
+
                                 sheet.Cells[$"H{rowindex}"].Style.Numberformat.Format = "0.##";
                                 sheet.Cells[$"I{rowindex}"].Style.Numberformat.Format = "0.###";
 
-                                sheet.Cells[$"H{rowindex}"].Value = minutes;
+                                if(minutes > 0)
+                                    sheet.Cells[$"H{rowindex}"].Value = minutes;
                                 if (times.Length > 1)
                                     sheet.Cells[$"I{rowindex}"].Value = double.Parse(times[1]) / 100;
                             }
@@ -309,11 +313,27 @@ namespace SupervisorMobility.API.Controllers
                     rowHeights[currentChar] += templateExtrahight;
 
                     //string currentSheet = worksheet.Name.Split(" ")[1];
-                    worksheet.Cells[$"H{rowIndexes[currentChar].Item2}"].Style.Numberformat.Format = "0.0#";
-                    worksheet.Cells[$"I{rowIndexes[currentChar].Item2}"].Style.Numberformat.Format = "0.0##";
+                    var cellTimeMin = worksheet.Cells[$"H{rowIndexes[currentChar].Item2}"];
+                    var cellTimeCnt = worksheet.Cells[$"I{rowIndexes[currentChar].Item2}"];
 
-                    worksheet.Cells[$"H{rowIndexes[currentChar].Item2}"].Formula = $"SUM(H{rowIndexes[currentChar].Item1}:H{rowIndexes[currentChar].Item2 - 1})";
-                    worksheet.Cells[$"I{rowIndexes[currentChar].Item2}"].Formula = $"SUM(I{rowIndexes[currentChar].Item1}:I{rowIndexes[currentChar].Item2 - 1})";
+                    cellTimeMin.Style.Numberformat.Format = "0.0#";
+                    cellTimeCnt.Style.Numberformat.Format = "0.0##";
+
+                    cellTimeMin.Formula = $"SUM(H{rowIndexes[currentChar].Item1}:H{rowIndexes[currentChar].Item2 - 1})";
+                    cellTimeCnt.Formula = $"SUM(I{rowIndexes[currentChar].Item1}:I{rowIndexes[currentChar].Item2 - 1})";
+
+                    cellTimeMin.Calculate();
+                    cellTimeCnt.Calculate();
+
+                    if (cellTimeMin.Value == null || string.IsNullOrWhiteSpace(cellTimeMin.Text) || cellTimeMin.Text == "0.0")
+                    {
+                        cellTimeMin.Value = string.Empty;
+                    }
+
+                    if (cellTimeCnt.Value == null || string.IsNullOrWhiteSpace(cellTimeCnt.Text) || cellTimeCnt.Text == "0.0")
+                    {
+                        cellTimeCnt.Value = string.Empty;
+                    }
                 }
 
                 //rowHeights = rowHeights.ToDictionary(kvp => kvp.Key, kvp => (kvp.Value + templateExtrahight));
@@ -633,39 +653,24 @@ namespace SupervisorMobility.API.Controllers
 
                 }
 
-                //if (changedAnalysis || changedSheet || changedImgSheet)
-                //{
-                //    sheet = package.Workbook.Worksheets["Analysis B"];
-                //    double specialHeight = stylesService.CalculateRowHeight(SosAnalysis.SOSHub.OtherInformation, (sheet.Columns[2].Width + sheet.Columns[3].Width + sheet.Columns[4].Width), sheet.Cells[$"B{startingAbnormalRowB}"].Style.Font.Size);
-                //    int rows = leftoffrow - startingAbnormalRowB + 1;
-                //    int size = 20 * rows;
-                //    if (specialHeight > size)
-                //    {
-                //        double nRowH = (specialHeight - size) / rows;
-                //        for (int i = startingAbnormalRowB; i <= leftoffrow; i++)
-                //        {
-                //            sheet.Rows[i].Height += nRowH;
-                //        }
-                //    }
-                //    sheet.Cells[$"B{startingAbnormalRowB}"].Value = SosAnalysis.SOSHub.OtherInformation;
-                //}
-                //if (sheet.Name == "Analysis B")
-                //    sheet = package.Workbook.Worksheets["Analysis A"];
+                if (!string.IsNullOrEmpty(SosAnalysis.SOSHub.OtherInformation))
+                {
+                    double width = sheet.Columns[2].Width + sheet.Columns[3].Width + sheet.Columns[4].Width;
+                    int trueWidth = imgService.WidthToPixels(width);
+                    var text = SosAnalysis.SOSHub.OtherInformation;
+                    foreach (var (item, index) in package.Workbook.Worksheets.Where(ws => ws.Name.Contains("Analysis")).Select((item, index) => (item, index)))
+                    {
+                        var result = stylesService.SplitTextByRowHeight(text, trueWidth, ValuesFont.Size, maxRowHeight: 160);
+                        text = result.overflowText;
+                        item.Cells[$"B{startingAbnormalRow}"].Value = result.fittingLines;
+                        if (string.IsNullOrEmpty(text))
+                        {
+                            break;
+                        }
+                    }
+                }
 
-                //double spHeight = stylesService.CalculateRowHeight(SosAnalysis.SOSHub.OtherInformation, (sheet.Columns[2].Width + sheet.Columns[3].Width + sheet.Columns[4].Width), sheet.Cells[$"B{startingAbnormalRow}"].Style.Font.Size);
-                //int spRows = leftoffrow - startingAbnormalRowB + 1;
-                //int tSize = 20 * spRows;
-                //if (spHeight > tSize)
-                //{
-                //    double nRowH = (spHeight - tSize) / spRows;
-                //    for (int i = startingAbnormalRow; i <= rowindex; i++)
-                //    {
-                //        sheet.Rows[i].Height += nRowH;
-                //    }
-                //}
-                //sheet.Cells[$"B{startingAbnormalRow}"].Value = SosAnalysis.SOSHub.OtherInformation;
-
-                package.Workbook.Worksheets.First().Select();
+                
 
                 #endregion
 
@@ -676,7 +681,6 @@ namespace SupervisorMobility.API.Controllers
 
                 sheetService.SetPrintingOptions(package.Workbook);
 
-                sheet.Protection.IsProtected = true;
                 package.SaveAs(ms);
             }
 
@@ -848,7 +852,7 @@ namespace SupervisorMobility.API.Controllers
 
                         if (sheet == null)
                         {
-                            sheetService.AddSheet(package, 1, currentChar);
+                            sheetService.AddSheet(package, 2, currentChar);
                             sheet = package.Workbook.Worksheets[$"Sequence {nextPage}"];
                             sheet.Cells["B3"].Value += nextPage;
                             rowHeights.Add(nextPage, 0);
@@ -924,8 +928,27 @@ namespace SupervisorMobility.API.Controllers
                     rowIndexes[currentChar] = (rowIndexes[currentChar].Item1, rowIndexes[currentChar].Item2 + 1);
                     rowHeights[currentChar] += templateExtrahight;
 
-                    sheet.Cells[$"H{rowIndexes[currentChar].Item2}"].Formula = $"SUM(H{rowIndexes[currentChar].Item1}:H{rowIndexes[currentChar].Item2 - 1})";
-                    sheet.Cells[$"I{rowIndexes[currentChar].Item2}"].Formula = $"SUM(I{rowIndexes[currentChar].Item1}:I{rowIndexes[currentChar].Item2 - 1})";
+                    var cellTimeMin = worksheet.Cells[$"H{rowIndexes[currentChar].Item2}"];
+                    var cellTimeCnt = worksheet.Cells[$"I{rowIndexes[currentChar].Item2}"];
+
+                    cellTimeMin.Style.Numberformat.Format = "0.0#";
+                    cellTimeCnt.Style.Numberformat.Format = "0.0##";
+
+                    cellTimeMin.Formula = $"SUM(H{rowIndexes[currentChar].Item1}:H{rowIndexes[currentChar].Item2 - 1})";
+                    cellTimeCnt.Formula = $"SUM(I{rowIndexes[currentChar].Item1}:I{rowIndexes[currentChar].Item2 - 1})";
+
+                    cellTimeMin.Calculate();
+                    cellTimeCnt.Calculate();
+
+                    if (cellTimeMin.Value == null || string.IsNullOrWhiteSpace(cellTimeMin.Text) || cellTimeMin.Text == "0.0")
+                    {
+                        cellTimeMin.Value = string.Empty;
+                    }
+
+                    if (cellTimeCnt.Value == null || string.IsNullOrWhiteSpace(cellTimeCnt.Text) || cellTimeCnt.Text == "0.0")
+                    {
+                        cellTimeCnt.Value = string.Empty;
+                    }
                 }
 
                 sheet = package.Workbook.Worksheets[0];
@@ -971,7 +994,7 @@ namespace SupervisorMobility.API.Controllers
 
                             if (sheet == null)
                             {
-                                sheetService.AddSheet(package, 1, currentChar);
+                                sheetService.AddSheet(package, 2, currentChar);
                                 sheet = package.Workbook.Worksheets[$"Sequence {nextPage}"];
 
                                 sheet.Cells["B3"].Value += nextPage;
@@ -1113,7 +1136,7 @@ namespace SupervisorMobility.API.Controllers
 
                                                 if (sheet == null)
                                                 {
-                                                    sheetService.AddSheet(package, 1, currentChar);
+                                                    sheetService.AddSheet(package, 2, currentChar);
                                                     sheet = package.Workbook.Worksheets[$"Sequence {nextPage}"];
 
                                                     sheet.Cells["B3"].Value += nextPage;
@@ -1183,7 +1206,7 @@ namespace SupervisorMobility.API.Controllers
 
                                 if (sheet == null)
                                 {
-                                    sheetService.AddSheet(package, 1, currentChar);
+                                    sheetService.AddSheet(package, 2, currentChar);
                                     sheet = package.Workbook.Worksheets[$"Sequence {nextPage}"];
 
                                     sheet.Cells["B3"].Value += nextPage;
@@ -1242,39 +1265,24 @@ namespace SupervisorMobility.API.Controllers
 
                 }
 
-                //if (changedAnalysis || changedSheet || changedImgSheet)
-                //{
-                //    sheet = package.Workbook.Worksheets["Analysis B"];
-                //    double specialHeight = stylesService.CalculateRowHeight(SosAnalysis.SOSHub.OtherInformation, (sheet.Columns[2].Width + sheet.Columns[3].Width + sheet.Columns[4].Width), sheet.Cells[$"B{startingAbnormalRowB}"].Style.Font.Size);
-                //    int rows = leftoffrow - startingAbnormalRowB + 1;
-                //    int size = 20 * rows;
-                //    if (specialHeight > size)
-                //    {
-                //        double nRowH = (specialHeight - size) / rows;
-                //        for (int i = startingAbnormalRowB; i <= leftoffrow; i++)
-                //        {
-                //            sheet.Rows[i].Height += nRowH;
-                //        }
-                //    }
-                //    sheet.Cells[$"B{startingAbnormalRowB}"].Value = SosAnalysis.SOSHub.OtherInformation;
-                //}
-                //if (sheet.Name == "Analysis B")
-                //    sheet = package.Workbook.Worksheets["Analysis A"];
+                if (!string.IsNullOrEmpty(SosSequence.SOSHub.OtherInformation))
+                {
+                    double width = sheet.Columns[2].Width + sheet.Columns[3].Width + sheet.Columns[4].Width;
+                    int trueWidth = imgService.WidthToPixels(width);
+                    var text = SosSequence.SOSHub.OtherInformation;
+                    foreach (var (item, index) in package.Workbook.Worksheets.Where(ws => ws.Name.Contains("Sequence")).Select((item, index) => (item, index)))
+                    {
+                        var result = stylesService.SplitTextByRowHeight(text, trueWidth, ValuesFont.Size, maxRowHeight: 160);
+                        text = result.overflowText;
+                        item.Cells[$"B{startingAbnormalRow}"].Value = result.fittingLines;
+                        if (string.IsNullOrEmpty(text))
+                        {
+                            break;
+                        }
+                    }
+                }
 
-                //double spHeight = stylesService.CalculateRowHeight(SosAnalysis.SOSHub.OtherInformation, (sheet.Columns[2].Width + sheet.Columns[3].Width + sheet.Columns[4].Width), sheet.Cells[$"B{startingAbnormalRow}"].Style.Font.Size);
-                //int spRows = leftoffrow - startingAbnormalRowB + 1;
-                //int tSize = 20 * spRows;
-                //if (spHeight > tSize)
-                //{
-                //    double nRowH = (spHeight - tSize) / spRows;
-                //    for (int i = startingAbnormalRow; i <= rowindex; i++)
-                //    {
-                //        sheet.Rows[i].Height += nRowH;
-                //    }
-                //}
-                //sheet.Cells[$"B{startingAbnormalRow}"].Value = SosAnalysis.SOSHub.OtherInformation;
-
-                package.Workbook.Worksheets.First().Select();
+                
 
                 #endregion
 
@@ -1317,7 +1325,7 @@ namespace SupervisorMobility.API.Controllers
                 sheet.Cells["G8"].Value = SosDistribution.InternalControlNumber;
 
                 sheet.Cells["B10"].Value = SosDistribution.DistributionLogbooks.First().Approver.Name;
-                sheet.Cells["E10"].Value = SosDistribution.SOSHub.ReviewerEditors.First().Name;
+                sheet.Cells["E10"].Value = SosDistribution.SOSHub.ReviewerEditors.First()?.Name;
                 sheet.Cells["G10"].Value = SosDistribution.SOSHub.ApproverOwners.First().Name;
 
                 sheet.Cells["B12"].Value = SosDistribution.CreatedAt?.ToString("dd-MMM-yyyy").Replace(".", ""); ;
@@ -1345,11 +1353,11 @@ namespace SupervisorMobility.API.Controllers
                     } while (i < max);
                 }
 
-                string[] models = SosDistribution.AplicationModels.Split("§");
+                string[] models = SosDistribution.AplicationModels.Split("§", StringSplitOptions.RemoveEmptyEntries);
                 if (models.Any())
                 {
                     string[] cols = { "L15", "M15", "N15", "O15", "Q15" };
-                    for(int j = 0; j < 5; j++)
+                    for(int j = 0; j < models.Length; j++)
                     {
                         sheet.Cells[$"{cols[j]}"].Value = models[j];
                     }
@@ -1472,32 +1480,24 @@ namespace SupervisorMobility.API.Controllers
                     {
                         var timeText = SosDistribution.Times.FirstOrDefault(p => p.SectionId == section.SectionId).Time;
 
-                        if (!string.IsNullOrEmpty(timeText))
+                        if (!string.IsNullOrEmpty(timeText) && timeText != "§§§§" && timeText != "0")
                         {
                             double[] times = Array.ConvertAll(timeText.Split("§"), s => string.IsNullOrEmpty(s) ? 0.0 : Double.Parse(s));
 
                             char col = 'L';
-                            for (int j = 0; j < 5; j++)
+                            for (int j = 0; j < models.Length; j++)
                             {
                                 col = (char)(col + j);
+
                                 if (times[j] == 0)
                                 {
                                     //sheet.Cells[$"H{rowindex}"].Style.Numberformat.Format = "0.##";
                                     //sheet.Cells[$"I{rowindex}"].Style.Numberformat.Format = "0.###";
-                                    if (firstPage && col == 'O')
-                                    {
-                                        sheet.Cells[$"{col}{rowindex}:P{rowindex}"].Style.Border.Diagonal.Style = ExcelBorderStyle.Thin;
-                                        sheet.Cells[$"{col}{rowindex}:P{rowindex}"].Style.Border.DiagonalUp = true;
-                                        col = 'P';
-                                    }
-                                    else
-                                    {
-                                        sheet.Cells[$"{col}{rowindex}"].Style.Border.Diagonal.Style = ExcelBorderStyle.Thin;
-                                        sheet.Cells[$"{col}{rowindex}"].Style.Border.DiagonalUp = true;
-                                    }
+                                    stylesService.DistTimesNullStyle(sheet, firstPage, rowindex, ref col);
                                 }
                                 else
                                 {
+                                    sheet.Cells[$"{col}{rowindex}"].Style.Numberformat.Format = "0.###";
                                     sheet.Cells[$"{col}{rowindex}"].Value = times[j];
                                     if (firstPage && col == 'O') col = 'P';
                                 }
@@ -1544,7 +1544,7 @@ namespace SupervisorMobility.API.Controllers
                     if (times.Any())
                     {
                         char col = 'L';
-                        for (int j = 0; j < 5; j++)
+                        for (int j = 0; j < times.Length; j++)
                         {
                             col = (char)(col + j);
                             if (times[j] != 0)
@@ -1556,15 +1556,17 @@ namespace SupervisorMobility.API.Controllers
                     }
 
                     char column = 'L';
-                    for (int j = 0; j < 5; j++)
+                    for (int j = 0; j < models.Length; j++)
                     {
                         column = (char)(column + j);
 
                         var cell = sheet.Cells[$"{column}{rowIndexes[currentChar].Item2}"];
 
+                        worksheet.Cells[$"{column}{rowIndexes[currentChar].Item2}"].Style.Numberformat.Format = "0.0##";
+
                         cell.Formula = $"SUM({column}{rowIndexes[currentChar].Item1}:{column}{rowIndexes[currentChar].Item2-1})";
                         cell.Calculate();
-                        if(cell.Value == null || string.IsNullOrWhiteSpace(cell.Text) || cell.Text == "0")
+                        if(cell.Value == null || string.IsNullOrWhiteSpace(cell.Text) || cell.Text == "0.0")
                         {
                             cell.Value = string.Empty;
                         }
@@ -1592,15 +1594,15 @@ namespace SupervisorMobility.API.Controllers
                     }
                 }
 
-                double changeHeightP = imgService.HeightToPixels(rowHeights.First().Value);
+                double changeHeightP = imgService.HeightToPixels(rowHeights.First().Value)-40;
 
                 int currentSheetColumnWidth = imgService.WidthToPixels(imgCellWidthDefTmplt);
 
                 int offsetY = 2;
 
                 //if anything is moved in template this needs to be updated
-                double globalXoffsetA = imgService.WidthToPixels(105.31) + 65/*105.31*/, globalYoffsetA = imgService.HeightToPixels(230.5) + 20/*230.5*/;
-                double globalXoffsetB = imgService.WidthToPixels(107.22) + 27/*107.22*/, globalYoffsetB = imgService.HeightToPixels(128.7) + 22/*90.6*/;
+                double globalXoffsetA = imgService.WidthToPixels(105.31) + 95/*105.31*/, globalYoffsetA = imgService.HeightToPixels(230.5) + 6/*230.5*/;
+                double globalXoffsetB = imgService.WidthToPixels(107.22) + 95/*107.22*/, globalYoffsetB = imgService.HeightToPixels(128.7) + 6/*90.6*/;
 
                 //sheet = package.Workbook.Worksheets["Analysis A"];
 
@@ -1648,22 +1650,22 @@ namespace SupervisorMobility.API.Controllers
 
                                         if (sheet == null)
                                         {
-                                            sheetService.AddSheet(package, 1, currentPIdx);
+                                            sheetService.AddSheet(package, 3, currentPIdx);
                                             sheet = package.Workbook.Worksheets[pageName];
 
                                             rowHeights.Add(nextPIdx, 0);
                                             rowIndexes.Add(nextPIdx, (9, 10));
 
 
-                                            var idx = rowIndexes[nextPIdx].Item2;
+                                            var idx = rowIndexes[nextPIdx].Item2-1;
                                             var height = rowHeights[nextPIdx];
 
                                             sheetService.GenerateDistributionsRows(sheet, ref height, ref idx, ChangeHeight, DefaultRowH, false);
 
-                                            rowIndexes[nextPIdx] = (rowIndexes[nextPIdx].Item1, idx);
+                                            rowIndexes[nextPIdx] = (rowIndexes[nextPIdx].Item1, idx+3);
                                             rowHeights[nextPIdx] = height;
 
-                                            stylesService.SetDistributionImgsStyles(sheet, rowIndexes[nextPIdx].Item1, rowIndexes[nextPIdx].Item2 - 1);
+                                            stylesService.SetDistributionImgsStyles(sheet, rowIndexes[nextPIdx].Item1, rowIndexes[nextPIdx].Item2-3);
 
                                             imgCellWidthExtTmplt = imgCellWidthExtTmplt != 0 ? imgCellWidthExtTmplt : sheet.Columns[17].Width + sheet.Columns[18].Width + sheet.Columns[19].Width + sheet.Columns[20].Width + sheet.Columns[21].Width + sheet.Columns[22].Width + sheet.Columns[23].Width;
                                             changedSheet = false;
@@ -1686,7 +1688,6 @@ namespace SupervisorMobility.API.Controllers
                             } while (true);
 
                             horizontalOffset = (int)((changeableW - w) / 2);
-                            (w, h) = (currentSheetColumnWidth / 2 - 20, 160);
                             
                             if (offsetY + h > changeHeightP && changedSheet)
                             {
@@ -1700,21 +1701,21 @@ namespace SupervisorMobility.API.Controllers
 
                                 if (sheet == null)
                                 {
-                                    sheetService.AddSheet(package, 1, currentPIdx);
+                                    sheetService.AddSheet(package, 3, currentPIdx);
                                     sheet = package.Workbook.Worksheets[pageName];
 
                                     rowHeights.Add(nextPIdx, 0);
                                     rowIndexes.Add(nextPIdx, (9, 10));
 
-                                    var idx = rowIndexes[nextPIdx].Item2;
+                                    var idx = rowIndexes[nextPIdx].Item2-1;
                                     var height = rowHeights[nextPIdx];
 
-                                    sheetService.GenerateAnalysisRows(sheet, ref height, ref idx, ChangeHeight, DefaultRowH);
+                                    sheetService.GenerateDistributionsRows(sheet, ref height, ref idx, ChangeHeight, DefaultRowH, false);
 
-                                    rowIndexes[nextPIdx] = (rowIndexes[nextPIdx].Item1, idx);
+                                    rowIndexes[nextPIdx] = (rowIndexes[nextPIdx].Item1, idx+3);
                                     rowHeights[nextPIdx] = height;
 
-                                    stylesService.SetDistributionImgsStyles(sheet, rowIndexes[nextPIdx].Item1, rowIndexes[nextPIdx].Item2 - 1);
+                                    stylesService.SetDistributionImgsStyles(sheet, rowIndexes[nextPIdx].Item1, rowIndexes[nextPIdx].Item2 - 3);
 
                                     imgCellWidthExtTmplt = imgCellWidthExtTmplt != 0 ? imgCellWidthExtTmplt : sheet.Columns[17].Width + sheet.Columns[18].Width + sheet.Columns[19].Width + sheet.Columns[20].Width + sheet.Columns[21].Width + sheet.Columns[22].Width + sheet.Columns[23].Width;
                                 }
@@ -1745,6 +1746,48 @@ namespace SupervisorMobility.API.Controllers
 
                 }
 
+                if (!string.IsNullOrEmpty(SosDistribution.SOSHub.OtherInformation))
+                {
+                    double width = sheet.Columns[2].Width + sheet.Columns[3].Width + sheet.Columns[4].Width + sheet.Columns[5].Width;
+                    int trueWidth = imgService.WidthToPixels(width);
+                    var text = SosDistribution.SOSHub.OtherInformation;
+                    foreach (var (item, index) in package.Workbook.Worksheets.Where(ws => ws.Name.Contains("DISTRIBUTION")).Select((item, index) => (item, index)))
+                    {
+                        var result = stylesService.SplitTextByRowHeight(text, trueWidth, ValuesFont.Size, maxRowHeight: 55.6, existingText: "Situación Anormal y/ o Casos Especiales");
+                        text = result.overflowText;
+                        item.Cells[$"B{rowIndexes.ElementAt(index).Value.Item2 - 1}"].Value = result.fittingLines;
+                        if (string.IsNullOrEmpty(text))
+                        {
+                            break;
+                        }
+                    }
+                }
+
+                string aaaaa = package.Workbook.Worksheets.Last().Name.Split(" ", 2)[1];
+                int aaaugh = sheetService.GetNextIndex(aaaaa);
+
+                string pn = $"HOE DISTRIBUTION ({aaaugh})";
+                string npi = pn.Split(" ", 2)[1];
+
+                sheet = package.Workbook.Worksheets[pn];
+
+                if (sheet == null)
+                {
+                    sheetService.AddSheet(package, 3, aaaaa);
+                    sheet = package.Workbook.Worksheets[pn];
+
+                    rowHeights.Add(npi, 0);
+                    rowIndexes.Add(npi, (9, 10));
+
+                    var idx = rowIndexes[npi].Item2 - 1;
+                    var height = rowHeights[npi];
+
+                    sheetService.GenerateDistributionsRows(sheet, ref height, ref idx, ChangeHeight, DefaultRowH, false);
+
+                    rowIndexes[npi] = (rowIndexes[npi].Item1, idx + 3);
+                    rowHeights[npi] = height;
+                }
+
                 sheet = package.Workbook.Worksheets.First();
                 int sheetTotal = package.Workbook.Worksheets.Where(p => p.Name.Contains("DISTRIBUTION")).Count();
 
@@ -1756,7 +1799,7 @@ namespace SupervisorMobility.API.Controllers
                     item.Cells["W6"].Value = sheetTotal;
                 }
 
-                package.Workbook.Worksheets.First().Select();
+                
 
                 #endregion
 
@@ -1770,7 +1813,7 @@ namespace SupervisorMobility.API.Controllers
 
             ms.Position = 0;
 
-            var res = File(ms, "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet", !string.IsNullOrEmpty(SosDistribution.InternalControlNumber) ? $"{SosDistribution.InternalControlNumber} Sequence Report.xlsx" : "Sequence Report.xlsx");
+            var res = File(ms, "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet", !string.IsNullOrEmpty(SosDistribution.InternalControlNumber) ? $"{SosDistribution.InternalControlNumber} Distribution Report.xlsx" : "Distribution Report.xlsx");
             res.EnableRangeProcessing = true;
             return res;
         }
