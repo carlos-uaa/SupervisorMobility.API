@@ -23,6 +23,5 @@ namespace SupervisorMobility.API.Models.SOS.SOSFlowDtos
 
         public bool? IsActive { get; set; }
         public int SOSHubId { get; set; }
-        public SOSHubDto? SOSHub { get; set; }
     }
 }
