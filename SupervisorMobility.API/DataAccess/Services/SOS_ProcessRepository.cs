@@ -15,6 +15,7 @@ using SupervisorMobility.API.Models.SOS.SOSAnalysisDtos;
 using SupervisorMobility.API.Models.SOS.SOSAnalysisLogbookDtos;
 using SupervisorMobility.API.Models.SOS.SOSCombinationDtos;
 using SupervisorMobility.API.Models.SOS.SOSCombinationLogbookDtos;
+using SupervisorMobility.API.Models.SOS.SOSDistributionAdditionalTimeDtos;
 using SupervisorMobility.API.Models.SOS.SOSDistributionDtos;
 using SupervisorMobility.API.Models.SOS.SOSDistributionLogbookDtos;
 using SupervisorMobility.API.Models.SOS.SOSFlowDtos;
@@ -3387,6 +3388,7 @@ namespace SupervisorMobility.API.DataAccess.Services
             {
                 query = query.Include(t => t.DistributionLogbooks).ThenInclude(l => l.Approver);
                 query = query.Include(t => t.DistributionLogbooks).ThenInclude(l => l.Reviewer);
+                query = query.Include(t => t.SOSDistributionAdditionalTime);
             }
 
             if (includeTurns)
@@ -3705,6 +3707,53 @@ namespace SupervisorMobility.API.DataAccess.Services
             }
             return new AsyncVoidMethodBuilder();
         }
+
+        public async Task<AsyncVoidMethodBuilder> AddSOSDistributionAdditionalTimeToSOSDistribution(SOSDistribution master, SOSDistributionAdditionalTime slave)
+        {
+            try
+            {
+                // Verificar si el master ya está siendo rastreado en el contexto
+                var localMasterEntry = _context.SOSDistributions.Local.FirstOrDefault(entry => entry.SOSHubId == master.SOSHubId);
+                if (localMasterEntry != null)
+                {
+                    master = localMasterEntry;
+                }
+                else
+                {
+                    if (_context.Entry(master).State == EntityState.Detached)
+                    {
+                        _context.SOSDistributions.Attach(master);
+                    }
+                }
+
+                // Verificar si el slave ya está siendo rastreado en el contexto
+                var localSlaveEntry = _context.SOSDistributionAdditionalTimes.Local.FirstOrDefault(entry => entry.SOSDistributionAdditionalTimeId == slave.SOSDistributionAdditionalTimeId);
+                if (localSlaveEntry != null)
+                {
+                    slave = localSlaveEntry;
+                }
+                else
+                {
+                    if (_context.Entry(slave).State == EntityState.Detached)
+                    {
+                        _context.SOSDistributionAdditionalTimes.Attach(slave);
+                    }
+                }
+
+                // Verificar si el comentario ya está en la colección
+                master.SOSDistributionAdditionalTime = slave;
+
+                // Guardar los cambios
+                await _context.SaveChangesAsync();
+            }
+            catch (Exception ex)
+            {
+                // Manejar el error apropiadamente, puedes loguearlo o lanzar una excepción personalizada
+                Debug.WriteLine("An error occurred while updating the SOSHub: " + ex.Message);
+            }
+            return new AsyncVoidMethodBuilder();
+        }
+
         #endregion
         #region Remove from SOSDistribution
 
@@ -3720,7 +3769,12 @@ namespace SupervisorMobility.API.DataAccess.Services
             _context.SaveChanges();
             return new AsyncVoidMethodBuilder();
         }
-
+        public async Task<AsyncVoidMethodBuilder> SOSDataRemoveAllSOSDistributionAdditionalTimeFromSOSDistribution(SOSDistribution Master)
+        {
+            Master.SOSDistributionAdditionalTime = null;
+            _context.SaveChanges();
+            return new AsyncVoidMethodBuilder();
+        }
         #endregion
         #region SOSDistributionLogbook
         public async Task<SOSDistributionLogbook> GetSOSDistributionLogbookById(int id)
@@ -3771,6 +3825,56 @@ namespace SupervisorMobility.API.DataAccess.Services
             _context.SOSDistributionLogbooks.Add(LogBook_ToCreate);
             return await _context.SaveChangesAsync();
         }
+        #endregion
+
+        #region SOS Distribution Additional Time
+        public async Task<SOSDistributionAdditionalTime> GetSOSDistributionAdditionalTimeId(int Id)
+        {
+            return await _context.SOSDistributionAdditionalTimes.AsNoTracking().Where(t => t.SOSDistributionAdditionalTimeId == Id).FirstOrDefaultAsync();
+        }
+        public async Task<int> UpdateSOSDistributionAdditionalTime(SOSDistributionAdditionalTimeForUpdateDto SOSDistributionAdditionalTimeForUpdate)
+        {
+            try
+            {
+                var query = _context.SOSDistributionAdditionalTimes.Where(t => t.SOSDistributionAdditionalTimeId == SOSDistributionAdditionalTimeForUpdate.SOSDistributionAdditionalTimeId && t.IsActive == true);
+
+                SOSDistributionAdditionalTime sosDistributionAdditionalTime = await query.FirstOrDefaultAsync();
+
+                if (sosDistributionAdditionalTime == null)
+                {
+                    throw new InvalidOperationException("SOS Distribution Additional Time not found or is not active.");
+                }
+
+                // Verifica si la entidad ya está siendo rastreada
+                var localEntry = _context.SOSDistributionAdditionalTimes.Local.FirstOrDefault(entry => entry.SOSDistributionAdditionalTimeId == SOSDistributionAdditionalTimeForUpdate.SOSDistributionAdditionalTimeId);
+                if (localEntry != null)
+                {
+                    // Si la entidad localmente rastreada es diferente, usa esa instancia
+                    _context.Entry(localEntry).CurrentValues.SetValues(SOSDistributionAdditionalTimeForUpdate);
+                }
+                else
+                {
+                    // Si no, adjunta la entidad obtenida de la base de datos
+                    if (_context.Entry(sosDistributionAdditionalTime).State == EntityState.Detached)
+                    {
+                        _context.SOSDistributionAdditionalTimes.Attach(sosDistributionAdditionalTime);
+                    }
+
+                    _mapper.Map(SOSDistributionAdditionalTimeForUpdate, sosDistributionAdditionalTime);
+                    _context.SOSDistributionAdditionalTimes.Update(sosDistributionAdditionalTime);
+                }
+
+                return await _context.SaveChangesAsync();
+            }
+            catch (Exception ex)
+            {
+                // Manejar el error apropiadamente, puedes loguearlo o lanzar una excepción personalizada
+                Debug.WriteLine("An error occurred while updating the Commentary.", ex.Message);
+                return 0;
+
+            }
+        }
+
         #endregion
         //Combination
         #region SOSCombination

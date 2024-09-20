@@ -115,6 +115,7 @@ namespace SupervisorMobility.API.Context
         public DbSet<SOSCombinationLogbook> SOSCombinationLogbooks { get; set; }
         public DbSet<SOSDistribution> SOSDistributions { get; set; }
         public DbSet<SOSDistributionLogbook> SOSDistributionLogbooks { get; set; }
+        public DbSet<SOSDistributionAdditionalTime> SOSDistributionAdditionalTimes { get; set; }
         public DbSet<Turn> Turns { get; set; }
         public DbSet<SOSTime> SOSTimes { get; set; }
 
@@ -482,6 +483,10 @@ namespace SupervisorMobility.API.Context
                 .HasDefaultValue(true);
 
             modelBuilder.Entity<SOSDistribution>()
+                .Property(p => p.IsActive)
+                .HasDefaultValue(true);
+
+            modelBuilder.Entity<SOSDistributionAdditionalTime>()
                 .Property(p => p.IsActive)
                 .HasDefaultValue(true);
 

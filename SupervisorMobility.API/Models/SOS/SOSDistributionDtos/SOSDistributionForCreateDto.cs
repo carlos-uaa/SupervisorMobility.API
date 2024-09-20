@@ -4,6 +4,7 @@ using SupervisorMobility.API.Models.SOS.SOSTimeDtos;
 using SupervisorMobility.API.Models.CommentaryDtos;
 using SupervisorMobility.API.Models.FileUploadDto;
 using SupervisorMobility.API.Models.SOS.SOSDistributionLogbookDtos;
+using SupervisorMobility.API.DataAccess.Entities.SOS;
 
 namespace SupervisorMobility.API.Models.SOS.SOSDistributionDtos
 {
@@ -31,6 +32,9 @@ namespace SupervisorMobility.API.Models.SOS.SOSDistributionDtos
 
         public DateTime? CreatedAt { get; set; }
         public DateTime? ApplicationMonth { get; set; }
+
+        public int? SOSDistributionAdditionalTimeId { get; set; }
+        public SOSDistributionAdditionalTime? SOSDistributionAdditionalTime { get; set; }
 
         public bool? IsActive { get; set; }
 
