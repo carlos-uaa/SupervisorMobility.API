@@ -5,6 +5,7 @@ using SupervisorMobility.API.DataAccess.Entities.SOS;
 using SupervisorMobility.API.DataAccess.Services;
 using SupervisorMobility.API.Models.CommentaryDtos;
 using SupervisorMobility.API.Models.FileUploadDto;
+using SupervisorMobility.API.Models.SOS.SOSDistributionAdditionalTimeDtos;
 using SupervisorMobility.API.Models.SOS.SOSDistributionDtos;
 using SupervisorMobility.API.Models.SOS.SOSDistributionLogbookDtos;
 using SupervisorMobility.API.Models.SOS.SOSTimeDtos;
@@ -129,6 +130,7 @@ namespace SupervisorMobility.API.Controllers.SOS_Controllers
             List<Turn> Bkup_Turn = new List<Turn>();
             List<SOSDistributionLogbook> Bkup_DistributionLogbook = new List<SOSDistributionLogbook>();
             List<SOSTime> Bkup_Times = new List<SOSTime>();
+            SOSDistributionAdditionalTime additionalTime = new SOSDistributionAdditionalTime();
 
             // Filtrar nuevos Comentarios
             List<UpdateCommentaryDto> filteredCommentaryList = sosUpdateEntity.Notes.Where(t => t.CommentaryId <= 0).ToList();
@@ -278,6 +280,9 @@ namespace SupervisorMobility.API.Controllers.SOS_Controllers
                 Bkup_Notes.Add(CommentaryToAdd);
             }
 
+            var AdditionalTimeUpdate = await _ProcessRepository.UpdateSOSDistributionAdditionalTime(sosUpdateEntity.SOSDistributionAdditionalTime);
+            additionalTime = await _ProcessRepository.GetSOSDistributionAdditionalTimeId(sosUpdateEntity.SOSDistributionAdditionalTime.SOSDistributionAdditionalTimeId);
+
             foreach (var logbook in sosUpdateEntity.DistributionLogbooks)
             {
                 SOSDistributionLogbook DistributionBkaux = await _ProcessRepository.GetSOSDistributionLogbookById(logbook.SOSDistributionLogbookId);
@@ -304,11 +309,15 @@ namespace SupervisorMobility.API.Controllers.SOS_Controllers
             sosUpdateEntity.Turns = null;
             sosUpdateEntity.DistributionLogbooks = null;
             sosUpdateEntity.Times= null;
+            sosUpdateEntity.SOSDistributionAdditionalTime = null;
+
 
             await _ProcessRepository.RemoveAllTimesFromSOSDistribution(_sosDistribution);
             await _ProcessRepository.RemoveAllTurnsFromSOSDistribution(_sosDistribution);
             await _ProcessRepository.SOSDataRemoveAllNotesFromSOSDistribution(_sosDistribution);
             await _ProcessRepository.SOSDataRemoveAllSOSDistributionLogbookFromSOSDistribution(_sosDistribution);
+            await _ProcessRepository.SOSDataRemoveAllSOSDistributionAdditionalTimeFromSOSDistribution(_sosDistribution);
+
 
             var result = await _ProcessRepository.UpdateSOSDistribution(sosUpdateEntity, _sosDistribution);
 
@@ -347,6 +356,7 @@ namespace SupervisorMobility.API.Controllers.SOS_Controllers
                     await _ProcessRepository.AddTurnToSOSDistribution(_sosDistribution, turn);
                 }
             }
+            await _ProcessRepository.AddSOSDistributionAdditionalTimeToSOSDistribution(_sosDistribution, additionalTime);
 
             if (result != null)
             {
