@@ -33,6 +33,9 @@ namespace SupervisorMobility.API.Models.SOS.SOSDistributionDtos
         public DateTime? CreatedAt { get; set; }
         public DateTime? ApplicationMonth { get; set; }
 
+        public int? SOSDistributionAdditionalTimeId { get; set; }
+        public SOSDistributionAdditionalTime? SOSDistributionAdditionalTime { get; set; }
+
         public bool? IsActive { get; set; }
 
         public int? SOSHubId { get; set; }

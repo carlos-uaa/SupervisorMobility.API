@@ -11,6 +11,7 @@ using SupervisorMobility.API.Models.SOS.SOSAnalysisDtos;
 using SupervisorMobility.API.Models.SOS.SOSAnalysisLogbookDtos;
 using SupervisorMobility.API.Models.SOS.SOSCombinationDtos;
 using SupervisorMobility.API.Models.SOS.SOSCombinationLogbookDtos;
+using SupervisorMobility.API.Models.SOS.SOSDistributionAdditionalTimeDtos;
 using SupervisorMobility.API.Models.SOS.SOSDistributionDtos;
 using SupervisorMobility.API.Models.SOS.SOSDistributionLogbookDtos;
 using SupervisorMobility.API.Models.SOS.SOSFlowDtos;
@@ -247,18 +248,24 @@ namespace SupervisorMobility.API.DataAccess.Services
         #endregion
         #region Add To Sos Distribution
         Task<AsyncVoidMethodBuilder> AddSOSDistributionLogbookToSOSDistribution(SOSDistribution Master, SOSDistributionLogbook Slave);
+        Task<AsyncVoidMethodBuilder> AddSOSDistributionAdditionalTimeToSOSDistribution(SOSDistribution Master, SOSDistributionAdditionalTime Slave);
         Task<AsyncVoidMethodBuilder> AddNoteToSOSDistribution(SOSDistribution Master, Commentary Slave);
 
         #endregion
         #region Remove from SosDistribution
         Task<AsyncVoidMethodBuilder> SOSDataRemoveAllSOSDistributionLogbookFromSOSDistribution(SOSDistribution Master);
         Task<AsyncVoidMethodBuilder> SOSDataRemoveAllNotesFromSOSDistribution(SOSDistribution Master);
+        Task<AsyncVoidMethodBuilder> SOSDataRemoveAllSOSDistributionAdditionalTimeFromSOSDistribution(SOSDistribution Master);
         #endregion
         #region SOSDistributionLogbook
         Task<SOSDistributionLogbook> GetSOSDistributionLogbookById(int id);
         Task<int> UpdateDistributionLogbook(SOSDistributionLogbookForUpdateDto DistributionForUpdate);
 
         Task<int> CreateSOSDistributionLogbook(SOSDistributionLogbook LogBook_ToCreate);
+        #endregion
+        #region SOS Distribution Additional time
+        Task<SOSDistributionAdditionalTime> GetSOSDistributionAdditionalTimeId(int id);
+        Task<int> UpdateSOSDistributionAdditionalTime(SOSDistributionAdditionalTimeForUpdateDto SOSDistributionAdditionalTimeForUpdate);
         #endregion
 
         //SOS Combination

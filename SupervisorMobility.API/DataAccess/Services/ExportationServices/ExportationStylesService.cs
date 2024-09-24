@@ -5,6 +5,8 @@ using System.Drawing;
 using DocumentFormat.OpenXml.Spreadsheet;
 using DocumentFormat.OpenXml.Bibliography;
 using DocumentFormat.OpenXml.Office2016.Excel;
+using DocumentFormat.OpenXml;
+using System.Text;
 
 namespace SupervisorMobility.API.DataAccess.Services.ExportationServices
 {
@@ -106,12 +108,15 @@ namespace SupervisorMobility.API.DataAccess.Services.ExportationServices
 
         public void ApplyDistributionStyles(ExcelWorksheet sheet, int rownumber, bool firstPage)
         {
+            var usedFont = sheet.Cells[$"B{rownumber - 1}"].Style.Font;
             sheet.Rows[rownumber].Height = 21.8;
 
             sheet.Cells[$"B{rownumber}"].Style.Border.Left.Style = ExcelBorderStyle.Medium;
             sheet.Cells[$"B{rownumber}"].Style.Border.Right.Style = ExcelBorderStyle.Thin;
             sheet.Cells[$"B{rownumber}"].Style.Border.Bottom.Style = /*!last ? ExcelBorderStyle.Dashed :*/ ExcelBorderStyle.Thin;
             sheet.Cells[$"B{rownumber}"].Style.VerticalAlignment = ExcelVerticalAlignment.Center;
+            sheet.Cells[$"B{rownumber}"].Style.HorizontalAlignment = ExcelHorizontalAlignment.Center;
+            sheet.Cells[$"B{rownumber}"].Style.Font = usedFont;
 
             sheet.Cells[$"C{rownumber}:G{rownumber}"].Merge = true;
             sheet.Cells[$"C{rownumber}:G{rownumber}"].Style.WrapText = true;
@@ -119,30 +124,38 @@ namespace SupervisorMobility.API.DataAccess.Services.ExportationServices
             sheet.Cells[$"C{rownumber}:G{rownumber}"].Style.Border.Right.Style = ExcelBorderStyle.Thin;
             sheet.Cells[$"C{rownumber}:G{rownumber}"].Style.Border.Bottom.Style = /*!last ? ExcelBorderStyle.Dashed :*/ ExcelBorderStyle.Thin;
             sheet.Cells[$"C{rownumber}:G{rownumber}"].Style.VerticalAlignment = ExcelVerticalAlignment.Center;
+            sheet.Cells[$"C{rownumber}:G{rownumber}"].Style.HorizontalAlignment = ExcelHorizontalAlignment.Left;
+            sheet.Cells[$"C{rownumber}:G{rownumber}"].Style.Font = usedFont; ;
 
             sheet.Cells[$"H{rownumber}:K{rownumber}"].Merge = true;
+            sheet.Cells[$"H{rownumber}:K{rownumber}"].Style.WrapText = true;
             sheet.Cells[$"H{rownumber}:K{rownumber}"].Style.Border.Left.Style = ExcelBorderStyle.Thin;
             sheet.Cells[$"H{rownumber}:K{rownumber}"].Style.Border.Right.Style = ExcelBorderStyle.Thin;
             sheet.Cells[$"H{rownumber}:K{rownumber}"].Style.Border.Bottom.Style = /*!last ? ExcelBorderStyle.Dashed :*/ ExcelBorderStyle.Thin;
             sheet.Cells[$"H{rownumber}:K{rownumber}"].Style.VerticalAlignment = ExcelVerticalAlignment.Center;
+            sheet.Cells[$"H{rownumber}:K{rownumber}"].Style.HorizontalAlignment = ExcelHorizontalAlignment.Left;
+            sheet.Cells[$"H{rownumber}:K{rownumber}"].Style.Font = usedFont; ;
 
             sheet.Cells[$"L{rownumber}"].Style.Border.Left.Style = ExcelBorderStyle.Thin;
             sheet.Cells[$"L{rownumber}"].Style.Border.Right.Style = ExcelBorderStyle.Thin;
             sheet.Cells[$"L{rownumber}"].Style.Border.Bottom.Style = /*!last ? ExcelBorderStyle.Dashed :*/ ExcelBorderStyle.Thin;
             sheet.Cells[$"L{rownumber}"].Style.VerticalAlignment = ExcelVerticalAlignment.Center;
             sheet.Cells[$"L{rownumber}"].Style.HorizontalAlignment = ExcelHorizontalAlignment.Center;
+            sheet.Cells[$"L{rownumber}"].Style.Font = usedFont; ;
 
             sheet.Cells[$"M{rownumber}"].Style.Border.Left.Style = ExcelBorderStyle.Thin;
             sheet.Cells[$"M{rownumber}"].Style.Border.Right.Style = ExcelBorderStyle.Thin;
             sheet.Cells[$"M{rownumber}"].Style.Border.Bottom.Style = /*!last ? ExcelBorderStyle.Dashed :*/ ExcelBorderStyle.Thin;
             sheet.Cells[$"M{rownumber}"].Style.VerticalAlignment = ExcelVerticalAlignment.Center;
             sheet.Cells[$"M{rownumber}"].Style.HorizontalAlignment = ExcelHorizontalAlignment.Center;
+            sheet.Cells[$"M{rownumber}"].Style.Font = usedFont; ;
 
             sheet.Cells[$"N{rownumber}"].Style.Border.Left.Style = ExcelBorderStyle.Thin;
             sheet.Cells[$"N{rownumber}"].Style.Border.Right.Style = ExcelBorderStyle.Thin;
             sheet.Cells[$"N{rownumber}"].Style.Border.Bottom.Style = /*!last ? ExcelBorderStyle.Dashed :*/ ExcelBorderStyle.Thin;
             sheet.Cells[$"N{rownumber}"].Style.VerticalAlignment = ExcelVerticalAlignment.Center;
             sheet.Cells[$"N{rownumber}"].Style.HorizontalAlignment = ExcelHorizontalAlignment.Center;
+            sheet.Cells[$"N{rownumber}"].Style.Font = usedFont;
 
             if (firstPage)
             {
@@ -152,12 +165,14 @@ namespace SupervisorMobility.API.DataAccess.Services.ExportationServices
                 sheet.Cells[$"O{rownumber}:P{rownumber}"].Style.Border.Bottom.Style = /*!last ? ExcelBorderStyle.Dashed :*/ ExcelBorderStyle.Thin;
                 sheet.Cells[$"O{rownumber}:P{rownumber}"].Style.VerticalAlignment = ExcelVerticalAlignment.Center;
                 sheet.Cells[$"O{rownumber}:P{rownumber}"].Style.HorizontalAlignment = ExcelHorizontalAlignment.Center;
+                sheet.Cells[$"O{rownumber}:P{rownumber}"].Style.Font = usedFont;
 
                 sheet.Cells[$"Q{rownumber}"].Style.Border.Left.Style = ExcelBorderStyle.Thin;
                 sheet.Cells[$"Q{rownumber}"].Style.Border.Right.Style = ExcelBorderStyle.Thin;
                 sheet.Cells[$"Q{rownumber}"].Style.Border.Bottom.Style = /*!last ? ExcelBorderStyle.Dashed :*/ ExcelBorderStyle.Thin;
                 sheet.Cells[$"Q{rownumber}"].Style.VerticalAlignment = ExcelVerticalAlignment.Center;
                 sheet.Cells[$"Q{rownumber}"].Style.HorizontalAlignment = ExcelHorizontalAlignment.Center;
+                sheet.Cells[$"Q{rownumber}"].Style.Font = usedFont;
             }
             else
             {
@@ -166,12 +181,14 @@ namespace SupervisorMobility.API.DataAccess.Services.ExportationServices
                 sheet.Cells[$"O{rownumber}:P{rownumber}"].Style.Border.Bottom.Style = /*!last ? ExcelBorderStyle.Dashed :*/ ExcelBorderStyle.Thin;
                 sheet.Cells[$"O{rownumber}:P{rownumber}"].Style.VerticalAlignment = ExcelVerticalAlignment.Center;
                 sheet.Cells[$"O{rownumber}:P{rownumber}"].Style.HorizontalAlignment = ExcelHorizontalAlignment.Center;
+                sheet.Cells[$"O{rownumber}:P{rownumber}"].Style.Font = usedFont;
 
                 sheet.Cells[$"P{rownumber}"].Style.Border.Left.Style = ExcelBorderStyle.Thin;
                 sheet.Cells[$"P{rownumber}"].Style.Border.Right.Style = ExcelBorderStyle.Thin;
                 sheet.Cells[$"P{rownumber}"].Style.Border.Bottom.Style = /*!last ? ExcelBorderStyle.Dashed :*/ ExcelBorderStyle.Thin;
                 sheet.Cells[$"P{rownumber}"].Style.VerticalAlignment = ExcelVerticalAlignment.Center;
                 sheet.Cells[$"P{rownumber}"].Style.HorizontalAlignment = ExcelHorizontalAlignment.Center;
+                sheet.Cells[$"P{rownumber}"].Style.Font = usedFont;
             }
         }
 
@@ -208,6 +225,8 @@ namespace SupervisorMobility.API.DataAccess.Services.ExportationServices
         public void SetSpecialCasesFirstColumnStyle(ExcelWorksheet sheet, int initialrow, int lastrow)
         {
             sheet.Cells[$"B{initialrow}:D{lastrow}"].Merge = true;
+            sheet.Cells[$"B{initialrow}:D{lastrow}"].Style.VerticalAlignment = ExcelVerticalAlignment.Top;
+            sheet.Cells[$"B{initialrow}:D{lastrow}"].Style.WrapText = true;
             sheet.Cells[$"B{initialrow}:D{lastrow}"].Style.Border.Left.Style = ExcelBorderStyle.Medium;
             sheet.Cells[$"B{initialrow}:D{lastrow}"].Style.Border.Bottom.Style = ExcelBorderStyle.Medium;
 
@@ -310,6 +329,28 @@ namespace SupervisorMobility.API.DataAccess.Services.ExportationServices
             }
         }
 
+        public void DistTimesNullStyle(ExcelWorksheet sheet, bool fp, int rowindex, ref char col)
+        {
+            ExcelRange cells;
+            if (fp && col == 'O')
+            {
+                cells = sheet.Cells[$"{col}{rowindex}:P{rowindex}"];
+                CrossedBorder(cells);
+                col = 'P';
+            }
+            else
+            {
+                cells = sheet.Cells[$"{col}{rowindex}"];
+                CrossedBorder(cells);
+            }
+        }
+
+        public void CrossedBorder(ExcelRange cells)
+        {
+            cells.Style.Border.Diagonal.Style = ExcelBorderStyle.Thin;
+            cells.Style.Border.DiagonalUp = true;
+        }
+
         public double CalculateRowHeight(string text, double columnWidth, double fontsize = 11, double lineSpacing = 1.2)
         {
             // Count the number of line breaks
@@ -323,44 +364,74 @@ namespace SupervisorMobility.API.DataAccess.Services.ExportationServices
             return lineHeight * lineCount;
         }
 
-        public double MeasureTextHeight(string text, ExcelFont font, double width)
+        public (string fittingLines, string overflowText) SplitTextByRowHeight(string newText, double columnWidth, double fontsize = 11, double lineSpacing = 1.2, double maxRowHeight = 20, string existingText = "")
         {
-            if (text.IsNullOrEmpty())
-                return 0.0;
+            List<string> lines = new List<string>();
+            string firstLine = "";
+            double lineHeight = fontsize * lineSpacing;
+            double currentHeight = 0;
+            StringBuilder currentLine = new StringBuilder();
+            StringBuilder overflowText = new StringBuilder();
 
-            var bitmap = new Bitmap(1, 1);
-            var graphics = Graphics.FromImage(bitmap);
-            var pixelWidth = Convert.ToInt32(width * 7); // 7 pixels per Excel column width
-            var fontSize = font.Size * 1.01f;
-            var drawingFont = new System.Drawing.Font(font.Name, fontSize);
-            var size = graphics.MeasureString(text, drawingFont, pixelWidth, new StringFormat { FormatFlags = StringFormatFlags.MeasureTrailingSpaces });
-
-            // Convert to points (72 DPI and 96 points per inch) with a max of 409 (Excel requirement)
-            return Math.Min(Convert.ToDouble(size.Height) * 72 / 96, 409);
-        }
-
-        public double MeasureTextHeightWithLineBreak(string text, ExcelFont font, double width)
-        {
-            if (text.IsNullOrEmpty())
-                return 0.0;
-
-            var lines = text.Split(new[] { "\r\n", "\n" }, StringSplitOptions.None);
-            var totalHeight = 0.0;
-
-            foreach (var line in lines)
+            // Add existing text lines first
+            if (!string.IsNullOrEmpty(existingText))
             {
-                var bitmap = new Bitmap(1, 1);
-                var graphics = Graphics.FromImage(bitmap);
-                var pixelWidth = Convert.ToInt32(width * 7); // 7 pixels per Excel column width
-                var fontSize = font.Size * 1.01f;
-                var drawingFont = new System.Drawing.Font(font.Name, fontSize);
-                var size = graphics.MeasureString(line, drawingFont, pixelWidth, new StringFormat { FormatFlags = StringFormatFlags.MeasureTrailingSpaces });
+                foreach (var line in existingText.Split(new[] { '\n' }, StringSplitOptions.None))
+                {
+                    lines.Add(line);
+                    currentHeight += lineHeight;
+                }
 
-                // Convert to points (72 DPI and 96 points per inch) with a max of 409 (Excel requirement)
-                totalHeight += Math.Min(Convert.ToDouble(size.Height) * 72 / 96, 409);
+                firstLine = string.Join(" ", lines) + "\n";
+                lines.Clear();
             }
 
-            return totalHeight;
+            foreach (var word in newText.Split(' '))
+            {
+                // Estimate the width of the current line with the new word
+                double estimatedLineWidth = (currentLine.Length + word.Length) * (fontsize * 0.6); // Approximate character width
+
+                if (estimatedLineWidth > columnWidth)
+                {
+                    // Check if the current height exceeds the max row height
+                    if (currentHeight + lineHeight > maxRowHeight)
+                    {
+                        overflowText.Append(currentLine.ToString() + " ");
+                        currentLine.Clear();
+                        overflowText.Append(word + " ");
+                        continue;
+                    }
+
+                    // Add the current line to the list and reset
+                    lines.Add(currentLine.ToString());
+                    currentLine.Clear();
+                    currentHeight += lineHeight;
+                }
+
+                if (currentLine.Length > 0)
+                {
+                    currentLine.Append(" ");
+                }
+                currentLine.Append(word);
+            }
+
+            // Add the last line if any
+            if (currentLine.Length > 0)
+            {
+                // Check if adding the last line exceeds the max row height
+                if (currentHeight + lineHeight > maxRowHeight)
+                {
+                    overflowText.Append(currentLine.ToString());
+                }
+                else
+                {
+                    lines.Add(currentLine.ToString());
+                }
+            }
+
+            var joined = string.Join(" ", lines);
+
+            return (string.Join("",firstLine,joined), overflowText.ToString().Trim());
         }
     }
 }
