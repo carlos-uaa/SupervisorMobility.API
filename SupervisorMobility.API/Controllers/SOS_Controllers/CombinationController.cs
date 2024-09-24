@@ -207,8 +207,8 @@ namespace SupervisorMobility.API.Controllers.SOS_Controllers
       
             foreach (var logbook in sosUpdateEntity.CombinationLogbooks)
             {
+                var CombinationUpdate = await _ProcessRepository.UpdateCombinationLogbook(logbook);
                 SOSCombinationLogbook CombinationBkaux = await _ProcessRepository.GetSOSCombinationLogbookById(logbook.SOSCombinationLogbookId);
-                _mapper.Map(logbook, CombinationBkaux);
                 Bkup_CombinationLogbook.Add(CombinationBkaux);
             }
 

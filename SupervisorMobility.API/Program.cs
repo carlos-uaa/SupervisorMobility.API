@@ -9,6 +9,7 @@ using SupervisorMobility.API.DataAccess.Services;
 using SupervisorMobility.API.Models.NotificationDtos;
 using SupervisorMobility.API.Services;
 using System.Diagnostics;
+using System.Runtime.InteropServices;
 
 Log.Logger = new LoggerConfiguration()
     .MinimumLevel.Debug()
@@ -17,6 +18,7 @@ Log.Logger = new LoggerConfiguration()
     .CreateLogger();
 
 var builder = WebApplication.CreateBuilder(args);
+
 
 // Add services to the container.
 builder.Services.AddCors(policy =>
@@ -28,20 +30,35 @@ builder.Services.AddCors(policy =>
  );
 });
 
-//builder.Services.AddDbContextFactory<SupervisorMobilityContext>(options =>
-//{
-//    options.UseSqlServer(builder.Configuration.GetConnectionString("SupervisorMobilityDBConnectionString"));
-//}, ServiceLifetime.Singleton);
 
 
 var env = builder.Environment;
+// Verifica si el sistema operativo es Linux
+bool isLinux = RuntimeInformation.IsOSPlatform(OSPlatform.Linux);
+
 if (env.IsDevelopment())
 {
-    builder.Configuration.AddJsonFile("appsettings.Development.json", optional: false, reloadOnChange: false);
+    // Usa una ruta completa si es Linux
+    if (isLinux)
+    {
+        builder.Configuration.AddJsonFile("/home/vanitas/Documentos/GrupoSinco/SupervisorMobility/SupervisorMobility.API/SupervisorMobility.API/appsettings.Development.json", optional: false, reloadOnChange: false);
+    }
+    else
+    {
+        builder.Configuration.AddJsonFile("appsettings.Development.json", optional: false, reloadOnChange: false);
+    }
 }
 else
 {
-    builder.Configuration.AddJsonFile("appsettings.json", optional: false, reloadOnChange: true);
+    // Usa una ruta completa si es Linux
+    if (isLinux)
+    {
+        builder.Configuration.AddJsonFile("/home/vanitas/Documentos/GrupoSinco/SupervisorMobility/SupervisorMobility.API/SupervisorMobility.API/appsettings.json", optional: false, reloadOnChange: true);
+    }
+    else
+    {
+        builder.Configuration.AddJsonFile("appsettings.json", optional: false, reloadOnChange: true);
+    }
 }
 
 builder.Host.UseSerilog();

@@ -285,9 +285,9 @@ namespace SupervisorMobility.API.Controllers.SOS_Controllers
 
             foreach (var logbook in sosUpdateEntity.DistributionLogbooks)
             {
-                SOSDistributionLogbook DistributionBkaux = await _ProcessRepository.GetSOSDistributionLogbookById(logbook.SOSDistributionLogbookId);
-                _mapper.Map(logbook, DistributionBkaux);
-                Bkup_DistributionLogbook.Add(DistributionBkaux);
+                var distributionUpdate = await _ProcessRepository.UpdateDistributionLogbook(logbook);
+                SOSDistributionLogbook distributionBkaux = await _ProcessRepository.GetSOSDistributionLogbookById(logbook.SOSDistributionLogbookId);
+                Bkup_DistributionLogbook.Add(distributionBkaux);
             }
 
             foreach (var time in sosUpdateEntity.Times)

@@ -13,6 +13,7 @@ using SupervisorMobility.API.Models.SOS.SOSCombinationDtos;
 using SupervisorMobility.API.Models.SOS.SOSCombinationLogbookDtos;
 using SupervisorMobility.API.Models.SOS.SOSDistributionAdditionalTimeDtos;
 using SupervisorMobility.API.Models.SOS.SOSDistributionDtos;
+using SupervisorMobility.API.Models.SOS.SOSDistributionLogbookDtos;
 using SupervisorMobility.API.Models.SOS.SOSFlowDtos;
 using SupervisorMobility.API.Models.SOS.SOSFlowLogbookDtos;
 using SupervisorMobility.API.Models.SOS.SOSHubDtos;
@@ -258,6 +259,8 @@ namespace SupervisorMobility.API.DataAccess.Services
         #endregion
         #region SOSDistributionLogbook
         Task<SOSDistributionLogbook> GetSOSDistributionLogbookById(int id);
+        Task<int> UpdateDistributionLogbook(SOSDistributionLogbookForUpdateDto DistributionForUpdate);
+
         Task<int> CreateSOSDistributionLogbook(SOSDistributionLogbook LogBook_ToCreate);
         #endregion
         #region SOS Distribution Additional time
