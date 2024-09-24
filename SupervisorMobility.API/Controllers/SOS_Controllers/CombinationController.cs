@@ -264,10 +264,8 @@ namespace SupervisorMobility.API.Controllers.SOS_Controllers
         {
             var result = await _ProcessRepository.RemoveSOSCombination(SOSCombinationId);
 
-            var SOSHub = await _ProcessRepository.GetSOSCombination(SOSCombinationId);
-
             if (result > 0)
-                return Ok(SOSHub);
+                return Ok();
             else
                 return BadRequest("something wrong");
         }
