@@ -160,37 +160,32 @@ namespace SupervisorMobility.API.DataAccess.Services
 
                 if (includeCollections)
                 {
-                    await _context.Entry(sosHub).Collection(a => a.SOSAnalysis).LoadAsync();
+                    await _context.Entry(sosHub).Collection(a => a.SOSAnalysis).Query().Where(d => d.IsActive == true).LoadAsync();
                     foreach (var analysis in sosHub.SOSAnalysis)
                     {
                         await _context.Entry(analysis).Collection(aa => aa.AnalysisLogbooks).LoadAsync();
-                        foreach (var logbook in analysis.AnalysisLogbooks)
-                        {
-                            await _context.Entry(logbook).Reference(al => al.Approver).LoadAsync();
-                        }
                     }
 
-                    await _context.Entry(sosHub).Collection(c => c.SOSCombination).LoadAsync();
+                    await _context.Entry(sosHub).Collection(c => c.SOSCombination).Query().Where(d => d.IsActive == true).LoadAsync();
                     foreach (var combination in sosHub.SOSCombination)
                     {
                         await _context.Entry(combination).Collection(aa => aa.CombinationLogbooks).LoadAsync();
                         await _context.Entry(combination).Collection(aa => aa.Turns).LoadAsync();
                     }
 
-                    await _context.Entry(sosHub).Collection(d => d.SOSDistribution).LoadAsync();
-                    foreach (var distribution in sosHub.SOSDistribution)
+                    await _context.Entry(sosHub).Collection(d => d.SOSDistribution).Query().Where(d => d.IsActive == true).LoadAsync(); foreach (var distribution in sosHub.SOSDistribution)
                     {
                         await _context.Entry(distribution).Collection(aa => aa.DistributionLogbooks).LoadAsync();
                         await _context.Entry(distribution).Collection(aa => aa.Turns).LoadAsync();
                     }
 
-                    await _context.Entry(sosHub).Collection(f => f.SOSFlow).LoadAsync();
+                    await _context.Entry(sosHub).Collection(f => f.SOSFlow).Query().Where(d => d.IsActive == true).LoadAsync();
                     foreach (var flow in sosHub.SOSFlow)
                     {
                         await _context.Entry(flow).Collection(aa => aa.FlowLogbooks).LoadAsync();
                     }
 
-                    await _context.Entry(sosHub).Collection(s => s.SOSSequence).LoadAsync();
+                    await _context.Entry(sosHub).Collection(s => s.SOSSequence).Query().Where(d => d.IsActive == true).LoadAsync();
                     foreach (var sequence in sosHub.SOSSequence)
                     {
                         await _context.Entry(sequence).Collection(aa => aa.SequenceLogbooks).LoadAsync();

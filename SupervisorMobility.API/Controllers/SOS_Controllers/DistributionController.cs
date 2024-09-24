@@ -372,10 +372,8 @@ namespace SupervisorMobility.API.Controllers.SOS_Controllers
         {
             var result = await _ProcessRepository.RemoveSOSDistribution(SOSDistributionId);
 
-            var SOSHub = await _ProcessRepository.GetSOSDistribution(SOSDistributionId);
-
             if (result > 0)
-                return Ok(SOSHub);
+                return Ok();
             else
                 return BadRequest("something wrong");
         }
