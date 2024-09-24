@@ -1,7 +1,5 @@
 ﻿using AutoMapper;
 using ClosedXML.Excel;
-using DocumentFormat.OpenXml.InkML;
-using DocumentFormat.OpenXml.Spreadsheet;
 using DuoVia.FuzzyStrings;
 using FuzzyString;
 using Microsoft.EntityFrameworkCore;
@@ -637,7 +635,7 @@ namespace SupervisorMobility.API.DataAccess.Services
 
 
                             IEnumerable<Plant> Plants = await _context.Plants.Where(u => u.IsActive == true).OrderBy(c => c.PlantId).ToListAsync();
-                            IEnumerable<Product> Products = await _context.Products.OrderBy(c => c.ProductId).ToListAsync();
+                            IEnumerable<Product> Products = await _context.Products.OrderBy(c => c.ProductId).Include(p => p.Distributions).ToListAsync();
 
                             Dictionary<int, Plant> PlantsDictionary = new Dictionary<int, Plant>();
                             Dictionary<(int, int), Area> AreasDictionary = new Dictionary<(int, int), Area>();
@@ -682,7 +680,7 @@ namespace SupervisorMobility.API.DataAccess.Services
                             CDMS_HOE_Directory HOEFolders = new CDMS_HOE_Directory();
                             TreeItemData rootNodeHOE = new TreeItemData();
 
-                            //Optencion de rutas y creacion de arboles de carpetas
+                            //Obtencion de rutas y creacion de arboles de carpetas
                             try
                             {
                                 //Recoleccion de rutas de GOS
@@ -690,7 +688,7 @@ namespace SupervisorMobility.API.DataAccess.Services
                                 {
                                     try
                                     {
-                                        var response = await _bridgeHttpClient.GetAsync("SMGos/GetDirectoryPathsGos");
+                                        var response = await _bridgeHttpClient.GetAsync("SMGOS/GetDirectoryPathsGOS");
 
                                         if (response.IsSuccessStatusCode)
                                         {
@@ -729,7 +727,7 @@ namespace SupervisorMobility.API.DataAccess.Services
                                 {
                                     try
                                     {
-                                        var response = await _bridgeHttpClient.GetAsync("SMCcp/GetDirectoryPathsCcp");
+                                        var response = await _bridgeHttpClient.GetAsync("SMCCP/GetDirectoryPathsCCP");
 
                                         if (response.IsSuccessStatusCode)
                                         {
@@ -767,7 +765,7 @@ namespace SupervisorMobility.API.DataAccess.Services
                                 {
                                     try
                                     {
-                                        var response = await _bridgeHttpClient.GetAsync("SMHoe/GetDirectoryPaths");
+                                        var response = await _bridgeHttpClient.GetAsync("SMHOE/GetDirectoryPathsHOE");
 
                                         if (response.IsSuccessStatusCode)
                                         {
@@ -836,8 +834,6 @@ namespace SupervisorMobility.API.DataAccess.Services
                                         IXLCell AreaCell = worksheet.Cell(CellAreaCode);
                                         IXLCell DistributionCell = worksheet.Cell(CellDistributionCode);
 
-                                        var CellStarOperationCode = "B12";
-
 
                                         var ExcelAreaCode = AreaCell.Value.ToString() != "" ? AreaCell.Value.ToString() : "";
                                         var ExcelDistDescription = DistributionCell.Value.ToString() != "" ? DistributionCell.Value.ToString() : "";
@@ -887,7 +883,8 @@ namespace SupervisorMobility.API.DataAccess.Services
                                             .Select(pair => new
                                             {
                                                 Distribution = pair.Value,
-                                                Similarity = 1 - pair.Value.Description.JaccardDistance(ExcelDistDescription)
+                                                // Se combina la similitud a nivel de caracteres y palabras
+                                                Similarity = CombineSimilarities(pair.Value.Description, ExcelDistDescription)
                                             })
                                             .OrderByDescending(result => result.Similarity)
                                             .FirstOrDefault();
@@ -936,48 +933,86 @@ namespace SupervisorMobility.API.DataAccess.Services
                                         if (PathResume.PlantId > 0)
                                         {
                                             //La planta existe
+                                            int rowStartOperation = 12;
+
                                             //Renglones de la pagina
                                             var rows = worksheet.Rows();
 
-                                            //rango de los productos
-                                            var ranges = new List<IXLRange> {
-                                                worksheet.Range("F10:J11"),
-                                                worksheet.Range("K10:O11"),
-                                                worksheet.Range("P10:T11"),
-                                                worksheet.Range("U10:Y11")
-                                                };
+                                            // Lista de filas posibles donde podrían estar los productos
+                                            var possibleRows = new List<int> { 8, 9, 10, 11, 12 };
 
-                                            //Lista de productos que usare en el json
+                                            // Lista donde se almacenarán los productos
                                             var products = new List<Dictionary<string, Dictionary<string, string>>>();
-                                            //Creacion de los productos dentro de los rangs previstos
-                                            foreach (var range in ranges)
+
+                                            // Recorremos cada fila posible
+                                            foreach (int row in possibleRows)
                                             {
 
-                                                var productName = range.FirstRow().FirstCell().Value.ToString();
-                                                var nameTime = string.Join("§", range.LastRow().Cells().Select(c => c.Value.ToString()));
-                                                var time = "§§§§";
-                                                var aditionalTime = "§§§§";
-                                                var standarTime = "§§§§";
+                                                // Intentamos encontrar los rangos con las celdas combinadas
+                                                var ranges = new List<IXLRange> {
+                                                    worksheet.Range($"F{row}:J{row + 1}"),
+                                                    worksheet.Range($"K{row}:O{row + 1}"),
+                                                    worksheet.Range($"P{row}:T{row + 1}"),
+                                                    worksheet.Range($"U{row}:Y{row + 1}")
+                                                };
 
-                                                var product = new Dictionary<string, Dictionary<string, string>>
+                                                //aqui la condicion
+                                                var productNameVerifyRange = ranges.First().FirstRow().FirstCell().Value.ToString();
+
+                                                var ProductExist = Products.Select(pair => new
+                                                {
+                                                    Product = pair,
+                                                    Similarity = 1 - pair.Code.JaccardDistance(productNameVerifyRange)
+                                                }).OrderByDescending(result => result.Similarity).FirstOrDefault();
+
+                                                // Ajusta este umbral según la necesidad
+                                                if (ProductExist != null && ProductExist.Similarity > 0.5)
+                                                {
+                                                    rowStartOperation = row + 2;
+                                                    // Recorremos los rangos encontrados
+                                                    foreach (var range in ranges)
                                                     {
+                                                        // Solo procesamos rangos con celdas combinadas
+                                                        if (range.IsMerged())
                                                         {
-                                                            productName,
-                                                            new Dictionary<string, string>
-                                                            {
-                                                                { "NameTime", nameTime },
-                                                                { "Time", time },
-                                                                { "AdditionalTime", aditionalTime },
-                                                                { "StandardTime", standarTime }
-                                                            }
-                                                        }
-                                                    };
+                                                            var productName = range.FirstRow().FirstCell().Value.ToString();
+                                                            var nameTime = string.Join("§", range.LastRow().Cells().Select(c => c.Value.ToString()));
+                                                            var time = "§§§§";
+                                                            var aditionalTime = "§§§§";
+                                                            var standarTime = "§§§§";
 
-                                                products.Add(product);
+                                                            // Creamos el diccionario para almacenar el producto
+                                                            var product = new Dictionary<string, Dictionary<string, string>>
+                                                                        {
+                                                                            {
+                                                                                productName,
+                                                                                new Dictionary<string, string>
+                                                                                {
+                                                                                    { "NameTime", nameTime },
+                                                                                    { "Time", time },
+                                                                                    { "AdditionalTime", aditionalTime },
+                                                                                    { "StandardTime", standarTime }
+                                                                                }
+                                                                            }
+                                                                        };
+
+                                                            // Añadimos el producto a la lista
+                                                            products.Add(product);
+                                                        }
+                                                    }
+
+                                                    // Si ya hemos encontrado al menos un rango válido, dejamos de buscar
+                                                    if (products.Count > 0)
+                                                    {
+                                                        break;
+                                                    }
+                                                }
+
                                             }
 
+
                                             //Renglon de inicio 
-                                            var startingRow = worksheet.Row(12);
+                                            var startingRow = worksheet.Row(rowStartOperation);
                                             //Variable para encontrar renglon Additional time
                                             int StartAdditionalTime = 0;
 
@@ -986,7 +1021,7 @@ namespace SupervisorMobility.API.DataAccess.Services
                                             {
                                                 // Obtener la celda en la columna B para cada renglón
                                                 var cellB = row.Cell("B");
-                                                if (cellB.IsMerged() && row.RowNumber() >= 12)
+                                                if (cellB.IsMerged() && row.RowNumber() >= rowStartOperation)
                                                 {
                                                     StartAdditionalTime = row.RowNumber();
                                                     break;
@@ -1039,7 +1074,11 @@ namespace SupervisorMobility.API.DataAccess.Services
 
                                                 if (PathResume.DistributionId > 0)
                                                 {
-                                                    //Optencion de los tiempos por renglon en base a operacion
+
+                                                    string lastOperationName = null; // Para almacenar el último nombre de operación
+
+
+                                                    //Obtencion de los tiempos por renglon en base a operacion
                                                     foreach (var row in rows.SkipWhile(r => r.RowNumber() < startingRow.RowNumber()))
                                                     {
                                                         PathResume.OperationId = null;
@@ -1047,14 +1086,26 @@ namespace SupervisorMobility.API.DataAccess.Services
                                                         var cellB = row.Cell("B");
 
                                                         // Verificar si la celda no está combinada y es mayor o igual a la fila 12
-                                                        if (!cellB.IsMerged() && row.RowNumber() >= 12)
+                                                        if (!cellB.IsMerged() && row.RowNumber() >= rowStartOperation)
                                                         {
                                                             var CellOpCode = row.Cell("C");
                                                             var CellOpDesc = row.Cell("D");
                                                             var CellCommentaryOrRestriction = row.Cell("E");
 
                                                             var ExcelOpCode = CellOpCode.Value.ToString() != "" ? CellOpCode.Value.ToString() : "";
+
                                                             var ExcelOpDescription = CellOpDesc.Value.ToString() != "" ? CellOpDesc.Value.ToString() : "";
+
+                                                            if (!string.IsNullOrEmpty(ExcelOpDescription))
+                                                            {
+                                                                lastOperationName = ExcelOpDescription;
+                                                            }
+
+                                                            // Si no hay un nombre en la columna B, reutilizamos el último nombre de operación
+                                                            if (lastOperationName != null)
+                                                            {
+                                                                ExcelOpDescription = lastOperationName;
+                                                            }
 
                                                             var ExcelCommentaryOrRestriction = CellCommentaryOrRestriction.Value.ToString() != "" ? CellCommentaryOrRestriction.Value.ToString() : "";
 
@@ -1079,9 +1130,6 @@ namespace SupervisorMobility.API.DataAccess.Services
                                                                     $" Pagina: {p} - {pageName}" +
                                                                     $" Distribucion: {coincidenciasDistributions.Distribution.Description}";
                                                             }
-
-
-
 
                                                             var range = worksheet.Range(row.Cell("F"), row.Cell("Y"));
 
@@ -1177,6 +1225,28 @@ namespace SupervisorMobility.API.DataAccess.Services
                                                                     {
                                                                         PathResume.ProductID = ProductExist.Product.ProductId;
                                                                     }
+
+                                                                    var finalproduct = ProductExist.Product;
+                                                                    var finalDistribution = await _context.Distributions.Where(p => p.DistributionId == PathResume.DistributionId).FirstOrDefaultAsync();
+
+
+                                                                    if (finalproduct != null)
+                                                                    {
+                                                                        if (finalproduct.Distributions != null)
+                                                                        {
+                                                                            if (!finalproduct.Distributions.Any(d => d.DistributionId == finalDistribution.DistributionId))
+                                                                            {
+                                                                                finalproduct.Distributions.Add(finalDistribution);
+                                                                            }
+                                                                        }
+                                                                        else
+                                                                        {
+                                                                            finalproduct.Distributions = new List<Distribution>();
+                                                                            finalproduct.Distributions.Add(finalDistribution);
+                                                                        }
+                                                                    }
+
+                                                                    await dbContext.SaveChangesAsync();
 
 
                                                                     //aqui va la creacion de rutas
@@ -1377,6 +1447,27 @@ namespace SupervisorMobility.API.DataAccess.Services
                                                                         PathResume.ProductID = ProductExist.Product.ProductId;
                                                                     }
 
+                                                                    var finalproduct = ProductExist.Product;
+                                                                    var finalDistribution = await _context.Distributions.Where(p => p.DistributionId == PathResume.DistributionId).FirstOrDefaultAsync();
+
+
+                                                                    if (finalproduct != null)
+                                                                    {
+                                                                        if (finalproduct.Distributions != null)
+                                                                        {
+                                                                            if (!finalproduct.Distributions.Any(d => d.DistributionId == finalDistribution.DistributionId))
+                                                                            {
+                                                                                finalproduct.Distributions.Add(finalDistribution);
+                                                                            }
+                                                                        }
+                                                                        else
+                                                                        {
+                                                                            finalproduct.Distributions = new List<Distribution>();
+                                                                            finalproduct.Distributions.Add(finalDistribution);
+                                                                        }
+                                                                    }
+
+                                                                    await dbContext.SaveChangesAsync();
 
                                                                     //aqui va la creacion de rutas
                                                                     TreeItemData? mejorCoincidenciaHOE = null;
@@ -1522,8 +1613,11 @@ namespace SupervisorMobility.API.DataAccess.Services
 
                                                             }
 
+
+
+
                                                         }
-                                                        else if (cellB.IsMerged() && row.RowNumber() >= 12)
+                                                        else if (cellB.IsMerged() && row.RowNumber() >= rowStartOperation)
                                                         {
                                                             //Finalizamos recorrido de renglones, ya no hay mas operaciones
                                                             break;
@@ -1585,8 +1679,8 @@ namespace SupervisorMobility.API.DataAccess.Services
                                                         AssyChartExist = finalasssychart;
                                                     }
 
-
-                                                    //Optencion de los tiempos por renglon en base a operacion
+                                                    string lastOperationName = null; // Para almacenar el último nombre de operación
+                                                    //Obtencion de los tiempos por renglon en base a operacion
                                                     foreach (var row in rows.SkipWhile(r => r.RowNumber() < startingRow.RowNumber()))
                                                     {
                                                         PathResume.OperationId = null;
@@ -1594,7 +1688,7 @@ namespace SupervisorMobility.API.DataAccess.Services
                                                         var cellB = row.Cell("B");
 
                                                         // Verificar si la celda no está combinada y es mayor o igual a la fila 12
-                                                        if (!cellB.IsMerged() && row.RowNumber() >= 12)
+                                                        if (!cellB.IsMerged() && row.RowNumber() >= rowStartOperation)
                                                         {
                                                             var CellOpCode = row.Cell("C");
                                                             var CellOpDesc = row.Cell("D");
@@ -1602,6 +1696,18 @@ namespace SupervisorMobility.API.DataAccess.Services
 
                                                             var ExcelOpCode = CellOpCode.Value.ToString() != "" ? CellOpCode.Value.ToString() : "";
                                                             var ExcelOpDescription = CellOpDesc.Value.ToString() != "" ? CellOpDesc.Value.ToString() : "";
+
+
+                                                            if (!string.IsNullOrEmpty(ExcelOpDescription))
+                                                            {
+                                                                lastOperationName = ExcelOpDescription;
+                                                            }
+
+                                                            // Si no hay un nombre en la columna B, reutilizamos el último nombre de operación
+                                                            if (lastOperationName != null)
+                                                            {
+                                                                ExcelOpDescription = lastOperationName;
+                                                            }
 
                                                             var ExcelCommentaryOrRestriction = CellCommentaryOrRestriction.Value.ToString() != "" ? CellCommentaryOrRestriction.Value.ToString() : "";
 
@@ -1684,14 +1790,15 @@ namespace SupervisorMobility.API.DataAccess.Services
                                                                     PathResume.ProductID = ProductExist.Product.ProductId;
                                                                 }
 
-                                                                var finalproduct = await _context.Products.Where(p => p.ProductId == ProductExist.Product.ProductId).FirstOrDefaultAsync();
+                                                                var finalproduct = ProductExist.Product;
                                                                 Debug.WriteLine("GET product dbContext");
 
                                                                 if (finalproduct != null)
                                                                 {
                                                                     if (finalproduct.Distributions != null)
                                                                     {
-                                                                        finalproduct.Distributions.Add(finalDistribution);
+                                                                        if (!finalproduct.Distributions.Any(d => d.DistributionId == finalDistribution.DistributionId))
+                                                                            finalproduct.Distributions.Add(finalDistribution);
                                                                     }
                                                                     else
                                                                     {
@@ -1855,6 +1962,8 @@ namespace SupervisorMobility.API.DataAccess.Services
                                                     //}
                                                 }//end else distribuccion no existe
 
+
+
                                             }//end if area > 0
                                             else //area no existe
                                             {
@@ -1920,8 +2029,8 @@ namespace SupervisorMobility.API.DataAccess.Services
                                                     AssyChartExist = finalasssychart;
                                                 }
 
-
-                                                //Optencion de los tiempos por renglon en base a operacion
+                                                string lastOperationName = null; // Para almacenar el último nombre de operación
+                                                //Obtencion de los tiempos por renglon en base a operacion
                                                 foreach (var row in rows.SkipWhile(r => r.RowNumber() < startingRow.RowNumber()))
                                                 {
                                                     PathResume.OperationId = null;
@@ -1929,7 +2038,7 @@ namespace SupervisorMobility.API.DataAccess.Services
                                                     var cellB = row.Cell("B");
 
                                                     // Verificar si la celda no está combinada y es mayor o igual a la fila 12
-                                                    if (!cellB.IsMerged() && row.RowNumber() >= 12)
+                                                    if (!cellB.IsMerged() && row.RowNumber() >= rowStartOperation)
                                                     {
                                                         var CellOpCode = row.Cell("C");
                                                         var CellOpDesc = row.Cell("D");
@@ -1938,6 +2047,16 @@ namespace SupervisorMobility.API.DataAccess.Services
                                                         var ExcelOpCode = CellOpCode.Value.ToString() != "" ? CellOpCode.Value.ToString() : "";
                                                         var ExcelOpDescription = CellOpDesc.Value.ToString() != "" ? CellOpDesc.Value.ToString() : "";
 
+                                                        if (!string.IsNullOrEmpty(ExcelOpDescription))
+                                                        {
+                                                            lastOperationName = ExcelOpDescription;
+                                                        }
+
+                                                        // Si no hay un nombre en la columna B, reutilizamos el último nombre de operación
+                                                        if (lastOperationName != null)
+                                                        {
+                                                            ExcelOpDescription = lastOperationName;
+                                                        }
                                                         var ExcelCommentaryOrRestriction = CellCommentaryOrRestriction.Value.ToString() != "" ? CellCommentaryOrRestriction.Value.ToString() : "";
 
                                                         if (ExcelOpCode.IsNullOrEmpty() && ExcelOpDescription.IsNullOrEmpty())
@@ -2018,14 +2137,15 @@ namespace SupervisorMobility.API.DataAccess.Services
                                                                 PathResume.ProductID = ProductExist.Product.ProductId;
                                                             }
 
-                                                            var finalproduct = await _context.Products.Where(p => p.ProductId == ProductExist.Product.ProductId).FirstOrDefaultAsync();
+                                                            var finalproduct = ProductExist.Product;
                                                             Debug.WriteLine("GET product dbContext");
 
                                                             if (finalproduct != null)
                                                             {
                                                                 if (finalproduct.Distributions != null)
                                                                 {
-                                                                    finalproduct.Distributions.Add(finalDistribution);
+                                                                    if (!finalproduct.Distributions.Any(d => d.DistributionId == finalDistribution.DistributionId))
+                                                                        finalproduct.Distributions.Add(finalDistribution);
                                                                 }
                                                                 else
                                                                 {
@@ -2526,7 +2646,7 @@ namespace SupervisorMobility.API.DataAccess.Services
 
 
                             IEnumerable<Plant> Plants = await _context.Plants.Where(u => u.IsActive == true).OrderBy(c => c.PlantId).ToListAsync();
-                            IEnumerable<Product> Products = await _context.Products.OrderBy(c => c.ProductId).ToListAsync();
+                            IEnumerable<Product> Products = await _context.Products.OrderBy(c => c.ProductId).Include(p => p.Distributions).ToListAsync();
 
                             Dictionary<int, Plant> PlantsDictionary = new Dictionary<int, Plant>();
                             Dictionary<(int, int), Area> AreasDictionary = new Dictionary<(int, int), Area>();
@@ -2571,7 +2691,7 @@ namespace SupervisorMobility.API.DataAccess.Services
                             CDMS_HOE_Directory HOEFolders = new CDMS_HOE_Directory();
                             TreeItemData rootNodeHOE = new TreeItemData();
 
-                            //Optencion de rutas y creacion de arboles de carpetas
+                            //Obtencion de rutas y creacion de arboles de carpetas
                             try
                             {
                                 //Recoleccion de rutas de GOS
@@ -2579,8 +2699,7 @@ namespace SupervisorMobility.API.DataAccess.Services
                                 {
                                     try
                                     {
-                                        var response = await _bridgeHttpClient.GetAsync("SMGos/GetDirectoryPathsGos");
-
+                                        var response = await _bridgeHttpClient.GetAsync("SMGOS/GetDirectoryPathsGOS");
                                         if (response.IsSuccessStatusCode)
                                         {
                                             var result = await response.Content.ReadFromJsonAsync<CDMS_GOS_Directory>();
@@ -2618,8 +2737,7 @@ namespace SupervisorMobility.API.DataAccess.Services
                                 {
                                     try
                                     {
-                                        var response = await _bridgeHttpClient.GetAsync("SMCcp/GetDirectoryPathsCcp");
-
+                                        var response = await _bridgeHttpClient.GetAsync("SMCCP/GetDirectoryPathsCCP");
                                         if (response.IsSuccessStatusCode)
                                         {
                                             var result = await response.Content.ReadFromJsonAsync<CDMS_CCP_Directory>();
@@ -2656,8 +2774,7 @@ namespace SupervisorMobility.API.DataAccess.Services
                                 {
                                     try
                                     {
-                                        var response = await _bridgeHttpClient.GetAsync("SMHoe/GetDirectoryPaths");
-
+                                        var response = await _bridgeHttpClient.GetAsync("SMHOE/GetDirectoryPathsHOE");
                                         if (response.IsSuccessStatusCode)
                                         {
                                             var result = await response.Content.ReadFromJsonAsync<CDMS_HOE_Directory>();
@@ -2725,8 +2842,6 @@ namespace SupervisorMobility.API.DataAccess.Services
                                         IXLCell AreaCell = worksheet.Cell(CellAreaCode);
                                         IXLCell DistributionCell = worksheet.Cell(CellDistributionCode);
 
-                                        var CellStarOperationCode = "B12";
-
 
                                         var ExcelAreaCode = AreaCell.Value.ToString() != "" ? AreaCell.Value.ToString() : "";
                                         var ExcelDistDescription = DistributionCell.Value.ToString() != "" ? DistributionCell.Value.ToString() : "";
@@ -2776,7 +2891,7 @@ namespace SupervisorMobility.API.DataAccess.Services
                                             .Select(pair => new
                                             {
                                                 Distribution = pair.Value,
-                                                Similarity = 1 - pair.Value.Description.JaccardDistance(ExcelDistDescription)
+                                                Similarity = CombineSimilarities(pair.Value.Description, ExcelDistDescription)
                                             })
                                             .OrderByDescending(result => result.Similarity)
                                             .FirstOrDefault();
@@ -2825,48 +2940,86 @@ namespace SupervisorMobility.API.DataAccess.Services
                                         if (PathResume.PlantId > 0)
                                         {
                                             //La planta existe
+                                            int rowStartOperation = 12;
+
                                             //Renglones de la pagina
                                             var rows = worksheet.Rows();
 
-                                            //rango de los productos
-                                            var ranges = new List<IXLRange> {
-                                                worksheet.Range("F10:J11"),
-                                                worksheet.Range("K10:O11"),
-                                                worksheet.Range("P10:T11"),
-                                                worksheet.Range("U10:Y11")
-                                                };
+                                            // Lista de filas posibles donde podrían estar los productos
+                                            var possibleRows = new List<int> { 8, 9, 10, 11, 12 };
 
-                                            //Lista de productos que usare en el json
+                                            // Lista donde se almacenarán los productos
                                             var products = new List<Dictionary<string, Dictionary<string, string>>>();
-                                            //Creacion de los productos dentro de los rangs previstos
-                                            foreach (var range in ranges)
+
+                                            // Recorremos cada fila posible
+                                            foreach (int row in possibleRows)
                                             {
 
-                                                var productName = range.FirstRow().FirstCell().Value.ToString();
-                                                var nameTime = string.Join("§", range.LastRow().Cells().Select(c => c.Value.ToString()));
-                                                var time = "§§§§";
-                                                var aditionalTime = "§§§§";
-                                                var standarTime = "§§§§";
+                                                // Intentamos encontrar los rangos con las celdas combinadas
+                                                var ranges = new List<IXLRange> {
+                                                    worksheet.Range($"F{row}:J{row + 1}"),
+                                                    worksheet.Range($"K{row}:O{row + 1}"),
+                                                    worksheet.Range($"P{row}:T{row + 1}"),
+                                                    worksheet.Range($"U{row}:Y{row + 1}")
+                                                };
 
-                                                var product = new Dictionary<string, Dictionary<string, string>>
+                                                //aqui la condicion
+                                                var productNameVerifyRange = ranges.First().FirstRow().FirstCell().Value.ToString();
+
+                                                var ProductExist = Products.Select(pair => new
+                                                {
+                                                    Product = pair,
+                                                    Similarity = 1 - pair.Code.JaccardDistance(productNameVerifyRange)
+                                                }).OrderByDescending(result => result.Similarity).FirstOrDefault();
+
+                                                // Ajusta este umbral según la necesidad
+                                                if (ProductExist != null && ProductExist.Similarity > 0.5)
+                                                {
+                                                    rowStartOperation = row + 2;
+                                                    // Recorremos los rangos encontrados
+                                                    foreach (var range in ranges)
                                                     {
+                                                        // Solo procesamos rangos con celdas combinadas
+                                                        if (range.IsMerged())
                                                         {
-                                                            productName,
-                                                            new Dictionary<string, string>
-                                                            {
-                                                                { "NameTime", nameTime },
-                                                                { "Time", time },
-                                                                { "AdditionalTime", aditionalTime },
-                                                                { "StandardTime", standarTime }
-                                                            }
-                                                        }
-                                                    };
+                                                            var productName = range.FirstRow().FirstCell().Value.ToString();
+                                                            var nameTime = string.Join("§", range.LastRow().Cells().Select(c => c.Value.ToString()));
+                                                            var time = "§§§§";
+                                                            var aditionalTime = "§§§§";
+                                                            var standarTime = "§§§§";
 
-                                                products.Add(product);
+                                                            // Creamos el diccionario para almacenar el producto
+                                                            var product = new Dictionary<string, Dictionary<string, string>>
+                                                                        {
+                                                                            {
+                                                                                productName,
+                                                                                new Dictionary<string, string>
+                                                                                {
+                                                                                    { "NameTime", nameTime },
+                                                                                    { "Time", time },
+                                                                                    { "AdditionalTime", aditionalTime },
+                                                                                    { "StandardTime", standarTime }
+                                                                                }
+                                                                            }
+                                                                        };
+
+                                                            // Añadimos el producto a la lista
+                                                            products.Add(product);
+                                                        }
+                                                    }
+
+                                                    // Si ya hemos encontrado al menos un rango válido, dejamos de buscar
+                                                    if (products.Count > 0)
+                                                    {
+                                                        break;
+                                                    }
+                                                }
+
                                             }
 
+
                                             //Renglon de inicio 
-                                            var startingRow = worksheet.Row(12);
+                                            var startingRow = worksheet.Row(rowStartOperation);
                                             //Variable para encontrar renglon Additional time
                                             int StartAdditionalTime = 0;
 
@@ -2875,7 +3028,7 @@ namespace SupervisorMobility.API.DataAccess.Services
                                             {
                                                 // Obtener la celda en la columna B para cada renglón
                                                 var cellB = row.Cell("B");
-                                                if (cellB.IsMerged() && row.RowNumber() >= 12)
+                                                if (cellB.IsMerged() && row.RowNumber() >= rowStartOperation)
                                                 {
                                                     StartAdditionalTime = row.RowNumber();
                                                     break;
@@ -2928,7 +3081,7 @@ namespace SupervisorMobility.API.DataAccess.Services
 
                                                 if (PathResume.DistributionId > 0)
                                                 {
-                                                    //Optencion de los tiempos por renglon en base a operacion
+                                                    //Obtencion de los tiempos por renglon en base a operacion
                                                     foreach (var row in rows.SkipWhile(r => r.RowNumber() < startingRow.RowNumber()))
                                                     {
                                                         PathResume.OperationId = null;
@@ -2936,7 +3089,7 @@ namespace SupervisorMobility.API.DataAccess.Services
                                                         var cellB = row.Cell("B");
 
                                                         // Verificar si la celda no está combinada y es mayor o igual a la fila 12
-                                                        if (!cellB.IsMerged() && row.RowNumber() >= 12)
+                                                        if (!cellB.IsMerged() && row.RowNumber() >= rowStartOperation)
                                                         {
                                                             var CellOpCode = row.Cell("C");
                                                             var CellOpDesc = row.Cell("D");
@@ -3067,6 +3220,26 @@ namespace SupervisorMobility.API.DataAccess.Services
                                                                         PathResume.ProductID = ProductExist.Product.ProductId;
                                                                     }
 
+                                                                    var finalproduct = ProductExist.Product;
+                                                                    var finalDistribution = await _context.Distributions.Where(p => p.DistributionId == PathResume.DistributionId).FirstOrDefaultAsync();
+
+                                                                    if (finalproduct != null)
+                                                                    {
+                                                                        if (finalproduct.Distributions != null)
+                                                                        {
+                                                                            if (!finalproduct.Distributions.Any(d => d.DistributionId == finalDistribution.DistributionId))
+                                                                            {
+                                                                                finalproduct.Distributions.Add(finalDistribution);
+                                                                            }
+                                                                        }
+                                                                        else
+                                                                        {
+                                                                            finalproduct.Distributions = new List<Distribution>();
+                                                                            finalproduct.Distributions.Add(finalDistribution);
+                                                                        }
+                                                                    }
+
+                                                                    await dbContext.SaveChangesAsync();
 
                                                                     //aqui va la creacion de rutas
                                                                     TreeItemData? mejorCoincidenciaHOE = null;
@@ -3266,6 +3439,28 @@ namespace SupervisorMobility.API.DataAccess.Services
                                                                         PathResume.ProductID = ProductExist.Product.ProductId;
                                                                     }
 
+                                                                    var finalproduct = ProductExist.Product;
+                                                                    var finalDistribution = await _context.Distributions.Where(p => p.DistributionId == PathResume.DistributionId).FirstOrDefaultAsync();
+
+
+                                                                    if (finalproduct != null)
+                                                                    {
+                                                                        if (finalproduct.Distributions != null)
+                                                                        {
+                                                                            if (!finalproduct.Distributions.Any(d => d.DistributionId == finalDistribution.DistributionId))
+                                                                            {
+                                                                                finalproduct.Distributions.Add(finalDistribution);
+                                                                            }
+                                                                        }
+                                                                        else
+                                                                        {
+                                                                            finalproduct.Distributions = new List<Distribution>();
+                                                                            finalproduct.Distributions.Add(finalDistribution);
+                                                                        }
+                                                                    }
+
+                                                                    await dbContext.SaveChangesAsync();
+
 
                                                                     //aqui va la creacion de rutas
                                                                     TreeItemData? mejorCoincidenciaHOE = null;
@@ -3411,6 +3606,7 @@ namespace SupervisorMobility.API.DataAccess.Services
 
                                                             }
 
+                                                            //añadir el producto a la distribucion
                                                         }
                                                         else if (cellB.IsMerged() && row.RowNumber() >= 12)
                                                         {
@@ -3475,7 +3671,7 @@ namespace SupervisorMobility.API.DataAccess.Services
                                                     }
 
 
-                                                    //Optencion de los tiempos por renglon en base a operacion
+                                                    //Obtencion de los tiempos por renglon en base a operacion
                                                     foreach (var row in rows.SkipWhile(r => r.RowNumber() < startingRow.RowNumber()))
                                                     {
                                                         PathResume.OperationId = null;
@@ -3573,14 +3769,15 @@ namespace SupervisorMobility.API.DataAccess.Services
                                                                     PathResume.ProductID = ProductExist.Product.ProductId;
                                                                 }
 
-                                                                var finalproduct = await _context.Products.Where(p => p.ProductId == ProductExist.Product.ProductId).FirstOrDefaultAsync();
+                                                                var finalproduct = ProductExist.Product;
                                                                 Debug.WriteLine("GET product dbContext");
 
                                                                 if (finalproduct != null)
                                                                 {
                                                                     if (finalproduct.Distributions != null)
                                                                     {
-                                                                        finalproduct.Distributions.Add(finalDistribution);
+                                                                        if (!finalproduct.Distributions.Any(d => d.DistributionId == finalDistribution.DistributionId))
+                                                                            finalproduct.Distributions.Add(finalDistribution);
                                                                     }
                                                                     else
                                                                     {
@@ -3810,7 +4007,7 @@ namespace SupervisorMobility.API.DataAccess.Services
                                                 }
 
 
-                                                //Optencion de los tiempos por renglon en base a operacion
+                                                //Obtencion de los tiempos por renglon en base a operacion
                                                 foreach (var row in rows.SkipWhile(r => r.RowNumber() < startingRow.RowNumber()))
                                                 {
                                                     PathResume.OperationId = null;
@@ -3907,14 +4104,15 @@ namespace SupervisorMobility.API.DataAccess.Services
                                                                 PathResume.ProductID = ProductExist.Product.ProductId;
                                                             }
 
-                                                            var finalproduct = await _context.Products.Where(p => p.ProductId == ProductExist.Product.ProductId).FirstOrDefaultAsync();
+                                                            var finalproduct = ProductExist.Product;
                                                             Debug.WriteLine("GET product dbContext");
 
                                                             if (finalproduct != null)
                                                             {
                                                                 if (finalproduct.Distributions != null)
                                                                 {
-                                                                    finalproduct.Distributions.Add(finalDistribution);
+                                                                    if (!finalproduct.Distributions.Any(d => d.DistributionId == finalDistribution.DistributionId))
+                                                                        finalproduct.Distributions.Add(finalDistribution);
                                                                 }
                                                                 else
                                                                 {
@@ -4372,7 +4570,37 @@ namespace SupervisorMobility.API.DataAccess.Services
                 }//end db context
 
             }//end using scope
+        }//end process path
+
+        double CombineSimilarities(string description1, string description2)
+        {
+            // Pesos ajustables para cada tipo de similitud
+            double wordSimilarityWeight = 0.5;  // Peso para la similitud a nivel de palabras
+            double charSimilarityWeight = 0.5;  // Peso para la similitud a nivel de caracteres
+
+            // Cálculo de la similitud a nivel de palabras
+            double wordSimilarity = 1 - JaccardDistanceByWords(description1, description2);
+
+            // Cálculo de la similitud a nivel de caracteres
+            double charSimilarity = 1 - description1.JaccardDistance(description2);
+
+            // Combinación de ambas similitudes con sus respectivos pesos
+            return (wordSimilarityWeight * wordSimilarity) + (charSimilarityWeight * charSimilarity);
         }
 
-    }
+        // Método auxiliar para calcular la distancia de Jaccard a nivel de palabras
+        double JaccardDistanceByWords(string description1, string description2)
+        {
+            // Tokenizar las cadenas en palabras
+            var words1 = description1.Split(' ').Distinct();
+            var words2 = description2.Split(' ').Distinct();
+
+            // Unir las palabras comunes y calcular los conjuntos de unión e intersección
+            var intersection = words1.Intersect(words2).Count();
+            var union = words1.Union(words2).Count();
+
+            // Retornar la distancia de Jaccard
+            return 1 - ((double)intersection / union);
+        }
+    }//end background service
 }
