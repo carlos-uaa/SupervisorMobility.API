@@ -1,4 +1,5 @@
 ﻿using AutoMapper;
+using CoreHtmlToImage;
 using DocumentFormat.OpenXml.Bibliography;
 using DocumentFormat.OpenXml.Drawing;
 using DocumentFormat.OpenXml.Drawing.Spreadsheet;
@@ -12,6 +13,7 @@ using OfficeOpenXml;
 using OfficeOpenXml.Drawing;
 using OfficeOpenXml.Style;
 using Org.BouncyCastle.Utilities;
+using SupervisorMobility.API.DataAccess.Entities;
 using SupervisorMobility.API.DataAccess.Entities.SOS;
 using SupervisorMobility.API.DataAccess.Services;
 using SupervisorMobility.API.DataAccess.Services.ExportationServices;
@@ -818,7 +820,7 @@ namespace SupervisorMobility.API.Controllers
                                 string indexString = $"{criticalIndex}.- ";
                                 string critString = $"{cp}\r\n";
                                 string reasonString = $"( {analysis.Reasons[cpIndex]} )";
-                                if (cp != section.Analyses.Last().CriticalPoints.Last())
+                                if (cp != section.Analyses.Last(p=>p.CriticalPoints.Any()).CriticalPoints.Last())
                                 {
                                     reasonString += "\r\n";
                                 }
@@ -1307,7 +1309,7 @@ namespace SupervisorMobility.API.Controllers
         [HttpGet("Excel/Distribution/{DistributionId}")]
         public async Task<IActionResult> DistributionExcelExport(int DistributionId)
         {
-            var SosDistribution = await _AnalysisProcessRepository.GetSOSDistribution(DistributionId, true, true, true, true, includeTurns: true);
+            var SosDistribution = await _AnalysisProcessRepository.GetSOSDistribution(DistributionId, true, true, true, true, includeTurns: true, includeTimes:true);
 
             string templateName = "DataAccess/Templates/Distribution Template.xlsx";
             MemoryStream ms = new MemoryStream();
@@ -1410,7 +1412,7 @@ namespace SupervisorMobility.API.Controllers
                                 string indexString = $"{criticalIndex}.- ";
                                 string critString = $"{cp}\r\n";
                                 string reasonString = $"( {analysis.Reasons[cpIndex]} )";
-                                if (cp != section.Analyses.Last().CriticalPoints.Last())
+                                if (cp != section.Analyses.Last(p=>p.CriticalPoints.Any()).CriticalPoints.Last())
                                 {
                                     reasonString += "\r\n";
                                 }
@@ -1484,10 +1486,10 @@ namespace SupervisorMobility.API.Controllers
                         {
                             double[] times = Array.ConvertAll(timeText.Split("§"), s => string.IsNullOrEmpty(s) ? 0.0 : Double.Parse(s));
 
-                            char col = 'L';
+                            char col = 'K';
                             for (int j = 0; j < models.Length; j++)
                             {
-                                col = (char)(col + j);
+                                col = (char)(col + 1);
 
                                 if (times[j] == 0)
                                 {
@@ -1604,9 +1606,74 @@ namespace SupervisorMobility.API.Controllers
                 double globalXoffsetA = imgService.WidthToPixels(105.31) + 95/*105.31*/, globalYoffsetA = imgService.HeightToPixels(230.5) + 6/*230.5*/;
                 double globalXoffsetB = imgService.WidthToPixels(107.22) + 95/*107.22*/, globalYoffsetB = imgService.HeightToPixels(128.7) + 6/*90.6*/;
 
-                //sheet = package.Workbook.Worksheets["Analysis A"];
+                var list = SosDistribution.Illustrations.ToList();
+                byte[] bytes = { };
 
-                if (SosDistribution.Illustrations != null && SosDistribution.Illustrations.Any())
+                if (SosDistribution.SOSDistributionAdditionalTime != null)
+                {
+                    //sheet = package.Workbook.Worksheets["Analysis A"];
+                    var html = $"<table style='font-family: Arial, sans-serif; border: 1px solid black; border-collapse:collapse; width: {currentSheetColumnWidth - 10}px;'>";
+
+                    html += $"<tr><td style='border: 1px solid black;'>TEMPO</td>";
+                    for (int j = 0; j < models.Length; j++)
+                    {
+                        html += $"<td style='border: 1px solid black;'>CANTIDAD {models[j]}</td>";
+                    }
+                    html += $"<td style='border: 1px solid black;'>TEMPO</td>";
+                    for (int j = 0; j < models.Length; j++)
+                    {
+                        html += $"<td style='border: 1px solid black;'>{models[j]}</td>";
+                    }
+                    html += $"</tr>";
+
+                    string[] side = { "TOMA", "DEJA", "PASOS" };
+
+                    Dictionary<int, double[]> quant = new Dictionary<int, double[]>{
+                        { 0, Array.ConvertAll(SosDistribution.SOSDistributionAdditionalTime.TakeQuantity.Split("§",StringSplitOptions.RemoveEmptyEntries), s => Double.Parse(s)) },
+                        { 1, Array.ConvertAll(SosDistribution.SOSDistributionAdditionalTime.LeaveQuantity.Split("§",StringSplitOptions.RemoveEmptyEntries), s => Double.Parse(s)) },
+                        { 2, Array.ConvertAll(SosDistribution.SOSDistributionAdditionalTime.StepsQuantity.Split("§",StringSplitOptions.RemoveEmptyEntries), s => Double.Parse(s)) }
+                    };
+                    Dictionary<int, double[]> mtime = new Dictionary<int, double[]>{
+                        { 0, Array.ConvertAll(SosDistribution.SOSDistributionAdditionalTime.TakeTime.Split("§",StringSplitOptions.RemoveEmptyEntries), s => Double.Parse(s)) },
+                        { 1, Array.ConvertAll(SosDistribution.SOSDistributionAdditionalTime.LeaveTime.Split("§",StringSplitOptions.RemoveEmptyEntries), s => Double.Parse(s)) },
+                        { 2, Array.ConvertAll(SosDistribution.SOSDistributionAdditionalTime.StepsTime.Split("§",StringSplitOptions.RemoveEmptyEntries), s => Double.Parse(s)) }
+                    };
+
+                    for (int i = 0; i < 3; i++)
+                    {
+
+                        html += $"<tr><td style='border: 1px solid black;'>{side[i]}</td>";
+                        foreach (var item in quant[i])
+                        {
+                            html += $"<td style='border: 1px solid black;'>{item}</td>";
+                        }
+                        foreach (var item in mtime[i])
+                        {
+                            html += $"<td style='border: 1px solid black;'>{item}</td>";
+                        }
+                        html += $"</tr>";
+                    }
+
+                    html += $"<tr><td style='border: 1px solid black;' colspan={1 + models.Length}></td>";
+                    for (int i = 0; i < mtime[0].Length; i++)
+                    {
+                        html += $"<td style='border: 1px solid black;'>{mtime[0][i] + mtime[1][i] + mtime[2][i]}</td>";
+                    }
+                    html += $"</tr>";
+
+                    html += "</table>";
+
+                    var converter = new HtmlConverter();
+                    bytes = converter.FromHtmlString(html,currentSheetColumnWidth - 10);
+
+                    var temp = new FileUpload { FileName = "Case" };
+
+                    var elementAt = SosDistribution.Illustrations != null && SosDistribution.Illustrations.Any() ? 1 : 0;
+
+                    list.Insert(elementAt, temp);
+                }
+
+                if (list.Any())
                 {
 
                     string[] imgPath = { $"uploads/SOSDistribution/Ilustrations/", "" };
@@ -1615,133 +1682,143 @@ namespace SupervisorMobility.API.Controllers
 
                     int tempindex = 0;
                     int spacing = 5;
-                    foreach (var image in SosDistribution.Illustrations)
+                    foreach (var image in list)
                     {
                         bool changedSheet = true;
                         imgPath[1] = image.StorageFileName;
                         int horizontalOffset = 0;
-                        using (FileStream stream = System.IO.File.OpenRead($"{imgPath[0]}{imgPath[1]}"))
+                        MemoryStream stream = new MemoryStream();
+                        if(image.FileName == "Case")
                         {
-                            Image imgObj = Image.FromStream(stream);
+                            stream = new MemoryStream(bytes);
+                        }
+                        else
+                        {
+                            FileStream fromFile = System.IO.File.OpenRead($"{imgPath[0]}{imgPath[1]}");
+                            fromFile.CopyTo(stream);
+                            fromFile.Close();fromFile.Dispose();
+                        }
+                        Image imgObj = Image.FromStream(stream);
 
-                            int w = imgObj.Width, h = imgObj.Height;
+                        int w = imgObj.Width, h = imgObj.Height;
 
-                            int changeableW = currentSheetColumnWidth, changeableH = (int)changeHeightP;
-                            int changeableOff = offsetY;
-                            do
+                        int changeableW = currentSheetColumnWidth, changeableH = (int)changeHeightP;
+                        int changeableOff = offsetY;
+                        do
+                        {
+                            if (w > changeableW)
                             {
-                                if (w > changeableW)
-                                {
-                                    (h, w) = imgService.GetResizeMagnitudesMaintainingAspectRatio(w, h, changeableW, true);
-                                }
-                                else if (h + changeableOff > changeableH)
-                                {
-                                    double overflow = (h + changeableOff) - changeableH;
-                                    double percent = overflow * 100 / changeableH;
-                                    if (tempindex != 0 && percent > 10)
-                                    {
-                                        string currentPIdx = sheet.Name.Split(" ", 2)[1];
-                                        int nextPage = sheetService.GetNextIndex(currentPIdx);
-
-                                        string pageName = $"HOE DISTRIBUTION ({nextPage})";
-                                        string nextPIdx = pageName.Split(" ", 2)[1];
-
-                                        sheet = package.Workbook.Worksheets[pageName];
-
-                                        if (sheet == null)
-                                        {
-                                            sheetService.AddSheet(package, 3, currentPIdx);
-                                            sheet = package.Workbook.Worksheets[pageName];
-
-                                            rowHeights.Add(nextPIdx, 0);
-                                            rowIndexes.Add(nextPIdx, (9, 10));
-
-
-                                            var idx = rowIndexes[nextPIdx].Item2-1;
-                                            var height = rowHeights[nextPIdx];
-
-                                            sheetService.GenerateDistributionsRows(sheet, ref height, ref idx, ChangeHeight, DefaultRowH, false);
-
-                                            rowIndexes[nextPIdx] = (rowIndexes[nextPIdx].Item1, idx+3);
-                                            rowHeights[nextPIdx] = height;
-
-                                            stylesService.SetDistributionImgsStyles(sheet, rowIndexes[nextPIdx].Item1, rowIndexes[nextPIdx].Item2-3);
-
-                                            imgCellWidthExtTmplt = imgCellWidthExtTmplt != 0 ? imgCellWidthExtTmplt : sheet.Columns[17].Width + sheet.Columns[18].Width + sheet.Columns[19].Width + sheet.Columns[20].Width + sheet.Columns[21].Width + sheet.Columns[22].Width + sheet.Columns[23].Width;
-                                            changedSheet = false;
-                                        }
-
-                                        changeHeightP = changeableH = imgService.HeightToPixels(rowHeights[nextPIdx]);
-                                        currentSheetColumnWidth = changeableW = imgService.WidthToPixels(imgCellWidthExtTmplt);
-                                        offsetY = changeableOff = 2;
-
-                                        globalXoffset = globalXoffsetB;
-                                        globalYoffset = globalYoffsetB;
-
-                                    }
-                                    (h, w) = imgService.GetResizeMagnitudesMaintainingAspectRatio(w, h, changeableH - changeableOff, false);
-                                }
-                                else
-                                {
-                                    break;
-                                }
-                            } while (true);
-
-                            horizontalOffset = (int)((changeableW - w) / 2);
-                            
-                            if (offsetY + h > changeHeightP && changedSheet)
+                                (h, w) = imgService.GetResizeMagnitudesMaintainingAspectRatio(w, h, changeableW, true);
+                            }
+                            else if (h + changeableOff > changeableH)
                             {
-                                string currentPIdx = sheet.Name.Split(" ", 2)[1];
-                                int nextPage = sheetService.GetNextIndex(currentPIdx);
-
-                                string pageName = $"HOE DISTRIBUTION ({nextPage})";
-                                string nextPIdx = pageName.Split(" ", 2)[1];
-
-                                sheet = package.Workbook.Worksheets[pageName];
-
-                                if (sheet == null)
+                                double overflow = (h + changeableOff) - changeableH;
+                                double percent = overflow * 100 / changeableH;
+                                if (tempindex != 0 && percent > 10)
                                 {
-                                    sheetService.AddSheet(package, 3, currentPIdx);
+                                    string currentPIdx = sheet.Name.Split(" ", 2)[1];
+                                    int nextPage = sheetService.GetNextIndex(currentPIdx);
+
+                                    string pageName = $"HOE DISTRIBUTION ({nextPage})";
+                                    string nextPIdx = pageName.Split(" ", 2)[1];
+
                                     sheet = package.Workbook.Worksheets[pageName];
 
-                                    rowHeights.Add(nextPIdx, 0);
-                                    rowIndexes.Add(nextPIdx, (9, 10));
+                                    if (sheet == null)
+                                    {
+                                        sheetService.AddSheet(package, 3, currentPIdx);
+                                        sheet = package.Workbook.Worksheets[pageName];
 
-                                    var idx = rowIndexes[nextPIdx].Item2-1;
-                                    var height = rowHeights[nextPIdx];
+                                        rowHeights.Add(nextPIdx, 0);
+                                        rowIndexes.Add(nextPIdx, (9, 10));
 
-                                    sheetService.GenerateDistributionsRows(sheet, ref height, ref idx, ChangeHeight, DefaultRowH, false);
 
-                                    rowIndexes[nextPIdx] = (rowIndexes[nextPIdx].Item1, idx+3);
-                                    rowHeights[nextPIdx] = height;
+                                        var idx = rowIndexes[nextPIdx].Item2 - 1;
+                                        var height = rowHeights[nextPIdx];
 
-                                    stylesService.SetDistributionImgsStyles(sheet, rowIndexes[nextPIdx].Item1, rowIndexes[nextPIdx].Item2 - 3);
+                                        sheetService.GenerateDistributionsRows(sheet, ref height, ref idx, ChangeHeight, DefaultRowH, false);
 
-                                    imgCellWidthExtTmplt = imgCellWidthExtTmplt != 0 ? imgCellWidthExtTmplt : sheet.Columns[17].Width + sheet.Columns[18].Width + sheet.Columns[19].Width + sheet.Columns[20].Width + sheet.Columns[21].Width + sheet.Columns[22].Width + sheet.Columns[23].Width;
+                                        rowIndexes[nextPIdx] = (rowIndexes[nextPIdx].Item1, idx + 3);
+                                        rowHeights[nextPIdx] = height;
+
+                                        stylesService.SetDistributionImgsStyles(sheet, rowIndexes[nextPIdx].Item1, rowIndexes[nextPIdx].Item2 - 3);
+
+                                        imgCellWidthExtTmplt = imgCellWidthExtTmplt != 0 ? imgCellWidthExtTmplt : sheet.Columns[17].Width + sheet.Columns[18].Width + sheet.Columns[19].Width + sheet.Columns[20].Width + sheet.Columns[21].Width + sheet.Columns[22].Width + sheet.Columns[23].Width;
+                                        changedSheet = false;
+                                    }
+
+                                    changeHeightP = changeableH = imgService.HeightToPixels(rowHeights[nextPIdx]);
+                                    currentSheetColumnWidth = changeableW = imgService.WidthToPixels(imgCellWidthExtTmplt);
+                                    offsetY = changeableOff = 2;
+
+                                    globalXoffset = globalXoffsetB;
+                                    globalYoffset = globalYoffsetB;
+
                                 }
+                                (h, w) = imgService.GetResizeMagnitudesMaintainingAspectRatio(w, h, changeableH - changeableOff, false);
+                            }
+                            else
+                            {
+                                break;
+                            }
+                        } while (true);
 
-                                changeHeightP = imgService.HeightToPixels(rowHeights[nextPIdx]);
-                                currentSheetColumnWidth = imgService.WidthToPixels(imgCellWidthExtTmplt);
+                        horizontalOffset = (int)((changeableW - w) / 2);
 
-                                globalXoffset = globalXoffsetB;
-                                globalYoffset = globalYoffsetB;
+                        if (offsetY + h > changeHeightP && changedSheet)
+                        {
+                            string currentPIdx = sheet.Name.Split(" ", 2)[1];
+                            int nextPage = sheetService.GetNextIndex(currentPIdx);
 
-                                offsetY = 2;
+                            string pageName = $"HOE DISTRIBUTION ({nextPage})";
+                            string nextPIdx = pageName.Split(" ", 2)[1];
 
-                                changedSheet = true;
-                                //spacing = 10;
+                            sheet = package.Workbook.Worksheets[pageName];
+
+                            if (sheet == null)
+                            {
+                                sheetService.AddSheet(package, 3, currentPIdx);
+                                sheet = package.Workbook.Worksheets[pageName];
+
+                                rowHeights.Add(nextPIdx, 0);
+                                rowIndexes.Add(nextPIdx, (9, 10));
+
+                                var idx = rowIndexes[nextPIdx].Item2 - 1;
+                                var height = rowHeights[nextPIdx];
+
+                                sheetService.GenerateDistributionsRows(sheet, ref height, ref idx, ChangeHeight, DefaultRowH, false);
+
+                                rowIndexes[nextPIdx] = (rowIndexes[nextPIdx].Item1, idx + 3);
+                                rowHeights[nextPIdx] = height;
+
+                                stylesService.SetDistributionImgsStyles(sheet, rowIndexes[nextPIdx].Item1, rowIndexes[nextPIdx].Item2 - 3);
+
+                                imgCellWidthExtTmplt = imgCellWidthExtTmplt != 0 ? imgCellWidthExtTmplt : sheet.Columns[17].Width + sheet.Columns[18].Width + sheet.Columns[19].Width + sheet.Columns[20].Width + sheet.Columns[21].Width + sheet.Columns[22].Width + sheet.Columns[23].Width;
                             }
 
-                            string pictureName = image.FileName.Split(".")[0];
-                            var picture = sheet.Drawings.AddPicture($"{pictureName}{tempindex}.png", stream);
-                            picture.SetSize(w, h);
+                            changeHeightP = imgService.HeightToPixels(rowHeights[nextPIdx]);
+                            currentSheetColumnWidth = imgService.WidthToPixels(imgCellWidthExtTmplt);
 
-                            picture.SetPosition((int)globalYoffset + offsetY, (int)globalXoffset + horizontalOffset);
+                            globalXoffset = globalXoffsetB;
+                            globalYoffset = globalYoffsetB;
 
-                            offsetY += h;
+                            offsetY = 2;
 
-                            tempindex++;
+                            changedSheet = true;
+                            //spacing = 10;
                         }
+
+                        string pictureName = image.FileName.Split(".")[0];
+                        var picture = sheet.Drawings.AddPicture($"{pictureName}{tempindex}.png", stream);
+                        picture.SetSize(w, h);
+
+                        picture.SetPosition((int)globalYoffset + offsetY, (int)globalXoffset + horizontalOffset);
+
+                        offsetY += h;
+
+                        tempindex++;
+
+                        stream.Close(); stream.Dispose();
                     }
 
                 }
@@ -1762,7 +1839,7 @@ namespace SupervisorMobility.API.Controllers
                         }
                     }
                 }
-
+                
                 string aaaaa = package.Workbook.Worksheets.Last().Name.Split(" ", 2)[1];
                 int aaaugh = sheetService.GetNextIndex(aaaaa);
 
@@ -1782,13 +1859,17 @@ namespace SupervisorMobility.API.Controllers
                     var idx = rowIndexes[npi].Item2 - 1;
                     var height = rowHeights[npi];
 
-                    sheetService.GenerateDistributionsRows(sheet, ref height, ref idx, ChangeHeight, DefaultRowH, false);
+                    sheetService.GenerateDistributionsRows(sheet, ref height, ref idx, 500, DefaultRowH, false);
 
                     rowIndexes[npi] = (rowIndexes[npi].Item1, idx + 3);
                     rowHeights[npi] = height;
                 }
 
                 sheet = package.Workbook.Worksheets.First();
+
+                var pic = sheet.Drawings["Picture 11"];
+                pic.SetSize(50, 29);
+
                 int sheetTotal = package.Workbook.Worksheets.Where(p => p.Name.Contains("DISTRIBUTION")).Count();
 
                 sheet.Cells["X12"].Value = 1;
@@ -1797,6 +1878,9 @@ namespace SupervisorMobility.API.Controllers
                 {
                     item.Cells["U6"].Value = index+2;
                     item.Cells["W6"].Value = sheetTotal;
+
+                    var dicpic = item.Drawings["Picture 2"];
+                    dicpic.SetSize(50, 29);
                 }
 
                 
