@@ -86,8 +86,6 @@ namespace SupervisorMobility.API.DataAccess.Services
                     {
                         var pages = workBook.Worksheets.Count - 1;
 
-                        //for (int p = 1; p <= pages; p++)
-                        //{
                         IXLWorksheet ws = workBook.Worksheet(1);
 
 
@@ -95,7 +93,6 @@ namespace SupervisorMobility.API.DataAccess.Services
                         int i = 1;
                         foreach (IXLRow row in ws.Rows())
                         {
-                            //Use the first row to add columns to DataTable.
                             HeadCount _headCount = new HeadCount();
 
                             if (firstRow)
@@ -697,7 +694,6 @@ namespace SupervisorMobility.API.DataAccess.Services
                                         }
                                         else
                                         {
-                                            //await _js.InvokeVoidAsync("alert", $"Error get folders: {response.Content.ReadAsStringAsync().Result}");
                                             Console.WriteLine($"GET FOLDERS GOS, Status Code {response.StatusCode} : {response.Content.ReadAsStringAsync().Result}");
                                         }
                                     }
@@ -804,10 +800,7 @@ namespace SupervisorMobility.API.DataAccess.Services
                                 //Log de error en alguna carga general
                             }
 
-                            //Propuesta no hacer
-                            //Verificar que el archivo a cargar, el area corresponde con la del supervisor si es admin hay que realizar la carga sin exepcion
-
-
+                          
 
                             //Start Massive Upload 
                             string filepath = Directory.GetCurrentDirectory().ToString() + "\\uploads\\massive\\" + trustedFileNameForStorage;
@@ -838,7 +831,6 @@ namespace SupervisorMobility.API.DataAccess.Services
                                         var ExcelAreaCode = AreaCell.Value.ToString() != "" ? AreaCell.Value.ToString() : "";
                                         var ExcelDistDescription = DistributionCell.Value.ToString() != "" ? DistributionCell.Value.ToString() : "";
 
-                                        //var ExcelAreaDescription = ws.Cell(row.RangeAddress.FirstAddress.RowNumber, 4).Value.ToString() != "" ? ws.Cell(row.RangeAddress.FirstAddress.RowNumber, 4).Value.ToString() : "";
 
 
                                         if (ExcelAreaCode.IsNullOrEmpty() && ExcelDistDescription.IsNullOrEmpty())
@@ -847,7 +839,6 @@ namespace SupervisorMobility.API.DataAccess.Services
                                         }
 
 
-                                        // Buscar el ID de planta en el diccionario de plantas
                                         var planta = PlantsDictionary.Values.FirstOrDefault(p => p.PlantId == plantnameid);
                                         if (planta != null)
                                         {
@@ -932,23 +923,18 @@ namespace SupervisorMobility.API.DataAccess.Services
 
                                         if (PathResume.PlantId > 0)
                                         {
-                                            //La planta existe
+                                            //la planta existe
                                             int rowStartOperation = 12;
 
-                                            //Renglones de la pagina
                                             var rows = worksheet.Rows();
 
-                                            // Lista de filas posibles donde podrían estar los productos
                                             var possibleRows = new List<int> { 8, 9, 10, 11, 12 };
 
-                                            // Lista donde se almacenarán los productos
                                             var products = new List<Dictionary<string, Dictionary<string, string>>>();
 
-                                            // Recorremos cada fila posible
                                             foreach (int row in possibleRows)
                                             {
 
-                                                // Intentamos encontrar los rangos con las celdas combinadas
                                                 var ranges = new List<IXLRange> {
                                                     worksheet.Range($"F{row}:J{row + 1}"),
                                                     worksheet.Range($"K{row}:O{row + 1}"),
@@ -956,7 +942,6 @@ namespace SupervisorMobility.API.DataAccess.Services
                                                     worksheet.Range($"U{row}:Y{row + 1}")
                                                 };
 
-                                                //aqui la condicion
                                                 var productNameVerifyRange = ranges.First().FirstRow().FirstCell().Value.ToString();
 
                                                 var ProductExist = Products.Select(pair => new
@@ -965,14 +950,13 @@ namespace SupervisorMobility.API.DataAccess.Services
                                                     Similarity = 1 - pair.Code.JaccardDistance(productNameVerifyRange)
                                                 }).OrderByDescending(result => result.Similarity).FirstOrDefault();
 
-                                                // Ajusta este umbral según la necesidad
+                                                //Si el rango es correcto deberia coincidir con un producto
                                                 if (ProductExist != null && ProductExist.Similarity > 0.5)
                                                 {
+                                                    //asigno el inicio del documento
                                                     rowStartOperation = row + 2;
-                                                    // Recorremos los rangos encontrados
                                                     foreach (var range in ranges)
                                                     {
-                                                        // Solo procesamos rangos con celdas combinadas
                                                         if (range.IsMerged())
                                                         {
                                                             var productName = range.FirstRow().FirstCell().Value.ToString();
@@ -981,7 +965,6 @@ namespace SupervisorMobility.API.DataAccess.Services
                                                             var aditionalTime = "§§§§";
                                                             var standarTime = "§§§§";
 
-                                                            // Creamos el diccionario para almacenar el producto
                                                             var product = new Dictionary<string, Dictionary<string, string>>
                                                                         {
                                                                             {
@@ -996,12 +979,10 @@ namespace SupervisorMobility.API.DataAccess.Services
                                                                             }
                                                                         };
 
-                                                            // Añadimos el producto a la lista
                                                             products.Add(product);
                                                         }
                                                     }
 
-                                                    // Si ya hemos encontrado al menos un rango válido, dejamos de buscar
                                                     if (products.Count > 0)
                                                     {
                                                         break;
@@ -1010,16 +991,11 @@ namespace SupervisorMobility.API.DataAccess.Services
 
                                             }
 
-
-                                            //Renglon de inicio 
                                             var startingRow = worksheet.Row(rowStartOperation);
-                                            //Variable para encontrar renglon Additional time
                                             int StartAdditionalTime = 0;
 
-                                            //Ciclo para optener las pociones de tiempo estandar y tiempo adicional
                                             foreach (var row in rows.SkipWhile(r => r.RowNumber() < startingRow.RowNumber()))
                                             {
-                                                // Obtener la celda en la columna B para cada renglón
                                                 var cellB = row.Cell("B");
                                                 if (cellB.IsMerged() && row.RowNumber() >= rowStartOperation)
                                                 {
@@ -1077,8 +1053,6 @@ namespace SupervisorMobility.API.DataAccess.Services
 
                                                     string lastOperationName = null; // Para almacenar el último nombre de operación
 
-
-                                                    //Obtencion de los tiempos por renglon en base a operacion
                                                     foreach (var row in rows.SkipWhile(r => r.RowNumber() < startingRow.RowNumber()))
                                                     {
                                                         PathResume.OperationId = null;
@@ -1962,8 +1936,6 @@ namespace SupervisorMobility.API.DataAccess.Services
                                                     //}
                                                 }//end else distribuccion no existe
 
-
-
                                             }//end if area > 0
                                             else //area no existe
                                             {
@@ -2311,36 +2283,7 @@ namespace SupervisorMobility.API.DataAccess.Services
 
                                             }
 
-                                        }//end if plant > 0
-
-                                        // no hay chance de que la planta no exista por que se accede a este controlador 
-                                        // mediante la pagina de planta, recibiendo el id de la planta como parametro
-
-
-                                        //        retries = 0;
-                                        // Si la operación tiene éxito, puedes salir del bucle
-                                        //        break;
-                                        //    }
-                                        //    catch (Exception ex)
-                                        //    {
-                                        //        // Maneja la excepción aquí, si es necesario
-                                        //        Debug.WriteLine($"I Value:{i}");
-                                        //        Debug.WriteLine($"Intento {retries + 1} falló: {ex.Message}");
-
-                                        //        // Incrementa el número de intentos
-                                        //        retries++;
-
-                                        //        // Espera el intervalo de tiempo antes de volver a intentarlo
-                                        //        await Task.Delay(retryInterval);
-                                        //    }
-
-
-
-                                        //}//end While retries
-
-
-
-                                        //Debug.WriteLine($"Pagina {p} : {pageName} ");
+                                        }
 
                                     }//for de paginas
 
@@ -4574,32 +4517,24 @@ namespace SupervisorMobility.API.DataAccess.Services
 
         double CombineSimilarities(string description1, string description2)
         {
-            // Pesos ajustables para cada tipo de similitud
-            double wordSimilarityWeight = 0.5;  // Peso para la similitud a nivel de palabras
-            double charSimilarityWeight = 0.5;  // Peso para la similitud a nivel de caracteres
+            double wordSimilarityWeight = 0.5; 
+            double charSimilarityWeight = 0.5;  
 
-            // Cálculo de la similitud a nivel de palabras
             double wordSimilarity = 1 - JaccardDistanceByWords(description1, description2);
 
-            // Cálculo de la similitud a nivel de caracteres
             double charSimilarity = 1 - description1.JaccardDistance(description2);
 
-            // Combinación de ambas similitudes con sus respectivos pesos
             return (wordSimilarityWeight * wordSimilarity) + (charSimilarityWeight * charSimilarity);
         }
 
-        // Método auxiliar para calcular la distancia de Jaccard a nivel de palabras
         double JaccardDistanceByWords(string description1, string description2)
         {
-            // Tokenizar las cadenas en palabras
             var words1 = description1.Split(' ').Distinct();
             var words2 = description2.Split(' ').Distinct();
 
-            // Unir las palabras comunes y calcular los conjuntos de unión e intersección
             var intersection = words1.Intersect(words2).Count();
             var union = words1.Union(words2).Count();
 
-            // Retornar la distancia de Jaccard
             return 1 - ((double)intersection / union);
         }
     }//end background service
