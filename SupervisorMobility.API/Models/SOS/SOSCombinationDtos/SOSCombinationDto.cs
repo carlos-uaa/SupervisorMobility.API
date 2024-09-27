@@ -6,6 +6,7 @@ using SupervisorMobility.API.DataAccess.Entities;
 using SupervisorMobility.API.Models.Users;
 using SupervisorMobility.API.Models.SOS.TurnDtos;
 using SupervisorMobility.API.Models.SOS.SOSCombinationLogbookDtos;
+using SupervisorMobility.API.Models.SOS.SOSCombinationOperationSequenceDtos;
 
 namespace SupervisorMobility.API.Models.SOS.SOSCombinationDtos
 {
@@ -24,7 +25,6 @@ namespace SupervisorMobility.API.Models.SOS.SOSCombinationDtos
 
 
         public ICollection<TurnDto>? Turns { get; set; }
-
         public DateTime? ApplicationMonth { get; set; }
 
         public string? ProductionVolumePerShift { get; set; }
@@ -34,6 +34,9 @@ namespace SupervisorMobility.API.Models.SOS.SOSCombinationDtos
         public ICollection<SOSCombinationLogbookDto>? CombinationLogbooks { get; set; } = new List<SOSCombinationLogbookDto>();
         public ICollection<FileUploadGeneralDto>? Illustrations { get; set; } = new List<FileUploadGeneralDto>();
 
+        public DateTime? CreatedAt { get; set; }
+        public int? SOSCombinationOperationSequenceId { get; set; }
+        public ICollection<SOSCombinationOperationSequenceDto>? SOSCombinationOperationSequence { get; set; }
 
         public int SOSHubId { get; set; }
         public SOSHubDto? SOSHub { get; set; }
