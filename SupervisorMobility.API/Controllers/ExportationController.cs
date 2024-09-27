@@ -1617,12 +1617,12 @@ namespace SupervisorMobility.API.Controllers
                     html += $"<tr><td style='border: 1px solid black;'>TEMPO</td>";
                     for (int j = 0; j < models.Length; j++)
                     {
-                        html += $"<td style='border: 1px solid black;'>CANTIDAD {models[j]}</td>";
+                        html += $"<td style='border: 1px solid black;text-align:center;'>CANTIDAD {models[j]}</td>";
                     }
                     html += $"<td style='border: 1px solid black;'>TEMPO</td>";
                     for (int j = 0; j < models.Length; j++)
                     {
-                        html += $"<td style='border: 1px solid black;'>{models[j]}</td>";
+                        html += $"<td style='border: 1px solid black;text-align:center;'>{models[j]}</td>";
                     }
                     html += $"</tr>";
 
@@ -1643,21 +1643,21 @@ namespace SupervisorMobility.API.Controllers
                     {
 
                         html += $"<tr><td style='border: 1px solid black;'>{side[i]}</td>";
-                        foreach (var item in quant[i])
+                        foreach (var item in quant[i].Take(models.Length))
                         {
                             html += $"<td style='border: 1px solid black;'>{item}</td>";
                         }
-                        foreach (var item in mtime[i])
+                        foreach (var item in mtime[i].Take(models.Length+1))
                         {
                             html += $"<td style='border: 1px solid black;'>{item}</td>";
                         }
                         html += $"</tr>";
                     }
 
-                    html += $"<tr><td style='border: 1px solid black;' colspan={1 + models.Length}></td>";
-                    for (int i = 0; i < mtime[0].Length; i++)
+                    html += $"<tr><td style='border: 1px solid black;' colspan={2 + models.Length}></td>";
+                    for (int i = 1; i < models.Length+1; i++)
                     {
-                        html += $"<td style='border: 1px solid black;'>{mtime[0][i] + mtime[1][i] + mtime[2][i]}</td>";
+                        html += $"<td style='border: 1px solid black;'>{(mtime[0][i] + mtime[1][i] + mtime[2][i]).ToString("F2")}</td>";
                     }
                     html += $"</tr>";
 
