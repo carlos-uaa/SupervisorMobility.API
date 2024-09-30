@@ -5,6 +5,8 @@ using SupervisorMobility.API.Models.SOS.SOSDistributionLogbookDtos;
 using SupervisorMobility.API.Models.SOS.SOSSequenceLogbookDtos;
 using SupervisorMobility.API.Models.SOS.TurnDtos;
 using SupervisorMobility.API.Models.SOS.SOSTimeDtos;
+using SupervisorMobility.API.DataAccess.Entities.SOS;
+using SupervisorMobility.API.Models.SOS.SOSDistributionAdditionalTimeDtos;
 
 namespace SupervisorMobility.API.Models.SOS.SOSDistributionDtos
 {
@@ -14,15 +16,13 @@ namespace SupervisorMobility.API.Models.SOS.SOSDistributionDtos
         public string? InternalControlNumber { get; set; }
         public string? OperationName { get; set; }
         public string? ProcessName { get; set; }
-        public int? ReviewerId { get; set; }
-
-        public int? ApproverId { get; set; }
+ 
 
         public string? TackTime { get; set; }
 
         public List<TurnForUpdateDto>? Turns { get; set; }
         public string? AplicationModels { get; set; } = "§§§§";
-        public List<SOSTimeForUpdateDto>? AplicationModelsTimes { get; set; }
+        public List<SOSTimeForUpdateDto>? Times { get; set; }
 
         public List<SOSDistributionLogbookForUpdateDto>? DistributionLogbooks { get; set; } = new List<SOSDistributionLogbookForUpdateDto>();
         public ICollection<FileUploadGeneralDto>? Illustrations { get; set; } = new List<FileUploadGeneralDto>();
@@ -34,6 +34,9 @@ namespace SupervisorMobility.API.Models.SOS.SOSDistributionDtos
 
         public DateTime? CreatedAt { get; set; }
         public DateTime? ApplicationMonth { get; set; }
+
+        public int? SOSDistributionAdditionalTimeId { get; set; }
+        public SOSDistributionAdditionalTimeForUpdateDto? SOSDistributionAdditionalTime { get; set; }
 
         public bool? IsActive { get; set; }
 

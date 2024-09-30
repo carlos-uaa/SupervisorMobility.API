@@ -3,6 +3,7 @@ using SupervisorMobility.API.DataAccess.Entities;
 using SupervisorMobility.API.Models.CommentaryDtos;
 using SupervisorMobility.API.Models.FileUploadDto;
 using SupervisorMobility.API.Models.SOS.SOSCombinationLogbookDtos;
+using SupervisorMobility.API.Models.SOS.SOSCombinationOperationSequenceDtos;
 using SupervisorMobility.API.Models.SOS.SOSHubDtos;
 using SupervisorMobility.API.Models.SOS.SOSSequenceLogbookDtos;
 using SupervisorMobility.API.Models.SOS.TurnDtos;
@@ -17,17 +18,14 @@ namespace SupervisorMobility.API.Models.SOS.SOSCombinationDtos
         public string? InternalControlNumber { get; set; }
         public string? OperationName { get; set; }
         public string? ProcessName { get; set; }
-        public int? ReviewerId { get; set; }
-        public UsersWithoutNavigationWithoutPeopleDetails? Reviewer { get; set; }
-        public FileUploadGeneralDto? ReviewerSignatureImage { get; set; } = new();
+        public string? ProductionPlanAndObservations { get; set; }
+
 
         public int? ReviewerHSId { get; set; }
         public UsersWithoutNavigationWithoutPeopleDetails? ReviewerHS { get; set; }
         public FileUploadGeneralDto? ReviewerHSSignatureImage { get; set; } = new();
 
-        public int? ApproverId { get; set; }
-        public UsersWithoutNavigationWithoutPeopleDetails? Approver { get; set; }
-        public FileUploadGeneralDto? ApproverSignatureImage { get; set; } = new();
+      
 
         public List<TurnForUpdateDto>? Turns { get; set; }
 
@@ -39,6 +37,9 @@ namespace SupervisorMobility.API.Models.SOS.SOSCombinationDtos
         public List<SOSCombinationLogbookForUpdateDto>? CombinationLogbooks { get; set; } = new List<SOSCombinationLogbookForUpdateDto>();
         public ICollection<FileUploadGeneralDto>? Illustrations { get; set; } = new List<FileUploadGeneralDto>();
 
+        public DateTime? CreatedAt { get; set; }
+        public int? SOSCombinationOperationSequenceId { get; set; }
+        public ICollection<SOSCombinationOperationSequenceForUpdateDto>? SOSCombinationOperationSequence { get; set; }
 
         public int SOSHubId { get; set; }
         public SOSHubDto? SOSHub { get; set; }

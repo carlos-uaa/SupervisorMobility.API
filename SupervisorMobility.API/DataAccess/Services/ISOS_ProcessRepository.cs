@@ -10,11 +10,17 @@ using SupervisorMobility.API.Models.SOS.MaterialDtos;
 using SupervisorMobility.API.Models.SOS.SOSAnalysisDtos;
 using SupervisorMobility.API.Models.SOS.SOSAnalysisLogbookDtos;
 using SupervisorMobility.API.Models.SOS.SOSCombinationDtos;
+using SupervisorMobility.API.Models.SOS.SOSCombinationLogbookDtos;
+using SupervisorMobility.API.Models.SOS.SOSDistributionAdditionalTimeDtos;
 using SupervisorMobility.API.Models.SOS.SOSDistributionDtos;
+using SupervisorMobility.API.Models.SOS.SOSDistributionLogbookDtos;
+using SupervisorMobility.API.Models.SOS.SOSFlowDtos;
+using SupervisorMobility.API.Models.SOS.SOSFlowLogbookDtos;
 using SupervisorMobility.API.Models.SOS.SOSHubDtos;
 using SupervisorMobility.API.Models.SOS.SOSHubDtos.AnalysisBkupDtos;
 using SupervisorMobility.API.Models.SOS.SOSHubDtos.SectionDtos;
 using SupervisorMobility.API.Models.SOS.SOSSequenceDtos;
+using SupervisorMobility.API.Models.SOS.SOSSequenceLogbookDtos;
 using SupervisorMobility.API.Models.SOS.SOSTimeDtos;
 using SupervisorMobility.API.Models.SOS.ToolDtos;
 using SupervisorMobility.API.Models.SOS.ToolsUsedDtos;
@@ -27,18 +33,14 @@ namespace SupervisorMobility.API.DataAccess.Services
     public interface ISOS_ProcessRepository
     {
         #region SOS_DataPool
-        Task<int> CreateSOScollection(SOSHub SOS_EntityToCreate);
+        Task<SOSHub> CreateSOScollection(SOSHub SOS_EntityToCreate);
         Task<SOSHub> GetSOSHub(int HubId, bool includeAnalysesBkup = false, bool includeSections = false, bool includeImages = false, bool includeVideos = false, bool includeCommentaries = false, bool includeTools = false, bool includeEquipments = false, bool includeMaterials = false, bool includeInformation = false, bool includePeople = false, bool includeDocuments = false, bool includeModel = false, bool includeHistory = false, bool includeDeleteds = false, bool includeCollections = false, bool includePeopleCollections = false);
         Task<IEnumerable<SOSHub>> GetAllSOSHub(bool includeAnalysesBkup = false, bool includeSections = false, bool includeImages = false, bool includeVideos = false, bool includeCommentaries = false, bool includeTools = false, bool includeEquipments = false, bool includeMaterials = false, bool includeInformation = false, bool includePeople = false, bool includeDocuments = false);
         Task<int> UpdateSOSHub(SOSHubForUpdateDto HubUpdate, SOSHub SosEntity);
+        Task<int> UpdateSOSHub(SOSHub SosEntity);
         Task<int> RemoveSOSHub(int SOS_DataPool_id);
         #endregion
-        #region History Hub Collection
-        Task<int> CreateHistorySOScollection(SOSHubHistory SOS_EntityToCreate);
-        Task<IEnumerable<SOSHubHistory>> GetAllHistorySOSHub(int HubId, bool includeAnalysesBkup = false, bool includeSections = false, bool includeImages = false, bool includeVideos = false, bool includeCommentaries = false, bool includeTools = false, bool includeEquipments = false, bool includeMaterials = false, bool includeInformation = false, bool includePeople = false, bool includeDocuments = false);
-        Task<AsyncVoidMethodBuilder> AddHistoryToSOSCollection(SOSHub Master, SOSHubHistory Slave);
 
-        #endregion
         #region AddTo Sos Hub
         Task<AsyncVoidMethodBuilder> AddProcessSheetCommentaryToSOSCollection(SOSHub Master, Commentary Slave);
         Task<AsyncVoidMethodBuilder> AddAnaysisBkupToSOSCollection(SOSHub Master, AnalysisBkup Slave);
@@ -49,22 +51,26 @@ namespace SupervisorMobility.API.DataAccess.Services
         Task<AsyncVoidMethodBuilder> AddCommonDirectionsToSOSCollection(SOSHub Master, List<CommonDirection> Slave);
         Task AddImageToSOSData(int SOS_DataPool_id, FileUpload evidence);
         Task AddVideoToSOSData(int SOS_DataPool_id, FileUpload evidence);
+        Task<AsyncVoidMethodBuilder> AddReviewerEditorToSOSCollection(SOSHub Master, User Slave);
+        Task<AsyncVoidMethodBuilder> AddApproverOwnersToSOSCollection(SOSHub Master, User Slave);
+        
+        Task<AsyncVoidMethodBuilder> AddProductToSOSCollection(SOSHub Master, Product Slave);
+
         #endregion
         #region Remove from Sos Hub
         Task<int> RemoveImageFromSOSData(int SOS_DataPool_id, int ImageFile_id);
         Task<int> RemoveVideoFromSOSData(int SOS_DataPool_id, int VideoFile_id);
         Task<int> RemoveCDFromSOSData(int SOS_DataPool_id, int File_id);
         Task<AsyncVoidMethodBuilder> SOSDataRemoveAllToolsEquipmentMaterial(SOSHub Master);
+        Task<AsyncVoidMethodBuilder> SOSDataRemoveAllReviewerEditors(SOSHub Master);
+        Task<AsyncVoidMethodBuilder> SOSDataRemoveAllApproverOwners(SOSHub Master);
         Task<AsyncVoidMethodBuilder> SOSDataRemoveAllAnalysisBkups(SOSHub Master);
         Task<AsyncVoidMethodBuilder> SOSDataRemoveAllSections(SOSHub Master);
         Task<AsyncVoidMethodBuilder> SOSDataRemoveAllProcessSheetCommentary(SOSHub Master);
         Task<AsyncVoidMethodBuilder> SOSDataRemoveAllCommonDirections(SOSHub Master);
+        Task<AsyncVoidMethodBuilder> SOSDataRemoveAllProducts(SOSHub Master);
         #endregion 
-        #region AddTo Ranges
-        Task<List<Commentary>> AddRangeCommentary(List<Commentary> commentariesToAdd);
-        Task<List<AnalysisBkup>> AddRangeAnalysisBkup(List<AnalysisBkup> analysisBkupsToAdd);
-        Task<List<Section>> AddRangeSections(List<Section> SectionsToAdd);
-        #endregion
+      
         #region Tool
         Task<int> AddRangeTool(List<Tool> ToolsToAdd);
         Task<List<ToolUsed>> AddRangeToolsUsed(List<ToolUsed> ToolsUsedToAdd);
@@ -100,11 +106,18 @@ namespace SupervisorMobility.API.DataAccess.Services
         Task<int> DeleteEquipment(int id);
         #endregion
         #region Commentary
+        Task<List<Commentary>> AddRangeCommentary(List<Commentary> commentariesToAdd);
         Task<Commentary> GetCommentaryById(int id);
         Task<int> UpdateCommentary(UpdateCommentaryDto CommentaryForUpdate);
 
         #endregion
-       
+        #region Users
+        Task<User> GetUserById(int id);
+
+        #endregion
+        #region Product
+        Task<Product> GetProductById(int id);
+        #endregion
         #region CommonDirection
         Task<CommonDirection> GetCommonDirectionById(int id);
         Task<int> UpdateCommonDirection(CommonDirectionDto commonDirectionForUpdate);
@@ -113,10 +126,12 @@ namespace SupervisorMobility.API.DataAccess.Services
         Task<List<CommonDirection>> GetAllCommonDirectionInactives();
         #endregion
         #region Analysis Bkup
+        Task<List<AnalysisBkup>> AddRangeAnalysisBkup(List<AnalysisBkup> analysisBkupsToAdd);
         Task<AnalysisBkup> GetAnalysisBkupId(int id);
         Task<int> UpdateAnalysisBkup(AnalysisBkupForUpdateDto analysisBkupForUpdate);
         #endregion
         #region Section
+        Task<List<Section>> AddRangeSections(List<Section> SectionsToAdd);
         Task<Section> GetSectionById(int id);
         Task<int> UpdateSection(SectionForUpdateDto sectionForUpdate);
 
@@ -146,7 +161,16 @@ namespace SupervisorMobility.API.DataAccess.Services
         Task<AsyncVoidMethodBuilder> RemoveAllTurnsFromSOSCombination(SOSCombination Master);
         Task<AsyncVoidMethodBuilder> RemoveAllTurnsFromSOSDistribution(SOSDistribution Master);
         #endregion
-        //Analysis
+       
+
+        #region HistoryHubCollection
+        Task<int> CreateHistorySOScollection(SOSHubHistory SOS_EntityToCreate);
+        Task<IEnumerable<SOSHubHistory>> GetAllHistorySOSHub(int HubId, bool includeAnalysesBkup = false, bool includeSections = false, bool includeImages = false, bool includeVideos = false, bool includeCommentaries = false, bool includeTools = false, bool includeEquipments = false, bool includeMaterials = false, bool includeInformation = false, bool includePeople = false, bool includeDocuments = false);
+        Task<AsyncVoidMethodBuilder> AddHistoryToSOSCollection(SOSHub Master, SOSHubHistory Slave);
+
+        #endregion
+
+        //SOS Analysis
         #region SOSAnalysis
         Task<int> CreateSOSAnalysis(SOSAnalysis SOS_AnalysisToCreate);
         Task<SOSAnalysis> GetSOSAnalysis(int SOSAnalysisId, bool includeImages = false, bool includeNotes = false, bool includeLogbooks = false, bool includeSpecialCases = false, bool includeSOS = false, bool includeImagesSOS = false);
@@ -176,7 +200,7 @@ namespace SupervisorMobility.API.DataAccess.Services
         Task<int> CreateSOSAnalysisLogbook(SOSAnalysisLogbook LogBook_ToCreate);
         Task<int> UpdateAnalysisLogbook(SOSAnalysisLogbookForUpdateDto analysisForUpdate);
         #endregion
-        //Sequence
+        //SOS Sequence
         #region SOSSequence
         Task<int> CreateSOSSequence(SOSSequence SOS_SequenceToCreate);
         Task<SOSSequence> GetSOSSequence(int SOSSequenceId, bool includeImages = false, bool includeNotes = false, bool includeLogbooks = false, bool includeSpecialCases = false, bool includeSOS = false, bool includeImagesSOS = false);
@@ -204,11 +228,12 @@ namespace SupervisorMobility.API.DataAccess.Services
         #region SOSSequenceLogbook
         Task<SOSSequenceLogbook> GetSOSSequenceLogbookById(int id);
         Task<int> CreateSOSSequenceLogbook(SOSSequenceLogbook LogBook_ToCreate);
+        Task<int> UpdateSequenceLogbook(SOSSequenceLogbookForUpdateDto SequenceForUpdate);
         #endregion
-        //Distribution
+        //SOS Distribution
         #region SOSDistribution
         Task<int> CreateSOSDistribution(SOSDistribution SOS_DistributionToCreate);
-        Task<SOSDistribution> GetSOSDistribution(int SOSDistributionId, bool includeImages = false, bool includeNotes = false, bool includeLogbooks = false, bool includeSOS = false, bool includeImagesSOS = false);
+        Task<SOSDistribution> GetSOSDistribution(int SOSDistributionId, bool includeImages = false, bool includeNotes = false, bool includeLogbooks = false, bool includeSOS = false, bool includeImagesSOS = false, bool includeTurns = false, bool includeTimes = false);
         Task<IEnumerable<SOSDistribution>> GetAllSOSDistribution(bool includeImages = false, bool includeNotes = false, bool includeLogbooks = false, bool includeSOS = false);
 
         Task<int> UpdateSOSDistribution(SOSDistributionForUpdateDto DistributionUpdate, SOSDistribution DistributionEntity);
@@ -223,19 +248,27 @@ namespace SupervisorMobility.API.DataAccess.Services
         #endregion
         #region Add To Sos Distribution
         Task<AsyncVoidMethodBuilder> AddSOSDistributionLogbookToSOSDistribution(SOSDistribution Master, SOSDistributionLogbook Slave);
+        Task<AsyncVoidMethodBuilder> AddSOSDistributionAdditionalTimeToSOSDistribution(SOSDistribution Master, SOSDistributionAdditionalTime Slave);
         Task<AsyncVoidMethodBuilder> AddNoteToSOSDistribution(SOSDistribution Master, Commentary Slave);
 
         #endregion
         #region Remove from SosDistribution
         Task<AsyncVoidMethodBuilder> SOSDataRemoveAllSOSDistributionLogbookFromSOSDistribution(SOSDistribution Master);
         Task<AsyncVoidMethodBuilder> SOSDataRemoveAllNotesFromSOSDistribution(SOSDistribution Master);
+        Task<AsyncVoidMethodBuilder> SOSDataRemoveAllSOSDistributionAdditionalTimeFromSOSDistribution(SOSDistribution Master);
         #endregion
         #region SOSDistributionLogbook
         Task<SOSDistributionLogbook> GetSOSDistributionLogbookById(int id);
+        Task<int> UpdateDistributionLogbook(SOSDistributionLogbookForUpdateDto DistributionForUpdate);
+
         Task<int> CreateSOSDistributionLogbook(SOSDistributionLogbook LogBook_ToCreate);
         #endregion
+        #region SOS Distribution Additional time
+        Task<SOSDistributionAdditionalTime> GetSOSDistributionAdditionalTimeId(int id);
+        Task<int> UpdateSOSDistributionAdditionalTime(SOSDistributionAdditionalTimeForUpdateDto SOSDistributionAdditionalTimeForUpdate);
+        #endregion
 
-        //Combination
+        //SOS Combination
         #region SOSCombination
         Task<int> CreateSOSCombination(SOSCombination SOS_CombinationToCreate);
         Task<SOSCombination> GetSOSCombination(int SOSCombinationId, bool includeImages = false, bool includeNotes = false, bool includeLogbooks = false, bool includeSOS = false, bool includeImagesSOS = false);
@@ -262,7 +295,38 @@ namespace SupervisorMobility.API.DataAccess.Services
         #endregion
         #region SOSCombinationLogbook
         Task<SOSCombinationLogbook> GetSOSCombinationLogbookById(int id);
+        Task<int> UpdateCombinationLogbook(SOSCombinationLogbookForUpdateDto CombinationForUpdate);
         Task<int> CreateSOSCombinationLogbook(SOSCombinationLogbook LogBook_ToCreate);
+        #endregion
+
+        //SOS Flow
+        #region SOSFlow
+        Task<int> CreateSOSFlow(SOSFlow SOS_FlowToCreate);
+        Task<SOSFlow> GetSOSFlow(int SOSFlowId, bool includeImages = false, bool includeNotes = false, bool includeLogbooks = false, bool includeSOS = false, bool includeImagesSOS = false);
+        Task<IEnumerable<SOSFlow>> GetAllSOSFlow(bool includeImages = false, bool includeNotes = false, bool includeLogbooks = false, bool includeSOS = false);
+
+        Task<int> UpdateSOSFlow(SOSFlowForUpdateDto FlowUpdate, SOSFlow FlowEntity);
+        Task<int> RemoveSOSFlow(int SOS_Flow_id);
+
+
+        #endregion
+        #region Add Range SOS Flow
+        Task<List<SOSFlowLogbook>> AddRangeSOSFlowLogbook(List<SOSFlowLogbook> SOSFlowLogbooksToAdd);
+        #endregion
+        #region Add To Sos Flow
+        Task<AsyncVoidMethodBuilder> AddSOSFlowLogbookToSOSFlow(SOSFlow Master, SOSFlowLogbook Slave);
+        //Task AddIlustrationToSOSFlow(int SOS_Flow_id, FileUpload evidence);
+
+        #endregion
+        #region Remove from SosFlow
+        Task<AsyncVoidMethodBuilder> SOSDataRemoveAllSOSFlowLogbookFromSOSFlow(SOSFlow Master);
+        //Task<int> RemoveIlustrationFromSOSFlow(int SOS_Flow_id, int ImageFile_id);
+
+        #endregion
+        #region SOSFlowLogbook
+        Task<SOSFlowLogbook> GetSOSFlowLogbookById(int id);
+        Task<int> UpdateFlowLogbook(SOSFlowLogbookForUpdateDto flowForUpdate);
+        Task<int> CreateSOSFlowLogbook(SOSFlowLogbook LogBook_ToCreate);
         #endregion
 
         #region commonOperations

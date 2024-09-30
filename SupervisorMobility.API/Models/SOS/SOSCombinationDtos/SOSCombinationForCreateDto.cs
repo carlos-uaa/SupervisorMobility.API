@@ -7,6 +7,7 @@ using SupervisorMobility.API.DataAccess.Entities.SOS;
 using SupervisorMobility.API.Models.SOS.SOSHubDtos;
 using SupervisorMobility.API.Models.Users;
 using SupervisorMobility.API.DataAccess.Entities;
+using SupervisorMobility.API.Models.SOS.SOSCombinationOperationSequenceDtos;
 
 namespace SupervisorMobility.API.Models.SOS.SOSCombinationDtos
 {
@@ -17,17 +18,14 @@ namespace SupervisorMobility.API.Models.SOS.SOSCombinationDtos
         public string? InternalControlNumber { get; set; }
         public string? OperationName { get; set; }
         public string? ProcessName { get; set; }
-        public int? ReviewerId { get; set; }
-        public UsersWithoutNavigationWithoutPeopleDetails? Reviewer { get; set; }
-        public FileUploadGeneralDto? ReviewerSignatureImage { get; set; } = new();
+        public string? ProductionPlanAndObservations { get; set; }
+
 
         public int? ReviewerHSId { get; set; }
         public UsersWithoutNavigationWithoutPeopleDetails? ReviewerHS { get; set; }
         public FileUploadGeneralDto? ReviewerHSSignatureImage { get; set; } = new();
 
-        public int? ApproverId { get; set; }
-        public UsersWithoutNavigationWithoutPeopleDetails? Approver { get; set; }
-        public FileUploadGeneralDto? ApproverSignatureImage { get; set; } = new();
+      
 
         public ICollection<TurnForCreateDto>? Turns { get; set; }
 
@@ -39,7 +37,10 @@ namespace SupervisorMobility.API.Models.SOS.SOSCombinationDtos
         public ICollection<SOSCombinationLogbookForCreateDto>? CombinationLogbooks { get; set; } = new List<SOSCombinationLogbookForCreateDto>();
         public ICollection<FileUploadForCreationDto>? Illustrations { get; set; } = new List<FileUploadForCreationDto>();
 
+        public DateTime? CreatedAt { get; set; }
+        public int? SOSCombinationOperationSequenceId { get; set; }
+        public ICollection<SOSCombinationOperationSequenceForCreateDto>? SOSCombinationOperationSequence { get; set; }
+
         public int SOSHubId { get; set; }
-        public SOSHubDto? SOSHub { get; set; }
     }
 }

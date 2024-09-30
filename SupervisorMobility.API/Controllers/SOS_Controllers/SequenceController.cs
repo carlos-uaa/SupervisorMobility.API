@@ -236,8 +236,8 @@ namespace SupervisorMobility.API.Controllers.SOS_Controllers
 
             foreach (var logbook in sosUpdateEntity.SequenceLogbooks)
             {
+                var SequenceUpdate = await _ProcessRepository.UpdateSequenceLogbook(logbook);
                 SOSSequenceLogbook SequenceBkaux = await _ProcessRepository.GetSOSSequenceLogbookById(logbook.SOSSequenceLogbookId);
-                _mapper.Map(logbook, SequenceBkaux);
                 Bkup_SequenceLogbook.Add(SequenceBkaux);
             }
 
@@ -297,15 +297,13 @@ namespace SupervisorMobility.API.Controllers.SOS_Controllers
 
         }//end Update 
 
-        [HttpDelete("{SOSAnaysisId}")]
-        public async Task<ActionResult<int>> RemoveSOSHub(int SOSAnaysisId)
+        [HttpDelete("{SOSSequenceId}")]
+        public async Task<ActionResult<int>> RemoveSOSHub(int SOSSequenceId)
         {
-            var result = await _ProcessRepository.RemoveSOSSequence(SOSAnaysisId);
-
-            var SOSHub = await _ProcessRepository.GetSOSHub(SOSAnaysisId);
+            var result = await _ProcessRepository.RemoveSOSSequence(SOSSequenceId);
 
             if (result > 0)
-                return Ok(SOSHub);
+                return Ok();
             else
                 return BadRequest("something wrong");
         }

@@ -15,18 +15,13 @@ namespace SupervisorMobility.API.Models.SOS.SOSFlowDtos
         public string? OperationName { get; set; }
         public string? ProcessName { get; set; }
 
-        public int? ReviewerId { get; set; }
-        public UsersWithoutNavigationWithoutPeopleDetails? Reviewer { get; set; }
-        public FileUploadGeneralDto? ReviewerSignatureImage { get; set; } = new();  
-        
+    
         public int? ReviewerHSId { get; set; }
         public UsersWithoutNavigationWithoutPeopleDetails? ReviewerHS { get; set; }
         public FileUploadGeneralDto? ReviewerHSSignatureImage { get; set; } = new();
 
-        public int? ApproverId { get; set; }
-        public UsersWithoutNavigationWithoutPeopleDetails? Approver { get; set; }
-        public FileUploadGeneralDto? ApproverSignatureImage { get; set; } = new();
-
+     
+        public DateTime? CreatedAt { get; set; }
         public string? TargetTime { get; set; }
 
         public ICollection<SOSFlowLogbookDto>? FlowLogbooks { get; set; } = new List<SOSFlowLogbookDto>();

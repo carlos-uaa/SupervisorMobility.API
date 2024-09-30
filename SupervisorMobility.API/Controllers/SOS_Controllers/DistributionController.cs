@@ -5,6 +5,7 @@ using SupervisorMobility.API.DataAccess.Entities.SOS;
 using SupervisorMobility.API.DataAccess.Services;
 using SupervisorMobility.API.Models.CommentaryDtos;
 using SupervisorMobility.API.Models.FileUploadDto;
+using SupervisorMobility.API.Models.SOS.SOSDistributionAdditionalTimeDtos;
 using SupervisorMobility.API.Models.SOS.SOSDistributionDtos;
 using SupervisorMobility.API.Models.SOS.SOSDistributionLogbookDtos;
 using SupervisorMobility.API.Models.SOS.SOSTimeDtos;
@@ -44,6 +45,19 @@ namespace SupervisorMobility.API.Controllers.SOS_Controllers
 
                 sOSDistributionToCreate.SOSHubId = SOSHubCollection_Id;
 
+                if (sOSDistributionToCreate.SOSDistributionAdditionalTime == null)
+                {
+                    sOSDistributionToCreate.SOSDistributionAdditionalTime = new SOSDistributionAdditionalTime
+                    {
+                        TakeQuantity = "§§§§",
+                        TakeTime = "§§§§§",
+                        LeaveQuantity = "§§§§",
+                        LeaveTime = "§§§§§",
+                        StepsQuantity = "§§§§",
+                        StepsTime = "§§§§§",
+                        IsActive = true
+                    };
+                }
 
                 SOSDistribution DistributionToCreate = _mapper.Map<SOSDistribution>(sOSDistributionToCreate);
 
@@ -82,10 +96,10 @@ namespace SupervisorMobility.API.Controllers.SOS_Controllers
         }
 
         [HttpGet("{id}", Name = "GetSOSDistribution")]
-        public async Task<ActionResult<SOSDistributionDto>> GetSOSDistribution(int id, bool includeImages = false, bool includeNotes = false, bool includeLogbooks = false, bool includeSOS = false, bool includeImagesSOS = false)
+        public async Task<ActionResult<SOSDistributionDto>> GetSOSDistribution(int id, bool includeImages = false, bool includeNotes = false, bool includeLogbooks = false, bool includeSOS = false, bool includeImagesSOS = false, bool includeTurns = false, bool includeTimes = false)
         {
 
-            var SOSDistribution = await _ProcessRepository.GetSOSDistribution(id, includeImages, includeNotes, includeLogbooks, includeSOS, includeImagesSOS);
+            var SOSDistribution = await _ProcessRepository.GetSOSDistribution(id, includeImages, includeNotes, includeLogbooks, includeSOS, includeImagesSOS, includeTurns, includeTimes);
             if (SOSDistribution == null)
             {
                 return NotFound("SOSDistribution not found!");
@@ -116,13 +130,14 @@ namespace SupervisorMobility.API.Controllers.SOS_Controllers
             List<Turn> Bkup_Turn = new List<Turn>();
             List<SOSDistributionLogbook> Bkup_DistributionLogbook = new List<SOSDistributionLogbook>();
             List<SOSTime> Bkup_Times = new List<SOSTime>();
+            SOSDistributionAdditionalTime additionalTime = new SOSDistributionAdditionalTime();
 
             // Filtrar nuevos Comentarios
             List<UpdateCommentaryDto> filteredCommentaryList = sosUpdateEntity.Notes.Where(t => t.CommentaryId <= 0).ToList();
             // Filtrar nuevos DistributionLogbooks
             List<SOSDistributionLogbookForUpdateDto> filteredDistributionLogbooksList = sosUpdateEntity.DistributionLogbooks.Where(t => t.SOSDistributionLogbookId <= 0).ToList();
             // Filtrar nuevos Tiempos
-            List<SOSTimeForUpdateDto> filteredTimesList = sosUpdateEntity.AplicationModelsTimes.Where(t => t.SOSTimeId <= 0).ToList();
+            List<SOSTimeForUpdateDto> filteredTimesList = sosUpdateEntity.Times.Where(t => t.SOSTimeId <= 0).ToList();
              // Filtrar nuevos Turnos
             List<TurnForUpdateDto> filteredTurnList = sosUpdateEntity.Turns.Where(t => t.TurnId <= 0).ToList();
 
@@ -186,7 +201,7 @@ namespace SupervisorMobility.API.Controllers.SOS_Controllers
             //aqui añadir Tiempos
             if (filteredTimesList.Any())
             {
-                sosUpdateEntity.AplicationModelsTimes.RemoveAll(t => t.SOSTimeId == null || t.SOSTimeId <= 0);
+                sosUpdateEntity.Times.RemoveAll(t => t.SOSTimeId == null || t.SOSTimeId <= 0);
 
                 // Mapear nuevas tiempos
                 List<SOSTime> newSOSTime = _mapper.Map<List<SOSTime>>(filteredTimesList);
@@ -239,7 +254,7 @@ namespace SupervisorMobility.API.Controllers.SOS_Controllers
             }
 
 
-            SOSDistribution _sosDistribution = await _ProcessRepository.GetSOSDistribution(sosDistribution_Id, true, true, true, true);
+            SOSDistribution _sosDistribution = await _ProcessRepository.GetSOSDistribution(sosDistribution_Id, true, true, true, true, includeTurns:true, includeTimes:true);
 
             ////Aqui va el historico de ser necesario en  un futuro 
 
@@ -265,14 +280,17 @@ namespace SupervisorMobility.API.Controllers.SOS_Controllers
                 Bkup_Notes.Add(CommentaryToAdd);
             }
 
+            var AdditionalTimeUpdate = await _ProcessRepository.UpdateSOSDistributionAdditionalTime(sosUpdateEntity.SOSDistributionAdditionalTime);
+            additionalTime = await _ProcessRepository.GetSOSDistributionAdditionalTimeId(sosUpdateEntity.SOSDistributionAdditionalTime.SOSDistributionAdditionalTimeId);
+
             foreach (var logbook in sosUpdateEntity.DistributionLogbooks)
             {
-                SOSDistributionLogbook DistributionBkaux = await _ProcessRepository.GetSOSDistributionLogbookById(logbook.SOSDistributionLogbookId);
-                _mapper.Map(logbook, DistributionBkaux);
-                Bkup_DistributionLogbook.Add(DistributionBkaux);
+                var distributionUpdate = await _ProcessRepository.UpdateDistributionLogbook(logbook);
+                SOSDistributionLogbook distributionBkaux = await _ProcessRepository.GetSOSDistributionLogbookById(logbook.SOSDistributionLogbookId);
+                Bkup_DistributionLogbook.Add(distributionBkaux);
             }
 
-            foreach (var time in sosUpdateEntity.AplicationModelsTimes)
+            foreach (var time in sosUpdateEntity.Times)
             {
                 var timeUpdate = await _ProcessRepository.UpdateTime(time);
                 SOSTime timeBkaux = await _ProcessRepository.GetSOSTimeById(time.SOSTimeId);
@@ -290,12 +308,16 @@ namespace SupervisorMobility.API.Controllers.SOS_Controllers
             sosUpdateEntity.Notes = null;
             sosUpdateEntity.Turns = null;
             sosUpdateEntity.DistributionLogbooks = null;
-            sosUpdateEntity.AplicationModelsTimes= null;
+            sosUpdateEntity.Times= null;
+            sosUpdateEntity.SOSDistributionAdditionalTime = null;
+
 
             await _ProcessRepository.RemoveAllTimesFromSOSDistribution(_sosDistribution);
             await _ProcessRepository.RemoveAllTurnsFromSOSDistribution(_sosDistribution);
             await _ProcessRepository.SOSDataRemoveAllNotesFromSOSDistribution(_sosDistribution);
             await _ProcessRepository.SOSDataRemoveAllSOSDistributionLogbookFromSOSDistribution(_sosDistribution);
+            await _ProcessRepository.SOSDataRemoveAllSOSDistributionAdditionalTimeFromSOSDistribution(_sosDistribution);
+
 
             var result = await _ProcessRepository.UpdateSOSDistribution(sosUpdateEntity, _sosDistribution);
 
@@ -334,6 +356,7 @@ namespace SupervisorMobility.API.Controllers.SOS_Controllers
                     await _ProcessRepository.AddTurnToSOSDistribution(_sosDistribution, turn);
                 }
             }
+            await _ProcessRepository.AddSOSDistributionAdditionalTimeToSOSDistribution(_sosDistribution, additionalTime);
 
             if (result != null)
             {
@@ -344,15 +367,13 @@ namespace SupervisorMobility.API.Controllers.SOS_Controllers
 
         }//end Update 
 
-        [HttpDelete("{SOSAnaysisId}")]
-        public async Task<ActionResult<int>> RemoveSOSHub(int SOSAnaysisId)
+        [HttpDelete("{SOSDistributionId}")]
+        public async Task<ActionResult<int>> RemoveSOSHub(int SOSDistributionId)
         {
-            var result = await _ProcessRepository.RemoveSOSDistribution(SOSAnaysisId);
-
-            var SOSHub = await _ProcessRepository.GetSOSHub(SOSAnaysisId);
+            var result = await _ProcessRepository.RemoveSOSDistribution(SOSDistributionId);
 
             if (result > 0)
-                return Ok(SOSHub);
+                return Ok();
             else
                 return BadRequest("something wrong");
         }

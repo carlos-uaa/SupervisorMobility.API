@@ -2,48 +2,55 @@
 using SupervisorMobility.API.DataAccess.Entities.SOS;
 using SupervisorMobility.API.Models.CommentaryDtos;
 using SupervisorMobility.API.Models.DistributionDtos;
+using SupervisorMobility.API.Models.ProductDtos;
 using SupervisorMobility.API.Models.SOS.EquipmentDtos;
 using SupervisorMobility.API.Models.SOS.MaterialDtos;
 using SupervisorMobility.API.Models.SOS.SOSHubDtos.AnalysisBkupDtos;
 using SupervisorMobility.API.Models.SOS.SOSHubDtos.SectionDtos;
 using SupervisorMobility.API.Models.SOS.ToolDtos;
 using SupervisorMobility.API.Models.SOS.ToolsUsedDtos;
+using SupervisorMobility.API.Models.Users;
 
 namespace SupervisorMobility.API.Models.SOS.SOSHubDtos
 {
     public class SOSHubForUpdateDto
     {
         public int SOSHubId { get; set; }
-        public string Folio { get; set; }
+        public string? Folio { get; set; }
         public List<AnalysisBkupForUpdateDto>? AnalysesBkup { get; set; } = new List<AnalysisBkupForUpdateDto>();
         public List<SectionForUpdateDto>? Sections { get; set; } = new List<SectionForUpdateDto>();
-        public string ProcessSheet { get; set; }
+        public string? ProcessSheet { get; set; }
         public List<UpdateCommentaryDto>? ProcessSheetCommentary { get; set; } = new List<UpdateCommentaryDto>();
         public List<CommonDirectionDto>? CommonDirection { get; set; } = new List<CommonDirectionDto>();
 
-        public int? AppliedModelId { get; set; }
+        public ICollection<ProductDto>? AppliedModels { get; set; } = new List<ProductDto>();
 
 
-        public string RevisedItems { get; set; }
 
         public string? TrainingTime { get; set; }
+        public string? RevisedItems { get; set; }
+        public string? OtherInformation { get; set; }
+
+
         public ICollection<EquipmentForUpdateDto>? SafetyEquipment { get; set; } = new List<EquipmentForUpdateDto>();
         public List<ToolUsedForUpdateDto>? ToolsUsed { get; set; } = new List<ToolUsedForUpdateDto>();
         public List<MaterialsUsedForUpdateDto>? MaterialsUsed { get; set; } = new List<MaterialsUsedForUpdateDto>();
-        public string OtherInformation { get; set; }
 
         public int? PlantId { get; set; }
         public int? AreaId { get; set; }
+        public int? DistributionId { get; set; }
+
+
         public int? DepartmentId { get; set; }
         public int? StationId { get; set; }
 
-        public int? OwnerId { get; set; }
 
         public DateTime? CreatedDate { get; set; }
-
-        public int? EditorId { get; set; }
-
         public DateTime? ModifiedDate { get; set; }
+ 
+        public List<UsersWithoutPeopleWithNavigation>? ApproverOwners { get; set; }
+        public List<UsersWithoutPeopleWithNavigation>? ReviewerEditors { get; set; }
+
 
         public string Plan { get; set; }
         public string SourcePlan { get; set; }

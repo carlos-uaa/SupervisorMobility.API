@@ -16,19 +16,12 @@ namespace SupervisorMobility.API.Models.SOS.SOSDistributionDtos
         public string? InternalControlNumber { get; set; }
         public string? OperationName { get; set; }
         public string? ProcessName { get; set; }
-        public int? ReviewerId { get; set; }
-        public UsersWithoutNavigationWithoutPeopleDetails? Reviewer { get; set; }
-        public FileUploadGeneralDto? ReviewerSignatureImage { get; set; } = new();
-
-        public int? ApproverId { get; set; }
-        public UsersWithoutNavigationWithoutPeopleDetails? Approver { get; set; }
-        public FileUploadGeneralDto? ApproverSignatureImage { get; set; } = new();
 
         public string? TackTime { get; set; }
 
         public ICollection<TurnDto>? Turns { get; set; }
         public string? AplicationModels { get; set; } = "§§§§";
-        public ICollection<SOSTimeDto>? AplicationModelsTimes { get; set; }
+        public ICollection<SOSTimeDto>? Times { get; set; }
 
         public ICollection<SOSDistributionLogbookDto>? DistributionLogbooks { get; set; } = new List<SOSDistributionLogbookDto>();
         public ICollection<FileUploadGeneralDto>? Illustrations { get; set; } = new List<FileUploadGeneralDto>();
@@ -39,6 +32,9 @@ namespace SupervisorMobility.API.Models.SOS.SOSDistributionDtos
         public string? ControlNumber { get; set; }
         public DateTime? CreatedAt { get; set; }
         public DateTime? ApplicationMonth { get; set; }
+
+        public int? SOSDistributionAdditionalTimeId { get; set; }
+        public SOSDistributionAdditionalTime? SOSDistributionAdditionalTime { get; set; }
 
         public bool? IsActive { get; set; }
 

@@ -1,4 +1,5 @@
-﻿using System.ComponentModel.DataAnnotations;
+﻿using SupervisorMobility.API.DataAccess.Entities.SOS;
+using System.ComponentModel.DataAnnotations;
 using System.ComponentModel.DataAnnotations.Schema;
 
 namespace SupervisorMobility.API.DataAccess.Entities
@@ -17,6 +18,9 @@ namespace SupervisorMobility.API.DataAccess.Entities
 
         public virtual ICollection<Distribution> Distributions { get; set; }
             = new List<Distribution>();
+        
+        public virtual ICollection<SOSHub> SOSHubs { get; set; }
+            = new List<SOSHub>();
 
         public Product(string code, string description)
         {

@@ -8,8 +8,8 @@ using SupervisorMobility.API.Models.FileUploadDto;
 using SupervisorMobility.API.Models.SOS.SOSAnalysisDtos;
 using SupervisorMobility.API.Models.SOS.SOSCombinationDtos;
 using SupervisorMobility.API.Models.SOS.SOSCombinationLogbookDtos;
-using SupervisorMobility.API.Models.SOS.SOSDistributionDtos;
-using SupervisorMobility.API.Models.SOS.SOSDistributionLogbookDtos;
+using SupervisorMobility.API.Models.SOS.SOSFlowDtos;
+using SupervisorMobility.API.Models.SOS.SOSFlowLogbookDtos;
 using SupervisorMobility.API.Models.SOS.SOSTimeDtos;
 using SupervisorMobility.API.Models.SOS.TurnDtos;
 using System.Diagnostics;
@@ -39,11 +39,17 @@ namespace SupervisorMobility.API.Controllers.SOS_Controllers
             if (sOSCombinationToCreate.SOSCombinationId == 0)
             {
                 sOSCombinationToCreate.IsActive = true;
+                sOSCombinationToCreate.CreatedAt = DateTime.Now;
 
                 sOSCombinationToCreate.SOSHubId = SOSHubCollection_Id;
 
 
                 SOSCombination CombinationToCreate = _mapper.Map<SOSCombination>(sOSCombinationToCreate);
+
+                if (CombinationToCreate.ReviewerHSId <= 0)
+                {
+                    CombinationToCreate.ReviewerHSId = null;
+                }
 
                 var createdResult = await _ProcessRepository.CreateSOSCombination(CombinationToCreate);
                 if (createdResult != null)
@@ -55,6 +61,14 @@ namespace SupervisorMobility.API.Controllers.SOS_Controllers
             {
                 //only add revision
                 SOSCombination _sosCombination = await _ProcessRepository.GetSOSCombination(sOSCombinationToCreate.SOSCombinationId, true, true, true, true );
+
+                if (sOSCombinationToCreate.ReviewerHSId <= 0)
+                {
+                    sOSCombinationToCreate.ReviewerHSId = null;
+                }else if(sOSCombinationToCreate.ReviewerHSId != _sosCombination.ReviewerHSId) {
+                    //update
+                }
+
 
                 SOSCombinationLogbook _logbookToCreate = _mapper.Map<SOSCombinationLogbook>(sOSCombinationToCreate.CombinationLogbooks?.Last());
                 _logbookToCreate.SOSCombinationId = _sosCombination.SOSCombinationId;
@@ -194,8 +208,8 @@ namespace SupervisorMobility.API.Controllers.SOS_Controllers
       
             foreach (var logbook in sosUpdateEntity.CombinationLogbooks)
             {
+                var CombinationUpdate = await _ProcessRepository.UpdateCombinationLogbook(logbook);
                 SOSCombinationLogbook CombinationBkaux = await _ProcessRepository.GetSOSCombinationLogbookById(logbook.SOSCombinationLogbookId);
-                _mapper.Map(logbook, CombinationBkaux);
                 Bkup_CombinationLogbook.Add(CombinationBkaux);
             }
 
@@ -246,15 +260,13 @@ namespace SupervisorMobility.API.Controllers.SOS_Controllers
 
 
 
-        [HttpDelete("{SOSAnaysisId}")]
-        public async Task<ActionResult<int>> RemoveSOSHub(int SOSAnaysisId)
+        [HttpDelete("{SOSCombinationId}")]
+        public async Task<ActionResult<int>> RemoveSOSHub(int SOSCombinationId)
         {
-            var result = await _ProcessRepository.RemoveSOSDistribution(SOSAnaysisId);
-
-            var SOSHub = await _ProcessRepository.GetSOSHub(SOSAnaysisId);
+            var result = await _ProcessRepository.RemoveSOSCombination(SOSCombinationId);
 
             if (result > 0)
-                return Ok(SOSHub);
+                return Ok();
             else
                 return BadRequest("something wrong");
         }
