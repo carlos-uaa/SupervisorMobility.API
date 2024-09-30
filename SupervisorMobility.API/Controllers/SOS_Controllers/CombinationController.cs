@@ -39,6 +39,7 @@ namespace SupervisorMobility.API.Controllers.SOS_Controllers
             if (sOSCombinationToCreate.SOSCombinationId == 0)
             {
                 sOSCombinationToCreate.IsActive = true;
+                sOSCombinationToCreate.CreatedAt = DateTime.Now;
 
                 sOSCombinationToCreate.SOSHubId = SOSHubCollection_Id;
 

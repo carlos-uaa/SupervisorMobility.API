@@ -7,6 +7,7 @@ using SupervisorMobility.API.DataAccess.Entities.SOS;
 using SupervisorMobility.API.Models.SOS.SOSHubDtos;
 using SupervisorMobility.API.Models.Users;
 using SupervisorMobility.API.DataAccess.Entities;
+using SupervisorMobility.API.Models.SOS.SOSCombinationOperationSequenceDtos;
 
 namespace SupervisorMobility.API.Models.SOS.SOSCombinationDtos
 {
@@ -17,6 +18,7 @@ namespace SupervisorMobility.API.Models.SOS.SOSCombinationDtos
         public string? InternalControlNumber { get; set; }
         public string? OperationName { get; set; }
         public string? ProcessName { get; set; }
+        public string? ProductionPlanAndObservations { get; set; }
 
 
         public int? ReviewerHSId { get; set; }
@@ -34,6 +36,10 @@ namespace SupervisorMobility.API.Models.SOS.SOSCombinationDtos
         public string? ControlNumber { get; set; }
         public ICollection<SOSCombinationLogbookForCreateDto>? CombinationLogbooks { get; set; } = new List<SOSCombinationLogbookForCreateDto>();
         public ICollection<FileUploadForCreationDto>? Illustrations { get; set; } = new List<FileUploadForCreationDto>();
+
+        public DateTime? CreatedAt { get; set; }
+        public int? SOSCombinationOperationSequenceId { get; set; }
+        public ICollection<SOSCombinationOperationSequenceForCreateDto>? SOSCombinationOperationSequence { get; set; }
 
         public int SOSHubId { get; set; }
     }
