@@ -18,7 +18,8 @@ namespace SupervisorMobility.API.Models.SOS.SOSCombinationDtos
         public string? InternalControlNumber { get; set; }
         public string? OperationName { get; set; }
         public string? ProcessName { get; set; }
-   
+        public string? ProductionPlanAndObservations { get; set; }
+
 
         public int? ReviewerHSId { get; set; }
         public UsersWithoutNavigationWithoutPeopleDetails? ReviewerHS { get; set; }
