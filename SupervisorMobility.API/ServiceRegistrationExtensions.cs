@@ -13,6 +13,7 @@ using Quartz.Spi;
 using SupervisorMobility.API.Models.NotificationDtos;
 using Microsoft.Extensions.DependencyInjection;
 using AutoMapper;
+using System.Runtime.InteropServices;
 
 
 namespace SupervisorMobility.API
@@ -29,7 +30,7 @@ namespace SupervisorMobility.API
             services.AddScoped<IStampingRepository, StampingRepository>();
             // HOE/SOS Analysis_Process
             services.AddScoped<ISOS_ProcessRepository, SOS_ProcessRepository>();
-         
+
             //services.AddSingleton<ISOSAnalysis_ProcessRepository, SOSAnalysis_ProcessRepository>(sp =>
             //{
             //    var scopeFactory = sp.GetRequiredService<ContextFactory>();
@@ -71,12 +72,21 @@ namespace SupervisorMobility.API
             this IServiceCollection services, IConfiguration configuration, IWebHostBuilder hostBuilder)
         {
             // add the DbContext
-            services.AddDbContext<SupervisorMobilityContext>(options => options.UseSqlServer(configuration.GetConnectionString("SupervisorMobilityDBConnectionString")), ServiceLifetime.Transient);
 
+            if (RuntimeInformation.IsOSPlatform(OSPlatform.Windows))
+            {
+                // Usa la cadena de conexión de Windows
+                services.AddDbContext<SupervisorMobilityContext>(options => options.UseSqlServer(configuration.GetConnectionString("SupervisorMobilityDBConnectionString")), ServiceLifetime.Transient);
+            }
+            else
+            {
+                // Usa la cadena de conexión de Linux
+                services.AddDbContext<SupervisorMobilityContext>(options => options.UseSqlServer(configuration.GetConnectionString("SupervisorMobilityDBConnectionLinuxString")), ServiceLifetime.Transient);
+            }
             //Add automapper
             services.AddAutoMapper(AppDomain.CurrentDomain.GetAssemblies());
 
-      
+
 
             //custos HTTP client service
             services.AddScoped<CustomHttpClientService>();
@@ -87,7 +97,7 @@ namespace SupervisorMobility.API
             services.AddSingleton<BackgroundProcessingService>();
 
             //Lanel Attendance Service
-            services.AddHostedService<LanelAttendanceService>();
+            // services.AddHostedService<LanelAttendanceService>();
 
             var emailConfig = configuration
                 .GetSection("EmailConfiguration")
@@ -102,21 +112,23 @@ namespace SupervisorMobility.API
                     options.SerializerSettings.ReferenceLoopHandling = ReferenceLoopHandling.Ignore;
                 });
 
-            // Configurar Quartz.NET
-            services.AddQuartz(q =>
+            if (RuntimeInformation.IsOSPlatform(OSPlatform.Windows))
             {
-                q.UseMicrosoftDependencyInjectionJobFactory();
+                // Configurar Quartz.NET
+                services.AddQuartz(q =>
+                {
+                    q.UseMicrosoftDependencyInjectionJobFactory();
 
-                var jobKey = new JobKey("ActiveLupItemsJob");
-                q.AddJob<ActiveLupItemsJob>(opts => opts.WithIdentity(jobKey));
-                q.AddTrigger(opts => opts
-                    .ForJob(jobKey)
-                    .WithIdentity("ActiveLupItemsJob-trigger")
-                    .WithCronSchedule("0 0 7 * * ?"));
-            });
+                    var jobKey = new JobKey("ActiveLupItemsJob");
+                    q.AddJob<ActiveLupItemsJob>(opts => opts.WithIdentity(jobKey));
+                    q.AddTrigger(opts => opts
+                        .ForJob(jobKey)
+                        .WithIdentity("ActiveLupItemsJob-trigger")
+                        .WithCronSchedule("0 0 7 * * ?"));
+                });
 
-            services.AddQuartzHostedService(q => q.WaitForJobsToComplete = true);
-
+                services.AddQuartzHostedService(q => q.WaitForJobsToComplete = true);
+            }
 
             //configuracion del tamaño de archivos 
             hostBuilder.ConfigureKestrel(serverOptions =>
@@ -127,7 +139,7 @@ namespace SupervisorMobility.API
             return services;
         }
 
-      
+
     }
 }
 

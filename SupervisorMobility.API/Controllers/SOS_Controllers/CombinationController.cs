@@ -208,8 +208,8 @@ namespace SupervisorMobility.API.Controllers.SOS_Controllers
       
             foreach (var logbook in sosUpdateEntity.CombinationLogbooks)
             {
+                var CombinationUpdate = await _ProcessRepository.UpdateCombinationLogbook(logbook);
                 SOSCombinationLogbook CombinationBkaux = await _ProcessRepository.GetSOSCombinationLogbookById(logbook.SOSCombinationLogbookId);
-                _mapper.Map(logbook, CombinationBkaux);
                 Bkup_CombinationLogbook.Add(CombinationBkaux);
             }
 
@@ -265,10 +265,8 @@ namespace SupervisorMobility.API.Controllers.SOS_Controllers
         {
             var result = await _ProcessRepository.RemoveSOSCombination(SOSCombinationId);
 
-            var SOSHub = await _ProcessRepository.GetSOSCombination(SOSCombinationId);
-
             if (result > 0)
-                return Ok(SOSHub);
+                return Ok();
             else
                 return BadRequest("something wrong");
         }

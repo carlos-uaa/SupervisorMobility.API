@@ -3365,13 +3365,18 @@ namespace SupervisorMobility.API.DataAccess.Services
             return _context.SaveChanges();
         }
 
-        public async Task<SOSDistribution> GetSOSDistribution(int SOSDistributionId, bool includeImages = false, bool includeNotes = false, bool includeLogbooks = false,bool includeSOS = false, bool includeImagesSOS = false, bool includeTurns = false)
+        public async Task<SOSDistribution> GetSOSDistribution(int SOSDistributionId, bool includeImages = false, bool includeNotes = false, bool includeLogbooks = false,bool includeSOS = false, bool includeImagesSOS = false, bool includeTurns = false, bool includeTimes = false)
         {
             var query = _context.SOSDistributions.AsNoTracking().Where(SOS => SOS.SOSDistributionId == SOSDistributionId && SOS.IsActive == true);
 
             if (includeImages)
             {
                 query = query.Include(i => i.Illustrations);
+            }
+
+            if (includeTimes)
+            {
+                query = query.Include(t => t.SOSDistributionAdditionalTime);
             }
 
             if (includeNotes)
