@@ -42,7 +42,7 @@ namespace SupervisorMobility.API.Controllers
         }
 
         /*
-         * Please note that if any elements of the template arechanged you need to update the cells positions in here accordingly
+         * Please note that if any elements of the templates are changed you need to update the cells positions in here accordingly
          */
         [HttpGet("Excel/Analyses/{AnalysisId}")]
         public async Task<IActionResult> AnalysesExcelExport(int AnalysisId)
@@ -296,6 +296,8 @@ namespace SupervisorMobility.API.Controllers
                 rowHeights[currentWorkingIndex] += TotalRowHeight;
                 rowIndexes[currentWorkingIndex] = (rowIndexes[currentWorkingIndex].Item1, rowindex);
 
+                string prevSheetName = "";
+
                 foreach (var worksheet in package.Workbook.Worksheets.Where(ws=>ws.Name.Contains("Analysis")))
                 {
                     string currentChar = worksheet.Name.Split(" ")[1];
@@ -321,8 +323,18 @@ namespace SupervisorMobility.API.Controllers
                     cellTimeMin.Style.Numberformat.Format = "0.0#";
                     cellTimeCnt.Style.Numberformat.Format = "0.0##";
 
-                    cellTimeMin.Formula = $"SUM(H{rowIndexes[currentChar].Item1}:H{rowIndexes[currentChar].Item2 - 1})";
-                    cellTimeCnt.Formula = $"SUM(I{rowIndexes[currentChar].Item1}:I{rowIndexes[currentChar].Item2 - 1})";
+                    string formula = $"SUM(H{rowIndexes[currentChar].Item1}:H{rowIndexes[currentChar].Item2 - 1})";
+                    string formula2 = $"SUM(I{rowIndexes[currentChar].Item1}:I{rowIndexes[currentChar].Item2 - 1})";
+
+                    if (!prevSheetName.IsNullOrEmpty())
+                    {
+                        string prevChar = prevSheetName.Split(" ")[1];
+                        formula += $"+{prevSheetName}!H{rowIndexes[prevChar].Item2}";
+                        formula2 += $"+{prevSheetName}!I{rowIndexes[prevChar].Item2}";
+                    }
+
+                    cellTimeMin.Formula = formula;
+                    cellTimeCnt.Formula = formula2;
 
                     cellTimeMin.Calculate();
                     cellTimeCnt.Calculate();
@@ -336,6 +348,7 @@ namespace SupervisorMobility.API.Controllers
                     {
                         cellTimeCnt.Value = string.Empty;
                     }
+                    prevSheetName = worksheet.Name;
                 }
 
                 //rowHeights = rowHeights.ToDictionary(kvp => kvp.Key, kvp => (kvp.Value + templateExtrahight));
@@ -912,6 +925,8 @@ namespace SupervisorMobility.API.Controllers
                 rowHeights[currentWorkingIndex] += TotalRowHeight;
                 rowIndexes[currentWorkingIndex] = (rowIndexes[currentWorkingIndex].Item1, rowindex);
 
+                string prevSheetName = "";
+
                 foreach (var worksheet in package.Workbook.Worksheets.Where(ws => ws.Name.Contains("Sequence")))
                 {
                     string currentChar = worksheet.Name.Split(" ")[1];
@@ -933,11 +948,21 @@ namespace SupervisorMobility.API.Controllers
                     var cellTimeMin = worksheet.Cells[$"H{rowIndexes[currentChar].Item2}"];
                     var cellTimeCnt = worksheet.Cells[$"I{rowIndexes[currentChar].Item2}"];
 
+                    string formula = $"SUM(H{rowIndexes[currentChar].Item1}:H{rowIndexes[currentChar].Item2 - 1})";
+                    string formula2 = $"SUM(I{rowIndexes[currentChar].Item1}:I{rowIndexes[currentChar].Item2 - 1})";
+
+                    if (!prevSheetName.IsNullOrEmpty())
+                    {
+                        string prevChar = prevSheetName.Split(" ")[1];
+                        formula += $"+{prevSheetName}!H{rowIndexes[prevChar].Item2}";
+                        formula2 += $"+{prevSheetName}!I{rowIndexes[prevChar].Item2}";
+                    }
+
                     cellTimeMin.Style.Numberformat.Format = "0.0#";
                     cellTimeCnt.Style.Numberformat.Format = "0.0##";
 
-                    cellTimeMin.Formula = $"SUM(H{rowIndexes[currentChar].Item1}:H{rowIndexes[currentChar].Item2 - 1})";
-                    cellTimeCnt.Formula = $"SUM(I{rowIndexes[currentChar].Item1}:I{rowIndexes[currentChar].Item2 - 1})";
+                    cellTimeMin.Formula = formula;
+                    cellTimeCnt.Formula = formula2;
 
                     cellTimeMin.Calculate();
                     cellTimeCnt.Calculate();
@@ -1522,6 +1547,8 @@ namespace SupervisorMobility.API.Controllers
                 rowHeights[currentWorkingIndex] += TotalRowHeight + 21.8; // + 21.8 due to last row
                 rowIndexes[currentWorkingIndex] = (rowIndexes[currentWorkingIndex].Item1, rowindex);
 
+                string prevSheetName = "";
+
                 foreach (var worksheet in package.Workbook.Worksheets.Where(ws => ws.Name.Contains("DISTRIBUTION")))
                 {
                     string currentChar = worksheet.Name.Split(" ", 2)[1];
@@ -1545,10 +1572,10 @@ namespace SupervisorMobility.API.Controllers
 
                     if (times.Any())
                     {
-                        char col = 'L';
+                        char col = 'K';
                         for (int j = 0; j < times.Length; j++)
                         {
-                            col = (char)(col + j);
+                            col = (char)(col + 1);
                             if (times[j] != 0)
                             {
                                 sheet.Cells[$"{col}{rowIndexes[currentChar].Item2-1}"].Value = times[j];
@@ -1557,16 +1584,24 @@ namespace SupervisorMobility.API.Controllers
                         }
                     }
 
-                    char column = 'L';
+                    char column = 'K';
                     for (int j = 0; j < models.Length; j++)
                     {
-                        column = (char)(column + j);
+                        column = (char)(column + 1);
 
                         var cell = sheet.Cells[$"{column}{rowIndexes[currentChar].Item2}"];
 
                         worksheet.Cells[$"{column}{rowIndexes[currentChar].Item2}"].Style.Numberformat.Format = "0.0##";
 
-                        cell.Formula = $"SUM({column}{rowIndexes[currentChar].Item1}:{column}{rowIndexes[currentChar].Item2-1})";
+                        string formula = $"SUM({column}{rowIndexes[currentChar].Item1}:{column}{rowIndexes[currentChar].Item2 - 1})";
+
+                        if (!prevSheetName.IsNullOrEmpty())
+                        {
+                            string prevChar = prevSheetName.Split(" ", 2)[1];
+                            formula += $"+{prevSheetName}!{column}{rowIndexes[prevChar].Item2}";
+                        }
+
+                        cell.Formula = formula;
                         cell.Calculate();
                         if(cell.Value == null || string.IsNullOrWhiteSpace(cell.Text) || cell.Text == "0.0")
                         {
@@ -1576,6 +1611,7 @@ namespace SupervisorMobility.API.Controllers
                         if (isFirst && column == 'O') column = 'P';
                     }
 
+                    prevSheetName = worksheet.Name;
                     stylesService.SetDistributionImgsStyles(worksheet, rowIndexes[currentChar].Item1, rowIndexes[currentChar].Item2-3, isFirst);
                 }
 
@@ -1839,31 +1875,6 @@ namespace SupervisorMobility.API.Controllers
                         }
                     }
                 }
-                
-                string aaaaa = package.Workbook.Worksheets.Last().Name.Split(" ", 2)[1];
-                int aaaugh = sheetService.GetNextIndex(aaaaa);
-
-                string pn = $"HOE DISTRIBUTION ({aaaugh})";
-                string npi = pn.Split(" ", 2)[1];
-
-                sheet = package.Workbook.Worksheets[pn];
-
-                if (sheet == null)
-                {
-                    sheetService.AddSheet(package, 3, aaaaa);
-                    sheet = package.Workbook.Worksheets[pn];
-
-                    rowHeights.Add(npi, 0);
-                    rowIndexes.Add(npi, (9, 10));
-
-                    var idx = rowIndexes[npi].Item2 - 1;
-                    var height = rowHeights[npi];
-
-                    sheetService.GenerateDistributionsRows(sheet, ref height, ref idx, 500, DefaultRowH, false);
-
-                    rowIndexes[npi] = (rowIndexes[npi].Item1, idx + 3);
-                    rowHeights[npi] = height;
-                }
 
                 sheet = package.Workbook.Worksheets.First();
 
@@ -1900,6 +1911,12 @@ namespace SupervisorMobility.API.Controllers
             var res = File(ms, "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet", !string.IsNullOrEmpty(SosDistribution.InternalControlNumber) ? $"{SosDistribution.InternalControlNumber} Distribution Report.xlsx" : "Distribution Report.xlsx");
             res.EnableRangeProcessing = true;
             return res;
+        }
+
+        [HttpGet("Excel/Distribution/{CombinationId}")]
+        public async Task<IActionResult> CombinationExcelExport(int CombinationId)
+        {
+            return Ok();
         }
     }
 }
