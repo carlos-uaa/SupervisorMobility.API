@@ -258,20 +258,23 @@ namespace SupervisorMobility.API.Controllers
                             sheet.Cells[$"E{rowindex}"].Value = indexSection;
                             sheet.Cells[$"F{rowindex}"].Value = section.Step;
 
-                            var timeText = SosAnalysis.Times.FirstOrDefault(p=>p.SectionId == section.SectionId)?.Time;
-
-                            if (!string.IsNullOrEmpty(timeText))
+                            if (SosAnalysis.Times != null && SosAnalysis.Times.Any())
                             {
-                                string[] times = timeText.Split('.');
-                                double minutes = double.Parse(times[0]) / 60;
+                                var timeText = SosAnalysis.Times.FirstOrDefault(p => p.SectionId == section.SectionId)?.Time;
 
-                                sheet.Cells[$"H{rowindex}"].Style.Numberformat.Format = "0.##";
-                                sheet.Cells[$"I{rowindex}"].Style.Numberformat.Format = "0.###";
+                                if (!string.IsNullOrEmpty(timeText))
+                                {
+                                    string[] times = timeText.Split('.');
+                                    double minutes = double.Parse(times[0]) / 60;
 
-                                if(minutes > 0)
-                                    sheet.Cells[$"H{rowindex}"].Value = minutes;
-                                if (times.Length > 1)
-                                    sheet.Cells[$"I{rowindex}"].Value = double.Parse(times[1]) / 100;
+                                    sheet.Cells[$"H{rowindex}"].Style.Numberformat.Format = "0.##";
+                                    sheet.Cells[$"I{rowindex}"].Style.Numberformat.Format = "0.###";
+
+                                    if (minutes > 0)
+                                        sheet.Cells[$"H{rowindex}"].Value = minutes;
+                                    if (times.Length > 1)
+                                        sheet.Cells[$"I{rowindex}"].Value = double.Parse(times[1]) / 100;
+                                }
                             }
 
                         }
@@ -893,18 +896,21 @@ namespace SupervisorMobility.API.Controllers
 
                     sheet.Cells[$"C{rowindex}"].Value = section.Step;
 
-                    var timeText = SosSequence.Times.FirstOrDefault(p => p.SectionId == section.SectionId).Time;
-
-                    if (!string.IsNullOrEmpty(timeText))
+                    if (SosSequence.Times != null && SosSequence.Times.Any())
                     {
-                        string[] times = timeText.Split('.');
-                        double minutes = double.Parse(times[0]) / 60;
-                        sheet.Cells[$"H{rowindex}"].Style.Numberformat.Format = "0.##";
-                        sheet.Cells[$"I{rowindex}"].Style.Numberformat.Format = "0.###";
+                        var timeText = SosSequence.Times.FirstOrDefault(p => p.SectionId == section.SectionId).Time;
 
-                        sheet.Cells[$"H{rowindex}"].Value = minutes;
-                        if (times.Length > 1)
-                            sheet.Cells[$"I{rowindex}"].Value = double.Parse(times[1]) / 100;
+                        if (!string.IsNullOrEmpty(timeText))
+                        {
+                            string[] times = timeText.Split('.');
+                            double minutes = double.Parse(times[0]) / 60;
+                            sheet.Cells[$"H{rowindex}"].Style.Numberformat.Format = "0.##";
+                            sheet.Cells[$"I{rowindex}"].Style.Numberformat.Format = "0.###";
+
+                            sheet.Cells[$"H{rowindex}"].Value = minutes;
+                            if (times.Length > 1)
+                                sheet.Cells[$"I{rowindex}"].Value = double.Parse(times[1]) / 100;
+                        }
                     }
 
                     sheet.Cells[$"J{rowindex}"].RichText.Add(fullText);
@@ -1913,7 +1919,7 @@ namespace SupervisorMobility.API.Controllers
             return res;
         }
 
-        [HttpGet("Excel/Distribution/{CombinationId}")]
+        [HttpGet("Excel/Combination/{CombinationId}")]
         public async Task<IActionResult> CombinationExcelExport(int CombinationId)
         {
             return Ok();
