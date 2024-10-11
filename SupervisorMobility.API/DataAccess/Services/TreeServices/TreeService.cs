@@ -4,12 +4,16 @@ using DuoVia.FuzzyStrings;
 using DocumentFormat.OpenXml.Spreadsheet;
 using Serilog;
 using System.Drawing;
+using SupervisorMobility.API.Entities;
+using SupervisorMobility.API.DataAccess.Entities;
+using FuzzyString;
+using System.Diagnostics;
+using System.Text.RegularExpressions;
 
 namespace SupervisorMobility.API.DataAccess.Services.TreeServices
 {
     public class TreeService: ITreeService
     {
-
 
         public TreeItemData ConstruirArbolCCP(List<FolderCCP> elementos)
         {
@@ -129,98 +133,152 @@ namespace SupervisorMobility.API.DataAccess.Services.TreeServices
             return root;
         }
 
-
-        public TreeItemData? EncontrarMejorCoincidenciaDifusa(TreeItemData nodoActual, string rutaUsuario, string palabraClave)
+        public TreeItemData? EncontrarNodoMejorCoincidencia(TreeItemData rootNode, Plant planta, string? departamento, Area? area, Distribution? distribucion, Product? producto)
         {
-            TreeItemData? mejorCoincidencia = null;
-            double puntuacionMaxima = 0;
-
-            double puntuacion = nodoActual.Ruta.DiceCoefficient(rutaUsuario);
-
-            bool contienePalabraClave = nodoActual.Ruta.Contains(palabraClave);
-
-            if (contienePalabraClave && (mejorCoincidencia == null || puntuacion > puntuacionMaxima))
+            var elementosABuscar = new List<(string? Code, string? Description)>
             {
-                puntuacionMaxima = puntuacion;
-                mejorCoincidencia = nodoActual;
-            }
-            else if (!contienePalabraClave && puntuacion > puntuacionMaxima)
-            {
-                mejorCoincidencia = nodoActual;
-            }
+                (planta.Code, planta.Description),
+                (departamento, null), 
+                (area?.Code, area?.Description),
+                (distribucion?.Code, distribucion?.Description),
+                (producto?.Code, producto?.Description)
+            };
+
+            HashSet<string> terminosEncontrados = new HashSet<string>();
+
+            TreeItemData? ultimoNodoEncontrado = null;
+
+            TreeItemData? resultado = BuscarNodoRecursivo(rootNode, elementosABuscar, ref ultimoNodoEncontrado, terminosEncontrados, (planta.Code, planta.Description));
+
+            return resultado;
+        }
+
+        private TreeItemData? BuscarNodoRecursivo(TreeItemData nodoActual, List<(string? Code, string? Description)> elementosABuscar, ref TreeItemData? ultimoNodoEncontrado, HashSet<string> terminosEncontrados, (string? Code, string? Description) planta)
+        {
+            var coincidencias = new List<(TreeItemData nodo, double puntuacion)>();
+
+            double umbralPlanta = 0.5; 
+            double umbralGenerico = 0.6; 
+
 
             foreach (var hijo in nodoActual.TreeItems)
             {
-                TreeItemData mejorCoincidenciaHijo = EncontrarMejorCoincidenciaDifusa(hijo, rutaUsuario, palabraClave);
-                if (mejorCoincidenciaHijo != null)
-                {
-                    bool contienePalabraClaveHijo = mejorCoincidenciaHijo.Ruta.Contains(palabraClave);
+                string nombreLimpiado = LimpiarNombre(hijo.Nombre).ToLower(); 
 
-                    if (contienePalabraClaveHijo && mejorCoincidenciaHijo.Ruta.DiceCoefficient(rutaUsuario) > puntuacionMaxima)
+                foreach (var (code, description) in elementosABuscar)
+                {
+                    double puntuacionCode = !string.IsNullOrEmpty(code) ? CombineSimilarities(code.ToLower(), nombreLimpiado) : 0;
+                    double puntuacionDescription = !string.IsNullOrEmpty(description) ? CombineSimilarities(description.ToLower(), nombreLimpiado) : 0;
+
+                    double umbral = (code == planta.Code && description == planta.Description) ? umbralPlanta : umbralGenerico;
+
+                    if (puntuacionCode >= umbral || puntuacionDescription >= umbral)
                     {
-                        puntuacionMaxima = mejorCoincidenciaHijo.Ruta.DiceCoefficient(rutaUsuario);
-                        mejorCoincidencia = mejorCoincidenciaHijo;
-                    }
-                    else if (!contienePalabraClaveHijo && mejorCoincidenciaHijo.Ruta.DiceCoefficient(rutaUsuario) > puntuacionMaxima)
-                    {
-                        mejorCoincidencia = mejorCoincidenciaHijo;
+                        double mejorPuntuacion = Math.Max(puntuacionCode, puntuacionDescription);
+                        coincidencias.Add((hijo, mejorPuntuacion));
+
+                        terminosEncontrados.Add(nombreLimpiado);
+                        ultimoNodoEncontrado = hijo; 
                     }
                 }
+
             }
 
-            return mejorCoincidencia;
-        }
+                if (ultimoNodoEncontrado != null && planta.Code != null && planta.Description != null)
+                {
+                    elementosABuscar.RemoveAll(e => e.Code == planta.Code && e.Description == planta.Description);
+                }
 
-        public TreeItemData? EncontrarMejorCoincidenciaDifusaInternal(TreeItemData nodoActual, string rutaUsuario, string palabraClave)
+                if (coincidencias.Any())
+                {
+                    foreach (var (nodoCoincidencia, _) in coincidencias.OrderByDescending(c => c.puntuacion))
+                    {
+                        var nodoEncontrado = BuscarNodoRecursivo(nodoCoincidencia, elementosABuscar, ref ultimoNodoEncontrado, terminosEncontrados, planta);
+                        if (nodoEncontrado != null)
+                        {
+                            return nodoEncontrado; 
+                        }
+                    }
+
+                }
+
+            return ultimoNodoEncontrado;
+        }
+           
+        private string LimpiarNombre(string nombre)
         {
-            TreeItemData? mejorCoincidencia = null;
-            double puntuacionMaxima = 0;
+            //v1
+            //string sinPrefijo = Regex.Replace(nombre, @"^\d+§\d+\.\s*", "");
 
-            double puntuacion = nodoActual.Ruta.DiceCoefficient(rutaUsuario);
-            bool contienePalabraClave = palabraClave != null && nodoActual.Nombre.Contains(palabraClave);
+            //// Mantener letras, números, espacios, paréntesis y guiones. Eliminar cualquier otro carácter.
+            //string nombreLimpiado = Regex.Replace(sinPrefijo, @"[^a-zA-Z0-9\s\(\)\-\.]", "").Trim();
 
-            if ((contienePalabraClave && puntuacion > puntuacionMaxima) ||
-                (!contienePalabraClave && puntuacion > puntuacionMaxima))
-            {
-                puntuacionMaxima = puntuacion;
-                mejorCoincidencia = nodoActual;
-            }
+            //return nombreLimpiado;
 
-            foreach (var hijo in nodoActual.TreeItems)
-            {
-                TreeItemData mejorCoincidenciaHijo = EncontrarMejorCoincidenciaDifusaInternal(hijo, rutaUsuario, palabraClave);
+            //V0
 
-                if (mejorCoincidenciaHijo != null)
-                {
-                    double puntuacionHijo = mejorCoincidenciaHijo.Ruta.DiceCoefficient(rutaUsuario);
-                    bool contienePalabraClaveHijo = palabraClave != null && mejorCoincidenciaHijo.Nombre.Contains(palabraClave);
+            // Primero, eliminar cualquier parte antes de un punto o símbolo '§'
+            var partes = nombre.Split(new[] { '§', '.' }, StringSplitOptions.RemoveEmptyEntries);
 
-                    if ((contienePalabraClaveHijo && puntuacionHijo > puntuacionMaxima) ||
-                        (!contienePalabraClaveHijo && puntuacionHijo > puntuacionMaxima))
-                    {
-                        puntuacionMaxima = puntuacionHijo;
-                        mejorCoincidencia = mejorCoincidenciaHijo;
-                    }
-                }
-            }
+            // Tomar la última parte y limpiar espacios
+            var nombreSignificativo = partes.Last().Trim();
 
-            return mejorCoincidencia;
+            return nombreSignificativo;
+
         }
 
-
-
-
-        public string NormalizarRutaUsuario(string rutaUsuario)
+        public double CombineSimilaritiesArea(string areaCode, string areaDescription, string excelCode)
         {
-            string[] segmentos = rutaUsuario.Split(' ');
-            for (int i = 0; i < segmentos.Length; i++)
+            // Primero calculamos la similitud del código
+            double codeSimilarity = areaCode.Equals(excelCode)
+                ? 1.0
+                : 1 - areaCode.JaccardDistance(excelCode);
+
+            // Calculamos la similitud usando la descripción
+            double descriptionSimilarity = areaDescription.Equals(excelCode)
+                ? 1.0
+                : CombineSimilarities(excelCode.ToLower(), areaDescription.ToLower());
+
+            // Definimos un umbral de similitud mínima para considerar que el código es relevante
+            double similarityThreshold = 0.7;
+
+            // Si la similitud del código es suficiente, le damos más peso
+            if (codeSimilarity >= similarityThreshold)
             {
-                if (int.TryParse(segmentos[i], out int numero))
-                {
-                    segmentos[i] = numero.ToString();
-                }
+                double codeWeight = 0.8;
+                double descriptionWeight = 0.2;
+                return (codeWeight * codeSimilarity) + (descriptionWeight * descriptionSimilarity);
             }
-            return string.Join(" ", segmentos);
+            else
+            {
+                // Si la similitud del código es baja, damos más peso a la descripción
+                double codeWeight = 0.1;
+                double descriptionWeight = 0.9;
+                return (codeWeight * codeSimilarity) + (descriptionWeight * descriptionSimilarity);
+            }
         }
-    }
+
+        public double CombineSimilarities(string description1, string description2)
+        {
+            double wordSimilarityWeight = 0.5;
+            double charSimilarityWeight = 0.5;
+
+            double wordSimilarity = 1 - JaccardDistanceByWords(description1, description2);
+
+            double charSimilarity = 1 - description1.JaccardDistance(description2);
+
+            return (wordSimilarityWeight * wordSimilarity) + (charSimilarityWeight * charSimilarity);
+        }
+
+        public double JaccardDistanceByWords(string description1, string description2)
+        {
+            var words1 = description1.Split(' ').Distinct();
+            var words2 = description2.Split(' ').Distinct();
+
+            var intersection = words1.Intersect(words2).Count();
+            var union = words1.Union(words2).Count();
+
+            return 1 - ((double)intersection / union);
+        }
+    }//end treeservice
 }
