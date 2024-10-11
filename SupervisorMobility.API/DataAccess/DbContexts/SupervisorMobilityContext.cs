@@ -1254,7 +1254,8 @@ namespace SupervisorMobility.API.Context
                 new ChecklistQuestion()
                 {
                     QuestionID = 4,
-                    Prompt = "¿Hay algún problema de seguridad y ergonomía identificado? ¿Si existe indicar, cuál?",
+                    Prompt = "¿Seguridad y ergonomía se encuentra sin problemas? Si los hay, especifíquelos",
+                    PromptEN = "Safety and ergonomics are without problems? If there are, specify",
                     NotGood = "",
                     CategorySequence = 4,
                     IsActive = true,
