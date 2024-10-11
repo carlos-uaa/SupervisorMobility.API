@@ -239,7 +239,7 @@ namespace SupervisorMobility.API.Controllers
                 }
 
                 var fileNameWithOutIp = "";
-                fileNameWithOutIp = fileURL.Split("HOE/").Last();
+                fileNameWithOutIp = fileURL.Split("/").Last();
 
 
                 var filePathSave = Path.Combine(_env.ContentRootPath, "downloads\\HOE", fileNameWithOutIp);

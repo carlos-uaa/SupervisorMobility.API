@@ -40,7 +40,7 @@ namespace SupervisorMobility.API.Controllers.SOS_Controllers
         {
             SOSHub SOSEntity = await _ProcessRepository.GetSOSHub(SOSHubCollection_Id, includeInformation: true);
 
-            if(sOSAnalysisToCreate.SOSAnalysisId == 0)
+            if (sOSAnalysisToCreate.SOSAnalysisId == 0)
             {
                 //Nombre del documento GOS o processShet
                 //sOSAnalysisToCreate.InternalControlNumber = SOSEntity.Folio;
@@ -53,18 +53,18 @@ namespace SupervisorMobility.API.Controllers.SOS_Controllers
 
 
                 SOSAnalysis AnalysisToCreate = _mapper.Map<SOSAnalysis>(sOSAnalysisToCreate);
-                
+
                 var createdResult = await _ProcessRepository.CreateSOSAnalysis(AnalysisToCreate);
                 if (createdResult != null)
                     return Ok(AnalysisToCreate);
                 else
-                    return BadRequest(); 
+                    return BadRequest();
             }
             else
             {
                 //only add revision
-                SOSAnalysis _sosAnalysis = await _ProcessRepository.GetSOSAnalysis(sOSAnalysisToCreate.SOSAnalysisId, true, true, true, true,true,true);
-              
+                SOSAnalysis _sosAnalysis = await _ProcessRepository.GetSOSAnalysis(sOSAnalysisToCreate.SOSAnalysisId, true, true, true, true, true, true);
+
                 SOSAnalysisLogbook _logbookToCreate = _mapper.Map<SOSAnalysisLogbook>(sOSAnalysisToCreate.AnalysisLogbooks?.Last());
                 _logbookToCreate.SOSAnalysisId = _sosAnalysis.SOSAnalysisId;
 
@@ -73,7 +73,7 @@ namespace SupervisorMobility.API.Controllers.SOS_Controllers
                 if (resultAddSections > 0)
                 {
                     Debug.WriteLine("SOSAnalysisLogbook añadidas con exito");
-                await _ProcessRepository.AddSOSAnalysisLogbookToSOSAnalysis(_sosAnalysis, _logbookToCreate);
+                    await _ProcessRepository.AddSOSAnalysisLogbookToSOSAnalysis(_sosAnalysis, _logbookToCreate);
                 }
                 else
                 {
@@ -117,11 +117,11 @@ namespace SupervisorMobility.API.Controllers.SOS_Controllers
         //Update
 
         [HttpPut("{sosAnalysis_Id}")]
-        public async Task<ActionResult> UpdateSOSAnalysis(int sosAnalysis_Id, SOSAnalysisForUpdateDto sosUpdateEntity)
+        public async Task<ActionResult> UpdateSOSAnalysis(int sosAnalysis_Id, int userId, SOSAnalysisForUpdateDto sosUpdateEntity)
         {
             List<Commentary> Bkup_Notes = new List<Commentary>();
             List<SOSAnalysisLogbook> Bkup_AnalysisLogbook = new List<SOSAnalysisLogbook>();
-            List<SOSTime> Bkup_Times = new List<SOSTime>(); 
+            List<SOSTime> Bkup_Times = new List<SOSTime>();
 
             // Filtrar nuevos Comentarios
             List<UpdateCommentaryDto> filteredCommentaryList = sosUpdateEntity.Notes.Where(t => t.CommentaryId <= 0).ToList();
@@ -157,7 +157,7 @@ namespace SupervisorMobility.API.Controllers.SOS_Controllers
                 }
             }
 
-           
+
 
             // Remover nuevos AnalysisLogbooks de la lista principal para evitar duplicados
             if (filteredAnalysisLogbooksList.Any())
@@ -274,7 +274,7 @@ namespace SupervisorMobility.API.Controllers.SOS_Controllers
             {
                 foreach (Commentary Comment in Bkup_Notes)
                 {
-                  await  _ProcessRepository.AddNoteToSOSAnalysis(_sosAnalysis, Comment);
+                    await _ProcessRepository.AddNoteToSOSAnalysis(_sosAnalysis, Comment);
                 }
             }
 
@@ -282,7 +282,7 @@ namespace SupervisorMobility.API.Controllers.SOS_Controllers
             {
                 foreach (SOSTime time in Bkup_Times)
                 {
-                    await _ProcessRepository.AddSOSTimeToSOSAnalysis(_sosAnalysis,time);
+                    await _ProcessRepository.AddSOSTimeToSOSAnalysis(_sosAnalysis, time);
                 }
             }
 
@@ -291,11 +291,13 @@ namespace SupervisorMobility.API.Controllers.SOS_Controllers
             {
                 foreach (SOSAnalysisLogbook logbook in Bkup_AnalysisLogbook)
                 {
-                   await _ProcessRepository.AddSOSAnalysisLogbookToSOSAnalysis(_sosAnalysis, logbook);
+                    await _ProcessRepository.AddSOSAnalysisLogbookToSOSAnalysis(_sosAnalysis, logbook);
                 }
             }
 
 
+            //Aqui iba el flujo :'v
+            //pero esta mal xd
 
             if (result != null)
             {
@@ -392,5 +394,8 @@ namespace SupervisorMobility.API.Controllers.SOS_Controllers
                 return BadRequest("something went wrong");
         }
 
+     
+
     }
+
 }
