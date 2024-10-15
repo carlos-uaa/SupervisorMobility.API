@@ -118,7 +118,6 @@ namespace SupervisorMobility.API.Controllers
             public LupForCreationDto? LupCmp { get; set; }
         }
 
-        [EnableCors]
         [HttpPost("evidencesLup")]
         public async Task<ActionResult<LupWithoutNavigationPropertiesDto>> CreateLupWithEvidence([FromForm] LupContent lupContent)
         {
