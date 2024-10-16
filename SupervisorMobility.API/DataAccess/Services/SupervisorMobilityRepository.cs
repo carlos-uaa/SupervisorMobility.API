@@ -1366,6 +1366,38 @@ namespace SupervisorMobility.API.Services
 
         }
 
+
+        public async Task<JobObservation?> FindNextYearJobObservation(int plantId, int areaId, int DistributionId, int supervisorId, int year)
+        {
+
+            var query = _context.JobObservations
+                .Where(u => u.IsActive == true && u.Type == 5);
+
+            if (plantId != default(int))
+            {
+                query = query.Where(j => j.PlantId == plantId);
+
+            }
+            if (areaId != default(int))
+            {
+                query = query.Where(j => j.AreaId == areaId);
+            }
+
+            if (DistributionId != default(int))
+            {
+                query = query.Where(j => j.DistributionId == DistributionId);
+
+            }
+
+            if (supervisorId != default(int))
+            {
+                query = query.Where(j => j.SupervisorId == supervisorId);
+            }
+
+
+            return await query.FirstOrDefaultAsync();
+        }
+
         public async Task<IEnumerable<JobObservation>> GetAllJobObservationsAsync(bool includeTree = false, bool includePeople = false, bool includeLup = false, bool includeHistory = false, bool includeCkAnswers = false, int idPlant = 0, int idArea = 0, bool ForSosProgram = false, int year = 0, int month = 0, int SOSAnualId = 0, int idUser = 0)
         {
 
@@ -2074,7 +2106,12 @@ namespace SupervisorMobility.API.Services
             return await query.FirstOrDefaultAsync();
         }
 
+        public async Task<SOSReviewProgram?> FindSOSSupervisor(int plantId, int areaId, int year, int SV_id)
+        {
+            var query = _context.SOSReviews.Where(p => p.PlantId == plantId && p.AreaId == areaId && p.AplicationYear == year);
 
+            return await query.FirstOrDefaultAsync();
+        }
 
         public async Task<int> AddSOSReview(SOSReviewProgram SOSEntity)
         {
