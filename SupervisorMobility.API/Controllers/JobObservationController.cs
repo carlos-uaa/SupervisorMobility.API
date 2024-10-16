@@ -335,16 +335,14 @@ namespace SupervisorMobility.API.Controllers
                 {
                     //existe en caso de ser una fecha mas reciente actualizar
                 
-                    DateTime FechaActual = jobObservationEntity.FinishedDate.Value;
-                    FechaActual.AddYears(1);
+                    DateTime FechaActual = jobObservationForUpdate.FinishedDate.Value.AddYears(1);
 
                     if(FechaActual < NextYearJob.PlannedStartDate)
                     {
-                        NextYearJob.PlannedStartDate = FechaActual;
-                        NextYearJob.PlannedEndDate = FechaActual;
+                        NextYearJob.StartDate = FechaActual;
+                        await _supervisorMobilityRepository.SaveChangesAsync();
                     }
 
-                    await _supervisorMobilityRepository.SaveChangesAsync();
                 }
                 else
                 {
@@ -368,10 +366,9 @@ namespace SupervisorMobility.API.Controllers
 
                     newYearJob.SupervisorId = jobObservationEntity.SupervisorId;
 
-                    newYearJob.PlannedStartDate = jobObservationForUpdate.FinishedDate.Value.AddYears(1); 
+                    newYearJob.StartDate = jobObservationForUpdate.FinishedDate.Value.AddYears(1); 
+                    newYearJob.EndDate = newYearJob.PlannedStartDate;
 
-
-                    newYearJob.PlannedEndDate = newYearJob.PlannedStartDate;
                     newYearJob.SectionIds = jobCategoryStructureIds;
 
 
