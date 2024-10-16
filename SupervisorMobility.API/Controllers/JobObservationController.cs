@@ -1,6 +1,8 @@
 ﻿using AutoMapper;
+using DocumentFormat.OpenXml.Bibliography;
 using Microsoft.AspNetCore.Cors;
 using Microsoft.AspNetCore.Mvc;
+using Microsoft.Extensions.Logging.Abstractions;
 using SupervisorMobility.API.Business;
 using SupervisorMobility.API.DataAccess.Entities;
 using SupervisorMobility.API.DataAccess.Services;
@@ -11,7 +13,6 @@ using SupervisorMobility.API.Models.FileUploadDto;
 using SupervisorMobility.API.Models.JobObservationDtos;
 using SupervisorMobility.API.Models.NotificationDtos;
 using SupervisorMobility.API.Services;
-using static SupervisorMobility.API.Controllers.ChecklistAnswersController;
 
 namespace SupervisorMobility.API.Controllers
 {
@@ -308,6 +309,83 @@ namespace SupervisorMobility.API.Controllers
                 //    var emailMessage = _email.CreateEmailMessage(auser, "Este es un mensaje de prueba enviado desde job observation");
                 //    _email.Send(emailMessage);
                 //}
+
+
+                //Si la Job Actual tiene un  sos plan id puedo buscar una del siguiente año directamente
+                //if (jobObservationEntity.PlantId != null && jobObservationEntity.AreaId != null && jobObservationEntity.SupervisorId != null)
+                //{
+                //    var SOS_Review_NextYear = await _supervisorMobilityRepository.FindSOSSupervisor((int)jobObservationEntity.PlantId, (int)jobObservationEntity.AreaId, jobObservationEntity.FinishedDate.Value.Year + 1,  (int) jobObservationEntity.SupervisorId);
+
+                //    //Si existe un plan del siguiente año, tengo que buscar la job y actualizar sus datos
+                //    if(SOS_Review_NextYear != null)
+                //    {
+                //        //buscar la job del siguiente año y actualizar la job
+                //    }
+                //    else
+                //    {
+                //        //crear un plan para el suigueinte año y añadir la nueva job 
+                //    }
+                //}
+
+                //Crear la job del typo 5
+
+                JobObservation? NextYearJob = await _supervisorMobilityRepository.FindNextYearJobObservation((int)jobObservationEntity.PlantId, (int)jobObservationEntity.AreaId, (int)jobObservationEntity.DistributionId, (int)jobObservationEntity.SupervisorId, jobObservationEntity.FinishedDate.Value.Year + 1);
+
+                if (NextYearJob != null)
+                {
+                    //existe en caso de ser una fecha mas reciente actualizar
+                
+                    DateTime FechaActual = jobObservationEntity.FinishedDate.Value;
+                    FechaActual.AddYears(1);
+
+                    if(FechaActual < NextYearJob.PlannedStartDate)
+                    {
+                        NextYearJob.PlannedStartDate = FechaActual;
+                        NextYearJob.PlannedEndDate = FechaActual;
+                    }
+
+                    await _supervisorMobilityRepository.SaveChangesAsync();
+                }
+                else
+                {
+                    IEnumerable<JobCategoryStructure> _checklistCategories = await _supervisorMobilityRepository.GetChecklistCategoriesAsync(false);
+                    string jobCategoryStructureIds = "";
+
+                    foreach (var category in _checklistCategories)
+                    {
+                        jobCategoryStructureIds += category.JobCategoryStructureId + "|";
+                      
+                    }
+
+                    //no existe hay que crearla
+                    JobObservation newYearJob = new JobObservation();
+
+                    newYearJob.Type = 5;
+
+                    newYearJob.PlantId = jobObservationEntity.PlantId;
+                    newYearJob.AreaId = jobObservationEntity.AreaId;
+                    newYearJob.DistributionId = jobObservationEntity.DistributionId;
+
+                    newYearJob.SupervisorId = jobObservationEntity.SupervisorId;
+
+                    newYearJob.PlannedStartDate = jobObservationEntity.FinishedDate;
+                    newYearJob.PlannedStartDate.Value.AddYears(1);
+
+
+                    newYearJob.PlannedEndDate = newYearJob.PlannedStartDate;
+                    newYearJob.SectionIds = jobCategoryStructureIds;
+
+
+                    var res = await _supervisorMobilityRepository.AddJobObservation(newYearJob);
+
+                    if(res > 0)
+                    {
+                        Console.WriteLine("Crada con exito");
+                    }
+
+                }
+
+
             }
 
 
