@@ -173,10 +173,12 @@ namespace SupervisorMobility.API.Controllers
             int distributionId,
             int operationId,
             int supervisorId,
-            int status)
+            int status,
+            int userId,
+            int page, int entries, int? sortO, string? sortL)
         {
 
-            var allJobObservations = await _supervisorMobilityRepository.GetJobObservationsByFiltersAsync(startDate, endDate, plantId, areaId, distributionId, operationId, supervisorId, status);
+            var allJobObservations = await _supervisorMobilityRepository.GetJobObservationsByFiltersAsync(startDate, endDate, plantId, areaId, distributionId, operationId, supervisorId, status, userId, page, entries, sortO, sortL);
             return Ok(_mapper.Map<IEnumerable<JobObservationDto>>(allJobObservations));
         }
 
