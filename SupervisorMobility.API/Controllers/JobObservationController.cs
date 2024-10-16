@@ -329,7 +329,7 @@ namespace SupervisorMobility.API.Controllers
 
                 //Crear la job del typo 5
 
-                JobObservation? NextYearJob = await _supervisorMobilityRepository.FindNextYearJobObservation((int)jobObservationEntity.PlantId, (int)jobObservationEntity.AreaId, (int)jobObservationEntity.DistributionId, (int)jobObservationEntity.SupervisorId, jobObservationEntity.FinishedDate.Value.Year + 1);
+                JobObservation? NextYearJob = await _supervisorMobilityRepository.FindNextYearJobObservation((int)jobObservationEntity.PlantId, (int)jobObservationEntity.AreaId, (int)jobObservationEntity.DistributionId, (int)jobObservationEntity.SupervisorId, jobObservationForUpdate.FinishedDate.Value.Year + 1);
 
                 if (NextYearJob != null)
                 {
@@ -368,8 +368,7 @@ namespace SupervisorMobility.API.Controllers
 
                     newYearJob.SupervisorId = jobObservationEntity.SupervisorId;
 
-                    newYearJob.PlannedStartDate = jobObservationEntity.FinishedDate;
-                    newYearJob.PlannedStartDate.Value.AddYears(1);
+                    newYearJob.PlannedStartDate = jobObservationForUpdate.FinishedDate.Value.AddYears(1); 
 
 
                     newYearJob.PlannedEndDate = newYearJob.PlannedStartDate;
