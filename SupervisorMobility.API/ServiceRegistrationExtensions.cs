@@ -14,6 +14,7 @@ using SupervisorMobility.API.Models.NotificationDtos;
 using Microsoft.Extensions.DependencyInjection;
 using AutoMapper;
 using System.Runtime.InteropServices;
+using SupervisorMobility.API.DataAccess.Services.OrderingServices;
 
 
 namespace SupervisorMobility.API
@@ -43,6 +44,7 @@ namespace SupervisorMobility.API
             services.AddScoped<IAssyChartService, AssyChartService>();
             services.AddScoped<IEmailService, EmailService>();
             services.AddScoped<ITreeService, TreeService>();
+            services.AddScoped<IOrderingService, OrderingService>();
 
 
             //Aca un ejemplo de servicio

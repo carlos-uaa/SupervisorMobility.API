@@ -12,6 +12,7 @@ using SupervisorMobility.API.DataAccess.Entities.ILU;
 using SupervisorMobility.API.DataAccess.Entities.LUP;
 using SupervisorMobility.API.DataAccess.Entities.Paths;
 using SupervisorMobility.API.DataAccess.Entities.SOS_Review;
+using SupervisorMobility.API.DataAccess.Services.OrderingServices;
 using SupervisorMobility.API.Entities;
 using SupervisorMobility.API.Models.HCIDtos;
 using SupervisorMobility.API.Models.ILURegisterDtos;
@@ -30,12 +31,14 @@ namespace SupervisorMobility.API.Services
     {
         private readonly SupervisorMobilityContext _context;
         private readonly IMapper _mapper;
+        private readonly IOrderingService orderingService;
 
 
-        public SupervisorMobilityRepository(SupervisorMobilityContext context, IMapper mapper)
+        public SupervisorMobilityRepository(SupervisorMobilityContext context, IMapper mapper, IOrderingService orderingService)
         {
             _mapper = mapper;
             _context = context ?? throw new ArgumentNullException(nameof(context));
+            orderingService = orderingService;
         }
 
         #region JobCategoryStructureOperations
@@ -1304,8 +1307,9 @@ namespace SupervisorMobility.API.Services
         #endregion
         #region JobObservationOperations
 
-        public async Task<IEnumerable<JobObservation>> GetJobObservationsByFiltersAsync(DateTime startDate, DateTime endDate, int plantId, int areaId, int distributionId, int operationId, int supervisorId, int status)
+        public async Task<IEnumerable<JobObservation>> GetJobObservationsByFiltersAsync(DateTime startDate, DateTime endDate, int plantId, int areaId, int distributionId, int operationId, int supervisorId, int status, int userId, int page = 1, int entries = 10, int? sortO = 2, string? sortL = "")
         {
+            var keySelectorExp = orderingService.BuildJOKeySelector<JobObservation>(sortL);
 
             var query = _context.JobObservations
                 //.Include(a => a.Area)
@@ -1316,6 +1320,23 @@ namespace SupervisorMobility.API.Services
                 //.Include(s => s.Supervisor)
                 //.Include(o => o.Operator).Where(u => u.IsActive == true)
                 .Where(u => u.IsActive == true);
+
+            if (userId != default)
+            {
+                var user = await _context.Users.Include(u => u.Subordinates).Where(p => p.UserId == userId).FirstOrDefaultAsync();
+                switch (user.UserType)
+                {
+                    case 2:
+                        query = query.Where(j => user.Subordinates.Any() && user.Subordinates.Select(subordinate => subordinate.UserId).Contains((int)j.SupervisorId));
+                        break;
+                    case 3:
+                        query = query.Where(j => j.SupervisorId == userId);
+                        break;
+                    case 5:
+                        query = query.Where(j => user.Subordinates.Any() && user.Subordinates.Any(sub => sub.SuperiorId == j.Supervisor.SuperiorId));
+                        break;
+                }
+            }
 
             if (plantId != default(int))
             {
@@ -1360,10 +1381,50 @@ namespace SupervisorMobility.API.Services
                 query = query.Where(j => j.StartDate.HasValue && j.StartDate.Value.Date <= endDate.Date);
             }
 
+            query = query.OrderByDynamic(keySelectorExp, sortO);
+
+            if (sortL != "id_field" && sortL != "") 
+            {
+                query = query.OrderByDescending(p => p.JobObservationId);
+            }
+
+            //previously returned query.OrderBy(c => c.StartDate)
+
+            return await query.Skip((page - 1) * entries)
+                        .Take(entries).ToListAsync();
+
+        }
 
 
-            return await query.OrderBy(c => c.StartDate).ToListAsync();
+        public async Task<JobObservation?> FindNextYearJobObservation(int plantId, int areaId, int DistributionId, int supervisorId, int year)
+        {
 
+            var query = _context.JobObservations
+                .Where(u => u.IsActive == true && u.Type == 5);
+
+            if (plantId != default(int))
+            {
+                query = query.Where(j => j.PlantId == plantId);
+
+            }
+            if (areaId != default(int))
+            {
+                query = query.Where(j => j.AreaId == areaId);
+            }
+
+            if (DistributionId != default(int))
+            {
+                query = query.Where(j => j.DistributionId == DistributionId);
+
+            }
+
+            if (supervisorId != default(int))
+            {
+                query = query.Where(j => j.SupervisorId == supervisorId);
+            }
+
+
+            return await query.FirstOrDefaultAsync();
         }
 
         public async Task<IEnumerable<JobObservation>> GetAllJobObservationsAsync(bool includeTree = false, bool includePeople = false, bool includeLup = false, bool includeHistory = false, bool includeCkAnswers = false, int idPlant = 0, int idArea = 0, bool ForSosProgram = false, int year = 0, int month = 0, int SOSAnualId = 0, int idUser = 0)
@@ -2074,7 +2135,12 @@ namespace SupervisorMobility.API.Services
             return await query.FirstOrDefaultAsync();
         }
 
+        public async Task<SOSReviewProgram?> FindSOSSupervisor(int plantId, int areaId, int year, int SV_id)
+        {
+            var query = _context.SOSReviews.Where(p => p.PlantId == plantId && p.AreaId == areaId && p.AplicationYear == year);
 
+            return await query.FirstOrDefaultAsync();
+        }
 
         public async Task<int> AddSOSReview(SOSReviewProgram SOSEntity)
         {
