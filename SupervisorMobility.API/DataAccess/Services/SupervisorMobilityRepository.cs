@@ -1315,7 +1315,7 @@ namespace SupervisorMobility.API.Services
                 //.Include(o => o.Operation)
                 //.Include(s => s.Supervisor)
                 //.Include(o => o.Operator).Where(u => u.IsActive == true)
-                .Where(u => u.IsActive == true);
+                .Where(u => u.IsActive == true && u.Type != 5);
 
             if (plantId != default(int))
             {
@@ -1367,7 +1367,7 @@ namespace SupervisorMobility.API.Services
         }
 
 
-        public async Task<JobObservation?> FindNextYearJobObservation(int plantId, int areaId, int DistributionId, int supervisorId, int year)
+        public async Task<JobObservation?> FindNextYearJobObservation(int plantId, int areaId, int DistributionId, int operationId, int supervisorId, int year)
         {
 
             var query = _context.JobObservations
@@ -1401,7 +1401,7 @@ namespace SupervisorMobility.API.Services
         public async Task<IEnumerable<JobObservation>> GetAllJobObservationsAsync(bool includeTree = false, bool includePeople = false, bool includeLup = false, bool includeHistory = false, bool includeCkAnswers = false, int idPlant = 0, int idArea = 0, bool ForSosProgram = false, int year = 0, int month = 0, int SOSAnualId = 0, int idUser = 0)
         {
 
-            var query = _context.JobObservations.Where(j => j.IsActive == true);
+            var query = _context.JobObservations.Where(j => j.IsActive == true && j.Type != 5);
 
             if (includeTree)
             {
@@ -1502,6 +1502,32 @@ namespace SupervisorMobility.API.Services
                     query = query.Where(j => j.SupervisorId == idUser);
                 }
 
+            }
+
+            return await query.OrderBy(c => c.JobObservationId).ToListAsync();
+
+        }
+        
+
+         public async Task<IEnumerable<JobObservation>> GetAllNextYearJobsObservations(int plantId, int areaId, int year)
+        {
+
+            var query = _context.JobObservations.Where(j => j.IsActive == true && j.Type == 5);
+
+            
+            if (plantId != 0)
+            {
+                query = query.Where(p => p.PlantId == plantId);
+            }
+
+            if (areaId != 0)
+            {
+                query = query.Where(p => p.AreaId == areaId);
+            }
+
+            if (year != 0)
+            {
+                query = query.Where(d => d.StartDate.Value.Year == year || d.EndDate.Value.Year == year);
             }
 
             return await query.OrderBy(c => c.JobObservationId).ToListAsync();

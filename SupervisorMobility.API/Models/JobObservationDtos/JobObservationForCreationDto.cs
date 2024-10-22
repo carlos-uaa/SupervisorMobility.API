@@ -4,7 +4,9 @@ namespace SupervisorMobility.API.Models.JobObservationDtos
 {
     public class JobObservationForCreationDto
     {
+        public int? JobObservationId { get; set; }
         public bool IsActive { get; set; }
+
 
         public int PlantId { get; set; }
         public int AreaId { get; set; }

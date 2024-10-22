@@ -2,6 +2,7 @@
 using DocumentFormat.OpenXml.Bibliography;
 using Microsoft.AspNetCore.Cors;
 using Microsoft.AspNetCore.Mvc;
+using Microsoft.EntityFrameworkCore.Query.Internal;
 using Microsoft.Extensions.Logging.Abstractions;
 using SupervisorMobility.API.Business;
 using SupervisorMobility.API.DataAccess.Entities;
@@ -280,11 +281,6 @@ namespace SupervisorMobility.API.Controllers
                 return NotFound("No Distribution");
             }
 
-            //if (!await _supervisorMobilityRepository.OperationExistsAsync(jobObservationForUpdate.OperationId))
-            //{
-            //    return NotFound("No Operation");
-            //}
-
 
             var jobObservationEntity = await _supervisorMobilityRepository.GetJobObservationAsync(jobObservationId, false);
             if (jobObservationEntity == null)
@@ -327,24 +323,45 @@ namespace SupervisorMobility.API.Controllers
                 //    }
                 //}
 
-                //Crear la job del typo 5
+                //Crear la job del typo 5 siempre y cuando sea del sos program, ya que revisa la operacion
 
-                JobObservation? NextYearJob = await _supervisorMobilityRepository.FindNextYearJobObservation((int)jobObservationEntity.PlantId, (int)jobObservationEntity.AreaId, (int)jobObservationEntity.DistributionId, (int)jobObservationEntity.SupervisorId, jobObservationForUpdate.FinishedDate.Value.Year + 1);
-
-                if (NextYearJob != null)
+                if (jobObservationEntity.PlantId != null && jobObservationEntity.AreaId != null && jobObservationEntity.DistributionId != null && jobObservationEntity.OperationId != null)
                 {
-                    //existe en caso de ser una fecha mas reciente actualizar
-                
-                    DateTime FechaActual = jobObservationForUpdate.FinishedDate.Value.AddYears(1);
 
-                    if(FechaActual < NextYearJob.PlannedStartDate)
-                    {
-                        NextYearJob.StartDate = FechaActual;
-                        await _supervisorMobilityRepository.SaveChangesAsync();
-                    }
+                        JobObservation? NextYearJob = await _supervisorMobilityRepository.FindNextYearJobObservation((int)jobObservationEntity.PlantId, (int)jobObservationEntity.AreaId, (int)jobObservationEntity.DistributionId, (int)jobObservationEntity.OperationId, (int)jobObservationEntity.SupervisorId, jobObservationForUpdate.FinishedDate.Value.Year + 1);
 
-                }
-                else
+                        if (NextYearJob != null)
+                        {
+                            //existe en caso de ser una fecha mas reciente actualizar
+
+                            Distribution distribution = await _supervisorMobilityRepository.GetDistributionOnlyIdAsync((int)jobObservationEntity.DistributionId, false);
+
+                            DateTime FechaActual = jobObservationForUpdate.FinishedDate.Value.AddYears(1);
+
+                            if(FechaActual < NextYearJob.StartDate)
+                            {
+
+                                NotificationToCreateDto NotifyUpdateNextYear = new NotificationToCreateDto();
+                                NotifyUpdateNextYear.MadeBy = auser;
+                                NotifyUpdateNextYear.UserId = jobObservationForUpdate.SupervisorId;
+                                NotifyUpdateNextYear.IsAccepted = true;
+                                NotifyUpdateNextYear.IsActive = true;
+                                NotifyUpdateNextYear.NotificationType = $"Actualizacion del SOS Anual - Update Job Observation";
+                                NotifyUpdateNextYear.NotificationText = $"Estimado Supervisor,\\n\\nHemos detectado una Job Observation." +
+                                    " A continuación, te informamos sobre las acciones que se tomarán en función del estado del SOS Anual para el próximo año: " +
+                                    $"\\n Distribucion: {distribution?.Description} - {distribution?.Code}" +
+                                    $"\\n{NextYearJob.StartDate} → {FechaActual}" +
+                                    "\\n\\nLos datos relacionados serán actualizados automáticamente con la nueva información." +
+                                    "\\n\\nPor favor, asegúrate de que la información esté actualizada para evitar posibles inconsistencias.\r\n\r\nSaludos cordiales,\r\n[SupervisorMobility]";
+
+                                var notynextYearUpdate = await _assyChartService.CreateNotificationAsync(NotifyUpdateNextYear);
+                                NextYearJob.StartDate = FechaActual;
+
+                                await _supervisorMobilityRepository.SaveChangesAsync();
+                            }
+
+                        }
+                        else
                 {
                     IEnumerable<JobCategoryStructure> _checklistCategories = await _supervisorMobilityRepository.GetChecklistCategoriesAsync(false);
                     string jobCategoryStructureIds = "";
@@ -363,10 +380,12 @@ namespace SupervisorMobility.API.Controllers
                     newYearJob.PlantId = jobObservationEntity.PlantId;
                     newYearJob.AreaId = jobObservationEntity.AreaId;
                     newYearJob.DistributionId = jobObservationEntity.DistributionId;
+                    newYearJob.OperationId = jobObservationEntity.OperationId;
 
                     newYearJob.SupervisorId = jobObservationEntity.SupervisorId;
 
                     newYearJob.StartDate = jobObservationForUpdate.FinishedDate.Value.AddYears(1); 
+                    newYearJob.PlannedStartDate = jobObservationForUpdate.FinishedDate.Value.AddYears(1); 
                     newYearJob.EndDate = newYearJob.PlannedStartDate;
 
                     newYearJob.SectionIds = jobCategoryStructureIds;
@@ -376,11 +395,30 @@ namespace SupervisorMobility.API.Controllers
 
                     if(res > 0)
                     {
-                        Console.WriteLine("Crada con exito");
+                        Distribution distribution = await _supervisorMobilityRepository.GetDistributionOnlyIdAsync((int)jobObservationEntity.DistributionId, false);
+
+                        NotificationToCreateDto notifynextYear = new NotificationToCreateDto();
+                        notifynextYear.MadeBy = auser;
+                        notifynextYear.UserId = jobObservationForUpdate.SupervisorId;
+                        notifynextYear.IsAccepted = true;
+                        notifynextYear.IsActive = true;
+                        notifynextYear.NotificationType = $"SOS Anual - New Job Observation";
+                        notifynextYear.NotificationText = "Estimado Supervisor,\\n\\nHemos detectado una Job Observation." +
+                            " A continuación, te informamos sobre las acciones que se tomarán en función del estado del SOS Anual para el próximo año " +
+                            "El sistema procederá a crear una nueva entrada en el SOS Anual con la información proporcionada por la Job Observation.:" +
+                            $"\\n\\n Distribucion: {distribution?.Description} - {distribution?.Code}" +
+                             $"\\n Fecha {newYearJob.StartDate}" +
+                            "\\n\\nPor favor, asegúrate de que la información esté actualizada para evitar posibles inconsistencias.\r\n\r\nSaludos cordiales,\r\n[SupervisorMobility]";
+
+
+                        var notynextYear = await _assyChartService.CreateNotificationAsync(notifynextYear);
+                        await _supervisorMobilityRepository.SaveChangesAsync();
+
                     }
 
                 }
 
+                }
 
             }
 
@@ -540,6 +578,23 @@ namespace SupervisorMobility.API.Controllers
             return Ok();
 
         }
+
+
+        [HttpGet("NextYear")]
+        public async Task<ActionResult<IEnumerable<JobObservationDto>>> GetAllNextYearJobsObservations(int plantId, int areaId, int year)
+        {
+
+            var allJobObservations = await _supervisorMobilityRepository.GetAllNextYearJobsObservations(plantId, areaId, year);
+
+            if (allJobObservations == null)
+            {
+                return NotFound();
+            }
+
+            return Ok(_mapper.Map<IEnumerable<JobObservationDto>>(allJobObservations));
+        }
+
+
 
         [HttpDelete("{jobObservationId}")]
         public async Task<ActionResult> DeleteJobObservation(int jobObservationId)
