@@ -227,7 +227,8 @@ namespace SupervisorMobility.API.Services
             int SOSAnualId = 0, int idUser = 0);
         Task<IEnumerable<JobObservation>> GetJobObservationsByFiltersAsync(DateTime startDate, DateTime endDate, int plantId, int areaId, int distributionId, int operationId, int supervisorId, int status, int userId, int page = 1, int entries = 10, int? sortO = 2, string? sortL = "");
         Task<JobObservation?> GetJobObservationAsync(int jobObservationId, bool includeTree = false, bool includePeople = false, bool includeLup = false, bool includeHistory = false, bool includeCkAnswers = false);
-        Task<JobObservation?> FindNextYearJobObservation(int plantId, int areaId, int DistributionId, int supervisorId, int year);
+        Task<JobObservation?> FindNextYearJobObservation(int plantId, int areaId, int DistributionId, int operationId, int supervisorId, int year);
+        Task<IEnumerable<JobObservation>> GetAllNextYearJobsObservations(int plantId, int areaId, int year);
         Task<int> AddJobObservation(JobObservation jobObservation);
         void DeleteJobObservation(JobObservation jobObservation);
         Task<bool> JobObservationExistAsync(int jobObservationId);
