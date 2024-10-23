@@ -334,15 +334,12 @@ namespace SupervisorMobility.API.Controllers
 
                         if (NextYearJob != null)
                         {
-                            //existe en caso de ser una fecha mas reciente actualizar
-
+                            
                             Distribution distribution = await _supervisorMobilityRepository.GetDistributionOnlyIdAsync((int)jobObservationEntity.DistributionId, false);
 
                             DateTime FechaActual = jobObservationForUpdate.FinishedDate.Value.AddYears(1);
 
-                            if(FechaActual < NextYearJob.StartDate)
-                            {
-
+                            
                                 NotificationToCreateDto NotifyUpdateNextYear = new NotificationToCreateDto();
                                 NotifyUpdateNextYear.MadeBy = auser;
                                 NotifyUpdateNextYear.UserId = jobObservationForUpdate.SupervisorId;
@@ -360,7 +357,7 @@ namespace SupervisorMobility.API.Controllers
                                 NextYearJob.StartDate = FechaActual;
 
                                 await _supervisorMobilityRepository.SaveChangesAsync();
-                            }
+                            
 
                         }
                         else
