@@ -16,6 +16,8 @@ using SupervisorMobility.API.DataAccess.Services.OrderingServices;
 using SupervisorMobility.API.Entities;
 using SupervisorMobility.API.Models.HCIDtos;
 using SupervisorMobility.API.Models.ILURegisterDtos;
+using SupervisorMobility.API.Models.JobObservationDtos;
+using SupervisorMobility.API.Models.JobPaginationDtos;
 using SupervisorMobility.API.Models.KaizenDtos;
 using SupervisorMobility.API.Models.KaizenTransactionDtos;
 using SupervisorMobility.API.Models.PATDtos;
@@ -23,6 +25,7 @@ using SupervisorMobility.API.Models.SOSReviewDtos;
 using SupervisorMobility.API.Models.Users;
 using System.Diagnostics;
 using System.Linq;
+using System.Linq.Expressions;
 using System.Runtime.CompilerServices;
 
 namespace SupervisorMobility.API.Services
@@ -38,7 +41,7 @@ namespace SupervisorMobility.API.Services
         {
             _mapper = mapper;
             _context = context ?? throw new ArgumentNullException(nameof(context));
-            orderingService = orderingService;
+            this.orderingService = orderingService;
         }
 
         #region JobCategoryStructureOperations
@@ -1307,9 +1310,9 @@ namespace SupervisorMobility.API.Services
         #endregion
         #region JobObservationOperations
 
-        public async Task<IEnumerable<JobObservation>> GetJobObservationsByFiltersAsync(DateTime startDate, DateTime endDate, int plantId, int areaId, int distributionId, int operationId, int supervisorId, int status, int userId, int page = 1, int entries = 10, int? sortO = 2, string? sortL = "")
+        public async Task<JOPaginationDto> GetJobObservationsByFiltersAsync(DateTime startDate, DateTime endDate, int jobObsId, int plantId, int areaId, int distributionId, int operationId, int supervisorId, int status, int userId, int typeId, string searchString, int page = 1, int entries = 10, int? sortO = 2, string? sortL = "")
         {
-            var keySelectorExp = orderingService.BuildJOKeySelector<JobObservation>(sortL);
+            Expression<Func<JobObservation, object>>? keySelectorExp = orderingService.BuildJOKeySelector<JobObservation>(sortL);
 
             var query = _context.JobObservations
                 //.Include(a => a.Area)
@@ -1320,6 +1323,16 @@ namespace SupervisorMobility.API.Services
                 //.Include(s => s.Supervisor)
                 //.Include(o => o.Operator).Where(u => u.IsActive == true)
                 .Where(u => u.IsActive == true);
+            IQueryable < Distribution >? dtquery = null;
+            IQueryable < Operation >? opquery = null;
+            IQueryable < User >? oquery = null;
+
+            query = query.Include(a => a.Area)
+                             .Include(p => p.Plant)
+                             .Include(d => d.Distribution)
+                             .Include(o => o.Operation);
+            query = query.Include(s => s.Supervisor)
+                             .Include(o => o.Operator);
 
             if (userId != default)
             {
@@ -1341,17 +1354,18 @@ namespace SupervisorMobility.API.Services
             if (plantId != default(int))
             {
                 query = query.Where(j => j.PlantId == plantId);
-
             }
             if (areaId != default(int))
             {
                 query = query.Where(j => j.AreaId == areaId);
+                dtquery = _context.Distributions.Where(p=>p.AreaId == areaId && p.IsActive==true);
+                oquery = _context.Users.Where(u => u.IsActive == true && u.UserType == 4 && u.PlantId == plantId && u.AreaId == areaId);
             }
 
             if (distributionId != default(int))
             {
                 query = query.Where(j => j.DistributionId == distributionId);
-
+                opquery = _context.Operations.Where(p=>p.DistributionId == distributionId && p.IsActive == true);
             }
             if (operationId != default(int))
             {
@@ -1363,14 +1377,6 @@ namespace SupervisorMobility.API.Services
                 query = query.Where(j => j.SupervisorId == supervisorId);
             }
 
-            if (status == default(int))
-            {
-                query = query.Where(j => j.Status != 7);
-            }
-            if (status != default(int))
-            {
-                query = query.Where(j => j.Status == status);
-            }
             if (startDate != default(DateTime))
             {
                 query = query.Where(j => j.StartDate.HasValue && j.StartDate.Value.Date >= startDate.Date || (j.StartDate.HasValue && j.StartDate.Value.Date <= startDate.Date && (j.EndDate.HasValue && j.EndDate.Value.Date >= startDate.Date)));
@@ -1381,17 +1387,117 @@ namespace SupervisorMobility.API.Services
                 query = query.Where(j => j.StartDate.HasValue && j.StartDate.Value.Date <= endDate.Date);
             }
 
-            query = query.OrderByDynamic(keySelectorExp, sortO);
-
-            if (sortL != "id_field" && sortL != "") 
+            if (!string.IsNullOrEmpty(searchString))
             {
-                query = query.OrderByDescending(p => p.JobObservationId);
+                query = query.Where(p =>
+                    p.JobObservationId.ToString().ToLower().Contains(searchString.ToLower()) ||
+                    p.Distribution.Description.ToLower().Contains(searchString.ToLower()) ||
+                    p.Operation.Description.ToLower().Contains(searchString.ToLower()) ||
+                    p.StartDate.ToString().ToLower().Contains(searchString.ToLower()) ||
+                    p.Operator.Name.ToLower().Contains(searchString.ToLower()) ||
+                    p.Supervisor.Name.ToLower().Contains(searchString.ToLower())
+                );
+            }
+
+            var queryWoutStatus = query;
+
+            if (status != default(int))
+            {
+                query = query.Where(j => j.Status == status);
+            }
+            //else
+            //{
+            //    query = query.Where(j => j.Status != 7);
+            //}
+
+            if (typeId != default)
+            {
+                query = query.Where(j => j.Type == typeId);
+            }
+            else
+            {
+                query = query.Where(j => j.Type != 5);
+            }
+
+            if (sortL != "id_field" && sortL != "")
+            {
+                query = query.OrderByDynamic(keySelectorExp, sortO).ThenByDescending(p => p.JobObservationId);
+            }
+            else
+            {
+                query = query.OrderByDynamic(keySelectorExp, sortO);
             }
 
             //previously returned query.OrderBy(c => c.StartDate)
-
-            return await query.Skip((page - 1) * entries)
+            int count = query.Count();
+            var list = await query.Skip((page - 1) * entries)
                         .Take(entries).ToListAsync();
+
+            if (jobObsId != default)
+            {
+                list.Clear();
+                list.Add(await _context.JobObservations.Include(a => a.Area)
+                             .Include(p => p.Plant)
+                             .Include(d => d.Distribution)
+                             .Include(o => o.Operation)
+                             .Include(s => s.Supervisor)
+                                 .Include(o => o.Operator)
+                    .FirstOrDefaultAsync(p=>p.JobObservationId == jobObsId));
+            }
+
+            JOCountPaginationDto counts = new();
+
+            counts.DistributionCount = new();
+            if (dtquery != null)
+            {
+                var dist = await dtquery.ToListAsync();
+                foreach(var item in dist)
+                {
+                    JOCount jOCount = new JOCount { id = item.DistributionId, count = query.Count(j=>j.DistributionId == item.DistributionId) };
+                    counts.DistributionCount.Add(jOCount);
+                }
+            }
+
+            counts.OperationCount = new();
+            if (opquery != null)
+            {
+                var oper = await opquery.ToListAsync();
+                foreach (var item in oper)
+                {
+                    JOCount jOCount = new JOCount { id = item.OperationId, count = query.Count(j => j.OperationId == item.OperationId) };
+                    counts.OperationCount.Add(jOCount);
+                }
+            }
+
+            counts.OperatorCount = new();
+            if (oquery != null)
+            {
+                var o = await oquery.ToListAsync();
+                foreach (var item in o)
+                {
+                    JOCount jOCount = new JOCount { id = item.UserId, count = query.Count(j => j.OperatorId == item.UserId) };
+                    counts.OperatorCount.Add(jOCount);
+                }
+            }
+
+            counts.StatusCount = new();
+            foreach (var sts in new[] { 1, 2, 3, 4, 5, 6, 7 })
+            {
+                JOCount jOCount = new JOCount { id = sts, count = queryWoutStatus.Count(j=>j.Status == sts) };
+                counts.StatusCount.Add(jOCount);
+            }
+
+            JOCount typeCount = new JOCount { id=44, count = query.Count(j=>j.Type == 4) };
+            counts.StatusCount.Add(typeCount);
+
+            JOPaginationDto response = new JOPaginationDto
+            {
+                JobObservations = _mapper.Map<IEnumerable<JobObservationDto>>(list),
+                Total = count,
+                CountPagination = counts
+            };
+
+            return response;
 
         }
 
