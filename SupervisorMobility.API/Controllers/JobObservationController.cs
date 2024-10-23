@@ -12,6 +12,7 @@ using SupervisorMobility.API.Models.ADUser;
 using SupervisorMobility.API.Models.ChecklistAnswerDtos;
 using SupervisorMobility.API.Models.FileUploadDto;
 using SupervisorMobility.API.Models.JobObservationDtos;
+using SupervisorMobility.API.Models.JobPaginationDtos;
 using SupervisorMobility.API.Models.NotificationDtos;
 using SupervisorMobility.API.Services;
 
@@ -167,9 +168,10 @@ namespace SupervisorMobility.API.Controllers
 
 
         [HttpGet("filters")]
-        public async Task<ActionResult<IEnumerable<JobObservationDto>>> GetJobObservationsByFilters(
+        public async Task<ActionResult<JOPaginationDto>> GetJobObservationsByFilters(
             DateTime startDate,
             DateTime endDate,
+            int jobObsId,
             int plantId,
             int areaId,
             int distributionId,
@@ -177,11 +179,14 @@ namespace SupervisorMobility.API.Controllers
             int supervisorId,
             int status,
             int userId,
+            int typeId,
+            string? searchString,
             int page, int entries, int? sortO, string? sortL)
         {
 
-            var allJobObservations = await _supervisorMobilityRepository.GetJobObservationsByFiltersAsync(startDate, endDate, plantId, areaId, distributionId, operationId, supervisorId, status, userId, page, entries, sortO, sortL);
-            return Ok(_mapper.Map<IEnumerable<JobObservationDto>>(allJobObservations));
+            var allJobObservations = await _supervisorMobilityRepository.GetJobObservationsByFiltersAsync(startDate, endDate, jobObsId, plantId, areaId, distributionId, operationId, supervisorId, status, userId, typeId, searchString, page, entries, sortO, sortL);
+            
+            return Ok(allJobObservations);
         }
 
         [HttpGet]

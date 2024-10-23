@@ -11,6 +11,7 @@ using SupervisorMobility.API.Models.SOSReviewDtos;
 using SupervisorMobility.API.Models.Users;
 using System.Runtime.CompilerServices;
 using SupervisorMobility.API.Models.ILURegisterDtos;
+using SupervisorMobility.API.Models.JobPaginationDtos;
 
 
 namespace SupervisorMobility.API.Services
@@ -225,7 +226,7 @@ namespace SupervisorMobility.API.Services
         Task<IEnumerable<JobObservation>> GetAllJobObservationsAsync(bool includeTree = false, bool includePeople = false, bool includeLup = false,
             bool includeHistory = false, bool includeCkAnswers = false, int idPlant = 0, int idArea = 0, bool ForSosProgram = false, int year = 0, int month = 0,
             int SOSAnualId = 0, int idUser = 0);
-        Task<IEnumerable<JobObservation>> GetJobObservationsByFiltersAsync(DateTime startDate, DateTime endDate, int plantId, int areaId, int distributionId, int operationId, int supervisorId, int status, int userId, int page = 1, int entries = 10, int? sortO = 2, string? sortL = "");
+        Task<JOPaginationDto> GetJobObservationsByFiltersAsync(DateTime startDate, DateTime endDate, int jobObsId, int plantId, int areaId, int distributionId, int operationId, int supervisorId, int status, int userId, int typeId, string searchString, int page = 1, int entries = 10, int? sortO = 2, string? sortL = "");
         Task<JobObservation?> GetJobObservationAsync(int jobObservationId, bool includeTree = false, bool includePeople = false, bool includeLup = false, bool includeHistory = false, bool includeCkAnswers = false);
         Task<JobObservation?> FindNextYearJobObservation(int plantId, int areaId, int DistributionId, int operationId, int supervisorId, int year);
         Task<IEnumerable<JobObservation>> GetAllNextYearJobsObservations(int plantId, int areaId, int year);
