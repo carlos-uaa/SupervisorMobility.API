@@ -226,7 +226,7 @@ namespace SupervisorMobility.API.Services
             bool includeHistory = false, bool includeCkAnswers = false, int idPlant = 0, int idArea = 0, bool ForSosProgram = false, int year = 0, int month = 0,
             int SOSAnualId = 0, int idUser = 0);
         Task<IEnumerable<JobObservation>> GetJobObservationsByFiltersAsync(DateTime startDate, DateTime endDate, int plantId, int areaId, int distributionId, int operationId, int supervisorId, int status);
-        Task<JobObservation?> GetJobObservationAsync(int jobObservationId, bool includeTree = false, bool includePeople = false, bool includeLup = false, bool includeHistory = false, bool includeCkAnswers = false);
+        Task<JobObservation?> GetJobObservationAsync(int jobObservationId, bool includeTree = false, bool includePeople = false, bool includeLup = false, bool includeHistory = false, bool includeCkAnswers = false, bool includeOperations = false);
         Task<JobObservation?> FindNextYearJobObservation(int plantId, int areaId, int DistributionId, int operationId, int supervisorId, int year);
         Task<IEnumerable<JobObservation>> GetAllNextYearJobsObservations(int plantId, int areaId, int year);
         Task<int> AddJobObservation(JobObservation jobObservation);

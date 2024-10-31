@@ -1334,7 +1334,7 @@ namespace SupervisorMobility.API.Services
             }
             if (operationId != default(int))
             {
-                query = query.Where(j => j.OperationId == operationId);
+                query = query.Where(j => j.Operations.Any(o => o.OperationId == operationId));
             }
 
             if (supervisorId != default(int))
@@ -1408,7 +1408,7 @@ namespace SupervisorMobility.API.Services
                 query = query.Include(a => a.Area)
                              .Include(p => p.Plant)
                              .Include(d => d.Distribution)
-                             .Include(o => o.Operation);
+                             .Include(o => o.Operations);
             }
 
             if (includePeople)
@@ -1536,7 +1536,7 @@ namespace SupervisorMobility.API.Services
 
 
 
-        public async Task<JobObservation?> GetJobObservationAsync(int jobObservationId, bool includeTree = false, bool includePeople = false, bool includeLup = false, bool includeHistory = false, bool includeCkAnswers = false)
+        public async Task<JobObservation?> GetJobObservationAsync(int jobObservationId, bool includeTree = false, bool includePeople = false, bool includeLup = false, bool includeHistory = false, bool includeCkAnswers = false, bool includeOperations = false)
         {
             var query = _context.JobObservations.Where(p => p.JobObservationId == jobObservationId);
 
@@ -1545,8 +1545,13 @@ namespace SupervisorMobility.API.Services
                 query = query.Include(a => a.Area)
                              .Include(p => p.Plant)
                              .Include(d => d.Distribution)
-                             .Include(o => o.Operation)
+                             .Include(o => o.Operations)
                              .Include(s => s.SignatureImage);
+            }   
+            
+            if (includeOperations)
+            {
+                query = query.Include(o => o.Operations);
             }
 
             if (includePeople)
@@ -1706,7 +1711,7 @@ namespace SupervisorMobility.API.Services
             }
             if (operationId != default(int))
             {
-                query = query.Where(j => j.OperationId == operationId);
+                query = query.Where(j => j.Operations.Any(o => o.OperationId == operationId));
             }
 
             if (supervisorId != default(int))

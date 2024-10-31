@@ -8,7 +8,7 @@
         public int? PlantId { get; set; }
         public int? AreaId { get; set; }
         public int? DistributionId { get; set; }
-        public int? OperationId { get; set; }
+        //public int? OperationId { get; set; }
         public int? SupervisorId { get; set; }
         public int? OperatorId { get; set; }
         public int? Type { get; set; }

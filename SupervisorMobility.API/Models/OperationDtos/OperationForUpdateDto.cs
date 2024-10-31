@@ -4,6 +4,8 @@ namespace SupervisorMobility.API.Models.OperationDtos
 {
     public class OperationForUpdateDto
     {
+        public int? OperationId { get; set; }
+
         [Required]
         [MaxLength(50)]
         public string Code { get; set; } = string.Empty;
