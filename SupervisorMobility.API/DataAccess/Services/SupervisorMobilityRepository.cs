@@ -1330,7 +1330,7 @@ namespace SupervisorMobility.API.Services
             query = query.Include(a => a.Area)
                              .Include(p => p.Plant)
                              .Include(d => d.Distribution)
-                             .Include(o => o.Operation);
+                             .Include(o => o.Operations);
             query = query.Include(s => s.Supervisor)
                              .Include(o => o.Operator);
 
@@ -1392,7 +1392,7 @@ namespace SupervisorMobility.API.Services
                 query = query.Where(p =>
                     p.JobObservationId.ToString().ToLower().Contains(searchString.ToLower()) ||
                     p.Distribution.Description.ToLower().Contains(searchString.ToLower()) ||
-                    p.Operation.Description.ToLower().Contains(searchString.ToLower()) ||
+                    p.Operations.Any(o=>o.Description.ToLower().Contains(searchString.ToLower())) ||
                     p.StartDate.ToString().ToLower().Contains(searchString.ToLower()) ||
                     p.Operator.Name.ToLower().Contains(searchString.ToLower()) ||
                     p.Supervisor.Name.ToLower().Contains(searchString.ToLower())
@@ -1437,7 +1437,7 @@ namespace SupervisorMobility.API.Services
                 list.Add(await _context.JobObservations.Include(a => a.Area)
                              .Include(p => p.Plant)
                              .Include(d => d.Distribution)
-                             .Include(o => o.Operation)
+                             .Include(o => o.Operations)
                              .Include(s => s.Supervisor)
                                  .Include(o => o.Operator)
                     .FirstOrDefaultAsync(p=>p.JobObservationId == jobObsId));
@@ -1462,7 +1462,7 @@ namespace SupervisorMobility.API.Services
                 var oper = await opquery.ToListAsync();
                 foreach (var item in oper)
                 {
-                    JOCount jOCount = new JOCount { id = item.OperationId, count = query.Count(j => j.OperationId == item.OperationId) };
+                    JOCount jOCount = new JOCount { id = item.OperationId, count = query.Count(j => j.Operations.Any(e=> e.OperationId == item.OperationId)) };
                     counts.OperationCount.Add(jOCount);
                 }
             }
