@@ -1362,21 +1362,6 @@ namespace SupervisorMobility.API.Services
                 oquery = _context.Users.Where(u => u.IsActive == true && u.UserType == 4 && u.PlantId == plantId && u.AreaId == areaId);
             }
 
-            if (distributionId != default(int))
-            {
-                query = query.Where(j => j.DistributionId == distributionId);
-                opquery = _context.Operations.Where(p=>p.DistributionId == distributionId && p.IsActive == true);
-            }
-            if (operationId != default(int))
-            {
-                query = query.Where(j => j.OperationId == operationId);
-            }
-
-            if (supervisorId != default(int))
-            {
-                query = query.Where(j => j.SupervisorId == supervisorId);
-            }
-
             if (startDate != default(DateTime))
             {
                 query = query.Where(j => j.StartDate.HasValue && j.StartDate.Value.Date >= startDate.Date || (j.StartDate.HasValue && j.StartDate.Value.Date <= startDate.Date && (j.EndDate.HasValue && j.EndDate.Value.Date >= startDate.Date)));
@@ -1399,8 +1384,6 @@ namespace SupervisorMobility.API.Services
                 );
             }
 
-            var queryWoutStatus = query;
-
             if (status != default(int))
             {
                 query = query.Where(j => j.Status == status);
@@ -1417,6 +1400,24 @@ namespace SupervisorMobility.API.Services
             else
             {
                 query = query.Where(j => j.Type != 5);
+            }
+
+            var DistQuery = query;
+
+            if (distributionId != default(int))
+            {
+                query = query.Where(j => j.DistributionId == distributionId);
+                opquery = _context.Operations.Where(p=>p.DistributionId == distributionId && p.IsActive == true);
+            }
+
+            if (operationId != default(int))
+            {
+                query = query.Where(j => j.OperationId == operationId);
+            }
+
+            if (supervisorId != default(int))
+            {
+                query = query.Where(j => j.SupervisorId == supervisorId);
             }
 
             if (sortL != "id_field" && sortL != "")
@@ -1483,7 +1484,7 @@ namespace SupervisorMobility.API.Services
             counts.StatusCount = new();
             foreach (var sts in new[] { 1, 2, 3, 4, 5, 6, 7 })
             {
-                JOCount jOCount = new JOCount { id = sts, count = queryWoutStatus.Count(j=>j.Status == sts) };
+                JOCount jOCount = new JOCount { id = sts, count = query.Count(j=>j.Status == sts) };
                 counts.StatusCount.Add(jOCount);
             }
 
