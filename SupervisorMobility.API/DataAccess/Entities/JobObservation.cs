@@ -18,8 +18,11 @@ namespace SupervisorMobility.API.Entities
         public int? AreaId { get; set; }
         public Distribution? Distribution { get; set; }
         public int? DistributionId { get; set; }
-        public Operation? Operation { get; set; }
-        public int? OperationId { get; set; }
+        //public Operation? Operation { get; set; }
+        //public int? OperationId { get; set; }
+
+        public ICollection<Operation> Operations { get; set; } = new List<Operation>();
+
         //whit people
         public User? Supervisor { get; set; }
         public User? Operator { get; set; }

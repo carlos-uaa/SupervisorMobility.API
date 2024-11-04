@@ -165,6 +165,11 @@ namespace SupervisorMobility.API.Context
                 .Property(p => p.IsActive)
                 .HasDefaultValue(true);
 
+            modelBuilder.Entity<JobObservation>()
+               .HasMany(s => s.Operations)  
+               .WithMany(u => u.JobObservations)  
+               .UsingEntity(join => join.ToTable("JobOperations")); // Nombre de la tabla intermedia
+
 
             modelBuilder.Entity<Plant>()
                 .Property(p => p.IsActive)
@@ -366,7 +371,6 @@ namespace SupervisorMobility.API.Context
                 .WithMany(u => u.SosHubsApproverOwners)  // Usuario puede estar en múltiples SOSHub como ApproverOwners
                 .UsingEntity(join => join.ToTable("SOSHubApproverOwners")); // Nombre de la tabla intermedia
 
-            // Configurar la relación entre SOSHub y User para ReviewerEditors
             modelBuilder.Entity<SOSHub>()
                 .HasMany(s => s.ReviewerEditors)  // SOSHub tiene muchos ReviewerEditors
                 .WithMany(u => u.SosHubsReviewerEditors)  // Usuario puede estar en múltiples SOSHub como ReviewerEditors
