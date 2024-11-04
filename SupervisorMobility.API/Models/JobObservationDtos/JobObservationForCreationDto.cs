@@ -1,4 +1,5 @@
 ﻿using SupervisorMobility.API.DataAccess.Entities;
+using SupervisorMobility.API.Models.OperationDtos;
 
 namespace SupervisorMobility.API.Models.JobObservationDtos
 {
@@ -11,7 +12,8 @@ namespace SupervisorMobility.API.Models.JobObservationDtos
         public int PlantId { get; set; }
         public int AreaId { get; set; }
         public int DistributionId { get; set; }
-        public int OperationId { get; set; }
+        //public int OperationId { get; set; }
+        public ICollection<OperationWithoutNavigationPropertiesDto>? Operations { get; set; } = new List<OperationWithoutNavigationPropertiesDto>();
 
         public int SupervisorId { get; set; }
         public int? OperatorId { get; set; }

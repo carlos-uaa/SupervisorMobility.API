@@ -1362,6 +1362,21 @@ namespace SupervisorMobility.API.Services
                 oquery = _context.Users.Where(u => u.IsActive == true && u.UserType == 4 && u.PlantId == plantId && u.AreaId == areaId);
             }
 
+            if (distributionId != default(int))
+            {
+                query = query.Where(j => j.DistributionId == distributionId);
+                opquery = _context.Operations.Where(p=>p.DistributionId == distributionId && p.IsActive == true);
+            }
+            if (operationId != default(int))
+            {
+                query = query.Where(j => j.Operations.Any(o => o.OperationId == operationId));
+            }
+
+            if (supervisorId != default(int))
+            {
+                query = query.Where(j => j.SupervisorId == supervisorId);
+            }
+
             if (startDate != default(DateTime))
             {
                 query = query.Where(j => j.StartDate.HasValue && j.StartDate.Value.Date >= startDate.Date || (j.StartDate.HasValue && j.StartDate.Value.Date <= startDate.Date && (j.EndDate.HasValue && j.EndDate.Value.Date >= startDate.Date)));
@@ -1400,24 +1415,6 @@ namespace SupervisorMobility.API.Services
             else
             {
                 query = query.Where(j => j.Type != 5);
-            }
-
-            var DistQuery = query;
-
-            if (distributionId != default(int))
-            {
-                query = query.Where(j => j.DistributionId == distributionId);
-                opquery = _context.Operations.Where(p=>p.DistributionId == distributionId && p.IsActive == true);
-            }
-
-            if (operationId != default(int))
-            {
-                query = query.Where(j => j.OperationId == operationId);
-            }
-
-            if (supervisorId != default(int))
-            {
-                query = query.Where(j => j.SupervisorId == supervisorId);
             }
 
             if (sortL != "id_field" && sortL != "")
@@ -1544,7 +1541,7 @@ namespace SupervisorMobility.API.Services
                 query = query.Include(a => a.Area)
                              .Include(p => p.Plant)
                              .Include(d => d.Distribution)
-                             .Include(o => o.Operation);
+                             .Include(o => o.Operations);
             }
 
             if (includePeople)
@@ -1672,7 +1669,7 @@ namespace SupervisorMobility.API.Services
 
 
 
-        public async Task<JobObservation?> GetJobObservationAsync(int jobObservationId, bool includeTree = false, bool includePeople = false, bool includeLup = false, bool includeHistory = false, bool includeCkAnswers = false)
+        public async Task<JobObservation?> GetJobObservationAsync(int jobObservationId, bool includeTree = false, bool includePeople = false, bool includeLup = false, bool includeHistory = false, bool includeCkAnswers = false, bool includeOperations = false)
         {
             var query = _context.JobObservations.Where(p => p.JobObservationId == jobObservationId);
 
@@ -1681,8 +1678,13 @@ namespace SupervisorMobility.API.Services
                 query = query.Include(a => a.Area)
                              .Include(p => p.Plant)
                              .Include(d => d.Distribution)
-                             .Include(o => o.Operation)
+                             .Include(o => o.Operations)
                              .Include(s => s.SignatureImage);
+            }   
+            
+            if (includeOperations)
+            {
+                query = query.Include(o => o.Operations);
             }
 
             if (includePeople)
@@ -1842,7 +1844,7 @@ namespace SupervisorMobility.API.Services
             }
             if (operationId != default(int))
             {
-                query = query.Where(j => j.OperationId == operationId);
+                query = query.Where(j => j.Operations.Any(o => o.OperationId == operationId));
             }
 
             if (supervisorId != default(int))

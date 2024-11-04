@@ -63,10 +63,10 @@ namespace SupervisorMobility.API.Controllers
 
             var finalJob = _mapper.Map<JobObservation>(JobEntity);
 
-            if (finalJob.OperationId == 0)
-            {
-                finalJob.OperationId = null;
-            }
+            //if (finalJob.OperationId == 0)
+            //{
+            //    finalJob.OperationId = null;
+            //}
 
             if (finalJob.OperatorId == 0)
             {
@@ -96,7 +96,7 @@ namespace SupervisorMobility.API.Controllers
             finalSOSReg.Month = month;
             finalSOSReg.Year = year;
             finalSOSReg.JobObservationId = finalJob.JobObservationId;
-            finalSOSReg.OperationId = finalJob.OperationId;
+            finalSOSReg.OperationId = finalJob.Operations.FirstOrDefault().OperationId;
 
 
             var result = await _supervisorMobilityRepository.AddSOSReviewRegister(finalSOSReg);
@@ -159,11 +159,11 @@ namespace SupervisorMobility.API.Controllers
                 {
                     try
                     {
-                        if (JobRegisterExist.Any(j => j.OperationId == job.OperationId))
+                        if (JobRegisterExist.Any(j => j.OperationId == job.Operations.FirstOrDefault().OperationId))
                         {
                             Debug.WriteLine($"Ya exite el registro ");
 
-                            var jobObservationEntity = JobRegisterExist.ToList().Find(j => j.OperationId == job.OperationId).JobObservation;
+                            var jobObservationEntity = JobRegisterExist.ToList().Find(j => j.OperationId == job.Operations.FirstOrDefault().OperationId).JobObservation;
                             var ForUpdate = _mapper.Map<JobObservationForUpdateDto>(jobObservationEntity);
 
                             ForUpdate.SupervisorId = job.SupervisorId;
@@ -186,7 +186,7 @@ namespace SupervisorMobility.API.Controllers
 
                             }
 
-                            var RegUserOpEntity = UserOpRegistersExist.ToList().Find(r => r.OperationId == job.OperationId);
+                            var RegUserOpEntity = UserOpRegistersExist.ToList().Find(r => r.OperationId == job.Operations.FirstOrDefault().OperationId);
 
                             if (RegUserOpEntity != null)
                             {
@@ -201,13 +201,13 @@ namespace SupervisorMobility.API.Controllers
                             {
                                 SOSRegUserOperation SOSRegUserOp = new();
                                 SOSRegUserOp.SOSReviewProgramid = sos_id;
-                                SOSRegUserOp.OperationId = job.OperationId;
+                                SOSRegUserOp.OperationId = job.Operations.FirstOrDefault().OperationId;
                                 SOSRegUserOp.SupervisorId = job.SupervisorId;
 
                                 var CreateRegUserOper = await _supervisorMobilityRepository.AddSOSRegUserOperation(SOSRegUserOp);
                             }
 
-                            var RegJobEntity = JobRegisterExist.ToList().Find(r => r.OperationId == job.OperationId);
+                            var RegJobEntity = JobRegisterExist.ToList().Find(r => r.OperationId == job.Operations.FirstOrDefault().OperationId);
 
                             if (RegJobEntity != null)
                             {
@@ -225,7 +225,7 @@ namespace SupervisorMobility.API.Controllers
                                 finalSOSReg.Month = job.StartDate.Value.Month;
                                 finalSOSReg.Year = job.StartDate.Value.Year;
                                 finalSOSReg.JobObservationId = jobObservationEntity.JobObservationId;
-                                finalSOSReg.OperationId = jobObservationEntity.OperationId;
+                                finalSOSReg.OperationId = jobObservationEntity.Operations.FirstOrDefault().OperationId;
 
                                 var CreateRegJobOper = await _supervisorMobilityRepository.AddSOSReviewRegister(finalSOSReg);
                             }
@@ -249,14 +249,14 @@ namespace SupervisorMobility.API.Controllers
                                 finalSOSReg.Month = job.StartDate.Value.Month;
                                 finalSOSReg.Year = job.StartDate.Value.Year;
                                 finalSOSReg.JobObservationId = finalJob.JobObservationId;
-                                finalSOSReg.OperationId = finalJob.OperationId;
+                                finalSOSReg.OperationId = finalJob.Operations.FirstOrDefault().OperationId;
 
                                 var resultcreate = await _supervisorMobilityRepository.AddSOSReviewRegister(finalSOSReg);
 
 
                                 SOSRegUserOperation SOSRegUserOp = new();
                                 SOSRegUserOp.SOSReviewProgramid = sos_id;
-                                SOSRegUserOp.OperationId = job.OperationId;
+                                SOSRegUserOp.OperationId = job.Operations.FirstOrDefault().OperationId;
                                 SOSRegUserOp.SupervisorId = job.SupervisorId;
 
                                 var CreateRegUserOper = await _supervisorMobilityRepository.AddSOSRegUserOperation(SOSRegUserOp);
@@ -267,10 +267,10 @@ namespace SupervisorMobility.API.Controllers
 
                                 var finalJob = _mapper.Map<JobObservation>(job);
 
-                                if (finalJob.OperationId == 0)
-                                {
-                                    finalJob.OperationId = null;
-                                }
+                                //if (finalJob.OperationId == 0)
+                                //{
+                                //    finalJob.OperationId = null;
+                                //}
                                 finalJob.PlannedStartDate = finalJob.StartDate;
 
                                 await _supervisorMobilityRepository.AddJobObservation(finalJob);
@@ -280,14 +280,14 @@ namespace SupervisorMobility.API.Controllers
                                 finalSOSReg.Month = job.StartDate.Value.Month;
                                 finalSOSReg.Year = job.StartDate.Value.Year;
                                 finalSOSReg.JobObservationId = finalJob.JobObservationId;
-                                finalSOSReg.OperationId = finalJob.OperationId;
+                                finalSOSReg.OperationId = finalJob.Operations.FirstOrDefault().OperationId;
 
                                 var resultcreate = await _supervisorMobilityRepository.AddSOSReviewRegister(finalSOSReg);
 
 
                                 SOSRegUserOperation SOSRegUserOp = new();
                                 SOSRegUserOp.SOSReviewProgramid = sos_id;
-                                SOSRegUserOp.OperationId = job.OperationId;
+                                SOSRegUserOp.OperationId = job.Operations.FirstOrDefault().OperationId;
                                 SOSRegUserOp.SupervisorId = job.SupervisorId;
 
                                 var CreateRegUserOper = await _supervisorMobilityRepository.AddSOSRegUserOperation(SOSRegUserOp);
@@ -304,7 +304,7 @@ namespace SupervisorMobility.API.Controllers
                     }
                     catch (Exception ex)
                     {
-                        Console.WriteLine($"falló job {job.OperationId}: {ex.Message}");
+                        Console.WriteLine($"falló job {job.Operations.FirstOrDefault().OperationId}: {ex.Message}");
 
                         // Incrementa el número de intentos
 
