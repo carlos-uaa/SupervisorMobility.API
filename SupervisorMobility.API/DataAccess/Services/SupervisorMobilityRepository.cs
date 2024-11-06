@@ -1379,12 +1379,12 @@ namespace SupervisorMobility.API.Services
 
             if (startDate != default(DateTime))
             {
-                query = query.Where(j => j.StartDate.HasValue && j.StartDate.Value.Date >= startDate.Date || (j.StartDate.HasValue && j.StartDate.Value.Date <= startDate.Date && (j.EndDate.HasValue && j.EndDate.Value.Date >= startDate.Date)));
+                query = query.Where(j => j.StartDate.HasValue && j.StartDate.Value.Date >= startDate.Date /*|| (j.StartDate.HasValue && j.StartDate.Value.Date >= startDate.Date && (j.EndDate.HasValue && j.EndDate.Value.Date <= startDate.Date))*/);
             }
-
-            if (endDate != default(DateTime))
+            else if (endDate != default(DateTime))
             {
-                query = query.Where(j => j.StartDate.HasValue && j.StartDate.Value.Date <= endDate.Date);
+                endDate = endDate.AddDays(1);
+                query = query.Where(j => j.StartDate.HasValue && j.StartDate.Value <= endDate);
             }
 
             if (!string.IsNullOrEmpty(searchString))
@@ -1398,6 +1398,8 @@ namespace SupervisorMobility.API.Services
                     p.Supervisor.Name.ToLower().Contains(searchString.ToLower())
                 );
             }
+
+            var queryWoutStatus = query;
 
             if (status != default(int))
             {
@@ -1481,11 +1483,11 @@ namespace SupervisorMobility.API.Services
             counts.StatusCount = new();
             foreach (var sts in new[] { 1, 2, 3, 4, 5, 6, 7 })
             {
-                JOCount jOCount = new JOCount { id = sts, count = query.Count(j=>j.Status == sts) };
+                JOCount jOCount = new JOCount { id = sts, count = queryWoutStatus.Count(j=>j.Status == sts) };
                 counts.StatusCount.Add(jOCount);
             }
 
-            JOCount typeCount = new JOCount { id=44, count = query.Count(j=>j.Type == 4) };
+            JOCount typeCount = new JOCount { id=44, count = queryWoutStatus.Count(j=>j.Type == 4) };
             counts.StatusCount.Add(typeCount);
 
             JOPaginationDto response = new JOPaginationDto
