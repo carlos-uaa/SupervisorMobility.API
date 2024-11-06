@@ -235,14 +235,20 @@ namespace SupervisorMobility.API.Controllers
                         {
                             Debug.WriteLine($"No Exite");
 
-                            if (job.JobObservationId != null)
+                            if (job.JobObservationId != null && job.JobObservationId  != 0 )
                             {
 
                                 var finalJob = await _supervisorMobilityRepository.GetJobObservationAsync((int)job.JobObservationId);
                                     
                                 _mapper.Map(job, finalJob);
 
-                              
+                                finalJob.Operations = new List<Operation>();
+
+                                foreach (var op in job.Operations)
+                                {
+                                    Operation opAdd = await _supervisorMobilityRepository.GetOperationForDistributionAsync(job.DistributionId, op.OperationId);
+                                    finalJob.Operations.Add(opAdd);
+                                }
 
                                 SOSRegisterJobObservation finalSOSReg = new();
                                 finalSOSReg.SOSReviewProgramid = sos_id;
@@ -272,6 +278,14 @@ namespace SupervisorMobility.API.Controllers
                                 //    finalJob.OperationId = null;
                                 //}
                                 finalJob.PlannedStartDate = finalJob.StartDate;
+
+                                finalJob.Operations = new List<Operation>();
+
+                                foreach (var op in job.Operations)
+                                {
+                                    Operation opAdd = await _supervisorMobilityRepository.GetOperationForDistributionAsync(job.DistributionId, op.OperationId);
+                                    finalJob.Operations.Add(opAdd);
+                                }
 
                                 await _supervisorMobilityRepository.AddJobObservation(finalJob);
 
