@@ -16,7 +16,7 @@ namespace SupervisorMobility.API.DataAccess.Services.OrderingServices
                 case 2:
                     return source.OrderByDescending(keySelector);
                 default:
-                    return (IOrderedQueryable<TSource>)source;
+                    return source.OrderBy(x => 1);
             }
         }
     }

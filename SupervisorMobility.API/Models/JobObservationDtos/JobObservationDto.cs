@@ -24,6 +24,7 @@ namespace SupervisorMobility.API.Models.JobObservationDtos
         public ICollection<LupDto> Lup { get; set; } = new List<LupDto>();
         //Whit History
         public ICollection<JobObservationHistoryDto> History { get; set; } = new List<JobObservationHistoryDto>();
+        public ICollection<OperationWithoutNavigationPropertiesDto>? Operations { get; set; } = new List<OperationWithoutNavigationPropertiesDto>();
         //Whit  answers to questions
         public ICollection<ChecklistAnswerDto>? checklistAnswers { get; set; } = new List<ChecklistAnswerDto>();
 
@@ -35,7 +36,7 @@ namespace SupervisorMobility.API.Models.JobObservationDtos
         public int? PlantId { get; set; }
         public int? AreaId { get; set; }
         public int? DistributionId { get; set; }
-        public int? OperationId { get; set; }
+        //public int? OperationId { get; set; }
         public int? SupervisorId { get; set; }
         public int? OperatorId { get; set; }
         public int? Type { get; set; }
@@ -64,6 +65,9 @@ namespace SupervisorMobility.API.Models.JobObservationDtos
         public string? TaktTime { get; set; }
         public string? Questions { get; set; }
         public int? ProductId { get; set; }
+
+        public string? ProductIds { get; set; }
+        public string? ProductSpecifications { get; set; }
 
         public string? OperationTimesJson { get; set; }
         public string? StepsNumber { get; set; }

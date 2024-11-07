@@ -8,7 +8,7 @@
         public int? PlantId { get; set; }
         public int? AreaId { get; set; }
         public int? DistributionId { get; set; }
-        public int? OperationId { get; set; }
+        //public int? OperationId { get; set; }
         public int? SupervisorId { get; set; }
         public int? OperatorId { get; set; }
         public int? Type { get; set; }
@@ -38,6 +38,9 @@
         public string? TaktTime { get; set; }
         public string? Questions { get; set; }
         public int? ProductId { get; set; }
+
+        public string? ProductIds { get; set; }
+        public string? ProductSpecifications { get; set; }
 
         public string? OperationTimesJson { get; set; }
         public string? StepsNumber { get; set; }
