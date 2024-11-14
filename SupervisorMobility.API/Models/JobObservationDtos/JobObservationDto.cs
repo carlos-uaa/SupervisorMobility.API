@@ -16,7 +16,7 @@ namespace SupervisorMobility.API.Models.JobObservationDtos
         public PlantDto Plant { get; set; } = new PlantDto();
         public AreaWithoutNavigationPropertiesDto? Area { get; set; } = new AreaWithoutNavigationPropertiesDto();
         public DistributionWithoutNavigationPropertiesDto Distribution { get; set; } = new DistributionWithoutNavigationPropertiesDto();
-        public OperationWithoutNavigationPropertiesDto Operation { get; set; } = new OperationWithoutNavigationPropertiesDto();
+        //public OperationWithoutNavigationPropertiesDto Operation { get; set; } = new OperationWithoutNavigationPropertiesDto();
         //whit people
         public UsersWithoutNavigationWithoutPeopleDetails Supervisor { get; set; } = new UsersWithoutNavigationWithoutPeopleDetails();
         public UsersWithoutPeopleWithNavigation? Operator { get; set; } = new UsersWithoutPeopleWithNavigation();
