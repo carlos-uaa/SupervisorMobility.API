@@ -1659,7 +1659,7 @@ namespace SupervisorMobility.API.Services
          public async Task<IEnumerable<JobObservation>> GetAllNextYearJobsObservations(int plantId, int areaId, int year)
         {
 
-            var query = _context.JobObservations.Where(j => j.IsActive == true && j.Type == 5);
+            var query = _context.JobObservations.Include(jo => jo.Operations).Where(j => j.IsActive == true && j.Type == 5);
 
             
             if (plantId != 0)

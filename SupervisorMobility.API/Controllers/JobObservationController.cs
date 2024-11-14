@@ -342,16 +342,17 @@ namespace SupervisorMobility.API.Controllers
                 if (jobObservationEntity.PlantId != null && jobObservationEntity.AreaId != null && jobObservationEntity.DistributionId != null && jobObservationEntity.Operations.FirstOrDefault() != null)
                 {
 
-
-                    List<JobObservation>? nextYearJobs = await _supervisorMobilityRepository.FindNextYearJobObservations(
+                   
+                    List<JobObservation>? nextYearJobs = await _supervisorMobilityRepository.FindNextYearJobObservations( 
                         (int)jobObservationEntity.PlantId,
                         (int)jobObservationEntity.AreaId,
                         (int)jobObservationEntity.DistributionId,
                         jobObservationEntity.Operations,
                         (int)jobObservationEntity.SupervisorId,
-                        jobObservationEntity.FinishedDate.Value.Year + 1);
+                        jobObservationForUpdate.FinishedDate.Value.Year + 1);
 
                     IEnumerable<JobCategoryStructure> _checklistCategories = await _supervisorMobilityRepository.GetChecklistCategoriesAsync(false);
+                    
                     string jobCategoryStructureIds = "";
                     foreach (var category in _checklistCategories)
                     {
@@ -370,13 +371,20 @@ namespace SupervisorMobility.API.Controllers
                         newYearJob.AreaId = jobObservationEntity.AreaId;
                         newYearJob.DistributionId = jobObservationEntity.DistributionId;
 
-                        //newYearJob.OperationId = jobObservationEntity.OperationId;
-                        newYearJob.Operations = jobObservationEntity.Operations;
+                     
+                        foreach (var op in jobObservationEntity.Operations)
+                        {
+                            if (!newYearJob.Operations.Any(existingOp => existingOp.OperationId == op.OperationId))
+                            {
+                                newYearJob.Operations.Add(op); // Agregar la operación faltante si no está en consolidatedFutureJob
+                            }
+                        }
 
                         newYearJob.SupervisorId = jobObservationEntity.SupervisorId;
 
-                        newYearJob.StartDate = jobObservationEntity.FinishedDate.Value.AddYears(1);
-                        newYearJob.PlannedStartDate = jobObservationEntity.FinishedDate.Value.AddYears(1);
+                        newYearJob.StartDate = jobObservationEntity.FinishedDate?.AddYears(1) ?? DateTime.Now.AddYears(1);
+                        newYearJob.PlannedStartDate = jobObservationEntity.FinishedDate?.AddYears(1) ?? DateTime.Now.AddYears(1);
+
                         newYearJob.EndDate = newYearJob.PlannedStartDate;
 
                         newYearJob.SectionIds = jobCategoryStructureIds;
@@ -421,9 +429,9 @@ namespace SupervisorMobility.API.Controllers
 
                             SupervisorId = jobObservationEntity.SupervisorId,
 
-                            StartDate = jobObservationEntity.FinishedDate.Value.AddYears(1),
-                            PlannedStartDate = jobObservationEntity.FinishedDate.Value.AddYears(1),
-                            EndDate = jobObservationEntity.FinishedDate.Value.AddYears(1),
+                            StartDate = jobObservationForUpdate.FinishedDate.Value.AddYears(1),
+                            PlannedStartDate = jobObservationForUpdate.FinishedDate.Value.AddYears(1),
+                            EndDate = jobObservationForUpdate.FinishedDate.Value.AddYears(1),
                             SectionIds = jobCategoryStructureIds
 
                         };
