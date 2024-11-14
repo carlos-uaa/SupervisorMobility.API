@@ -1502,10 +1502,10 @@ namespace SupervisorMobility.API.Services
         }
 
 
-        public async Task<JobObservation?> FindNextYearJobObservation(int plantId, int areaId, int DistributionId, int operationId, int supervisorId, int year)
+        public async Task<List<JobObservation>?> FindNextYearJobObservations(int plantId, int areaId, int DistributionId, ICollection<Operation> operationsToFind, int supervisorId, int year)
         {
 
-            var query = _context.JobObservations
+            var query = _context.JobObservations.Include(o => o.Operations)
                 .Where(u => u.IsActive == true && u.Type == 5);
 
             if (plantId != default(int))
@@ -1529,8 +1529,20 @@ namespace SupervisorMobility.API.Services
                 query = query.Where(j => j.SupervisorId == supervisorId);
             }
 
+            var operationIds = operationsToFind.Select(o => o.OperationId).ToHashSet();
 
-            return await query.FirstOrDefaultAsync();
+            var matchingJobs = await query
+                .Select(j => new
+                {
+                    JobObservation = j,
+                    MatchCount = j.Operations.Count(op => operationIds.Contains(op.OperationId))
+                })
+                .Where(x => x.MatchCount > 0)  
+                .OrderByDescending(x => x.MatchCount)
+                .Select(x => x.JobObservation)  
+        .ToListAsync();
+
+            return matchingJobs;
         }
 
         public async Task<IEnumerable<JobObservation>> GetAllJobObservationsAsync(bool includeTree = false, bool includePeople = false, bool includeLup = false, bool includeHistory = false, bool includeCkAnswers = false, int idPlant = 0, int idArea = 0, bool ForSosProgram = false, int year = 0, int month = 0, int SOSAnualId = 0, int idUser = 0)
@@ -1647,7 +1659,7 @@ namespace SupervisorMobility.API.Services
          public async Task<IEnumerable<JobObservation>> GetAllNextYearJobsObservations(int plantId, int areaId, int year)
         {
 
-            var query = _context.JobObservations.Where(j => j.IsActive == true && j.Type == 5);
+            var query = _context.JobObservations.Include(jo => jo.Operations).Where(j => j.IsActive == true && j.Type == 5);
 
             
             if (plantId != 0)
@@ -1724,6 +1736,13 @@ namespace SupervisorMobility.API.Services
         {
             //_context.JobObservations.Remove(jobObservation);
             jobObservation.IsActive = false;
+            _context.SaveChanges();
+        }  
+        
+        public void PermanentDeleteJobObservation(JobObservation jobObservation)
+        {
+            _context.JobObservations.Remove(jobObservation);
+            //jobObservation.IsActive = false;
             _context.SaveChanges();
         }
         public async Task<bool> JobObservationExistAsync(int jobObservationId)
