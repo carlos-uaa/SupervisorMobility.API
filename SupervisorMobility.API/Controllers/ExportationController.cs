@@ -332,8 +332,12 @@ namespace SupervisorMobility.API.Controllers
                     if (!prevSheetName.IsNullOrEmpty())
                     {
                         string prevChar = prevSheetName.Split(" ")[1];
-                        formula += $"+{prevSheetName}!H{rowIndexes[prevChar].Item2}";
-                        formula2 += $"+{prevSheetName}!I{rowIndexes[prevChar].Item2}";
+                        var pcellm = package.Workbook.Worksheets[prevSheetName].Cells[$"H{rowIndexes[prevChar].Item2}"];
+                        var pcells = package.Workbook.Worksheets[prevSheetName].Cells[$"I{rowIndexes[prevChar].Item2}"];
+                        if (pcellm.Value != null && !string.IsNullOrWhiteSpace(pcellm.Text))
+                            formula += $"+'{prevSheetName}'!H{rowIndexes[prevChar].Item2}";
+                        if (pcells.Value != null && !string.IsNullOrWhiteSpace(pcells.Text))
+                            formula2 += $"+'{prevSheetName}'!I{rowIndexes[prevChar].Item2}";
                     }
 
                     cellTimeMin.Formula = formula;
@@ -960,8 +964,12 @@ namespace SupervisorMobility.API.Controllers
                     if (!prevSheetName.IsNullOrEmpty())
                     {
                         string prevChar = prevSheetName.Split(" ")[1];
-                        formula += $"+{prevSheetName}!H{rowIndexes[prevChar].Item2}";
-                        formula2 += $"+{prevSheetName}!I{rowIndexes[prevChar].Item2}";
+                        var pcellm = package.Workbook.Worksheets[prevSheetName].Cells[$"H{rowIndexes[prevChar].Item2}"];
+                        var pcells = package.Workbook.Worksheets[prevSheetName].Cells[$"I{rowIndexes[prevChar].Item2}"];
+                        if (pcellm.Value != null && !string.IsNullOrWhiteSpace(pcellm.Text))
+                            formula += $"+'{prevSheetName}'!H{rowIndexes[prevChar].Item2}";
+                        if (pcells.Value != null && !string.IsNullOrWhiteSpace(pcells.Text))
+                            formula2 += $"+'{prevSheetName}'!I{rowIndexes[prevChar].Item2}";
                     }
 
                     cellTimeMin.Style.Numberformat.Format = "0.0#";
@@ -982,6 +990,8 @@ namespace SupervisorMobility.API.Controllers
                     {
                         cellTimeCnt.Value = string.Empty;
                     }
+
+                    prevSheetName = worksheet.Name;
                 }
 
                 sheet = package.Workbook.Worksheets[0];
@@ -1604,7 +1614,9 @@ namespace SupervisorMobility.API.Controllers
                         if (!prevSheetName.IsNullOrEmpty())
                         {
                             string prevChar = prevSheetName.Split(" ", 2)[1];
-                            formula += $"+{prevSheetName}!{column}{rowIndexes[prevChar].Item2}";
+                            var pcellt = package.Workbook.Worksheets[prevSheetName].Cells[$"{column}{rowIndexes[prevChar]}"];
+                            if (pcellt.Value != null && !string.IsNullOrWhiteSpace(pcellt.Text))
+                                formula += $"+'{prevSheetName}'!{column}{rowIndexes[prevChar].Item2}";
                         }
 
                         cell.Formula = formula;
