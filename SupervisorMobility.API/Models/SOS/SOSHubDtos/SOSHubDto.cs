@@ -17,6 +17,7 @@ using SupervisorMobility.API.Models.StationDtos;
 using SupervisorMobility.API.Models.SOS.ToolsUsedDtos;
 using SupervisorMobility.API.DataAccess.Entities.SOS.History;
 using SupervisorMobility.API.Models.SOS.SOSAnalysisDtos;
+using SupervisorMobility.API.Models.PATDtos;
 
 namespace SupervisorMobility.API.Models.SOS.SOSHubDtos
 {
@@ -84,6 +85,8 @@ namespace SupervisorMobility.API.Models.SOS.SOSHubDtos
         public ICollection<SOSFlow>? SOSFlow { get; set; } = new List<SOSFlow>();
         public ICollection<SOSSequence>? SOSSequence { get; set; } = new List<SOSSequence>();
         public ICollection<SOSHubHistory>? History { get; set; } = new List<SOSHubHistory>();
+        public ICollection<PATDto>? PATs { get; set; } = new List<PATDto>();
+
 
         public bool? IsActive { get; set; }
     }

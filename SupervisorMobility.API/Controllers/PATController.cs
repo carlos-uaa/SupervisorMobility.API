@@ -2,10 +2,14 @@
 using Microsoft.AspNetCore.Mvc;
 using SupervisorMobility.API.Business;
 using SupervisorMobility.API.DataAccess.Entities;
+using SupervisorMobility.API.DataAccess.Entities.SOS;
+using SupervisorMobility.API.DataAccess.Services;
 using SupervisorMobility.API.Models.ILURegisterDtos;
 using SupervisorMobility.API.Models.PATDtos;
 using SupervisorMobility.API.Models.PlantDtos;
+using SupervisorMobility.API.Models.SOS.SOSDistributionDtos;
 using SupervisorMobility.API.Services;
+using System.Diagnostics;
 
 namespace SupervisorMobility.API.Controllers
 {
@@ -17,10 +21,12 @@ namespace SupervisorMobility.API.Controllers
         private readonly IMapper _mapper;
         readonly IAssyChartService _assyChartService;
         private readonly ISupervisorMobilityRepository _supervisorMobilityRepository;
+        private readonly ISOS_ProcessRepository _ProcessRepository;
 
         public PATController(ISupervisorMobilityRepository supervisorMobilityRepository, IAssyChartService assyChartService,
-            IMapper mapper)
+            IMapper mapper, ISOS_ProcessRepository repository)
         {
+            _ProcessRepository = repository;
             _assyChartService = assyChartService;
             _supervisorMobilityRepository = supervisorMobilityRepository ??
                 throw new ArgumentNullException(nameof(supervisorMobilityRepository));
@@ -42,10 +48,48 @@ namespace SupervisorMobility.API.Controllers
             return NotFound();
         }
 
+        [HttpPost("sosHub")]
+        public async Task<ActionResult<PATDto>> GeneratePatSosHub(PATFotCreationDto patToCreate, int SOSHubCollection_Id)
+        {
+
+            if (patToCreate.PATid == 0)
+            {
+                
+                patToCreate.CreationDate = DateTime.Now;
+                patToCreate.IsActive = true;
+
+                patToCreate.SOSHubId = SOSHubCollection_Id;
+
+                PAT PatToCreate = _mapper.Map<PAT>(patToCreate);
+
+                var createdResult = await _supervisorMobilityRepository.AddPat(PatToCreate);
+                if (createdResult != null)
+                    return Ok(PatToCreate);
+                else
+                    return BadRequest();
+            }
+            else
+            {
+                var patEntity = await _assyChartService.FetchPatAsync(patToCreate.PATid);
+                if (patEntity == null)
+                {
+                    return NotFound();
+                }
+
+                PATForUpdateDto pat = _mapper.Map<PATForUpdateDto>(patToCreate);
+
+                await _supervisorMobilityRepository.UpdatePAT(pat, patEntity);
+
+
+
+                return Ok(patEntity);
+            }
+
+        }
+
 
         [HttpGet("{PATid}")]
-        public async Task<ActionResult<PATDto>> getPatById(
-                  int PATid, bool includeCollections = false)
+        public async Task<ActionResult<PATDto>> getPatById(int PATid, bool includeCollections = false)
         {
             if (includeCollections)
             {

@@ -35,5 +35,9 @@ namespace SupervisorMobility.API.DataAccess.Entities.SOS
         public bool? IsActive { get; set; }
         public int SOSHubId { get; set; }
         public SOSHub? SOSHub { get; set; }
+
+        public ICollection<SOSAnalysis>? Analyses { get; set; } = new List<SOSAnalysis>();
+        public ICollection<SOSSequence>? Sequences { get; set; } = new List<SOSSequence>();
+
     }
 }

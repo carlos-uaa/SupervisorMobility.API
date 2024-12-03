@@ -2,6 +2,8 @@
 {
     public class PATFotCreationDto
     {
+        public int PATid { get; set; }
+
         public int SupervisorId { get; set; }
         public int Status { get; set; }
         public int? SSVresponsibleID { get; set; }
@@ -42,5 +44,10 @@
         public DateTime? EditionDate { get; set; }
 
         public DateTime? ApprovalDate { get; set; }
+
+        public int? SOSHubId { get; set; }
+        public bool IsActive { get; set; }
+
+
     }
 }
