@@ -14,6 +14,7 @@ namespace SupervisorMobility.API.DataAccess.Entities
     public class PatUserRole
     {
         [Key, DatabaseGenerated(DatabaseGeneratedOption.Identity)]
+        public int PatUserRoleId { get; set; }
         public int PATId { get; set; }
         public int UserId { get; set; }
         public OperatorRole? Role { get; set; }

@@ -303,6 +303,11 @@ namespace SupervisorMobility.API.Context
                 .HasForeignKey(p => p.SupervisorId)
                 .OnDelete(DeleteBehavior.NoAction);
 
+            modelBuilder.Entity<PatUserRole>()
+                .HasOne<PAT>().WithMany(p=>p.PatUserRoles)
+                .HasForeignKey(pur=>pur.PATId)
+                .OnDelete(DeleteBehavior.NoAction);
+
             //modelBuilder.Entity<PAT>()
             //    .HasOne(p => p.Distribution)
             //    .WithMany()
