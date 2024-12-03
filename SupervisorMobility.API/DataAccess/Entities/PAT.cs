@@ -1,4 +1,5 @@
-﻿using SupervisorMobility.API.Entities;
+﻿using SupervisorMobility.API.DataAccess.Entities.SOS;
+using SupervisorMobility.API.Entities;
 using SupervisorMobility.API.Models.ILURegisterDtos;
 using System.ComponentModel.DataAnnotations;
 using System.ComponentModel.DataAnnotations.Schema;
@@ -73,6 +74,8 @@ namespace SupervisorMobility.API.DataAccess.Entities
         [Column(TypeName = "Date")]
         public DateTime? ApprovalDate { get; set; }
 
+        public int? SOSHubId { get; set; }
+        public SOSHub? SOSHub { get; set; }
         public bool IsActive { get; set; }
     }
 }

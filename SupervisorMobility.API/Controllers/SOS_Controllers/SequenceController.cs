@@ -91,6 +91,8 @@ namespace SupervisorMobility.API.Controllers.SOS_Controllers
             return Ok(_mapper.Map<SOSSequenceDto>(SOSSequence));
         }
 
+
+
         [HttpGet("all")]
         public async Task<ActionResult<IEnumerable<SOSSequenceDto>>> GetAllSOSSequence(bool includeImages = false, bool includeNotes = false, bool includeLogbooks = false, bool includeSpecialCases = false, bool includeSOS = false)
         {
@@ -103,14 +105,24 @@ namespace SupervisorMobility.API.Controllers.SOS_Controllers
 
             return Ok(_mapper.Map<IEnumerable<SOSSequenceDto>>(CheckpointEntities));
         }
+        
+        [HttpGet("byDistribution")]
+        public async Task<ActionResult<IEnumerable<SOSSequenceDto>>> GetByDistributionSOSSequence(int Distribution_Id, bool includeImages = false, bool includeNotes = false, bool includeLogbooks = false, bool includeSpecialCases = false, bool includeSOS = false)
+        {
+
+            var CheckpointEntities = await _ProcessRepository.GetAllSOSSequenceByDistribution(Distribution_Id, includeImages, includeNotes, includeLogbooks, includeSpecialCases, includeSOS);
+            if (CheckpointEntities == null)
+            {
+                return NotFound("Get All Sos Analisis not found!");
+            }
+
+            return Ok(_mapper.Map<IEnumerable<SOSSequenceDto>>(CheckpointEntities));
+        }
 
         //Update
-
         [HttpPut("{sosSequence_Id}")]
         public async Task<ActionResult> UpdateSOSSequence(int sosSequence_Id, SOSSequenceForUpdateDto sosUpdateEntity)
         {
-
-
             List<Commentary> Bkup_Notes = new List<Commentary>();
             List<SOSSequenceLogbook> Bkup_SequenceLogbook = new List<SOSSequenceLogbook>();
             List<SOSTime> Bkup_Times = new List<SOSTime>();

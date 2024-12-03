@@ -1,4 +1,5 @@
 ﻿using AutoMapper;
+using Azure.Core.GeoJson;
 using CsvHelper;
 
 using DuoVia.FuzzyStrings;
@@ -7,6 +8,7 @@ using SupervisorMobility.API.Context;
 using SupervisorMobility.API.DataAccess.Entities;
 using SupervisorMobility.API.DataAccess.Entities.SOS;
 using SupervisorMobility.API.DataAccess.Entities.SOS.History;
+using SupervisorMobility.API.Migrations;
 using SupervisorMobility.API.Models.CommentaryDtos;
 using SupervisorMobility.API.Models.FileUploadDto;
 using SupervisorMobility.API.Models.SOS.EquipmentDtos;
@@ -55,7 +57,7 @@ namespace SupervisorMobility.API.DataAccess.Services
 
             return SOS_EntityToCreate;
         }
-        public async Task<SOSHub> GetSOSHub(int HubId, bool includeAnalysesBkup = false, bool includeSections = false, bool includeImages = false, bool includeVideos = false, bool includeCommentaries = false, bool includeTools = false, bool includeEquipments = false, bool includeMaterials = false, bool includeInformation = false, bool includePeople = false, bool includeDocuments = false, bool includeModel = false, bool includeHistory = false, bool includeDeleteds = false, bool includeCollections = false, bool includePeopleCollections = false)
+        public async Task<SOSHub> GetSOSHub(int HubId, bool includeAnalysesBkup = false, bool includeSections = false, bool includeImages = false, bool includeVideos = false, bool includeCommentaries = false, bool includeTools = false, bool includeEquipments = false, bool includeMaterials = false, bool includeInformation = false, bool includePeople = false, bool includeDocuments = false, bool includeModel = false, bool includeHistory = false, bool includeDeleteds = false, bool includeCollections = false, bool includePeopleCollections = false, bool includePats = false)
         {
             var query = _context.SOSHubs.AsNoTracking().Where(SOS => SOS.SOSHubId == HubId && SOS.IsActive == true);
 
@@ -158,6 +160,12 @@ namespace SupervisorMobility.API.DataAccess.Services
                     await _context.Entry(sosHub).Collection(m => m.History).LoadAsync();
                 }
 
+                if (includePats)
+                {
+                    await _context.Entry(sosHub).Collection(o => o.PATs).LoadAsync();
+                }
+
+
                 if (includeCollections)
                 {
                     await _context.Entry(sosHub).Collection(a => a.SOSAnalysis).Query().Where(d => d.IsActive == true).LoadAsync();
@@ -177,6 +185,9 @@ namespace SupervisorMobility.API.DataAccess.Services
                     {
                         await _context.Entry(distribution).Collection(aa => aa.DistributionLogbooks).LoadAsync();
                         await _context.Entry(distribution).Collection(aa => aa.Turns).LoadAsync();
+
+                        await _context.Entry(distribution).Collection(aa => aa.Analyses).LoadAsync();
+                        await _context.Entry(distribution).Collection(aa => aa.Sequences).LoadAsync();
                     }
 
                     await _context.Entry(sosHub).Collection(f => f.SOSFlow).Query().Where(d => d.IsActive == true).LoadAsync();
@@ -2681,6 +2692,64 @@ namespace SupervisorMobility.API.DataAccess.Services
 
             return sosAnalyses;
         }
+        public async Task<IEnumerable<SOSAnalysis>> GetAllSOSAnalysisByDistribution(int Distribution_Id, bool includeImages = false, bool includeNotes = false, bool includeLogbooks = false, bool includeSpecialCases = false, bool includeSOS = false)
+        {
+            var sosHubIds = await _context.SOSHubs.Where(hub => hub.DistributionId == Distribution_Id)
+                                                   .Select(hub => hub.SOSHubId).ToListAsync();
+
+            var query = _context.SOSAnalyses.AsNoTracking().Where(SOS => sosHubIds.Contains(SOS.SOSHubId) && SOS.IsActive == true);
+
+            if (includeImages)
+            {
+                query = query.Include(i => i.Illustrations);
+            }
+
+            if (includeNotes)
+            {
+                query = query.Include(query => query.Notes);
+            }
+
+            if (includeLogbooks)
+            {
+                query = query.Include(t => t.AnalysisLogbooks);
+            }
+
+
+            if (includeSOS)
+            {
+                query = query.Include(m => m.SOSHub).ThenInclude(ms => ms.Sections).ThenInclude(msa => msa.Analyses);
+            }
+
+            var sosAnalyses = await query.OrderBy(s => s.SOSHubId).ToListAsync();
+
+            if (includeImages)
+            {
+                foreach (var SOSAnalysis in sosAnalyses)
+                {
+                    SOSAnalysis.Illustrations = SOSAnalysis.Illustrations.Where(i => i.IsActive == true).ToList();
+                }
+            }
+
+            if (includeNotes)
+            {
+                foreach (var SOSAnalysis in sosAnalyses)
+                {
+                    SOSAnalysis.Notes = SOSAnalysis.Notes.Where(v => v.IsActive == true).ToList();
+                }
+            }
+
+            if (includeLogbooks)
+            {
+                foreach (var SOSAnalysis in sosAnalyses)
+                {
+                    SOSAnalysis.AnalysisLogbooks = SOSAnalysis.AnalysisLogbooks.Where(t => t.IsActive == true).ToList();
+                }
+            }
+
+
+
+            return sosAnalyses;
+        }
 
         public async Task<int> UpdateSOSAnalysis(SOSAnalysisForUpdateDto AnalysisUpdate, SOSAnalysis AnalysisEntity)
         {
@@ -3084,6 +3153,64 @@ namespace SupervisorMobility.API.DataAccess.Services
 
             return sosSequences;
         }
+        public async Task<IEnumerable<SOSSequence>> GetAllSOSSequenceByDistribution(int Distribution_Id, bool includeImages = false, bool includeNotes = false, bool includeLogbooks = false, bool includeSpecialCases = false, bool includeSOS = false)
+        {
+            var sosHubIds = await _context.SOSHubs.Where(hub => hub.DistributionId == Distribution_Id)
+                                                    .Select(hub => hub.SOSHubId).ToListAsync();
+
+            var query = _context.SOSSequences.AsNoTracking().Where(sequence => sosHubIds.Contains(sequence.SOSHubId) && sequence.IsActive == true);
+
+            if (includeImages)
+            {
+                query = query.Include(i => i.Illustrations);
+            }
+
+            if (includeNotes)
+            {
+                query = query.Include(query => query.Notes);
+            }
+
+            if (includeLogbooks)
+            {
+                query = query.Include(t => t.SequenceLogbooks);
+            }
+
+            if (includeSOS)
+            {
+                query = query.Include(m => m.SOSHub).ThenInclude(ms => ms.Sections).ThenInclude(msa => msa.Analyses);
+
+            }
+
+            var sosSequences = await query.OrderBy(s => s.SOSHubId).ToListAsync();
+
+            if (includeImages)
+            {
+                foreach (var SOSSequence in sosSequences)
+                {
+                    SOSSequence.Illustrations = SOSSequence.Illustrations.Where(i => i.IsActive == true).ToList();
+                }
+            }
+
+            if (includeNotes)
+            {
+                foreach (var SOSSequence in sosSequences)
+                {
+                    SOSSequence.Notes = SOSSequence.Notes.Where(v => v.IsActive == true).ToList();
+                }
+            }
+
+            if (includeLogbooks)
+            {
+                foreach (var SOSSequence in sosSequences)
+                {
+                    SOSSequence.SequenceLogbooks = SOSSequence.SequenceLogbooks.Where(t => t.IsActive == true).ToList();
+                }
+            }
+
+
+
+            return sosSequences;
+        }
 
         public async Task<int> UpdateSOSSequence(SOSSequenceForUpdateDto SequenceUpdate, SOSSequence SequenceEntity)
         {
@@ -3361,11 +3488,55 @@ namespace SupervisorMobility.API.DataAccess.Services
         #region SOSDistribution
         public async Task<int> CreateSOSDistribution(SOSDistribution SOS_DistributionToCreate)
         {
+            var analysesCopy = SOS_DistributionToCreate.Analyses.ToList();
+
+            for (int j = 0; j < analysesCopy.Count; j++)
+            {
+                var Analysis = analysesCopy[j];
+                var localMasterEntry = _context.SOSAnalyses.Local
+                    .FirstOrDefault(entry => entry.SOSAnalysisId == Analysis.SOSAnalysisId);
+
+                if (localMasterEntry != null)
+                {
+                    SOS_DistributionToCreate.Analyses.Remove(Analysis);
+                    SOS_DistributionToCreate.Analyses.Add(localMasterEntry);
+                }
+                else
+                {
+                    if (_context.Entry(Analysis).State == EntityState.Detached)
+                    {
+                        _context.SOSAnalyses.Attach(Analysis);
+                    }
+                }
+            }
+
+            var sequencesCopy = SOS_DistributionToCreate.Sequences.ToList();
+
+            for (int j = 0; j < sequencesCopy.Count; j++)
+            {
+                var sequence = sequencesCopy[j];
+                var localMasterEntry = _context.SOSSequences.Local
+                    .FirstOrDefault(entry => entry.SOSSequenceId == sequence.SOSSequenceId);
+
+                if (localMasterEntry != null)
+                {
+                    SOS_DistributionToCreate.Sequences.Remove(sequence);
+                    SOS_DistributionToCreate.Sequences.Add(localMasterEntry);
+                }
+                else
+                {
+                    if (_context.Entry(sequence).State == EntityState.Detached)
+                    {
+                        _context.SOSSequences.Attach(sequence);
+                    }
+                }
+            }
+
             _context.SOSDistributions.Add(SOS_DistributionToCreate);
             return _context.SaveChanges();
         }
 
-        public async Task<SOSDistribution> GetSOSDistribution(int SOSDistributionId, bool includeImages = false, bool includeNotes = false, bool includeLogbooks = false,bool includeSOS = false, bool includeImagesSOS = false, bool includeTurns = false, bool includeTimes = false)
+        public async Task<SOSDistribution> GetSOSDistribution(int SOSDistributionId, bool includeImages = false, bool includeNotes = false, bool includeLogbooks = false, bool includeSOS = false, bool includeImagesSOS = false, bool includeTurns = false, bool includeTimes = false, bool includeCollections = false)
         {
             var query = _context.SOSDistributions.AsNoTracking().Where(SOS => SOS.SOSDistributionId == SOSDistributionId && SOS.IsActive == true);
 
@@ -3395,6 +3566,12 @@ namespace SupervisorMobility.API.DataAccess.Services
             {
                 query = query.Include(t => t.Turns).ThenInclude(t => t.Supervisor);
                 query = query.Include(t => t.Turns).ThenInclude(t => t.Operator);
+            }
+
+            if (includeCollections)
+            {
+                query = query.AsNoTracking().Include(s => s.Sequences).ThenInclude(sh => sh.SOSHub).ThenInclude(shs => shs.Sections).ThenInclude(shsa => shsa.Analyses);
+                query = query.AsNoTracking().Include(s => s.Analyses).ThenInclude(sh => sh.SOSHub).ThenInclude(shs => shs.Sections).ThenInclude(shsa => shsa.Analyses);
             }
 
             if (includeSOS)
@@ -3437,6 +3614,12 @@ namespace SupervisorMobility.API.DataAccess.Services
             if (includeLogbooks)
             {
                 sosHub.DistributionLogbooks = sosHub.DistributionLogbooks.Where(t => t.IsActive == true).ToList();
+            }
+
+            if (includeCollections)
+            {
+                sosHub.Sequences = sosHub.Sequences.Where(t => t.IsActive == true).ToList();
+                sosHub.Analyses = sosHub.Analyses.Where(t => t.IsActive == true).ToList();
             }
 
 
@@ -3532,6 +3715,7 @@ namespace SupervisorMobility.API.DataAccess.Services
 
             }
         }
+
 
         public async Task<int> RemoveSOSDistribution(int SOS_Distribution_id)
         {
@@ -3652,6 +3836,119 @@ namespace SupervisorMobility.API.DataAccess.Services
             }
             return new AsyncVoidMethodBuilder();
         }
+
+        public async Task<AsyncVoidMethodBuilder> AddAnalysisToSOSDistribution(SOSDistribution master, SOSAnalysis slave)
+        {
+            try
+            {
+                // Verificar si el master ya está siendo rastreado en el contexto
+                var localMasterEntry = _context.SOSDistributions.Local.FirstOrDefault(entry => entry.SOSDistributionId == master.SOSDistributionId);
+                if (localMasterEntry != null)
+                {
+                    master = localMasterEntry;
+                }
+                else
+                {
+                    if (_context.Entry(master).State == EntityState.Detached)
+                    {
+                        _context.SOSDistributions.Attach(master);
+                    }
+                }
+
+                // Verificar si el slave ya está siendo rastreado en el contexto
+                var localSlaveEntry = _context.SOSAnalyses.Local.FirstOrDefault(entry => entry.SOSAnalysisId == slave.SOSAnalysisId);
+                if (localSlaveEntry != null)
+                {
+                    slave = localSlaveEntry;
+                }
+                else
+                {
+                    if (_context.Entry(slave).State == EntityState.Detached)
+                    {
+                        _context.SOSAnalyses.Attach(slave);
+                    }
+                }
+
+                // Añadir el Analysis a la colección de Analyses del master
+                if (master.Analyses == null)
+                {
+                    master.Analyses = new List<SOSAnalysis>();
+                }
+
+                // Verificar si el analysis ya está en la colección
+                if (!master.Analyses.Any(c => c.SOSAnalysisId == slave.SOSAnalysisId))
+                {
+                    master.Analyses.Add(slave);
+                }
+
+                // Guardar los cambios
+                await _context.SaveChangesAsync();
+            }
+            catch (Exception ex)
+            {
+                // Manejar el error apropiadamente, puedes loguearlo o lanzar una excepción personalizada
+                Debug.WriteLine("An error occurred while updating the SOSHub: " + ex.Message);
+            }
+            return new AsyncVoidMethodBuilder();
+        }
+        public async Task<AsyncVoidMethodBuilder> AddSequenceToSOSDistribution(SOSDistribution master, SOSSequence slave)
+        {
+            try
+            {
+                // Verificar si el master ya está siendo rastreado en el contexto
+                var localMasterEntry = _context.SOSDistributions.Local.FirstOrDefault(entry => entry.SOSDistributionId == master.SOSDistributionId);
+                if (localMasterEntry != null)
+                {
+                    master = localMasterEntry;
+                }
+                else
+                {
+                    if (_context.Entry(master).State == EntityState.Detached)
+                    {
+                        _context.SOSDistributions.Attach(master);
+                    }
+                }
+
+                // Verificar si el slave ya está siendo rastreado en el contexto
+                var localSlaveEntry = _context.SOSSequences.Local.FirstOrDefault(entry => entry.SOSSequenceId == slave.SOSSequenceId);
+                if (localSlaveEntry != null)
+                {
+                    slave = localSlaveEntry;
+                }
+                else
+                {
+                    if (_context.Entry(slave).State == EntityState.Detached)
+                    {
+                        _context.SOSSequences.Attach(slave);
+                    }
+                }
+
+                // Añadir el Analysis a la colección de Analyses del master
+                if (master.Sequences == null)
+                {
+                    master.Sequences = new List<SOSSequence>();
+                }
+
+                // Verificar si el analysis ya está en la colección
+                if (!master.Sequences.Any(c => c.SOSSequenceId == slave.SOSSequenceId))
+                {
+                    master.Sequences.Add(slave);
+                }
+
+                // Guardar los cambios
+                await _context.SaveChangesAsync();
+            }
+            catch (Exception ex)
+            {
+                // Manejar el error apropiadamente, puedes loguearlo o lanzar una excepción personalizada
+                Debug.WriteLine("An error occurred while updating the SOSHub: " + ex.Message);
+            }
+            return new AsyncVoidMethodBuilder();
+        }
+
+
+
+
 
         public async Task<AsyncVoidMethodBuilder> AddSOSDistributionLogbookToSOSDistribution(SOSDistribution master, SOSDistributionLogbook slave)
         {
@@ -3775,12 +4072,43 @@ namespace SupervisorMobility.API.DataAccess.Services
             _context.SaveChanges();
             return new AsyncVoidMethodBuilder();
         }
+
+        public async Task<AsyncVoidMethodBuilder> SOSDataRemoveAllSequencesFromSOSDistribution(SOSDistribution Master)
+        {
+            foreach(var sec in Master.Sequences)
+            {
+                SOSSequence item = _context.SOSSequences.Where(ss => ss.SOSSequenceId == sec.SOSSequenceId).Include(d => d.Distributions).FirstOrDefault();
+                SOSDistribution dis = item.Distributions.First(dis => dis.SOSDistributionId == Master.SOSDistributionId);
+
+                item.Distributions.Remove(dis);
+            }
+
+            Master.Sequences?.Clear();
+            _context.SaveChanges();
+            return new AsyncVoidMethodBuilder();
+        }
+
+        public async Task<AsyncVoidMethodBuilder> SOSDataRemoveAllAnalysisFromSOSDistribution(SOSDistribution Master)
+        {
+            foreach (var sec in Master.Analyses)
+            {
+                SOSAnalysis item = _context.SOSAnalyses.Where(sa => sa.SOSAnalysisId == sec.SOSAnalysisId).Include(d => d.Distributions).FirstOrDefault();
+
+                SOSDistribution dis = item.Distributions.First(dis => dis.SOSDistributionId == Master.SOSDistributionId);
+
+                item.Distributions.Remove(dis);
+            }
+            Master.Analyses?.Clear();
+            _context.SaveChanges();
+            return new AsyncVoidMethodBuilder();
+        }
         #endregion
         #region SOSDistributionLogbook
         public async Task<SOSDistributionLogbook> GetSOSDistributionLogbookById(int id)
         {
             return await _context.SOSDistributionLogbooks.AsNoTracking().Where(t => t.SOSDistributionLogbookId == id && t.IsActive == true).FirstOrDefaultAsync();
         }
+
 
         public async Task<int> UpdateDistributionLogbook(SOSDistributionLogbookForUpdateDto DistributionForUpdate)
         {
@@ -4279,7 +4607,7 @@ namespace SupervisorMobility.API.DataAccess.Services
             return await _context.SaveChangesAsync();
         }
         #endregion
-    
+
         //Flow
         #region SOSFlow
         public async Task<int> CreateSOSFlow(SOSFlow SOS_FlowToCreate)
@@ -4321,11 +4649,11 @@ namespace SupervisorMobility.API.DataAccess.Services
                 query = query.Include(m => m.SOSHub).ThenInclude(s => s.MaterialsUsed).ThenInclude(m => m.Material);
                 query = query.Include(m => m.SOSHub).ThenInclude(s => s.SafetyEquipment);
                 query = query.Include(m => m.SOSHub).ThenInclude(p => p.Plant);
-                query = query.Include(m => m.SOSHub).ThenInclude(d => d.Department );
+                query = query.Include(m => m.SOSHub).ThenInclude(d => d.Department);
                 query = query.Include(m => m.SOSHub).ThenInclude(d => d.Distribution);
             }
 
-           
+
 
 
             var sosHub = await query.FirstOrDefaultAsync();

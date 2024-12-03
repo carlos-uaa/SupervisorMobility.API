@@ -1,5 +1,6 @@
 ﻿using SupervisorMobility.API.DataAccess.Entities;
 using SupervisorMobility.API.Models.ILURegisterDtos;
+using SupervisorMobility.API.Models.SOS.SOSHubDtos;
 
 namespace SupervisorMobility.API.Models.PATDtos
 {
@@ -26,5 +27,6 @@ namespace SupervisorMobility.API.Models.PATDtos
         public DateTime? EditionDate { get; set; }
 
         public DateTime? ApprovalDate { get; set; }
+        public int? SOSHubId { get; set; }
     }
 }

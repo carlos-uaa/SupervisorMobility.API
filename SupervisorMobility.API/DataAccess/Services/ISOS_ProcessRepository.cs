@@ -34,7 +34,7 @@ namespace SupervisorMobility.API.DataAccess.Services
     {
         #region SOS_DataPool
         Task<SOSHub> CreateSOScollection(SOSHub SOS_EntityToCreate);
-        Task<SOSHub> GetSOSHub(int HubId, bool includeAnalysesBkup = false, bool includeSections = false, bool includeImages = false, bool includeVideos = false, bool includeCommentaries = false, bool includeTools = false, bool includeEquipments = false, bool includeMaterials = false, bool includeInformation = false, bool includePeople = false, bool includeDocuments = false, bool includeModel = false, bool includeHistory = false, bool includeDeleteds = false, bool includeCollections = false, bool includePeopleCollections = false);
+        Task<SOSHub> GetSOSHub(int HubId, bool includeAnalysesBkup = false, bool includeSections = false, bool includeImages = false, bool includeVideos = false, bool includeCommentaries = false, bool includeTools = false, bool includeEquipments = false, bool includeMaterials = false, bool includeInformation = false, bool includePeople = false, bool includeDocuments = false, bool includeModel = false, bool includeHistory = false, bool includeDeleteds = false, bool includeCollections = false, bool includePeopleCollections = false, bool includePats = false);
         Task<IEnumerable<SOSHub>> GetAllSOSHub(bool includeAnalysesBkup = false, bool includeSections = false, bool includeImages = false, bool includeVideos = false, bool includeCommentaries = false, bool includeTools = false, bool includeEquipments = false, bool includeMaterials = false, bool includeInformation = false, bool includePeople = false, bool includeDocuments = false);
         Task<int> UpdateSOSHub(SOSHubForUpdateDto HubUpdate, SOSHub SosEntity);
         Task<int> UpdateSOSHub(SOSHub SosEntity);
@@ -175,6 +175,7 @@ namespace SupervisorMobility.API.DataAccess.Services
         Task<int> CreateSOSAnalysis(SOSAnalysis SOS_AnalysisToCreate);
         Task<SOSAnalysis> GetSOSAnalysis(int SOSAnalysisId, bool includeImages = false, bool includeNotes = false, bool includeLogbooks = false, bool includeSpecialCases = false, bool includeSOS = false, bool includeImagesSOS = false);
         Task<IEnumerable<SOSAnalysis>> GetAllSOSAnalysis(bool includeImages = false, bool includeNotes = false, bool includeLogbooks = false, bool includeSpecialCases = false, bool includeSOS = false);
+        Task<IEnumerable<SOSAnalysis>> GetAllSOSAnalysisByDistribution(int Distribution_Id, bool includeImages = false, bool includeNotes = false, bool includeLogbooks = false, bool includeSpecialCases = false, bool includeSOS = false);
 
         Task<int> UpdateSOSAnalysis(SOSAnalysisForUpdateDto AnalysisUpdate, SOSAnalysis AnalysisEntity);
         Task<int> RemoveSOSAnalysis(int SOS_Analysis_id);
@@ -205,6 +206,7 @@ namespace SupervisorMobility.API.DataAccess.Services
         Task<int> CreateSOSSequence(SOSSequence SOS_SequenceToCreate);
         Task<SOSSequence> GetSOSSequence(int SOSSequenceId, bool includeImages = false, bool includeNotes = false, bool includeLogbooks = false, bool includeSpecialCases = false, bool includeSOS = false, bool includeImagesSOS = false);
         Task<IEnumerable<SOSSequence>> GetAllSOSSequence(bool includeImages = false, bool includeNotes = false, bool includeLogbooks = false, bool includeSpecialCases = false, bool includeSOS = false);
+        Task<IEnumerable<SOSSequence>> GetAllSOSSequenceByDistribution(int Distribution_Id, bool includeImages = false, bool includeNotes = false, bool includeLogbooks = false, bool includeSpecialCases = false, bool includeSOS = false);
 
         Task<int> UpdateSOSSequence(SOSSequenceForUpdateDto SequenceUpdate, SOSSequence SequenceEntity);
         Task<int> RemoveSOSSequence(int SOS_Sequence_id);
@@ -233,7 +235,7 @@ namespace SupervisorMobility.API.DataAccess.Services
         //SOS Distribution
         #region SOSDistribution
         Task<int> CreateSOSDistribution(SOSDistribution SOS_DistributionToCreate);
-        Task<SOSDistribution> GetSOSDistribution(int SOSDistributionId, bool includeImages = false, bool includeNotes = false, bool includeLogbooks = false, bool includeSOS = false, bool includeImagesSOS = false, bool includeTurns = false, bool includeTimes = false);
+        Task<SOSDistribution> GetSOSDistribution(int SOSDistributionId, bool includeImages = false, bool includeNotes = false, bool includeLogbooks = false, bool includeSOS = false, bool includeImagesSOS = false, bool includeTurns = false, bool includeTimes = false, bool includeCollections = false);
         Task<IEnumerable<SOSDistribution>> GetAllSOSDistribution(bool includeImages = false, bool includeNotes = false, bool includeLogbooks = false, bool includeSOS = false);
 
         Task<int> UpdateSOSDistribution(SOSDistributionForUpdateDto DistributionUpdate, SOSDistribution DistributionEntity);
@@ -250,11 +252,15 @@ namespace SupervisorMobility.API.DataAccess.Services
         Task<AsyncVoidMethodBuilder> AddSOSDistributionLogbookToSOSDistribution(SOSDistribution Master, SOSDistributionLogbook Slave);
         Task<AsyncVoidMethodBuilder> AddSOSDistributionAdditionalTimeToSOSDistribution(SOSDistribution Master, SOSDistributionAdditionalTime Slave);
         Task<AsyncVoidMethodBuilder> AddNoteToSOSDistribution(SOSDistribution Master, Commentary Slave);
+        Task<AsyncVoidMethodBuilder> AddAnalysisToSOSDistribution(SOSDistribution master, SOSAnalysis slave);
+        Task<AsyncVoidMethodBuilder> AddSequenceToSOSDistribution(SOSDistribution master, SOSSequence slave);
 
         #endregion
         #region Remove from SosDistribution
         Task<AsyncVoidMethodBuilder> SOSDataRemoveAllSOSDistributionLogbookFromSOSDistribution(SOSDistribution Master);
         Task<AsyncVoidMethodBuilder> SOSDataRemoveAllNotesFromSOSDistribution(SOSDistribution Master);
+        Task<AsyncVoidMethodBuilder> SOSDataRemoveAllSequencesFromSOSDistribution(SOSDistribution Master);
+        Task<AsyncVoidMethodBuilder> SOSDataRemoveAllAnalysisFromSOSDistribution(SOSDistribution Master);
         Task<AsyncVoidMethodBuilder> SOSDataRemoveAllSOSDistributionAdditionalTimeFromSOSDistribution(SOSDistribution Master);
         #endregion
         #region SOSDistributionLogbook

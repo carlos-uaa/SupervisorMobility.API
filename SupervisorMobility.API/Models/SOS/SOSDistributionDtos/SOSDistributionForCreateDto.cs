@@ -5,6 +5,8 @@ using SupervisorMobility.API.Models.CommentaryDtos;
 using SupervisorMobility.API.Models.FileUploadDto;
 using SupervisorMobility.API.Models.SOS.SOSDistributionLogbookDtos;
 using SupervisorMobility.API.DataAccess.Entities.SOS;
+using SupervisorMobility.API.Models.SOS.SOSAnalysisDtos;
+using SupervisorMobility.API.Models.SOS.SOSSequenceDtos;
 
 namespace SupervisorMobility.API.Models.SOS.SOSDistributionDtos
 {
@@ -39,5 +41,8 @@ namespace SupervisorMobility.API.Models.SOS.SOSDistributionDtos
         public bool? IsActive { get; set; }
 
         public int? SOSHubId { get; set; }
+
+        public ICollection<SOSAnalysisDto>? Analyses { get; set; } = new List<SOSAnalysisDto>();
+        public ICollection<SOSSequenceDto>? Sequences { get; set; } = new List<SOSSequenceDto>();
     }
 }

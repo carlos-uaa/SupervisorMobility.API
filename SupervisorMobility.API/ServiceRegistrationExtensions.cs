@@ -78,12 +78,12 @@ namespace SupervisorMobility.API
             if (RuntimeInformation.IsOSPlatform(OSPlatform.Windows))
             {
                 // Usa la cadena de conexión de Windows
-                services.AddDbContext<SupervisorMobilityContext>(options => options.UseSqlServer(configuration.GetConnectionString("SupervisorMobilityDBConnectionString")), ServiceLifetime.Transient);
+                services.AddDbContext<SupervisorMobilityContext>(options => options.UseSqlServer(configuration.GetConnectionString("SupervisorMobilityDBConnectionString"), options => { options.CommandTimeout(300); }), ServiceLifetime.Transient);
             }
             else
             {
                 // Usa la cadena de conexión de Linux
-                services.AddDbContext<SupervisorMobilityContext>(options => options.UseSqlServer(configuration.GetConnectionString("SupervisorMobilityDBConnectionLinuxString")), ServiceLifetime.Transient);
+                services.AddDbContext<SupervisorMobilityContext>(options => options.UseSqlServer(configuration.GetConnectionString("SupervisorMobilityDBConnectionLinuxString"), options => { options.CommandTimeout(300); }), ServiceLifetime.Transient);
             }
             //Add automapper
             services.AddAutoMapper(AppDomain.CurrentDomain.GetAssemblies());

@@ -166,8 +166,8 @@ namespace SupervisorMobility.API.Context
                 .HasDefaultValue(true);
 
             modelBuilder.Entity<JobObservation>()
-               .HasMany(s => s.Operations)  
-               .WithMany(u => u.JobObservations)  
+               .HasMany(s => s.Operations)
+               .WithMany(u => u.JobObservations)
                .UsingEntity(join => join.ToTable("JobOperations")); // Nombre de la tabla intermedia
 
 
@@ -365,7 +365,7 @@ namespace SupervisorMobility.API.Context
             modelBuilder.Entity<SOSHub>()
                 .Property(p => p.IsActive)
                 .HasDefaultValue(true);
-        
+
             modelBuilder.Entity<SOSHub>()
                 .HasMany(s => s.ApproverOwners)  // SOSHub tiene muchos ApproverOwners
                 .WithMany(u => u.SosHubsApproverOwners)  // Usuario puede estar en múltiples SOSHub como ApproverOwners
@@ -376,11 +376,11 @@ namespace SupervisorMobility.API.Context
                 .WithMany(u => u.SosHubsReviewerEditors)  // Usuario puede estar en múltiples SOSHub como ReviewerEditors
                 .UsingEntity(join => join.ToTable("SOSHubReviewerEditors")); // Nombre de la tabla intermedia
 
-            
+
             // Configurar la relación entre SOSHub y Products
             modelBuilder.Entity<SOSHub>()
-                .HasMany(s => s.AppliedModels)  
-                .WithMany(u => u.SOSHubs)  
+                .HasMany(s => s.AppliedModels)
+                .WithMany(u => u.SOSHubs)
                 .UsingEntity(join => join.ToTable("SOSHubProducts"));
 
             // Si tienes relaciones similares con SOSHubHistory, también necesitas configurarlas
@@ -493,6 +493,27 @@ namespace SupervisorMobility.API.Context
             modelBuilder.Entity<SOSDistributionAdditionalTime>()
                 .Property(p => p.IsActive)
                 .HasDefaultValue(true);
+
+            modelBuilder.Entity<SOSDistribution>()
+                   .HasMany(d => d.Sequences)
+                   .WithMany(s => s.Distributions)
+                   .UsingEntity<Dictionary<string, object>>(
+                       "SOSDistributionSequence",
+                       r => r.HasOne<SOSSequence>().WithMany().HasForeignKey("SOSSequenceId").OnDelete(DeleteBehavior.NoAction),
+                       l => l.HasOne<SOSDistribution>().WithMany().HasForeignKey("SOSDistributionId").OnDelete(DeleteBehavior.NoAction)
+                   );
+
+            // Configuración adicional para otras relaciones potenciales
+            modelBuilder.Entity<SOSDistribution>()
+                .HasMany(d => d.Analyses)
+                .WithMany(a => a.Distributions)
+                .UsingEntity<Dictionary<string, object>>(
+                    "SOSDistributionAnalysis",
+                    r => r.HasOne<SOSAnalysis>().WithMany().HasForeignKey("SOSAnalysisId").OnDelete(DeleteBehavior.NoAction),
+                    l => l.HasOne<SOSDistribution>().WithMany().HasForeignKey("SOSDistributionId").OnDelete(DeleteBehavior.NoAction)
+                );
+
+
 
             modelBuilder.Entity<SOSFlow>()
                 .Property(p => p.IsActive)
