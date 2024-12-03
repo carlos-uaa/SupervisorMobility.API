@@ -37,8 +37,6 @@ namespace SupervisorMobility.API.Entities
         public int DistributionId { get; set; }
         public Distribution? Distribution { get; set; }
 
-        public int SOSHubId { get; set; }
-        public SOSHub? SOSHub  { get; set; }
         public ICollection<JobObservation> JobObservations { get; set; } = new List<JobObservation>();
 
         public Operation(string code, string description)

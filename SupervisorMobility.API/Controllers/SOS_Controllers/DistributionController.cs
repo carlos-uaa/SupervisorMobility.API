@@ -34,8 +34,7 @@ namespace SupervisorMobility.API.Controllers.SOS_Controllers
         [HttpPost]
         public async Task<ActionResult<SOSDistributionDto>> GenerateDistribution(SOSDistributionForCreateDto sOSDistributionToCreate, int SOSHubCollection_Id)
         {
-            SOSHub SOSEntity = await _ProcessRepository.GetSOSHub(SOSHubCollection_Id, includeInformation: true);
-
+           
             if (sOSDistributionToCreate.SOSDistributionId == 0)
             {
                 //Nombre del documento GOS o processShet
