@@ -54,6 +54,7 @@ namespace SupervisorMobility.API.Context
         public DbSet<ILURegister> ILURegisters { get; set; }
         public DbSet<PAT> PATs { get; set; }
         public DbSet<LeadershipRecord> LeadershipRecords { get; set; }
+        public DbSet<PatUserRole> PatUserRoles { get; set; }
         public DbSet<UserCareerPath> UserCareerPaths { get; set; }
 
         public DbSet<SOSReviewProgram> SOSReviews { get; set; }
