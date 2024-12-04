@@ -1202,6 +1202,11 @@ namespace SupervisorMobility.API.Services
                 .Where(p => p.SOSCodePathId == RouteId).FirstOrDefaultAsync();
         }
 
+        public async Task<int> DeletePat(PAT patEntity)
+        {
+            patEntity.IsActive = false;
+            return await _context.SaveChangesAsync();
+        }
         public async Task<SOSCodePath?> TryFindCodePathItemAsync(int assychartId, string code)
         {
             return await _context.CodePaths
