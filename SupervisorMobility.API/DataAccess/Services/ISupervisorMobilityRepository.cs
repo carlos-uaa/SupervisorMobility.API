@@ -150,7 +150,7 @@ namespace SupervisorMobility.API.Services
 
         Task<SOSCodePath?> GetCodePathItemAsync(int RouteId);
         Task<SOSCodePath?> TryFindCodePathItemAsync(int assychartId, string code);
-
+        Task<int> DeletePat(PAT patEntity);
         Task<IEnumerable<SOSCodePath>> GetAllCodePathsAsync();
         Task AssyChartRemoveAllCodePaths(AssyChart AssyChart);
 

@@ -204,6 +204,19 @@ namespace SupervisorMobility.API.Controllers
 
         }
 
+        [HttpDelete("{patId}")]
+        public async Task<ActionResult<int>> RemovePat(int patId)
+        {
+
+            var PatEntity = await _supervisorMobilityRepository.GetPat(patId);
+            var result = await _supervisorMobilityRepository.DeletePat(PatEntity);
+
+            if (result > 0)
+                return Ok(PatEntity);
+            else
+                return BadRequest("something wrong");
+        }
+
         [HttpPut("{patId}/LeadershipRecords/")]
         public async Task<ActionResult> CreateLeadershipRecord(int patId,
          LeadershipRecordsForUpdateDto leadershipRecordForUpdate)
