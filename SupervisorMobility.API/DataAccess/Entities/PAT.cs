@@ -79,6 +79,21 @@ namespace SupervisorMobility.API.DataAccess.Entities
         [NotMapped]
         public SOSHub? SOSHub { get; set; }
 
+        public string? HistoricalAbility { get; set; }
+
         public bool IsActive { get; set; }
     }
+
+    //HistoricalAbility JSON FORMAT
+    /*
+     * [
+     *  {
+     *    "month":
+     *      {
+     *        "OR_O":double,
+     *        "OR_P":double
+     *      }
+     *  }
+     * ]
+     */
 }
