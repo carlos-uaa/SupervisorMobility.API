@@ -55,6 +55,8 @@ namespace SupervisorMobility.API.DataAccess.Entities
         public ICollection<LeadershipRecord>? LeadershipRecords { get; set; }
         public ICollection<PatUserRole>? PatUserRoles { get; set; }
 
+        public int? KnowledgePercentage { get; set; }
+
 
         [Column(TypeName = "Date")]
         public DateTime? AplicationDate { get; set; }
