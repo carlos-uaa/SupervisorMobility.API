@@ -1,4 +1,5 @@
-﻿using SupervisorMobility.API.DataAccess.Entities.SOS;
+﻿using SupervisorMobility.API.DataAccess.Entities;
+using SupervisorMobility.API.DataAccess.Entities.SOS;
 using SupervisorMobility.API.Models.ILURegisterDtos;
 using SupervisorMobility.API.Models.PlantDtos;
 using SupervisorMobility.API.Models.SOS.SOSHubDtos;
@@ -23,6 +24,10 @@ namespace SupervisorMobility.API.Models.PATDtos
         //public int DistributionId { get; set; }
         //public DistributionDtos.DistributionWithoutNavigationPropertiesDto? Distribution { get; set; }
         public ICollection<LeadershipRecordsDto>? LeadershipRecords { get; set; }
+        public ICollection<PatUserRole>? PatUserRoles { get; set; }
+
+        public int? KnowledgePercentage { get; set; }
+
 
         public DateTime? AplicationDate { get; set; }
         public int? AplicationYear { get; set; }
@@ -34,5 +39,8 @@ namespace SupervisorMobility.API.Models.PATDtos
         public DateTime? ApprovalDate { get; set; }
         public int? SOSHubId { get; set; }
         public SOSHubDto? SOSHub { get; set; }
+
+        public string? HistoricalAbility { get; set; }
+
     }
 }

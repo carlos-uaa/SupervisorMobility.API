@@ -17,6 +17,8 @@ namespace SupervisorMobility.API.Models.PATDtos
         //public int DistributionId { get; set; }
         public ICollection<LeadershipRecordsWithoutNavigationDto>? LeadershipRecords { get; set; }
 
+        public int? KnowledgePercentage { get; set; }
+
 
         public DateTime? AplicationDate { get; set; }
         public int? AplicationYear { get; set; }
@@ -28,5 +30,7 @@ namespace SupervisorMobility.API.Models.PATDtos
 
         public DateTime? ApprovalDate { get; set; }
         public int? SOSHubId { get; set; }
+        public string? HistoricalAbility { get; set; }
+
     }
 }
