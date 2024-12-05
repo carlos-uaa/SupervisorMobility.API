@@ -32,5 +32,14 @@ namespace SupervisorMobility.API.DataAccess.Entities
             Code = code;
             Description = description;
         }
+
+        public override bool Equals(object? obj)
+        {
+            return obj is Operation operation && DistributionId == operation.DistributionId;
+        }
+        public override int GetHashCode() 
+        {
+            return HashCode.Combine(DistributionId, Code, Description);
+        }
     }
 }

@@ -53,7 +53,9 @@ namespace SupervisorMobility.API.DataAccess.Entities
         //[NotMapped]
         //public Distribution? Distribution { get; set; }
         public ICollection<LeadershipRecord>? LeadershipRecords { get; set; }
+        public ICollection<PatUserRole>? PatUserRoles { get; set; }
 
+        public int? KnowledgePercentage { get; set; }
 
 
         [Column(TypeName = "Date")]
@@ -75,7 +77,25 @@ namespace SupervisorMobility.API.DataAccess.Entities
         public DateTime? ApprovalDate { get; set; }
 
         public int? SOSHubId { get; set; }
+        [ForeignKey("SOSHubId")]
+        [NotMapped]
         public SOSHub? SOSHub { get; set; }
+
+        public string? HistoricalAbility { get; set; }
+
         public bool IsActive { get; set; }
     }
+
+    //HistoricalAbility JSON FORMAT
+    /*
+     * [
+     *  {
+     *    "month":
+     *      {
+     *        "OR_O":double,
+     *        "OR_P":double
+     *      }
+     *  }
+     * ]
+     */
 }

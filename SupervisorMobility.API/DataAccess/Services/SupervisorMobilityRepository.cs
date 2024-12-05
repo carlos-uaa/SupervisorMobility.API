@@ -2126,11 +2126,12 @@ namespace SupervisorMobility.API.Services
             return await _context.PATs
                    .Include(p => p.Plant)
                    .Include(a => a.Area)
-                   .Include(sv => sv.Supervisor)
+                   .Include(sv => sv.Supervisor).ThenInclude(s => s.ILURegisers)
                    .Include(ssv => ssv.SSVresponsible)
                    .Include(lr => lr.LeadershipRecords)
                    .Where(p => p.PATid == patId).FirstOrDefaultAsync();
         }
+
         public async Task<PAT?> GetPatForYearOfSV(int sv, int Year)
         {
             return await _context.PATs.Where(p => p.SupervisorId == sv && p.AplicationYear == Year).FirstOrDefaultAsync();
