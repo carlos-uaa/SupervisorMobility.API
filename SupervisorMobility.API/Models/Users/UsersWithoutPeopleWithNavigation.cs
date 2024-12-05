@@ -39,7 +39,6 @@ namespace SupervisorMobility.API.Models.Users
         public ICollection<AreaDtos.AreaWithoutNavigationPropertiesDto>? Areas { get; set; }
         public GroupDto? Group { get; set; } = new GroupDto();
         public ICollection<ILURegisterWithoutNavigationDto>? ILURegisers { get; set; }
-        public ICollection<LeadershipRecordsDto>? LeadershipRecords { get; set; }
 
 
         public DateTime? IncomesDate { get; set; }

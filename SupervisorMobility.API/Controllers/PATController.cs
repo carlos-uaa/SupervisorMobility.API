@@ -177,33 +177,6 @@ namespace SupervisorMobility.API.Controllers
 
         //LeaderRecords
 
-        [HttpPost("{patId}/LeadershipRecords")]
-        public async Task<ActionResult> CreateLeadershipRecord(int patId,
-          LeadershipRecordsForCreationDto leadershipRecordsForCreation)
-        {
-            var patEntity = await _assyChartService.FetchPatAsync(patId);
-            if (patEntity == null)
-            {
-                return NotFound();
-            }
-
-            LeadershipRecord recordEntity = new LeadershipRecord();
-
-            _mapper.Map(leadershipRecordsForCreation, recordEntity);
-
-           var result = await _supervisorMobilityRepository.AddLeadershipRecordToPAT(patEntity, recordEntity);
-
-            if(result > 0)
-            {
-                return Ok(recordEntity);
-            }
-            else
-            {
-                return NotFound($"Error: on create or save changes ");
-            }
-
-        }
-
         [HttpDelete("{patId}")]
         public async Task<ActionResult<int>> RemovePat(int patId)
         {
@@ -217,27 +190,7 @@ namespace SupervisorMobility.API.Controllers
                 return BadRequest("something wrong");
         }
 
-        [HttpPut("{patId}/LeadershipRecords/")]
-        public async Task<ActionResult> CreateLeadershipRecord(int patId,
-         LeadershipRecordsForUpdateDto leadershipRecordForUpdate)
-        {
-            var patEntity = await _assyChartService.FetchPatAsync(patId);
-            if (patEntity == null)
-            {
-                return NotFound($"Error: Pat by id {patId} Not Exist");
-            }
-
-           var result =  await _supervisorMobilityRepository.UpdateLeadershipRecordToPAT(patEntity, leadershipRecordForUpdate);
-
-            if(result > 0 ) { 
-            return Ok();
-            }
-            else
-            {
-                return NotFound($"Error: on update or save changes ");
-            }
-
-        }
+        
 
 
     }

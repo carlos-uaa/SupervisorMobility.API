@@ -46,7 +46,6 @@ namespace SupervisorMobility.API.DataAccess.Entities
             = new List<SOSReviewProgram>();
 
         public ICollection<ILURegister>? ILURegisers { get; set; }
-        public ICollection<LeadershipRecord>? LeadershipRecords { get; set; }
 
         [Column(TypeName = "Date")]
         public DateTime? CreatedDate { get; set; } = DateTime.Now;

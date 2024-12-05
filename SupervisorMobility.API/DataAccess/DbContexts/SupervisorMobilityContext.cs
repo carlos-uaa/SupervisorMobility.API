@@ -53,7 +53,6 @@ namespace SupervisorMobility.API.Context
         public DbSet<ILULevel> ILULevels { get; set; }
         public DbSet<ILURegister> ILURegisters { get; set; }
         public DbSet<PAT> PATs { get; set; }
-        public DbSet<LeadershipRecord> LeadershipRecords { get; set; }
         public DbSet<PatUserRole> PatUserRoles { get; set; }
         public DbSet<UserCareerPath> UserCareerPaths { get; set; }
 
@@ -275,9 +274,7 @@ namespace SupervisorMobility.API.Context
               .Property(p => p.IsActive)
               .HasDefaultValue(true);
 
-            modelBuilder.Entity<LeadershipRecord>()
-              .Property(p => p.isActive)
-              .HasDefaultValue(true);
+       
 
             modelBuilder.Entity<PAT>()
                .HasOne(p => p.Area)

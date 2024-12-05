@@ -14,9 +14,6 @@ namespace SupervisorMobility.API.Models.PATDtos
         public int PlantId { get; set; }
         public int AreaId { get; set; }
 
-        //public int DistributionId { get; set; }
-        public ICollection<LeadershipRecordsWithoutNavigationDto>? LeadershipRecords { get; set; }
-
         public int? KnowledgePercentage { get; set; }
 
 

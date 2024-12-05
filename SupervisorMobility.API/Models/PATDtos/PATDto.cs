@@ -21,9 +21,6 @@ namespace SupervisorMobility.API.Models.PATDtos
         public PlantDto? Plant { get; set; }
         public int AreaId { get; set; }
         public AreaDtos.AreaWithoutNavigationPropertiesDto? Area { get; set; }
-        //public int DistributionId { get; set; }
-        //public DistributionDtos.DistributionWithoutNavigationPropertiesDto? Distribution { get; set; }
-        public ICollection<LeadershipRecordsDto>? LeadershipRecords { get; set; }
         public ICollection<PatUserRole>? PatUserRoles { get; set; }
 
         public int? KnowledgePercentage { get; set; }
