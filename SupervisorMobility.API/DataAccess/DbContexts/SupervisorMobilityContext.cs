@@ -53,10 +53,9 @@ namespace SupervisorMobility.API.Context
         public DbSet<ILULevel> ILULevels { get; set; }
         public DbSet<ILURegister> ILURegisters { get; set; }
         public DbSet<PAT> PATs { get; set; }
-        public DbSet<LeadershipRecord> LeadershipRecords { get; set; }
         public DbSet<PatUserRole> PatUserRoles { get; set; }
+        public DbSet<PatDistributionComment>? PatDistributionComments { get; set; }
         public DbSet<UserCareerPath> UserCareerPaths { get; set; }
-
         public DbSet<SOSReviewProgram> SOSReviews { get; set; }
         public DbSet<SOSReviewDistSuggestion> SOSSuggestionsDistribution { get; set; }
         public DbSet<SOSRegisterJobObservation> SOSRegisters { get; set; }
@@ -275,9 +274,7 @@ namespace SupervisorMobility.API.Context
               .Property(p => p.IsActive)
               .HasDefaultValue(true);
 
-            modelBuilder.Entity<LeadershipRecord>()
-              .Property(p => p.isActive)
-              .HasDefaultValue(true);
+       
 
             modelBuilder.Entity<PAT>()
                .HasOne(p => p.Area)
@@ -303,16 +300,6 @@ namespace SupervisorMobility.API.Context
                 .HasForeignKey(p => p.SupervisorId)
                 .OnDelete(DeleteBehavior.NoAction);
 
-            modelBuilder.Entity<PatUserRole>()
-                .HasOne<PAT>().WithMany(p=>p.PatUserRoles)
-                .HasForeignKey(pur=>pur.PATId)
-                .OnDelete(DeleteBehavior.NoAction);
-
-            //modelBuilder.Entity<PAT>()
-            //    .HasOne(p => p.Distribution)
-            //    .WithMany()
-            //    .HasForeignKey(p => p.DistributionId)
-            //    .OnDelete(DeleteBehavior.NoAction);
 
             modelBuilder.Entity<ILULevel>()
            .Property(e => e.ILULevelId)

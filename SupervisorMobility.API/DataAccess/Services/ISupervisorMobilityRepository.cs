@@ -290,10 +290,7 @@ namespace SupervisorMobility.API.Services
         Task<IEnumerable<PAT>> GetAllPATsofSSV(int ssvID);
 
         #endregion
-        #region LeadershipRecord
-        Task<int> AddLeadershipRecordToPAT(PAT entity, LeadershipRecord leadershipRecordsForCreation);
-        Task<int> UpdateLeadershipRecordToPAT(PAT entity, LeadershipRecordsForUpdateDto leadershipRecordsForUpdate);
-        #endregion
+     
         #region Logger
 
         #endregion

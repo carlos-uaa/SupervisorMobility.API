@@ -3,22 +3,13 @@ using System.ComponentModel.DataAnnotations;
 
 namespace SupervisorMobility.API.DataAccess.Entities
 {
-    public enum OperatorRole
-    {
-        SV,
-        Lider,
-        CA, // C/A
-        NI
-    }
-
-    public class PatUserRole
+    public class PatDistributionComment
     {
         [Key, DatabaseGenerated(DatabaseGeneratedOption.Identity)]
-        public int PatUserRoleId { get; set; }
+        public int PatDistributionCommentId { get; set; }
         public int PATId { get; set; }
-        public int UserId { get; set; }
-        public OperatorRole? Role { get; set; }
-        public string? Comment { get; set; }
+        public int DistributionId { get; set; }
+        public string Comment { get; set; } = string.Empty;
         public bool IsActive { get; set; }
     }
 }
