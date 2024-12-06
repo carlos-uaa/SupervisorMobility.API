@@ -2112,6 +2112,8 @@ namespace SupervisorMobility.API.Services
                    .Include(a => a.Area)
                    .Include(sv => sv.Supervisor).ThenInclude(s => s.ILURegisers)
                    .Include(ssv => ssv.SSVresponsible)
+                   .Include(pu => pu.PatUserRoles)
+                   .Include(pd => pd.PatDistributionComments)
                    .Where(p => p.PATid == patId).FirstOrDefaultAsync();
         }
 
@@ -2124,7 +2126,7 @@ namespace SupervisorMobility.API.Services
 
             _mapper.Map(patForUpdate, PatEntity);
 
-            return _context.SaveChanges();
+            return await _context.SaveChangesAsync();
         }
         public async Task<IEnumerable<PAT>> GetAllPATs()
         {

@@ -10,6 +10,7 @@ using SupervisorMobility.API.Models.PlantDtos;
 using SupervisorMobility.API.Models.SOS.SOSDistributionDtos;
 using SupervisorMobility.API.Services;
 using System.Diagnostics;
+using System.Text.RegularExpressions;
 
 namespace SupervisorMobility.API.Controllers
 {
@@ -99,8 +100,7 @@ namespace SupervisorMobility.API.Controllers
             }
             else
             {
-                var Pat = await _supervisorMobilityRepository
-                                .GetPat(PATid);
+                var Pat = await _supervisorMobilityRepository.GetPat(PATid);
                 return Ok(_mapper.Map<PATwithoutNavigations>(Pat));
 
             }
@@ -160,8 +160,7 @@ namespace SupervisorMobility.API.Controllers
         }
 
         [HttpPut("{patId}")]
-        public async Task<ActionResult> UpdatePat(int patId,
-            PATForUpdateDto pat)
+        public async Task<ActionResult> UpdatePat(int patId,PATForUpdateDto pat)
         {
             var patEntity = await _assyChartService.FetchPatAsync(patId);
             if (patEntity == null)
@@ -169,9 +168,16 @@ namespace SupervisorMobility.API.Controllers
                 return NotFound();
             }
 
-            await _supervisorMobilityRepository.UpdatePAT(pat, patEntity);
+            int resUpdate = await _supervisorMobilityRepository.UpdatePAT(pat, patEntity);
 
-            return Ok();
+            if (resUpdate > 0)
+            {
+                return Ok();    
+            }
+            else
+            {
+                return NotFound();
+            }
 
         }
 

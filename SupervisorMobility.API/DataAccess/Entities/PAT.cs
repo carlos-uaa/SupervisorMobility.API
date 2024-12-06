@@ -49,7 +49,7 @@ namespace SupervisorMobility.API.DataAccess.Entities
         public Area? Area { get; set; }
 
         public ICollection<PatUserRole>? PatUserRoles { get; set; }
-
+        public ICollection<PatDistributionComment>? PatDistributionComments { get; set; }
         public int? KnowledgePercentage { get; set; }
 
 
