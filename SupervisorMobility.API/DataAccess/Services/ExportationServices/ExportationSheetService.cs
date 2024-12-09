@@ -70,6 +70,38 @@ namespace SupervisorMobility.API.DataAccess.Services.ExportationServices
             ms.Dispose();
         }
 
+        public void AddOtherSheet(ExcelPackage package, int type, string currentIdx = "A")
+        {
+            string sheetName = "";
+            string sheetWN = "";
+            switch (type)
+            {
+                case 0:
+                    sheetName = "DataAccess/Templates/PAT Yearly template.xlsx";
+                    sheetWN = "SOS Anual " + GetNextIndex(currentIdx);
+                    break;
+                default:
+                    break;
+            }
+
+            MemoryStream ms = new MemoryStream();
+
+            using var templateStream = System.IO.File.OpenRead(sheetName);
+
+            using (var ExtraTemplate = new ExcelPackage(templateStream))
+            {
+                ExcelWorksheet sourceSheet = ExtraTemplate.Workbook.Worksheets[0];
+
+                package.Workbook.Worksheets.Add(sheetWN, sourceSheet);
+
+            }
+
+            templateStream.Close();
+            ms.Close();
+            templateStream.Dispose();
+            ms.Dispose();
+        }
+
         public void GenerateAnalysisRows(ExcelWorksheet worksheet, ref double rowHeight, ref int idx, double ChangeHeight, double DefaultRowH)
         {
             _stylesService.ChangeLastRowStyleAnalysis(worksheet, idx, false);
@@ -170,6 +202,13 @@ namespace SupervisorMobility.API.DataAccess.Services.ExportationServices
             }
 
             return new string('A', length + 1);
+        }
+
+        public int ColumnLetterToNumber(string columnLetters)
+        {
+            int sum = 0; 
+            foreach (char c in columnLetters) { sum *= 26; sum += c - 'A' + 1; }
+            return sum;
         }
 
         public int GetNextIndex(string input)
