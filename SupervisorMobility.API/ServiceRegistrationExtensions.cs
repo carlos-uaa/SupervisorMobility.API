@@ -47,7 +47,6 @@ namespace SupervisorMobility.API
             services.AddScoped<IOrderingService, OrderingService>();
 
 
-            //Aca un ejemplo de servicio
 
             services.Configure<IISServerOptions>(options =>
             {
