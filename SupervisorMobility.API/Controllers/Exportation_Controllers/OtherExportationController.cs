@@ -172,8 +172,8 @@ namespace SupervisorMobility.API.Controllers.Exportation_Controllers
                             sheet.Cells[$"{Col}6"].Value = usersOfArea[j].Name;
                             sheet.Cells[$"{Col}10"].Value = usersOfArea[j].Payroll;
                             sheet.Cells[$"{Col}42"].Value = operatorRoles?[j].Comment;
-                            if(operatorRoles != null)
-                                sheet.Cells[$"{Col}50"].Value = roles[operatorRoles[j].Role];
+                            //if(operatorRoles != null)
+                            //    sheet.Cells[$"{Col}50"].Value = roles[operatorRoles[j].Role];
                         }
 
                         if (matrix[i, j] == null) { Col = sheetService.GetNextCombination(Col); Col = sheetService.GetNextCombination(Col); continue; }
