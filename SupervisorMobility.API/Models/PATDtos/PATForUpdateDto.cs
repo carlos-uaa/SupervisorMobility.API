@@ -30,6 +30,7 @@ namespace SupervisorMobility.API.Models.PATDtos
         public DateTime? ApprovalDate { get; set; }
         public int? SOSHubId { get; set; }
         public string? HistoricalAbility { get; set; }
+        public string? SaveLeader { get; set; }
 
         public ICollection<PatUserRoleForUpdateDto>? PatUserRoles { get; set; }
         public ICollection<PatDistributionCommentForUpdateDto>? PatDistributionComments { get; set; }
