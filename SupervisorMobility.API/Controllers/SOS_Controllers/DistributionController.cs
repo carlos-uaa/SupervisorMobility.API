@@ -8,6 +8,8 @@ using SupervisorMobility.API.Models.FileUploadDto;
 using SupervisorMobility.API.Models.SOS.SOSDistributionAdditionalTimeDtos;
 using SupervisorMobility.API.Models.SOS.SOSDistributionDtos;
 using SupervisorMobility.API.Models.SOS.SOSDistributionLogbookDtos;
+using SupervisorMobility.API.Models.SOS.SOSHubDtos;
+using SupervisorMobility.API.Models.SOS.SOSHubDtos.SectionDtos;
 using SupervisorMobility.API.Models.SOS.SOSTimeDtos;
 using SupervisorMobility.API.Models.SOS.TurnDtos;
 using System.Diagnostics;
@@ -32,8 +34,7 @@ namespace SupervisorMobility.API.Controllers.SOS_Controllers
         [HttpPost]
         public async Task<ActionResult<SOSDistributionDto>> GenerateDistribution(SOSDistributionForCreateDto sOSDistributionToCreate, int SOSHubCollection_Id)
         {
-            SOSHub SOSEntity = await _ProcessRepository.GetSOSHub(SOSHubCollection_Id, includeInformation: true);
-
+           
             if (sOSDistributionToCreate.SOSDistributionId == 0)
             {
                 //Nombre del documento GOS o processShet
@@ -96,10 +97,10 @@ namespace SupervisorMobility.API.Controllers.SOS_Controllers
         }
 
         [HttpGet("{id}", Name = "GetSOSDistribution")]
-        public async Task<ActionResult<SOSDistributionDto>> GetSOSDistribution(int id, bool includeImages = false, bool includeNotes = false, bool includeLogbooks = false, bool includeSOS = false, bool includeImagesSOS = false, bool includeTurns = false, bool includeTimes = false)
+        public async Task<ActionResult<SOSDistributionDto>> GetSOSDistribution(int id, bool includeImages = false, bool includeNotes = false, bool includeLogbooks = false, bool includeSOS = false, bool includeImagesSOS = false, bool includeTurns = false, bool includeTimes = false, bool includeCollections = false)
         {
 
-            var SOSDistribution = await _ProcessRepository.GetSOSDistribution(id, includeImages, includeNotes, includeLogbooks, includeSOS, includeImagesSOS, includeTurns, includeTimes);
+            var SOSDistribution = await _ProcessRepository.GetSOSDistribution(id, includeImages, includeNotes, includeLogbooks, includeSOS, includeImagesSOS, includeTurns, includeTimes, includeCollections: includeCollections);
             if (SOSDistribution == null)
             {
                 return NotFound("SOSDistribution not found!");
@@ -126,6 +127,9 @@ namespace SupervisorMobility.API.Controllers.SOS_Controllers
         [HttpPut("{sosDistribution_Id}")]
         public async Task<ActionResult> UpdateSOSDistribution(int sosDistribution_Id, SOSDistributionForUpdateDto sosUpdateEntity)
         {
+            List<SOSAnalysis> Bkup_Analysis = new List<SOSAnalysis>();
+            List<SOSSequence> Bkup_Sequence = new List<SOSSequence>();
+
             List<Commentary> Bkup_Notes = new List<Commentary>();
             List<Turn> Bkup_Turn = new List<Turn>();
             List<SOSDistributionLogbook> Bkup_DistributionLogbook = new List<SOSDistributionLogbook>();
@@ -140,6 +144,41 @@ namespace SupervisorMobility.API.Controllers.SOS_Controllers
             List<SOSTimeForUpdateDto> filteredTimesList = sosUpdateEntity.Times.Where(t => t.SOSTimeId <= 0).ToList();
              // Filtrar nuevos Turnos
             List<TurnForUpdateDto> filteredTurnList = sosUpdateEntity.Turns.Where(t => t.TurnId <= 0).ToList();
+
+
+            //Logica de secciones para soshub
+            SOSHub entitySOSHub = await _ProcessRepository.GetSOSHub((int)sosUpdateEntity.SOSHubId, includeSections: true, includeDeleteds: true);
+            SOSHubForUpdateDto _SOSHubForUpdate = sosUpdateEntity.SOSHub;
+
+            List<Section> Sections = new List<Section>();
+
+            List<SectionForUpdateDto> filteredSectionList = _SOSHubForUpdate.Sections
+              .Where(t => t.SectionId <= 0).ToList();
+
+            Sections.AddRange(entitySOSHub.Sections?.Where(p => p.IsActive == false));
+
+            await _ProcessRepository.SOSDataRemoveAllSections(entitySOSHub);
+
+            foreach (var section in _SOSHubForUpdate.Sections)
+            {
+                var SecUpdate = await _ProcessRepository.UpdateSection(section);
+
+                Section sectionToAdd = await _ProcessRepository.GetSectionById(section.SectionId);
+                Sections.Add(sectionToAdd);
+            }
+
+            //_SOSHubForUpdate.Sections = null;
+
+            //var resultUpdate = await _ProcessRepository.UpdateSOSHub(_SOSHubForUpdate, entitySOSHub);
+
+            if (Sections.Any())
+            {
+                foreach (Section sec in Sections)
+                {
+                    await _ProcessRepository.AddSectionSOSCollection(entitySOSHub, sec);
+                }
+            }
+            //
 
 
             // Remover nuevos Comentarios de la lista principal para evitar duplicados
@@ -254,7 +293,7 @@ namespace SupervisorMobility.API.Controllers.SOS_Controllers
             }
 
 
-            SOSDistribution _sosDistribution = await _ProcessRepository.GetSOSDistribution(sosDistribution_Id, true, true, true, true, includeTurns:true, includeTimes:true);
+            SOSDistribution _sosDistribution = await _ProcessRepository.GetSOSDistribution(sosDistribution_Id, true, true, true, true, includeTurns:true, includeTimes:true, includeCollections: true);
 
             ////Aqui va el historico de ser necesario en  un futuro 
 
@@ -272,6 +311,20 @@ namespace SupervisorMobility.API.Controllers.SOS_Controllers
 
             //Crear bkup de datos relacionados
             //hacer update entity sin relaciones
+
+            foreach (var sequence in sosUpdateEntity.Sequences)
+            {
+                SOSSequence sequenceToAdd = await _ProcessRepository.GetSOSSequence(sequence.SOSSequenceId);
+                Bkup_Sequence.Add(sequenceToAdd);
+            }
+
+            foreach (var analysis in sosUpdateEntity.Analyses)
+            {
+                SOSAnalysis analysisToAdd = await _ProcessRepository.GetSOSAnalysis(analysis.SOSAnalysisId);
+                Bkup_Analysis.Add(analysisToAdd);
+            }
+
+
             foreach (var note in sosUpdateEntity.Notes)
             {
                 var CommentaryUpdate = await _ProcessRepository.UpdateCommentary(note);
@@ -305,12 +358,17 @@ namespace SupervisorMobility.API.Controllers.SOS_Controllers
             }
 
             //Nulleamos el update para evitar errores
+            sosUpdateEntity.Sequences = null;
+            sosUpdateEntity.Analyses = null;
+
             sosUpdateEntity.Notes = null;
             sosUpdateEntity.Turns = null;
             sosUpdateEntity.DistributionLogbooks = null;
             sosUpdateEntity.Times= null;
             sosUpdateEntity.SOSDistributionAdditionalTime = null;
 
+            await _ProcessRepository.SOSDataRemoveAllSequencesFromSOSDistribution(_sosDistribution);
+            await _ProcessRepository.SOSDataRemoveAllAnalysisFromSOSDistribution(_sosDistribution);
 
             await _ProcessRepository.RemoveAllTimesFromSOSDistribution(_sosDistribution);
             await _ProcessRepository.RemoveAllTurnsFromSOSDistribution(_sosDistribution);
@@ -322,6 +380,24 @@ namespace SupervisorMobility.API.Controllers.SOS_Controllers
             var result = await _ProcessRepository.UpdateSOSDistribution(sosUpdateEntity, _sosDistribution);
 
             //Notes - Volver a añádir las notas
+            if (Bkup_Analysis.Any())
+            {
+                foreach (SOSAnalysis Analysis in Bkup_Analysis)
+                {
+                    await _ProcessRepository.AddAnalysisToSOSDistribution(_sosDistribution, Analysis);
+                }
+            } 
+            if (Bkup_Sequence.Any())
+            {
+                foreach (SOSSequence Sequence in Bkup_Sequence)
+                {
+                    await _ProcessRepository.AddSequenceToSOSDistribution(_sosDistribution, Sequence);
+                }
+            }
+
+            
+
+
             if (Bkup_Notes.Any())
             {
                 foreach (Commentary Comment in Bkup_Notes)

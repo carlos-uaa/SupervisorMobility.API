@@ -1,4 +1,5 @@
-﻿using SupervisorMobility.API.Entities;
+﻿using SupervisorMobility.API.DataAccess.Entities.SOS;
+using SupervisorMobility.API.Entities;
 using SupervisorMobility.API.Models.ILURegisterDtos;
 using System.ComponentModel.DataAnnotations;
 using System.ComponentModel.DataAnnotations.Schema;
@@ -47,12 +48,9 @@ namespace SupervisorMobility.API.DataAccess.Entities
 
         public Area? Area { get; set; }
 
-        //public int? DistributionId { get; set; }
-        //[ForeignKey("DistributionId")]
-        //[NotMapped]
-        //public Distribution? Distribution { get; set; }
-        public ICollection<LeadershipRecord>? LeadershipRecords { get; set; }
-
+        public ICollection<PatUserRole>? PatUserRoles { get; set; }
+        public ICollection<PatDistributionComment>? PatDistributionComments { get; set; }
+        public int? KnowledgePercentage { get; set; }
 
 
         [Column(TypeName = "Date")]
@@ -73,6 +71,27 @@ namespace SupervisorMobility.API.DataAccess.Entities
         [Column(TypeName = "Date")]
         public DateTime? ApprovalDate { get; set; }
 
+        public int? SOSHubId { get; set; }
+        [ForeignKey("SOSHubId")]
+        [NotMapped]
+        public SOSHub? SOSHub { get; set; }
+
+        public string? HistoricalAbility { get; set; }
+        public string? SaveLeader { get; set; } = "S";
+
         public bool IsActive { get; set; }
     }
+
+    //HistoricalAbility JSON FORMAT
+    /*
+     * [
+     *  {
+     *    "month":
+     *      {
+     *        "OR_O":double,
+     *        "OR_P":double
+     *      }
+     *  }
+     * ]
+     */
 }

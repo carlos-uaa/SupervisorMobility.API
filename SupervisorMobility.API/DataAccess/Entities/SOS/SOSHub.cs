@@ -69,6 +69,8 @@ namespace SupervisorMobility.API.DataAccess.Entities.SOS
 
         public ICollection<SOSHubHistory>? History { get; set; } = new List<SOSHubHistory>();
 
+        public ICollection<PAT>? PATs { get; set; } = new List<PAT>();
+
         public bool? IsActive { get; set; }
     }
 }

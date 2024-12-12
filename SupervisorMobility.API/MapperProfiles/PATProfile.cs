@@ -8,6 +8,7 @@ namespace SupervisorMobility.API.MapperProfiles
         {
             CreateMap<DataAccess.Entities.PAT, Models.PATDtos.PATDto>().ReverseMap();
             CreateMap<DataAccess.Entities.PAT, Models.PATDtos.PATForUpdateDto>().ReverseMap();
+            CreateMap<Models.PATDtos.PATFotCreationDto, Models.PATDtos.PATForUpdateDto>().ReverseMap();
             CreateMap<DataAccess.Entities.PAT, Models.PATDtos.PATFotCreationDto>().ReverseMap();
             CreateMap<DataAccess.Entities.PAT, Models.PATDtos.PATwithoutNavigations>().ReverseMap();
         }

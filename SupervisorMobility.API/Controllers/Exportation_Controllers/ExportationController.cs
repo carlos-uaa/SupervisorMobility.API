@@ -20,7 +20,7 @@ using SupervisorMobility.API.DataAccess.Services.ExportationServices;
 using System.Drawing;
 using System.Text.RegularExpressions;
 
-namespace SupervisorMobility.API.Controllers
+namespace SupervisorMobility.API.Controllers.Exportation_Controllers
 {
     [Route("api/Exportation")]
     [ApiController]
@@ -67,7 +67,7 @@ namespace SupervisorMobility.API.Controllers
                 string SecurityEq = "";
                 if (SosAnalysis.SOSHub?.SafetyEquipment != null && SosAnalysis.SOSHub.SafetyEquipment.Any())
                 {
-                    SecurityEq = string.Join(", ", SosAnalysis.SOSHub.SafetyEquipment.Select(se=>se.EquipmentName));
+                    SecurityEq = string.Join(", ", SosAnalysis.SOSHub.SafetyEquipment.Select(se => se.EquipmentName));
                 }
                 sheet.Cells["D7"].Value = SecurityEq;
                 string Tools = "";
@@ -85,9 +85,9 @@ namespace SupervisorMobility.API.Controllers
                 {
                     //SosAnalysis.AnalysisLogbooks = SosAnalysis.AnalysisLogbooks?.OrderByDescending(p => p.NoRevision).ToList();
 
-                    List<string> Cols = new List<string>{ "K", "N", "O", "P" };
+                    List<string> Cols = new List<string> { "K", "N", "O", "P" };
 
-                    foreach (var (item, index) in SosAnalysis.AnalysisLogbooks.Take(4).Select((item, index)=>(item, index)))
+                    foreach (var (item, index) in SosAnalysis.AnalysisLogbooks.Take(4).Select((item, index) => (item, index)))
                     {
                         sheet.Cells[$"{Cols[index]}4"].Value = item == SosAnalysis.AnalysisLogbooks.First() ? "N" : item.NoRevision;
                         sheet.Cells[$"{Cols[index]}5"].Value = item.Date?.ToString("dd-MMM-yyyy").Replace(".", "");
@@ -134,7 +134,7 @@ namespace SupervisorMobility.API.Controllers
 
                 double TotalRowHeight = 0;//to be able to know when to jump to next sheet
 
-                Dictionary<string, double> rowHeights = new Dictionary<string, double>{ { "A", 0 } };//page index, total rows height
+                Dictionary<string, double> rowHeights = new Dictionary<string, double> { { "A", 0 } };//page index, total rows height
                 const double ChangeHeightDefaultTemplate = 580;//Total row height from an empty template to change sheet
                 const double ChangeHeightExtraTemplates = 580 + 309.6 - 75.6; //default table height + information table height in default template - heght to here the table starts
 
@@ -160,11 +160,11 @@ namespace SupervisorMobility.API.Controllers
 
                     int comparator = 0;
                     if (section.Analyses.Count % 2 == 0)
-                        comparator = (section.Analyses.Count / 2) - 1;
+                        comparator = section.Analyses.Count / 2 - 1;
                     else
                         comparator = section.Analyses.Count / 2;
 
-                    foreach (var (analysis, index) in section.Analyses.Select((analysis, index)=>(analysis, index)))
+                    foreach (var (analysis, index) in section.Analyses.Select((analysis, index) => (analysis, index)))
                     {
                         double analysisHeight, StepHeight, CriticalHeight;
                         indexAnalysis++;
@@ -192,14 +192,14 @@ namespace SupervisorMobility.API.Controllers
                         }
 
                         analysisHeight = stylesService.CalculateRowHeight(analysis.Text, sheet.Columns[3].Width + sheet.Columns[4].Width, sheet.Cells["B14"].Style.Font.Size);
-                        StepHeight = stylesService.CalculateRowHeight(section.Step, (sheet.Columns[6].Width + sheet.Columns[7].Width), sheet.Cells["F14"].Style.Font.Size);
-                        CriticalHeight = stylesService.CalculateRowHeight(fullText, (sheet.Columns[10].Width + sheet.Columns[11].Width + sheet.Columns[12].Width), sheet.Cells["J14"].Style.Font.Size);
+                        StepHeight = stylesService.CalculateRowHeight(section.Step, sheet.Columns[6].Width + sheet.Columns[7].Width, sheet.Cells["F14"].Style.Font.Size);
+                        CriticalHeight = stylesService.CalculateRowHeight(fullText, sheet.Columns[10].Width + sheet.Columns[11].Width + sheet.Columns[12].Width, sheet.Cells["J14"].Style.Font.Size);
 
                         var rowheight = Math.Max(20, Math.Max(analysisHeight, Math.Max(StepHeight, CriticalHeight)));
 
                         var chHeightP = (TotalRowHeight + rowheight) * 100 / ChangeHeight;
 
-                        if(chHeightP > 100)
+                        if (chHeightP > 100)
                         {
                             sheet.DeleteRow(rowindex);
                             rowindex--;
@@ -239,7 +239,7 @@ namespace SupervisorMobility.API.Controllers
                         sheet.Cells[$"B{rowindex}"].Value = indexAnalysis;
 
                         MatchCollection result = Regex.Matches(analysis.Text, @"(\*[^*]+\*|\s*[^*]+\s*)");
-                        foreach(Match text in result)
+                        foreach (Match text in result)
                         {
                             if (text.Value.Contains("*"))
                             {
@@ -253,7 +253,7 @@ namespace SupervisorMobility.API.Controllers
                             }
                         }
 
-                        if(index == comparator)
+                        if (index == comparator)
                         {
                             sheet.Cells[$"E{rowindex}"].Value = indexSection;
                             sheet.Cells[$"F{rowindex}"].Value = section.Step;
@@ -290,7 +290,7 @@ namespace SupervisorMobility.API.Controllers
                 }
 
                 const double DefaultRowH = 40;
-                
+
 
                 double templateExtrahight = 25.1 + 8 + 16.2 + 15; //Time row height + whitespace + abnormalities headers + second row in analysis headers
 
@@ -301,7 +301,7 @@ namespace SupervisorMobility.API.Controllers
 
                 string prevSheetName = "";
 
-                foreach (var worksheet in package.Workbook.Worksheets.Where(ws=>ws.Name.Contains("Analysis")))
+                foreach (var worksheet in package.Workbook.Worksheets.Where(ws => ws.Name.Contains("Analysis")))
                 {
                     string currentChar = worksheet.Name.Split(" ")[1];
                     ChangeHeight = currentChar == "A" ? ChangeHeightDefaultTemplate : ChangeHeightExtraTemplates;
@@ -376,7 +376,7 @@ namespace SupervisorMobility.API.Controllers
 
                 rowindex = startingAbnormalRow = rowIndexes[firstSheetIndex].Item2;
 
-                Dictionary<string, int> abnormalStarts = rowIndexes.ToDictionary(kpv => kpv.Key,kpv => kpv.Value.Item2);
+                Dictionary<string, int> abnormalStarts = rowIndexes.ToDictionary(kpv => kpv.Key, kpv => kpv.Value.Item2);
 
                 if (SosAnalysis.SOSHub.MaterialsUsed != null && SosAnalysis.SOSHub.MaterialsUsed.Any())
                 {
@@ -498,7 +498,8 @@ namespace SupervisorMobility.API.Controllers
 
                 //sheet = package.Workbook.Worksheets["Analysis A"];
 
-                if (SosAnalysis.Illustrations != null && SosAnalysis.Illustrations.Any()) {
+                if (SosAnalysis.Illustrations != null && SosAnalysis.Illustrations.Any())
+                {
 
                     string[] imgPath = { $"uploads/SOSAnalysis/Ilustrations/", "" };
 
@@ -519,7 +520,7 @@ namespace SupervisorMobility.API.Controllers
                         using (FileStream stream = System.IO.File.OpenRead($"{imgPath[0]}{imgPath[1]}"))
                         {
                             Image imgObj = Image.FromStream(stream);
-                            
+
                             int w = imgObj.Width, h = imgObj.Height;
 
                             switch (_case)
@@ -533,9 +534,9 @@ namespace SupervisorMobility.API.Controllers
                                         {
                                             (h, w) = imgService.GetResizeMagnitudesMaintainingAspectRatio(w, h, changeableW, true);
                                         }
-                                        else if (h + changeableOff > changeableH )
+                                        else if (h + changeableOff > changeableH)
                                         {
-                                            double overflow = (h + changeableOff) - changeableH; 
+                                            double overflow = h + changeableOff - changeableH;
                                             double percent = overflow * 100 / changeableH;
                                             if (tempindex != 0 && percent > 10)
                                             {
@@ -561,7 +562,7 @@ namespace SupervisorMobility.API.Controllers
                                                     sheetService.GenerateAnalysisRows(sheet, ref height, ref idx, ChangeHeight, DefaultRowH);
 
                                                     idx += 4;
-                                                    abnormalStarts.Add(nextPage,idx);
+                                                    abnormalStarts.Add(nextPage, idx);
 
                                                     sheetService.GenerateAbnormalRows(sheet, ref height, ref idx, abnormalStarts[nextPage], true);
 
@@ -589,8 +590,8 @@ namespace SupervisorMobility.API.Controllers
                                             break;
                                         }
                                     } while (true);
-                                    
-                                    horizontalOffset = (int)((changeableW - w) / 2);
+
+                                    horizontalOffset = (changeableW - w) / 2;
                                     break;
                                 case 1:
                                     (w, h) = (currentSheetColumnWidth / 2 - 20, 160);
@@ -658,7 +659,7 @@ namespace SupervisorMobility.API.Controllers
                             var picture = sheet.Drawings.AddPicture($"{pictureName}{tempindex}.png", stream);
                             picture.SetSize(w, h);
 
-                            picture.SetPosition((int)globalYoffset + offsetY,(int)globalXoffset + horizontalOffset);
+                            picture.SetPosition((int)globalYoffset + offsetY, (int)globalXoffset + horizontalOffset);
 
                             if (_case == 0)
                             {
@@ -692,7 +693,7 @@ namespace SupervisorMobility.API.Controllers
                     }
                 }
 
-                
+
 
                 #endregion
 
@@ -708,7 +709,7 @@ namespace SupervisorMobility.API.Controllers
 
             ms.Position = 0;
 
-            var res = File(ms, "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet", !string.IsNullOrEmpty(SosAnalysis.InternalControlNumber)? $"{SosAnalysis.InternalControlNumber} Analysis Report.xlsx" : "Analysis Report.xlsx");
+            var res = File(ms, "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet", !string.IsNullOrEmpty(SosAnalysis.InternalControlNumber) ? $"{SosAnalysis.InternalControlNumber} Analysis Report.xlsx" : "Analysis Report.xlsx");
             res.EnableRangeProcessing = true;
             return res;
         }
@@ -840,7 +841,7 @@ namespace SupervisorMobility.API.Controllers
                                 string indexString = $"{criticalIndex}.- ";
                                 string critString = $"{cp}\r\n";
                                 string reasonString = $"( {analysis.Reasons[cpIndex]} )";
-                                if (cp != section.Analyses.Last(p=>p.CriticalPoints.Any()).CriticalPoints.Last())
+                                if (cp != section.Analyses.Last(p => p.CriticalPoints.Any()).CriticalPoints.Last())
                                 {
                                     reasonString += "\r\n";
                                 }
@@ -853,9 +854,9 @@ namespace SupervisorMobility.API.Controllers
                             }
                         }
                     }
-                    CriticalHeight = stylesService.CalculateRowHeight(fullText, (sheet.Columns[10].Width + sheet.Columns[11].Width + sheet.Columns[12].Width), sheet.Cells["J16"].Style.Font.Size);
+                    CriticalHeight = stylesService.CalculateRowHeight(fullText, sheet.Columns[10].Width + sheet.Columns[11].Width + sheet.Columns[12].Width, sheet.Cells["J16"].Style.Font.Size);
 
-                    StepHeight = stylesService.CalculateRowHeight(section.Step, (sheet.Columns[3].Width + sheet.Columns[4].Width + sheet.Columns[5].Width + sheet.Columns[6].Width + sheet.Columns[7].Width), sheet.Cells["B16"].Style.Font.Size);
+                    StepHeight = stylesService.CalculateRowHeight(section.Step, sheet.Columns[3].Width + sheet.Columns[4].Width + sheet.Columns[5].Width + sheet.Columns[6].Width + sheet.Columns[7].Width, sheet.Cells["B16"].Style.Font.Size);
                     var rowheight = Math.Max(20, Math.Max(StepHeight, CriticalHeight));
 
                     var chHeightP = (TotalRowHeight + rowheight) * 100 / ChangeHeight;
@@ -1168,7 +1169,7 @@ namespace SupervisorMobility.API.Controllers
                                         }
                                         else if (h + changeableOff > changeableH)
                                         {
-                                            double overflow = (h + changeableOff) - changeableH;
+                                            double overflow = h + changeableOff - changeableH;
                                             double percent = overflow * 100 / changeableH;
                                             if (tempindex != 0 && percent > 10)
                                             {
@@ -1223,7 +1224,7 @@ namespace SupervisorMobility.API.Controllers
                                         }
                                     } while (true);
 
-                                    horizontalOffset = (int)((changeableW - w) / 2);
+                                    horizontalOffset = (changeableW - w) / 2;
                                     break;
                                 case 1:
                                     (w, h) = (currentSheetColumnWidth / 2 - 20, 160);
@@ -1325,7 +1326,7 @@ namespace SupervisorMobility.API.Controllers
                     }
                 }
 
-                
+
 
                 #endregion
 
@@ -1350,7 +1351,7 @@ namespace SupervisorMobility.API.Controllers
         [HttpGet("Excel/Distribution/{DistributionId}")]
         public async Task<IActionResult> DistributionExcelExport(int DistributionId)
         {
-            var SosDistribution = await _AnalysisProcessRepository.GetSOSDistribution(DistributionId, true, true, true, true, includeTurns: true, includeTimes:true);
+            var SosDistribution = await _AnalysisProcessRepository.GetSOSDistribution(DistributionId, true, true, true, true, includeTurns: true, includeTimes: true);
 
             string templateName = "DataAccess/Templates/Distribution Template.xlsx";
             MemoryStream ms = new MemoryStream();
@@ -1400,7 +1401,7 @@ namespace SupervisorMobility.API.Controllers
                 if (models.Any())
                 {
                     string[] cols = { "L15", "M15", "N15", "O15", "Q15" };
-                    for(int j = 0; j < models.Length; j++)
+                    for (int j = 0; j < models.Length; j++)
                     {
                         sheet.Cells[$"{cols[j]}"].Value = models[j];
                     }
@@ -1420,8 +1421,8 @@ namespace SupervisorMobility.API.Controllers
                 double ChangeHeight = ChangeHeightDefaultTemplate;
 
                 Dictionary<string, (int, int)> rowIndexes = new Dictionary<string, (int, int)> { { "DISTRIBUTION", (16, 17) } }; //page index, start index, final row index
-                                                                                                                      //int startingRow = 14;//the row where the analyses start in an empty template
-                                                                                                                      //int startingRowB = 7;
+                                                                                                                                 //int startingRow = 14;//the row where the analyses start in an empty template
+                                                                                                                                 //int startingRowB = 7;
 
                 int sheetStartRow = rowIndexes["DISTRIBUTION"].Item1;
 
@@ -1453,7 +1454,7 @@ namespace SupervisorMobility.API.Controllers
                                 string indexString = $"{criticalIndex}.- ";
                                 string critString = $"{cp}\r\n";
                                 string reasonString = $"( {analysis.Reasons[cpIndex]} )";
-                                if (cp != section.Analyses.Last(p=>p.CriticalPoints.Any()).CriticalPoints.Last())
+                                if (cp != section.Analyses.Last(p => p.CriticalPoints.Any()).CriticalPoints.Last())
                                 {
                                     reasonString += "\r\n";
                                 }
@@ -1468,9 +1469,9 @@ namespace SupervisorMobility.API.Controllers
 
                     }
 
-                    CriticalHeight = stylesService.CalculateRowHeight(fullText, (sheet.Columns[8].Width + sheet.Columns[9].Width + sheet.Columns[10].Width + sheet.Columns[11].Width), ValuesFont.Size);
+                    CriticalHeight = stylesService.CalculateRowHeight(fullText, sheet.Columns[8].Width + sheet.Columns[9].Width + sheet.Columns[10].Width + sheet.Columns[11].Width, ValuesFont.Size);
 
-                    StepHeight = stylesService.CalculateRowHeight(section.Step, (sheet.Columns[3].Width + sheet.Columns[4].Width + sheet.Columns[5].Width + sheet.Columns[6].Width + sheet.Columns[7].Width), ValuesFont.Size);
+                    StepHeight = stylesService.CalculateRowHeight(section.Step, sheet.Columns[3].Width + sheet.Columns[4].Width + sheet.Columns[5].Width + sheet.Columns[6].Width + sheet.Columns[7].Width, ValuesFont.Size);
                     var rowheight = Math.Max(21.8, Math.Max(StepHeight, CriticalHeight));
 
                     var chHeightP = (TotalRowHeight + rowheight) * 100 / ChangeHeight;
@@ -1525,7 +1526,7 @@ namespace SupervisorMobility.API.Controllers
 
                         if (!string.IsNullOrEmpty(timeText) && timeText != "§§§§" && timeText != "0")
                         {
-                            double[] times = Array.ConvertAll(timeText.Split("§"), s => string.IsNullOrEmpty(s) ? 0.0 : Double.Parse(s));
+                            double[] times = Array.ConvertAll(timeText.Split("§"), s => string.IsNullOrEmpty(s) ? 0.0 : double.Parse(s));
 
                             char col = 'K';
                             for (int j = 0; j < models.Length; j++)
@@ -1578,13 +1579,13 @@ namespace SupervisorMobility.API.Controllers
 
                         sheetService.GenerateDistributionsRows(worksheet, ref height, ref idx, ChangeHeight, DefaultRowH, isFirst);
 
-                        rowIndexes[currentChar] = (rowIndexes[currentChar].Item1, idx+1);
+                        rowIndexes[currentChar] = (rowIndexes[currentChar].Item1, idx + 1);
                         rowHeights[currentChar] = height;
                     }
 
                     rowIndexes[currentChar] = (rowIndexes[currentChar].Item1, rowIndexes[currentChar].Item2 + 2);
 
-                    double[] times = Array.ConvertAll(SosDistribution.AdditionalTime.Split("§"), s => string.IsNullOrEmpty(s) ? 0.0 : Double.Parse(s));
+                    double[] times = Array.ConvertAll(SosDistribution.AdditionalTime.Split("§"), s => string.IsNullOrEmpty(s) ? 0.0 : double.Parse(s));
 
                     if (times.Any())
                     {
@@ -1594,7 +1595,7 @@ namespace SupervisorMobility.API.Controllers
                             col = (char)(col + 1);
                             if (times[j] != 0)
                             {
-                                sheet.Cells[$"{col}{rowIndexes[currentChar].Item2-1}"].Value = times[j];
+                                sheet.Cells[$"{col}{rowIndexes[currentChar].Item2 - 1}"].Value = times[j];
                             }
                             if (isFirst && col == 'O') col = 'P';
                         }
@@ -1621,7 +1622,7 @@ namespace SupervisorMobility.API.Controllers
 
                         cell.Formula = formula;
                         cell.Calculate();
-                        if(cell.Value == null || string.IsNullOrWhiteSpace(cell.Text) || cell.Text == "0.0")
+                        if (cell.Value == null || string.IsNullOrWhiteSpace(cell.Text) || cell.Text == "0.0")
                         {
                             cell.Value = string.Empty;
                         }
@@ -1630,7 +1631,7 @@ namespace SupervisorMobility.API.Controllers
                     }
 
                     prevSheetName = worksheet.Name;
-                    stylesService.SetDistributionImgsStyles(worksheet, rowIndexes[currentChar].Item1, rowIndexes[currentChar].Item2-3, isFirst);
+                    stylesService.SetDistributionImgsStyles(worksheet, rowIndexes[currentChar].Item1, rowIndexes[currentChar].Item2 - 3, isFirst);
                 }
 
                 sheet = package.Workbook.Worksheets[0];
@@ -1650,7 +1651,7 @@ namespace SupervisorMobility.API.Controllers
                     }
                 }
 
-                double changeHeightP = imgService.HeightToPixels(rowHeights.First().Value)-40;
+                double changeHeightP = imgService.HeightToPixels(rowHeights.First().Value) - 40;
 
                 int currentSheetColumnWidth = imgService.WidthToPixels(imgCellWidthDefTmplt);
 
@@ -1683,14 +1684,14 @@ namespace SupervisorMobility.API.Controllers
                     string[] side = { "TOMA", "DEJA", "PASOS" };
 
                     Dictionary<int, double[]> quant = new Dictionary<int, double[]>{
-                        { 0, Array.ConvertAll(SosDistribution.SOSDistributionAdditionalTime.TakeQuantity.Split("§",StringSplitOptions.RemoveEmptyEntries), s => Double.Parse(s)) },
-                        { 1, Array.ConvertAll(SosDistribution.SOSDistributionAdditionalTime.LeaveQuantity.Split("§",StringSplitOptions.RemoveEmptyEntries), s => Double.Parse(s)) },
-                        { 2, Array.ConvertAll(SosDistribution.SOSDistributionAdditionalTime.StepsQuantity.Split("§",StringSplitOptions.RemoveEmptyEntries), s => Double.Parse(s)) }
+                        { 0, Array.ConvertAll(SosDistribution.SOSDistributionAdditionalTime.TakeQuantity.Split("§",StringSplitOptions.RemoveEmptyEntries), s => double.Parse(s)) },
+                        { 1, Array.ConvertAll(SosDistribution.SOSDistributionAdditionalTime.LeaveQuantity.Split("§",StringSplitOptions.RemoveEmptyEntries), s => double.Parse(s)) },
+                        { 2, Array.ConvertAll(SosDistribution.SOSDistributionAdditionalTime.StepsQuantity.Split("§",StringSplitOptions.RemoveEmptyEntries), s => double.Parse(s)) }
                     };
                     Dictionary<int, double[]> mtime = new Dictionary<int, double[]>{
-                        { 0, Array.ConvertAll(SosDistribution.SOSDistributionAdditionalTime.TakeTime.Split("§",StringSplitOptions.RemoveEmptyEntries), s => Double.Parse(s)) },
-                        { 1, Array.ConvertAll(SosDistribution.SOSDistributionAdditionalTime.LeaveTime.Split("§",StringSplitOptions.RemoveEmptyEntries), s => Double.Parse(s)) },
-                        { 2, Array.ConvertAll(SosDistribution.SOSDistributionAdditionalTime.StepsTime.Split("§",StringSplitOptions.RemoveEmptyEntries), s => Double.Parse(s)) }
+                        { 0, Array.ConvertAll(SosDistribution.SOSDistributionAdditionalTime.TakeTime.Split("§",StringSplitOptions.RemoveEmptyEntries), s => double.Parse(s)) },
+                        { 1, Array.ConvertAll(SosDistribution.SOSDistributionAdditionalTime.LeaveTime.Split("§",StringSplitOptions.RemoveEmptyEntries), s => double.Parse(s)) },
+                        { 2, Array.ConvertAll(SosDistribution.SOSDistributionAdditionalTime.StepsTime.Split("§",StringSplitOptions.RemoveEmptyEntries), s => double.Parse(s)) }
                     };
 
                     for (int i = 0; i < 3; i++)
@@ -1701,7 +1702,7 @@ namespace SupervisorMobility.API.Controllers
                         {
                             html += $"<td style='border: 1px solid black;'>{item}</td>";
                         }
-                        foreach (var item in mtime[i].Take(models.Length+1))
+                        foreach (var item in mtime[i].Take(models.Length + 1))
                         {
                             html += $"<td style='border: 1px solid black;'>{item}</td>";
                         }
@@ -1709,7 +1710,7 @@ namespace SupervisorMobility.API.Controllers
                     }
 
                     html += $"<tr><td style='border: 1px solid black;' colspan={2 + models.Length}></td>";
-                    for (int i = 1; i < models.Length+1; i++)
+                    for (int i = 1; i < models.Length + 1; i++)
                     {
                         html += $"<td style='border: 1px solid black;'>{(mtime[0][i] + mtime[1][i] + mtime[2][i]).ToString("F2")}</td>";
                     }
@@ -1718,7 +1719,7 @@ namespace SupervisorMobility.API.Controllers
                     html += "</table>";
 
                     var converter = new HtmlConverter();
-                    bytes = converter.FromHtmlString(html,currentSheetColumnWidth - 10);
+                    bytes = converter.FromHtmlString(html, currentSheetColumnWidth - 10);
 
                     var temp = new FileUpload { FileName = "Case" };
 
@@ -1742,7 +1743,7 @@ namespace SupervisorMobility.API.Controllers
                         imgPath[1] = image.StorageFileName;
                         int horizontalOffset = 0;
                         MemoryStream stream = new MemoryStream();
-                        if(image.FileName == "Case")
+                        if (image.FileName == "Case")
                         {
                             stream = new MemoryStream(bytes);
                         }
@@ -1750,7 +1751,7 @@ namespace SupervisorMobility.API.Controllers
                         {
                             FileStream fromFile = System.IO.File.OpenRead($"{imgPath[0]}{imgPath[1]}");
                             fromFile.CopyTo(stream);
-                            fromFile.Close();fromFile.Dispose();
+                            fromFile.Close(); fromFile.Dispose();
                         }
                         Image imgObj = Image.FromStream(stream);
 
@@ -1766,7 +1767,7 @@ namespace SupervisorMobility.API.Controllers
                             }
                             else if (h + changeableOff > changeableH)
                             {
-                                double overflow = (h + changeableOff) - changeableH;
+                                double overflow = h + changeableOff - changeableH;
                                 double percent = overflow * 100 / changeableH;
                                 if (tempindex != 0 && percent > 10)
                                 {
@@ -1817,7 +1818,7 @@ namespace SupervisorMobility.API.Controllers
                             }
                         } while (true);
 
-                        horizontalOffset = (int)((changeableW - w) / 2);
+                        horizontalOffset = (changeableW - w) / 2;
 
                         if (offsetY + h > changeHeightP && changedSheet)
                         {
@@ -1903,16 +1904,16 @@ namespace SupervisorMobility.API.Controllers
 
                 sheet.Cells["X12"].Value = 1;
                 sheet.Cells["Z12"].Value = sheetTotal;
-                foreach (var (item,index) in package.Workbook.Worksheets.Where(p=>p.Name.Contains("DISTRIBUTION")).Skip(1).Select((item, index)=>(item,index)))
+                foreach (var (item, index) in package.Workbook.Worksheets.Where(p => p.Name.Contains("DISTRIBUTION")).Skip(1).Select((item, index) => (item, index)))
                 {
-                    item.Cells["U6"].Value = index+2;
+                    item.Cells["U6"].Value = index + 2;
                     item.Cells["W6"].Value = sheetTotal;
 
                     var dicpic = item.Drawings["Picture 2"];
                     dicpic.SetSize(50, 29);
                 }
 
-                
+
 
                 #endregion
 

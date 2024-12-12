@@ -1,7 +1,12 @@
-﻿namespace SupervisorMobility.API.Models.PATDtos
+﻿using SupervisorMobility.API.Models.PATDtos.PatDistributionCommentDtos;
+using SupervisorMobility.API.Models.PATDtos.PatUserRoleDtos;
+
+namespace SupervisorMobility.API.Models.PATDtos
 {
     public class PATFotCreationDto
     {
+        public int PATid { get; set; }
+
         public int SupervisorId { get; set; }
         public int Status { get; set; }
         public int? SSVresponsibleID { get; set; }
@@ -42,5 +47,12 @@
         public DateTime? EditionDate { get; set; }
 
         public DateTime? ApprovalDate { get; set; }
+
+        public int? SOSHubId { get; set; }
+        public bool IsActive { get; set; }
+
+        public ICollection<PatUserRoleForCreateDto>? PatUserRoles { get; set; }
+        public ICollection<PatDistributionCommentForCreateDto>? PatDistributionComments { get; set; }
+
     }
 }

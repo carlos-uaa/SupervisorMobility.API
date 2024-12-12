@@ -836,10 +836,7 @@ namespace SupervisorMobility.API.Services
                 query = query.Include(s => s.Subordinates);
             }
 
-            if (includeLeadershipRecord)
-            {
-                query = query.Include(s => s.LeadershipRecords);
-            }
+           
 
             return await query.OrderBy(c => c.UserId).ToListAsync();
         }
@@ -864,10 +861,7 @@ namespace SupervisorMobility.API.Services
                 query = query.Include(ss => ss.Subordinates);
             }
 
-            if (includeLeadershipRecord)
-            {
-                query = query.Include(ss => ss.LeadershipRecords);
-            }
+           
 
             return await query.OrderBy(c => c.UserId).ToListAsync();
 
@@ -891,10 +885,7 @@ namespace SupervisorMobility.API.Services
             {
                 query = query.Include(ss => ss.Subordinates);
             }
-            if (includeLeadershipRecord)
-            {
-                query = query.Include(ss => ss.LeadershipRecords);
-            }
+         
             return await query.OrderBy(c => c.UserId).ToListAsync();
 
         }
@@ -917,9 +908,6 @@ namespace SupervisorMobility.API.Services
             {
                 query = query
                     .Include(ss => ss.Subordinates);
-            } if (includeLeadershipRecord)
-            {
-                query = query.Include(u => u.LeadershipRecords);
             }
 
             return await query.OrderBy(c => c.UserId).ToListAsync();
@@ -962,7 +950,6 @@ namespace SupervisorMobility.API.Services
                 .Include(g => g.Group)
                 .Include(s => s.Superior)
                 .Include(s => s.Superior.Areas)
-                .Include(lr => lr.LeadershipRecords)
                 .Include(ss => ss.Subordinates)
                     .ThenInclude(sub => sub.Area)
                 .Include(ILU => ILU.ILURegisers)
@@ -978,7 +965,6 @@ namespace SupervisorMobility.API.Services
                 .Include(a => a.Area)
                 .Include(d => d.Distribution)
                 .Include(g => g.Group)
-                .Include(lr => lr.LeadershipRecords)
                 .Include(s => s.Superior)
                 .Include(ss => ss.Subordinates)
                 .Include(ILU => ILU.ILURegisers)
@@ -992,7 +978,6 @@ namespace SupervisorMobility.API.Services
            .Include(p => p.Plant)
                 .Include(a => a.Area)
                 .Include(d => d.Distribution)
-                .Include(lr => lr.LeadershipRecords)
                 .Include(g => g.Group)
                 .Include(s => s.Superior)
                 .Include(ss => ss.Subordinates)
@@ -1007,7 +992,6 @@ namespace SupervisorMobility.API.Services
                 .Include(a => a.Area)
                 .Include(d => d.Distribution)
                 .Include(g => g.Group)
-                .Include(lr => lr.LeadershipRecords)
                 .Include(s => s.Superior)
                 .Include(ss => ss.Subordinates)
                 .Include(aa => aa.Areas)
@@ -1202,6 +1186,11 @@ namespace SupervisorMobility.API.Services
                 .Where(p => p.SOSCodePathId == RouteId).FirstOrDefaultAsync();
         }
 
+        public async Task<int> DeletePat(PAT patEntity)
+        {
+            patEntity.IsActive = false;
+            return await _context.SaveChangesAsync();
+        }
         public async Task<SOSCodePath?> TryFindCodePathItemAsync(int assychartId, string code)
         {
             return await _context.CodePaths
@@ -2121,11 +2110,13 @@ namespace SupervisorMobility.API.Services
             return await _context.PATs
                    .Include(p => p.Plant)
                    .Include(a => a.Area)
-                   .Include(sv => sv.Supervisor)
+                   .Include(sv => sv.Supervisor).ThenInclude(s => s.ILURegisers)
                    .Include(ssv => ssv.SSVresponsible)
-                   .Include(lr => lr.LeadershipRecords)
+                   .Include(pu => pu.PatUserRoles)
+                   .Include(pd => pd.PatDistributionComments)
                    .Where(p => p.PATid == patId).FirstOrDefaultAsync();
         }
+
         public async Task<PAT?> GetPatForYearOfSV(int sv, int Year)
         {
             return await _context.PATs.Where(p => p.SupervisorId == sv && p.AplicationYear == Year).FirstOrDefaultAsync();
@@ -2135,7 +2126,7 @@ namespace SupervisorMobility.API.Services
 
             _mapper.Map(patForUpdate, PatEntity);
 
-            return _context.SaveChanges();
+            return await _context.SaveChangesAsync();
         }
         public async Task<IEnumerable<PAT>> GetAllPATs()
         {
@@ -2166,34 +2157,6 @@ namespace SupervisorMobility.API.Services
                            .Where(p => p.SSVresponsibleID == ssvID && p.IsActive == true)
                             .OrderBy(c => c.PATid).ToListAsync();
         }
-        #endregion
-        #region LeadershipRecords
-
-        public async Task<int> AddLeadershipRecordToPAT(PAT entity, LeadershipRecord leadershipRecordsForCreation)
-        {
-            if (entity.LeadershipRecords != null)
-            {
-                entity.LeadershipRecords.Add(leadershipRecordsForCreation);
-            }
-            else
-            {
-                entity.LeadershipRecords = new List<LeadershipRecord>();
-                entity.LeadershipRecords.Add(leadershipRecordsForCreation);
-            }
-
-            return await _context.SaveChangesAsync();
-        }
-
-        public async Task<int> UpdateLeadershipRecordToPAT(PAT entity, LeadershipRecordsForUpdateDto leadershipRecordsForUpdate)
-        {
-            LeadershipRecord recordEntity = new LeadershipRecord();
-
-            recordEntity = entity.LeadershipRecords.ToList().Find(r => r.LeadershipRecordsid == leadershipRecordsForUpdate.LeadershipRecordsid);
-            _mapper.Map(leadershipRecordsForUpdate, recordEntity);
-
-            return await _context.SaveChangesAsync();
-        }
-
         #endregion
         #region UserNotFound
         public async Task<IEnumerable<UserNotFound>> GetAllUsersNotFoundAsync()

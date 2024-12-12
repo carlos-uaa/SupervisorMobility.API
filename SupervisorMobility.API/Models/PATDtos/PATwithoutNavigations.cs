@@ -1,4 +1,6 @@
-﻿namespace SupervisorMobility.API.Models.PATDtos
+﻿using SupervisorMobility.API.Models.SOS.SOSHubDtos;
+
+namespace SupervisorMobility.API.Models.PATDtos
 {
     public class PATwithoutNavigations
     {
@@ -24,5 +26,6 @@
         public DateTime? EditionDate { get; set; }
 
         public DateTime? ApprovalDate { get; set; }
+        public int? SOSHubId { get; set; }
     }
 }

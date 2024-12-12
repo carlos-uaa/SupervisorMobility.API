@@ -24,5 +24,7 @@ namespace SupervisorMobility.API.DataAccess.Entities.SOS
         public bool? IsActive { get; set; }
         public int SOSHubId { get; set; }
         public SOSHub? SOSHub { get; set; }
+        public ICollection<SOSDistribution>? Distributions { get; set; } = new List<SOSDistribution>();
+
     }
 }

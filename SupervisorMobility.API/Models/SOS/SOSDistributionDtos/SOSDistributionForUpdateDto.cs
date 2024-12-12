@@ -7,6 +7,9 @@ using SupervisorMobility.API.Models.SOS.TurnDtos;
 using SupervisorMobility.API.Models.SOS.SOSTimeDtos;
 using SupervisorMobility.API.DataAccess.Entities.SOS;
 using SupervisorMobility.API.Models.SOS.SOSDistributionAdditionalTimeDtos;
+using SupervisorMobility.API.Models.SOS.SOSAnalysisDtos;
+using SupervisorMobility.API.Models.SOS.SOSSequenceDtos;
+using SupervisorMobility.API.Models.SOS.SOSHubDtos;
 
 namespace SupervisorMobility.API.Models.SOS.SOSDistributionDtos
 {
@@ -41,5 +44,9 @@ namespace SupervisorMobility.API.Models.SOS.SOSDistributionDtos
         public bool? IsActive { get; set; }
 
         public int? SOSHubId { get; set; }
+        public SOSHubForUpdateDto? SOSHub { get; set; }
+
+        public ICollection<SOSAnalysisDto>? Analyses { get; set; } = new List<SOSAnalysisDto>();
+        public ICollection<SOSSequenceDto>? Sequences { get; set; } = new List<SOSSequenceDto>();
     }
 }

@@ -150,7 +150,7 @@ namespace SupervisorMobility.API.Services
 
         Task<SOSCodePath?> GetCodePathItemAsync(int RouteId);
         Task<SOSCodePath?> TryFindCodePathItemAsync(int assychartId, string code);
-
+        Task<int> DeletePat(PAT patEntity);
         Task<IEnumerable<SOSCodePath>> GetAllCodePathsAsync();
         Task AssyChartRemoveAllCodePaths(AssyChart AssyChart);
 
@@ -290,10 +290,7 @@ namespace SupervisorMobility.API.Services
         Task<IEnumerable<PAT>> GetAllPATsofSSV(int ssvID);
 
         #endregion
-        #region LeadershipRecord
-        Task<int> AddLeadershipRecordToPAT(PAT entity, LeadershipRecord leadershipRecordsForCreation);
-        Task<int> UpdateLeadershipRecordToPAT(PAT entity, LeadershipRecordsForUpdateDto leadershipRecordsForUpdate);
-        #endregion
+     
         #region Logger
 
         #endregion
