@@ -59,22 +59,22 @@ namespace SupervisorMobility.API.Controllers.Exportation_Controllers
                 .Distinct().ToList();
 
 
-            List<Distribution> distributions = new List<Distribution>();
+            List<Distribution> distributions = (List<Distribution>)await _SMProcessRepository.GetDistributionsForAreaAsync(PAT.AreaId.Value);
 
-            foreach (var user in usersOfArea) 
-            {
-                foreach (var reg in user.ILURegisers.Where(ilu=>ilu.AcquisitionDate.HasValue && ilu.AcquisitionDate.Value.Year == PAT.AplicationYear))
-                {
-                    if (reg.DistributionId.HasValue)
-                    {
-                        if(!distributions.Any(p=>p.DistributionId == reg.DistributionId))
-                        {
-                            var dist = await _SMProcessRepository.GetDistributionOnlyIdAsync(reg.DistributionId.Value);
-                            distributions.Add(dist);
-                        }
-                    }
-                }
-            }
+            //foreach (var user in usersOfArea) 
+            //{
+            //    foreach (var reg in user.ILURegisers.Where(ilu=>ilu.AcquisitionDate.HasValue && ilu.AcquisitionDate.Value.Year == PAT.AplicationYear))
+            //    {
+            //        if (reg.DistributionId.HasValue)
+            //        {
+            //            if(!distributions.Any(p=>p.DistributionId == reg.DistributionId))
+            //            {
+            //                var dist = await _SMProcessRepository.GetDistributionOnlyIdAsync(reg.DistributionId.Value);
+            //                distributions.Add(dist);
+            //            }
+            //        }
+            //    }
+            //}
 
             var orderedPatDistributionComments = distributions
                 .Select(id => PAT.PatDistributionComments.FirstOrDefault(pdc => pdc.DistributionId == id.DistributionId))
@@ -325,22 +325,22 @@ namespace SupervisorMobility.API.Controllers.Exportation_Controllers
                 .Distinct().ToList();
 
 
-            List<Distribution> distributions = new List<Distribution>();
+            List<Distribution> distributions = (List<Distribution>) await _SMProcessRepository.GetDistributionsForAreaAsync(PAT.AreaId.Value);
 
-            foreach (var user in usersOfArea)
-            {
-                foreach (var reg in user.ILURegisers.Where(ilu => ilu.AcquisitionDate.HasValue && ilu.AcquisitionDate.Value.Year == PAT.AplicationYear))
-                {
-                    if (reg.DistributionId.HasValue)
-                    {
-                        if (!distributions.Any(p => p.DistributionId == reg.DistributionId))
-                        {
-                            var dist = await _SMProcessRepository.GetDistributionOnlyIdAsync(reg.DistributionId.Value);
-                            distributions.Add(dist);
-                        }
-                    }
-                }
-            }
+            //foreach (var user in usersOfArea)
+            //{
+            //    foreach (var reg in user.ILURegisers.Where(ilu => ilu.AcquisitionDate.HasValue && ilu.AcquisitionDate.Value.Year == PAT.AplicationYear))
+            //    {
+            //        if (reg.DistributionId.HasValue)
+            //        {
+            //            if (!distributions.Any(p => p.DistributionId == reg.DistributionId))
+            //            {
+            //                var dist = await _SMProcessRepository.GetDistributionOnlyIdAsync(reg.DistributionId.Value);
+            //                distributions.Add(dist);
+            //            }
+            //        }
+            //    }
+            //}
 
             var orderedPatDistributionComments = distributions
                 .Select(id => PAT.PatDistributionComments.FirstOrDefault(pdc => pdc.DistributionId == id.DistributionId))
