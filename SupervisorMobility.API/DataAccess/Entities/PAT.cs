@@ -77,6 +77,7 @@ namespace SupervisorMobility.API.DataAccess.Entities
         public SOSHub? SOSHub { get; set; }
 
         public string? HistoricalAbility { get; set; }
+        public string? SaveLeader { get; set; } = "S";
 
         public bool IsActive { get; set; }
     }

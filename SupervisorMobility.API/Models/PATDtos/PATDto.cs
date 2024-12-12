@@ -40,6 +40,7 @@ namespace SupervisorMobility.API.Models.PATDtos
         public SOSHubDto? SOSHub { get; set; }
 
         public string? HistoricalAbility { get; set; }
+        public string? SaveLeader { get; set; }
 
     }
 }
