@@ -476,7 +476,7 @@ namespace SupervisorMobility.API.DataAccess.Services
                 {
 
 
-                    if (!messageError.IsNullOrEmpty())
+                    if (!string.IsNullOrEmpty(messageError))
                     {
                         var emailMessageError = _email.CreateEmailMessage(userEntity.Email, "Headcount processed", $"Headcount document has been processed, you can now review its contents on the details page. \n LIST ERRORS:  \n" + messageError);
                         _email.Send(emailMessageError);
@@ -526,7 +526,7 @@ namespace SupervisorMobility.API.DataAccess.Services
                 {
                     try
                     {
-                        if (!messageError.IsNullOrEmpty())
+                        if (!string.IsNullOrEmpty(messageError))
                         {
 
 
@@ -830,7 +830,7 @@ namespace SupervisorMobility.API.DataAccess.Services
 
 
 
-                                        if (ExcelAreaCode.IsNullOrEmpty() && ExcelDistDescription.IsNullOrEmpty())
+                                        if (string.IsNullOrEmpty(ExcelAreaCode) && string.IsNullOrEmpty(ExcelDistDescription))
                                         {
                                             break;
                                         }
@@ -1097,7 +1097,7 @@ namespace SupervisorMobility.API.DataAccess.Services
                                                                 //si es renglon vacio brincamos al siguiente
                                                                 continue;
                                                             }
-                                                            else if (ExcelOpCode.IsNullOrEmpty() && !ExcelOpDescription.IsNullOrEmpty())
+                                                            else if (string.IsNullOrEmpty(ExcelOpCode) && !string.IsNullOrEmpty(ExcelOpDescription))
                                                             {
                                                                 DocumentError = true;
                                                                 eMailBody += $"\\n Falta No. Operacion..." +
@@ -1105,7 +1105,7 @@ namespace SupervisorMobility.API.DataAccess.Services
                                                                     $" Pagina: {p} - {pageName}" +
                                                                     $" Distribucion: {coincidenciasDistributions.Distribution.Description}";
                                                             }
-                                                            else if (!ExcelOpCode.IsNullOrEmpty() && ExcelOpDescription.IsNullOrEmpty())
+                                                            else if (!string.IsNullOrEmpty(ExcelOpCode) && string.IsNullOrEmpty(ExcelOpDescription))
                                                             {
                                                                 DocumentError = true;
                                                                 eMailBody += $"\\n Falta Nombre de operacion..." +
@@ -1741,12 +1741,12 @@ namespace SupervisorMobility.API.DataAccess.Services
 
                                                             var ExcelCommentaryOrRestriction = CellCommentaryOrRestriction.Value.ToString() != "" ? CellCommentaryOrRestriction.Value.ToString() : "";
 
-                                                            if (ExcelOpCode.IsNullOrEmpty() && ExcelOpDescription.IsNullOrEmpty())
+                                                            if (string.IsNullOrEmpty(ExcelOpCode) && string.IsNullOrEmpty(ExcelOpDescription))
                                                             {
                                                                 //si es renglon vacio brincamos al siguiente
                                                                 continue;
                                                             }
-                                                            else if (ExcelOpCode.IsNullOrEmpty() && !ExcelOpDescription.IsNullOrEmpty())
+                                                            else if (string.IsNullOrEmpty(ExcelOpCode) && !string.IsNullOrEmpty(ExcelOpDescription))
                                                             {
                                                                 DocumentError = true;
                                                                 eMailBody += $"\\n Falta No. Operacion..." +
@@ -1754,7 +1754,7 @@ namespace SupervisorMobility.API.DataAccess.Services
                                                                     $" Pagina: {p} - {pageName}" +
                                                                     $" Distribucion: {coincidenciasDistributions.Distribution.Description}";
                                                             }
-                                                            else if (!ExcelOpCode.IsNullOrEmpty() && ExcelOpDescription.IsNullOrEmpty())
+                                                            else if (!string.IsNullOrEmpty(ExcelOpCode) && string.IsNullOrEmpty(ExcelOpDescription))
                                                             {
                                                                 DocumentError = true;
                                                                 eMailBody += $"\\n Falta Nombre de operacion..." +
@@ -2093,12 +2093,12 @@ namespace SupervisorMobility.API.DataAccess.Services
                                                         }
                                                         var ExcelCommentaryOrRestriction = CellCommentaryOrRestriction.Value.ToString() != "" ? CellCommentaryOrRestriction.Value.ToString() : "";
 
-                                                        if (ExcelOpCode.IsNullOrEmpty() && ExcelOpDescription.IsNullOrEmpty())
+                                                        if (string.IsNullOrEmpty(ExcelOpCode) && string.IsNullOrEmpty(ExcelOpDescription))
                                                         {
                                                             //si es renglon vacio brincamos al siguiente
                                                             continue;
                                                         }
-                                                        else if (ExcelOpCode.IsNullOrEmpty() && !ExcelOpDescription.IsNullOrEmpty())
+                                                        else if (string.IsNullOrEmpty(ExcelOpCode) && !string.IsNullOrEmpty(ExcelOpDescription))
                                                         {
                                                             DocumentError = true;
                                                             eMailBody += $"\\n Falta No. Operacion..." +
@@ -2106,7 +2106,7 @@ namespace SupervisorMobility.API.DataAccess.Services
                                                                 $" Pagina: {p} - {pageName}" +
                                                                 $" Distribucion: {coincidenciasDistributions.Distribution.Description}";
                                                         }
-                                                        else if (!ExcelOpCode.IsNullOrEmpty() && ExcelOpDescription.IsNullOrEmpty())
+                                                        else if (!string.IsNullOrEmpty(ExcelOpCode) && string.IsNullOrEmpty(ExcelOpDescription))
                                                         {
                                                             DocumentError = true;
                                                             eMailBody += $"\\n Falta Nombre de operacion..." +

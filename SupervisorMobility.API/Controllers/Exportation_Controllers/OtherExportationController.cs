@@ -158,7 +158,7 @@ namespace SupervisorMobility.API.Controllers.Exportation_Controllers
                 {
                     sheet.Cells[$"B{Row}"].Value = i + 1;
                     sheet.Cells[$"C{Row}"].Value = distributions[i]?.Description;
-                    if (!orderedPatDistributionComments[i].Comment.IsNullOrEmpty())
+                    if (!string.IsNullOrEmpty(orderedPatDistributionComments[i].Comment))
                         sheet.Cells[$"CD{Row}"].Value = orderedPatDistributionComments[i]?.Comment;
 
                     for (int j = 0; j < usersOfArea.Count; j++)
@@ -212,7 +212,7 @@ namespace SupervisorMobility.API.Controllers.Exportation_Controllers
 
                             sheet.Cells[$"B{Row}"].Value = i + 1;
                             sheet.Cells[$"C{Row}"].Value = distributions[i]?.Description;
-                            if (!orderedPatDistributionComments[i].Comment.IsNullOrEmpty())
+                            if (!string.IsNullOrEmpty(orderedPatDistributionComments[i].Comment))
                                 sheet.Cells[$"CD{Row}"].Value = orderedPatDistributionComments[i]?.Comment;
 
                             pagePplIndex++;
@@ -245,7 +245,7 @@ namespace SupervisorMobility.API.Controllers.Exportation_Controllers
 
                 }
 
-                if (!PAT.HistoricalAbility.IsNullOrEmpty())
+                if (!string.IsNullOrEmpty(PAT.HistoricalAbility))
                 {
                     string hCol = "CD";
                     int hRow = 42;
@@ -425,7 +425,7 @@ namespace SupervisorMobility.API.Controllers.Exportation_Controllers
                 {
                     sheet.Cells[$"B{Row}"].Value = i + 1;
                     sheet.Cells[$"C{Row}"].Value = distributions[i]?.Description;
-                    if (!orderedPatDistributionComments[i].Comment.IsNullOrEmpty())
+                    if (!string.IsNullOrEmpty(orderedPatDistributionComments[i].Comment))
                         sheet.Cells[$"CD{Row}"].Value = orderedPatDistributionComments[i]?.Comment;
 
                     for (int j = 0; j < usersOfArea.Count; j++)
@@ -479,7 +479,7 @@ namespace SupervisorMobility.API.Controllers.Exportation_Controllers
 
                             sheet.Cells[$"B{Row}"].Value = i + 1;
                             sheet.Cells[$"C{Row}"].Value = distributions[i]?.Description;
-                            if (!orderedPatDistributionComments[i].Comment.IsNullOrEmpty())
+                            if (!string.IsNullOrEmpty(orderedPatDistributionComments[i].Comment))
                                 sheet.Cells[$"CD{Row}"].Value = orderedPatDistributionComments[i]?.Comment;
 
                             pagePplIndex++;
@@ -512,7 +512,7 @@ namespace SupervisorMobility.API.Controllers.Exportation_Controllers
 
                 }
 
-                if (!PAT.HistoricalAbility.IsNullOrEmpty())
+                if (!string.IsNullOrEmpty(PAT.HistoricalAbility))
                 {
                     string hCol = "CD";
                     int hRow = 42;
