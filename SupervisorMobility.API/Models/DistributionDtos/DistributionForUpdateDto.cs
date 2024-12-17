@@ -11,5 +11,7 @@ namespace SupervisorMobility.API.Models.DistributionDtos
         [MaxLength(200)]
         public string Description { get; set; } = string.Empty;
         public bool IsActive { get; set; }
+        public int CriticalType { get; set; }
+
     }
 }
