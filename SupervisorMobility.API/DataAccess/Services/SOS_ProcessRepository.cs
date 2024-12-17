@@ -8,7 +8,6 @@ using SupervisorMobility.API.Context;
 using SupervisorMobility.API.DataAccess.Entities;
 using SupervisorMobility.API.DataAccess.Entities.SOS;
 using SupervisorMobility.API.DataAccess.Entities.SOS.History;
-using SupervisorMobility.API.Migrations;
 using SupervisorMobility.API.Models.CommentaryDtos;
 using SupervisorMobility.API.Models.FileUploadDto;
 using SupervisorMobility.API.Models.SOS.EquipmentDtos;
@@ -165,8 +164,8 @@ namespace SupervisorMobility.API.DataAccess.Services
                     await _context.Entry(sosHub).Collection(o => o.PATs).LoadAsync();
                     foreach (var pat in sosHub.PATs)
                     {
-                        await _context.Entry(pat).Reference(aa => aa.SSVresponsible).LoadAsync();
-                        await _context.Entry(pat).Reference(aa => aa.Supervisor).LoadAsync();
+                        
+                        await _context.Entry(pat).Collection(aa => aa.Supervisors).LoadAsync();
                     }
                 }
 

@@ -28,7 +28,6 @@ using Microsoft.EntityFrameworkCore;
 using static Microsoft.EntityFrameworkCore.DbLoggerCategory;
 using DocumentFormat.OpenXml.Wordprocessing;
 using DocumentFormat.OpenXml.EMMA;
-using Irony.Parsing;
 using DuoVia.FuzzyStrings;
 using SupervisorMobility.API.Models.HCIDtos;
 

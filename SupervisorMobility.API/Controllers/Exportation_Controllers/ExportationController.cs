@@ -329,7 +329,7 @@ namespace SupervisorMobility.API.Controllers.Exportation_Controllers
                     string formula = $"SUM(H{rowIndexes[currentChar].Item1}:H{rowIndexes[currentChar].Item2 - 1})";
                     string formula2 = $"SUM(I{rowIndexes[currentChar].Item1}:I{rowIndexes[currentChar].Item2 - 1})";
 
-                    if (!prevSheetName.IsNullOrEmpty())
+                    if (!string.IsNullOrEmpty(prevSheetName))
                     {
                         string prevChar = prevSheetName.Split(" ")[1];
                         var pcellm = package.Workbook.Worksheets[prevSheetName].Cells[$"H{rowIndexes[prevChar].Item2}"];
@@ -962,7 +962,7 @@ namespace SupervisorMobility.API.Controllers.Exportation_Controllers
                     string formula = $"SUM(H{rowIndexes[currentChar].Item1}:H{rowIndexes[currentChar].Item2 - 1})";
                     string formula2 = $"SUM(I{rowIndexes[currentChar].Item1}:I{rowIndexes[currentChar].Item2 - 1})";
 
-                    if (!prevSheetName.IsNullOrEmpty())
+                    if (!string.IsNullOrEmpty(prevSheetName))
                     {
                         string prevChar = prevSheetName.Split(" ")[1];
                         var pcellm = package.Workbook.Worksheets[prevSheetName].Cells[$"H{rowIndexes[prevChar].Item2}"];
@@ -1612,7 +1612,7 @@ namespace SupervisorMobility.API.Controllers.Exportation_Controllers
 
                         string formula = $"SUM({column}{rowIndexes[currentChar].Item1}:{column}{rowIndexes[currentChar].Item2 - 1})";
 
-                        if (!prevSheetName.IsNullOrEmpty())
+                        if (!string.IsNullOrEmpty(prevSheetName))
                         {
                             string prevChar = prevSheetName.Split(" ", 2)[1];
                             var pcellt = package.Workbook.Worksheets[prevSheetName].Cells[$"{column}{rowIndexes[prevChar]}"];
