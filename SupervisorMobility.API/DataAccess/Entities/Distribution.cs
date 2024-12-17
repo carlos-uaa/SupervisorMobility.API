@@ -15,10 +15,12 @@ namespace SupervisorMobility.API.DataAccess.Entities
         [MaxLength(200)]
         public string Description { get; set; }
         public bool? IsActive { get; set; }
+        public int CriticalType { get; set; }
 
         //Navigation properties
         public int AreaId { get; set; }
         public Area? Area { get; set; }
+
 
         public ICollection<Operation> Operations { get; set; }
             = new List<Operation>();
