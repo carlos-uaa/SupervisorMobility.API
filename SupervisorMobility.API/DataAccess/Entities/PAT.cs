@@ -11,31 +11,9 @@ namespace SupervisorMobility.API.DataAccess.Entities
         [Key, DatabaseGenerated(DatabaseGeneratedOption.Identity)]
         public int PATid { get; set; }
 
-        public int? SupervisorId { get; set; }
         public int Status { get; set; }
 
-        public User? Supervisor
-        {
-            get { return _supervisor; }
-            set
-            {
-                _supervisor = value;
-                if (_supervisor != null)
-                {
-                    SSVresponsibleID = _supervisor.SuperiorId;
-                    AreaId = (int)_supervisor.AreaId;
-                }
-                else
-                {
-                    SSVresponsibleID = null;
-                }
-            }
-        }
-        private User? _supervisor;
-
-        public int? SSVresponsibleID { get; set; }
-
-        public User? SSVresponsible { get; set; }
+        public ICollection<User>? Supervisors { get; set; }
 
         public int? PlantId { get; set; }
         [ForeignKey("PlantId")]
@@ -50,6 +28,7 @@ namespace SupervisorMobility.API.DataAccess.Entities
 
         public ICollection<PatUserRole>? PatUserRoles { get; set; }
         public ICollection<PatDistributionComment>? PatDistributionComments { get; set; }
+        public ICollection<PatSubordinate>? PatSubordinates { get; set; }
         public int? KnowledgePercentage { get; set; }
 
 

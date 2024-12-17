@@ -2110,17 +2110,16 @@ namespace SupervisorMobility.API.Services
             return await _context.PATs
                    .Include(p => p.Plant)
                    .Include(a => a.Area)
-                   .Include(sv => sv.Supervisor).ThenInclude(s => s.ILURegisers)
-                   .Include(ssv => ssv.SSVresponsible)
+                   .Include(sv => sv.Supervisors).ThenInclude(s => s.ILURegisers)
                    .Include(pu => pu.PatUserRoles)
                    .Include(pd => pd.PatDistributionComments)
                    .Where(p => p.PATid == patId).FirstOrDefaultAsync();
         }
 
-        public async Task<PAT?> GetPatForYearOfSV(int sv, int Year)
-        {
-            return await _context.PATs.Where(p => p.SupervisorId == sv && p.AplicationYear == Year).FirstOrDefaultAsync();
-        }
+        //public async Task<PAT?> GetPatForYearOfSV(int sv, int Year)
+        //{
+        //    return await _context.PATs.Where(p => p.SupervisorId == sv && p.AplicationYear == Year).FirstOrDefaultAsync();
+        //}
         public async Task<int> UpdatePAT(PATForUpdateDto patForUpdate, PAT PatEntity)
         {
 
@@ -2133,8 +2132,8 @@ namespace SupervisorMobility.API.Services
             return await _context.PATs
                    .Include(p => p.Plant)
                    .Include(a => a.Area)
-                   .Include(sv => sv.Supervisor)
-                   .Include(ssv => ssv.SSVresponsible).Where(u => u.IsActive == true)
+                   .Include(sv => sv.Supervisors)
+                   .Where(u => u.IsActive == true)
                     .OrderBy(c => c.PATid).ToListAsync();
         }
         public async Task<IEnumerable<PAT>> GetAllPATsOfSv(int svId)
@@ -2142,9 +2141,8 @@ namespace SupervisorMobility.API.Services
             return await _context.PATs
                     .Include(p => p.Plant)
                     .Include(a => a.Area)
-                    .Include(sv => sv.Supervisor)
-                    .Include(ssv => ssv.SSVresponsible)
-                    .Where(p => p.SupervisorId == svId && p.IsActive == true)
+                    .Include(sv => sv.Supervisors)
+                    .Where(p => p.Supervisors.Any(s => s.UserId == svId) && p.IsActive == true)
                     .OrderBy(c => c.PATid).ToListAsync();
         }
         public async Task<IEnumerable<PAT>> GetAllPATsofSSV(int ssvID)
@@ -2152,9 +2150,8 @@ namespace SupervisorMobility.API.Services
             return await _context.PATs
                            .Include(p => p.Plant)
                    .Include(a => a.Area)
-                   .Include(sv => sv.Supervisor)
-                   .Include(ssv => ssv.SSVresponsible)
-                           .Where(p => p.SSVresponsibleID == ssvID && p.IsActive == true)
+                   .Include(sv => sv.Supervisors)
+                           .Where(p => p.Supervisors.Any(s => s.SuperiorId == ssvID) && p.IsActive == true)
                             .OrderBy(c => c.PATid).ToListAsync();
         }
         #endregion

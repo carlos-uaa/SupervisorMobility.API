@@ -283,7 +283,7 @@ namespace SupervisorMobility.API.Services
         #region PAT
         Task<PAT?> GetPat(int patId);
         Task<int> AddPat(PAT patForAdd);
-        Task<PAT?> GetPatForYearOfSV(int sv, int Year);
+        //Task<PAT?> GetPatForYearOfSV(int sv, int Year);
         Task<int> UpdatePAT(PATForUpdateDto patForUpdate, PAT PatEntity);
         Task<IEnumerable<PAT>> GetAllPATs();
         Task<IEnumerable<PAT>> GetAllPATsOfSv(int svId);
