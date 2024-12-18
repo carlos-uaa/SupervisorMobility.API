@@ -9,6 +9,7 @@ using SupervisorMobility.API.Models.PATDtos;
 using SupervisorMobility.API.Models.PlantDtos;
 using SupervisorMobility.API.Models.SOS.SOSDistributionDtos;
 using SupervisorMobility.API.Services;
+using System.Collections.Generic;
 using System.Diagnostics;
 using System.Text.RegularExpressions;
 
@@ -50,34 +51,77 @@ namespace SupervisorMobility.API.Controllers
         }
 
         [HttpPost("sosHub")]
-        public async Task<ActionResult<PATDto>> GeneratePatSosHub(PATFotCreationDto patToCreate, int SOSHubCollection_Id)
+        public async Task<ActionResult<PATDto>> GeneratePatSosHub(PATFotCreationDto patToGenerate, int SOSHubCollection_Id)
         {
 
-            if (patToCreate.PATid == 0)
+            if (patToGenerate.PATid == 0)
             {
-                
-                patToCreate.CreationDate = DateTime.Now;
-                patToCreate.IsActive = true;
 
-                patToCreate.SOSHubId = SOSHubCollection_Id;
+                patToGenerate.CreationDate = DateTime.Now;
+                patToGenerate.IsActive = true;
 
-                PAT PatToCreate = _mapper.Map<PAT>(patToCreate);
+                patToGenerate.SOSHubId = SOSHubCollection_Id;
+
+                PAT PatToCreate = _mapper.Map<PAT>(patToGenerate);
+
+                PatToCreate.Supervisors.Clear();
+
+                foreach(var usr in patToGenerate.Supervisors)
+                {
+                    PatToCreate.Supervisors.Add(await _supervisorMobilityRepository.GetUserAsync(usr.UserId));
+                }
 
                 var createdResult = await _supervisorMobilityRepository.AddPat(PatToCreate);
+
+
                 if (createdResult != null)
-                    return Ok(PatToCreate);
+                {
+                    List<User> all_Users = new();
+
+                    all_Users.AddRange(PatToCreate.Supervisors);
+                    foreach(var usr in patToGenerate.Supervisors)
+                    {
+                        all_Users.AddRange(await _supervisorMobilityRepository.GetAllSubordinatesAsync(usr.UserId));
+                    }
+
+                    PatToCreate.PatSubordinates = new List<PatSubordinate>();
+
+                    foreach (User subordinate in all_Users)
+                    {
+                        PatSubordinate newSubordinate = new PatSubordinate();
+
+                        newSubordinate.PatId = PatToCreate.PATid;
+                        newSubordinate.UserId = subordinate.UserId;
+                        newSubordinate.StartDate = new DateTime((int)PatToCreate.AplicationYear, 1, 1);
+
+                        PatToCreate.PatSubordinates.Add(newSubordinate);
+                    }
+
+                    bool update = await _supervisorMobilityRepository.SaveChangesAsync();
+
+                    if (update)
+                    {
+                        return Ok(PatToCreate);
+                    }
+                    else
+                    {
+                        Console.WriteLine("Error add subordinates");
+                        return Ok(PatToCreate);
+                    }
+
+                }
                 else
                     return BadRequest();
             }
             else
             {
-                var patEntity = await _assyChartService.FetchPatAsync(patToCreate.PATid);
+                var patEntity = await _assyChartService.FetchPatAsync(patToGenerate.PATid);
                 if (patEntity == null)
                 {
                     return NotFound();
                 }
 
-                PATForUpdateDto pat = _mapper.Map<PATForUpdateDto>(patToCreate);
+                PATForUpdateDto pat = _mapper.Map<PATForUpdateDto>(patToGenerate);
 
                 await _supervisorMobilityRepository.UpdatePAT(pat, patEntity);
 
