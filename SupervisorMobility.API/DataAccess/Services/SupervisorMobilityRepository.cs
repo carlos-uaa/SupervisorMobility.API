@@ -2113,6 +2113,7 @@ namespace SupervisorMobility.API.Services
                    .Include(sv => sv.Supervisors).ThenInclude(s => s.ILURegisers)
                    .Include(pu => pu.PatUserRoles)
                    .Include(pd => pd.PatDistributionComments)
+                   .Include(pd => pd.PatSubordinates)
                    .Where(p => p.PATid == patId).FirstOrDefaultAsync();
         }
 
