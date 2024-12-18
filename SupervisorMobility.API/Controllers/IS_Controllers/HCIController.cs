@@ -31,6 +31,8 @@ namespace SupervisorMobility.API.Controllers.IS_Controllers
             HCI hciEntity = new();
             _mapper.Map(hciForCreate, hciEntity);
 
+            hciEntity.User = await _supervisorMobilityRepository.GetUserAsync((int)hciForCreate.UserId);
+
             var entityhci = await _supervisorMobilityRepository.AddHCI(hciEntity);
 
             if (entityhci != null)

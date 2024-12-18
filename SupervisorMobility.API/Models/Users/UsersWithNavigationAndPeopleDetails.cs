@@ -48,5 +48,8 @@ namespace SupervisorMobility.API.Models.Users
         public DateTime? BirthDate { get; set; }
         public int? ProfilePictureId { get; set; }
                 public FileUploadGeneralDto? ProfilePicture { get; set; }
+
+        public int? HciId { get; set; }
+
     }
 }

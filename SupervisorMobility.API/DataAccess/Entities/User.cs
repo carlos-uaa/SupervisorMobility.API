@@ -79,6 +79,10 @@ namespace SupervisorMobility.API.DataAccess.Entities
 
         public int? GroupId { get; set; }
         public Group? Group { get; set; }
+
+        public int? HciId { get; set; }
+        public HCI? Hci { get; set; }
+
         public ICollection<SOSHub> SosHubsApproverOwners { get; set; }
 
         public ICollection<SOSHub> SosHubsReviewerEditors { get; set; }
