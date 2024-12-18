@@ -164,8 +164,8 @@ namespace SupervisorMobility.API.DataAccess.Services
                     await _context.Entry(sosHub).Collection(o => o.PATs).LoadAsync();
                     foreach (var pat in sosHub.PATs)
                     {
-                        await _context.Entry(pat).Reference(aa => aa.SSVresponsible).LoadAsync();
-                        await _context.Entry(pat).Reference(aa => aa.Supervisor).LoadAsync();
+                        
+                        await _context.Entry(pat).Collection(aa => aa.Supervisors).LoadAsync();
                     }
                 }
 

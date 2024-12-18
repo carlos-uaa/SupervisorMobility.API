@@ -50,7 +50,7 @@ namespace SupervisorMobility.API.Controllers.Exportation_Controllers
 
             var usersOfArea = (List<User>)await _SMProcessRepository.GetAllSubordinatesAsync(PAT.Supervisor.UserId);
             usersOfArea.Insert(0, PAT.Supervisor);
-            usersOfArea = usersOfArea.OrderBy(p=>p.Payroll).ToList();
+            usersOfArea = usersOfArea.OrderBy(p => p.Payroll).ToList();
 
             var uniqueDistributions = usersOfArea.Where(user => user.ILURegisers != null)
                 .SelectMany(user => user.ILURegisers)
@@ -97,7 +97,8 @@ namespace SupervisorMobility.API.Controllers.Exportation_Controllers
                     value = iluLevel.ILULevelCode[0].ToString();
                 }
 
-                category = iluLevel.ILULevelCode.Substring(1) switch { 
+                category = iluLevel.ILULevelCode.Substring(1) switch
+                {
                     "TraineeLeader" => 2,
                     "Trainee" => 1,
                     "Leader" => 3,
@@ -141,7 +142,7 @@ namespace SupervisorMobility.API.Controllers.Exportation_Controllers
                     int colIndex = usersOfArea.IndexOf(uo);
                     foreach (var reg in uo.ILURegisers)
                     {
-                        int rowIndex = distributions.FindIndex(p=>p.DistributionId == reg.DistributionId);
+                        int rowIndex = distributions.FindIndex(p => p.DistributionId == reg.DistributionId);
                         matrix[rowIndex, colIndex] = reg;
                     }
                 }
@@ -190,10 +191,10 @@ namespace SupervisorMobility.API.Controllers.Exportation_Controllers
                             var picture = sheet.Drawings.AddPicture($"{i}{j}Picture", stream);
 
 
-                            picture.SetSize(colWidth-6, rowHeight - 6);
+                            picture.SetSize(colWidth - 6, rowHeight - 6);
 
-                            int YOffset = (rowHeight - (int)(picture.Size.Height/9525)) / 2;
-                            int XOffset = (colWidth - (int)(picture.Size.Width/9525)) / 2;
+                            int YOffset = (rowHeight - (int)(picture.Size.Height / 9525)) / 2;
+                            int XOffset = (colWidth - (int)(picture.Size.Width / 9525)) / 2;
 
                             picture.SetPosition(Row - 1, YOffset, column - 1, XOffset);
                         }
@@ -254,15 +255,15 @@ namespace SupervisorMobility.API.Controllers.Exportation_Controllers
 
                     foreach (var monthData in data)
                     {
-                        foreach (var month in monthData) 
+                        foreach (var month in monthData)
                         {
                             double or_o = month.First.OR_O;
                             double or_p = month.First.OR_P;
 
-                            if(or_o != 0)
+                            if (or_o != 0)
                                 sheet.Cells[$"{hCol}{hRow}"].Value = or_o;
-                            if(or_p != 0)
-                                sheet.Cells[$"{hCol}{hRow+1}"].Value = or_p;
+                            if (or_p != 0)
+                                sheet.Cells[$"{hCol}{hRow + 1}"].Value = or_p;
 
                             hCol = sheetService.GetNextCombination(hCol);
 
@@ -282,9 +283,9 @@ namespace SupervisorMobility.API.Controllers.Exportation_Controllers
                     item.Cells["CH4"].Value = $"{index + 1} de {totalPages}";
                 }
 
-                    //sheetService.SetPrintingOptions(package.Workbook);
+                //sheetService.SetPrintingOptions(package.Workbook);
 
-                    package.SaveAs(ms);
+                package.SaveAs(ms);
             }
 
             ms.Position = 0;
@@ -325,7 +326,7 @@ namespace SupervisorMobility.API.Controllers.Exportation_Controllers
                 .Distinct().ToList();
 
 
-            List<Distribution> distributions = (List<Distribution>) await _SMProcessRepository.GetDistributionsForAreaAsync(PAT.AreaId.Value);
+            List<Distribution> distributions = (List<Distribution>)await _SMProcessRepository.GetDistributionsForAreaAsync(PAT.AreaId.Value);
 
             //foreach (var user in usersOfArea)
             //{
