@@ -41,7 +41,6 @@ namespace SupervisorMobility.API.Controllers.Exportation_Controllers
         public async Task<IActionResult> PATYearlyExcelExport(int PATId)
         {
             var PAT = await _SMProcessRepository.GetPat(PATId);
-            var _sosHub = await _SOSProcessRepository.GetSOSHub(PAT.SOSHubId.Value, includePeople: true);
 
             Dictionary<OperatorRole, string> roles = new Dictionary<OperatorRole, string>
             {
@@ -132,7 +131,7 @@ namespace SupervisorMobility.API.Controllers.Exportation_Controllers
 
                 var InfoSup = PAT.Supervisors.FirstOrDefault();
                 string ResponableSVs = string.Join(" / ", PAT.Supervisors.Select(user=>user.Name));
-                string ResponableSSVs = string.Join(" / ", PAT.SOSHub.ReviewerEditors.Select(user=>user.Name));
+                string ResponableSSVs = string.Join(" / ", PAT.Supervisors.Select(user => user.Superior?.Name).Where(name => name != null).Distinct());
 
                 sheet.Cells["B4"].Value = InfoSup?.Department;
                 sheet.Cells["H4"].Value = InfoSup?.Area?.Description;
@@ -409,7 +408,7 @@ namespace SupervisorMobility.API.Controllers.Exportation_Controllers
 
                 var InfoSup = PAT.Supervisors.FirstOrDefault();
                 string ResponableSVs = string.Join(" / ", PAT.Supervisors.Select(user => user.Name));
-                string ResponableSSVs = string.Join(" / ", PAT.SOSHub.ReviewerEditors.Select(user => user.Name));
+                string ResponableSSVs = string.Join(" / ", PAT.Supervisors.Select(user => user.Superior?.Name).Where(name=> name!=null).Distinct());
 
                 sheet.Cells["B4"].Value = InfoSup?.Department;
                 sheet.Cells["H4"].Value = InfoSup?.Area?.Description;
