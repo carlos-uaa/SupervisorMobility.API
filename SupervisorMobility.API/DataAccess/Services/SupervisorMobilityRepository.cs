@@ -2111,6 +2111,7 @@ namespace SupervisorMobility.API.Services
                    .Include(p => p.Plant)
                    .Include(a => a.Area)
                    .Include(sv => sv.Supervisors).ThenInclude(s => s.ILURegisers)
+                   .Include(sv => sv.Supervisors).ThenInclude(sssv => sssv.Superior)
                    .Include(pu => pu.PatUserRoles)
                    .Include(pd => pd.PatDistributionComments)
                    .Include(pd => pd.PatSubordinates)
@@ -2134,6 +2135,7 @@ namespace SupervisorMobility.API.Services
                    .Include(p => p.Plant)
                    .Include(a => a.Area)
                    .Include(sv => sv.Supervisors)
+                   .ThenInclude(ss => ss.Superior)
                    .Where(u => u.IsActive == true)
                     .OrderBy(c => c.PATid).ToListAsync();
         }
@@ -2143,6 +2145,7 @@ namespace SupervisorMobility.API.Services
                     .Include(p => p.Plant)
                     .Include(a => a.Area)
                     .Include(sv => sv.Supervisors)
+                   .ThenInclude(ss => ss.Superior)
                     .Where(p => p.Supervisors.Any(s => s.UserId == svId) && p.IsActive == true)
                     .OrderBy(c => c.PATid).ToListAsync();
         }
@@ -2152,6 +2155,7 @@ namespace SupervisorMobility.API.Services
                            .Include(p => p.Plant)
                    .Include(a => a.Area)
                    .Include(sv => sv.Supervisors)
+                   .ThenInclude(ss => ss.Superior)
                            .Where(p => p.Supervisors.Any(s => s.SuperiorId == ssvID) && p.IsActive == true)
                             .OrderBy(c => c.PATid).ToListAsync();
         }
