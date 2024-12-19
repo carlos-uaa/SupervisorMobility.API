@@ -344,6 +344,12 @@ namespace SupervisorMobility.API.Context
             .Property(p => p.IsActive)
             .HasDefaultValue(true);
 
+            modelBuilder.Entity<HCI>()
+                .HasOne(u => u.User)
+                .WithOne(h => h.Hci)
+                .HasForeignKey<User>(u => u.HciId)
+                .OnDelete(DeleteBehavior.NoAction);
+
             modelBuilder.Entity<Commentary>()
             .Property(p => p.IsActive)
             .HasDefaultValue(true);
