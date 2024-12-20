@@ -21,14 +21,16 @@ namespace SupervisorMobility.API.Controllers.Exportation_Controllers
     public class OtherExportationController : ControllerBase
     {
         private readonly ISupervisorMobilityRepository _SMProcessRepository;
+        private readonly ISOS_ProcessRepository _SOSProcessRepository;
         private readonly IWebHostEnvironment _env;
         private readonly ExportationStylesService stylesService;
         private readonly ExportationImgService imgService;
         private readonly ExportationSheetService sheetService;
 
-        public OtherExportationController(ISupervisorMobilityRepository repository, IWebHostEnvironment env)
+        public OtherExportationController(ISupervisorMobilityRepository repository, IWebHostEnvironment env, ISOS_ProcessRepository SOSrepository)
         {
             _SMProcessRepository = repository;
+            _SOSProcessRepository = SOSrepository;
             _env = env ?? throw new ArgumentNullException(nameof(env));
             stylesService = new ExportationStylesService();
             imgService = new ExportationImgService();
@@ -48,8 +50,14 @@ namespace SupervisorMobility.API.Controllers.Exportation_Controllers
                 { OperatorRole.NI, "NI" }
             };
 
-            var usersOfArea = (List<User>)await _SMProcessRepository.GetAllSubordinatesAsync(PAT.Supervisor.UserId);
-            usersOfArea.Insert(0, PAT.Supervisor);
+            List<User> usersOfArea = new();
+            usersOfArea.AddRange(PAT.Supervisors!);
+            foreach (var item in PAT.Supervisors!)
+            {
+                usersOfArea.AddRange((List<User>)await _SMProcessRepository.GetAllSubordinatesAsync(item.UserId));
+            }
+
+            usersOfArea = usersOfArea.GroupBy(user => user.UserId).Select(group => group.First()).ToList();
             usersOfArea = usersOfArea.OrderBy(p => p.Payroll).ToList();
 
             var uniqueDistributions = usersOfArea.Where(user => user.ILURegisers != null)
@@ -121,12 +129,16 @@ namespace SupervisorMobility.API.Controllers.Exportation_Controllers
 
                 //#region information table
 
-                sheet.Cells["B4"].Value = PAT.Supervisor?.Department;
-                sheet.Cells["H4"].Value = PAT.Supervisor?.Area?.Description;
-                sheet.Cells["P4"].Value = PAT.Supervisor?.Group?.Description;
+                var InfoSup = PAT.Supervisors.FirstOrDefault();
+                string ResponableSVs = string.Join(" / ", PAT.Supervisors.Select(user=>user.Name));
+                string ResponableSSVs = string.Join(" / ", PAT.Supervisors.Select(user => user.Superior?.Name).Where(name => name != null).Distinct());
+
+                sheet.Cells["B4"].Value = InfoSup?.Department;
+                sheet.Cells["H4"].Value = InfoSup?.Area?.Description;
+                sheet.Cells["P4"].Value = InfoSup?.Group?.Description;
                 sheet.Cells["X4"].Value = PAT.AplicationYear;
-                sheet.Cells["AI4"].Value = PAT.Supervisor?.Name;
-                sheet.Cells["AU4"].Value = PAT.SSVresponsible?.Name;
+                sheet.Cells["AI4"].Value = ResponableSVs;
+                sheet.Cells["AU4"].Value = ResponableSSVs;
                 sheet.Cells["CA4"].Value = PAT.CreationDate;
                 sheet.Cells["G7"].Value = PAT.KnowledgePercentage;
                 sheet.Cells["G10"].Value = PAT.SaveLeader;
@@ -315,8 +327,14 @@ namespace SupervisorMobility.API.Controllers.Exportation_Controllers
                 { 9, "Septiembre" }, { 10, "Octubre" }, { 11, "Noviembre" }, { 12, "Diciembre" }
             };
 
-            var usersOfArea = (List<User>)await _SMProcessRepository.GetAllSubordinatesAsync(PAT.Supervisor.UserId);
-            usersOfArea.Insert(0, PAT.Supervisor);
+            List<User> usersOfArea = new();
+            usersOfArea.AddRange(PAT.Supervisors!);
+            foreach (var item in PAT.Supervisors!)
+            {
+                usersOfArea.AddRange((List<User>)await _SMProcessRepository.GetAllSubordinatesAsync(item.UserId));
+            }
+
+            usersOfArea = usersOfArea.GroupBy(user => user.UserId).Select(group => group.First()).ToList();
             usersOfArea = usersOfArea.OrderBy(p => p.Payroll).ToList();
 
             var uniqueDistributions = usersOfArea.Where(user => user.ILURegisers != null)
@@ -388,12 +406,16 @@ namespace SupervisorMobility.API.Controllers.Exportation_Controllers
 
                 //#region information table
 
-                sheet.Cells["B4"].Value = PAT.Supervisor?.Department;
-                sheet.Cells["H4"].Value = PAT.Supervisor?.Area?.Description;
-                sheet.Cells["P4"].Value = PAT.Supervisor?.Group?.Description;
-                sheet.Cells["X4"].Value = months[PAT.AplicationDate.Value.Month];
-                sheet.Cells["AI4"].Value = PAT.Supervisor?.Name;
-                sheet.Cells["AU4"].Value = PAT.SSVresponsible?.Name;
+                var InfoSup = PAT.Supervisors.FirstOrDefault();
+                string ResponableSVs = string.Join(" / ", PAT.Supervisors.Select(user => user.Name));
+                string ResponableSSVs = string.Join(" / ", PAT.Supervisors.Select(user => user.Superior?.Name).Where(name=> name!=null).Distinct());
+
+                sheet.Cells["B4"].Value = InfoSup?.Department;
+                sheet.Cells["H4"].Value = InfoSup?.Area?.Description;
+                sheet.Cells["P4"].Value = InfoSup?.Group?.Description;
+                sheet.Cells["X4"].Value = PAT.AplicationYear;
+                sheet.Cells["AI4"].Value = ResponableSVs;
+                sheet.Cells["AU4"].Value = ResponableSSVs;
                 sheet.Cells["CA4"].Value = PAT.CreationDate;
                 sheet.Cells["G7"].Value = PAT.KnowledgePercentage;
                 sheet.Cells["G10"].Value = PAT.SaveLeader;
