@@ -451,7 +451,7 @@ namespace SupervisorMobility.API.Controllers.Exportation_Controllers
                 {
                     sheet.Cells[$"B{Row}"].Value = i + 1;
                     sheet.Cells[$"C{Row}"].Value = distributions[i]?.Description;
-                    if (!string.IsNullOrEmpty(orderedPatDistributionComments[i].Comment))
+                    if (orderedPatDistributionComments.Any() && !string.IsNullOrEmpty(orderedPatDistributionComments[i].Comment))
                         sheet.Cells[$"CD{Row}"].Value = orderedPatDistributionComments[i]?.Comment;
 
                     for (int j = 0; j < usersOfArea.Count; j++)
@@ -462,8 +462,12 @@ namespace SupervisorMobility.API.Controllers.Exportation_Controllers
                             sheet.Cells[$"{Col}6"].Value = usersOfArea[j].Name;
                             sheet.Cells[$"{Col}10"].Value = usersOfArea[j].Payroll;
                             sheet.Cells[$"{Col}42"].Value = operatorRoles?[j].Comment;
-                            if (operatorRoles != null && operatorRoles[j].Role != null)
-                                sheet.Cells[$"{Col}50"].Value = roles[operatorRoles[j].Role.Value];
+                            if (operatorRoles.Any())
+                            {
+                                sheet.Cells[$"{Col}42"].Value = operatorRoles?[j].Comment;
+                                if (operatorRoles[j].Role != null)
+                                    sheet.Cells[$"{Col}50"].Value = roles[operatorRoles[j].Role.Value];
+                            }
                         }
 
                         if (matrix[i, j] == null) { Col = sheetService.GetNextCombination(Col); Col = sheetService.GetNextCombination(Col); continue; }
