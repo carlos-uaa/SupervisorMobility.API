@@ -82,6 +82,7 @@ namespace SupervisorMobility.API.Controllers
                     foreach(var usr in patToGenerate.Supervisors)
                     {
                         all_Users.AddRange(await _supervisorMobilityRepository.GetAllSubordinatesAsync(usr.UserId));
+                        all_Users.Insert(0, await _supervisorMobilityRepository.GetUserAsync(usr.UserId));
                     }
 
                     PatToCreate.PatSubordinates = new List<PatSubordinate>();
