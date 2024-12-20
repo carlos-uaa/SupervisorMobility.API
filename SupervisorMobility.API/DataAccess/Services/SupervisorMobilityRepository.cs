@@ -2127,6 +2127,13 @@ namespace SupervisorMobility.API.Services
 
             _mapper.Map(patForUpdate, PatEntity);
 
+            PatEntity.Supervisors.Clear();
+           foreach (var usr in patForUpdate.Supervisors)
+            {
+                PatEntity.Supervisors.Add(await GetUserAsync(usr.UserId));
+            }
+
+
             return await _context.SaveChangesAsync();
         }
         public async Task<IEnumerable<PAT>> GetAllPATs()
