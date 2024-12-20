@@ -30,7 +30,7 @@ namespace SupervisorMobility.API.Models.Users
         public int? GroupId { get; set; }
         public int? DistributionId { get; set; }
         public ICollection<UsersWithoutNavigationWithoutPeopleDetails>? Subordinates { get; set; }
-        public ICollection<ILURegisterWithoutNavigationDto>? ILURegisers { get; set; }
+        //public ICollection<ILURegisterWithoutNavigationDto>? ILURegisers { get; set; }
 
         public ICollection<AreaDtos.AreaWithoutNavigationPropertiesDto>? Areas { get; set; }
 
