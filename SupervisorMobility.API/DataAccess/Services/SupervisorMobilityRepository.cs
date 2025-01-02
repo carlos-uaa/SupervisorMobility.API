@@ -14,6 +14,7 @@ using SupervisorMobility.API.DataAccess.Entities.Paths;
 using SupervisorMobility.API.DataAccess.Entities.SOS_Review;
 using SupervisorMobility.API.DataAccess.Services.OrderingServices;
 using SupervisorMobility.API.Entities;
+using SupervisorMobility.API.Models.ADUser;
 using SupervisorMobility.API.Models.HCIDtos;
 using SupervisorMobility.API.Models.ILURegisterDtos;
 using SupervisorMobility.API.Models.JobObservationDtos;
@@ -1033,6 +1034,13 @@ namespace SupervisorMobility.API.Services
             var entityUser = await _context.Users.FirstOrDefaultAsync(u => u.UserId == userId);
 
             _mapper.Map(user, entityUser);
+
+            //entityUser.Subordinates.Clear();
+            //foreach(var usr in user.Subordinates)
+            //{
+            //    entityUser.Subordinates.Add(await GetUserAsync(usr.UserId));
+            //}
+
 
             _context.SaveChanges();
         }
