@@ -32,6 +32,8 @@ namespace SupervisorMobility.API.Models.Users
         public int? AreaId { get; set; }
         public int? GroupId { get; set; }
         public int? DistributionId { get; set; }
+        public int? DepartmentId { get; set; }
+
         public ICollection<ILURegisterWithoutNavigationDto>? ILURegisers { get; set; }
         public DateTime? IncomesDate { get; set; }
         public DateTime? BirthDate { get; set; }

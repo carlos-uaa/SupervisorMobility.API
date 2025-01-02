@@ -1,4 +1,5 @@
 ﻿using SupervisorMobility.API.Models.AreaDtos;
+using SupervisorMobility.API.Models.DepartmentDtos;
 using SupervisorMobility.API.Models.DistributionDtos;
 using SupervisorMobility.API.Models.FileUploadDto;
 using SupervisorMobility.API.Models.GroupDtos;
@@ -19,7 +20,6 @@ namespace SupervisorMobility.API.Models.Users
         public int? SuperiorId { get; set; }
 
         public string? Management { get; set; }
-        public string? Department { get; set; }
         public string? Process { get; set; }
 
         public DateTime? CreatedDate { get; set; } = DateTime.Now;
@@ -32,12 +32,14 @@ namespace SupervisorMobility.API.Models.Users
         public int? AreaId { get; set; }
         public int? GroupId { get; set; }
         public int? DistributionId { get; set; }
+        public int? DepartmentId { get; set; }
 
 
         public DistributionWithoutNavigationPropertiesDto? Distribution { get; set; }
         public PlantDto? Plant { get; set; } = new PlantDto();
         public AreaWithoutNavigationPropertiesDto? Area { get; set; } = new AreaWithoutNavigationPropertiesDto();
         public GroupDto? Group { get; set; } = new GroupDto();
+        public DepartmentDto? Department { get; set; } = new DepartmentDto();
 
 
         public UsersWithoutPeopleWithNavigation? Superior { get; set; }
