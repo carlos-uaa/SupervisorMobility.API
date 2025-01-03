@@ -188,6 +188,8 @@ namespace SupervisorMobility.API.DataAccess.Entities
                     case 4:
                         hash = hash * 23 + Payroll.GetHashCode();
                         hash = hash * 23 + (Name != null ? Name.GetHashCode() : 0);
+                        hash = hash * 23 + (Management != null ? Management.GetHashCode() : 0);
+                        hash = hash * 23 + (Process != null ? Process.GetHashCode() : 0);
                         hash = hash * 23 + (SuperiorId != null ? SuperiorId.GetHashCode() : 0);
                         hash = hash * 23 + (PlantId != null ? PlantId.GetHashCode() : 0);
                         hash = hash * 23 + (AreaId != null ? AreaId.GetHashCode() : 0);
