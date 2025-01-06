@@ -7,6 +7,7 @@ using SupervisorMobility.API.Business;
 using SupervisorMobility.API.DataAccess.Entities;
 using SupervisorMobility.API.Entities;
 using SupervisorMobility.API.Models.FileUploadDto;
+using SupervisorMobility.API.Models.HCIDtos;
 using SupervisorMobility.API.Models.ReturnResults;
 using SupervisorMobility.API.Models.Users;
 using SupervisorMobility.API.Services;
@@ -661,6 +662,9 @@ namespace SupervisorMobility.API.Controllers
             UploadUsersResult ResultToReturn = new UploadUsersResult();
             foreach (var ItemInUserList in UsersToCreate)
             {
+                //Hci del usuario
+                bool HCIStatus = false;
+
                 List<Area> AreasInUser = new List<Area>();
                 List<User> UsersInUser = new List<User>();
                 bool haveAreas = false;
@@ -748,7 +752,7 @@ namespace SupervisorMobility.API.Controllers
                     ItemInUserList.Areas = null;
                 }
 
-                ///////////////////
+                
                 if (ItemInUserList.UserId == -1)
                 {
                     bool existUser = false;
@@ -808,9 +812,6 @@ namespace SupervisorMobility.API.Controllers
                                         InComingUserToCompare = _mapper.Map<User>(ItemInUserList);
                                     }
                                 }
-
-
-
                                 var userToUpdate = _mapper.Map<UsersForUpdateDto>(InComingUserToCompare);
                                 userToUpdate.CreatedDate = (DateTime)entityentity.CreatedDate;
                                 await _supervisorMobilityRepository.UpdateUser(userToUpdate, entityentity.UserId);
@@ -823,7 +824,7 @@ namespace SupervisorMobility.API.Controllers
                                 ResultToReturn.UsersExist++;
                             }
 
-
+                            HCIStatus = await _supervisorMobilityRepository.SearchExistHciForUserId(UserToReturn.UserId);
                         }
                     }
                     else
@@ -833,8 +834,6 @@ namespace SupervisorMobility.API.Controllers
                         if (finalUser != null)
                             ResultToReturn.UsersCreated++;
                         UserToReturn = _mapper.Map<User>(finalUser);
-
-
                     }
 
                 }
@@ -874,7 +873,6 @@ namespace SupervisorMobility.API.Controllers
                                 if (finalUser != null)
                                     ResultToReturn.UsersCreated++;
                                 UserToReturn = _mapper.Map<User>(finalUser);
-
                             }
                             else
                             {
@@ -994,9 +992,9 @@ namespace SupervisorMobility.API.Controllers
                                         UserToReturn = _mapper.Map<User>(UserInDb);
                                     }
                                 }//end else son iguales
-
-
                             }//end else usuario si existia
+                            
+                            HCIStatus = await _supervisorMobilityRepository.SearchExistHciForUserId(UserToReturn.UserId); 
                         }
                         else
                         {
@@ -1005,7 +1003,6 @@ namespace SupervisorMobility.API.Controllers
                             if (finalUser != null)
                                 ResultToReturn.UsersCreated++;
                             UserToReturn = _mapper.Map<User>(finalUser);
-
                         }
                     }
                     else
@@ -1129,6 +1126,7 @@ namespace SupervisorMobility.API.Controllers
 
                     }//end else existe en base de datos
 
+
                 }//end else tiene id
 
                 if (haveUsers)
@@ -1147,6 +1145,15 @@ namespace SupervisorMobility.API.Controllers
                         _supervisorMobilityRepository.UserAddArea(UserToReturn, elemntArea);
                     }
                 }
+
+                    if (!HCIStatus)
+                    {
+                        HCI hciEntity = new();
+
+                        hciEntity.User = await _supervisorMobilityRepository.GetUserAsync(UserToReturn.UserId);
+
+                        var entityhci = await _supervisorMobilityRepository.AddHCI(hciEntity);
+                    }
 
             }
 
