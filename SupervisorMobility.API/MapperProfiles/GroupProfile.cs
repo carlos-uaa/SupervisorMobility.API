@@ -6,7 +6,7 @@ namespace SupervisorMobility.API.Profiles
     {
         public GroupProfile()
         {
-            CreateMap<Entities.Group, Models.GroupDtos.GroupDto>();
+            CreateMap<Entities.Group, Models.GroupDtos.GroupDto>().ReverseMap();
             CreateMap<Entities.Group, Models.GroupDtos.GroupForCreationDto>().ReverseMap();
             CreateMap<Entities.Group, Models.GroupDtos.GroupForUpdateDto>().ReverseMap();
         }

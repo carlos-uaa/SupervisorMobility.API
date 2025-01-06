@@ -744,7 +744,7 @@ namespace SupervisorMobility.API.Controllers
 
 
 
-        [EnableCors("CorsPolicy")]
+        //[EnableCors("CorsPolicy")]
         [HttpGet("Bulk/DownloadUsers")]
         public async Task<IActionResult> DownloadAllUsers()
         {
