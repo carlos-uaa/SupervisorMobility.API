@@ -299,23 +299,24 @@ namespace SupervisorMobility.API.Controllers.Exportation_Controllers
                 rowHeights[currentWorkingIndex] += TotalRowHeight;
                 rowIndexes[currentWorkingIndex] = (rowIndexes[currentWorkingIndex].Item1, rowindex);
 
+                ChangeHeight = currentWorkingIndex == "A" ? ChangeHeightDefaultTemplate : ChangeHeightExtraTemplates;
+                if (rowHeights[currentWorkingIndex] < ChangeHeight)
+                {
+                    var idx = rowIndexes[currentWorkingIndex].Item2;
+                    var height = rowHeights[currentWorkingIndex];
+
+                    sheetService.GenerateAnalysisRows(sheet, ref height, ref idx, ChangeHeight, DefaultRowH);
+
+                    rowIndexes[currentWorkingIndex] = (rowIndexes[currentWorkingIndex].Item1, idx);
+                    rowHeights[currentWorkingIndex] = height;
+                }
+
                 string prevSheetName = "";
 
                 foreach (var worksheet in package.Workbook.Worksheets.Where(ws => ws.Name.Contains("Analysis")))
                 {
                     string currentChar = worksheet.Name.Split(" ")[1];
-                    ChangeHeight = currentChar == "A" ? ChangeHeightDefaultTemplate : ChangeHeightExtraTemplates;
-                    if (rowHeights[currentChar] < ChangeHeight)
-                    {
-                        var idx = rowIndexes[currentChar].Item2;
-                        var height = rowHeights[currentChar];
-
-                        sheetService.GenerateAnalysisRows(worksheet, ref height, ref idx, ChangeHeight, DefaultRowH);
-
-                        rowIndexes[currentChar] = (rowIndexes[currentChar].Item1, idx);
-                        rowHeights[currentChar] = height;
-                    }
-
+                    
                     rowIndexes[currentChar] = (rowIndexes[currentChar].Item1, rowIndexes[currentChar].Item2 + 1);
                     rowHeights[currentChar] += templateExtrahight;
 
