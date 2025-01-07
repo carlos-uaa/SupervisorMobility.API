@@ -2805,7 +2805,10 @@ namespace SupervisorMobility.API.Services
                  .Include(t => t.User).ThenInclude(u => u.Department);
             }
 
-            
+            if (includeTransactions)
+            {
+                query = query.Include(p => p.Categories).ThenInclude(p=>p.ChosenCategory);
+            }
 
             //if (includeTransactions)
             //{
