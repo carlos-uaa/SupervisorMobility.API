@@ -31,7 +31,7 @@ steps:
 
 - task: CopyFiles@2
   inputs:
-    SourceFolder: '$(Build.SourcesDirectory)/DataAccess/Icons'
+    SourceFolder: '$(Build.SourcesDirectory)/SupervisorMobility.API/DataAccess/Icons'
     Contents: '**'
     TargetFolder: '$(Build.ArtifactStagingDirectory)/app/DataAccess/Icons'
   displayName: 'Copy Icons'
