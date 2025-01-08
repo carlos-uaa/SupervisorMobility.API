@@ -1,5 +1,6 @@
 ﻿
 using AutoMapper;
+using DocumentFormat.OpenXml.Bibliography;
 using DocumentFormat.OpenXml.InkML;
 using DocumentFormat.OpenXml.Spreadsheet;
 using DocumentFormat.OpenXml.Wordprocessing;
@@ -2818,6 +2819,11 @@ namespace SupervisorMobility.API.Services
 
             return await query.FirstOrDefaultAsync();
 
+        }
+
+        public async Task<bool> SearchExistHciForUserId(int userId)
+        {
+            return await _context.HCIs.AnyAsync(k => k.IsActive == true && k.UserId == userId);
         }
         public async Task<IEnumerable<HCI>> GetAllHCIs(bool includeNavigation = false, bool includePeople = false, bool includeCommentaries = false, bool includeTransactions = false)
         {
