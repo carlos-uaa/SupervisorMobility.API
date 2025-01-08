@@ -406,6 +406,7 @@ namespace SupervisorMobility.API.Services
         #endregion
         #region HCI
         Task<HCI?> GetHCI(int HCIId, bool includeNavigation = false, bool includePeople = false, bool includeEvidences = false, bool includeTransactions = false);
+        Task<bool> SearchExistHciForUserId(int userId);
         Task<int> AddHCI(HCI HCIForAdd);
         Task<int> RemoveHCI(HCI HCIForAdd);
         Task<int> UpdateHCI(UpdateHCIDto HCIForUpdate, HCI HCIEntity);
