@@ -31,6 +31,9 @@ using System.ComponentModel;
 using SupervisorMobility.API.DataAccess.Services;
 using DocumentFormat.OpenXml.Office2016.Drawing.Command;
 using DocumentFormat.OpenXml.Bibliography;
+using DocumentFormat.OpenXml.Spreadsheet;
+using DocumentFormat.OpenXml.Packaging;
+using DocumentFormat.OpenXml;
 
 namespace SupervisorMobility.API.Controllers
 {
@@ -297,10 +300,23 @@ namespace SupervisorMobility.API.Controllers
 
         }
 
-       
-       
+   
+        [HttpGet("Headcount/example")]
+        public async Task<IActionResult> DownloadHeadcountExample()
+        {
+            string filePath = _env.ContentRootPath + "\\Documents\\HC_Example.xlsx";
 
-        //10 Oct hace falta actualizar esta descarga de la informacion generandola al formato de carga de trabajo
+            var provider = new FileExtensionContentTypeProvider();
+            if (!provider.TryGetContentType(filePath, out var contentType))
+            {
+                contentType = "application/octet-stream";
+            }
+
+            var bytes = await System.IO.File.ReadAllBytesAsync(filePath);
+            return File(bytes, contentType, Path.GetFileName(filePath));
+
+
+        }//end download file function 
 
         [HttpGet("Bulk/ByPlantId/{plantId}")]
         public async Task<IActionResult> DownloadBulkOnePlant(int plantId)
@@ -313,78 +329,80 @@ namespace SupervisorMobility.API.Controllers
             }
 
             MemoryStream ms = new MemoryStream();
-            using (SLDocument ws = new SLDocument())
+
+            using (SpreadsheetDocument document = SpreadsheetDocument.Create(ms, SpreadsheetDocumentType.Workbook))
             {
-                //Plant ROW data
-                ws.SetCellValue("A1", "PlantId");
-                ws.SetCellValue("B1", assyChartsForPlant[0].PlantId);
+                // Crear el Workbook
+                WorkbookPart workbookPart = document.AddWorkbookPart();
+                workbookPart.Workbook = new Workbook();
 
-                ws.SetCellValue("D1", "PlantCode");
-                ws.SetCellValue("E1", assyChartsForPlant[0].Plant.Code);
+                // Crear la hoja
+                WorksheetPart worksheetPart = workbookPart.AddNewPart<WorksheetPart>();
+                worksheetPart.Worksheet = new Worksheet(new SheetData());
 
-                ws.SetCellValue("G1", "PlantId");
-                ws.SetCellValue("H1", assyChartsForPlant[0].Plant.Description);
+                // Vincular hoja al Workbook
+                Sheets sheets = document.WorkbookPart.Workbook.AppendChild(new Sheets());
+                Sheet sheet = new Sheet()
+                {
+                    Id = document.WorkbookPart.GetIdOfPart(worksheetPart),
+                    SheetId = 1,
+                    Name = "Sheet1"
+                };
+                sheets.Append(sheet);
 
-                //ROW Data identificators
+                // Obtener la hoja
+                SheetData sheetData = worksheetPart.Worksheet.GetFirstChild<SheetData>();
 
-                ws.SetCellValue("A2", "AssyChartId");
-                ws.SetCellValue("B2", "isActive");
-                ws.SetCellValue("C2", "GOS");
-                ws.SetCellValue("D2", "CCP");
-                ws.SetCellValue("E2", "HOE");
-                ws.SetCellValue("F2", "CreationDate");
-                ws.SetCellValue("G2", "ModificationDate");
-                ws.SetCellValue("H2", "ProductId");
-                ws.SetCellValue("I2", "ProductCode");
-                ws.SetCellValue("J2", "ProductDescription");
-                ws.SetCellValue("K2", "ProductIsActive");
-                ws.SetCellValue("L2", "AreaId");
-                ws.SetCellValue("M2", "AreaCode");
-                ws.SetCellValue("N2", "AreaDescription");
-                ws.SetCellValue("O2", "AreaIsActive");
-                ws.SetCellValue("P2", "OperationId");
-                ws.SetCellValue("Q2", "OperationCode");
-                ws.SetCellValue("R2", "OperationDescription");
-                ws.SetCellValue("S2", "OperationIsActive");
-                ws.SetCellValue("T2", "DistributionId");
-                ws.SetCellValue("U2", "DistributionCode");
-                ws.SetCellValue("V2", "DistributionDescription");
-                ws.SetCellValue("W2", "DistributionIsActive");
+                // Fila de encabezados
+                Row headerRow1 = new Row();
+                headerRow1.Append(
+                    new Cell() { CellValue = new CellValue("PlantId"), DataType = CellValues.String },
+                    new Cell() { CellValue = new CellValue(assyChartsForPlant[0].PlantId.ToString()), DataType = CellValues.String },
+                    new Cell() { CellValue = new CellValue("PlantCode"), DataType = CellValues.String },
+                    new Cell() { CellValue = new CellValue(assyChartsForPlant[0].Plant.Code), DataType = CellValues.String },
+                    new Cell() { CellValue = new CellValue("PlantDescription"), DataType = CellValues.String },
+                    new Cell() { CellValue = new CellValue(assyChartsForPlant[0].Plant.Description), DataType = CellValues.String }
+                );
+                sheetData.Append(headerRow1);
 
-                int row = 3;
+                Row headerRow2 = new Row();
+                headerRow2.Append(
+                    new Cell() { CellValue = new CellValue("AssyChartId"), DataType = CellValues.String },
+                    new Cell() { CellValue = new CellValue("isActive"), DataType = CellValues.String },
+                    new Cell() { CellValue = new CellValue("GOS"), DataType = CellValues.String },
+                    new Cell() { CellValue = new CellValue("CCP"), DataType = CellValues.String },
+                    new Cell() { CellValue = new CellValue("HOE"), DataType = CellValues.String },
+                    new Cell() { CellValue = new CellValue("CreationDate"), DataType = CellValues.String },
+                    new Cell() { CellValue = new CellValue("ModificationDate"), DataType = CellValues.String },
+                    new Cell() { CellValue = new CellValue("ProductId"), DataType = CellValues.String },
+                    new Cell() { CellValue = new CellValue("ProductCode"), DataType = CellValues.String },
+                    new Cell() { CellValue = new CellValue("ProductDescription"), DataType = CellValues.String }
+                );
+                sheetData.Append(headerRow2);
+
+                // Agregar datos de las filas
                 foreach (var itemUser in assyChartsForPlant)
                 {
-
-                    ws.SetCellValue($"A{row}", itemUser.AssyChardId.ToString() ?? "");
-                    ws.SetCellValue($"B{row}", itemUser.IsActive.ToString() ?? "");
-                    //ws.SetCellValue($"C{row}", itemUser.GOS ?? "");
-                    //ws.SetCellValue($"D{row}", itemUser.CCP ?? "");
-                    //ws.SetCellValue($"E{row}", itemUser.HOE);
-                    ws.SetCellValue($"F{row}", itemUser.CreationDate.ToString() ?? "");
-                    ws.SetCellValue($"G{row}", itemUser.ModificationDate.ToString() ?? "");
-                    //ws.SetCellValue($"H{row}", itemUser.Product?.ProductId.ToString() ?? "");
-                    //ws.SetCellValue($"I{row}", itemUser.Product?.Code ?? "");
-                    //ws.SetCellValue($"J{row}", itemUser.Product?.Description ?? "");
-                    //ws.SetCellValue($"K{row}", itemUser.Product?.IsActive?.ToString() ?? "");
-                    ws.SetCellValue($"L{row}", itemUser.Area?.AreaId.ToString() ?? "");
-                    ws.SetCellValue($"M{row}", itemUser.Area?.Code ?? "");
-                    ws.SetCellValue($"N{row}", itemUser.Area?.Description ?? "");
-                    ws.SetCellValue($"O{row}", itemUser.Area?.IsActive?.ToString() ?? "");
-                    ws.SetCellValue($"P{row}", itemUser.Operation?.OperationId.ToString() ?? "");
-                    ws.SetCellValue($"Q{row}", itemUser.Operation?.Code ?? "");
-                    ws.SetCellValue($"R{row}", itemUser.Operation?.Description ?? "");
-                    ws.SetCellValue($"S{row}", itemUser.Operation?.IsActive.ToString() ?? "");
-                    ws.SetCellValue($"T{row}", itemUser.Distribution?.DistributionId.ToString() ?? "");
-                    ws.SetCellValue($"U{row}", itemUser.Distribution?.Code ?? "");
-                    ws.SetCellValue($"V{row}", itemUser.Distribution?.Description ?? "");
-                    ws.SetCellValue($"W{row}", itemUser.Distribution?.IsActive?.ToString() ?? "");
-                    row++;
+                    Row dataRow = new Row();
+                    dataRow.Append(
+                        new Cell() { CellValue = new CellValue(itemUser.AssyChardId.ToString()), DataType = CellValues.String },
+                        new Cell() { CellValue = new CellValue(itemUser.IsActive.ToString()), DataType = CellValues.String },
+                        new Cell() { CellValue = new CellValue(itemUser.CreationDate.ToString()), DataType = CellValues.String },
+                        new Cell() { CellValue = new CellValue(itemUser.ModificationDate.ToString()), DataType = CellValues.String },
+                        new Cell() { CellValue = new CellValue(itemUser.Area?.AreaId.ToString()), DataType = CellValues.String },
+                        new Cell() { CellValue = new CellValue(itemUser.Area?.Code), DataType = CellValues.String },
+                        new Cell() { CellValue = new CellValue(itemUser.Area?.Description), DataType = CellValues.String },
+                        new Cell() { CellValue = new CellValue(itemUser.Operation?.OperationId.ToString()), DataType = CellValues.String },
+                        new Cell() { CellValue = new CellValue(itemUser.Operation?.Code), DataType = CellValues.String },
+                        new Cell() { CellValue = new CellValue(itemUser.Distribution?.DistributionId.ToString()), DataType = CellValues.String },
+                        new Cell() { CellValue = new CellValue(itemUser.Distribution?.Code), DataType = CellValues.String }
+                    );
+                    sheetData.Append(dataRow);
                 }
 
-                ws.SaveAs(ms);
+                workbookPart.Workbook.Save();
             }
-            // this is important. Otherwise you get an empty file
-            // (because you'd be at EOF after the stream is written to, I think...).
+
             ms.Position = 0;
 
             var res = File(ms, "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet", $"{assyChartsForPlant[0].Plant.Description}.xlsx" ?? "ReportOnePlant.xlsx");
@@ -410,102 +428,94 @@ namespace SupervisorMobility.API.Controllers
             }
 
             MemoryStream ms = new MemoryStream(6000 * 65536);
-            SLDocument ws = new SLDocument();
-            bool firstSheet = true;
 
-            foreach (var plant in allPlants)
+            using (SpreadsheetDocument document = SpreadsheetDocument.Create(ms, SpreadsheetDocumentType.Workbook))
             {
-                if (firstSheet)
+                WorkbookPart workbookPart = document.AddWorkbookPart();
+                workbookPart.Workbook = new Workbook();
+
+                Sheets sheets = workbookPart.Workbook.AppendChild(new Sheets());
+                bool firstSheet = true;
+
+                foreach (var plant in allPlants)
                 {
-                    ws.RenameWorksheet(SLDocument.DefaultFirstSheetName, plant.Description ?? "Primer Planta");
+                    // Crear una nueva hoja
+                    WorksheetPart worksheetPart = workbookPart.AddNewPart<WorksheetPart>();
+                    worksheetPart.Worksheet = new Worksheet(new SheetData());
+
+                    string sheetName = plant.Description ?? (firstSheet ? "Primer Planta" : "Planta Siguiente");
+                    Sheet sheet = new Sheet()
+                    {
+                        Id = workbookPart.GetIdOfPart(worksheetPart),
+                        SheetId = (uint)(sheets.ChildElements.Count + 1),
+                        Name = sheetName
+                    };
+                    sheets.Append(sheet);
+
+                    // Obtener el objeto SheetData
+                    SheetData sheetData = worksheetPart.Worksheet.GetFirstChild<SheetData>();
+
+                    // Encabezados de la tabla
+                    Row headerRow1 = new Row();
+                    headerRow1.Append(
+                        new Cell() { CellValue = new CellValue("PlantId"), DataType = CellValues.String },
+                        new Cell() { CellValue = new CellValue(plant.PlantId.ToString() ?? ""), DataType = CellValues.String },
+                        new Cell() { CellValue = new CellValue("PlantCode"), DataType = CellValues.String },
+                        new Cell() { CellValue = new CellValue(plant.Code ?? ""), DataType = CellValues.String },
+                        new Cell() { CellValue = new CellValue("PlantDescription"), DataType = CellValues.String },
+                        new Cell() { CellValue = new CellValue(plant.Description ?? ""), DataType = CellValues.String }
+                    );
+                    sheetData.Append(headerRow1);
+
+                    Row headerRow2 = new Row();
+                    headerRow2.Append(
+                        new Cell() { CellValue = new CellValue("AssyChartId"), DataType = CellValues.String },
+                        new Cell() { CellValue = new CellValue("isActive"), DataType = CellValues.String },
+                        new Cell() { CellValue = new CellValue("GOS"), DataType = CellValues.String },
+                        new Cell() { CellValue = new CellValue("CCP"), DataType = CellValues.String },
+                        new Cell() { CellValue = new CellValue("HOE"), DataType = CellValues.String },
+                        new Cell() { CellValue = new CellValue("CreationDate"), DataType = CellValues.String },
+                        new Cell() { CellValue = new CellValue("ModificationDate"), DataType = CellValues.String },
+                        new Cell() { CellValue = new CellValue("AreaId"), DataType = CellValues.String },
+                        new Cell() { CellValue = new CellValue("AreaCode"), DataType = CellValues.String },
+                        new Cell() { CellValue = new CellValue("AreaDescription"), DataType = CellValues.String }
+                    );
+                    sheetData.Append(headerRow2);
+
+                    // Obtener datos de la planta
+                    var assyChartsEntitys = await _supervisorMobilityRepository.GetAllAssyChartsByPlantAsync(plant.PlantId);
+                    List<AssyChartWhitInfo> assyChartsForPlant = assyChartsEntitys != null
+                        ? _mapper.Map<List<AssyChartWhitInfo>>(assyChartsEntitys)
+                        : new List<AssyChartWhitInfo>();
+
+                    if (assyChartsForPlant.Count > 0)
+                    {
+                        int rowIndex = 3;
+                        foreach (var itemUser in assyChartsForPlant)
+                        {
+                            Row dataRow = new Row();
+                            dataRow.Append(
+                                new Cell() { CellValue = new CellValue(itemUser.AssyChardId.ToString() ?? ""), DataType = CellValues.String },
+                                new Cell() { CellValue = new CellValue(itemUser.IsActive.ToString() ?? ""), DataType = CellValues.String },
+                                new Cell() { CellValue = new CellValue(itemUser.CreationDate.ToString() ?? ""), DataType = CellValues.String },
+                                new Cell() { CellValue = new CellValue(itemUser.ModificationDate.ToString() ?? ""), DataType = CellValues.String },
+                                new Cell() { CellValue = new CellValue(itemUser.Area?.AreaId.ToString() ?? ""), DataType = CellValues.String },
+                                new Cell() { CellValue = new CellValue(itemUser.Area?.Code ?? ""), DataType = CellValues.String },
+                                new Cell() { CellValue = new CellValue(itemUser.Area?.Description ?? ""), DataType = CellValues.String },
+                                new Cell() { CellValue = new CellValue(itemUser.Operation?.OperationId.ToString() ?? ""), DataType = CellValues.String },
+                                new Cell() { CellValue = new CellValue(itemUser.Operation?.Code ?? ""), DataType = CellValues.String },
+                                new Cell() { CellValue = new CellValue(itemUser.Distribution?.DistributionId.ToString() ?? ""), DataType = CellValues.String }
+                            );
+                            sheetData.Append(dataRow);
+                            rowIndex++;
+                        }
+                    }
+
                     firstSheet = false;
                 }
-                else
-                {
-                    ws.AddWorksheet(plant.Description ?? "Planta Siguiente");
-                }
 
-                //Plant ROW data
-                ws.SetCellValue("A1", "PlantId");
-                ws.SetCellValue("B1", plant.PlantId.ToString() ?? "");
-
-                ws.SetCellValue("D1", "PlantCode");
-                ws.SetCellValue("E1", plant.Code ?? "");
-
-                ws.SetCellValue("G1", "PlantId");
-                ws.SetCellValue("H1", plant.Description ?? "");
-
-                //ROW Data identificators
-
-                ws.SetCellValue("A2", "AssyChartId");
-                ws.SetCellValue("B2", "isActive");
-                ws.SetCellValue("C2", "GOS");
-                ws.SetCellValue("D2", "CCP");
-                ws.SetCellValue("E2", "HOE");
-                ws.SetCellValue("F2", "CreationDate");
-                ws.SetCellValue("G2", "ModificationDate");
-                ws.SetCellValue("H2", "ProductId");
-                ws.SetCellValue("I2", "ProductCode");
-                ws.SetCellValue("J2", "ProductDescription");
-                ws.SetCellValue("K2", "ProductIsActive");
-                ws.SetCellValue("L2", "AreaId");
-                ws.SetCellValue("M2", "AreaCode");
-                ws.SetCellValue("N2", "AreaDescription");
-                ws.SetCellValue("O2", "AreaIsActive");
-                ws.SetCellValue("P2", "OperationId");
-                ws.SetCellValue("Q2", "OperationCode");
-                ws.SetCellValue("R2", "OperationDescription");
-                ws.SetCellValue("S2", "OperationIsActive");
-                ws.SetCellValue("T2", "DistributionId");
-                ws.SetCellValue("U2", "DistributionCode");
-                ws.SetCellValue("V2", "DistributionDescription");
-                ws.SetCellValue("W2", "DistributionIsActive");
-
-                var assyChartsEntitys = await _supervisorMobilityRepository.GetAllAssyChartsByPlantAsync(plant.PlantId);
-                List<AssyChartWhitInfo> assyChartsForPlant = new List<AssyChartWhitInfo>();
-                if (assyChartsEntitys != null)
-                {
-                    assyChartsForPlant = _mapper.Map<List<AssyChartWhitInfo>>(assyChartsEntitys);
-                }
-
-
-                if (assyChartsForPlant.Count != 0)
-                {
-
-                    int row = 3;
-                    foreach (var itemUser in assyChartsForPlant)
-                    {
-                        ws.SetCellValue($"A{row}", itemUser.AssyChardId.ToString() ?? "");
-                        ws.SetCellValue($"B{row}", itemUser.IsActive.ToString() ?? "");
-                        //ws.SetCellValue($"C{row}", itemUser.GOS ?? "");
-                        //ws.SetCellValue($"D{row}", itemUser.CCP ?? "");
-                        //ws.SetCellValue($"E{row}", itemUser.HOE);
-                        ws.SetCellValue($"F{row}", itemUser.CreationDate.ToString() ?? "");
-                        ws.SetCellValue($"G{row}", itemUser.ModificationDate.ToString() ?? "");
-                        //ws.SetCellValue($"H{row}", itemUser.Product?.ProductId.ToString() ?? "");
-                        //ws.SetCellValue($"I{row}", itemUser.Product?.Code ?? "");
-                        //ws.SetCellValue($"J{row}", itemUser.Product?.Description ?? "");
-                        //ws.SetCellValue($"K{row}", itemUser.Product?.IsActive?.ToString() ?? "");
-                        ws.SetCellValue($"L{row}", itemUser.Area?.AreaId.ToString() ?? "");
-                        ws.SetCellValue($"M{row}", itemUser.Area?.Code ?? "");
-                        ws.SetCellValue($"N{row}", itemUser.Area?.Description ?? "");
-                        ws.SetCellValue($"O{row}", itemUser.Area?.IsActive?.ToString() ?? "");
-                        ws.SetCellValue($"P{row}", itemUser.Operation?.OperationId.ToString() ?? "");
-                        ws.SetCellValue($"Q{row}", itemUser.Operation?.Code ?? "");
-                        ws.SetCellValue($"R{row}", itemUser.Operation?.Description ?? "");
-                        ws.SetCellValue($"S{row}", itemUser.Operation?.IsActive.ToString() ?? "");
-                        ws.SetCellValue($"T{row}", itemUser.Distribution?.DistributionId.ToString() ?? "");
-                        ws.SetCellValue($"U{row}", itemUser.Distribution?.Code ?? "");
-                        ws.SetCellValue($"V{row}", itemUser.Distribution?.Description ?? "");
-                        ws.SetCellValue($"W{row}", itemUser.Distribution?.IsActive?.ToString() ?? "");
-                        row++;
-                    }
-                }
+                workbookPart.Workbook.Save();
             }
-
-
-
-            ws.SaveAs(ms);
 
             ms.Position = 0;
 
@@ -527,7 +537,7 @@ namespace SupervisorMobility.API.Controllers
             if (FileInfo is not null)
             {
                 var path = Path.Combine(_env.ContentRootPath, "uploads\\guides", FileInfo.StorageFileName);
-               
+
                 var memory = new MemoryStream();
                 using (var stream = new FileStream(path, FileMode.Open))
                 {
@@ -551,7 +561,7 @@ namespace SupervisorMobility.API.Controllers
         [HttpGet("Users/DownloadAllExample")]
         public async Task<IActionResult> DownloadAllExample()
         {
-            string filePath = _env.ContentRootPath + "Documents\\All_Example.xlsx";
+            string filePath = _env.ContentRootPath + "\\Documents\\All_Example.xlsx";
 
             var provider = new FileExtensionContentTypeProvider();
             if (!provider.TryGetContentType(filePath, out var contentType))
@@ -562,7 +572,7 @@ namespace SupervisorMobility.API.Controllers
             var bytes = await System.IO.File.ReadAllBytesAsync(filePath);
             return File(bytes, contentType, Path.GetFileName(filePath));
 
-            //var path = Path.Combine(_env.ContentRootPath, "Documents\\All_Example.xlsx");
+            //var path = Path.Combine(_env.ContentRootPath, "\\Documents\\All_Example.xlsx");
 
             //var memory = new MemoryStream();
             //using (var stream = new FileStream(path, FileMode.Open))
@@ -583,7 +593,7 @@ namespace SupervisorMobility.API.Controllers
         [HttpGet("Users/DownloadSSVExample")]
         public async Task<IActionResult> DownloadSSVExample()
         {
-            var path = Path.Combine(_env.ContentRootPath, "Documents\\SSV_Example.xlsx");
+            var path = Path.Combine(_env.ContentRootPath, "\\Documents\\SSV_Example.xlsx");
 
             var memory = new MemoryStream();
             using (var stream = new FileStream(path, FileMode.Open))
@@ -604,7 +614,7 @@ namespace SupervisorMobility.API.Controllers
         public async Task<IActionResult> DownloadSupervisorExample()
         {
 
-            var path = Path.Combine(_env.ContentRootPath, "Documents\\SV_Example.xlsx");
+            var path = Path.Combine(_env.ContentRootPath, "\\Documents\\SV_Example.xlsx");
 
             var memory = new MemoryStream();
             using (var stream = new FileStream(path, FileMode.Open))
@@ -623,7 +633,7 @@ namespace SupervisorMobility.API.Controllers
         [HttpGet("Users/DownloadOperatorsExample")]
         public async Task<IActionResult> DownloadOperatorsExample()
         {
-            var path = Path.Combine(_env.ContentRootPath, "Documents\\Operators_Exmaple.xlsx");
+            var path = Path.Combine(_env.ContentRootPath, "\\Documents\\Operators_Exmaple.xlsx");
 
             var memory = new MemoryStream();
             using (var stream = new FileStream(path, FileMode.Open))
@@ -757,101 +767,105 @@ namespace SupervisorMobility.API.Controllers
             }
 
             MemoryStream ms = new MemoryStream();
-            SLDocument ws = new SLDocument();
 
-
-            ws.RenameWorksheet(SLDocument.DefaultFirstSheetName, "Users Bulk");
-
-            //ROW Data identificators
-
-            ws.SetCellValue("A1", "UserId");
-            ws.SetCellValue("B1", "UserName@compasdcpcs.local");
-            ws.SetCellValue("C1", "Payroll");
-            ws.SetCellValue("D1", "Name");
-            ws.SetCellValue("E1", "Email");
-            ws.SetCellValue("F1", "UserType");
-            ws.SetCellValue("G1", "SuperiorId");
-            ws.SetCellValue("H1", "SubordinadosId's");
-            ws.SetCellValue("I1", "Plant");
-            ws.SetCellValue("J1", "Area");
-            ws.SetCellValue("K1", "Group");
-            ws.SetCellValue("L1", "Distribution");
-
-
-
-            int row = 2;
-            foreach (var itemUser in allUsersList)
+            using (SpreadsheetDocument document = SpreadsheetDocument.Create(ms, SpreadsheetDocumentType.Workbook))
             {
-                ws.SetCellValue("A1", "UserId");
-                ws.SetCellValue("B1", "UserName@compasdcpcs.local");
-                ws.SetCellValue("C1", "Payroll");
-                ws.SetCellValue("D1", "Name");
-                ws.SetCellValue("E1", "Email");
-                ws.SetCellValue("F1", "UserType");
-                ws.SetCellValue("G1", "SuperiorId");
-                ws.SetCellValue("H1", "SubordinadosId's");
-                ws.SetCellValue("I1", "Plant");
-                ws.SetCellValue("J1", "Area");
-                ws.SetCellValue("K1", "Group");
-                ws.SetCellValue("L1", "Distribution");
-                ws.SetCellValue($"A{row}", itemUser.UserId.ToString() ?? "");
-                ws.SetCellValue($"B{row}", itemUser.ObjectId?.ToString() ?? "");
-                ws.SetCellValue($"C{row}", itemUser.Payroll.ToString() ?? "");
-                ws.SetCellValue($"D{row}", itemUser.Name.ToString() ?? "");
-                ws.SetCellValue($"E{row}", itemUser.Email?.ToString() ?? ""); ;
+                // Crear Workbook y Worksheet
+                WorkbookPart workbookPart = document.AddWorkbookPart();
+                workbookPart.Workbook = new Workbook();
 
-                ws.SetCellValue($"F{row}", itemUser.UserType.ToString() ?? "");
+                WorksheetPart worksheetPart = workbookPart.AddNewPart<WorksheetPart>();
+                worksheetPart.Worksheet = new Worksheet(new SheetData());
 
-                ws.SetCellValue($"G{row}", itemUser.SuperiorId.ToString() ?? "");
-                var subs = "";
-                if (itemUser.Subordinates?.Count > 0)
+                // Crear hojas en el Workbook
+                Sheets sheets = document.WorkbookPart.Workbook.AppendChild(new Sheets());
+                Sheet sheet = new Sheet()
                 {
-                    foreach (var subitem in itemUser.Subordinates)
+                    Id = document.WorkbookPart.GetIdOfPart(worksheetPart),
+                    SheetId = 1,
+                    Name = "Users Bulk"
+                };
+                sheets.Append(sheet);
+
+                // Acceder a SheetData
+                SheetData sheetData = worksheetPart.Worksheet.GetFirstChild<SheetData>();
+
+                // Crear fila de encabezados
+                Row headerRow = new Row();
+                string[] headers = new[]
+                {
+            "UserId", "UserName@compasdcpcs.local", "Payroll", "Name", "Email",
+            "UserType", "SuperiorId", "SubordinadosId's", "Plant", "Area", "Group", "Distribution"
+        };
+
+                foreach (var header in headers)
+                {
+                    Cell cell = new Cell()
                     {
-                        subs += $"{subitem.UserId},";
-                    }
-                    ws.SetCellValue($"H{row}", subs ?? "");
-
+                        CellValue = new CellValue(header),
+                        DataType = CellValues.String
+                    };
+                    headerRow.Append(cell);
                 }
+                sheetData.Append(headerRow);
 
-                ws.SetCellValue($"I{row}", itemUser.PlantId?.ToString() ?? "");
-
-                if (itemUser.UserType == 2)
+                // Agregar datos de los usuarios
+                foreach (var itemUser in allUsersList)
                 {
-                    var areas = "";
-                    if (itemUser.Areas?.Count > 0)
+                    Row dataRow = new Row();
+
+                    dataRow.Append(CreateTextCell(itemUser.UserId.ToString()));
+                    dataRow.Append(CreateTextCell(itemUser.ObjectId?.ToString() ?? ""));
+                    dataRow.Append(CreateTextCell(itemUser.Payroll.ToString() ?? ""));
+                    dataRow.Append(CreateTextCell(itemUser.Name.ToString() ?? ""));
+                    dataRow.Append(CreateTextCell(itemUser.Email?.ToString() ?? ""));
+                    dataRow.Append(CreateTextCell(itemUser.UserType.ToString() ?? ""));
+                    dataRow.Append(CreateTextCell(itemUser.SuperiorId.ToString() ?? ""));
+
+                    // Subordinados
+                    string subs = string.Join(",", itemUser.Subordinates?.Select(s => s.UserId.ToString()) ?? Enumerable.Empty<string>());
+                    dataRow.Append(CreateTextCell(subs));
+
+                    dataRow.Append(CreateTextCell(itemUser.PlantId?.ToString() ?? ""));
+
+                    // Áreas
+                    if (itemUser.UserType == 2)
                     {
-                        foreach (var itemArea in itemUser.Areas)
-                        {
-                            areas += $"{itemArea.AreaId},";
-                        }
+                        string areas = string.Join(",", itemUser.Areas?.Select(a => a.AreaId.ToString()) ?? Enumerable.Empty<string>());
+                        dataRow.Append(CreateTextCell(areas));
                     }
-                    ws.SetCellValue($"J{row}", areas ?? "");
+                    else
+                    {
+                        dataRow.Append(CreateTextCell(itemUser.AreaId?.ToString() ?? ""));
+                    }
 
+                    dataRow.Append(CreateTextCell(itemUser.GroupId?.ToString() ?? ""));
+                    dataRow.Append(CreateTextCell(itemUser.DistributionId?.ToString() ?? ""));
+
+                    sheetData.Append(dataRow);
                 }
-                else
-                {
-                    ws.SetCellValue($"J{row}", itemUser.AreaId?.ToString() ?? "");
 
-                }
-
-                ws.SetCellValue($"K{row}", itemUser.GroupId?.ToString() ?? "");
-                ws.SetCellValue($"L{row}", itemUser.DistributionId?.ToString() ?? "");
-                row++;
+                workbookPart.Workbook.Save();
             }
 
+            // Aquí puedes usar el MemoryStream (`ms`) según sea necesario.
+            ms.Seek(0, SeekOrigin.Begin);
 
-
-            ws.SaveAs(ms);
-
-            ms.Position = 0;
 
             var res = File(ms, "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet", "UsersBulk.xlsx");
             res.EnableRangeProcessing = true;
             return res;
 
         }//end download file function 
-        
+
+        Cell CreateTextCell(string text)
+        {
+            return new Cell()
+            {
+                CellValue = new CellValue(text),
+                DataType = CellValues.String
+            };
+        }
 
         [HttpPost("MassiveUploadTreeData")]
         public async Task<ActionResult<FileUpload>> MassiveUploadTreeData(IFormFile file, int plantnameid, int userId)
@@ -895,7 +909,7 @@ namespace SupervisorMobility.API.Controllers
         [HttpGet("MassiveUploadTreeDataExample")]
         public async Task<IActionResult> MassiveDownloadDocumentTreeDataTemplate()
         {
-            var path = Path.Combine(_env.ContentRootPath, "Documents\\TreeDataExample.xlsx");
+            var path = Path.Combine(_env.ContentRootPath, "\\Documents\\TreeDataExample.xlsx");
 
             var memory = new MemoryStream();
             using (var stream = new FileStream(path, FileMode.Open))
@@ -957,11 +971,11 @@ namespace SupervisorMobility.API.Controllers
             return Ok(fileToReturn);
         }
 
-       // [EnableCors("CorsPolicy")]
+        // [EnableCors("CorsPolicy")]
         [HttpGet("MassivePathsExample")]
         public async Task<IActionResult> MassivePathsDownloadDocumentTemplate()
         {
-            var path = Path.Combine(_env.ContentRootPath, "Documents\\PathsExample.xlsx");
+            var path = Path.Combine(_env.ContentRootPath, "\\Documents\\PathsExample.xlsx");
 
             var memory = new MemoryStream();
             using (var stream = new FileStream(path, FileMode.Open))

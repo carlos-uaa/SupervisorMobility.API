@@ -1,5 +1,7 @@
 ﻿using AutoMapper;
-using ClosedXML.Excel;
+using DocumentFormat.OpenXml;
+using DocumentFormat.OpenXml.Packaging;
+using DocumentFormat.OpenXml.Spreadsheet;
 using Microsoft.AspNetCore.Cors;
 using Microsoft.AspNetCore.Mvc;
 using SpreadsheetLight;
@@ -1478,6 +1480,21 @@ namespace SupervisorMobility.API.Controllers
             return Ok(ResultToReturn);
         }
 
+        string GetCellValue(WorkbookPart workbookPart, Cell cell)
+        {
+            if (cell == null || cell.CellValue == null) return null;
+
+            string value = cell.CellValue.Text;
+
+            // Manejar celdas con SharedStringTable (para celdas con texto)
+            if (cell.DataType != null && cell.DataType.Value == CellValues.SharedString)
+            {
+                return workbookPart.SharedStringTablePart.SharedStringTable.Elements<SharedStringItem>().ElementAt(int.Parse(value)).InnerText;
+            }
+
+            return value; // Para valores numéricos o fechas
+        }
+
         //[EnableCors("Cors")]
         [HttpPost("FileUpload/Data")]
         public async Task<ActionResult<UploadUsersResult>> ApplyUsersUpload(FileUploadGeneralDto FileToInsert)
@@ -1557,33 +1574,33 @@ namespace SupervisorMobility.API.Controllers
 
                     List<string> RowsInFile = new List<string>();
 
-                    using (var workBook = new XLWorkbook(file))
+                    using (SpreadsheetDocument document = SpreadsheetDocument.Open(file, false))
                     {
-                        IXLWorksheet ws = workBook.Worksheet(1);
-                        foreach (IXLRow row in ws.Rows())
+                        // Obtener la primera hoja de trabajo
+                        WorkbookPart workbookPart = document.WorkbookPart;
+                        Sheet sheet = workbookPart.Workbook.Sheets.Elements<Sheet>().FirstOrDefault();
+                        if (sheet != null)
                         {
-                            if (!row.IsEmpty())
+                            WorksheetPart worksheetPart = (WorksheetPart)workbookPart.GetPartById(sheet.Id);
+                            SheetData sheetData = worksheetPart.Worksheet.Elements<SheetData>().FirstOrDefault();
+
+                            if (sheetData != null)
                             {
-                                RowsInFile.Clear();
-
-                                foreach (IXLCell cell in row.Cells(1, 13))
+                                foreach (var row in sheetData.Elements<Row>())
                                 {
-                                    string toinsert = "§";
-
-                                    // Verificar si la celda no está vacía antes de obtener su valor
-                                    if (!cell.IsEmpty())
+                                   
+                                    foreach (var cell in row.Elements<Cell>().Take(13)) // Leer hasta la columna 13
                                     {
-                                        toinsert = cell.Value.ToString();
+                                        string cellValue = GetCellValue(workbookPart, cell);
+                                        RowsInFile.Add(string.IsNullOrEmpty(cellValue) ? "§" : cellValue);
                                     }
 
-                                    RowsInFile.Add(toinsert);
+                                    DataInFile.Add(RowsInFile.ToArray());
                                 }
-                                DataInFile.Add(RowsInFile.ToArray());
                             }
-
-
                         }
                     }
+
                 }
                 catch (Exception ex)
                 {
@@ -2466,53 +2483,97 @@ namespace SupervisorMobility.API.Controllers
         {
 
             MemoryStream ms = new MemoryStream(6000 * 65536);
-            SLDocument ws = new SLDocument();
+            using (SpreadsheetDocument document = SpreadsheetDocument.Create(ms, SpreadsheetDocumentType.Workbook))
+            {
+                WorkbookPart workbookPart = document.AddWorkbookPart();
+                workbookPart.Workbook = new Workbook();
 
-            ws.RenameWorksheet(SLDocument.DefaultFirstSheetName, "Users Bulk");
+                Sheets sheets = workbookPart.Workbook.AppendChild(new Sheets());
 
+                // Crear una hoja
+                WorksheetPart worksheetPart = workbookPart.AddNewPart<WorksheetPart>();
+                worksheetPart.Worksheet = new Worksheet(new SheetData());
 
-            ws.SetCellValue("A1", "UserId");
-            ws.SetCellValue("B1", "UserName@compasdcpcs.local");
-            ws.SetCellValue("C1", "Payroll");
-            ws.SetCellValue("D1", "Name");
-            ws.SetCellValue("E1", "Email");
-            ws.SetCellValue("F1", "UserType");
-            ws.SetCellValue("G1", "SuperiorId");
-            ws.SetCellValue("H1", "SubordinadosId's");
-            ws.SetCellValue("I1", "Plant");
-            ws.SetCellValue("J1", "Area");
-            ws.SetCellValue("K1", "Group");
-            ws.SetCellValue("L1", "Distribution");
+                Sheet sheet = new Sheet()
+                {
+                    Id = workbookPart.GetIdOfPart(worksheetPart),
+                    SheetId = 1,
+                    Name = "Users Bulk"
+                };
+                sheets.Append(sheet);
 
+                // Obtener el objeto SheetData
+                SheetData sheetData = worksheetPart.Worksheet.GetFirstChild<SheetData>();
 
-            ws.SetCellValue("A2", "This field is used for the User_id registered in the Mobility supervisor system,");
-            ws.SetCellValue("B2", "This field is used for the UserName");
-            ws.SetCellValue("C2", "This field is used for the Payroll");
-            ws.SetCellValue("D2", "This field is used for the staff name");
-            ws.SetCellValue("E2", "This field is for the e-mail address, to which the notifications will be sent.");
-            ws.SetCellValue("F2", "This field belongs to the user's privilege level within the system.");
-            ws.SetCellValue("G2", "This field is used for the User_id Superior registered in the Mobility supervisor system");
-            ws.SetCellValue("H2", "This field is used for the User_id's Subordinates registered in the Mobility supervisor system");
-            ws.SetCellValue("I2", "This field is used for the Plant_id registered in the Mobility supervisor system");
-            ws.SetCellValue("J2", "This field is used for the Area_id registered in the Mobility supervisor system");
-            ws.SetCellValue("K2", "This field is used for the Group_id registered in the Mobility supervisor system");
-            ws.SetCellValue("L2", "This field is used for the Distribution_id registered in the Mobility supervisor system");
+                // Encabezados
+                Row headerRow = new Row();
+                headerRow.Append(
+                    new Cell() { CellValue = new CellValue("UserId"), DataType = CellValues.String },
+                    new Cell() { CellValue = new CellValue("UserName@compasdcpcs.local"), DataType = CellValues.String },
+                    new Cell() { CellValue = new CellValue("Payroll"), DataType = CellValues.String },
+                    new Cell() { CellValue = new CellValue("Name"), DataType = CellValues.String },
+                    new Cell() { CellValue = new CellValue("Email"), DataType = CellValues.String },
+                    new Cell() { CellValue = new CellValue("UserType"), DataType = CellValues.String },
+                    new Cell() { CellValue = new CellValue("SuperiorId"), DataType = CellValues.String },
+                    new Cell() { CellValue = new CellValue("SubordinadosId's"), DataType = CellValues.String },
+                    new Cell() { CellValue = new CellValue("Plant"), DataType = CellValues.String },
+                    new Cell() { CellValue = new CellValue("Area"), DataType = CellValues.String },
+                    new Cell() { CellValue = new CellValue("Group"), DataType = CellValues.String },
+                    new Cell() { CellValue = new CellValue("Distribution"), DataType = CellValues.String }
+                );
+                sheetData.Append(headerRow);
 
-            ws.SetCellValue("A3", "in case it already exists, the user information will be updated.");
-            ws.SetCellValue("B3", "Is the email provided by the activedirectory under the name PrincipalName");
-            ws.SetCellValue("E3", "Preferably the e-mail address that the person uses to receive the job information.");
-            ws.SetCellValue("F3", "1 - Admin: Full access to the entire system, 2 - SSV, 3 - SV, 4 - Operator");
-            ws.SetCellValue("J3", "In case you are registering an SSV, which has several areas, it is necessary to separate them by commas. eg (1,2,3) without parentheses");
-            ws.SetCellValue("H3", "In case only have one Subordinate, the User_ID of subordinated register in Mobility supervisor system");
-            ws.SetCellValue("L3", "Can be left blank");
+                // Fila de descripciones
+                Row descriptionRow = new Row();
+                descriptionRow.Append(
+                    new Cell() { CellValue = new CellValue("This field is used for the User_id registered in the Mobility supervisor system,"), DataType = CellValues.String },
+                    new Cell() { CellValue = new CellValue("This field is used for the UserName"), DataType = CellValues.String },
+                    new Cell() { CellValue = new CellValue("This field is used for the Payroll"), DataType = CellValues.String },
+                    new Cell() { CellValue = new CellValue("This field is used for the staff name"), DataType = CellValues.String },
+                    new Cell() { CellValue = new CellValue("This field is for the e-mail address, to which the notifications will be sent."), DataType = CellValues.String },
+                    new Cell() { CellValue = new CellValue("This field belongs to the user's privilege level within the system."), DataType = CellValues.String },
+                    new Cell() { CellValue = new CellValue("This field is used for the User_id Superior registered in the Mobility supervisor system"), DataType = CellValues.String },
+                    new Cell() { CellValue = new CellValue("This field is used for the User_id's Subordinates registered in the Mobility supervisor system"), DataType = CellValues.String },
+                    new Cell() { CellValue = new CellValue("This field is used for the Plant_id registered in the Mobility supervisor system"), DataType = CellValues.String },
+                    new Cell() { CellValue = new CellValue("This field is used for the Area_id registered in the Mobility supervisor system"), DataType = CellValues.String },
+                    new Cell() { CellValue = new CellValue("This field is used for the Group_id registered in the Mobility supervisor system"), DataType = CellValues.String },
+                    new Cell() { CellValue = new CellValue("This field is used for the Distribution_id registered in the Mobility supervisor system"), DataType = CellValues.String }
+                );
+                sheetData.Append(descriptionRow);
 
-            ws.SetCellValue("H4", "In case you are registering many Subordinates, it is necessary to separate them by commas. eg: (1,2,3) without parentheses ");
-            ws.SetCellValue("J4", "In case you are registering an SV,the id of one of the areas administering the SSV who will be his or her superior");
+                // Fila de notas adicionales
+                Row notesRow1 = new Row();
+                notesRow1.Append(
+                    new Cell() { CellValue = new CellValue("in case it already exists, the user information will be updated."), DataType = CellValues.String },
+                    new Cell() { CellValue = new CellValue("Is the email provided by the activedirectory under the name PrincipalName"), DataType = CellValues.String },
+                    null,
+                    null,
+                    new Cell() { CellValue = new CellValue("Preferably the e-mail address that the person uses to receive the job information."), DataType = CellValues.String },
+                    new Cell() { CellValue = new CellValue("1 - Admin: Full access to the entire system, 2 - SSV, 3 - SV, 4 - Operator"), DataType = CellValues.String },
+                    null,
+                    new Cell() { CellValue = new CellValue("In case only have one Subordinate, the User_ID of subordinated register in Mobility supervisor system"), DataType = CellValues.String },
+                    null,
+                    new Cell() { CellValue = new CellValue("In case you are registering an SSV, which has several areas, it is necessary to separate them by commas. eg (1,2,3) without parentheses"), DataType = CellValues.String }
+                );
+                sheetData.Append(notesRow1);
 
+                Row notesRow2 = new Row();
+                notesRow2.Append(
+                    null,
+                    null,
+                    null,
+                    null,
+                    null,
+                    null,
+                    new Cell() { CellValue = new CellValue("Can be left blank"), DataType = CellValues.String }
+                );
+                sheetData.Append(notesRow2);
 
-            ws.SaveAs(ms);
+                workbookPart.Workbook.Save();
+            }
 
             ms.Position = 0;
+
 
             var res = File(ms, "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet", "AllUsersFormat.xlsx");
             res.EnableRangeProcessing = true;
@@ -2526,33 +2587,70 @@ namespace SupervisorMobility.API.Controllers
         {
 
             MemoryStream ms = new MemoryStream(6000 * 65536);
-            SLDocument ws = new SLDocument();
+            using (SpreadsheetDocument document = SpreadsheetDocument.Create(ms, SpreadsheetDocumentType.Workbook))
+            {
+                WorkbookPart workbookPart = document.AddWorkbookPart();
+                workbookPart.Workbook = new Workbook();
 
-            ws.RenameWorksheet(SLDocument.DefaultFirstSheetName, "SSV Format");
+                Sheets sheets = workbookPart.Workbook.AppendChild(new Sheets());
 
-            //ROW Data identificators
-            ws.SetCellValue("A1", "UserId SSV");
-            ws.SetCellValue("B1", "Name");
-            ws.SetCellValue("C1", "Email");
-            ws.SetCellValue("D1", "Plant");
-            ws.SetCellValue("E1", "Group");
-            ws.SetCellValue("F1", "AreasManage");
-            ws.SetCellValue("G1", "UserName@compasdcpcs.local");
+                // Crear una hoja
+                WorksheetPart worksheetPart = workbookPart.AddNewPart<WorksheetPart>();
+                worksheetPart.Worksheet = new Worksheet(new SheetData());
 
-            ws.SetCellValue("A2", "This field is used for the User_id registered in the Mobility supervisor system,");
-            ws.SetCellValue("B2", "This field is used for the staff name");
-            ws.SetCellValue("C2", "This field is for the e-mail address, to which the notifications will be sent.");
-            ws.SetCellValue("D2", "This field is used for the Plant_id registered in the Mobility supervisor system");
-            ws.SetCellValue("E2", "This field is used for the Group_id registered in the Mobility supervisor system");
-            ws.SetCellValue("F2", "This field is used for the Area_id registered in the Mobility supervisor system");
-            ws.SetCellValue("G2", "This field is used for the UserName");
+                Sheet sheet = new Sheet()
+                {
+                    Id = workbookPart.GetIdOfPart(worksheetPart),
+                    SheetId = 1,
+                    Name = "SSV Format"
+                };
+                sheets.Append(sheet);
 
-            ws.SetCellValue("A3", "in case it already exists, the user information will be updated.");
-            ws.SetCellValue("C3", "Preferably the e-mail address that the person uses to receive the job information.");
-            ws.SetCellValue("F3", "In case of having several areas, it is necessary to separate them by commas. eg (1,2,3) without parentheses");
-            ws.SetCellValue("G3", "Is the email provided by the activedirectory under the name PrincipalName");
+                // Obtener el objeto SheetData
+                SheetData sheetData = worksheetPart.Worksheet.GetFirstChild<SheetData>();
 
-            ws.SaveAs(ms);
+                // Encabezados
+                Row headerRow = new Row();
+                headerRow.Append(
+                    new Cell() { CellValue = new CellValue("UserId SSV"), DataType = CellValues.String },
+                    new Cell() { CellValue = new CellValue("Name"), DataType = CellValues.String },
+                    new Cell() { CellValue = new CellValue("Email"), DataType = CellValues.String },
+                    new Cell() { CellValue = new CellValue("Plant"), DataType = CellValues.String },
+                    new Cell() { CellValue = new CellValue("Group"), DataType = CellValues.String },
+                    new Cell() { CellValue = new CellValue("AreasManage"), DataType = CellValues.String },
+                    new Cell() { CellValue = new CellValue("UserName@compasdcpcs.local"), DataType = CellValues.String }
+                );
+                sheetData.Append(headerRow);
+
+                // Descripciones
+                Row descriptionRow = new Row();
+                descriptionRow.Append(
+                    new Cell() { CellValue = new CellValue("This field is used for the User_id registered in the Mobility supervisor system,"), DataType = CellValues.String },
+                    new Cell() { CellValue = new CellValue("This field is used for the staff name"), DataType = CellValues.String },
+                    new Cell() { CellValue = new CellValue("This field is for the e-mail address, to which the notifications will be sent."), DataType = CellValues.String },
+                    new Cell() { CellValue = new CellValue("This field is used for the Plant_id registered in the Mobility supervisor system"), DataType = CellValues.String },
+                    new Cell() { CellValue = new CellValue("This field is used for the Group_id registered in the Mobility supervisor system"), DataType = CellValues.String },
+                    new Cell() { CellValue = new CellValue("This field is used for the Area_id registered in the Mobility supervisor system"), DataType = CellValues.String },
+                    new Cell() { CellValue = new CellValue("This field is used for the UserName"), DataType = CellValues.String }
+                );
+                sheetData.Append(descriptionRow);
+
+                // Notas adicionales
+                Row notesRow = new Row();
+                notesRow.Append(
+                    new Cell() { CellValue = new CellValue("in case it already exists, the user information will be updated."), DataType = CellValues.String },
+                    null,
+                    new Cell() { CellValue = new CellValue("Preferably the e-mail address that the person uses to receive the job information."), DataType = CellValues.String },
+                    null,
+                    null,
+                    new Cell() { CellValue = new CellValue("In case of having several areas, it is necessary to separate them by commas. eg (1,2,3) without parentheses"), DataType = CellValues.String },
+                    new Cell() { CellValue = new CellValue("Is the email provided by the activedirectory under the name PrincipalName"), DataType = CellValues.String }
+                );
+                sheetData.Append(notesRow);
+
+                workbookPart.Workbook.Save();
+            }
+
 
             ms.Position = 0;
 
@@ -2568,36 +2666,67 @@ namespace SupervisorMobility.API.Controllers
         {
 
             MemoryStream ms = new MemoryStream(6000 * 65536);
-            SLDocument ws = new SLDocument();
 
-            ws.RenameWorksheet(SLDocument.DefaultFirstSheetName, "Users Bulk");
+            using (SpreadsheetDocument document = SpreadsheetDocument.Create(ms, SpreadsheetDocumentType.Workbook))
+            {
+                WorkbookPart workbookPart = document.AddWorkbookPart();
+                workbookPart.Workbook = new Workbook();
 
-            //ROW Data identificators
+                Sheets sheets = workbookPart.Workbook.AppendChild(new Sheets());
 
-            ws.SetCellValue("A1", "UserId Supervisor");
-            ws.SetCellValue("B1", "Name");
-            ws.SetCellValue("C1", "Email");
-            ws.SetCellValue("D1", "SSV_Id Superior");
-            ws.SetCellValue("E1", "Assign Area_ID");
-            ws.SetCellValue("F1", "UserName@compasdcpcs.local");
+                // Crear una hoja
+                WorksheetPart worksheetPart = workbookPart.AddNewPart<WorksheetPart>();
+                worksheetPart.Worksheet = new Worksheet(new SheetData());
 
+                Sheet sheet = new Sheet()
+                {
+                    Id = workbookPart.GetIdOfPart(worksheetPart),
+                    SheetId = 1,
+                    Name = "Users Bulk"
+                };
+                sheets.Append(sheet);
 
+                // Obtener el objeto SheetData
+                SheetData sheetData = worksheetPart.Worksheet.GetFirstChild<SheetData>();
 
-            ws.SetCellValue("A2", "This field is used for the User_id registered in the Mobility supervisor system,");
-            ws.SetCellValue("B2", "This field is used for the staff name");
-            ws.SetCellValue("C2", "This field is for the e-mail address, to which the notifications will be sent.");
-            ws.SetCellValue("D2", "This field is used for the User_id registered in the Mobility supervisor system");
-            ws.SetCellValue("E2", "This field is used for the Area_id registered in the Mobility supervisor system");
-            ws.SetCellValue("F2", "This field is used for the UserName");
+                // Encabezados
+                Row headerRow = new Row();
+                headerRow.Append(
+                    new Cell() { CellValue = new CellValue("UserId Supervisor"), DataType = CellValues.String },
+                    new Cell() { CellValue = new CellValue("Name"), DataType = CellValues.String },
+                    new Cell() { CellValue = new CellValue("Email"), DataType = CellValues.String },
+                    new Cell() { CellValue = new CellValue("SSV_Id Superior"), DataType = CellValues.String },
+                    new Cell() { CellValue = new CellValue("Assign Area_ID"), DataType = CellValues.String },
+                    new Cell() { CellValue = new CellValue("UserName@compasdcpcs.local"), DataType = CellValues.String }
+                );
+                sheetData.Append(headerRow);
 
-            ws.SetCellValue("A3", "in case it already exists, the user information will be updated.");
-            ws.SetCellValue("C3", "Preferably the e-mail address that the person uses to receive the job information.");
-            ws.SetCellValue("D3", "the id of the person who will be his or her superior");
-            ws.SetCellValue("E3", "the id of one of the areas administering the SSV who will be his or her superior");
-            ws.SetCellValue("F3", "Is the email provided by the activedirectory under the name PrincipalName");
+                // Descripciones
+                Row descriptionRow = new Row();
+                descriptionRow.Append(
+                    new Cell() { CellValue = new CellValue("This field is used for the User_id registered in the Mobility supervisor system,"), DataType = CellValues.String },
+                    new Cell() { CellValue = new CellValue("This field is used for the staff name"), DataType = CellValues.String },
+                    new Cell() { CellValue = new CellValue("This field is for the e-mail address, to which the notifications will be sent."), DataType = CellValues.String },
+                    new Cell() { CellValue = new CellValue("This field is used for the User_id registered in the Mobility supervisor system"), DataType = CellValues.String },
+                    new Cell() { CellValue = new CellValue("This field is used for the Area_id registered in the Mobility supervisor system"), DataType = CellValues.String },
+                    new Cell() { CellValue = new CellValue("This field is used for the UserName"), DataType = CellValues.String }
+                );
+                sheetData.Append(descriptionRow);
 
+                // Notas adicionales
+                Row notesRow = new Row();
+                notesRow.Append(
+                    new Cell() { CellValue = new CellValue("in case it already exists, the user information will be updated."), DataType = CellValues.String },
+                    null,
+                    new Cell() { CellValue = new CellValue("Preferably the e-mail address that the person uses to receive the job information."), DataType = CellValues.String },
+                    new Cell() { CellValue = new CellValue("the id of the person who will be his or her superior"), DataType = CellValues.String },
+                    new Cell() { CellValue = new CellValue("the id of one of the areas administering the SSV who will be his or her superior"), DataType = CellValues.String },
+                    new Cell() { CellValue = new CellValue("Is the email provided by the activedirectory under the name PrincipalName"), DataType = CellValues.String }
+                );
+                sheetData.Append(notesRow);
 
-            ws.SaveAs(ms);
+                workbookPart.Workbook.Save();
+            }
 
             ms.Position = 0;
 
@@ -2613,28 +2742,62 @@ namespace SupervisorMobility.API.Controllers
         {
 
             MemoryStream ms = new MemoryStream(6000 * 65536);
-            SLDocument ws = new SLDocument();
+            using (SpreadsheetDocument document = SpreadsheetDocument.Create(ms, SpreadsheetDocumentType.Workbook))
+            {
+                WorkbookPart workbookPart = document.AddWorkbookPart();
+                workbookPart.Workbook = new Workbook();
 
-            ws.RenameWorksheet(SLDocument.DefaultFirstSheetName, "Users Bulk");
+                Sheets sheets = workbookPart.Workbook.AppendChild(new Sheets());
 
-            //ROW Data identificators
+                // Crear una hoja
+                WorksheetPart worksheetPart = workbookPart.AddNewPart<WorksheetPart>();
+                worksheetPart.Worksheet = new Worksheet(new SheetData());
 
-            ws.SetCellValue("A1", "UserId Operator");
-            ws.SetCellValue("B1", "Payroll");
-            ws.SetCellValue("C1", "Name");
-            ws.SetCellValue("D1", "Distribution Id");
-            ws.SetCellValue("E1", "Supervisor_Id Superior");
+                Sheet sheet = new Sheet()
+                {
+                    Id = workbookPart.GetIdOfPart(worksheetPart),
+                    SheetId = 1,
+                    Name = "Users Bulk"
+                };
+                sheets.Append(sheet);
 
-            ws.SetCellValue("A2", "This field is used for the User_id registered in the Mobility supervisor system,");
-            ws.SetCellValue("B2", "This field is used for the Payroll");
-            ws.SetCellValue("C2", "This field is used for the UserName");
-            ws.SetCellValue("D2", "This field is used for the Distribution_id registered in the Mobility supervisor system");
-            ws.SetCellValue("E2", "This field is used for the User_id Superior registered in the Mobility supervisor system");
+                // Obtener el objeto SheetData
+                SheetData sheetData = worksheetPart.Worksheet.GetFirstChild<SheetData>();
 
-            ws.SetCellValue("A3", "in case it already exists, the user information will be updated.");
-            ws.SetCellValue("D3", "Can be left blank");
+                // Encabezados
+                Row headerRow = new Row();
+                headerRow.Append(
+                    new Cell() { CellValue = new CellValue("UserId Operator"), DataType = CellValues.String },
+                    new Cell() { CellValue = new CellValue("Payroll"), DataType = CellValues.String },
+                    new Cell() { CellValue = new CellValue("Name"), DataType = CellValues.String },
+                    new Cell() { CellValue = new CellValue("Distribution Id"), DataType = CellValues.String },
+                    new Cell() { CellValue = new CellValue("Supervisor_Id Superior"), DataType = CellValues.String }
+                );
+                sheetData.Append(headerRow);
 
-            ws.SaveAs(ms);
+                // Descripciones
+                Row descriptionRow = new Row();
+                descriptionRow.Append(
+                    new Cell() { CellValue = new CellValue("This field is used for the User_id registered in the Mobility supervisor system,"), DataType = CellValues.String },
+                    new Cell() { CellValue = new CellValue("This field is used for the Payroll"), DataType = CellValues.String },
+                    new Cell() { CellValue = new CellValue("This field is used for the UserName"), DataType = CellValues.String },
+                    new Cell() { CellValue = new CellValue("This field is used for the Distribution_id registered in the Mobility supervisor system"), DataType = CellValues.String },
+                    new Cell() { CellValue = new CellValue("This field is used for the User_id Superior registered in the Mobility supervisor system"), DataType = CellValues.String }
+                );
+                sheetData.Append(descriptionRow);
+
+                // Notas adicionales
+                Row notesRow = new Row();
+                notesRow.Append(
+                    new Cell() { CellValue = new CellValue("in case it already exists, the user information will be updated."), DataType = CellValues.String },
+                    null,
+                    null,
+                    new Cell() { CellValue = new CellValue("Can be left blank"), DataType = CellValues.String }
+                );
+                sheetData.Append(notesRow);
+
+                workbookPart.Workbook.Save();
+            }
 
             ms.Position = 0;
 
