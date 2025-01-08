@@ -751,9 +751,9 @@ namespace SupervisorMobility.API.Controllers.Exportation_Controllers
 
                     foreach (var item in _HCI.ILUs)
                     {
-                        sheet.Cells[$"D{currentRow}"].Value = (item.Start?.ToString("dd/MM/yyyy", CultureInfo.InvariantCulture) ?? "") + " - " + (item.End?.ToString("dd/MM/yyyy", CultureInfo.InvariantCulture) ?? "");
-                        sheet.Cells[$"F{currentRow}"].Value = item.Description;
-                        sheet.Cells[$"L{currentRow}"].Value = item.level.ToUpperInvariant();
+                        sheet.Cells[$"D{currentRow}"].Value = (item.AcquisitionDate?.ToString("dd/MM/yyyy", CultureInfo.InvariantCulture) ?? "") + " - " + (item.EndDate?.ToString("dd/MM/yyyy", CultureInfo.InvariantCulture) ?? "");
+                        sheet.Cells[$"F{currentRow}"].Value = item.Distribution?.Description;
+                        sheet.Cells[$"L{currentRow}"].Value = item.ILULevel?.ILULevelCode.ToUpperInvariant();
 
                         currentRow++;
                         if (currentRow > LastRow && item != _HCI.ILUs.Last())
