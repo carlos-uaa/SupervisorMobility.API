@@ -26,6 +26,7 @@ steps:
     New-Item -Path "$(Build.ArtifactStagingDirectory)/app/uploads/thenEvidence" -ItemType Directory -Force
     New-Item -Path "$(Build.ArtifactStagingDirectory)/app/uploads/previousEvidence" -ItemType Directory -Force
     New-Item -Path "$(Build.ArtifactStagingDirectory)/app/DataAccess/Templates" -ItemType Directory -Force
+    New-Item -Path "$(Build.ArtifactStagingDirectory)/app/DataAccess/Icons" -ItemType Directory -Force
   displayName: 'Create Directories'
 
 - task: ArchiveFiles@2
