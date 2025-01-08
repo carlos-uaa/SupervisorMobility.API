@@ -29,6 +29,13 @@ steps:
     New-Item -Path "$(Build.ArtifactStagingDirectory)/app/DataAccess/Icons" -ItemType Directory -Force
   displayName: 'Create Directories'
 
+- task: CopyFiles@2
+  inputs:
+    SourceFolder: '$(Build.SourcesDirectory)/DataAccess/Icons'
+    Contents: '**'
+    TargetFolder: '$(Build.ArtifactStagingDirectory)/app/DataAccess/Icons'
+  displayName: 'Copy Icons'
+
 - task: ArchiveFiles@2
   inputs:
     rootFolderOrFile: '$(Build.ArtifactStagingDirectory)/app'
