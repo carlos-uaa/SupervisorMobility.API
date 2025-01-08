@@ -939,21 +939,22 @@ namespace SupervisorMobility.API.Controllers.Exportation_Controllers
 
                 string prevSheetName = "";
 
+                ChangeHeight = currentWorkingIndex == "A" ? ChangeHeightDefaultTemplate : ChangeHeightExtraTemplates;
+                if (rowHeights[currentWorkingIndex] < ChangeHeight)
+                {
+                    var idx = rowIndexes[currentWorkingIndex].Item2;
+                    var height = rowHeights[currentWorkingIndex];
+
+                    sheetService.GenerateSequenceRows(sheet, ref height, ref idx, ChangeHeight, DefaultRowH);
+
+                    rowIndexes[currentWorkingIndex] = (rowIndexes[currentWorkingIndex].Item1, idx);
+                    rowHeights[currentWorkingIndex] = height;
+                }
+
                 foreach (var worksheet in package.Workbook.Worksheets.Where(ws => ws.Name.Contains("Sequence")))
                 {
                     string currentChar = worksheet.Name.Split(" ")[1];
-                    ChangeHeight = currentChar == "A" ? ChangeHeightDefaultTemplate : ChangeHeightExtraTemplates;
-                    if (rowHeights[currentChar] < ChangeHeight)
-                    {
-                        var idx = rowIndexes[currentChar].Item2;
-                        var height = rowHeights[currentChar];
-
-                        sheetService.GenerateSequenceRows(worksheet, ref height, ref idx, ChangeHeight, DefaultRowH);
-
-                        rowIndexes[currentChar] = (rowIndexes[currentChar].Item1, idx);
-                        rowHeights[currentChar] = height;
-                    }
-
+                    
                     rowIndexes[currentChar] = (rowIndexes[currentChar].Item1, rowIndexes[currentChar].Item2 + 1);
                     rowHeights[currentChar] += templateExtrahight;
 
@@ -1567,23 +1568,24 @@ namespace SupervisorMobility.API.Controllers.Exportation_Controllers
 
                 string prevSheetName = "";
 
+                bool isFirst = sheet == package.Workbook.Worksheets.First();
+                ChangeHeight = isFirst ? ChangeHeightDefaultTemplate : ChangeHeightExtraTemplates;
+
+                if (rowHeights[currentWorkingIndex] < ChangeHeight)
+                {
+                    var idx = rowIndexes[currentWorkingIndex].Item2;
+                    var height = rowHeights[currentWorkingIndex];
+
+                    sheetService.GenerateDistributionsRows(sheet, ref height, ref idx, ChangeHeight, DefaultRowH, isFirst);
+
+                    rowIndexes[currentWorkingIndex] = (rowIndexes[currentWorkingIndex].Item1, idx + 1);
+                    rowHeights[currentWorkingIndex] = height;
+                }
+
                 foreach (var worksheet in package.Workbook.Worksheets.Where(ws => ws.Name.Contains("DISTRIBUTION")))
                 {
                     string currentChar = worksheet.Name.Split(" ", 2)[1];
-                    bool isFirst = worksheet == package.Workbook.Worksheets.First();
-                    ChangeHeight = isFirst ? ChangeHeightDefaultTemplate : ChangeHeightExtraTemplates;
-
-                    if (rowHeights[currentChar] < ChangeHeight)
-                    {
-                        var idx = rowIndexes[currentChar].Item2;
-                        var height = rowHeights[currentChar];
-
-                        sheetService.GenerateDistributionsRows(worksheet, ref height, ref idx, ChangeHeight, DefaultRowH, isFirst);
-
-                        rowIndexes[currentChar] = (rowIndexes[currentChar].Item1, idx + 1);
-                        rowHeights[currentChar] = height;
-                    }
-
+                    
                     rowIndexes[currentChar] = (rowIndexes[currentChar].Item1, rowIndexes[currentChar].Item2 + 2);
 
                     double[] times = Array.ConvertAll(SosDistribution.AdditionalTime.Split("§"), s => string.IsNullOrEmpty(s) ? 0.0 : double.Parse(s));
