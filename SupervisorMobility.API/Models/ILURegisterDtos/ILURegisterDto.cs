@@ -10,6 +10,7 @@ namespace SupervisorMobility.API.Models.ILURegisterDtos
         public int ILURegisterid { get; set; }
 
         public DateTime? AcquisitionDate { get; set; } = DateTime.Now;
+        public DateTime? EndDate { get; set; }
 
         //public int? OperationId { get; set; }
         //public OperationWithoutNavigationPropertiesDto? Operation { get; set; }

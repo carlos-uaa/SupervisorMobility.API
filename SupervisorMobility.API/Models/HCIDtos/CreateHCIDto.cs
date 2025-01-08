@@ -2,6 +2,7 @@
 using SupervisorMobility.API.Models.CommentaryDtos;
 using SupervisorMobility.API.DataAccess.Entities;
 using SupervisorMobility.API.Models.HCICategoryDtos;
+using SupervisorMobility.API.DataAccess.Entities.ILU;
 
 namespace SupervisorMobility.API.Models.HCIDtos
 {
@@ -17,7 +18,7 @@ namespace SupervisorMobility.API.Models.HCIDtos
         public ICollection<HCICategoryDto>? Categories { get; set; }
           = new List<HCICategoryDto>();
 
-        public ICollection<HCIILU>? ILUs { get; set; } = new List<HCIILU>();
+        public ICollection<ILURegister>? ILUs { get; set; } = new List<ILURegister>();
         public ICollection<UserCareerPath>? CareerPaths { get; set; } = new List<UserCareerPath>();
         public ICollection<CreateCommentaryDto>? Commentaries { get; set; }
           = new List<CreateCommentaryDto>();
