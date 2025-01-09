@@ -295,7 +295,7 @@ namespace SupervisorMobility.API.Controllers.Exportation_Controllers
         }
 
         [HttpGet("Excel/PATMonthly/{PATId}")]
-        public async Task<IActionResult> PATMonthlyExcelExport(int PATId)
+        public async Task<IActionResult> PATMonthlyExcelExport(int PATId, int AplicationMonth)
         {
             var PAT = await _SMProcessRepository.GetPat(PATId);
 
@@ -400,7 +400,7 @@ namespace SupervisorMobility.API.Controllers.Exportation_Controllers
                 sheet.Cells["B4"].Value = InfoSup?.Department;
                 sheet.Cells["H4"].Value = InfoSup?.Area?.Description;
                 sheet.Cells["P4"].Value = InfoSup?.Group?.Description;
-                sheet.Cells["X4"].Value = PAT.AplicationYear;
+                sheet.Cells["X4"].Value = months[AplicationMonth];
                 sheet.Cells["AI4"].Value = ResponableSVs;
                 sheet.Cells["AU4"].Value = ResponableSSVs;
                 sheet.Cells["CA4"].Value = PAT.CreationDate;
