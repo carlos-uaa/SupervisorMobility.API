@@ -4,7 +4,6 @@ using SupervisorMobility.API.Business;
 using SupervisorMobility.API.DataAccess.Entities;
 using SupervisorMobility.API.Models.Users;
 using SupervisorMobility.API.Models.ReturnResults;
-using ClosedXML.Excel;
 using DocumentFormat.OpenXml.Spreadsheet;
 using System.Drawing.Text;
 using Microsoft.EntityFrameworkCore.ChangeTracking;

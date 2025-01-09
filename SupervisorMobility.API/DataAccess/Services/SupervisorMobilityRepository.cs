@@ -1,5 +1,6 @@
 ﻿
 using AutoMapper;
+using DocumentFormat.OpenXml.Bibliography;
 using DocumentFormat.OpenXml.InkML;
 using DocumentFormat.OpenXml.Spreadsheet;
 using DocumentFormat.OpenXml.Wordprocessing;
@@ -11,9 +12,11 @@ using SupervisorMobility.API.DataAccess.Entities;
 using SupervisorMobility.API.DataAccess.Entities.ILU;
 using SupervisorMobility.API.DataAccess.Entities.LUP;
 using SupervisorMobility.API.DataAccess.Entities.Paths;
+using SupervisorMobility.API.DataAccess.Entities.SOS;
 using SupervisorMobility.API.DataAccess.Entities.SOS_Review;
 using SupervisorMobility.API.DataAccess.Services.OrderingServices;
 using SupervisorMobility.API.Entities;
+using SupervisorMobility.API.Models.ADUser;
 using SupervisorMobility.API.Models.HCIDtos;
 using SupervisorMobility.API.Models.ILURegisterDtos;
 using SupervisorMobility.API.Models.JobObservationDtos;
@@ -21,6 +24,7 @@ using SupervisorMobility.API.Models.JobPaginationDtos;
 using SupervisorMobility.API.Models.KaizenDtos;
 using SupervisorMobility.API.Models.KaizenTransactionDtos;
 using SupervisorMobility.API.Models.PATDtos;
+using SupervisorMobility.API.Models.SOS.SOSHubDtos.AnalysisDtos;
 using SupervisorMobility.API.Models.SOSReviewDtos;
 using SupervisorMobility.API.Models.Users;
 using System.Diagnostics;
@@ -1033,6 +1037,13 @@ namespace SupervisorMobility.API.Services
             var entityUser = await _context.Users.FirstOrDefaultAsync(u => u.UserId == userId);
 
             _mapper.Map(user, entityUser);
+
+            //entityUser.Subordinates.Clear();
+            //foreach(var usr in user.Subordinates)
+            //{
+            //    entityUser.Subordinates.Add(await GetUserAsync(usr.UserId));
+            //}
+
 
             _context.SaveChanges();
         }
@@ -2110,21 +2121,29 @@ namespace SupervisorMobility.API.Services
             return await _context.PATs
                    .Include(p => p.Plant)
                    .Include(a => a.Area)
-                   .Include(sv => sv.Supervisor).ThenInclude(s => s.ILURegisers)
-                   .Include(ssv => ssv.SSVresponsible)
+                   .Include(sv => sv.Supervisors).ThenInclude(s => s.ILURegisers)
+                   .Include(sv => sv.Supervisors).ThenInclude(sssv => sssv.Superior)
                    .Include(pu => pu.PatUserRoles)
                    .Include(pd => pd.PatDistributionComments)
+                   .Include(pd => pd.PatSubordinates)
                    .Where(p => p.PATid == patId).FirstOrDefaultAsync();
         }
 
-        public async Task<PAT?> GetPatForYearOfSV(int sv, int Year)
-        {
-            return await _context.PATs.Where(p => p.SupervisorId == sv && p.AplicationYear == Year).FirstOrDefaultAsync();
-        }
+        //public async Task<PAT?> GetPatForYearOfSV(int sv, int Year)
+        //{
+        //    return await _context.PATs.Where(p => p.SupervisorId == sv && p.AplicationYear == Year).FirstOrDefaultAsync();
+        //}
         public async Task<int> UpdatePAT(PATForUpdateDto patForUpdate, PAT PatEntity)
         {
 
             _mapper.Map(patForUpdate, PatEntity);
+
+            PatEntity.Supervisors.Clear();
+           foreach (var usr in patForUpdate.Supervisors)
+            {
+                PatEntity.Supervisors.Add(await GetUserAsync(usr.UserId));
+            }
+
 
             return await _context.SaveChangesAsync();
         }
@@ -2133,8 +2152,9 @@ namespace SupervisorMobility.API.Services
             return await _context.PATs
                    .Include(p => p.Plant)
                    .Include(a => a.Area)
-                   .Include(sv => sv.Supervisor)
-                   .Include(ssv => ssv.SSVresponsible).Where(u => u.IsActive == true)
+                   .Include(sv => sv.Supervisors)
+                   .ThenInclude(ss => ss.Superior)
+                   .Where(u => u.IsActive == true)
                     .OrderBy(c => c.PATid).ToListAsync();
         }
         public async Task<IEnumerable<PAT>> GetAllPATsOfSv(int svId)
@@ -2142,9 +2162,9 @@ namespace SupervisorMobility.API.Services
             return await _context.PATs
                     .Include(p => p.Plant)
                     .Include(a => a.Area)
-                    .Include(sv => sv.Supervisor)
-                    .Include(ssv => ssv.SSVresponsible)
-                    .Where(p => p.SupervisorId == svId && p.IsActive == true)
+                    .Include(sv => sv.Supervisors)
+                   .ThenInclude(ss => ss.Superior)
+                    .Where(p => p.Supervisors.Any(s => s.UserId == svId) && p.IsActive == true)
                     .OrderBy(c => c.PATid).ToListAsync();
         }
         public async Task<IEnumerable<PAT>> GetAllPATsofSSV(int ssvID)
@@ -2152,9 +2172,9 @@ namespace SupervisorMobility.API.Services
             return await _context.PATs
                            .Include(p => p.Plant)
                    .Include(a => a.Area)
-                   .Include(sv => sv.Supervisor)
-                   .Include(ssv => ssv.SSVresponsible)
-                           .Where(p => p.SSVresponsibleID == ssvID && p.IsActive == true)
+                   .Include(sv => sv.Supervisors)
+                   .ThenInclude(ss => ss.Superior)
+                           .Where(p => p.Supervisors.Any(s => s.SuperiorId == ssvID) && p.IsActive == true)
                             .OrderBy(c => c.PATid).ToListAsync();
         }
         #endregion
@@ -2773,7 +2793,7 @@ namespace SupervisorMobility.API.Services
 
             if (includeNavigation)
             {
-                query = query.Include(p => p.CareerPaths).Include(p => p.Categories).Include(p => p.Commentaries).Include(p => p.ILUs).Include(p => p.Transactions);
+                query = query.Include(p => p.CareerPaths).Include(p => p.Categories).Include(p => p.Commentaries).Include(p => p.Transactions);
             }
 
             if (includePeople)
@@ -2783,16 +2803,34 @@ namespace SupervisorMobility.API.Services
 
                 query = query
                  .Include(t => t.User).ThenInclude(u => u.Area);
+
+                query = query
+                 .Include(t => t.User).ThenInclude(u => u.Department);
+
+                query = query.Include(h => h.User)
+                             .ThenInclude(u => u.ILURegisers)
+                             .ThenInclude(i => i.Distribution)
+                             .Include(h => h.User)
+                             .ThenInclude(u => u.ILURegisers)
+                             .ThenInclude(i => i.ILULevel);
+
+
+
             }
 
-            //if (includeTransactions)
-            //{
-            //    query = query
-            //     .Include(t => t.Transactions);
-            //}
+            if (includeTransactions)
+            {
+                query = query.Include(p => p.Categories).ThenInclude(p=>p.ChosenCategory);
+            }
+
 
             return await query.FirstOrDefaultAsync();
 
+        }
+
+        public async Task<bool> SearchExistHciForUserId(int userId)
+        {
+            return await _context.HCIs.AnyAsync(k => k.IsActive == true && k.UserId == userId);
         }
         public async Task<IEnumerable<HCI>> GetAllHCIs(bool includeNavigation = false, bool includePeople = false, bool includeCommentaries = false, bool includeTransactions = false)
         {
@@ -2840,9 +2878,25 @@ namespace SupervisorMobility.API.Services
         public async Task<int> UpdateHCI(UpdateHCIDto HCIForUpdate, HCI HCIEntity)
         {
 
-            _mapper.Map(HCIForUpdate, HCIEntity);
+            var localEntry = _context.HCIs.Local.FirstOrDefault(entry => entry.HCIId == HCIForUpdate.HCIId);
+            if (localEntry != null)
+            {
+                _context.Entry(localEntry).CurrentValues.SetValues(HCIForUpdate);
 
-            return _context.SaveChanges();
+                UpdateILURegisters(localEntry.ILUs, HCIForUpdate.ILUs);
+            }
+            else
+            {
+                if (_context.Entry(HCIEntity).State == EntityState.Detached)
+                {
+                    _context.HCIs.Attach(HCIEntity);
+                }
+
+                _mapper.Map(HCIForUpdate, HCIEntity);
+                _context.HCIs.Update(HCIEntity);
+            }
+
+            return await _context.SaveChangesAsync();
         }
 
         public async Task<int> RemoveHCI(HCI HCIForAdd)
@@ -2862,6 +2916,31 @@ namespace SupervisorMobility.API.Services
         {
             return _context.HCICategories.OrderBy(p => p.ChosenCategoryDepartmentId).ToList();
         }
+
+        private void UpdateILURegisters(ICollection<ILURegister> existingILURegisters, ICollection<ILURegisterForUpdateDto> updatedILURegisters)
+        {
+            foreach (var updatedILURegister in updatedILURegisters)
+            {
+                var existingILURegister = existingILURegisters.FirstOrDefault(a => a.ILURegisterid == updatedILURegister.ILURegisterid);
+
+                if (existingILURegister != null)
+                {
+                    _context.Entry(existingILURegister).CurrentValues.SetValues(updatedILURegister);
+                }
+                else
+                {
+                    var newILURegister = _mapper.Map<ILURegister>(updatedILURegister);
+                    existingILURegisters.Add(newILURegister);
+                }
+            }
+
+            var iluRegistersToRemove = existingILURegisters.Where(a => !updatedILURegisters.Any(ua => ua.ILURegisterid == a.ILURegisterid)).ToList();
+            foreach (var iluToRemove in iluRegistersToRemove)
+            {
+                existingILURegisters.Remove(iluToRemove);
+            }
+        }
+
         #endregion
 
         #region HCI ILU

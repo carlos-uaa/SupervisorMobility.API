@@ -2,6 +2,7 @@
 using SupervisorMobility.API.DataAccess.Entities.SOS;
 using SupervisorMobility.API.Models.ILURegisterDtos;
 using SupervisorMobility.API.Models.PATDtos.PatDistributionCommentDtos;
+using SupervisorMobility.API.Models.PATDtos.PatSubordinateDtos;
 using SupervisorMobility.API.Models.PATDtos.PatUserRoleDtos;
 using SupervisorMobility.API.Models.PlantDtos;
 using SupervisorMobility.API.Models.SOS.SOSHubDtos;
@@ -14,16 +15,16 @@ namespace SupervisorMobility.API.Models.PATDtos
 
         public int PATid { get; set; }
         public int Status { get; set; }
-        public int SupervisorId { get; set; }
-        public UsersWithoutNavigationWithoutPeopleDetails? Supervisor { get; set; }
-        public int? SSVresponsibleID { get; set; }
-        public UsersWithoutNavigationWithoutPeopleDetails? SSVresponsible { get; set; }
+
+        public ICollection<UsersWithPeopleWithoutNavigationDetails>? Supervisors { get; set; }
+     
 
         public int PlantId { get; set; }
         public PlantDto? Plant { get; set; }
         public int AreaId { get; set; }
         public AreaDtos.AreaWithoutNavigationPropertiesDto? Area { get; set; }
         public ICollection<PatUserRoleDto>? PatUserRoles { get; set; }
+        public ICollection<PatSubordinateDto>? PatSubordinates { get; set; }
         public ICollection<PatDistributionCommentDto>? PatDistributionComments { get; set; }
         public int? KnowledgePercentage { get; set; }
 

@@ -1,5 +1,8 @@
-﻿using SupervisorMobility.API.Models.PATDtos.PatDistributionCommentDtos;
+﻿using SupervisorMobility.API.DataAccess.Entities;
+using SupervisorMobility.API.Models.PATDtos.PatDistributionCommentDtos;
+using SupervisorMobility.API.Models.PATDtos.PatSubordinateDtos;
 using SupervisorMobility.API.Models.PATDtos.PatUserRoleDtos;
+using SupervisorMobility.API.Models.Users;
 
 namespace SupervisorMobility.API.Models.PATDtos
 {
@@ -7,15 +10,11 @@ namespace SupervisorMobility.API.Models.PATDtos
     {
         public int PATid { get; set; }
 
-        public int SupervisorId { get; set; }
         public int Status { get; set; }
-        public int? SSVresponsibleID { get; set; }
-
-
+ 
         public int PlantId { get; set; }
         public int AreaId { get; set; }
 
-        //public int DistributionId { get; set; }
 
 
         public DateTime? AplicationDate { get; set; }
@@ -51,7 +50,10 @@ namespace SupervisorMobility.API.Models.PATDtos
         public int? SOSHubId { get; set; }
         public bool IsActive { get; set; }
 
+        public ICollection<UsersWithoutNavigationWithoutPeopleDetails>? Supervisors { get; set; }
+
         public ICollection<PatUserRoleForCreateDto>? PatUserRoles { get; set; }
+        public ICollection<PatSubordinateForCreateDto>? PatSubordinates { get; set; }
         public ICollection<PatDistributionCommentForCreateDto>? PatDistributionComments { get; set; }
 
     }

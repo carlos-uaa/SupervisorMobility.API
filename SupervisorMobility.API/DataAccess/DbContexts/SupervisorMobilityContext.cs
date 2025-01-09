@@ -54,6 +54,7 @@ namespace SupervisorMobility.API.Context
         public DbSet<ILURegister> ILURegisters { get; set; }
         public DbSet<PAT> PATs { get; set; }
         public DbSet<PatUserRole> PatUserRoles { get; set; }
+        public DbSet<PatSubordinate> PatSubordinates { get; set; }
         public DbSet<PatDistributionComment>? PatDistributionComments { get; set; }
         public DbSet<UserCareerPath> UserCareerPaths { get; set; }
         public DbSet<SOSReviewProgram> SOSReviews { get; set; }
@@ -274,8 +275,6 @@ namespace SupervisorMobility.API.Context
               .Property(p => p.IsActive)
               .HasDefaultValue(true);
 
-       
-
             modelBuilder.Entity<PAT>()
                .HasOne(p => p.Area)
                .WithMany()
@@ -289,17 +288,19 @@ namespace SupervisorMobility.API.Context
               .OnDelete(DeleteBehavior.NoAction);
 
             modelBuilder.Entity<PAT>()
-                .HasOne(p => p.SSVresponsible)
-                .WithMany()
-                .HasForeignKey(p => p.SSVresponsibleID)
-                .OnDelete(DeleteBehavior.NoAction);
-
-            modelBuilder.Entity<PAT>()
-                .HasOne(p => p.Supervisor)
-                .WithMany()
-                .HasForeignKey(p => p.SupervisorId)
-                .OnDelete(DeleteBehavior.NoAction);
-
+                .HasMany(p => p.Supervisors)      // Relación muchos
+                .WithMany()                       // Relación con User sin navegación inversa
+                .UsingEntity<Dictionary<string, object>>(
+                    "PatSupervisor",              // Nombre de la tabla intermedia
+                    j => j.HasOne<User>()         // Configura la relación con User
+                            .WithMany()
+                            .HasForeignKey("SupervisorId")
+                            .OnDelete(DeleteBehavior.NoAction),
+                    j => j.HasOne<PAT>()          // Configura la relación con PAT
+                            .WithMany()
+                            .HasForeignKey("PATId")
+                            .OnDelete(DeleteBehavior.NoAction)
+                );
 
             modelBuilder.Entity<ILULevel>()
            .Property(e => e.ILULevelId)
@@ -342,6 +343,12 @@ namespace SupervisorMobility.API.Context
             modelBuilder.Entity<HCI>()
             .Property(p => p.IsActive)
             .HasDefaultValue(true);
+
+            modelBuilder.Entity<HCI>()
+                .HasOne(u => u.User)
+                .WithOne(h => h.Hci)
+                .HasForeignKey<User>(u => u.HciId)
+                .OnDelete(DeleteBehavior.NoAction);
 
             modelBuilder.Entity<Commentary>()
             .Property(p => p.IsActive)

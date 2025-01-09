@@ -13,6 +13,8 @@ using System.Text.Json.Nodes;
 using SupervisorMobility.API.DataAccess.Entities.ILU;
 using OfficeOpenXml.FormulaParsing.Excel.Functions;
 using Newtonsoft.Json;
+using DocumentFormat.OpenXml.Drawing.Charts;
+using System.Globalization;
 
 namespace SupervisorMobility.API.Controllers.Exportation_Controllers
 {
@@ -21,14 +23,16 @@ namespace SupervisorMobility.API.Controllers.Exportation_Controllers
     public class OtherExportationController : ControllerBase
     {
         private readonly ISupervisorMobilityRepository _SMProcessRepository;
+        private readonly ISOS_ProcessRepository _SOSProcessRepository;
         private readonly IWebHostEnvironment _env;
         private readonly ExportationStylesService stylesService;
         private readonly ExportationImgService imgService;
         private readonly ExportationSheetService sheetService;
 
-        public OtherExportationController(ISupervisorMobilityRepository repository, IWebHostEnvironment env)
+        public OtherExportationController(ISupervisorMobilityRepository repository, IWebHostEnvironment env, ISOS_ProcessRepository SOSrepository)
         {
             _SMProcessRepository = repository;
+            _SOSProcessRepository = SOSrepository;
             _env = env ?? throw new ArgumentNullException(nameof(env));
             stylesService = new ExportationStylesService();
             imgService = new ExportationImgService();
@@ -48,9 +52,15 @@ namespace SupervisorMobility.API.Controllers.Exportation_Controllers
                 { OperatorRole.NI, "NI" }
             };
 
-            var usersOfArea = (List<User>)await _SMProcessRepository.GetAllSubordinatesAsync(PAT.Supervisor.UserId);
-            usersOfArea.Insert(0, PAT.Supervisor);
-            usersOfArea = usersOfArea.OrderBy(p=>p.Payroll).ToList();
+            List<User> usersOfArea = new();
+            usersOfArea.AddRange(PAT.Supervisors!);
+            foreach (var item in PAT.Supervisors!)
+            {
+                usersOfArea.AddRange((List<User>)await _SMProcessRepository.GetAllSubordinatesAsync(item.UserId));
+            }
+
+            usersOfArea = usersOfArea.GroupBy(user => user.UserId).Select(group => group.First()).ToList();
+            usersOfArea = usersOfArea.OrderBy(p => p.Payroll).ToList();
 
             var uniqueDistributions = usersOfArea.Where(user => user.ILURegisers != null)
                 .SelectMany(user => user.ILURegisers)
@@ -61,28 +71,10 @@ namespace SupervisorMobility.API.Controllers.Exportation_Controllers
 
             List<Distribution> distributions = (List<Distribution>)await _SMProcessRepository.GetDistributionsForAreaAsync(PAT.AreaId.Value);
 
-            //foreach (var user in usersOfArea) 
-            //{
-            //    foreach (var reg in user.ILURegisers.Where(ilu=>ilu.AcquisitionDate.HasValue && ilu.AcquisitionDate.Value.Year == PAT.AplicationYear))
-            //    {
-            //        if (reg.DistributionId.HasValue)
-            //        {
-            //            if(!distributions.Any(p=>p.DistributionId == reg.DistributionId))
-            //            {
-            //                var dist = await _SMProcessRepository.GetDistributionOnlyIdAsync(reg.DistributionId.Value);
-            //                distributions.Add(dist);
-            //            }
-            //        }
-            //    }
-            //}
-
+            
             var orderedPatDistributionComments = distributions
                 .Select(id => PAT.PatDistributionComments.FirstOrDefault(pdc => pdc.DistributionId == id.DistributionId))
                 .Where(pdc => pdc != null).ToList();
-            //foreach (var dist in uniqueDistributions) 
-            //{
-            //    distributions.Add();
-            //}
 
             var iluLevels = await _SMProcessRepository.GetAllILULevel();
             var levels = new Dictionary<string, (string, int)>();
@@ -97,7 +89,8 @@ namespace SupervisorMobility.API.Controllers.Exportation_Controllers
                     value = iluLevel.ILULevelCode[0].ToString();
                 }
 
-                category = iluLevel.ILULevelCode.Substring(1) switch { 
+                category = iluLevel.ILULevelCode.Substring(1) switch
+                {
                     "TraineeLeader" => 2,
                     "Trainee" => 1,
                     "Leader" => 3,
@@ -120,12 +113,16 @@ namespace SupervisorMobility.API.Controllers.Exportation_Controllers
 
                 //#region information table
 
-                sheet.Cells["B4"].Value = PAT.Supervisor?.Department;
-                sheet.Cells["H4"].Value = PAT.Supervisor?.Area?.Description;
-                sheet.Cells["P4"].Value = PAT.Supervisor?.Group?.Description;
+                var InfoSup = PAT.Supervisors.FirstOrDefault();
+                string ResponableSVs = string.Join(" / ", PAT.Supervisors.Select(user=>user.Name));
+                string ResponableSSVs = string.Join(" / ", PAT.Supervisors.Select(user => user.Superior?.Name).Where(name => name != null).Distinct());
+
+                sheet.Cells["B4"].Value = InfoSup?.Department;
+                sheet.Cells["H4"].Value = InfoSup?.Area?.Description;
+                sheet.Cells["P4"].Value = InfoSup?.Group?.Description;
                 sheet.Cells["X4"].Value = PAT.AplicationYear;
-                sheet.Cells["AI4"].Value = PAT.Supervisor?.Name;
-                sheet.Cells["AU4"].Value = PAT.SSVresponsible?.Name;
+                sheet.Cells["AI4"].Value = ResponableSVs;
+                sheet.Cells["AU4"].Value = ResponableSSVs;
                 sheet.Cells["CA4"].Value = PAT.CreationDate;
                 sheet.Cells["G7"].Value = PAT.KnowledgePercentage;
                 sheet.Cells["G10"].Value = PAT.SaveLeader;
@@ -141,7 +138,7 @@ namespace SupervisorMobility.API.Controllers.Exportation_Controllers
                     int colIndex = usersOfArea.IndexOf(uo);
                     foreach (var reg in uo.ILURegisers)
                     {
-                        int rowIndex = distributions.FindIndex(p=>p.DistributionId == reg.DistributionId);
+                        int rowIndex = distributions.FindIndex(p => p.DistributionId == reg.DistributionId);
                         matrix[rowIndex, colIndex] = reg;
                     }
                 }
@@ -158,7 +155,7 @@ namespace SupervisorMobility.API.Controllers.Exportation_Controllers
                 {
                     sheet.Cells[$"B{Row}"].Value = i + 1;
                     sheet.Cells[$"C{Row}"].Value = distributions[i]?.Description;
-                    if (!orderedPatDistributionComments[i].Comment.IsNullOrEmpty())
+                    if (orderedPatDistributionComments.Any() && !string.IsNullOrEmpty(orderedPatDistributionComments[i].Comment))
                         sheet.Cells[$"CD{Row}"].Value = orderedPatDistributionComments[i]?.Comment;
 
                     for (int j = 0; j < usersOfArea.Count; j++)
@@ -168,9 +165,12 @@ namespace SupervisorMobility.API.Controllers.Exportation_Controllers
                             sheet.Cells[$"{Col}5"].Value = j + 1;
                             sheet.Cells[$"{Col}6"].Value = usersOfArea[j].Name;
                             sheet.Cells[$"{Col}10"].Value = usersOfArea[j].Payroll;
-                            sheet.Cells[$"{Col}42"].Value = operatorRoles?[j].Comment;
-                            if (operatorRoles != null && operatorRoles[j].Role != null)
-                                sheet.Cells[$"{Col}50"].Value = roles[operatorRoles[j].Role.Value];
+                            if (operatorRoles.Any())
+                            {
+                                sheet.Cells[$"{Col}42"].Value = operatorRoles?[j].Comment;
+                                if (operatorRoles[j].Role != null)
+                                    sheet.Cells[$"{Col}50"].Value = roles[operatorRoles[j].Role.Value];
+                            }
                         }
 
                         if (matrix[i, j] == null) { Col = sheetService.GetNextCombination(Col); Col = sheetService.GetNextCombination(Col); continue; }
@@ -190,10 +190,10 @@ namespace SupervisorMobility.API.Controllers.Exportation_Controllers
                             var picture = sheet.Drawings.AddPicture($"{i}{j}Picture", stream);
 
 
-                            picture.SetSize(colWidth-6, rowHeight - 6);
+                            picture.SetSize(colWidth - 6, rowHeight - 6);
 
-                            int YOffset = (rowHeight - (int)(picture.Size.Height/9525)) / 2;
-                            int XOffset = (colWidth - (int)(picture.Size.Width/9525)) / 2;
+                            int YOffset = (rowHeight - (int)(picture.Size.Height / 9525)) / 2;
+                            int XOffset = (colWidth - (int)(picture.Size.Width / 9525)) / 2;
 
                             picture.SetPosition(Row - 1, YOffset, column - 1, XOffset);
                         }
@@ -212,7 +212,7 @@ namespace SupervisorMobility.API.Controllers.Exportation_Controllers
 
                             sheet.Cells[$"B{Row}"].Value = i + 1;
                             sheet.Cells[$"C{Row}"].Value = distributions[i]?.Description;
-                            if (!orderedPatDistributionComments[i].Comment.IsNullOrEmpty())
+                            if (!string.IsNullOrEmpty(orderedPatDistributionComments[i].Comment))
                                 sheet.Cells[$"CD{Row}"].Value = orderedPatDistributionComments[i]?.Comment;
 
                             pagePplIndex++;
@@ -245,7 +245,7 @@ namespace SupervisorMobility.API.Controllers.Exportation_Controllers
 
                 }
 
-                if (!PAT.HistoricalAbility.IsNullOrEmpty())
+                if (!string.IsNullOrEmpty(PAT.HistoricalAbility))
                 {
                     string hCol = "CD";
                     int hRow = 42;
@@ -254,15 +254,15 @@ namespace SupervisorMobility.API.Controllers.Exportation_Controllers
 
                     foreach (var monthData in data)
                     {
-                        foreach (var month in monthData) 
+                        foreach (var month in monthData)
                         {
                             double or_o = month.First.OR_O;
                             double or_p = month.First.OR_P;
 
-                            if(or_o != 0)
+                            if (or_o != 0)
                                 sheet.Cells[$"{hCol}{hRow}"].Value = or_o;
-                            if(or_p != 0)
-                                sheet.Cells[$"{hCol}{hRow+1}"].Value = or_p;
+                            if (or_p != 0)
+                                sheet.Cells[$"{hCol}{hRow + 1}"].Value = or_p;
 
                             hCol = sheetService.GetNextCombination(hCol);
 
@@ -282,9 +282,9 @@ namespace SupervisorMobility.API.Controllers.Exportation_Controllers
                     item.Cells["CH4"].Value = $"{index + 1} de {totalPages}";
                 }
 
-                    //sheetService.SetPrintingOptions(package.Workbook);
+                //sheetService.SetPrintingOptions(package.Workbook);
 
-                    package.SaveAs(ms);
+                package.SaveAs(ms);
             }
 
             ms.Position = 0;
@@ -295,7 +295,7 @@ namespace SupervisorMobility.API.Controllers.Exportation_Controllers
         }
 
         [HttpGet("Excel/PATMonthly/{PATId}")]
-        public async Task<IActionResult> PATMonthlyExcelExport(int PATId)
+        public async Task<IActionResult> PATMonthlyExcelExport(int PATId, int AplicationMonth)
         {
             var PAT = await _SMProcessRepository.GetPat(PATId);
 
@@ -314,8 +314,14 @@ namespace SupervisorMobility.API.Controllers.Exportation_Controllers
                 { 9, "Septiembre" }, { 10, "Octubre" }, { 11, "Noviembre" }, { 12, "Diciembre" }
             };
 
-            var usersOfArea = (List<User>)await _SMProcessRepository.GetAllSubordinatesAsync(PAT.Supervisor.UserId);
-            usersOfArea.Insert(0, PAT.Supervisor);
+            List<User> usersOfArea = new();
+            usersOfArea.AddRange(PAT.Supervisors!);
+            foreach (var item in PAT.Supervisors!)
+            {
+                usersOfArea.AddRange((List<User>)await _SMProcessRepository.GetAllSubordinatesAsync(item.UserId));
+            }
+
+            usersOfArea = usersOfArea.GroupBy(user => user.UserId).Select(group => group.First()).ToList();
             usersOfArea = usersOfArea.OrderBy(p => p.Payroll).ToList();
 
             var uniqueDistributions = usersOfArea.Where(user => user.ILURegisers != null)
@@ -325,7 +331,7 @@ namespace SupervisorMobility.API.Controllers.Exportation_Controllers
                 .Distinct().ToList();
 
 
-            List<Distribution> distributions = (List<Distribution>) await _SMProcessRepository.GetDistributionsForAreaAsync(PAT.AreaId.Value);
+            List<Distribution> distributions = (List<Distribution>)await _SMProcessRepository.GetDistributionsForAreaAsync(PAT.AreaId.Value);
 
             //foreach (var user in usersOfArea)
             //{
@@ -387,12 +393,16 @@ namespace SupervisorMobility.API.Controllers.Exportation_Controllers
 
                 //#region information table
 
-                sheet.Cells["B4"].Value = PAT.Supervisor?.Department;
-                sheet.Cells["H4"].Value = PAT.Supervisor?.Area?.Description;
-                sheet.Cells["P4"].Value = PAT.Supervisor?.Group?.Description;
-                sheet.Cells["X4"].Value = months[PAT.AplicationDate.Value.Month];
-                sheet.Cells["AI4"].Value = PAT.Supervisor?.Name;
-                sheet.Cells["AU4"].Value = PAT.SSVresponsible?.Name;
+                var InfoSup = PAT.Supervisors.FirstOrDefault();
+                string ResponableSVs = string.Join(" / ", PAT.Supervisors.Select(user => user.Name));
+                string ResponableSSVs = string.Join(" / ", PAT.Supervisors.Select(user => user.Superior?.Name).Where(name=> name!=null).Distinct());
+
+                sheet.Cells["B4"].Value = InfoSup?.Department;
+                sheet.Cells["H4"].Value = InfoSup?.Area?.Description;
+                sheet.Cells["P4"].Value = InfoSup?.Group?.Description;
+                sheet.Cells["X4"].Value = months[AplicationMonth];
+                sheet.Cells["AI4"].Value = ResponableSVs;
+                sheet.Cells["AU4"].Value = ResponableSSVs;
                 sheet.Cells["CA4"].Value = PAT.CreationDate;
                 sheet.Cells["G7"].Value = PAT.KnowledgePercentage;
                 sheet.Cells["G10"].Value = PAT.SaveLeader;
@@ -425,7 +435,7 @@ namespace SupervisorMobility.API.Controllers.Exportation_Controllers
                 {
                     sheet.Cells[$"B{Row}"].Value = i + 1;
                     sheet.Cells[$"C{Row}"].Value = distributions[i]?.Description;
-                    if (!orderedPatDistributionComments[i].Comment.IsNullOrEmpty())
+                    if (orderedPatDistributionComments.Any() && !string.IsNullOrEmpty(orderedPatDistributionComments[i].Comment))
                         sheet.Cells[$"CD{Row}"].Value = orderedPatDistributionComments[i]?.Comment;
 
                     for (int j = 0; j < usersOfArea.Count; j++)
@@ -436,8 +446,12 @@ namespace SupervisorMobility.API.Controllers.Exportation_Controllers
                             sheet.Cells[$"{Col}6"].Value = usersOfArea[j].Name;
                             sheet.Cells[$"{Col}10"].Value = usersOfArea[j].Payroll;
                             sheet.Cells[$"{Col}42"].Value = operatorRoles?[j].Comment;
-                            if (operatorRoles != null && operatorRoles[j].Role != null)
-                                sheet.Cells[$"{Col}50"].Value = roles[operatorRoles[j].Role.Value];
+                            if (operatorRoles.Any())
+                            {
+                                sheet.Cells[$"{Col}42"].Value = operatorRoles?[j].Comment;
+                                if (operatorRoles[j].Role != null)
+                                    sheet.Cells[$"{Col}50"].Value = roles[operatorRoles[j].Role.Value];
+                            }
                         }
 
                         if (matrix[i, j] == null) { Col = sheetService.GetNextCombination(Col); Col = sheetService.GetNextCombination(Col); continue; }
@@ -479,7 +493,7 @@ namespace SupervisorMobility.API.Controllers.Exportation_Controllers
 
                             sheet.Cells[$"B{Row}"].Value = i + 1;
                             sheet.Cells[$"C{Row}"].Value = distributions[i]?.Description;
-                            if (!orderedPatDistributionComments[i].Comment.IsNullOrEmpty())
+                            if (!string.IsNullOrEmpty(orderedPatDistributionComments[i].Comment))
                                 sheet.Cells[$"CD{Row}"].Value = orderedPatDistributionComments[i]?.Comment;
 
                             pagePplIndex++;
@@ -512,7 +526,7 @@ namespace SupervisorMobility.API.Controllers.Exportation_Controllers
 
                 }
 
-                if (!PAT.HistoricalAbility.IsNullOrEmpty())
+                if (!string.IsNullOrEmpty(PAT.HistoricalAbility))
                 {
                     string hCol = "CD";
                     int hRow = 42;
@@ -557,6 +571,281 @@ namespace SupervisorMobility.API.Controllers.Exportation_Controllers
             ms.Position = 0;
 
             var res = File(ms, "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet", PAT.AplicationDate.HasValue ? $"Yearly PAT {PAT.AplicationDate.Value.Year}.xlsx" : "Yearly PAT.xlsx");
+            res.EnableRangeProcessing = true;
+            return res;
+        }
+
+        [HttpGet("Excel/HCI/{HCIId}")]
+        public async Task<IActionResult> HCIExcelExport(int HCIId)
+        {
+            var _HCI = await _SMProcessRepository.GetHCI(HCIId, true, true, includeTransactions: true);
+
+            string templateName = "DataAccess/Templates/HCI Template.xlsx";
+            const string sheetNames = "HCI ";
+            MemoryStream ms = new MemoryStream();
+
+            using var templateStream = System.IO.File.OpenRead(templateName);
+
+            using (var package = new ExcelPackage(templateStream))
+            {
+                package.Workbook.CalcMode = ExcelCalcMode.Automatic;
+                var sheet = package.Workbook.Worksheets["HCI"];
+
+                //#region information table
+
+                sheet.Cells["B3"].Value = _HCI.User?.Name;
+                sheet.Cells["E3"].Value = _HCI.User?.Payroll;
+                sheet.Cells["J3"].Value = _HCI.User?.BirthDate.ToString();
+                sheet.Cells["B4"].Value = _HCI.User?.Management;
+                sheet.Cells["F4"].Value = _HCI.User?.Department?.Description;
+                sheet.Cells["J4"].Value = _HCI.User?.Process;
+                sheet.Cells["M4"].Value = _HCI.User?.IncomesDate.ToString();
+
+                //var imageFile = new FileInfo("path_to_your_image.jpg");
+                //var picture = sheet.Drawings.AddPicture("MyImage", imageFile);
+
+                //picture.SetPosition(1, 0, 1, 0);
+
+                //var cellWidth = sheet.Column(1).Width * 7.5;
+                //var cellHeight = sheet.Row(1).Height;
+
+                //picture.SetSize((int)cellWidth, (int)cellHeight);
+
+                if (_HCI.Transactions != null)
+                {
+                    int pageIndex = 1;
+                    int LastRow = 18;
+                    int currentRow = 9;
+
+                    #region Manuals Training
+
+                    var ManualTraining = _HCI.Transactions.Where(t => t.Type == 1).ToList();
+                    foreach (var item in ManualTraining)
+                    {
+                        sheet.Cells[$"A{currentRow}"].Value = (item.DateStart?.ToString("dd/MM/yyyy", CultureInfo.InvariantCulture)??"") + " - " + (item.DateEnd?.ToString("dd/MM/yyyy", CultureInfo.InvariantCulture) ?? "");
+                        sheet.Cells[$"B{currentRow}"].Value = item.Description;
+
+                        currentRow++;
+                        if (currentRow > LastRow && item != ManualTraining.Last())
+                        {
+                            sheet = package.Workbook.Worksheets[$"{sheetNames}{pageIndex + 1}"];
+
+                            if (sheet == null)
+                            {
+                                sheetService.AddOtherSheet(package, 2, pageIndex.ToString());
+                                sheet = package.Workbook.Worksheets[$"{sheetNames}{pageIndex + 1}"];
+                            }
+
+                            pageIndex++;
+                            currentRow = 9;
+                        }
+                    }
+                    #endregion
+
+                    sheet = package.Workbook.Worksheets.First();
+                    pageIndex = 1;
+
+                    #region Company Training
+                    LastRow = 38;
+                    currentRow = 21;
+
+                    var CompanyTraining = _HCI.Transactions.Where(t => t.Type == 2).ToList();
+                    foreach (var item in CompanyTraining)
+                    {
+                        sheet.Cells[$"A{currentRow}"].Value = (item.DateStart?.ToString("dd/MM/yyyy", CultureInfo.InvariantCulture) ?? "") + " - " + (item.DateEnd?.ToString("dd/MM/yyyy", CultureInfo.InvariantCulture) ?? "");
+                        sheet.Cells[$"B{currentRow}"].Value = item.Description;
+
+                        currentRow++;
+                        if (currentRow > LastRow && item != CompanyTraining.Last())
+                        {
+                            sheet = package.Workbook.Worksheets[$"{sheetNames}{pageIndex + 1}"];
+
+                            if (sheet == null)
+                            {
+                                sheetService.AddOtherSheet(package, 2, pageIndex.ToString());
+                                sheet = package.Workbook.Worksheets[$"{sheetNames}{pageIndex + 1}"];
+                            }
+
+                            pageIndex++;
+                            currentRow = 21;
+                        }
+                    }
+                    #endregion
+
+                    sheet = package.Workbook.Worksheets.First();
+                    pageIndex = 1;
+
+                    #region Knowledge
+                    LastRow = 52;
+                    currentRow = 41;
+
+                    var Knowledge = _HCI.Transactions.Where(t => t.Type == 3).ToList();
+                    foreach (var item in Knowledge)
+                    {
+                        sheet.Cells[$"A{currentRow}"].Value = item.DateEnd?.ToString("dd/MM/yyyy", CultureInfo.InvariantCulture) ?? "";
+                        sheet.Cells[$"B{currentRow}"].Value = item.Description;
+
+                        currentRow++;
+                        if (currentRow > LastRow && item != Knowledge.Last())
+                        {
+                            sheet = package.Workbook.Worksheets[$"{sheetNames}{pageIndex + 1}"];
+
+                            if (sheet == null)
+                            {
+                                sheetService.AddOtherSheet(package, 2, pageIndex.ToString());
+                                sheet = package.Workbook.Worksheets[$"{sheetNames}{pageIndex + 1}"];
+                            }
+
+                            pageIndex++;
+                            currentRow = 41;
+                        }
+                    }
+                    #endregion
+                }
+
+                sheet = package.Workbook.Worksheets.First();
+
+                if (_HCI.CareerPaths != null)
+                {
+                    int pageIndex = 1;
+                    int LastRow = 18;
+                    int currentRow = 9;
+
+                    #region Career
+
+                    foreach (var item in _HCI.CareerPaths)
+                    {
+                        sheet.Cells[$"D{currentRow}"].Value = item.CareerPathNo;
+                        sheet.Cells[$"E{currentRow}"].Value = item.ChangeDate?.ToString("dd/MM/yyyy", CultureInfo.InvariantCulture) ?? "";
+                        sheet.Cells[$"F{currentRow}"].Value = item.Department;
+                        sheet.Cells[$"G{currentRow}"].Value = item.Process;
+                        sheet.Cells[$"J{currentRow}"].Value = item.OperationDescription;
+
+                        currentRow++;
+                        if (currentRow > LastRow && item != _HCI.CareerPaths.Last())
+                        {
+                            sheet = package.Workbook.Worksheets[$"{sheetNames}{pageIndex + 1}"];
+
+                            if (sheet == null)
+                            {
+                                sheetService.AddOtherSheet(package, 2, pageIndex.ToString());
+                                sheet = package.Workbook.Worksheets[$"{sheetNames}{pageIndex + 1}"];
+                            }
+
+                            pageIndex++;
+                            currentRow = 9;
+                        }
+                    }
+                    #endregion
+                }
+
+                sheet = package.Workbook.Worksheets.First();
+
+                if (_HCI.ILUs != null)
+                {
+                    int pageIndex = 1;
+                    int LastRow = 52;
+                    int currentRow = 21;
+
+                    #region Experience
+
+                    foreach (var item in _HCI.ILUs)
+                    {
+                        sheet.Cells[$"D{currentRow}"].Value = (item.AcquisitionDate?.ToString("dd/MM/yyyy", CultureInfo.InvariantCulture) ?? "") + " - " + (item.EndDate?.ToString("dd/MM/yyyy", CultureInfo.InvariantCulture) ?? "");
+                        sheet.Cells[$"F{currentRow}"].Value = item.Distribution?.Description;
+                        sheet.Cells[$"L{currentRow}"].Value = item.ILULevel?.ILULevelCode.ToUpperInvariant();
+
+                        currentRow++;
+                        if (currentRow > LastRow && item != _HCI.ILUs.Last())
+                        {
+                            sheet = package.Workbook.Worksheets[$"{sheetNames}{pageIndex + 1}"];
+
+                            if (sheet == null)
+                            {
+                                sheetService.AddOtherSheet(package, 2, pageIndex.ToString());
+                                sheet = package.Workbook.Worksheets[$"{sheetNames}{pageIndex + 1}"];
+                            }
+
+                            pageIndex++;
+                            currentRow = 21;
+                        }
+                    }
+                    #endregion
+                }
+
+                sheet = package.Workbook.Worksheets.First();
+
+                if (_HCI.Categories != null)
+                {
+                    int pageIndex = 1;
+                    int LastRow = 17;
+                    int currentRow = 10;
+
+                    #region Categories
+
+                    foreach (var item in _HCI.Categories)
+                    {
+                        sheet.Cells[$"N{currentRow}"].Value = item.ChosenCategory?.Description ?? "";
+                        sheet.Cells[$"P{currentRow}"].Value = item.Date?.ToString("dd/MM/yyyy", CultureInfo.InvariantCulture) ?? "";
+
+                        currentRow++;
+                        if (currentRow > LastRow && item != _HCI.Categories.Last())
+                        {
+                            sheet = package.Workbook.Worksheets[$"{sheetNames}{pageIndex + 1}"];
+
+                            if (sheet == null)
+                            {
+                                sheetService.AddOtherSheet(package, 2, pageIndex.ToString());
+                                sheet = package.Workbook.Worksheets[$"{sheetNames}{pageIndex + 1}"];
+                            }
+
+                            pageIndex++;
+                            currentRow = 10;
+                        }
+                    }
+                    #endregion
+                }
+
+                sheet = package.Workbook.Worksheets.First();
+
+                if (_HCI.Commentaries != null)
+                {
+                    int pageIndex = 1;
+                    int LastRow = 52;
+                    int currentRow = 20;
+
+                    #region Special Notes
+
+                    foreach (var item in _HCI.Commentaries)
+                    {
+                        sheet.Cells[$"N{currentRow}"].Value = item.Comment;
+
+                        currentRow++;
+                        if (currentRow > LastRow && item != _HCI.Commentaries.Last())
+                        {
+                            sheet = package.Workbook.Worksheets[$"{sheetNames}{pageIndex + 1}"];
+
+                            if (sheet == null)
+                            {
+                                sheetService.AddOtherSheet(package, 2, pageIndex.ToString());
+                                sheet = package.Workbook.Worksheets[$"{sheetNames}{pageIndex + 1}"];
+                            }
+
+                            pageIndex++;
+                            currentRow = 20;
+                        }
+                    }
+                    #endregion
+                }
+
+                //sheetService.SetPrintingOptions(package.Workbook);
+
+                package.SaveAs(ms);
+            }
+
+            ms.Position = 0;
+
+            var res = File(ms, "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet",$"HCI {_HCI.User?.Name??"Unknown user"}.xlsx");
             res.EnableRangeProcessing = true;
             return res;
         }

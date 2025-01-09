@@ -15,6 +15,7 @@ namespace SupervisorMobility.API.Models.Users
         public int UserType { get; set; }
 
         public int? SuperiorId { get; set; }
+        public UsersWithoutPeopleWithNavigation? Superior { get; set; }
 
         public string? Management { get; set; }
         public string? Department { get; set; }
@@ -33,14 +34,16 @@ namespace SupervisorMobility.API.Models.Users
         public int? AreaId { get; set; }
         public int? GroupId { get; set; }
         public int? DistributionId { get; set; }
+        public int? DepartmentId { get; set; }
 
         public ICollection<UsersWithoutPeopleWithNavigation>? Subordinates { get; set; }
-        public ICollection<AreaDtos.AreaWithoutNavigationPropertiesDto>? Areas { get; set; }
-        public ICollection<ILURegisterWithoutNavigationDto>? ILURegisers { get; set; }
         public DateTime? IncomesDate { get; set; }
         public DateTime? BirthDate { get; set; }
         public int? ProfilePictureId { get; set; }
 
         public FileUploadGeneralDto? ProfilePicture { get; set; }
+
+        public int? HciId { get; set; }
+
     }
 }

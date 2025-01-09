@@ -5,6 +5,8 @@ namespace SupervisorMobility.API.Models.ILURegisterDtos
     public class ILURegisterForCreationDto
     {
         public DateTime? AcquisitionDate { get; set; } = DateTime.Now;
+        public DateTime? EndDate { get; set; }
+
         //public int? OperationId { get; set; }
         public int? DistributionId { get; set; }
         public int? OperatorId { get; set; }

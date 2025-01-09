@@ -85,6 +85,11 @@ namespace SupervisorMobility.API.DataAccess.Services.ExportationServices
                     sheetName = "DataAccess/Templates/PAT Monthly template.xlsx";
                     sheetWN = "SOS Mensual " + GetNextIndex(currentIdx);
                     break;
+
+                case 2:
+                    sheetName = "DataAccess/Templates/HCI template.xlsx";
+                    sheetWN = "HCI " + GetNextIndex(currentIdx);
+                    break;
                 default:
                     break;
             }

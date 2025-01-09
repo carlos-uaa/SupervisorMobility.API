@@ -164,8 +164,8 @@ namespace SupervisorMobility.API.DataAccess.Services
                     await _context.Entry(sosHub).Collection(o => o.PATs).LoadAsync();
                     foreach (var pat in sosHub.PATs)
                     {
-                        await _context.Entry(pat).Reference(aa => aa.SSVresponsible).LoadAsync();
-                        await _context.Entry(pat).Reference(aa => aa.Supervisor).LoadAsync();
+                        
+                        await _context.Entry(pat).Collection(aa => aa.Supervisors).LoadAsync();
                     }
                 }
 
@@ -2698,10 +2698,9 @@ namespace SupervisorMobility.API.DataAccess.Services
         }
         public async Task<IEnumerable<SOSAnalysis>> GetAllSOSAnalysisByDistribution(int Distribution_Id, bool includeImages = false, bool includeNotes = false, bool includeLogbooks = false, bool includeSpecialCases = false, bool includeSOS = false)
         {
-            var sosHubIds = await _context.SOSHubs.Where(hub => hub.DistributionId == Distribution_Id)
-                                                   .Select(hub => hub.SOSHubId).ToListAsync();
-
-            var query = _context.SOSAnalyses.AsNoTracking().Where(SOS => sosHubIds.Contains(SOS.SOSHubId) && SOS.IsActive == true);
+            
+            var query = _context.SOSAnalyses.AsNoTracking()
+                  .Where(analysis => analysis.SOSHub.DistributionId == Distribution_Id && analysis.IsActive == true);
 
             if (includeImages)
             {
@@ -2725,31 +2724,6 @@ namespace SupervisorMobility.API.DataAccess.Services
             }
 
             var sosAnalyses = await query.OrderBy(s => s.SOSHubId).ToListAsync();
-
-            if (includeImages)
-            {
-                foreach (var SOSAnalysis in sosAnalyses)
-                {
-                    SOSAnalysis.Illustrations = SOSAnalysis.Illustrations.Where(i => i.IsActive == true).ToList();
-                }
-            }
-
-            if (includeNotes)
-            {
-                foreach (var SOSAnalysis in sosAnalyses)
-                {
-                    SOSAnalysis.Notes = SOSAnalysis.Notes.Where(v => v.IsActive == true).ToList();
-                }
-            }
-
-            if (includeLogbooks)
-            {
-                foreach (var SOSAnalysis in sosAnalyses)
-                {
-                    SOSAnalysis.AnalysisLogbooks = SOSAnalysis.AnalysisLogbooks.Where(t => t.IsActive == true).ToList();
-                }
-            }
-
 
 
             return sosAnalyses;
@@ -3159,10 +3133,8 @@ namespace SupervisorMobility.API.DataAccess.Services
         }
         public async Task<IEnumerable<SOSSequence>> GetAllSOSSequenceByDistribution(int Distribution_Id, bool includeImages = false, bool includeNotes = false, bool includeLogbooks = false, bool includeSpecialCases = false, bool includeSOS = false)
         {
-            var sosHubIds = await _context.SOSHubs.Where(hub => hub.DistributionId == Distribution_Id)
-                                                    .Select(hub => hub.SOSHubId).ToListAsync();
-
-            var query = _context.SOSSequences.AsNoTracking().Where(sequence => sosHubIds.Contains(sequence.SOSHubId) && sequence.IsActive == true);
+            var query = _context.SOSSequences.AsNoTracking()
+                   .Where(s => s.SOSHub.DistributionId == Distribution_Id && s.IsActive == true);
 
             if (includeImages)
             {
@@ -3187,32 +3159,7 @@ namespace SupervisorMobility.API.DataAccess.Services
 
             var sosSequences = await query.OrderBy(s => s.SOSHubId).ToListAsync();
 
-            if (includeImages)
-            {
-                foreach (var SOSSequence in sosSequences)
-                {
-                    SOSSequence.Illustrations = SOSSequence.Illustrations.Where(i => i.IsActive == true).ToList();
-                }
-            }
-
-            if (includeNotes)
-            {
-                foreach (var SOSSequence in sosSequences)
-                {
-                    SOSSequence.Notes = SOSSequence.Notes.Where(v => v.IsActive == true).ToList();
-                }
-            }
-
-            if (includeLogbooks)
-            {
-                foreach (var SOSSequence in sosSequences)
-                {
-                    SOSSequence.SequenceLogbooks = SOSSequence.SequenceLogbooks.Where(t => t.IsActive == true).ToList();
-                }
-            }
-
-
-
+         
             return sosSequences;
         }
 
@@ -3546,7 +3493,8 @@ namespace SupervisorMobility.API.DataAccess.Services
 
             if (includeImages)
             {
-                query = query.Include(i => i.Illustrations);
+                //query = query.Include(i => i.Illustrations);
+                query = query.Include(i => i.Illustrations.Where(il => il.IsActive == true));
             }
 
             if (includeTimes)
@@ -3556,14 +3504,14 @@ namespace SupervisorMobility.API.DataAccess.Services
 
             if (includeNotes)
             {
-                query = query.Include(query => query.Notes);
+                query = query.Include(query => query.Notes.Where(il => il.IsActive == true));
             }
 
             if (includeLogbooks)
             {
-                query = query.Include(t => t.DistributionLogbooks).ThenInclude(l => l.Approver);
-                query = query.Include(t => t.DistributionLogbooks).ThenInclude(l => l.Reviewer);
-                query = query.Include(t => t.SOSDistributionAdditionalTime);
+                query = query.Include(t => t.DistributionLogbooks.Where(il => il.IsActive == true)).ThenInclude(l => l.Approver);
+                query = query.Include(t => t.DistributionLogbooks.Where(il => il.IsActive == true)).ThenInclude(l => l.Reviewer);
+                //query = query.Include(t => t.SOSDistributionAdditionalTime);
             }
 
             if (includeTurns)
@@ -3572,11 +3520,6 @@ namespace SupervisorMobility.API.DataAccess.Services
                 query = query.Include(t => t.Turns).ThenInclude(t => t.Operator);
             }
 
-            if (includeCollections)
-            {
-                query = query.AsNoTracking().Include(s => s.Sequences).ThenInclude(sh => sh.SOSHub).ThenInclude(shs => shs.Sections).ThenInclude(shsa => shsa.Analyses);
-                query = query.AsNoTracking().Include(s => s.Analyses).ThenInclude(sh => sh.SOSHub).ThenInclude(shs => shs.Sections).ThenInclude(shsa => shsa.Analyses);
-            }
 
             if (includeSOS)
             {
@@ -3601,30 +3544,53 @@ namespace SupervisorMobility.API.DataAccess.Services
 
             var sosHub = await query.FirstOrDefaultAsync();
 
+            if (includeCollections)
+            {
+                //query = query.AsNoTracking().Include(s => s.Sequences).ThenInclude(sh => sh.SOSHub).ThenInclude(shs => shs.Sections).ThenInclude(shsa => shsa.Analyses);
+
+                var sequences = await _context.SOSSequences
+                                .Where(s => s.Distributions.Any(d=> d.SOSDistributionId == SOSDistributionId) )
+                                .Include(sh => sh.SOSHub)
+                                .ThenInclude(shs => shs.Sections)
+                                .ThenInclude(shsa => shsa.Analyses)
+                                .ToListAsync();
+                sosHub.Sequences = sequences;
+
+                //query = query.AsNoTracking().Include(s => s.Analyses).ThenInclude(sh => sh.SOSHub).ThenInclude(shs => shs.Sections).ThenInclude(shsa => shsa.Analyses);
+
+                var analyses = await _context.SOSAnalyses
+                               .Where(s => s.Distributions.Any(d => d.SOSDistributionId == SOSDistributionId))
+                               .Include(sh => sh.SOSHub)
+                               .ThenInclude(shs => shs.Sections)
+                               .ThenInclude(shsa => shsa.Analyses)
+                               .ToListAsync();
+                sosHub.Analyses = analyses;
+            }
             if (sosHub == null)
                 return null;
 
             // Filtrar los subobjetos manualmente después de la carga inicial
-            if (includeImages)
-            {
-                sosHub.Illustrations = sosHub.Illustrations.Where(i => i.IsActive == true).ToList();
-            }
+            //if (includeImages)
+            //{
+            //    sosHub.Illustrations = sosHub.Illustrations.Where(i => i.IsActive == true).ToList();
+            //}
 
-            if (includeNotes)
-            {
-                sosHub.Notes = sosHub.Notes.Where(v => v.IsActive == true).ToList();
-            }
+            //if (includeNotes)
+            //{
+            //    sosHub.Notes = sosHub.Notes.Where(v => v.IsActive == true).ToList();
+            //}
 
-            if (includeLogbooks)
-            {
-                sosHub.DistributionLogbooks = sosHub.DistributionLogbooks.Where(t => t.IsActive == true).ToList();
-            }
+            //if (includeLogbooks)
+            //{
 
-            if (includeCollections)
-            {
-                sosHub.Sequences = sosHub.Sequences.Where(t => t.IsActive == true).ToList();
-                sosHub.Analyses = sosHub.Analyses.Where(t => t.IsActive == true).ToList();
-            }
+            //    sosHub.DistributionLogbooks = sosHub.DistributionLogbooks.Where(t => t.IsActive == true).ToList();
+            //}
+
+            //if (includeCollections)
+            //{
+            //    sosHub.Sequences = sosHub.Sequences.Where(t => t.IsActive == true).ToList();
+            //    sosHub.Analyses = sosHub.Analyses.Where(t => t.IsActive == true).ToList();
+            //}
 
 
 

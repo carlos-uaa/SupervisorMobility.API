@@ -1,9 +1,10 @@
 ﻿using AutoMapper;
 using ClosedXML.Excel;
+using DocumentFormat.OpenXml.Packaging;
+using DocumentFormat.OpenXml.Spreadsheet;
 using DuoVia.FuzzyStrings;
 using FuzzyString;
 using Microsoft.EntityFrameworkCore;
-using Microsoft.IdentityModel.Tokens;
 using Slugify;
 using SupervisorMobility.API.Business;
 using SupervisorMobility.API.Context;
@@ -79,387 +80,138 @@ namespace SupervisorMobility.API.DataAccess.Services
                 string messageError = "";
                 try
                 {
-                    using (var workBook = new XLWorkbook(filepath))
+                    // Abrir archivo Excel
+                    using (SpreadsheetDocument document = SpreadsheetDocument.Open(filepath, false))
                     {
-                        var pages = workBook.Worksheets.Count - 1;
+                        WorkbookPart workbookPart = document.WorkbookPart;
+                        Sheet sheet = workbookPart.Workbook.Sheets.Elements<Sheet>().FirstOrDefault();
 
-                        IXLWorksheet ws = workBook.Worksheet(1);
-
-
-                        bool firstRow = true;
-                        int i = 1;
-                        foreach (IXLRow row in ws.Rows())
+                        if (sheet != null)
                         {
-                            HeadCount _headCount = new HeadCount();
+                            WorksheetPart worksheetPart = (WorksheetPart)workbookPart.GetPartById(sheet.Id);
+                            SheetData sheetData = worksheetPart.Worksheet.GetFirstChild<SheetData>();
 
-                            if (firstRow)
+                            bool firstRow = true;
+                            int i = 1;
+
+                            foreach (Row row in sheetData.Elements<Row>())
                             {
-                                firstRow = false;
-                            }
-                            else
-                            {
-                                if (!row.IsEmpty())
+                                HeadCount _headCount = new HeadCount();
+
+                                if (firstRow)
                                 {
-                                    int maxRetries = 5; // Número máximo de intentos
-                                    TimeSpan retryInterval = TimeSpan.FromSeconds(5); // Intervalo de tiempo entre intentos (5 segundos en este caso)
-                                    int retries = 0;
-
-                                    while (retries < maxRetries)
+                                    firstRow = false; // Ignorar la primera fila (cabecera)
+                                                      // Columna 1 A: Código
+                                                      // Columna 2 B: CO
+                                                      // Columna 3 C: ID y nombre de área
+                                                      // Columna 4 D: Departamento
+                                                      // Columna 5 E: Extraer y procesar valor
+                                                      // Columna 6 F: Nivel
+                                                      // Columna 7 G: Grupo
+                                                      // Columna 8 H: Presupuesto
+                                                      // Columna 9 I: RTO
+                                                      // Columna 11 J: Comentarios
+                                                      // Columna 12 L: Tipo de labor
+                                                      // Columna 13 M: Line Operative 
+                                                      // Columna 14 N: DSTR
+                                                      // Columna 15 O: Fuction_Type
+                                }
+                                else
+                                {
+                                    if (row.Elements<Cell>().Any())
                                     {
-                                        try
+                                        int retries = 0;
+                                        const int maxRetries = 5;
+                                        TimeSpan retryInterval = TimeSpan.FromSeconds(5);
+
+                                        while (retries < maxRetries)
                                         {
-
-
                                             try
                                             {
-                                                // id subarea nombre subarea
-                                                var valueFunctionDescription = ws.Cell(row.RangeAddress.FirstAddress.RowNumber, 5).GetString() != "" ? ws.Cell(row.RangeAddress.FirstAddress.RowNumber, 5).GetValue<string>().Trim() : "";
+                                                var cells = row.Elements<Cell>().ToList();
 
+                                                // Columna 5: Extraer y procesar valor
+                                                string valueFunctionDescription = GetCellValue(workbookPart, cells.ElementAtOrDefault(4))?.Trim() ?? "";
 
-                                                bool contieneNumero = valueFunctionDescription.Any(char.IsDigit);
-
-                                                //la celda esta dentro de los preocesso
-                                                if (contieneNumero)
+                                                if (valueFunctionDescription.Any(char.IsDigit))
                                                 {
-                                                    //Tiene id de subarea,  extraemos numero
-                                                    string numeroString = new string(valueFunctionDescription.Where(char.IsDigit).ToArray());
-
-                                                    //convertimos
-                                                    if (int.TryParse(numeroString, out int numero))
-                                                    {
-                                                        //guaramos id
-                                                        _headCount.ID_subarea = numero;
-                                                    }
-                                                    else
-                                                    {
-                                                        //fallo el numero asignamos default
-                                                        _headCount.ID_subarea = 0;
-                                                    }
+                                                    string numberString = new string(valueFunctionDescription.Where(char.IsDigit).ToArray());
+                                                    _headCount.ID_subarea = int.TryParse(numberString, out int numero) ? numero : 0;
                                                 }
                                                 else
                                                 {
-                                                    //No tiene id de subarea
                                                     _headCount.ID_subarea = 0;
                                                 }
 
-                                                try
-                                                {
-                                                    _headCount.nombre_subarea = valueFunctionDescription;
-                                                }
-                                                catch (Exception ex)
-                                                {
+                                                _headCount.nombre_subarea = valueFunctionDescription;
 
-                                                }
+                                                // Columna 15: Fuction_Type
+                                                _headCount.Fuction_Type = GetCellValue(workbookPart, cells.ElementAtOrDefault(14))?.Trim() ?? "";
 
-                                                try
-                                                {
-                                                    _headCount.Fuction_Type = ws.Cell(row.RangeAddress.FirstAddress.RowNumber, 15).GetString() != "" ? ws.Cell(row.RangeAddress.FirstAddress.RowNumber, 15).GetValue<string>().Trim() : "";
-                                                }
-                                                catch (Exception ex)
-                                                {
+                                                // Columna 9: RTO
+                                                _headCount.RTO = GetCellValue(workbookPart, cells.ElementAtOrDefault(8)) ?? "";
 
-                                                }
+                                                // Columna 1: Código
+                                                _headCount.Codigo = int.TryParse(GetCellValue(workbookPart, cells.ElementAtOrDefault(0)), out int code) ? code : -1;
 
-                                                //break;
+                                                // Columna 2: CO
+                                                _headCount.CO = GetCellValue(workbookPart, cells.ElementAtOrDefault(1)) ?? "";
 
-
-                                            }
-                                            catch (Exception ex)
-                                            {
-
-                                            }
-
-                                            try
-                                            {
-                                                _headCount.RTO = ws.Cell(row.RangeAddress.FirstAddress.RowNumber, 9).GetString() != "" ? ws.Cell(row.RangeAddress.FirstAddress.RowNumber, 9).GetValue<string>() : "";
-
-                                            }
-                                            catch (Exception ex)
-                                            {
-
-                                            }
-
-                                            //procedimiento
-                                            try
-                                            {
-                                                _headCount.Codigo = ws.Cell(row.RangeAddress.FirstAddress.RowNumber, 1).GetString() != "" ? (int)ws.Cell(row.RangeAddress.FirstAddress.RowNumber, 1).Value : -1;
-                                            }
-                                            catch (Exception ex)
-                                            {
-
-                                            }
-                                            try
-                                            {
-                                                _headCount.CO = ws.Cell(row.RangeAddress.FirstAddress.RowNumber, 2).GetString() != "" ? ws.Cell(row.RangeAddress.FirstAddress.RowNumber, 2).GetValue<string>() : "";
-                                                //                                  ToInsertIntoList.GOS = ws.Cell(row.RangeAddress.FirstAddress.RowNumber, 3).GetString() != "" ? ws.Cell(row.RangeAddress.FirstAddress.RowNumber, 3).GetValue<string>() : "";
-                                            }
-                                            catch (Exception ex)
-                                            {
-
-                                            }
-                                            try
-                                            {
-                                                var valuesArea = ws.Cell(row.RangeAddress.FirstAddress.RowNumber, 3).GetString() != "" ? ws.Cell(row.RangeAddress.FirstAddress.RowNumber, 3).GetValue<string>() : "";
+                                                // Columna 3: ID y nombre de área
+                                                string valuesArea = GetCellValue(workbookPart, cells.ElementAtOrDefault(2)) ?? "";
                                                 var splitedArea = valuesArea.Split("-");
+                                                _headCount.ID_Area = int.TryParse(splitedArea.ElementAtOrDefault(0), out int areaId) ? areaId : 0;
+                                                _headCount.Nombre_Area = splitedArea.ElementAtOrDefault(1) ?? "";
 
-                                                try
-                                                {
-                                                    _headCount.ID_Area = int.Parse(splitedArea[0]);
-                                                }
-                                                catch (Exception ex)
-                                                {
+                                                // Columna 4: Departamento
+                                                string valueDepartament = GetCellValue(workbookPart, cells.ElementAtOrDefault(3)) ?? "";
+                                                ProcessDepartment(valueDepartament, _headCount);
 
-                                                }
+                                                // Columna 6: Nivel
+                                                _headCount.Nivel = GetCellValue(workbookPart, cells.ElementAtOrDefault(5)) ?? "";
 
-                                                try
-                                                {
-                                                    _headCount.Nombre_Area = splitedArea[1];
-                                                }
-                                                catch (Exception ex)
-                                                {
+                                                // Columna 7: Grupo
+                                                _headCount.Group = GetCellValue(workbookPart, cells.ElementAtOrDefault(6)) ?? "";
 
-                                                }
+                                                // Columna 8: Presupuesto
+                                                _headCount.BUDGET = GetCellValue(workbookPart, cells.ElementAtOrDefault(7)) ?? "";
 
+                                                // Columna 11: Comentarios
+                                                _headCount.Comentarios = GetCellValue(workbookPart, cells.ElementAtOrDefault(10)) ?? "";
 
-                                            }
-                                            catch (Exception ex)
-                                            {
+                                                // Columna 12: Tipo de labor
+                                                _headCount.LABOR_TYPE = GetCellValue(workbookPart, cells.ElementAtOrDefault(11)) ?? "";
 
-                                            }
-
-                                            try
-                                            {
-
-                                                var valueDepartament = ws.Cell(row.RangeAddress.FirstAddress.RowNumber, 4).GetString() != "" ? ws.Cell(row.RangeAddress.FirstAddress.RowNumber, 4).GetValue<string>() : "";
-
-                                                if (valueDepartament.Contains("_") && valueDepartament.Contains("-"))
-                                                {
-                                                    var CostDepartament = valueDepartament.Split("_");
-                                                    var splitedDepartament = CostDepartament[0].Split("-");
-                                                    try
-                                                    {
-                                                        _headCount.Cost_center = int.Parse(splitedDepartament[0]);
-                                                    }
-                                                    catch (Exception ex)
-                                                    {
-
-                                                    }
-                                                    try
-                                                    {
-                                                        _headCount.ID_Departamento = splitedDepartament[1];
-                                                    }
-                                                    catch (Exception ex)
-                                                    {
-
-                                                    }
-                                                    try
-                                                    {
-                                                        _headCount.Nombre_Departamento = CostDepartament[1];
-                                                    }
-                                                    catch (Exception ex)
-                                                    {
-
-                                                    }
-                                                }
-                                                else if (!valueDepartament.Contains("_") && valueDepartament.Contains("-"))
-                                                {
-                                                    var firstSplit = valueDepartament.Split("-");
-                                                    try
-                                                    {
-                                                        _headCount.Cost_center = int.Parse(firstSplit[0]);
-                                                    }
-                                                    catch (Exception ex)
-                                                    {
-
-                                                    }
-                                                    try
-                                                    {
-                                                        _headCount.ID_Departamento = firstSplit[1];
-                                                    }
-                                                    catch (Exception ex)
-                                                    {
-
-                                                    }
-                                                    try
-                                                    {
-                                                        _headCount.Nombre_Departamento = firstSplit[1];
-                                                    }
-                                                    catch (Exception ex)
-                                                    {
-
-                                                    }
-                                                }
-                                                else if (valueDepartament.Contains("_") && !valueDepartament.Contains("-"))
-                                                {
-                                                    var firstSplit2 = valueDepartament.Split("_");
-
-                                                    if (int.TryParse(firstSplit2[0], out int numero))
-                                                    {
-                                                        //guaramos id
-                                                        _headCount.Cost_center = numero;
-                                                    }
-                                                    else
-                                                    {
-                                                        //fallo el numero asignamos default
-                                                        _headCount.Cost_center = 0;
-                                                    }
-
-                                                    try
-                                                    {
-                                                        _headCount.ID_Departamento = firstSplit2[1];
-                                                    }
-                                                    catch (Exception ex)
-                                                    {
-
-                                                    }
-                                                    try
-                                                    {
-                                                        _headCount.Nombre_Departamento = firstSplit2[1];
-                                                    }
-                                                    catch (Exception ex)
-                                                    {
-
-                                                    }
-
-                                                }
-
-
-
-                                            }
-                                            catch (Exception ex)
-                                            {
-
-                                            }
-
-
-                                            try
-                                            {
-                                                _headCount.Nivel = ws.Cell(row.RangeAddress.FirstAddress.RowNumber, 6).GetString() != "" ? ws.Cell(row.RangeAddress.FirstAddress.RowNumber, 6).GetValue<string>() : "";
-
-                                            }
-                                            catch (Exception ex)
-                                            {
-
-                                            }
-                                            try
-                                            {
-                                                _headCount.Group = ws.Cell(row.RangeAddress.FirstAddress.RowNumber, 7).GetString() != "" ? ws.Cell(row.RangeAddress.FirstAddress.RowNumber, 7).GetValue<string>() : "";
-                                            }
-                                            catch (Exception ex)
-                                            {
-
-                                            }
-                                            try
-                                            {
-                                                _headCount.BUDGET = ws.Cell(row.RangeAddress.FirstAddress.RowNumber, 8).GetString() != "" ? ws.Cell(row.RangeAddress.FirstAddress.RowNumber, 8).GetValue<string>() : "";
-                                            }
-                                            catch (Exception ex)
-                                            {
-
-                                            }
-
-                                            try
-                                            {
-                                                var valueHC = ws.Cell(row.RangeAddress.FirstAddress.RowNumber, 1).GetString() != "" ? ws.Cell(row.RangeAddress.FirstAddress.RowNumber, 1).Value.ToString() : "";
-                                                try
-                                                {
-                                                    _headCount.HC = int.Parse(valueHC);
-                                                }
-                                                catch (Exception ex)
-                                                {
-
-                                                }
-                                            }
-                                            catch (Exception ex)
-                                            {
-
-                                            }
-                                            try
-                                            {
-                                                _headCount.Comentarios = ws.Cell(row.RangeAddress.FirstAddress.RowNumber, 11).GetString() != "" ? ws.Cell(row.RangeAddress.FirstAddress.RowNumber, 11).GetValue<string>() : "";
-                                            }
-                                            catch (Exception ex)
-                                            {
-
-                                            }
-                                            try
-                                            {
-                                                _headCount.LABOR_TYPE = ws.Cell(row.RangeAddress.FirstAddress.RowNumber, 12).GetString() != "" ? ws.Cell(row.RangeAddress.FirstAddress.RowNumber, 12).GetValue<string>() : "";
-                                            }
-                                            catch (Exception ex)
-                                            {
-
-                                            }
-                                            try
-                                            {
+                                                // Datos adicionales
                                                 _headCount.Fecha_de_alta = DateTime.Now;
-                                            }
-                                            catch (Exception ex)
-                                            {
-
-                                            }
-                                            try
-                                            {
                                                 _headCount.UserUploadId = UserIdUpload;
-                                            }
-                                            catch (Exception ex)
-                                            {
-                                            }
-                                            try
-                                            {
                                                 _headCount.Usuario_de_alta = userEntity.Name;
+
+                                                await _supervisorMobilityRepository.AddHeadCoutAsync(_headCount);
+
+                                                Debug.WriteLine($"Intento {retries + 1} Línea [{i}] completado");
+                                                break; // Operación exitosa
                                             }
                                             catch (Exception ex)
                                             {
+                                                retries++;
+                                                Debug.WriteLine($"Intento {retries} en Línea [{i}] falló: {ex.Message}");
 
+                                                if (retries == maxRetries)
+                                                {
+                                                    messageError += $"Error en la fila [{i}]. Verifica el documento.\n";
+                                                }
+
+                                                await Task.Delay(retryInterval);
                                             }
-
-                                            await _supervisorMobilityRepository.AddHeadCoutAsync(_headCount);
-
-
-                                            retries = 0;
-
-                                            Debug.WriteLine($"Intento {retries + 1} Linea Position [{i}]");
-
-                                            // Si la operación tiene éxito, puedes salir del bucle
-                                            break;
                                         }
-                                        catch (Exception ex)
-                                        {
+                                    }
+                                }
 
-                                            // Maneja la excepción aquí, si es necesario
-                                            Debug.WriteLine($"Intento {retries + 1} Linea Position [{i}] falló: {ex.Message}");
-
-                                            // Incrementa el número de intentos
-                                            retries++;
-
-
-                                            if (retries == 5)
-                                            {
-                                                //añade notificacion de error
-                                                messageError += $"Error in data ROW [{i}], please check document and solve this issue \n, ";
-
-                                            }
-
-                                            // Espera el intervalo de tiempo antes de volver a intentarlo
-                                            await Task.Delay(retryInterval);
-                                        }
-
-
-
-                                    }//While
-
-                                }//end is not empety row
-                            }//end else first roe
-                            i++;
-                        }//end foreach
-
-                        //}//for de paginas
-
-                    }//end using woorkbook
-
-
-
+                                i++;
+                            }
+                        }
+                    }
                 }//end try
                 catch (Exception ex)
                 {
@@ -476,7 +228,7 @@ namespace SupervisorMobility.API.DataAccess.Services
                 {
 
 
-                    if (!messageError.IsNullOrEmpty())
+                    if (!string.IsNullOrEmpty(messageError))
                     {
                         var emailMessageError = _email.CreateEmailMessage(userEntity.Email, "Headcount processed", $"Headcount document has been processed, you can now review its contents on the details page. \n LIST ERRORS:  \n" + messageError);
                         _email.Send(emailMessageError);
@@ -526,7 +278,7 @@ namespace SupervisorMobility.API.DataAccess.Services
                 {
                     try
                     {
-                        if (!messageError.IsNullOrEmpty())
+                        if (!string.IsNullOrEmpty(messageError))
                         {
 
 
@@ -830,7 +582,7 @@ namespace SupervisorMobility.API.DataAccess.Services
 
 
 
-                                        if (ExcelAreaCode.IsNullOrEmpty() && ExcelDistDescription.IsNullOrEmpty())
+                                        if (string.IsNullOrEmpty(ExcelAreaCode) && string.IsNullOrEmpty(ExcelDistDescription))
                                         {
                                             break;
                                         }
@@ -1097,7 +849,7 @@ namespace SupervisorMobility.API.DataAccess.Services
                                                                 //si es renglon vacio brincamos al siguiente
                                                                 continue;
                                                             }
-                                                            else if (ExcelOpCode.IsNullOrEmpty() && !ExcelOpDescription.IsNullOrEmpty())
+                                                            else if (string.IsNullOrEmpty(ExcelOpCode) && !string.IsNullOrEmpty(ExcelOpDescription))
                                                             {
                                                                 DocumentError = true;
                                                                 eMailBody += $"\\n Falta No. Operacion..." +
@@ -1105,7 +857,7 @@ namespace SupervisorMobility.API.DataAccess.Services
                                                                     $" Pagina: {p} - {pageName}" +
                                                                     $" Distribucion: {coincidenciasDistributions.Distribution.Description}";
                                                             }
-                                                            else if (!ExcelOpCode.IsNullOrEmpty() && ExcelOpDescription.IsNullOrEmpty())
+                                                            else if (!string.IsNullOrEmpty(ExcelOpCode) && string.IsNullOrEmpty(ExcelOpDescription))
                                                             {
                                                                 DocumentError = true;
                                                                 eMailBody += $"\\n Falta Nombre de operacion..." +
@@ -1741,12 +1493,12 @@ namespace SupervisorMobility.API.DataAccess.Services
 
                                                             var ExcelCommentaryOrRestriction = CellCommentaryOrRestriction.Value.ToString() != "" ? CellCommentaryOrRestriction.Value.ToString() : "";
 
-                                                            if (ExcelOpCode.IsNullOrEmpty() && ExcelOpDescription.IsNullOrEmpty())
+                                                            if (string.IsNullOrEmpty(ExcelOpCode) && string.IsNullOrEmpty(ExcelOpDescription))
                                                             {
                                                                 //si es renglon vacio brincamos al siguiente
                                                                 continue;
                                                             }
-                                                            else if (ExcelOpCode.IsNullOrEmpty() && !ExcelOpDescription.IsNullOrEmpty())
+                                                            else if (string.IsNullOrEmpty(ExcelOpCode) && !string.IsNullOrEmpty(ExcelOpDescription))
                                                             {
                                                                 DocumentError = true;
                                                                 eMailBody += $"\\n Falta No. Operacion..." +
@@ -1754,7 +1506,7 @@ namespace SupervisorMobility.API.DataAccess.Services
                                                                     $" Pagina: {p} - {pageName}" +
                                                                     $" Distribucion: {coincidenciasDistributions.Distribution.Description}";
                                                             }
-                                                            else if (!ExcelOpCode.IsNullOrEmpty() && ExcelOpDescription.IsNullOrEmpty())
+                                                            else if (!string.IsNullOrEmpty(ExcelOpCode) && string.IsNullOrEmpty(ExcelOpDescription))
                                                             {
                                                                 DocumentError = true;
                                                                 eMailBody += $"\\n Falta Nombre de operacion..." +
@@ -2093,12 +1845,12 @@ namespace SupervisorMobility.API.DataAccess.Services
                                                         }
                                                         var ExcelCommentaryOrRestriction = CellCommentaryOrRestriction.Value.ToString() != "" ? CellCommentaryOrRestriction.Value.ToString() : "";
 
-                                                        if (ExcelOpCode.IsNullOrEmpty() && ExcelOpDescription.IsNullOrEmpty())
+                                                        if (string.IsNullOrEmpty(ExcelOpCode) && string.IsNullOrEmpty(ExcelOpDescription))
                                                         {
                                                             //si es renglon vacio brincamos al siguiente
                                                             continue;
                                                         }
-                                                        else if (ExcelOpCode.IsNullOrEmpty() && !ExcelOpDescription.IsNullOrEmpty())
+                                                        else if (string.IsNullOrEmpty(ExcelOpCode) && !string.IsNullOrEmpty(ExcelOpDescription))
                                                         {
                                                             DocumentError = true;
                                                             eMailBody += $"\\n Falta No. Operacion..." +
@@ -2106,7 +1858,7 @@ namespace SupervisorMobility.API.DataAccess.Services
                                                                 $" Pagina: {p} - {pageName}" +
                                                                 $" Distribucion: {coincidenciasDistributions.Distribution.Description}";
                                                         }
-                                                        else if (!ExcelOpCode.IsNullOrEmpty() && ExcelOpDescription.IsNullOrEmpty())
+                                                        else if (!string.IsNullOrEmpty(ExcelOpCode) && string.IsNullOrEmpty(ExcelOpDescription))
                                                         {
                                                             DocumentError = true;
                                                             eMailBody += $"\\n Falta Nombre de operacion..." +
@@ -2641,8 +2393,49 @@ namespace SupervisorMobility.API.DataAccess.Services
 
         //Codigo de procesamiento de Rutas inhabilitado 10/Oct 2024
         //ProcessTreeDataAsync Se encarga del manejo de las rutas dado que ahora se usa el documento carga de trabajo, con formato especifico
-       
-      
-        
+
+        // Método para obtener valor de una celda
+        string GetCellValue(WorkbookPart workbookPart, Cell cell)
+        {
+            if (cell == null || cell.CellValue == null) return null;
+
+            string value = cell.CellValue.Text;
+
+            if (cell.DataType != null && cell.DataType.Value == CellValues.SharedString)
+            {
+                return workbookPart.SharedStringTablePart.SharedStringTable.Elements<SharedStringItem>().ElementAt(int.Parse(value)).InnerText;
+            }
+
+            return value;
+        }
+
+        // Método para procesar departamento
+        void ProcessDepartment(string valueDepartament, HeadCount _headCount)
+        {
+            if (valueDepartament.Contains("_") && valueDepartament.Contains("-"))
+            {
+                var parts = valueDepartament.Split("_");
+                var splitedDepartament = parts[0].Split("-");
+                _headCount.Cost_center = int.TryParse(splitedDepartament.ElementAtOrDefault(0), out int costCenter) ? costCenter : 0;
+                _headCount.ID_Departamento = splitedDepartament.ElementAtOrDefault(1);
+                _headCount.Nombre_Departamento = parts.ElementAtOrDefault(1);
+            }
+            else if (!valueDepartament.Contains("_") && valueDepartament.Contains("-"))
+            {
+                var splitedDepartament = valueDepartament.Split("-");
+                _headCount.Cost_center = int.TryParse(splitedDepartament.ElementAtOrDefault(0), out int costCenter) ? costCenter : 0;
+                _headCount.ID_Departamento = splitedDepartament.ElementAtOrDefault(1);
+                _headCount.Nombre_Departamento = splitedDepartament.ElementAtOrDefault(1);
+            }
+            else if (valueDepartament.Contains("_"))
+            {
+                var parts = valueDepartament.Split("_");
+                _headCount.Cost_center = int.TryParse(parts.ElementAtOrDefault(0), out int costCenter) ? costCenter : 0;
+                _headCount.ID_Departamento = parts.ElementAtOrDefault(1);
+                _headCount.Nombre_Departamento = parts.ElementAtOrDefault(1);
+            }
+        }
+
+
     }//end background service
 }

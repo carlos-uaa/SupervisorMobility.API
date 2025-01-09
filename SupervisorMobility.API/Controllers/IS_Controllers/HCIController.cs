@@ -5,6 +5,7 @@ using SupervisorMobility.API.Models.HCIDtos;
 using SupervisorMobility.API.Services;
 using SupervisorMobility.API.Models.Users;
 using SupervisorMobility.API.Models.HCICategoryDtos;
+using SupervisorMobility.API.DataAccess.Entities.LUP;
 
 namespace SupervisorMobility.API.Controllers.IS_Controllers
 {
@@ -30,6 +31,8 @@ namespace SupervisorMobility.API.Controllers.IS_Controllers
         {
             HCI hciEntity = new();
             _mapper.Map(hciForCreate, hciEntity);
+
+            hciEntity.User = await _supervisorMobilityRepository.GetUserAsync((int)hciForCreate.UserId);
 
             var entityhci = await _supervisorMobilityRepository.AddHCI(hciEntity);
 
@@ -65,7 +68,7 @@ namespace SupervisorMobility.API.Controllers.IS_Controllers
         public async Task<ActionResult<HCIDto>> UpdateHCI(int hciId, UpdateHCIDto hciForUpdate)
         {
 
-            var entityhci = await _supervisorMobilityRepository.GetHCI(hciId);
+            var entityhci = await _supervisorMobilityRepository.GetHCI(hciId, includePeople: true);
 
             var result = await _supervisorMobilityRepository.UpdateHCI(hciForUpdate, entityhci);
 

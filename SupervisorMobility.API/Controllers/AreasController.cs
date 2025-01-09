@@ -6,31 +6,9 @@ using SupervisorMobility.API.Business;
 using SupervisorMobility.API.DataAccess.Entities;
 using SupervisorMobility.API.DataAccess.Services.TreeServices;
 using SupervisorMobility.API.DataAccess.Services;
-using SupervisorMobility.API.Entities;
 using SupervisorMobility.API.Models.AreaDtos;
 using SupervisorMobility.API.Services;
-using System.Diagnostics;
-using Microsoft.IdentityModel.Tokens;
-using SupervisorMobility.API.DataAccess.Entities.Paths;
-using FuzzyString;
-using SupervisorMobility.API.Models.AssyChart;
-using ClosedXML.Excel;
-using DocumentFormat.OpenXml.Spreadsheet;
-using DocumentFormat.OpenXml.Packaging;
-using SupervisorMobility.API.Models.OperationDtos;
-using Slugify;
-using SupervisorMobility.API.Models.DistributionDtos;
-using SupervisorMobility.API.DataAccess.Entities.TreeStruct;
-using SupervisorMobility.API.Entities.CDMS;
 using SupervisorMobility.API.Context;
-using DocumentFormat.OpenXml.Bibliography;
-using Microsoft.EntityFrameworkCore;
-using static Microsoft.EntityFrameworkCore.DbLoggerCategory;
-using DocumentFormat.OpenXml.Wordprocessing;
-using DocumentFormat.OpenXml.EMMA;
-using Irony.Parsing;
-using DuoVia.FuzzyStrings;
-using SupervisorMobility.API.Models.HCIDtos;
 
 namespace SupervisorMobility.API.Controllers
 {
