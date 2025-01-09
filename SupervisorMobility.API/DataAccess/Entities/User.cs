@@ -30,7 +30,6 @@ namespace SupervisorMobility.API.DataAccess.Entities
         public int UserType { get; set; }
 
         public string? Management {  get; set; }
-        public string? Department {  get; set; }
         public string? Process {  get; set; }
         
 
@@ -79,6 +78,9 @@ namespace SupervisorMobility.API.DataAccess.Entities
 
         public int? GroupId { get; set; }
         public Group? Group { get; set; }
+
+        public int? DepartmentId { get; set; }
+        public Department? Department { get; set; }
 
         public int? HciId { get; set; }
         public HCI? Hci { get; set; }
@@ -134,6 +136,9 @@ namespace SupervisorMobility.API.DataAccess.Entities
                            PlantId == other.PlantId &&
                            AreaId == other.AreaId &&
                            DistributionId == other.DistributionId &&
+                           DepartmentId == other.DepartmentId &&
+                           Management == other.Management &&
+                           Process == other.Process &&
                            GroupId == other.GroupId;
                 case 5:
                     return Name == other.Name &&
@@ -183,10 +188,13 @@ namespace SupervisorMobility.API.DataAccess.Entities
                     case 4:
                         hash = hash * 23 + Payroll.GetHashCode();
                         hash = hash * 23 + (Name != null ? Name.GetHashCode() : 0);
+                        hash = hash * 23 + (Management != null ? Management.GetHashCode() : 0);
+                        hash = hash * 23 + (Process != null ? Process.GetHashCode() : 0);
                         hash = hash * 23 + (SuperiorId != null ? SuperiorId.GetHashCode() : 0);
                         hash = hash * 23 + (PlantId != null ? PlantId.GetHashCode() : 0);
                         hash = hash * 23 + (AreaId != null ? AreaId.GetHashCode() : 0);
                         hash = hash * 23 + (DistributionId != null ? DistributionId.GetHashCode() : 0);
+                        hash = hash * 23 + (DepartmentId != null ? DepartmentId.GetHashCode() : 0);
                         hash = hash * 23 + (GroupId != null ? GroupId.GetHashCode() : 0);
                         break;
                     case 5:

@@ -15,7 +15,6 @@ namespace SupervisorMobility.API.Models.Users
         public int? SuperiorId { get; set; }
 
         public string? Management { get; set; }
-        public string? Department { get; set; }
         public string? Process { get; set; }
 
 
@@ -29,6 +28,8 @@ namespace SupervisorMobility.API.Models.Users
         public int? AreaId { get; set; }
         public int? GroupId { get; set; }
         public int? DistributionId { get; set; }
+        public int? DepartmentId { get; set; }
+
         public ICollection<UsersWithoutNavigationWithoutPeopleDetails>? Subordinates { get; set; }
         public ICollection<ILURegisterForCreationDto>? ILURegisers { get; set; }
 

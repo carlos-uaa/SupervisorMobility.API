@@ -8,7 +8,10 @@ namespace SupervisorMobility.API.MapperProfiles
     {
         public HCIProfile()
         {
-            CreateMap<HCI, Models.HCIDtos.HCIDto>().ReverseMap();
+            CreateMap<HCI, Models.HCIDtos.HCIDto>()
+                .ForMember(dest => dest.ILUs, opt => opt.MapFrom(src => src.User != null ? src.User.ILURegisers : null))
+                .ReverseMap();
+
             CreateMap<HCI, Models.HCIDtos.CreateHCIDto>().ReverseMap();
             CreateMap<HCI, Models.HCIDtos.UpdateHCIDto>().ReverseMap();
             CreateMap<HCITransaction, Models.HCITransactionDtos.HCITransactionDto>().ReverseMap();

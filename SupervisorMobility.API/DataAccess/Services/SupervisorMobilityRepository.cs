@@ -12,6 +12,7 @@ using SupervisorMobility.API.DataAccess.Entities;
 using SupervisorMobility.API.DataAccess.Entities.ILU;
 using SupervisorMobility.API.DataAccess.Entities.LUP;
 using SupervisorMobility.API.DataAccess.Entities.Paths;
+using SupervisorMobility.API.DataAccess.Entities.SOS;
 using SupervisorMobility.API.DataAccess.Entities.SOS_Review;
 using SupervisorMobility.API.DataAccess.Services.OrderingServices;
 using SupervisorMobility.API.Entities;
@@ -23,6 +24,7 @@ using SupervisorMobility.API.Models.JobPaginationDtos;
 using SupervisorMobility.API.Models.KaizenDtos;
 using SupervisorMobility.API.Models.KaizenTransactionDtos;
 using SupervisorMobility.API.Models.PATDtos;
+using SupervisorMobility.API.Models.SOS.SOSHubDtos.AnalysisDtos;
 using SupervisorMobility.API.Models.SOSReviewDtos;
 using SupervisorMobility.API.Models.Users;
 using System.Diagnostics;
@@ -2791,7 +2793,7 @@ namespace SupervisorMobility.API.Services
 
             if (includeNavigation)
             {
-                query = query.Include(p => p.CareerPaths).Include(p => p.Categories).Include(p => p.Commentaries).Include(p => p.ILUs).Include(p => p.Transactions);
+                query = query.Include(p => p.CareerPaths).Include(p => p.Categories).Include(p => p.Commentaries).Include(p => p.Transactions);
             }
 
             if (includePeople)
@@ -2801,13 +2803,26 @@ namespace SupervisorMobility.API.Services
 
                 query = query
                  .Include(t => t.User).ThenInclude(u => u.Area);
+
+                query = query
+                 .Include(t => t.User).ThenInclude(u => u.Department);
+
+                query = query.Include(h => h.User)
+                             .ThenInclude(u => u.ILURegisers)
+                             .ThenInclude(i => i.Distribution)
+                             .Include(h => h.User)
+                             .ThenInclude(u => u.ILURegisers)
+                             .ThenInclude(i => i.ILULevel);
+
+
+
             }
 
-            //if (includeTransactions)
-            //{
-            //    query = query
-            //     .Include(t => t.Transactions);
-            //}
+            if (includeTransactions)
+            {
+                query = query.Include(p => p.Categories).ThenInclude(p=>p.ChosenCategory);
+            }
+
 
             return await query.FirstOrDefaultAsync();
 
@@ -2863,9 +2878,25 @@ namespace SupervisorMobility.API.Services
         public async Task<int> UpdateHCI(UpdateHCIDto HCIForUpdate, HCI HCIEntity)
         {
 
-            _mapper.Map(HCIForUpdate, HCIEntity);
+            var localEntry = _context.HCIs.Local.FirstOrDefault(entry => entry.HCIId == HCIForUpdate.HCIId);
+            if (localEntry != null)
+            {
+                _context.Entry(localEntry).CurrentValues.SetValues(HCIForUpdate);
 
-            return _context.SaveChanges();
+                UpdateILURegisters(localEntry.ILUs, HCIForUpdate.ILUs);
+            }
+            else
+            {
+                if (_context.Entry(HCIEntity).State == EntityState.Detached)
+                {
+                    _context.HCIs.Attach(HCIEntity);
+                }
+
+                _mapper.Map(HCIForUpdate, HCIEntity);
+                _context.HCIs.Update(HCIEntity);
+            }
+
+            return await _context.SaveChangesAsync();
         }
 
         public async Task<int> RemoveHCI(HCI HCIForAdd)
@@ -2885,6 +2916,31 @@ namespace SupervisorMobility.API.Services
         {
             return _context.HCICategories.OrderBy(p => p.ChosenCategoryDepartmentId).ToList();
         }
+
+        private void UpdateILURegisters(ICollection<ILURegister> existingILURegisters, ICollection<ILURegisterForUpdateDto> updatedILURegisters)
+        {
+            foreach (var updatedILURegister in updatedILURegisters)
+            {
+                var existingILURegister = existingILURegisters.FirstOrDefault(a => a.ILURegisterid == updatedILURegister.ILURegisterid);
+
+                if (existingILURegister != null)
+                {
+                    _context.Entry(existingILURegister).CurrentValues.SetValues(updatedILURegister);
+                }
+                else
+                {
+                    var newILURegister = _mapper.Map<ILURegister>(updatedILURegister);
+                    existingILURegisters.Add(newILURegister);
+                }
+            }
+
+            var iluRegistersToRemove = existingILURegisters.Where(a => !updatedILURegisters.Any(ua => ua.ILURegisterid == a.ILURegisterid)).ToList();
+            foreach (var iluToRemove in iluRegistersToRemove)
+            {
+                existingILURegisters.Remove(iluToRemove);
+            }
+        }
+
         #endregion
 
         #region HCI ILU
