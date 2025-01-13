@@ -445,7 +445,6 @@ namespace SupervisorMobility.API.Controllers.Exportation_Controllers
                             sheet.Cells[$"{Col}5"].Value = j + 1;
                             sheet.Cells[$"{Col}6"].Value = usersOfArea[j].Name;
                             sheet.Cells[$"{Col}10"].Value = usersOfArea[j].Payroll;
-                            sheet.Cells[$"{Col}42"].Value = operatorRoles?[j].Comment;
                             if (operatorRoles.Any())
                             {
                                 sheet.Cells[$"{Col}42"].Value = operatorRoles?[j].Comment;
@@ -456,7 +455,7 @@ namespace SupervisorMobility.API.Controllers.Exportation_Controllers
 
                         if (matrix[i, j] == null) { Col = sheetService.GetNextCombination(Col); Col = sheetService.GetNextCombination(Col); continue; }
 
-                        sheet.Cells[$"{Col}{Row}"].Value = matrix[i, j].AcquisitionDate;
+                        sheet.Cells[$"{Col}{Row}"].Value = matrix[i, j].AcquisitionDate.Value.Day;
 
                         Col = sheetService.GetNextCombination(Col);
 
@@ -570,7 +569,7 @@ namespace SupervisorMobility.API.Controllers.Exportation_Controllers
 
             ms.Position = 0;
 
-            var res = File(ms, "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet", PAT.AplicationDate.HasValue ? $"Yearly PAT {PAT.AplicationDate.Value.Year}.xlsx" : "Yearly PAT.xlsx");
+            var res = File(ms, "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet", AplicationMonth != 0 ? $"{months[AplicationMonth]} PAT.xlsx" : "Monthly PAT.xlsx");
             res.EnableRangeProcessing = true;
             return res;
         }
