@@ -702,9 +702,9 @@ namespace SupervisorMobility.API.Controllers.SOS_Controllers
         [HttpDelete("{SOSHubId}")]
         public async Task<ActionResult<int>> RemoveSOSHub(int SOSHubId)
         {
-            var result = await _AnalysisProcessRepository.RemoveSOSHub(SOSHubId);
-
             var SOSHub = await _AnalysisProcessRepository.GetSOSHub(SOSHubId);
+
+            var result = await _AnalysisProcessRepository.RemoveSOSHub(SOSHubId);
 
             if (result > 0)
                 return Ok(SOSHub);

@@ -38,8 +38,7 @@ namespace SupervisorMobility.API.Models.SOS.SOSCombinationDtos
         public ICollection<FileUploadGeneralDto>? Illustrations { get; set; } = new List<FileUploadGeneralDto>();
 
         public DateTime? CreatedAt { get; set; }
-        public int? SOSCombinationOperationSequenceId { get; set; }
-        public ICollection<SOSCombinationOperationSequenceForUpdateDto>? SOSCombinationOperationSequence { get; set; }
+        public List<SOSCombinationOperationSequenceForUpdateDto>? SOSCombinationOperationSequence { get; set; }
 
         public int SOSHubId { get; set; }
         public SOSHubDto? SOSHub { get; set; }
