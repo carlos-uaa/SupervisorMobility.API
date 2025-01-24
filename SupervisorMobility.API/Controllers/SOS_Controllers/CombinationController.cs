@@ -54,6 +54,7 @@ namespace SupervisorMobility.API.Controllers.SOS_Controllers
                     CombinationOperationToAdd.SectionId = sec.SectionId;
                     CombinationOperationToAdd.ProcessName = sec.Step;
                     CombinationOperationToAdd.SequenceId = SOSEntity.Sections.ToList().IndexOf(sec) + 1;
+                    CombinationOperationToAdd.IsActive = true;
 
                     sOSCombinationToCreate.SOSCombinationOperationSequence?.Add(CombinationOperationToAdd);
                 }
