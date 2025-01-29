@@ -11,6 +11,7 @@ using SupervisorMobility.API.Models.SOS.SOSAnalysisDtos;
 using SupervisorMobility.API.Models.SOS.SOSAnalysisLogbookDtos;
 using SupervisorMobility.API.Models.SOS.SOSCombinationDtos;
 using SupervisorMobility.API.Models.SOS.SOSCombinationLogbookDtos;
+using SupervisorMobility.API.Models.SOS.SOSCombinationOperationSequenceDtos;
 using SupervisorMobility.API.Models.SOS.SOSDistributionAdditionalTimeDtos;
 using SupervisorMobility.API.Models.SOS.SOSDistributionDtos;
 using SupervisorMobility.API.Models.SOS.SOSDistributionLogbookDtos;
@@ -277,7 +278,7 @@ namespace SupervisorMobility.API.DataAccess.Services
         //SOS Combination
         #region SOSCombination
         Task<int> CreateSOSCombination(SOSCombination SOS_CombinationToCreate);
-        Task<SOSCombination> GetSOSCombination(int SOSCombinationId, bool includeImages = false, bool includeNotes = false, bool includeLogbooks = false, bool includeSOS = false, bool includeImagesSOS = false);
+        Task<SOSCombination> GetSOSCombination(int SOSCombinationId, bool includeImages = false, bool includeNotes = false, bool includeLogbooks = false, bool includeSOS = false, bool includeImagesSOS = false, bool includeProcess = false);
         Task<IEnumerable<SOSCombination>> GetAllSOSCombination(bool includeImages = false, bool includeNotes = false, bool includeLogbooks = false, bool includeSOS = false);
 
         Task<int> UpdateSOSCombination(SOSCombinationForUpdateDto CombinationUpdate, SOSCombination CombinationEntity);
@@ -287,6 +288,10 @@ namespace SupervisorMobility.API.DataAccess.Services
         #endregion
         #region Add Range SOS Combination
         Task<List<SOSCombinationLogbook>> AddRangeSOSCombinationLogbook(List<SOSCombinationLogbook> SOSCombinationLogbooksToAdd);
+        Task<List<SOSCombinationOperationSequence>> AddRangeSOSOperationSequences(List<SOSCombinationOperationSequence> SOSOperationSequencesToAdd);
+        Task<AsyncVoidMethodBuilder> AddOperationSequenceToSOSCombination(SOSCombination Master, SOSCombinationOperationSequence Slave);
+
+        Task<AsyncVoidMethodBuilder> RemoveAllOperationsSequenceFromSOSCombination(SOSCombination Master);
         #endregion
         #region Add To Sos Combination
         Task<AsyncVoidMethodBuilder> AddSOSCombinationLogbookToSOSCombination(SOSCombination Master, SOSCombinationLogbook Slave);
@@ -304,7 +309,10 @@ namespace SupervisorMobility.API.DataAccess.Services
         Task<int> UpdateCombinationLogbook(SOSCombinationLogbookForUpdateDto CombinationForUpdate);
         Task<int> CreateSOSCombinationLogbook(SOSCombinationLogbook LogBook_ToCreate);
         #endregion
-
+        #region SOSCombinationOperationSequences
+        Task<SOSCombinationOperationSequence> GetSOSCombinationOperationSequencesById(int id);
+        Task<int> UpdateSOSCombinationOperationSequences(SOSCombinationOperationSequenceForUpdateDto OperationSequenceForUpdate);
+        #endregion
         //SOS Flow
         #region SOSFlow
         Task<int> CreateSOSFlow(SOSFlow SOS_FlowToCreate);

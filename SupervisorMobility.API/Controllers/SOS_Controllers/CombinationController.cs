@@ -1,5 +1,6 @@
 ﻿using AutoMapper;
 using Microsoft.AspNetCore.Mvc;
+using Quartz.Core;
 using SupervisorMobility.API.DataAccess.Entities;
 using SupervisorMobility.API.DataAccess.Entities.SOS;
 using SupervisorMobility.API.DataAccess.Services;
@@ -8,6 +9,7 @@ using SupervisorMobility.API.Models.FileUploadDto;
 using SupervisorMobility.API.Models.SOS.SOSAnalysisDtos;
 using SupervisorMobility.API.Models.SOS.SOSCombinationDtos;
 using SupervisorMobility.API.Models.SOS.SOSCombinationLogbookDtos;
+using SupervisorMobility.API.Models.SOS.SOSCombinationOperationSequenceDtos;
 using SupervisorMobility.API.Models.SOS.SOSFlowDtos;
 using SupervisorMobility.API.Models.SOS.SOSFlowLogbookDtos;
 using SupervisorMobility.API.Models.SOS.SOSTimeDtos;
@@ -34,7 +36,7 @@ namespace SupervisorMobility.API.Controllers.SOS_Controllers
         [HttpPost]
         public async Task<ActionResult<SOSCombinationDto>> GenerateCombination(SOSCombinationForCreateDto sOSCombinationToCreate, int SOSHubCollection_Id)
         {
-            SOSHub SOSEntity = await _ProcessRepository.GetSOSHub(SOSHubCollection_Id, includeInformation: true);
+            SOSHub SOSEntity = await _ProcessRepository.GetSOSHub(SOSHubCollection_Id, includeInformation: true, includeSections: true);
 
             if (sOSCombinationToCreate.SOSCombinationId == 0)
             {
@@ -43,6 +45,19 @@ namespace SupervisorMobility.API.Controllers.SOS_Controllers
 
                 sOSCombinationToCreate.SOSHubId = SOSHubCollection_Id;
 
+                sOSCombinationToCreate.SOSCombinationOperationSequence = new List<SOSCombinationOperationSequenceForCreateDto>();
+
+                foreach(Section sec in SOSEntity.Sections)
+                {
+                    SOSCombinationOperationSequenceForCreateDto CombinationOperationToAdd = new();
+
+                    CombinationOperationToAdd.SectionId = sec.SectionId;
+                    CombinationOperationToAdd.ProcessName = sec.Step;
+                    CombinationOperationToAdd.SequenceId = SOSEntity.Sections.ToList().IndexOf(sec) + 1;
+                    CombinationOperationToAdd.IsActive = true;
+
+                    sOSCombinationToCreate.SOSCombinationOperationSequence?.Add(CombinationOperationToAdd);
+                }
 
                 SOSCombination CombinationToCreate = _mapper.Map<SOSCombination>(sOSCombinationToCreate);
 
@@ -94,10 +109,10 @@ namespace SupervisorMobility.API.Controllers.SOS_Controllers
         }//New revision
 
         [HttpGet("{id}", Name = "GetSOSCombination")]
-        public async Task<ActionResult<SOSCombinationDto>> GetSOSCombination(int id, bool includeImages = false, bool includeNotes = false, bool includeLogbooks = false, bool includeSpecialCases = false, bool includeSOS = false, bool includeImagesSOS = false)
+        public async Task<ActionResult<SOSCombinationDto>> GetSOSCombination(int id, bool includeImages = false, bool includeNotes = false, bool includeLogbooks = false, bool includeSpecialCases = false, bool includeSOS = false, bool includeImagesSOS = false, bool includeProcess = false)
         {
 
-            var SOSCombination = await _ProcessRepository.GetSOSCombination(id, includeImages, includeNotes, includeLogbooks,  includeSOS, includeImagesSOS);
+            var SOSCombination = await _ProcessRepository.GetSOSCombination(id, includeImages, includeNotes, includeLogbooks,  includeSOS, includeImagesSOS, includeProcess);
             if (SOSCombination == null)
             {
                 return NotFound("SOSCombination not found!");
@@ -125,11 +140,41 @@ namespace SupervisorMobility.API.Controllers.SOS_Controllers
         {
             List<Turn> Bkup_Turn = new List<Turn>();
             List<SOSCombinationLogbook> Bkup_CombinationLogbook = new List<SOSCombinationLogbook>();
+            List<SOSCombinationOperationSequence> Bkup_OperationSequence = new List<SOSCombinationOperationSequence>();
 
           // Filtrar nuevos CombinationLogbooks
             List<SOSCombinationLogbookForUpdateDto> filteredCombinationLogbooksList = sosUpdateEntity.CombinationLogbooks.Where(t => t.SOSCombinationLogbookId <= 0).ToList();
            // Filtrar nuevos Turnos
             List<TurnForUpdateDto> filteredTurnList = sosUpdateEntity.Turns.Where(t => t.TurnId <= 0).ToList();
+            //filtrar nuevos SOSCombinationOperationSequence
+            List<SOSCombinationOperationSequenceForUpdateDto> filteredOperationSequence = sosUpdateEntity.SOSCombinationOperationSequence.Where(sq => sq.SOSCombinationOperationSequenceId <= 0).ToList();
+
+            // Remover nuevos SOSCombinationOperationSequenceForUpdateDto de la lista principal para evitar duplicados
+            if (filteredOperationSequence.Any())
+            {
+                sosUpdateEntity.SOSCombinationOperationSequence.RemoveAll(t => t.SOSCombinationOperationSequenceId == null || t.SOSCombinationOperationSequenceId <= 0);
+
+                // Mapear nuevas norms/standars
+                List<SOSCombinationOperationSequence> newSOSOperationSequences = _mapper.Map<List<SOSCombinationOperationSequence>>(filteredOperationSequence);
+
+                foreach (var OperationSequence in newSOSOperationSequences)
+                {
+                    OperationSequence.SOSCombinationOperationSequenceId= 0;
+                    OperationSequence.IsActive = true;
+                }
+
+                var resultAddOperationSequences = await _ProcessRepository.AddRangeSOSOperationSequences(newSOSOperationSequences);
+
+                if (resultAddOperationSequences != null)
+                {
+                    Debug.WriteLine("Operation Sequences añadidos con exitop");
+                    Bkup_OperationSequence.AddRange(resultAddOperationSequences);
+                }
+                else
+                {
+                    Debug.WriteLine("Error OperationSequences añadidos");
+                }
+            }
 
 
             // Remover nuevos CombinationLogbooks de la lista principal para evitar duplicados
@@ -188,7 +233,7 @@ namespace SupervisorMobility.API.Controllers.SOS_Controllers
             }
 
 
-            SOSCombination _sosCombination = await _ProcessRepository.GetSOSCombination(sosCombination_Id, true, true, true, true);
+            SOSCombination _sosCombination = await _ProcessRepository.GetSOSCombination(sosCombination_Id, true, true, true, true, true, true);
 
             ////Aqui va el historico de ser necesario en  un futuro 
 
@@ -220,11 +265,21 @@ namespace SupervisorMobility.API.Controllers.SOS_Controllers
                 Bkup_Turn.Add(turnBkaux);
             }
 
+            foreach (var operationSequence in sosUpdateEntity.SOSCombinationOperationSequence)
+            {
+                var operationSequenceUpdate = await _ProcessRepository.UpdateSOSCombinationOperationSequences(operationSequence);
+                SOSCombinationOperationSequence operationSequenceBkaux = await _ProcessRepository.GetSOSCombinationOperationSequencesById(operationSequence.SOSCombinationOperationSequenceId);
+                Bkup_OperationSequence.Add(operationSequenceBkaux);
+            }
+
+
             //Nulleamos el update para evitar errores
             sosUpdateEntity.Turns = null;
             sosUpdateEntity.CombinationLogbooks = null;
+            sosUpdateEntity.SOSCombinationOperationSequence = null;
 
             await _ProcessRepository.RemoveAllTurnsFromSOSCombination(_sosCombination);
+            await _ProcessRepository.RemoveAllOperationsSequenceFromSOSCombination(_sosCombination);
             await _ProcessRepository.SOSDataRemoveAllSOSCombinationLogbookFromSOSCombination(_sosCombination);
 
             var result = await _ProcessRepository.UpdateSOSCombination(sosUpdateEntity, _sosCombination);
@@ -246,6 +301,15 @@ namespace SupervisorMobility.API.Controllers.SOS_Controllers
                 foreach (Turn turn in Bkup_Turn)
                 {
                     await _ProcessRepository.AddTurnToSOSCombination(_sosCombination, turn);
+                }
+            }
+
+            //Operations Sequence
+            if (Bkup_OperationSequence.Any())
+            {
+                foreach (SOSCombinationOperationSequence operationSequence in Bkup_OperationSequence)
+                {
+                    await _ProcessRepository.AddOperationSequenceToSOSCombination(_sosCombination, operationSequence);
                 }
             }
 
