@@ -4209,11 +4209,11 @@ namespace SupervisorMobility.API.DataAccess.Services
         public async Task<SOSCombination> GetSOSCombination( int SOSCombinationId, bool includeImages = false, bool includeNotes = false, bool includeLogbooks = false, bool includeSOS = false, bool includeImagesSOS = false, bool includeProcess = false)
         {
             // Consulta inicial para encontrar la combinación
-            var sosCombination = await _context.SOSCombinations
-                .AsNoTracking()
+            var sosCombination = await _context.SOSCombinations.AsNoTracking()
                 .Where(c => c.SOSCombinationId == SOSCombinationId && c.IsActive == true)
                 .FirstOrDefaultAsync();
 
+           
             // Verificar si sosCombination es nulo antes de cargar relaciones
             if (sosCombination != null)
             {
@@ -4366,6 +4366,7 @@ namespace SupervisorMobility.API.DataAccess.Services
                 }
                 else
                 {
+                   
                     _mapper.Map(CombinationUpdate, CombinationEntity);
                     _context.SOSCombinations.Update(CombinationEntity);
                 }

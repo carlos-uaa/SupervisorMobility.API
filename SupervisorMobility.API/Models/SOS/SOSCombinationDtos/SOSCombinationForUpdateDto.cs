@@ -41,6 +41,6 @@ namespace SupervisorMobility.API.Models.SOS.SOSCombinationDtos
         public List<SOSCombinationOperationSequenceForUpdateDto>? SOSCombinationOperationSequence { get; set; }
 
         public int SOSHubId { get; set; }
-        public SOSHubDto? SOSHub { get; set; }
+        public SOSHubForUpdateDto? SOSHub { get; set; }
     }
 }

@@ -233,7 +233,7 @@ namespace SupervisorMobility.API.Controllers.SOS_Controllers
             }
 
 
-            SOSCombination _sosCombination = await _ProcessRepository.GetSOSCombination(sosCombination_Id, true, true, true, true, true, true);
+            SOSCombination _sosCombination = await _ProcessRepository.GetSOSCombination(sosCombination_Id, true, true, true);
 
             ////Aqui va el historico de ser necesario en  un futuro 
 
@@ -275,6 +275,7 @@ namespace SupervisorMobility.API.Controllers.SOS_Controllers
 
             //Nulleamos el update para evitar errores
             sosUpdateEntity.Turns = null;
+            sosUpdateEntity.SOSHub = null;
             sosUpdateEntity.CombinationLogbooks = null;
             sosUpdateEntity.SOSCombinationOperationSequence = null;
 
