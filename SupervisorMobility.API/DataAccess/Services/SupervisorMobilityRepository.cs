@@ -2047,7 +2047,6 @@ namespace SupervisorMobility.API.Services
             return await _context.ILULevels
             .Where(p => p.ILULevelId == idILU).FirstOrDefaultAsync();
         }
-
         public async Task<IEnumerable<ILULevel>> GetAllILULevel()
         {
             return await _context.ILULevels.Where(u => u.isActive == true)
@@ -2081,6 +2080,15 @@ namespace SupervisorMobility.API.Services
             return await _context.ILURegisters
                .Where(p => p.ILURegisterid == idILUR).FirstOrDefaultAsync();
         }
+
+        public async Task<ILURegister?> GetLastILURegisterForUserAndDistribution(int id_User, int id_dist)
+        {
+            return await _context.ILURegisters
+               .Where(p => p.OperatorId == id_User && p.DistributionId == id_dist)
+            .OrderByDescending(p => p.AcquisitionDate) 
+            .FirstOrDefaultAsync();
+        }
+
         public async Task<int> AddILURegister(ILURegister iLURegister)
         {
             _context.ILURegisters.Add(iLURegister);

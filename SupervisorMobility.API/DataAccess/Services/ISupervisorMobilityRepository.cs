@@ -274,6 +274,7 @@ namespace SupervisorMobility.API.Services
         #endregion
         #region ILURegister
         Task<ILURegister> GetILURegister(int idILUR);
+        Task<ILURegister?> GetLastILURegisterForUserAndDistribution(int id_User, int id_dist);
         Task<int> AddILURegister(ILURegister iLURegister);
         Task<int> AddILURegToUser(ILURegister iLURegister, User Master);
         Task<int> UpdateILURegister(ILURegister iluRforUpdate, ILURegister iluREntity);
