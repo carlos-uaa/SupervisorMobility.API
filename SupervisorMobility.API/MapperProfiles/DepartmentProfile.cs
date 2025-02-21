@@ -7,6 +7,7 @@ namespace SupervisorMobility.API.Profiles
         public DepartmentProfile()
         {
             CreateMap<Entities.Department, Models.DepartmentDtos.DepartmentDto>();
+            CreateMap<Models.DepartmentDtos.DepartmentDto, Entities.Department>();
             CreateMap<Entities.Department, Models.DepartmentDtos.DepartmentForCreationDto>().ReverseMap();
             CreateMap<Entities.Department, Models.DepartmentDtos.DepartmentForUpdateDto>().ReverseMap();
         }

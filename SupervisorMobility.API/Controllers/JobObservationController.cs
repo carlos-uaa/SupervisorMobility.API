@@ -1,5 +1,6 @@
 ﻿using AutoMapper;
 using DocumentFormat.OpenXml.Bibliography;
+using DocumentFormat.OpenXml.Spreadsheet;
 using FuzzyString;
 using Microsoft.AspNetCore.Cors;
 using Microsoft.AspNetCore.Mvc;
@@ -7,6 +8,7 @@ using Microsoft.EntityFrameworkCore.Query.Internal;
 using Microsoft.Extensions.Logging.Abstractions;
 using SupervisorMobility.API.Business;
 using SupervisorMobility.API.DataAccess.Entities;
+using SupervisorMobility.API.DataAccess.Entities.ILU;
 using SupervisorMobility.API.DataAccess.Services;
 using SupervisorMobility.API.Entities;
 using SupervisorMobility.API.Models.ADUser;
@@ -192,7 +194,7 @@ namespace SupervisorMobility.API.Controllers
         {
 
             var allJobObservations = await _supervisorMobilityRepository.GetJobObservationsByFiltersAsync(startDate, endDate, jobObsId, plantId, areaId, distributionId, operationId, supervisorId, status, userId, typeId, searchString, page, entries, sortO, sortL);
-            
+
             return Ok(allJobObservations);
         }
 
@@ -320,30 +322,73 @@ namespace SupervisorMobility.API.Controllers
                 //    _email.Send(emailMessage);
                 //}
 
+                if (jobObservationEntity.Type == 4)
+                {
+                    ILURegister _newIlu = new();
 
-                //Si la Job Actual tiene un  sos plan id puedo buscar una del siguiente año directamente
-                //if (jobObservationEntity.PlantId != null && jobObservationEntity.AreaId != null && jobObservationEntity.SupervisorId != null)
-                //{
-                //    var SOS_Review_NextYear = await _supervisorMobilityRepository.FindSOSSupervisor((int)jobObservationEntity.PlantId, (int)jobObservationEntity.AreaId, jobObservationEntity.FinishedDate.Value.Year + 1,  (int) jobObservationEntity.SupervisorId);
+                    _newIlu.DistributionId = jobObservationEntity.DistributionId;
+                    _newIlu.OperatorId = jobObservationEntity.OperatorId;
+                    _newIlu.isActive = true;
 
-                //    //Si existe un plan del siguiente año, tengo que buscar la job y actualizar sus datos
-                //    if(SOS_Review_NextYear != null)
-                //    {
-                //        //buscar la job del siguiente año y actualizar la job
-                //    }
-                //    else
-                //    {
-                //        //crear un plan para el suigueinte año y añadir la nueva job 
-                //    }
-                //}
+                    ILURegister? LastLevel = await _supervisorMobilityRepository.GetLastILURegisterForUserAndDistribution((int)_newIlu.OperatorId, (int)_newIlu.DistributionId);
+                    //puede ser null
+                    switch (LastLevel.ILULevelId.Value)
+                    {
+                        //Falta saber que pasa con los leaders
+                        case 1:
+                            _newIlu.ILULevelId = 2;
+                            break;
+                        case 4:
+                            _newIlu.ILULevelId = 6;
+                            break;
+                        case 8:
+                            _newIlu.ILULevelId = 11;
+                            break;
+                    }
+
+                    var Createresult = await _supervisorMobilityRepository.AddILURegister(_newIlu);
+
+                    if (Createresult > 0)
+                    {
+
+                        User MasterUser = await _supervisorMobilityRepository.GetUserAsync((int)jobObservationEntity.OperatorId);
+
+                        if (MasterUser != null)
+                        {
+                            var AddToUserResult = await _supervisorMobilityRepository.AddILURegToUser(_newIlu, MasterUser);
+                        }
+
+
+                        try
+                        {
+                            var temp = await _supervisorMobilityRepository.GetDistributionOnlyIdAsync((int)jobObservationEntity.DistributionId);
+                            var temp2 = await _supervisorMobilityRepository.GetILULevel(_newIlu.ILULevelId.Value);
+                            HCIILU toAdd = new HCIILU
+                            {
+                                Description = temp.Description,
+                                level = temp2.ILULevelCode.ToString(),
+                                Register = _newIlu,
+                            };
+                            await _supervisorMobilityRepository.AddHciIluReg(toAdd);
+                        }
+                        catch (Exception ex)
+                        {
+                            Console.WriteLine(ex.ToString());
+                        }
+
+
+                    }
+
+
+                }
 
                 //Crear la job del typo 5 siempre y cuando sea del sos program, ya que revisa la operacion
 
                 if (jobObservationEntity.PlantId != null && jobObservationEntity.AreaId != null && jobObservationEntity.DistributionId != null && jobObservationEntity.Operations.FirstOrDefault() != null)
                 {
 
-                   
-                    List<JobObservation>? nextYearJobs = await _supervisorMobilityRepository.FindNextYearJobObservations( 
+
+                    List<JobObservation>? nextYearJobs = await _supervisorMobilityRepository.FindNextYearJobObservations(
                         (int)jobObservationEntity.PlantId,
                         (int)jobObservationEntity.AreaId,
                         (int)jobObservationEntity.DistributionId,
@@ -352,7 +397,7 @@ namespace SupervisorMobility.API.Controllers
                         jobObservationForUpdate.FinishedDate.Value.Year + 1);
 
                     IEnumerable<JobCategoryStructure> _checklistCategories = await _supervisorMobilityRepository.GetChecklistCategoriesAsync(false);
-                    
+
                     string jobCategoryStructureIds = "";
                     foreach (var category in _checklistCategories)
                     {
@@ -371,7 +416,7 @@ namespace SupervisorMobility.API.Controllers
                         newYearJob.AreaId = jobObservationEntity.AreaId;
                         newYearJob.DistributionId = jobObservationEntity.DistributionId;
 
-                     
+
                         foreach (var op in jobObservationEntity.Operations)
                         {
                             if (!newYearJob.Operations.Any(existingOp => existingOp.OperationId == op.OperationId))

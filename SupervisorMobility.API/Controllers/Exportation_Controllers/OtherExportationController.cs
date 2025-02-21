@@ -138,8 +138,12 @@ namespace SupervisorMobility.API.Controllers.Exportation_Controllers
                     int colIndex = usersOfArea.IndexOf(uo);
                     foreach (var reg in uo.ILURegisers)
                     {
-                        int rowIndex = distributions.FindIndex(p => p.DistributionId == reg.DistributionId);
-                        matrix[rowIndex, colIndex] = reg;
+                        if(reg.Distribution is not null)
+                        {
+                            int rowIndex = distributions.FindIndex(p => p.DistributionId == reg.DistributionId);
+                            matrix[rowIndex, colIndex] = reg;
+
+                        }
                     }
                 }
 
@@ -165,7 +169,7 @@ namespace SupervisorMobility.API.Controllers.Exportation_Controllers
                             sheet.Cells[$"{Col}5"].Value = j + 1;
                             sheet.Cells[$"{Col}6"].Value = usersOfArea[j].Name;
                             sheet.Cells[$"{Col}10"].Value = usersOfArea[j].Payroll;
-                            if (operatorRoles.Any())
+                            if (operatorRoles?.Any() ?? false)
                             {
                                 sheet.Cells[$"{Col}42"].Value = operatorRoles?[j].Comment;
                                 if (operatorRoles[j].Role != null)
@@ -748,11 +752,21 @@ namespace SupervisorMobility.API.Controllers.Exportation_Controllers
 
                     #region Experience
 
-                    foreach (var item in _HCI.ILUs)
+                    foreach (var item in _HCI.ILUs.Where(e => e.isActive)
+                        .GroupBy(e => new { e.DistributionId, ILUCategory = GetILUCategory(e.ILULevel?.ILULevelCode) })
+                        .Select(g => g.OrderByDescending(e => e.AcquisitionDate).First())
+                        .ToList())
                     {
                         sheet.Cells[$"D{currentRow}"].Value = (item.AcquisitionDate?.ToString("dd/MM/yyyy", CultureInfo.InvariantCulture) ?? "") + " - " + (item.EndDate?.ToString("dd/MM/yyyy", CultureInfo.InvariantCulture) ?? "");
                         sheet.Cells[$"F{currentRow}"].Value = item.Distribution?.Description;
-                        sheet.Cells[$"L{currentRow}"].Value = item.ILULevel?.ILULevelCode.ToUpperInvariant();
+                        string iluLevlelCode = item.ILULevel?.ILULevelCode switch
+                        {
+                            "ITrainee" or "I" or "ILeader" or "LTrainee" or "LTraineeLeader" => "I",
+                            "L" or "LLeader" or "UTrainee" or "ULeaderTrainee" => "L",
+                            "U" or "ULeader" => "U",
+                            _ => ""
+                        };
+                        sheet.Cells[$"L{currentRow}"].Value = iluLevlelCode.ToUpperInvariant();
 
                         currentRow++;
                         if (currentRow > LastRow && item != _HCI.ILUs.Last())
@@ -848,5 +862,17 @@ namespace SupervisorMobility.API.Controllers.Exportation_Controllers
             res.EnableRangeProcessing = true;
             return res;
         }
+
+        private string GetILUCategory(string? iluLevelCode)
+        {
+            return iluLevelCode switch
+            {
+                "ITrainee" or "I" or "ILeader" or "LTrainee" or "LTraineeLeader" => "IGroup",
+                "L" or "LLeader" or "UTrainee" or "ULeaderTrainee" => "LGroup",
+                "U" or "ULeader" => "UGroup",
+                _ => "Other"
+            };
+        }
     }
+
 }
