@@ -169,7 +169,7 @@ namespace SupervisorMobility.API.Controllers.Exportation_Controllers
                             sheet.Cells[$"{Col}5"].Value = j + 1;
                             sheet.Cells[$"{Col}6"].Value = usersOfArea[j].Name;
                             sheet.Cells[$"{Col}10"].Value = usersOfArea[j].Payroll;
-                            if (operatorRoles.Any())
+                            if (operatorRoles?.Any() ?? false)
                             {
                                 sheet.Cells[$"{Col}42"].Value = operatorRoles?[j].Comment;
                                 if (operatorRoles[j].Role != null)
