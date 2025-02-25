@@ -1,4 +1,4 @@
-﻿using System.ComponentModel.DataAnnotations.Schema;
+﻿ using System.ComponentModel.DataAnnotations.Schema;
 using System.ComponentModel.DataAnnotations;
 
 namespace SupervisorMobility.API.DataAccess.Entities.SOS
@@ -11,7 +11,9 @@ namespace SupervisorMobility.API.DataAccess.Entities.SOS
         public string? OperationName { get; set; }
         public string? ProcessName { get; set; }
 
-  
+
+        [Column(TypeName = "nvarchar(MAX)")]
+        public string Flow { get; set; } 
 
         public int? ReviewerHSId { get; set; }
         public User? ReviewerHS { get; set; }
