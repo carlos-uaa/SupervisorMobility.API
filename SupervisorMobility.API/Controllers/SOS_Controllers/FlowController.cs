@@ -160,7 +160,7 @@ namespace SupervisorMobility.API.Controllers.SOS_Controllers
            
 
 
-            SOSFlow _sosFlow = await _ProcessRepository.GetSOSFlow(sosFlow_Id, true, true, true, true);
+            SOSFlow _sosFlow = await _ProcessRepository.GetSOSFlow(sosFlow_Id, true, true, true);
 
             ////Aqui va el historico de ser necesario en  un futuro 
 
