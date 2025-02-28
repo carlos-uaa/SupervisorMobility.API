@@ -15,6 +15,7 @@ using OfficeOpenXml.FormulaParsing.Excel.Functions;
 using Newtonsoft.Json;
 using DocumentFormat.OpenXml.Drawing.Charts;
 using System.Globalization;
+using DocumentFormat.OpenXml.Wordprocessing;
 
 namespace SupervisorMobility.API.Controllers.Exportation_Controllers
 {
@@ -71,7 +72,7 @@ namespace SupervisorMobility.API.Controllers.Exportation_Controllers
 
             List<Distribution> distributions = (List<Distribution>)await _SMProcessRepository.GetDistributionsForAreaAsync(PAT.AreaId.Value);
 
-            
+
             var orderedPatDistributionComments = distributions
                 .Select(id => PAT.PatDistributionComments.FirstOrDefault(pdc => pdc.DistributionId == id.DistributionId))
                 .Where(pdc => pdc != null).ToList();
@@ -114,7 +115,7 @@ namespace SupervisorMobility.API.Controllers.Exportation_Controllers
                 //#region information table
 
                 var InfoSup = PAT.Supervisors.FirstOrDefault();
-                string ResponableSVs = string.Join(" / ", PAT.Supervisors.Select(user=>user.Name));
+                string ResponableSVs = string.Join(" / ", PAT.Supervisors.Select(user => user.Name));
                 string ResponableSSVs = string.Join(" / ", PAT.Supervisors.Select(user => user.Superior?.Name).Where(name => name != null).Distinct());
 
                 sheet.Cells["B4"].Value = InfoSup?.Department;
@@ -138,7 +139,7 @@ namespace SupervisorMobility.API.Controllers.Exportation_Controllers
                     int colIndex = usersOfArea.IndexOf(uo);
                     foreach (var reg in uo.ILURegisers)
                     {
-                        if(reg.Distribution is not null)
+                        if (reg.Distribution is not null)
                         {
                             int rowIndex = distributions.FindIndex(p => p.DistributionId == reg.DistributionId);
                             matrix[rowIndex, colIndex] = reg;
@@ -159,6 +160,39 @@ namespace SupervisorMobility.API.Controllers.Exportation_Controllers
                 {
                     sheet.Cells[$"B{Row}"].Value = i + 1;
                     sheet.Cells[$"C{Row}"].Value = distributions[i]?.Description;
+
+                    string imageType = "";
+                    switch (distributions[i]?.CriticalType)
+                    {
+                        case 1:
+                            imageType = $"DataAccess/Icons/HOE_Symbols/A.png";
+                            break;
+                        case 2:
+                            imageType = $"DataAccess/Icons/HOE_Symbols/B.png";
+                            break;
+                        case 3:
+                            imageType = $"DataAccess/Icons/HOE_Symbols/C.png";
+                            break;
+                    }
+
+                    if (imageType != "")
+                    {
+                        using (FileStream stream = System.IO.File.OpenRead(imageType))
+                        {
+                            int column = sheetService.ColumnLetterToNumber(Col);
+
+                            var picture = sheet.Drawings.AddPicture($"{i}{distributions[i]?.CriticalType}Critical", stream);
+
+
+                            picture.SetSize(rowHeight - 6, rowHeight - 6);
+
+                            int YOffset = (rowHeight - (int)(picture.Size.Height / 9525)) / 2;
+                            int XOffset = (colWidth - (int)(picture.Size.Width / 9525)) / 2;
+
+                            picture.SetPosition(Row - 1, YOffset, column - 2, XOffset);
+                        }
+                    }
+
                     if (orderedPatDistributionComments.Any() && !string.IsNullOrEmpty(orderedPatDistributionComments[i].Comment))
                         sheet.Cells[$"CD{Row}"].Value = orderedPatDistributionComments[i]?.Comment;
 
@@ -399,7 +433,7 @@ namespace SupervisorMobility.API.Controllers.Exportation_Controllers
 
                 var InfoSup = PAT.Supervisors.FirstOrDefault();
                 string ResponableSVs = string.Join(" / ", PAT.Supervisors.Select(user => user.Name));
-                string ResponableSSVs = string.Join(" / ", PAT.Supervisors.Select(user => user.Superior?.Name).Where(name=> name!=null).Distinct());
+                string ResponableSSVs = string.Join(" / ", PAT.Supervisors.Select(user => user.Superior?.Name).Where(name => name != null).Distinct());
 
                 sheet.Cells["B4"].Value = InfoSup?.Department;
                 sheet.Cells["H4"].Value = InfoSup?.Area?.Description;
@@ -442,6 +476,41 @@ namespace SupervisorMobility.API.Controllers.Exportation_Controllers
                 {
                     sheet.Cells[$"B{Row}"].Value = i + 1;
                     sheet.Cells[$"C{Row}"].Value = distributions[i]?.Description;
+
+
+                    string imageType = "";
+                    switch (distributions[i]?.CriticalType)
+                    {
+                        case 1:
+                            imageType = $"DataAccess/Icons/HOE_Symbols/A.png";
+                            break;
+                        case 2:
+                            imageType = $"DataAccess/Icons/HOE_Symbols/B.png";
+                            break;
+                        case 3:
+                            imageType = $"DataAccess/Icons/HOE_Symbols/C.png";
+                            break;
+                    }
+
+                    if (imageType != "")
+                    {
+                        using (FileStream stream = System.IO.File.OpenRead(imageType))
+                        {
+                            int column = sheetService.ColumnLetterToNumber(Col);
+
+                            var picture = sheet.Drawings.AddPicture($"{i}{distributions[i]?.CriticalType}Critical", stream);
+
+
+                            picture.SetSize(rowHeight - 6, rowHeight - 6);
+
+                            int YOffset = (rowHeight - (int)(picture.Size.Height / 9525)) / 2;
+                            int XOffset = (colWidth - (int)(picture.Size.Width / 9525)) / 2;
+
+                            picture.SetPosition(Row - 1, YOffset, column - 2, XOffset);
+                        }
+                    }
+
+
                     if (orderedPatDistributionComments.Any() && !string.IsNullOrEmpty(orderedPatDistributionComments[i].Comment))
                         sheet.Cells[$"CD{Row}"].Value = orderedPatDistributionComments[i]?.Comment;
 
@@ -628,7 +697,7 @@ namespace SupervisorMobility.API.Controllers.Exportation_Controllers
                     var ManualTraining = _HCI.Transactions.Where(t => t.Type == 1).ToList();
                     foreach (var item in ManualTraining)
                     {
-                        sheet.Cells[$"A{currentRow}"].Value = (item.DateStart?.ToString("dd/MM/yyyy", CultureInfo.InvariantCulture)??"") + " - " + (item.DateEnd?.ToString("dd/MM/yyyy", CultureInfo.InvariantCulture) ?? "");
+                        sheet.Cells[$"A{currentRow}"].Value = (item.DateStart?.ToString("dd/MM/yyyy", CultureInfo.InvariantCulture) ?? "") + " - " + (item.DateEnd?.ToString("dd/MM/yyyy", CultureInfo.InvariantCulture) ?? "");
                         sheet.Cells[$"B{currentRow}"].Value = item.Description;
 
                         currentRow++;
@@ -861,7 +930,7 @@ namespace SupervisorMobility.API.Controllers.Exportation_Controllers
 
             ms.Position = 0;
 
-            var res = File(ms, "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet",$"HCI {_HCI.User?.Name??"Unknown user"}.xlsx");
+            var res = File(ms, "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet", $"HCI {_HCI.User?.Name ?? "Unknown user"}.xlsx");
             res.EnableRangeProcessing = true;
             return res;
         }
