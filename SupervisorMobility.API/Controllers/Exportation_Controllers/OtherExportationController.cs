@@ -83,11 +83,27 @@ namespace SupervisorMobility.API.Controllers.Exportation_Controllers
             foreach (var iluLevel in iluLevels)
             {
                 string value; int category;
-                if (iluLevel.ILULevelCode == "ITrainee")
-                    value = "";
-                else
+                switch (iluLevel.ILULevelCode)
                 {
-                    value = iluLevel.ILULevelCode[0].ToString();
+                    case "ITrainee":
+                        value = "";
+                        break;
+                    case "ILeader":
+                    case "LTrainee":
+                    case "LTraineeLeader":
+                        value = "I";
+                        break;
+                    case "LLeader":
+                    case "UTrainee":
+                        value = "L";
+                        break;
+                    case "ULeaderTrainee":
+                    case "ULeader":
+                        value = "U";
+                        break;
+                    default:
+                        value = iluLevel.ILULevelCode[0].ToString();
+                        break;
                 }
 
                 category = iluLevel.ILULevelCode.Substring(1) switch
@@ -400,11 +416,28 @@ namespace SupervisorMobility.API.Controllers.Exportation_Controllers
             foreach (var iluLevel in iluLevels)
             {
                 string value; int category;
-                if (iluLevel.ILULevelCode == "ITrainee")
-                    value = "";
-                else
+
+                switch (iluLevel.ILULevelCode)
                 {
-                    value = iluLevel.ILULevelCode[0].ToString();
+                    case "ITrainee":
+                        value = "";
+                        break;
+                    case "ILeader":
+                    case "LTrainee":
+                    case "LTraineeLeader":
+                        value = "I";
+                        break;
+                    case "LLeader":
+                    case "UTrainee":
+                        value = "L";
+                        break;
+                    case "ULeaderTrainee":
+                    case "ULeader":
+                        value = "U";
+                            break;
+                    default:
+                        value = iluLevel.ILULevelCode[0].ToString();
+                        break;
                 }
 
                 category = iluLevel.ILULevelCode.Substring(1) switch
