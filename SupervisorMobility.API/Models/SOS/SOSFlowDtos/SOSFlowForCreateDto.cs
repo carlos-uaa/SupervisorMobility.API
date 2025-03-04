@@ -14,6 +14,8 @@ namespace SupervisorMobility.API.Models.SOS.SOSFlowDtos
         public string? InternalControlNumber { get; set; }
         public string? OperationName { get; set; }
         public string? ProcessName { get; set; }
+        public string Flow { get; set; }
+
         public int? ReviewerHSId { get; set; }
 
         public DateTime? CreatedAt { get; set; }

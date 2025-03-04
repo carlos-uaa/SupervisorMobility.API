@@ -334,7 +334,7 @@ namespace SupervisorMobility.API.Controllers
                     //puede ser null
                     switch (LastLevel.ILULevelId.Value)
                     {
-                        //Falta saber que pasa con los leaders
+                        
                         case 1:
                             _newIlu.ILULevelId = 2;
                             break;
@@ -343,6 +343,14 @@ namespace SupervisorMobility.API.Controllers
                             break;
                         case 8:
                             _newIlu.ILULevelId = 11;
+                            break;
+                        
+                        //Leaders
+                        case 5:
+                            _newIlu.ILULevelId = 7;
+                            break;
+                        case 9:
+                            _newIlu.ILULevelId = 10;
                             break;
                     }
 

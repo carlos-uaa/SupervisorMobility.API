@@ -2,6 +2,7 @@
 using Microsoft.AspNetCore.Mvc;
 using SupervisorMobility.API.DataAccess.Entities;
 using SupervisorMobility.API.DataAccess.Entities.ILU;
+using SupervisorMobility.API.DataAccess.Entities.LUP;
 using SupervisorMobility.API.Models.ILU;
 using SupervisorMobility.API.Models.ILURegisterDtos;
 using SupervisorMobility.API.Services;
@@ -31,37 +32,103 @@ namespace SupervisorMobility.API.Controllers
         public async Task<ActionResult> AddNewILU(ILURegisterForCreationDto ILUToRegister, int userID)
         {
             var finalILURegister = _mapper.Map<ILURegister>(ILUToRegister);
-            var Createresult = await _supervisorMobilityRepository.AddILURegister(finalILURegister);
 
-            if (Createresult > 0)
+            ILURegister _newIluITraining = new();
+            User MasterUser = await _supervisorMobilityRepository.GetUserAsync(userID);
+
+            int Createresult = 0;
+
+            if (finalILURegister.ILULevelId == 2 || finalILURegister.ILULevelId == 3)
             {
 
-                User MasterUser = await _supervisorMobilityRepository.GetUserAsync(userID);
+                ILURegister? LastLevelCheckTraining = await _supervisorMobilityRepository.GetLastILURegisterForUserAndDistribution((int)finalILURegister.OperatorId, (int)finalILURegister.DistributionId);
+                //puede ser null
 
-                if (MasterUser != null)
+                if (LastLevelCheckTraining != null && LastLevelCheckTraining.ILULevelId.Value == 1)
                 {
-                    var AddToUserResult = await _supervisorMobilityRepository.AddILURegToUser(finalILURegister, MasterUser);
+                    Createresult = await _supervisorMobilityRepository.AddILURegister(finalILURegister);
+
+                    var AddILUToUser = await _supervisorMobilityRepository.AddILURegToUser(finalILURegister, MasterUser);
+
+                    try
+                    {
+                        var temp = await _supervisorMobilityRepository.GetDistributionOnlyIdAsync(finalILURegister.DistributionId.Value);
+                        var temp2 = await _supervisorMobilityRepository.GetILULevel(finalILURegister.ILULevelId.Value);
+                        HCIILU toAdd = new HCIILU
+                        {
+                            Description = temp.Description,
+                            level = temp2.ILULevelCode.ToString(),
+                            Register = finalILURegister,
+                        };
+                        await _supervisorMobilityRepository.AddHciIluReg(toAdd);
+                    }
+                    catch (Exception ex)
+                    {
+                        Console.WriteLine(ex.ToString());
+                    }
+
+                    _newIluITraining.DistributionId = (int)finalILURegister.DistributionId;
+                    _newIluITraining.OperatorId = (int)finalILURegister.OperatorId;
+                    _newIluITraining.AcquisitionDate = ILUToRegister.AcquisitionDate.Value.AddMinutes(1);
+                    _newIluITraining.ILULevelId = finalILURegister.ILULevelId == 2 ? 4 : 5;
+                    _newIluITraining.isActive = true;
+
+                    var CreateITrainee = await _supervisorMobilityRepository.AddILURegister(_newIluITraining);
+
+                    var AddITrainee = await _supervisorMobilityRepository.AddILURegToUser(finalILURegister, MasterUser);
+
+                    try
+                    {
+                        Distribution temp = await _supervisorMobilityRepository.GetDistributionOnlyIdAsync(_newIluITraining.DistributionId.Value);
+                        ILULevel temp2 = await _supervisorMobilityRepository.GetILULevel(_newIluITraining.ILULevelId.Value);
+                        HCIILU toAdd = new HCIILU
+                        {
+                            Description = temp.Description,
+                            level = temp2.ILULevelCode.ToString(),
+                            Register = _newIluITraining,
+                        };
+                        await _supervisorMobilityRepository.AddHciIluReg(toAdd);
+                    }
+                    catch (Exception ex)
+                    {
+                        Console.WriteLine(ex.ToString());
+                    }
+
+
+                    if (Createresult > 0 || CreateITrainee > 0)
+                        return Ok(finalILURegister);
+                    else
+                        return NotFound();
                 }
 
-                try
-                {
-                    var temp = await _supervisorMobilityRepository.GetDistributionOnlyIdAsync(finalILURegister.DistributionId.Value);
-                    var temp2 = await _supervisorMobilityRepository.GetILULevel(finalILURegister.ILULevelId.Value);
-                    HCIILU toAdd = new HCIILU { 
-                        Description = temp.Description, 
-                        level = temp2.ILULevelCode.ToString(),
-                        Register = finalILURegister,
-                    };
-                    await _supervisorMobilityRepository.AddHciIluReg(toAdd);
-                }
-                catch (Exception ex)
-                {
-                    Console.WriteLine(ex.ToString());
-                }
-
-
-                return Ok(finalILURegister);
             }
+
+            Createresult = await _supervisorMobilityRepository.AddILURegister(finalILURegister);
+
+            var AddToUserResult = await _supervisorMobilityRepository.AddILURegToUser(finalILURegister, MasterUser);
+
+            try
+            {
+                var temp = await _supervisorMobilityRepository.GetDistributionOnlyIdAsync(finalILURegister.DistributionId.Value);
+                var temp2 = await _supervisorMobilityRepository.GetILULevel(finalILURegister.ILULevelId.Value);
+                HCIILU toAdd = new HCIILU
+                {
+                    Description = temp.Description,
+                    level = temp2.ILULevelCode.ToString(),
+                    Register = finalILURegister,
+                };
+                await _supervisorMobilityRepository.AddHciIluReg(toAdd);
+            }
+            catch (Exception ex)
+            {
+                Console.WriteLine(ex.ToString());
+            }
+
+            if (Createresult > 0)
+                return Ok(finalILURegister);
+
+
+
 
 
 
