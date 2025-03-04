@@ -746,7 +746,7 @@ namespace SupervisorMobility.API.Services
                 .Include(a => a.Area)
                 .Include(p => p.Plant)
                 .Include(d => d.Distribution)
-                .Include(o => o.Operation)
+                .Include(o => o.Operations)
                 .Include(s => s.Supervisor)
                 .Include(o => o.Operator)
                 .Where(H => H.JobObservationVersionId == HistoryJobObservationId).FirstOrDefaultAsync();
@@ -759,7 +759,7 @@ namespace SupervisorMobility.API.Services
                  .Include(a => a.Area)
                     .Include(p => p.Plant)
                     .Include(d => d.Distribution)
-                    .Include(o => o.Operation)
+                    .Include(o => o.Operations)
                     .Include(l => l.Lup)
                     .Include(s => s.Supervisor)
                     .Include(o => o.Operator)
