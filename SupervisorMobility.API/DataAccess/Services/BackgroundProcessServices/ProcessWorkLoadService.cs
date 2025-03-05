@@ -268,7 +268,7 @@ namespace SupervisorMobility.API.DataAccess.Services.BackgroundProcessServices
                                             Console.WriteLine($"La celda {CellDistributionCode} contiene una imagen.");
                                         }
 
-                                        continue;
+                                        //continue;
 
                                         if (string.IsNullOrEmpty(ExcelAreaCode) && string.IsNullOrEmpty(ExcelDistDescription))
                                         {
