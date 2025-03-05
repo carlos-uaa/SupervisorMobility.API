@@ -32,7 +32,7 @@ namespace SupervisorMobility.API.Models.PATDtos
         public string? HistoricalAbility { get; set; }
         public string? SaveLeader { get; set; }
 
-        public ICollection<UsersWithoutNavigationWithoutPeopleDetails>? Supervisors { get; set; }
+        public ICollection<UsersWithoutPeopleWithNavigation>? Supervisors { get; set; }
         public ICollection<PatSubordinateForUpdateDto>? PatSubordinates { get; set; }
         public ICollection<PatUserRoleForUpdateDto>? PatUserRoles { get; set; }
         public ICollection<PatDistributionCommentForUpdateDto>? PatDistributionComments { get; set; }

@@ -489,8 +489,11 @@ namespace SupervisorMobility.API.Controllers.Exportation_Controllers
                     int colIndex = usersOfArea.IndexOf(uo);
                     foreach (var reg in uo.ILURegisers)
                     {
-                        int rowIndex = distributions.FindIndex(p => p.DistributionId == reg.DistributionId);
-                        matrix[rowIndex, colIndex] = reg;
+                        if (reg.Distribution is not null)
+                        {
+                            int rowIndex = distributions.FindIndex(p => p.DistributionId == reg.DistributionId);
+                            matrix[rowIndex, colIndex] = reg;
+                        }
                     }
                 }
 
