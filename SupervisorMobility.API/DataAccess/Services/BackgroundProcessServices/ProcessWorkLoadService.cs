@@ -260,15 +260,7 @@ namespace SupervisorMobility.API.DataAccess.Services.BackgroundProcessServices
 
                                         var ExcelAreaCode = AreaCell.Value.ToString() != "" ? AreaCell.Value.ToString() : "";
                                         var ExcelDistDescription = DistributionCell.Value.ToString() != "" ? DistributionCell.Value.ToString() : "";
-                                      
-                                        bool distributionCellHasImage = worksheet.Pictures.Any(picture => picture.Placement.ToString() == CellDistributionCode);
-
-                                        if (distributionCellHasImage)
-                                        {
-                                            Console.WriteLine($"La celda {CellDistributionCode} contiene una imagen.");
-                                        }
-
-                                        //continue;
+                                     
 
                                         if (string.IsNullOrEmpty(ExcelAreaCode) && string.IsNullOrEmpty(ExcelDistDescription))
                                         {
