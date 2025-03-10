@@ -140,7 +140,7 @@ namespace SupervisorMobility.API.Controllers.Exportation_Controllers
                 sheet.Cells["X4"].Value = PAT.AplicationYear;
                 sheet.Cells["AI4"].Value = ResponableSVs;
                 sheet.Cells["AU4"].Value = ResponableSSVs;
-                sheet.Cells["CA4"].Value = PAT.CreationDate;
+                sheet.Cells["CA4"].Value = PAT.CreationDate?.ToString("dd/MM/yyyy");
                 sheet.Cells["G7"].Value = PAT.KnowledgePercentage;
                 sheet.Cells["G10"].Value = PAT.SaveLeader;
 
@@ -474,7 +474,7 @@ namespace SupervisorMobility.API.Controllers.Exportation_Controllers
                 sheet.Cells["X4"].Value = months[AplicationMonth];
                 sheet.Cells["AI4"].Value = ResponableSVs;
                 sheet.Cells["AU4"].Value = ResponableSSVs;
-                sheet.Cells["CA4"].Value = PAT.CreationDate;
+                sheet.Cells["CA4"].Value = PAT.CreationDate?.ToString("dd/MM/yyyy");
                 sheet.Cells["G7"].Value = PAT.KnowledgePercentage;
                 sheet.Cells["G10"].Value = PAT.SaveLeader;
 
