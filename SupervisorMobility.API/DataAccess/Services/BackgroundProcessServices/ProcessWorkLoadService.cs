@@ -1146,6 +1146,7 @@ namespace SupervisorMobility.API.DataAccess.Services.BackgroundProcessServices
                                                         // Verificar si la celda no está combinada y es mayor o igual a la fila 12
                                                         if (!cellB.IsMerged() && row.RowNumber() >= rowStartOperation)
                                                         {
+                                                            bool allCellsAreEmpty = true;
                                                             var CellOpCode = row.Cell("C");
                                                             var CellOpDesc = row.Cell("D");
                                                             var CellCommentaryOrRestriction = row.Cell("E");
@@ -1166,8 +1167,17 @@ namespace SupervisorMobility.API.DataAccess.Services.BackgroundProcessServices
                                                             }
 
                                                             var ExcelCommentaryOrRestriction = CellCommentaryOrRestriction.Value.ToString() != "" ? CellCommentaryOrRestriction.Value.ToString() : "";
+                                                            for (char col = 'C'; col <= 'Y'; col++)
+                                                            {
+                                                                var cell = row.Cell(col.ToString());
+                                                                if (!cell.IsEmpty())
+                                                                {
+                                                                    allCellsAreEmpty = false;
+                                                                    break;
+                                                                }
+                                                            }
 
-                                                            if (string.IsNullOrEmpty(ExcelOpCode) && string.IsNullOrEmpty(ExcelOpDescription))
+                                                            if (allCellsAreEmpty)
                                                             {
                                                                 //si es renglon vacio brincamos al siguiente
                                                                 continue;
@@ -1500,6 +1510,8 @@ namespace SupervisorMobility.API.DataAccess.Services.BackgroundProcessServices
                                                     // Verificar si la celda no está combinada y es mayor o igual a la fila 12
                                                     if (!cellB.IsMerged() && row.RowNumber() >= rowStartOperation)
                                                     {
+                                                        bool allCellsAreEmpty = true;
+
                                                         var CellOpCode = row.Cell("C");
                                                         var CellOpDesc = row.Cell("D");
                                                         var CellCommentaryOrRestriction = row.Cell("E");
@@ -1519,7 +1531,17 @@ namespace SupervisorMobility.API.DataAccess.Services.BackgroundProcessServices
                                                         }
                                                         var ExcelCommentaryOrRestriction = CellCommentaryOrRestriction.Value.ToString() != "" ? CellCommentaryOrRestriction.Value.ToString() : "";
 
-                                                        if (string.IsNullOrEmpty(ExcelOpCode) && string.IsNullOrEmpty(ExcelOpDescription))
+                                                        for (char col = 'C'; col <= 'Y'; col++)
+                                                        {
+                                                            var cell = row.Cell(col.ToString());
+                                                            if (!cell.IsEmpty())
+                                                            {
+                                                                allCellsAreEmpty = false;
+                                                                break;
+                                                            }
+                                                        }
+
+                                                        if (allCellsAreEmpty)
                                                         {
                                                             //si es renglon vacio brincamos al siguiente
                                                             continue;
