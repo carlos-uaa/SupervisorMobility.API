@@ -328,6 +328,7 @@ namespace SupervisorMobility.API.Controllers
 
                     _newIlu.DistributionId = jobObservationEntity.DistributionId;
                     _newIlu.OperatorId = jobObservationEntity.OperatorId;
+                    _newIlu.AcquisitionDate = DateTime.Now.AddMinutes(1);
                     _newIlu.isActive = true;
 
                     ILURegister? LastLevel = await _supervisorMobilityRepository.GetLastILURegisterForUserAndDistribution((int)_newIlu.OperatorId, (int)_newIlu.DistributionId);
