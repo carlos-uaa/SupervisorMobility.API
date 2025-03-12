@@ -238,7 +238,7 @@ namespace SupervisorMobility.API.Controllers
                             if (job.JobObservationId != null && job.JobObservationId  != 0 )
                             {
 
-                                var finalJob = await _supervisorMobilityRepository.GetJobObservationAsync((int)job.JobObservationId);
+                                var finalJob = await _supervisorMobilityRepository.GetJobObservationAsync((int)job.JobObservationId, true);
                                     
                                 _mapper.Map(job, finalJob);
 

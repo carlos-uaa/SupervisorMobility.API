@@ -68,7 +68,7 @@ namespace SupervisorMobility.API.Entities
         public int? KpiId { get; set; }
         public string? TaktTime { get; set; }
         public string? Questions { get; set; }
-        public int? ProductId { get; set; }
+     
 
         public string? ProductIds { get; set; }
         public string? ProductSpecifications { get; set; }
