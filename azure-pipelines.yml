@@ -36,6 +36,13 @@ steps:
     TargetFolder: '$(Build.ArtifactStagingDirectory)/app/DataAccess/Icons'
   displayName: 'Copy Icons'
 
+- task: CopyFiles@2
+  inputs:
+    SourceFolder: '$(Build.SourcesDirectory)/SupervisorMobility.API/DataAccess/Templates'
+    Contents: '**'
+    TargetFolder: '$(Build.ArtifactStagingDirectory)/app/DataAccess/Templates'
+  displayName: 'Copy Excel Templates'
+
 - task: ArchiveFiles@2
   inputs:
     rootFolderOrFile: '$(Build.ArtifactStagingDirectory)/app'
