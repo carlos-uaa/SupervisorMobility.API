@@ -69,7 +69,7 @@ namespace SupervisorMobility.API.Controllers
 
                     _newIluITraining.DistributionId = (int)finalILURegister.DistributionId;
                     _newIluITraining.OperatorId = (int)finalILURegister.OperatorId;
-                    _newIluITraining.AcquisitionDate = ILUToRegister.AcquisitionDate.Value.AddMinutes(1);
+                    _newIluITraining.AcquisitionDate = ILUToRegister.AcquisitionDate.Value.AddMinutes(1).AddSeconds(5);
                     _newIluITraining.ILULevelId = finalILURegister.ILULevelId == 2 ? 4 : 5;
                     _newIluITraining.isActive = true;
 
