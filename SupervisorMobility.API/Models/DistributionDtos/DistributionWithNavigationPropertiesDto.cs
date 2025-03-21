@@ -9,7 +9,6 @@ namespace SupervisorMobility.API.Models.DistributionDtos
         public string Description { get; set; } = string.Empty;
         public bool? IsActive { get; set; }
         public int CriticalType { get; set; }
-
         public ICollection<ProductDtos.ProductDto> Products { get; set; }
             = new List<ProductDtos.ProductDto>();
         public ICollection<OperationWithoutNavigationPropertiesDto> Operations { get; set; }

@@ -10,9 +10,10 @@
         public string? ProductName { get; set; }
         public string? NameTime { get; set; }
         public string? Time { get; set; }
+        public int CriticalType { get; set; }
+
         public string? AdditionalTime { get; set; }
         public string? StandardTime { get; set; }
-        public int CriticalType { get; set; }
 
         public bool? IsActive { get; set; }
     }

@@ -24,9 +24,8 @@ namespace SupervisorMobility.API.Entities
         public string? ProductName { get; set; }
         public string? NameTime { get; set; }
         public string? Time { get; set; } = "§§§§";
-        public string? AdditionalTime { get; set; } = "§§§§";
-        public string? StandardTime { get; set; } = "§§§§";
-
+        public string? AdditionalTime { get; set; }
+        public string? StandardTime { get; set; }
         public string? cell { get; set; } = "";
 
         public int CriticalType { get; set; }

@@ -18,6 +18,7 @@ using SupervisorMobility.API.Models.DistributionDtos;
 using SupervisorMobility.API.Models.OperationDtos;
 using SupervisorMobility.API.Services;
 using System.Diagnostics;
+using static Microsoft.EntityFrameworkCore.DbLoggerCategory;
 
 namespace SupervisorMobility.API.DataAccess.Services.BackgroundProcessServices
 {
@@ -253,14 +254,17 @@ namespace SupervisorMobility.API.DataAccess.Services.BackgroundProcessServices
 
                                         var CellAreaCode = "B6";
                                         var CellDistributionCode = "D6";
+                                        var CellDistribution_DSRelevant_ImpABC = "D6";
 
                                         IXLCell AreaCell = worksheet.Cell(CellAreaCode);
                                         IXLCell DistributionCell = worksheet.Cell(CellDistributionCode);
+                                        IXLCell Distribution_DSRelevant_ImpABC_Cell = worksheet.Cell(CellDistribution_DSRelevant_ImpABC);
 
 
                                         var ExcelAreaCode = AreaCell.Value.ToString() != "" ? AreaCell.Value.ToString() : "";
                                         var ExcelDistDescription = DistributionCell.Value.ToString() != "" ? DistributionCell.Value.ToString() : "";
-                                     
+                                        var ExcelDistDSRelevant = Distribution_DSRelevant_ImpABC_Cell.Value.ToString() != "" ? Distribution_DSRelevant_ImpABC_Cell.Value.ToString() : "";
+
 
                                         if (string.IsNullOrEmpty(ExcelAreaCode) && string.IsNullOrEmpty(ExcelDistDescription))
                                         {
@@ -366,10 +370,10 @@ namespace SupervisorMobility.API.DataAccess.Services.BackgroundProcessServices
                                             {
 
                                                 var ranges = new List<IXLRange> {
-                                                    worksheet.Range($"F{row}:J{row + 1}"),
-                                                    worksheet.Range($"K{row}:O{row + 1}"),
-                                                    worksheet.Range($"P{row}:T{row + 1}"),
-                                                    worksheet.Range($"U{row}:Y{row + 1}")
+                                                    worksheet.Range($"G{row}:K{row + 1}"),
+                                                    worksheet.Range($"L{row}:P{row + 1}"),
+                                                    worksheet.Range($"Q{row}:U{row + 1}"),
+                                                    worksheet.Range($"V{row}:Z{row + 1}")
                                                 };
 
                                                 var productNameVerifyRange = ranges.First().FirstRow().FirstCell().Value.ToString();
@@ -436,7 +440,7 @@ namespace SupervisorMobility.API.DataAccess.Services.BackgroundProcessServices
 
                                             //Aditional Time For product
                                             var additionalTimeRow = worksheet.Row(StartAdditionalTime);
-                                            var rangeAditionalTime = worksheet.Range(additionalTimeRow.Cell("F"), additionalTimeRow.Cell("Y"));
+                                            var rangeAditionalTime = worksheet.Range(additionalTimeRow.Cell("G"), additionalTimeRow.Cell("Z"));
                                             var cellsAditionalTime = rangeAditionalTime.Cells().ToList();
                                             var aditionalTimeGroups = new List<string>();
 
@@ -456,7 +460,7 @@ namespace SupervisorMobility.API.DataAccess.Services.BackgroundProcessServices
 
                                             //Standar Time For product
                                             var standarTimeRow = worksheet.Row(StartAdditionalTime + 1);
-                                            var rangeStandarTime = worksheet.Range(standarTimeRow.Cell("F"), standarTimeRow.Cell("Y"));
+                                            var rangeStandarTime = worksheet.Range(standarTimeRow.Cell("G"), standarTimeRow.Cell("Z"));
                                             var cellsStandarTime = rangeStandarTime.Cells().ToList();
                                             var standarTimeGroups = new List<string>();
 
@@ -480,7 +484,7 @@ namespace SupervisorMobility.API.DataAccess.Services.BackgroundProcessServices
                                                 //el area existe
                                                 if (PathResume.DistributionId > 0)
                                                 {
-                                                    //la distribucion exsite
+                                                    //la distribucion exsite chekar si esta actualizada
                                                     string lastOperationName = null; // Para almacenar el último nombre de operación
 
                                                     foreach (var row in rows.SkipWhile(r => r.RowNumber() < startingRow.RowNumber()))
@@ -495,11 +499,14 @@ namespace SupervisorMobility.API.DataAccess.Services.BackgroundProcessServices
                                                             bool allCellsAreEmpty = true;
                                                             var CellOpCode = row.Cell("C");
                                                             var CellOpDesc = row.Cell("D");
-                                                            var CellCommentaryOrRestriction = row.Cell("E");
+                                                            var CellOp_DSRelevant_ImpABC = row.Cell("E");
+                                                            var CellCommentaryOrRestriction = row.Cell("F");
 
                                                             var ExcelOpCode = CellOpCode.Value.ToString() != "" ? CellOpCode.Value.ToString() : "";
 
                                                             var ExcelOpDescription = CellOpDesc.Value.ToString() != "" ? CellOpDesc.Value.ToString() : "";
+
+                                                            var ExcelOpDSRelevant = CellOp_DSRelevant_ImpABC.Value.ToString() != "" ? CellOp_DSRelevant_ImpABC.Value.ToString() : "";
 
                                                             if (!string.IsNullOrEmpty(ExcelOpDescription))
                                                             {
@@ -514,7 +521,7 @@ namespace SupervisorMobility.API.DataAccess.Services.BackgroundProcessServices
 
                                                             var ExcelCommentaryOrRestriction = CellCommentaryOrRestriction.Value.ToString() != "" ? CellCommentaryOrRestriction.Value.ToString() : "";
 
-                                                            for (char col = 'C'; col <= 'Y'; col++)
+                                                            for (char col = 'C'; col <= 'Z'; col++)
                                                             {
                                                                 var cell = row.Cell(col.ToString());
                                                                 if (!cell.IsEmpty())
@@ -546,7 +553,7 @@ namespace SupervisorMobility.API.DataAccess.Services.BackgroundProcessServices
                                                                     $" Distribucion: {coincidenciasDistributions.Distribution.Description}";
                                                             }
 
-                                                            var range = worksheet.Range(row.Cell("F"), row.Cell("Y"));
+                                                            var range = worksheet.Range(row.Cell("G"), row.Cell("Z"));
 
                                                             var cells = range.Cells().ToList();
                                                             var timeGroups = new List<string>();
@@ -828,6 +835,22 @@ namespace SupervisorMobility.API.DataAccess.Services.BackgroundProcessServices
                                                                     {
                                                                         OperationforUpdate.restrictionorcomment = ExcelCommentaryOrRestriction;
                                                                         isUpdate = true;
+                                                                    }
+                                                                    
+                                                                    if (OperationforUpdate.CriticalType != ExcelOpDSRelevant switch { "A" => 1, "B" => 2, "C" => 3, "a" => 1,"b" => 2, "c" => 3, _ => 0})
+                                                                    {
+                                                                        OperationforUpdate.CriticalType = ExcelOpDSRelevant switch
+                                                                        {
+                                                                            "A" => 1,
+                                                                            "B" => 2,
+                                                                            "C" => 3,
+                                                                            "a" => 1,
+                                                                            "b" => 2,
+                                                                            "c" => 3,
+
+                                                                            _ => 0
+                                                                        };
+                                                                        isUpdate = true;
 
                                                                     }
 
@@ -850,7 +873,7 @@ namespace SupervisorMobility.API.DataAccess.Services.BackgroundProcessServices
                                                                 {
                                                                     DocumentError = true;
                                                                     eMailBody += $"\\n Faltan datos en el documento..." +
-                                                                        $" Rango de celdas F{row.RowNumber()}-Y{row.RowNumber()}" +
+                                                                        $" Rango de celdas G{row.RowNumber()}-Z{row.RowNumber()}" +
                                                                         $" Pagina: {p} - {pageName}" +
                                                                         $" Distribucion: {coincidenciasDistributions.Distribution.Description} Operacion: {coincidenciasOperaciones.Operation.Code}";
 
@@ -1028,7 +1051,17 @@ namespace SupervisorMobility.API.DataAccess.Services.BackgroundProcessServices
                                                                     operationForCreate.Time = ProductJson.Values.First()["Time"];
                                                                     operationForCreate.AdditionalTime = ProductJson.Values.First()["AdditionalTime"];
                                                                     operationForCreate.StandardTime = ProductJson.Values.First()["StandardTime"];
+                                                                    operationForCreate.CriticalType = ExcelOpDSRelevant switch
+                                                                    {
+                                                                        "A" => 1,
+                                                                        "B" => 2,
+                                                                        "C" => 3,
+                                                                        "a" => 1,
+                                                                        "b" => 2,
+                                                                        "c" => 3,
 
+                                                                        _ => 0
+                                                                    }; 
 
                                                                     var finalOperation = _mapper.Map<Operation>(operationForCreate);
 
@@ -1077,6 +1110,18 @@ namespace SupervisorMobility.API.DataAccess.Services.BackgroundProcessServices
                                                     string slug = slugHelper.GenerateSlug(codeGen);
 
                                                     var distributionForCreate = _mapper.Map<DistributionForCreationDto>(new DistributionForCreationDto() { Code = slug, Description = ExcelDistDescription, IsActive = true });
+                                                    distributionForCreate.CriticalType = ExcelDistDSRelevant switch
+                                                                        {
+                                                                            "A" => 1,
+                                                                            "B" => 2,
+                                                                            "C" => 3,
+                                                                            "a" => 1,
+                                                                            "b" => 2,
+                                                                            "c" => 3,
+
+                                                                            _ => 0
+                                                                        };
+
                                                     var finalDistribution = _mapper.Map<Distribution>(distributionForCreate);
 
 
@@ -1149,10 +1194,12 @@ namespace SupervisorMobility.API.DataAccess.Services.BackgroundProcessServices
                                                             bool allCellsAreEmpty = true;
                                                             var CellOpCode = row.Cell("C");
                                                             var CellOpDesc = row.Cell("D");
-                                                            var CellCommentaryOrRestriction = row.Cell("E");
+                                                            var CellOp_DSRelevant_ImpABC = row.Cell("E");
+                                                            var CellCommentaryOrRestriction = row.Cell("D");
 
                                                             var ExcelOpCode = CellOpCode.Value.ToString() != "" ? CellOpCode.Value.ToString() : "";
                                                             var ExcelOpDescription = CellOpDesc.Value.ToString() != "" ? CellOpDesc.Value.ToString() : "";
+                                                            var ExcelOpDSRelevant = CellOp_DSRelevant_ImpABC.Value.ToString() != "" ? CellOp_DSRelevant_ImpABC.Value.ToString() : "";
 
 
                                                             if (!string.IsNullOrEmpty(ExcelOpDescription))
@@ -1167,7 +1214,7 @@ namespace SupervisorMobility.API.DataAccess.Services.BackgroundProcessServices
                                                             }
 
                                                             var ExcelCommentaryOrRestriction = CellCommentaryOrRestriction.Value.ToString() != "" ? CellCommentaryOrRestriction.Value.ToString() : "";
-                                                            for (char col = 'C'; col <= 'Y'; col++)
+                                                            for (char col = 'C'; col <= 'Z'; col++)
                                                             {
                                                                 var cell = row.Cell(col.ToString());
                                                                 if (!cell.IsEmpty())
@@ -1199,7 +1246,7 @@ namespace SupervisorMobility.API.DataAccess.Services.BackgroundProcessServices
                                                                     $" Distribucion: {coincidenciasDistributions.Distribution.Description}";
                                                             }
 
-                                                            var range = worksheet.Range(row.Cell("F"), row.Cell("Y"));
+                                                            var range = worksheet.Range(row.Cell("G"), row.Cell("Z"));
 
                                                             var cells = range.Cells().ToList();
                                                             var timeGroups = new List<string>();
@@ -1286,7 +1333,17 @@ namespace SupervisorMobility.API.DataAccess.Services.BackgroundProcessServices
                                                                 operationForCreate.Time = ProductJson.Values.First()["Time"];
                                                                 operationForCreate.AdditionalTime = ProductJson.Values.First()["AdditionalTime"];
                                                                 operationForCreate.StandardTime = ProductJson.Values.First()["StandardTime"];
+                                                                operationForCreate.CriticalType = ExcelOpDSRelevant switch
+                                                                    {
+                                                                        "A" => 1,
+                                                                        "B" => 2,
+                                                                        "C" => 3,
+                                                                        "a" => 1,
+                                                                        "b" => 2,
+                                                                        "c" => 3,
 
+                                                                        _ => 0
+                                                                    };
 
                                                                 var finalOperation = _mapper.Map<Operation>(operationForCreate);
 
@@ -1457,6 +1514,18 @@ namespace SupervisorMobility.API.DataAccess.Services.BackgroundProcessServices
                                                 string slug = slugHelper.GenerateSlug(codeGen);
 
                                                 var distributionForCreate = _mapper.Map<DistributionForCreationDto>(new DistributionForCreationDto() { Code = slug, Description = ExcelDistDescription, IsActive = true });
+                                                distributionForCreate.CriticalType = ExcelDistDSRelevant switch
+                                                {
+                                                    "A" => 1,
+                                                    "B" => 2,
+                                                    "C" => 3,
+                                                    "a" => 1,
+                                                    "b" => 2,
+                                                    "c" => 3,
+
+                                                    _ => 0
+                                                };
+
                                                 var finalDistribution = _mapper.Map<Distribution>(distributionForCreate);
 
 
@@ -1514,10 +1583,13 @@ namespace SupervisorMobility.API.DataAccess.Services.BackgroundProcessServices
 
                                                         var CellOpCode = row.Cell("C");
                                                         var CellOpDesc = row.Cell("D");
-                                                        var CellCommentaryOrRestriction = row.Cell("E");
+                                                        var CellOp_DSRelevant_ImpABC = row.Cell("E");
+                                                        var CellCommentaryOrRestriction = row.Cell("F");
 
                                                         var ExcelOpCode = CellOpCode.Value.ToString() != "" ? CellOpCode.Value.ToString() : "";
                                                         var ExcelOpDescription = CellOpDesc.Value.ToString() != "" ? CellOpDesc.Value.ToString() : "";
+                                                        var ExcelOpDSRelevant = CellOp_DSRelevant_ImpABC.Value.ToString() != "" ? CellOp_DSRelevant_ImpABC.Value.ToString() : "";
+
 
                                                         if (!string.IsNullOrEmpty(ExcelOpDescription))
                                                         {
@@ -1563,7 +1635,7 @@ namespace SupervisorMobility.API.DataAccess.Services.BackgroundProcessServices
                                                                 $" Distribucion: {coincidenciasDistributions.Distribution.Description}";
                                                         }
 
-                                                        var range = worksheet.Range(row.Cell("F"), row.Cell("Y"));
+                                                        var range = worksheet.Range(row.Cell("G"), row.Cell("Z"));
 
                                                         var cells = range.Cells().ToList();
                                                         var timeGroups = new List<string>();
@@ -1649,7 +1721,17 @@ namespace SupervisorMobility.API.DataAccess.Services.BackgroundProcessServices
                                                             operationForCreate.Time = ProductJson.Values.First()["Time"];
                                                             operationForCreate.AdditionalTime = ProductJson.Values.First()["AdditionalTime"];
                                                             operationForCreate.StandardTime = ProductJson.Values.First()["StandardTime"];
+                                                            operationForCreate.CriticalType = ExcelOpDSRelevant switch
+                                                            {
+                                                                "A" => 1,
+                                                                "B" => 2,
+                                                                "C" => 3,
+                                                                "a" => 1,
+                                                                "b" => 2,
+                                                                "c" => 3,
 
+                                                                _ => 0
+                                                            };
 
                                                             var finalOperation = _mapper.Map<Operation>(operationForCreate);
 
@@ -1818,7 +1900,6 @@ namespace SupervisorMobility.API.DataAccess.Services.BackgroundProcessServices
                                     }//for de paginas
 
                                 }//end using
-
 
                             }//end try
                             catch (FileNotFoundException ex)
