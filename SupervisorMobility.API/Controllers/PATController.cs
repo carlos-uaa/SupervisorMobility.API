@@ -1,5 +1,7 @@
 ﻿using AutoMapper;
+using CsvHelper.Configuration.Attributes;
 using Microsoft.AspNetCore.Mvc;
+using Microsoft.Extensions.Logging.Abstractions;
 using SupervisorMobility.API.Business;
 using SupervisorMobility.API.DataAccess.Entities;
 using SupervisorMobility.API.DataAccess.Entities.SOS;
@@ -40,6 +42,16 @@ namespace SupervisorMobility.API.Controllers
         public async Task<ActionResult> AddNewPat(PATFotCreationDto PatForCreate)
         {
             var finalPat = _mapper.Map<PAT>(PatForCreate);
+            finalPat.IsActive = true;
+
+            List<User> users = finalPat.Supervisors.ToList();
+            finalPat.Supervisors = new List<User>();
+
+            foreach (var usr in users)
+            {
+                finalPat.Supervisors.Add(await _supervisorMobilityRepository.GetUserAsync(usr.UserId));
+            }
+
             var result = await _supervisorMobilityRepository.AddPat(finalPat);
 
             if (result > 0)
