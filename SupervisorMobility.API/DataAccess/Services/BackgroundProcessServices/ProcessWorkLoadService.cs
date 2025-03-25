@@ -1,5 +1,6 @@
 ﻿using AutoMapper;
 using ClosedXML.Excel;
+using DocumentFormat.OpenXml.Bibliography;
 using DuoVia.FuzzyStrings;
 using FuzzyString;
 using Microsoft.EntityFrameworkCore;
@@ -69,6 +70,7 @@ namespace SupervisorMobility.API.DataAccess.Services.BackgroundProcessServices
                             Dictionary<(int, int), Area> AreasDictionary = new Dictionary<(int, int), Area>();
                             Dictionary<(int, int, int), Distribution> DistributionsDictionary = new Dictionary<(int, int, int), Distribution>();
                             Dictionary<(int, int, int, int), Operation> OperationsDictionary = new Dictionary<(int, int, int, int), Operation>();
+                            Dictionary<(int, int, int, int), Operation> OperationsUsedDictionary = new Dictionary<(int, int, int, int), Operation>();
 
                             foreach (Plant plantElement in Plants)
                             {
@@ -254,7 +256,7 @@ namespace SupervisorMobility.API.DataAccess.Services.BackgroundProcessServices
 
                                         var CellAreaCode = "B6";
                                         var CellDistributionCode = "D6";
-                                        var CellDistribution_DSRelevant_ImpABC = "D6";
+                                        var CellDistribution_DSRelevant_ImpABC = "E6";
 
                                         IXLCell AreaCell = worksheet.Cell(CellAreaCode);
                                         IXLCell DistributionCell = worksheet.Cell(CellDistributionCode);
@@ -313,6 +315,21 @@ namespace SupervisorMobility.API.DataAccess.Services.BackgroundProcessServices
                                         {
                                             PathResume.DistributionId = coincidenciasDistributions.Distribution.DistributionId;
                                             PathResume.DescripcionDistribucion = coincidenciasDistributions.Distribution.Description;
+
+                                            if (coincidenciasDistributions.Distribution.CriticalType != ExcelDistDSRelevant switch { "A" => 1, "B" => 2, "C" => 3, "a" => 1, "b" => 2, "c" => 3, _ => 0 })
+                                            {
+                                                coincidenciasDistributions.Distribution.CriticalType = ExcelDistDSRelevant switch
+                                                {
+                                                    "A" => 1,
+                                                    "B" => 2,
+                                                    "C" => 3,
+                                                    "a" => 1,
+                                                    "b" => 2,
+                                                    "c" => 3,
+
+                                                    _ => 0
+                                                };
+                                            }
                                         }
 
 
@@ -484,7 +501,7 @@ namespace SupervisorMobility.API.DataAccess.Services.BackgroundProcessServices
                                                 //el area existe
                                                 if (PathResume.DistributionId > 0)
                                                 {
-                                                    //la distribucion exsite chekar si esta actualizada
+                                                    
                                                     string lastOperationName = null; // Para almacenar el último nombre de operación
 
                                                     foreach (var row in rows.SkipWhile(r => r.RowNumber() < startingRow.RowNumber()))
@@ -658,6 +675,20 @@ namespace SupervisorMobility.API.DataAccess.Services.BackgroundProcessServices
                                                                     var finalproduct = coincidenciasProduct.Product;
                                                                     var finalDistribution = await _context.Distributions.Where(p => p.DistributionId == PathResume.DistributionId).FirstOrDefaultAsync();
 
+                                                                    if (finalDistribution.CriticalType != ExcelDistDSRelevant switch { "A" => 1, "B" => 2, "C" => 3, "a" => 1, "b" => 2, "c" => 3, _ => 0 })
+                                                                    {
+                                                                        finalDistribution.CriticalType = ExcelDistDSRelevant switch
+                                                                        {
+                                                                            "A" => 1,
+                                                                            "B" => 2,
+                                                                            "C" => 3,
+                                                                            "a" => 1,
+                                                                            "b" => 2,
+                                                                            "c" => 3,
+
+                                                                            _ => 0
+                                                                        };
+                                                                    }
 
                                                                     if (finalproduct != null)
                                                                     {
@@ -836,8 +867,8 @@ namespace SupervisorMobility.API.DataAccess.Services.BackgroundProcessServices
                                                                         OperationforUpdate.restrictionorcomment = ExcelCommentaryOrRestriction;
                                                                         isUpdate = true;
                                                                     }
-                                                                    
-                                                                    if (OperationforUpdate.CriticalType != ExcelOpDSRelevant switch { "A" => 1, "B" => 2, "C" => 3, "a" => 1,"b" => 2, "c" => 3, _ => 0})
+
+                                                                    if (OperationforUpdate.CriticalType != ExcelOpDSRelevant switch { "A" => 1, "B" => 2, "C" => 3, "a" => 1, "b" => 2, "c" => 3, _ => 0 })
                                                                     {
                                                                         OperationforUpdate.CriticalType = ExcelOpDSRelevant switch
                                                                         {
@@ -1061,16 +1092,30 @@ namespace SupervisorMobility.API.DataAccess.Services.BackgroundProcessServices
                                                                         "c" => 3,
 
                                                                         _ => 0
-                                                                    }; 
+                                                                    };
 
                                                                     var finalOperation = _mapper.Map<Operation>(operationForCreate);
 
 
-
-                                                                    var distribution = await dbContext.Distributions.Where(o => o.AreaId == (int)PathResume.AreaId && o.DistributionId == (int)PathResume.DistributionId).FirstOrDefaultAsync();
-                                                                    if (distribution != null)
+                                                                    if (finalDistribution.CriticalType != ExcelDistDSRelevant switch { "A" => 1, "B" => 2, "C" => 3, "a" => 1, "b" => 2, "c" => 3, _ => 0 })
                                                                     {
-                                                                        distribution.Operations.Add(finalOperation);
+                                                                        finalDistribution.CriticalType = ExcelDistDSRelevant switch
+                                                                        {
+                                                                            "A" => 1,
+                                                                            "B" => 2,
+                                                                            "C" => 3,
+                                                                            "a" => 1,
+                                                                            "b" => 2,
+                                                                            "c" => 3,
+
+                                                                            _ => 0
+                                                                        };
+                                                                    }
+
+
+                                                                    if (finalDistribution != null)
+                                                                    {
+                                                                        finalDistribution.Operations.Add(finalOperation);
                                                                     }
                                                                     dbContext.SaveChanges();
 
@@ -1111,16 +1156,16 @@ namespace SupervisorMobility.API.DataAccess.Services.BackgroundProcessServices
 
                                                     var distributionForCreate = _mapper.Map<DistributionForCreationDto>(new DistributionForCreationDto() { Code = slug, Description = ExcelDistDescription, IsActive = true });
                                                     distributionForCreate.CriticalType = ExcelDistDSRelevant switch
-                                                                        {
-                                                                            "A" => 1,
-                                                                            "B" => 2,
-                                                                            "C" => 3,
-                                                                            "a" => 1,
-                                                                            "b" => 2,
-                                                                            "c" => 3,
+                                                    {
+                                                        "A" => 1,
+                                                        "B" => 2,
+                                                        "C" => 3,
+                                                        "a" => 1,
+                                                        "b" => 2,
+                                                        "c" => 3,
 
-                                                                            _ => 0
-                                                                        };
+                                                        _ => 0
+                                                    };
 
                                                     var finalDistribution = _mapper.Map<Distribution>(distributionForCreate);
 
@@ -1334,16 +1379,16 @@ namespace SupervisorMobility.API.DataAccess.Services.BackgroundProcessServices
                                                                 operationForCreate.AdditionalTime = ProductJson.Values.First()["AdditionalTime"];
                                                                 operationForCreate.StandardTime = ProductJson.Values.First()["StandardTime"];
                                                                 operationForCreate.CriticalType = ExcelOpDSRelevant switch
-                                                                    {
-                                                                        "A" => 1,
-                                                                        "B" => 2,
-                                                                        "C" => 3,
-                                                                        "a" => 1,
-                                                                        "b" => 2,
-                                                                        "c" => 3,
+                                                                {
+                                                                    "A" => 1,
+                                                                    "B" => 2,
+                                                                    "C" => 3,
+                                                                    "a" => 1,
+                                                                    "b" => 2,
+                                                                    "c" => 3,
 
-                                                                        _ => 0
-                                                                    };
+                                                                    _ => 0
+                                                                };
 
                                                                 var finalOperation = _mapper.Map<Operation>(operationForCreate);
 
@@ -1459,11 +1504,24 @@ namespace SupervisorMobility.API.DataAccess.Services.BackgroundProcessServices
 
                                                                 }
 
-
-                                                                var distribution = await _context.Distributions.Where(o => o.AreaId == (int)PathResume.AreaId && o.DistributionId == (int)PathResume.DistributionId).FirstOrDefaultAsync();
-                                                                if (distribution != null)
+                                                                if (finalDistribution != null)
                                                                 {
-                                                                    distribution.Operations.Add(finalOperation);
+
+                                                                    if (finalDistribution.CriticalType != ExcelDistDSRelevant switch { "A" => 1, "B" => 2, "C" => 3, "a" => 1, "b" => 2, "c" => 3, _ => 0 })
+                                                                    {
+                                                                        finalDistribution.CriticalType = ExcelDistDSRelevant switch
+                                                                        {
+                                                                            "A" => 1,
+                                                                            "B" => 2,
+                                                                            "C" => 3,
+                                                                            "a" => 1,
+                                                                            "b" => 2,
+                                                                            "c" => 3,
+
+                                                                            _ => 0
+                                                                        };
+                                                                    }
+                                                                    finalDistribution.Operations.Add(finalOperation);
                                                                 }
                                                                 dbContext.SaveChanges();
 
@@ -1858,10 +1916,26 @@ namespace SupervisorMobility.API.DataAccess.Services.BackgroundProcessServices
                                                             }
 
 
-                                                            var distribution = await _context.Distributions.Where(o => o.AreaId == (int)PathResume.AreaId && o.DistributionId == (int)PathResume.DistributionId).FirstOrDefaultAsync();
-                                                            if (distribution != null)
+
+                                                            if (finalDistribution != null)
                                                             {
-                                                                distribution.Operations.Add(finalOperation);
+                                                                if (finalDistribution.CriticalType != ExcelDistDSRelevant switch { "A" => 1, "B" => 2, "C" => 3, "a" => 1, "b" => 2, "c" => 3, _ => 0 })
+                                                                {
+                                                                    finalDistribution.CriticalType = ExcelDistDSRelevant switch
+                                                                    {
+                                                                        "A" => 1,
+                                                                        "B" => 2,
+                                                                        "C" => 3,
+                                                                        "a" => 1,
+                                                                        "b" => 2,
+                                                                        "c" => 3,
+
+                                                                        _ => 0
+                                                                    };
+                                                                }
+
+
+                                                                finalDistribution.Operations.Add(finalOperation);
                                                             }
                                                             dbContext.SaveChanges();
 
