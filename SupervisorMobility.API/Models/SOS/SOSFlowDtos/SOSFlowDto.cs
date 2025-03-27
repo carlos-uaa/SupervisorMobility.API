@@ -19,6 +19,8 @@ namespace SupervisorMobility.API.Models.SOS.SOSFlowDtos
 
         public int? ReviewerHSId { get; set; }
         public UsersWithoutNavigationWithoutPeopleDetails? ReviewerHS { get; set; }
+        public int? ApproverId { get; set; }
+        public UsersWithoutNavigationWithoutPeopleDetails? Approver { get; set; }
         public FileUploadGeneralDto? ReviewerHSSignatureImage { get; set; } = new();
 
      
