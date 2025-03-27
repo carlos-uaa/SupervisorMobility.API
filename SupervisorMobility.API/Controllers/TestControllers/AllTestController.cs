@@ -1,32 +1,20 @@
 ﻿using AutoMapper;
-using DocumentFormat.OpenXml.Office2010.Excel;
 using Microsoft.AspNetCore.Mvc;
 using SupervisorMobility.API.Context;
 using SupervisorMobility.API.DataAccess.Entities;
-using SupervisorMobility.API.DataAccess.Entities.SOS;
-using SupervisorMobility.API.DataAccess.Entities.SOS.History;
 using SupervisorMobility.API.DataAccess.Entities.TreeStruct;
 using SupervisorMobility.API.DataAccess.Services;
 using SupervisorMobility.API.DataAccess.Services.TreeServices;
 using SupervisorMobility.API.Entities.CDMS;
 using SupervisorMobility.API.Entities;
-using SupervisorMobility.API.Models.CommentaryDtos;
 using SupervisorMobility.API.Models.FileUploadDto;
-using SupervisorMobility.API.Models.SOS.EquipmentDtos;
-using SupervisorMobility.API.Models.SOS.MaterialDtos;
-using SupervisorMobility.API.Models.SOS.SOSAnalysisDtos;
-using SupervisorMobility.API.Models.SOS.SOSAnalysisLogbookDtos;
-using SupervisorMobility.API.Models.SOS.SOSHubDtos;
-using SupervisorMobility.API.Models.SOS.SOSTimeDtos;
-using SupervisorMobility.API.Models.SOS.ToolDtos;
-using SupervisorMobility.API.Models.SOSReviewDtos;
 using System.Diagnostics;
 using Microsoft.EntityFrameworkCore;
-using FuzzyString;
-using DocumentFormat.OpenXml.EMMA;
 using SupervisorMobility.API.Services;
-using DocumentFormat.OpenXml.InkML;
-using static Quartz.Logging.OperationName;
+using ClosedXML.Excel;
+using DocumentFormat.OpenXml.Spreadsheet;
+using DocumentFormat.OpenXml.Wordprocessing;
+using SupervisorMobility.API.Models.Users;
 
 namespace SupervisorMobility.API.Controllers.SOS_Controllers
 {
@@ -73,12 +61,12 @@ namespace SupervisorMobility.API.Controllers.SOS_Controllers
                 (int)jobObservationEntity.SupervisorId,
                 jobObservationEntity.FinishedDate.Value.Year + 1);
 
-                IEnumerable<JobCategoryStructure> _checklistCategories = await _supervisorMobilityRepository.GetChecklistCategoriesAsync(false);
-                string jobCategoryStructureIds = "";
-                foreach (var category in _checklistCategories)
-                {
-                    jobCategoryStructureIds += category.JobCategoryStructureId + "|";
-                }
+            IEnumerable<JobCategoryStructure> _checklistCategories = await _supervisorMobilityRepository.GetChecklistCategoriesAsync(false);
+            string jobCategoryStructureIds = "";
+            foreach (var category in _checklistCategories)
+            {
+                jobCategoryStructureIds += category.JobCategoryStructureId + "|";
+            }
 
             if (nextYearJobs == null || nextYearJobs.Count == 0)
             {
@@ -190,29 +178,29 @@ namespace SupervisorMobility.API.Controllers.SOS_Controllers
 
                 if (res > 0)
                 {
-                  
-                //    Distribution distribution = await _supervisorMobilityRepository.GetDistributionOnlyIdAsync((int)jobObservationEntity.DistributionId, false);
 
-                //    DateTime FechaActual = jobObservationForUpdate.FinishedDate.Value.AddYears(1);
+                    //    Distribution distribution = await _supervisorMobilityRepository.GetDistributionOnlyIdAsync((int)jobObservationEntity.DistributionId, false);
+
+                    //    DateTime FechaActual = jobObservationForUpdate.FinishedDate.Value.AddYears(1);
 
 
-                //    NotificationToCreateDto NotifyUpdateNextYear = new NotificationToCreateDto();
-                //    NotifyUpdateNextYear.MadeBy = auser;
-                //    NotifyUpdateNextYear.UserId = jobObservationForUpdate.SupervisorId;
-                //    NotifyUpdateNextYear.IsAccepted = true;
-                //    NotifyUpdateNextYear.IsActive = true;
-                //    NotifyUpdateNextYear.NotificationType = $"Actualizacion del SOS Anual - Update Job Observation";
-                //    NotifyUpdateNextYear.NotificationText = $"Estimado Supervisor,\\n\\nHemos detectado una Job Observation." +
-                //        " A continuación, te informamos sobre las acciones que se tomarán en función del estado del SOS Anual para el próximo año: " +
-                //        $"\\n Distribucion: {distribution?.Description} - {distribution?.Code}" +
-                //        $"\\n{NextYearJob.StartDate} → {FechaActual}" +
-                //        "\\n\\nLos datos relacionados serán actualizados automáticamente con la nueva información." +
-                //        "\\n\\nPor favor, asegúrate de que la información esté actualizada para evitar posibles inconsistencias.\r\n\r\nSaludos cordiales,\r\n[SupervisorMobility]";
+                    //    NotificationToCreateDto NotifyUpdateNextYear = new NotificationToCreateDto();
+                    //    NotifyUpdateNextYear.MadeBy = auser;
+                    //    NotifyUpdateNextYear.UserId = jobObservationForUpdate.SupervisorId;
+                    //    NotifyUpdateNextYear.IsAccepted = true;
+                    //    NotifyUpdateNextYear.IsActive = true;
+                    //    NotifyUpdateNextYear.NotificationType = $"Actualizacion del SOS Anual - Update Job Observation";
+                    //    NotifyUpdateNextYear.NotificationText = $"Estimado Supervisor,\\n\\nHemos detectado una Job Observation." +
+                    //        " A continuación, te informamos sobre las acciones que se tomarán en función del estado del SOS Anual para el próximo año: " +
+                    //        $"\\n Distribucion: {distribution?.Description} - {distribution?.Code}" +
+                    //        $"\\n{NextYearJob.StartDate} → {FechaActual}" +
+                    //        "\\n\\nLos datos relacionados serán actualizados automáticamente con la nueva información." +
+                    //        "\\n\\nPor favor, asegúrate de que la información esté actualizada para evitar posibles inconsistencias.\r\n\r\nSaludos cordiales,\r\n[SupervisorMobility]";
 
-                //    var notynextYearUpdate = await _assyChartService.CreateNotificationAsync(NotifyUpdateNextYear);
-                //    NextYearJob.StartDate = FechaActual;
+                    //    var notynextYearUpdate = await _assyChartService.CreateNotificationAsync(NotifyUpdateNextYear);
+                    //    NextYearJob.StartDate = FechaActual;
 
-                //    await _supervisorMobilityRepository.SaveChangesAsync();
+                    //    await _supervisorMobilityRepository.SaveChangesAsync();
                 }
 
 
@@ -232,7 +220,7 @@ namespace SupervisorMobility.API.Controllers.SOS_Controllers
             int d_id = 1436;
             int m_id = 3;
 
-            if(plantid != null && areaid != null && distributionid != null && productid != null)
+            if (plantid != null && areaid != null && distributionid != null && productid != null)
             {
                 p_id = (int)plantid;
                 a_id = (int)areaid;
@@ -431,18 +419,18 @@ namespace SupervisorMobility.API.Controllers.SOS_Controllers
 
                 var coincidenciaProduct = Products.Where(p => p.ProductId == m_id).FirstOrDefault();
 
-                nodoHoe =  _treeService.EncontrarNodoMejorCoincidencia(rootNodeHOE, coincidenciasplanta, "produccion", coincidenciasAreas.Value, coincidenciasDistributions.Value, coincidenciaProduct);
-                if(nodoHoe != null)
+                nodoHoe = _treeService.EncontrarNodoMejorCoincidencia(rootNodeHOE, coincidenciasplanta, "produccion", coincidenciasAreas.Value, coincidenciasDistributions.Value, coincidenciaProduct);
+                if (nodoHoe != null)
                 {
-                    Console.WriteLine($"Nodo [HOE] c: {nodoHoe?.Ruta}" );
-                    Debug.WriteLine($"Nodo [HOE]: {nodoHoe?.Ruta}" );
+                    Console.WriteLine($"Nodo [HOE] c: {nodoHoe?.Ruta}");
+                    Debug.WriteLine($"Nodo [HOE]: {nodoHoe?.Ruta}");
                 }
                 else
                 {
-                    Console.WriteLine($"[HOE] No encontrado :c  " );
-                    Debug.WriteLine($"HOE No encontrado :c  " );
+                    Console.WriteLine($"[HOE] No encontrado :c  ");
+                    Debug.WriteLine($"HOE No encontrado :c  ");
 
-                    
+
                 }
 
                 nodoGos = _treeService.EncontrarNodoMejorCoincidencia(rootNodeGOS, coincidenciasplanta, "produccion", coincidenciasAreas.Value, coincidenciasDistributions.Value, coincidenciaProduct);
@@ -486,7 +474,7 @@ namespace SupervisorMobility.API.Controllers.SOS_Controllers
             }
 
 
-                return Ok(itemToReturn);
+            return Ok(itemToReturn);
 
         }
 
@@ -533,6 +521,194 @@ namespace SupervisorMobility.API.Controllers.SOS_Controllers
             }
             return StatusCode(statusCode, message);
         }
+
+        [HttpPost("MassiveUpdateUserPayroll")]
+        public async Task<ActionResult> MassiveUpdateUserPayroll(IFormFile file)
+        {
+            //Este controlador sirve para realizar una actualizacion masiva para aquellos usurios logren encontrarse
+            //dentro del sistema y no tengan un numero de nomina asignado, ya sea por que no se guardo en su momento 
+            //no contaba con uno por el tipo de usuario. Cambios afectados en Febrero-Marzo 2025
+            // Indecisiones COMPAS. . . 
+
+            var uploadResult = new FileUploadForCreationDto();
+            string trustedFileNameForStorage = string.Empty;
+            var unstrustedFileName = file.FileName;
+
+            trustedFileNameForStorage = Path.GetRandomFileName();
+            trustedFileNameForStorage = System.IO.Path.ChangeExtension(trustedFileNameForStorage, ".xlsx");
+            var path = Path.Combine(_env.ContentRootPath, "uploads\\massive", trustedFileNameForStorage);
+            var directory = Path.GetDirectoryName(path);
+            if (!Directory.Exists(directory))
+            {
+                Directory.CreateDirectory(directory);
+            }
+            await using (FileStream fs = new FileStream(path, FileMode.Create))
+            {
+                // Utiliza "await" para asegurarte de que se complete la copia del archivo antes de continuar
+                await file.CopyToAsync(fs);
+            }
+
+
+            string filepath = Directory.GetCurrentDirectory().ToString() + "\\uploads\\massive\\" + trustedFileNameForStorage;
+            string messageError = "";
+
+            int findingUsers = 0;
+            int UpdatedUsers = 0;
+
+            try
+            {
+                // Abrir archivo Excel
+                using (var workBook = new XLWorkbook(filepath))
+                {
+                    var pages = workBook.Worksheets.Count;
+
+
+                    foreach (var worksheet in workBook.Worksheets)
+                    {
+
+                        if (worksheet != null)
+                        {
+                            var headerRow = worksheet.Row(1);
+                            bool headersFound = false;
+
+                            foreach (var cell in headerRow.Cells())
+                            {
+                                if (cell.Value.ToString() == "Número de nómina" && cell.Address.ColumnLetter == "J" &&
+                                    headerRow.Cell(cell.Address.ColumnNumber + 1).Value.ToString() == "Nombre" && headerRow.Cell(cell.Address.ColumnNumber + 1).Address.ColumnLetter == "K")
+                                {
+                                    headersFound = true;
+                                    break;
+                                }
+                            }
+
+                            if (!headersFound && worksheet.Name != "HC")
+                            {
+                                continue; 
+                            }
+
+
+                            IEnumerable<User> users = await _supervisorMobilityRepository.GetAllUsersAsync();
+
+
+                            int i = 0;
+                            var rows = worksheet.Rows();
+                            foreach (var row in rows.SkipWhile(r => r.RowNumber() < 4))
+                            {
+
+                                var cellPayroll = row.Cell("J");
+                                var cellName = row.Cell("K");
+                          
+                                int retries = 0;
+                                const int maxRetries = 5;
+                                TimeSpan retryInterval = TimeSpan.FromSeconds(5);
+
+                                while (retries < maxRetries)
+                                {
+                                    try
+                                    {
+                                        bool allCellsAreEmpty = true;
+
+                                        // Columna 9: Extraer el numero de nomina y procesar valor
+                                        string Payroll = cellPayroll.Value.ToString() != "" ? cellPayroll.Value.ToString() : "";
+
+                                        // Columna 10: Extraer el nombre de la persona
+                                        string NameUser = cellName.Value.ToString() != "" ? cellName.Value.ToString() : "";
+
+
+                                        for (char col = 'B'; col <= 'Z'; col++)
+                                        {
+                                            var cell = row.Cell(col.ToString());
+                                            if (!cell.IsEmpty())
+                                            {
+                                                allCellsAreEmpty = false;
+                                                break;
+                                            }
+                                        }
+
+
+                                        if (allCellsAreEmpty)
+                                        {
+                                            //si es renglon vacio brincamos al siguiente
+                                            //break;
+                                            continue;
+                                        }
+
+                                        User? usrLocate = users.FirstOrDefault(u => u.Name == NameUser);
+                                        if (usrLocate != null)
+                                        {
+                                            if (usrLocate.Payroll is null )
+                                            {
+                                                UpdatedUsers++;
+                                                usrLocate.Payroll = int.Parse(Payroll);
+
+
+                                                await _supervisorMobilityRepository.UpdateUser(_mapper.Map<UsersForUpdateDto>(usrLocate), (int)usrLocate.Payroll);
+                                                var rs = await _supervisorMobilityRepository.SaveChangesAsync();
+
+                                                if (rs)
+                                                {
+                                                    Console.WriteLine("Usuario actualizado con exito");
+                                                    Debug.WriteLine("Usuario actualizado con exito");
+                                                }
+                                            }
+
+                                        Console.WriteLine($"User {NameUser} encontrado id: {usrLocate?.UserId}");
+                                        Debug.WriteLine($"User {NameUser} encontrado id: {usrLocate?.UserId}");
+
+                                        Console.WriteLine($"Intento {retries + 1} Línea [{i}] completado");
+                                        Debug.WriteLine($"Intento {retries + 1} Línea [{i}] completado");
+
+                                            findingUsers++;
+                                        }
+
+                                        break; // Operación exitosa
+                                    }
+                                    catch (Exception ex)
+                                    {
+                                        retries++;
+                                        Debug.WriteLine($"Intento {retries} en Línea [{i}] falló: {ex.Message}");
+
+                                        if (retries == maxRetries)
+                                        {
+                                            messageError += $"Error en la fila [{i}]. Verifica el documento.\n";
+                                        }
+
+                                        await Task.Delay(retryInterval);
+                                    }
+                                }
+
+
+
+                                i++;
+                            }
+
+                            Debug.WriteLine("Pagina procesada");
+                            Console.WriteLine("Pagina procesada");
+                        }
+
+                            break;
+                    }
+                }
+            }//end try
+            catch (Exception ex)
+            {
+                Debug.WriteLine($"Error en Using Woorkbook {ex.ToString()}");
+            }//end trycatch to add excel to list
+            finally
+            {
+                Debug.WriteLine($"Users Found: {findingUsers}");
+                Console.WriteLine($"Users Found: {findingUsers}"); 
+                Debug.WriteLine($"Users Updated: {UpdatedUsers}");
+                Console.WriteLine($"Users Updated: {UpdatedUsers}");
+
+            }
+
+            var objectRetur = new { FoundUsers = findingUsers, UpdatedUsers = UpdatedUsers };
+
+
+            return Ok(objectRetur);
+        }
+
 
 
 
