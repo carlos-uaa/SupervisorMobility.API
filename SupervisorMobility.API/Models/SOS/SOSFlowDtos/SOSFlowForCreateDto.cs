@@ -17,6 +17,7 @@ namespace SupervisorMobility.API.Models.SOS.SOSFlowDtos
         public string Flow { get; set; }
 
         public int? ReviewerHSId { get; set; }
+        public int? ApproverId { get; set; }
 
         public DateTime? CreatedAt { get; set; }
         public string? TargetTime { get; set; }
