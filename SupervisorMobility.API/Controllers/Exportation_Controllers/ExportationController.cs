@@ -316,7 +316,7 @@ namespace SupervisorMobility.API.Controllers.Exportation_Controllers
                 foreach (var worksheet in package.Workbook.Worksheets.Where(ws => ws.Name.Contains("Analysis")))
                 {
                     string currentChar = worksheet.Name.Split(" ")[1];
-                    
+
                     rowIndexes[currentChar] = (rowIndexes[currentChar].Item1, rowIndexes[currentChar].Item2 + 1);
                     rowHeights[currentChar] += templateExtrahight;
 
@@ -954,7 +954,7 @@ namespace SupervisorMobility.API.Controllers.Exportation_Controllers
                 foreach (var worksheet in package.Workbook.Worksheets.Where(ws => ws.Name.Contains("Sequence")))
                 {
                     string currentChar = worksheet.Name.Split(" ")[1];
-                    
+
                     rowIndexes[currentChar] = (rowIndexes[currentChar].Item1, rowIndexes[currentChar].Item2 + 1);
                     rowHeights[currentChar] += templateExtrahight;
 
@@ -1374,7 +1374,7 @@ namespace SupervisorMobility.API.Controllers.Exportation_Controllers
                 sheet.Cells["E10"].Value = SosDistribution.SOSHub.ReviewerEditors.First()?.Name;
                 sheet.Cells["G10"].Value = SosDistribution.SOSHub.ApproverOwners.First().Name;
 
-                sheet.Cells["B12"].Value = SosDistribution.CreatedAt?.ToString("dd-MMM-yyyy").Replace(".", ""); ;
+                sheet.Cells["B12"].Value = SosDistribution.CreatedAt?.ToString("dd-MMM-yyyy").Replace(".", "");
                 sheet.Cells["D12"].Value = SosDistribution.ApplicationMonth;
                 //sheet.Cells["G12"].Value = SosDistribution.SOSHub.AppliedModel.Code;
                 sheet.Cells["I12"].Value = SosDistribution.TackTime;
@@ -1585,7 +1585,7 @@ namespace SupervisorMobility.API.Controllers.Exportation_Controllers
                 foreach (var worksheet in package.Workbook.Worksheets.Where(ws => ws.Name.Contains("DISTRIBUTION")))
                 {
                     string currentChar = worksheet.Name.Split(" ", 2)[1];
-                    
+
                     rowIndexes[currentChar] = (rowIndexes[currentChar].Item1, rowIndexes[currentChar].Item2 + 2);
 
                     double[] times = Array.ConvertAll(SosDistribution.AdditionalTime.Split("§"), s => string.IsNullOrEmpty(s) ? 0.0 : double.Parse(s));
@@ -1939,6 +1939,165 @@ namespace SupervisorMobility.API.Controllers.Exportation_Controllers
         public async Task<IActionResult> CombinationExcelExport(int CombinationId)
         {
             return Ok();
+        }
+
+        [HttpPost("Excel/Flow/{FlowId}")]
+        public async Task<IActionResult> FlowExcelExport(int FlowId, List<IFormFile> Diagrams)
+        {
+            var SosFlow = await _AnalysisProcessRepository.GetSOSFlow(FlowId, includePeople:true, includeLogbooks:true, includeSOS: true);
+
+            string templateName = "DataAccess/Templates/Flow Template.xlsx";
+            MemoryStream ms = new MemoryStream();
+
+            using var templateStream = System.IO.File.OpenRead(templateName);
+
+            using (var package = new ExcelPackage(templateStream))
+            {
+                package.Workbook.CalcMode = ExcelCalcMode.Automatic;
+                var sheet = package.Workbook.Worksheets.First();
+
+                #region information table
+
+                sheet.Cells["C5"].Value = SosFlow.SOSHub.Plant?.Description;
+                sheet.Cells["G6"].Value = SosFlow.SOSHub.Area?.Description;
+                sheet.Cells["L6"].Value = SosFlow.SOSHub.Department?.Description;
+                sheet.Cells["R6"].Value = SosFlow.InternalControlNumber;
+                                                                                                
+                sheet.Cells["A9"].Value = SosFlow.OperationName;                                
+                sheet.Cells["A12"].Value = SosFlow.SOSHub.ApproverOwners?.First().Name;
+                sheet.Cells["D12"].Value = SosFlow.SOSHub.ReviewerEditors?.First()?.Name;
+                sheet.Cells["G13"].Value = SosFlow.ReviewerHS?.Name;        
+                sheet.Cells["J12"].Value = SosFlow.Approver?.Name;
+
+                sheet.Cells["F15"].Value = SosFlow.CreatedAt?.ToString("dd-MMM-yyyy").Replace(".", "");
+                sheet.Cells["J15"].Value = SosFlow.TargetTime;
+
+                #region revitions
+
+                if (SosFlow.FlowLogbooks != null && SosFlow.FlowLogbooks.Any())
+                {
+                    //SosAnalysis.AnalysisLogbooks = SosAnalysis.AnalysisLogbooks?.OrderByDescending(p => p.NoRevision).ToList();
+
+                    List<string> Cols = new List<string> { "K", "N", "O", "P" };
+
+                    foreach (var (item, index) in SosFlow.FlowLogbooks.Take(8).Select((item, index) => (item, index)))
+                    {
+                        sheet.Cells[$"M{8+index}"].Value = item.Approver?.Name;
+                        sheet.Cells[$"P{8+index}"].Value = index + 1;
+                        sheet.Cells[$"Q{8 + index}"].Value = item.Changes;
+                        sheet.Cells[$"V{8+index}"].Value = item.Date?.ToString("dd-MMM-yyyy").Replace(".", "");
+                        sheet.Cells[$"X{8 + index}"].Value = item.NoRevision;
+                    }
+
+                    if (SosFlow.FlowLogbooks.Skip(8).Any())
+                    {
+                        int items = 1;
+                        const int availableSlots = 26;
+                        sheetService.AddSheet(package, 5);
+
+                        int backuprow = 2;
+
+                        sheet = package.Workbook.Worksheets["Backup"];
+
+                        foreach (var item in SosFlow.FlowLogbooks.Skip(8))
+                        {
+                            sheet.Cells[$"A{backuprow}"].Value = item.NoRevision;
+                            sheet.Cells[$"B{backuprow}"].Value = item.Date?.ToString("dd-MMM-yyyy").Replace(".", "");
+                            sheet.Cells[$"C{backuprow}"].Value = item.Changes;
+                            sheet.Cells[$"D{backuprow}"].Value = item.Approver.Name;
+                            sheet.Cells[$"E{backuprow}"].Value = item.Reviewer.Name;
+
+                            items++;
+                            if (items > availableSlots)
+                                break;
+
+                            backuprow+=2;
+                        }
+                        sheet = package.Workbook.Worksheets.First();
+                    }
+                }
+
+                #endregion
+
+                #endregion
+
+                int startRow = 18;
+                int startColumn = 0;
+                int rowSpan = 29;     // Number of rows to span
+                int colSpan = 23;     // Number of columns to span
+                int i = 1;
+
+                double cellWidth = sheet.Column(startColumn+1).Width * 7.5;  // Width in pixels
+                double cellHeight = sheet.Row(startRow+1).Height * 1.33;     // Height in pixels
+
+                bool morePagesFlag = false;
+
+                foreach (var diagram in Diagrams)
+                {
+                    if (morePagesFlag)
+                    {
+                        startRow = 8;
+                        startColumn = 1;
+                        rowSpan = 37;     // Number of rows to span
+                        colSpan = 25;     // Number of columns to span
+
+                        string currentChar = sheet.Name.Split(" ")[1];
+                        string nextPage = sheetService.GetNextCombination(currentChar);
+
+                        string pageName = $"Flow {nextPage}";
+
+                        sheet = package.Workbook.Worksheets[pageName];
+
+                        if (sheet == null)
+                        {
+                            sheetService.AddSheet(package, 4, nextPage);
+                            sheet = package.Workbook.Worksheets[pageName];
+                        }
+
+                        sheet.Cells["B6"].Value = SosFlow.SOSHub.Plant?.Description;
+                        sheet.Cells["H6"].Value = SosFlow.SOSHub.Area?.Description;
+                        sheet.Cells["M6"].Value = SosFlow.SOSHub.Department?.Description;
+                        sheet.Cells["S6"].Value = SosFlow.InternalControlNumber;
+                    }
+
+                    using var stream = new MemoryStream();
+                    await diagram.CopyToAsync(stream);
+                    stream.Position = 0;
+
+                    var picture = sheet.Drawings.AddPicture($"Image_{i}", stream);
+
+                    // Calculate total size for uniform cells
+                    double totalWidth = cellWidth * colSpan;
+                    double totalHeight = cellHeight * rowSpan;
+
+                    picture.SetPosition(startRow, 0, startColumn, 0); // Start position
+                    picture.SetSize((int)totalWidth, (int)totalHeight);
+                    i++;
+                    morePagesFlag = true;
+                }
+
+                int sheetTotal = package.Workbook.Worksheets.Where(p => p.Name.Contains("Flow")).Count();
+
+                sheet.Cells["X6"].Value = 1;
+                sheet.Cells["Y6"].Value = sheetTotal;
+                foreach (var (item, index) in package.Workbook.Worksheets.Where(p => p.Name.Contains("Flow")).Skip(1).Select((item, index) => (item, index)))
+                {
+                    item.Cells["Y6"].Value = index + 2;
+                    item.Cells["Z6"].Value = sheetTotal;
+                }
+
+                // Save to file
+                //package.Workbook.Calculate();
+                sheetService.SetPrintingOptions(package.Workbook);
+
+                sheet.Protection.IsProtected = true;
+                package.SaveAs(ms);
+            }
+
+            ms.Position = 0;
+            var res = File(ms, "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet", !string.IsNullOrEmpty(SosFlow.InternalControlNumber) ? $"{SosFlow.InternalControlNumber} Flow Report.xlsx" : "Flow Report.xlsx");
+            res.EnableRangeProcessing = true;
+            return res;
         }
     }
 }
