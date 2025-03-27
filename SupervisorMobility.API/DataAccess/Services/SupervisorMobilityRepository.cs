@@ -962,6 +962,14 @@ namespace SupervisorMobility.API.Services
             }
             return await _context.Users.Where(p => p.UserId == userId).FirstOrDefaultAsync();
         }
+
+        public async Task<User?> FindUserByName(string name)
+        {
+            var users = await _context.Users.ToListAsync();
+            //var bestMatch = FuzzySharp.Process.ExtractOne(name, users.Select(u => u.Name));
+            return users.FirstOrDefault(u => u.Name == name);
+        }
+
         public async Task<User?> GetUserByObjectIdAsync(string objectId)
         {
             return await _context.Users.Include(a => a.Area)
