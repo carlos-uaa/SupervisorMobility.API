@@ -316,7 +316,7 @@ namespace SupervisorMobility.API.DataAccess.Services
         //SOS Flow
         #region SOSFlow
         Task<int> CreateSOSFlow(SOSFlow SOS_FlowToCreate);
-        Task<SOSFlow> GetSOSFlow(int SOSFlowId, bool includeImages = false, bool includeNotes = false, bool includeLogbooks = false, bool includeSOS = false, bool includeImagesSOS = false);
+        Task<SOSFlow> GetSOSFlow(int SOSFlowId, bool includeImages = false, bool includeNotes = false, bool includeLogbooks = false, bool includeSOS = false, bool includeImagesSOS = false, bool includePeople = false);
         Task<IEnumerable<SOSFlow>> GetAllSOSFlow(bool includeImages = false, bool includeNotes = false, bool includeLogbooks = false, bool includeSOS = false);
 
         Task<int> UpdateSOSFlow(SOSFlowForUpdateDto FlowUpdate, SOSFlow FlowEntity);

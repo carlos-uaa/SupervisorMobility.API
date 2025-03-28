@@ -92,10 +92,10 @@ namespace SupervisorMobility.API.Controllers.SOS_Controllers
         }//New revision
 
         [HttpGet("{id}", Name = "GetSOSFlow")]
-        public async Task<ActionResult<SOSFlowDto>> GetSOSFlow(int id, bool includeImages = false, bool includeNotes = false, bool includeLogbooks = false, bool includeSpecialCases = false, bool includeSOS = false, bool includeImagesSOS = false)
+        public async Task<ActionResult<SOSFlowDto>> GetSOSFlow(int id, bool includeImages = false, bool includeNotes = false, bool includeLogbooks = false, bool includeSpecialCases = false, bool includeSOS = false, bool includeImagesSOS = false, bool includePeople = false)
         {
 
-            var SOSFlow = await _ProcessRepository.GetSOSFlow(id, includeImages, includeNotes, includeLogbooks, includeSOS, includeImagesSOS);
+            var SOSFlow = await _ProcessRepository.GetSOSFlow(id, includeImages, includeNotes, includeLogbooks, includeSOS, includeImagesSOS, includePeople);
             if (SOSFlow == null)
             {
                 return NotFound("SOSFlow not found!");

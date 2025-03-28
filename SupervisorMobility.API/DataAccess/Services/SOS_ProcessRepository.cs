@@ -4751,7 +4751,7 @@ namespace SupervisorMobility.API.DataAccess.Services
             return _context.SaveChanges();
         }
 
-        public async Task<SOSFlow> GetSOSFlow(int SOSFlowId, bool includeImages = false, bool includeNotes = false, bool includeLogbooks = false, bool includeSOS = false, bool includeImagesSOS = false)
+        public async Task<SOSFlow> GetSOSFlow(int SOSFlowId, bool includeImages = false, bool includeNotes = false, bool includeLogbooks = false, bool includeSOS = false, bool includeImagesSOS = false, bool includePeople = false)
         {
             var query = _context.SOSFlows.AsNoTracking().Where(SOS => SOS.SOSFlowId == SOSFlowId && SOS.IsActive == true);
 
@@ -4764,6 +4764,11 @@ namespace SupervisorMobility.API.DataAccess.Services
             //{
             //    query = query.Include(query => query.Notes);
             //}
+            if (includePeople)
+            {
+                query = query.Include(p => p.Approver);
+                query = query.Include(p => p.ReviewerHS);
+            }
 
             if (includeLogbooks)
             {
@@ -4784,6 +4789,7 @@ namespace SupervisorMobility.API.DataAccess.Services
                 query = query.Include(m => m.SOSHub).ThenInclude(s => s.MaterialsUsed).ThenInclude(m => m.Material);
                 query = query.Include(m => m.SOSHub).ThenInclude(s => s.SafetyEquipment);
                 query = query.Include(m => m.SOSHub).ThenInclude(p => p.Plant);
+                query = query.Include(m => m.SOSHub).ThenInclude(a => a.Area);
                 query = query.Include(m => m.SOSHub).ThenInclude(d => d.Department);
                 query = query.Include(m => m.SOSHub).ThenInclude(d => d.Distribution);
             }

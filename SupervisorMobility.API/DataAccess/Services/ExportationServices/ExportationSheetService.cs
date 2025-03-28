@@ -38,6 +38,14 @@ namespace SupervisorMobility.API.DataAccess.Services.ExportationServices
                     sheetName = "DataAccess/Templates/Distribution Extra Template.xlsx";
                     sheetWN = "HOE DISTRIBUTION (" + GetNextIndex(currentIdx) + ")";
                     break;
+                case 4:
+                    sheetName = "DataAccess/Templates/Flow Extra Template.xlsx";
+                    sheetWN = "Flow " + GetNextCombination(currentIdx);
+                    break;
+                case 5:
+                    sheetName = "DataAccess/Templates/Flow Backup Template.xlsx";
+                    sheetWN = "Backup";
+                    break;
             }
 
             MemoryStream ms = new MemoryStream();
@@ -54,6 +62,7 @@ namespace SupervisorMobility.API.DataAccess.Services.ExportationServices
                 {
                     case 1:
                     case 2:
+                    case 4:
                         if (package.Workbook.Worksheets.Any(ws => ws.Name == "Backup"))
                             package.Workbook.Worksheets.MoveBefore(sheetWN, "Backup");
                         break;

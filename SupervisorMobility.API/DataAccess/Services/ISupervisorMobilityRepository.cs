@@ -168,6 +168,7 @@ namespace SupervisorMobility.API.Services
         Task<User?> GetUserByObjectIdAsync(string objectId);
         Task<User?> GetUserByEmailAsync(string email);
         Task<User?> GetUserByPayrollAsync(int payroll);
+        Task<User?> FindUserByName(string name);
         Task<User?> GetUserByPayrollAndMoreAsync(int payroll, int plantid, int areaid, int groupid);
         Task<bool> UserExistAsync(int userId);
         Task<bool> UserExistByPayrollAsync(int payroll);

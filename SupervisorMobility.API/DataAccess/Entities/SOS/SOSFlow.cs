@@ -17,6 +17,9 @@ namespace SupervisorMobility.API.DataAccess.Entities.SOS
 
         public int? ReviewerHSId { get; set; }
         public User? ReviewerHS { get; set; }
+        public int? ApproverId { get; set; }
+        public User? Approver { get; set; } 
+
         public FileUpload? ReviewerHSSignatureImage { get; set; } = new();
 
         public DateTime? CreatedAt { get; set; }
