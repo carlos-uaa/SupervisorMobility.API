@@ -37,6 +37,7 @@ namespace SupervisorMobility.API.Entities
         public Distribution? Distribution { get; set; }
 
         public ICollection<JobObservation> JobObservations { get; set; } = new List<JobObservation>();
+        public ICollection<JobObservationVersion> JobObservationVersions { get; set; } = new List<JobObservationVersion>();
 
         public Operation(string code, string description)
         {
