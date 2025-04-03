@@ -62,6 +62,36 @@ namespace SupervisorMobility.API.Controllers
 
 
         }
+        
+        [HttpGet("Details")]
+    public async Task<ActionResult<IEnumerable<DistributionWithNavigationPropertiesDto>>> GetDistributionsDetails(
+                    int plantId, int areaId, bool includecollections = false)
+        {
+            if (!await _supervisorMobilityRepository.PlantExistAsync(plantId))
+            {
+                return NotFound();
+            }
+
+            if (!await _supervisorMobilityRepository.AreaExistAsync(areaId))
+            {
+                return NotFound();
+            }
+
+            var areasForPlant = await _supervisorMobilityRepository
+                .GetDistributionsForAreaDetailsAsync(areaId);
+
+            if (includecollections)
+            {
+                            return Ok(_mapper.Map<IEnumerable<DistributionWithNavigationPropertiesDto>>(areasForPlant));
+            }
+            else
+            {
+                return Ok(_mapper.Map<IEnumerable<DistributionWithoutNavigationPropertiesDto>>(areasForPlant));
+            }
+
+
+
+        }
 
         [HttpGet("{distributionId}", Name = "GetDistribution")]
         public async Task<ActionResult<DistributionWithNavigationPropertiesDto>> GetDistribution(

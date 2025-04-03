@@ -292,6 +292,20 @@ namespace SupervisorMobility.API.Services
             return await _context.Distributions
                 .Where(o => o.AreaId == areaId && o.IsActive == true).ToListAsync();
         }
+        
+        public async Task<IEnumerable<Distribution>> GetDistributionsForAreaDetailsAsync(int areaId, bool includecollections = false)
+        {
+
+            if (includecollections)
+            {
+                return await _context.Distributions.Include(o => o.Operations).Include(p => p.Products)
+                     .Where(o => o.AreaId == areaId)
+                    .ToListAsync();
+            }
+
+            return await _context.Distributions
+                .Where(o => o.AreaId == areaId).ToListAsync();
+        }
 
         public async Task<IEnumerable<Distribution>> GetAllDistributions()
         {
