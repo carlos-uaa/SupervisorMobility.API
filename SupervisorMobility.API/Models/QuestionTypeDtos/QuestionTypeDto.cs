@@ -9,8 +9,5 @@ namespace SupervisorMobility.API.Models.QuestionTypeDtos
         public string Description { get; set; } = string.Empty;
         public bool IsActive { get; set; }
 
-        //Navigation property
-        public ICollection<ChecklistQuestionDto> ChecklistQuestions { get; set; }
-            = new List<ChecklistQuestionDto>();
     }
 }

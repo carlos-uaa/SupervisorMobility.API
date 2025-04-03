@@ -12,6 +12,11 @@
         public string PromptEN { get; set; }
         public string NotGoodEN { get; set; }
 
+        public int TypeId { get; set; }
+
+        public List<string>? Options { get; set; }
+        public List<string>? Actions { get; set; }
+
         public int JobCategoryStructureId { get; set; }
     }
 }
