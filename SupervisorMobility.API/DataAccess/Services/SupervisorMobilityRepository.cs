@@ -437,7 +437,7 @@ namespace SupervisorMobility.API.Services
         {
             if (includeChecklistQuestions)
             {
-                return await _context.QuestionTypes.Include(cq => cq.ChecklistQuestions)
+                return await _context.QuestionTypes
                     .Where(q => q.QuestionTypeId == questionTypeId).FirstOrDefaultAsync();
             }
 

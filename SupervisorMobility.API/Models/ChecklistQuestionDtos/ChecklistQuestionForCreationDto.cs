@@ -1,4 +1,5 @@
-﻿using System.ComponentModel.DataAnnotations;
+﻿using SupervisorMobility.API.Models.QuestionTypeDtos;
+using System.ComponentModel.DataAnnotations;
 
 namespace SupervisorMobility.API.Models.ChecklistQuestionDtos
 {
@@ -13,6 +14,11 @@ namespace SupervisorMobility.API.Models.ChecklistQuestionDtos
         public string NotGood { get; set; } = string.Empty;
         public int CategorySequence { get; set; }
         public int JobCategoryStructureId { get; set; }
+
+        public int TypeId { get; set; }
+
+        public List<string>? Options { get; set; }
+        public List<string>? Actions { get; set; }
 
         public bool? IsActive { get; set; }
 

@@ -1,5 +1,4 @@
 ﻿using SupervisorMobility.API.Models.ChecklistCategoryDtos;
-
 namespace SupervisorMobility.API.Models.ChecklistQuestionDtos
 {
     public class ChecklistQuestionsWithoutQuestionType
@@ -11,6 +10,8 @@ namespace SupervisorMobility.API.Models.ChecklistQuestionDtos
         public int CategorySequence { get; set; }
         public string PromptEN { get; set; }
         public string NotGoodEN { get; set; }
+        public List<string>? Options { get; set; }
+        public List<string>? Actions { get; set; }
         public bool? IsActive { get; set; }
         public int JobCategoryStructureId { get; set; }
 
