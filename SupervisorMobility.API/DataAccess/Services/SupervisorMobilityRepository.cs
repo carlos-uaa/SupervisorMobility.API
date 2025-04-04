@@ -207,7 +207,7 @@ namespace SupervisorMobility.API.Services
 
             if (includeCollections)
             {
-                return await _context.Areas.Include(a => a.Distributions)
+                return await _context.Areas.Include(a => a.Distributions.Where(d => d.IsActive == true))
               .Where(a => a.PlantId == plantId && a.IsActive == true).ToListAsync();
             }
 
@@ -227,9 +227,10 @@ namespace SupervisorMobility.API.Services
         {
             if (includeOperations)
             {
-                return await _context.Areas.Include(a => a.Distributions)
-                .Where(a => a.PlantId == plantId && a.AreaId == areaId)
-                .FirstOrDefaultAsync();
+                return await _context.Areas
+                    .Include(a => a.Distributions.Where(d => d.IsActive == true))
+                    .Where(a => a.PlantId == plantId && a.AreaId == areaId)
+                    .FirstOrDefaultAsync();
             }
             return await _context.Areas
                 .Where(a => a.PlantId == plantId && a.AreaId == areaId)
@@ -284,7 +285,7 @@ namespace SupervisorMobility.API.Services
 
             if (includecollections)
             {
-                return await _context.Distributions.Include(o => o.Operations).Include(p => p.Products)
+                return await _context.Distributions.Include(o => o.Operations.Where(d => d.IsActive == true)).Include(p => p.Products)
                      .Where(o => o.AreaId == areaId && o.IsActive == true)
                     .ToListAsync();
             }
@@ -318,7 +319,7 @@ namespace SupervisorMobility.API.Services
         {
             if (includeCollections)
             {
-                return await _context.Distributions.Include(o => o.Operations).Include(p => p.Products)
+                return await _context.Distributions.Include(o => o.Operations.Where(d => d.IsActive == true)).Include(p => p.Products)
                      .Where(o => o.AreaId == areaId && o.DistributionId == distributionId)
                     .FirstOrDefaultAsync();
             }

@@ -63,7 +63,7 @@ namespace SupervisorMobility.API.DataAccess.Services.BackgroundProcessServices
                     {
                         try
                         {
-                            IEnumerable<Plant> Plants = await _context.Plants.Where(u => u.IsActive == true).OrderBy(c => c.PlantId).ToListAsync();
+                            IEnumerable<Plant> Plants = await _context.Plants.Where( u => u.PlantId == plantnameid && u.IsActive == true).OrderBy(c => c.PlantId).ToListAsync();
                             IEnumerable<Product> Products = await _context.Products.OrderBy(c => c.ProductId).Include(p => p.Distributions).ToListAsync();
 
                             Dictionary<int, Plant> PlantsDictionary = new Dictionary<int, Plant>();
@@ -348,7 +348,7 @@ namespace SupervisorMobility.API.DataAccess.Services.BackgroundProcessServices
                                         //Optenemos AssyChart para rutas
                                         AssyChart? AssyChartExist = null;
 
-                                        if ((int)PathResume.PlantId != null && PathResume.AreaId != null && PathResume.DistributionId != null)
+                                        if (PathResume.PlantId != null && PathResume.AreaId != null && PathResume.DistributionId != null)
                                         {
                                             AssyChartExist = await _context.AssyCharts.Include(pr => pr.RoutesProductsAssyChart).ThenInclude(r => r.Product).Where(p => p.PlantId == (int)PathResume.PlantId && p.AreaId == (int)PathResume.AreaId && p.DistributionId == (int)PathResume.DistributionId).FirstOrDefaultAsync();
                                         }
@@ -377,14 +377,14 @@ namespace SupervisorMobility.API.DataAccess.Services.BackgroundProcessServices
 
                                             Debug.WriteLine($"Create assychart id {finalasssychart.AssyChardId} plantid {(int)PathResume.PlantId} areaid {(int)PathResume.AreaId} distributionid {(int)PathResume.DistributionId} ");
 
-                                            if ((int)PathResume.PlantId != null && PathResume.AreaId != null && PathResume.DistributionId != null)
+                                            if (PathResume.PlantId != null && PathResume.AreaId != null && PathResume.DistributionId != null)
                                             {
                                                 AssyChartExist = await _context.AssyCharts.Include(pr => pr.RoutesProductsAssyChart).ThenInclude(r => r.Product).Where(p => p.PlantId == (int)PathResume.PlantId && p.AreaId == (int)PathResume.AreaId && p.DistributionId == (int)PathResume.DistributionId).FirstOrDefaultAsync();
                                             }
                                         }
 
 
-                                        if ((int)PathResume.PlantId > 0)
+                                        if (PathResume.PlantId > 0)
                                         {
                                             //la planta existe
                                             int rowStartOperation = 12;
@@ -508,10 +508,10 @@ namespace SupervisorMobility.API.DataAccess.Services.BackgroundProcessServices
                                             }
 
 
-                                            if ((int)PathResume.AreaId > 0)
+                                            if (PathResume.AreaId > 0)
                                             {
                                                 //el area existe
-                                                if ((int)PathResume.DistributionId > 0)
+                                                if (PathResume.DistributionId > 0)
                                                 {
                                                     //La districucion existe
                                                     string lastOperationName = null; // Para almacenar el último nombre de operación
@@ -661,7 +661,7 @@ namespace SupervisorMobility.API.DataAccess.Services.BackgroundProcessServices
                                                                 }
                                                             }
 
-                                                            if ((int)PathResume.OperationId > 0)
+                                                            if (PathResume.OperationId > 0)
                                                             {
                                                                 Debug.WriteLine($"La Operacion {ExcelOpCode} - {ExcelOpDescription} Existe :) !!! ");
                                                                 //Aqui una verificacion de informacion, si algun dato en los tiempos cambia, hay que actualizar el json//
@@ -2159,12 +2159,6 @@ namespace SupervisorMobility.API.DataAccess.Services.BackgroundProcessServices
 
                                                 }
 
-                                                //if (DocumentError)
-                                                //{
-                                                //    break;
-                                                //}
-
-
                                             }
 
                                         }
@@ -2177,41 +2171,59 @@ namespace SupervisorMobility.API.DataAccess.Services.BackgroundProcessServices
 
                                 }//end using
 
-                                var noUsedAreas = GetUnusedAreas(AreasDictionary, AreasUsedDictionary);
-                                var noUsedDistributions = GetUnusedDistributions(DistributionsDictionary, DistributionsUsedDictionary); 
-                                var noUsedOperations = GetUnusedOperations(OperationsDictionary, OperationsUsedDictionary);
-
-                                foreach(var area in noUsedAreas)
+                                foreach (var area in AreasUsedDictionary.Select(a => a.Value))
                                 {
-                                    area.IsActive = false;
+                                    area.IsActive = true;
 
                                     // Actualizar el área en el contexto
                                     _context.Areas.Update(area);
                                 }
-                                
+
+                                foreach (var distribution in DistributionsUsedDictionary.Select(d => d.Value))
+                                {
+                                    distribution.IsActive = true;
+
+                                    // Actualizar la distribución en el contexto
+                                    _context.Distributions.Update(distribution);
+                                }
+
+                                foreach (var operation in OperationsUsedDictionary.Select(o => o.Value))
+                                {
+                                    operation.IsActive = true;
+
+                                    // Actualizar la operación en el contexto
+                                    _context.Operations.Update(operation);
+                                }
+
+
+                                var noUsedDistributions = GetUnusedDistributions(DistributionsDictionary, DistributionsUsedDictionary, AreasUsedDictionary);
+                                var noUsedOperations = GetUnusedOperations(OperationsDictionary, OperationsUsedDictionary, DistributionsUsedDictionary);
+
+
                                 foreach (var distribution in noUsedDistributions)
                                 {
                                     distribution.IsActive = false;
-
-                                    // Actualizar la distribución en el contexto
                                     _context.Distributions.Update(distribution);
                                 }
 
                                 foreach (var operation in noUsedOperations)
                                 {
                                     operation.IsActive = false;
-
-                                    // Actualizar la operación en el contexto
                                     _context.Operations.Update(operation);
                                 }
 
                                 await _context.SaveChangesAsync();
 
+                                
+
                             }//end try
                             catch (FileNotFoundException ex)
                             {
-                                Console.WriteLine($"Error Tree Data: {ex.Message.ToString()}");
-                                Debug.WriteLine($"Error Tree Data: {ex.Message.ToString()}");
+                                Console.WriteLine($"Error Documento : {ex.Message.ToString()} " +
+                                    $">>{ex.StackTrace}");
+                                Debug.WriteLine($"Error Documento : {ex.Message.ToString()} " +
+                                    $">>{ex.StackTrace}");
+
                                 DocumentError = true;
                                 transaction.Rollback();
                                 //no se pudo abrir el archivo
@@ -2475,21 +2487,23 @@ namespace SupervisorMobility.API.DataAccess.Services.BackgroundProcessServices
         }
 
         public static List<Operation> GetUnusedOperations(
-           Dictionary<(int, int, int, int), Operation> operationsDictionary,
-           Dictionary<(int, int, int, int), Operation> operationsUsedDictionary)
+            Dictionary<(int, int, int, int), Operation> operationsDictionary,
+            Dictionary<(int, int, int, int), Operation> operationsUsedDictionary,
+            Dictionary<(int, int, int), Distribution> distributionsUsedDictionary)
         {
             return operationsDictionary
-                .Where(op => !operationsUsedDictionary.ContainsKey(op.Key))
+                .Where(op => !operationsUsedDictionary.ContainsKey(op.Key) && distributionsUsedDictionary.ContainsKey((op.Key.Item1, op.Key.Item2, op.Key.Item3)))
                 .Select(op => op.Value)
                 .ToList();
         }
 
         public static List<Distribution> GetUnusedDistributions(
             Dictionary<(int, int, int), Distribution> distributionsDictionary,
-            Dictionary<(int, int, int), Distribution> distributionsUsedDictionary)
+            Dictionary<(int, int, int), Distribution> distributionsUsedDictionary,
+            Dictionary<(int, int), Area> areasUsedDictionary)
         {
             return distributionsDictionary
-                .Where(dist => !distributionsUsedDictionary.ContainsKey(dist.Key))
+                .Where(dist => !distributionsUsedDictionary.ContainsKey(dist.Key) && areasUsedDictionary.ContainsKey((dist.Key.Item1, dist.Key.Item2)))
                 .Select(dist => dist.Value)
                 .ToList();
         }
