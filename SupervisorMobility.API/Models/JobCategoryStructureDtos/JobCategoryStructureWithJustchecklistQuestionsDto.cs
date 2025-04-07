@@ -13,7 +13,7 @@ namespace SupervisorMobility.API.Models.ChecklistCategoryDtos
         public bool IsActive { get; set; }
 
         //Navigation property
-        public ICollection<ChecklistQuestionWithoutNavigationPropertiesDto> ChecklistQuestions { get; set; }
-            = new List<ChecklistQuestionWithoutNavigationPropertiesDto>();
+        public ICollection<ChecklistQuestionsWithType> ChecklistQuestions { get; set; }
+            = new List<ChecklistQuestionsWithType>();
     }
 }
