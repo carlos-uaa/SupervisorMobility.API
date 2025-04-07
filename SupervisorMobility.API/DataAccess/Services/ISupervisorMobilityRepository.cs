@@ -67,6 +67,7 @@ namespace SupervisorMobility.API.Services
         #endregion
         #region DistributionOperations
         Task<IEnumerable<Distribution>> GetDistributionsForAreaAsync(int areaId, bool includecollections = false);
+        Task<IEnumerable<Distribution>> GetDistributionsForAreaDetailsAsync(int areaId, bool includecollections = false);
         Task<IEnumerable<Distribution>> GetAllDistributions();
 
         Task<Distribution?> GetDistributionForAreaAsync(int areaId, int distributionId, bool includeCollections = false);

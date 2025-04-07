@@ -42,21 +42,50 @@ namespace SupervisorMobility.API.Controllers
             {
                 return NotFound();
             }
+            var areasForPlant = await _supervisorMobilityRepository
+            .GetDistributionsForAreaAsync(areaId, includecollections);
 
             if (includecollections)
             {
-                var areasForPlant = await _supervisorMobilityRepository
-                .GetDistributionsForAreaAsync(areaId, includecollections);
                 return Ok(_mapper.Map<IEnumerable<DistributionWithNavigationPropertiesDto>>(areasForPlant));
 
             }
             else
             {
-                var areasForPlant = await _supervisorMobilityRepository
-                .GetDistributionsForAreaAsync(areaId);
+
                 return Ok(_mapper.Map<IEnumerable<DistributionWithoutNavigationPropertiesDto>>(areasForPlant));
 
 
+            }
+
+
+
+        }
+
+        [HttpGet("Details")]
+        public async Task<ActionResult<IEnumerable<DistributionWithNavigationPropertiesDto>>> GetDistributionsDetails(
+                    int plantId, int areaId, bool includecollections = false)
+        {
+            if (!await _supervisorMobilityRepository.PlantExistAsync(plantId))
+            {
+                return NotFound();
+            }
+
+            if (!await _supervisorMobilityRepository.AreaExistAsync(areaId))
+            {
+                return NotFound();
+            }
+
+            var areasForPlant = await _supervisorMobilityRepository
+                .GetDistributionsForAreaDetailsAsync(areaId);
+
+            if (includecollections)
+            {
+                return Ok(_mapper.Map<IEnumerable<DistributionWithNavigationPropertiesDto>>(areasForPlant));
+            }
+            else
+            {
+                return Ok(_mapper.Map<IEnumerable<DistributionWithoutNavigationPropertiesDto>>(areasForPlant));
             }
 
 
@@ -77,10 +106,10 @@ namespace SupervisorMobility.API.Controllers
                 return NotFound();
             }
 
+            var distribution = await _supervisorMobilityRepository
+                    .GetDistributionForAreaAsync(areaId, distributionId, includeCollections);
             if (includeCollections)
             {
-                var distribution = await _supervisorMobilityRepository
-                        .GetDistributionForAreaAsync(areaId, distributionId, includeCollections);
                 if (distribution == null)
                 {
                     return NotFound();
@@ -90,8 +119,7 @@ namespace SupervisorMobility.API.Controllers
             }
             else
             {
-                var distribution = await _supervisorMobilityRepository
-        .GetDistributionForAreaAsync(areaId, distributionId);
+
                 if (distribution == null)
                 {
                     return NotFound();
@@ -286,8 +314,8 @@ namespace SupervisorMobility.API.Controllers
                     distributionId = createdDistributionToReturn.DistributionId
                 },
                 createdDistributionToReturn);
-        
-    }
+
+        }
 
         [HttpPost("{distributionId}/products/add")]
         public async Task<ActionResult<DistributionWithoutNavigationPropertiesDto>> AddProduct(int plantId, int areaId, int distributionId,

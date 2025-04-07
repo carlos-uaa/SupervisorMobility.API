@@ -1,9 +1,11 @@
-﻿using AutoMapper;
+﻿
+using AutoMapper;
 using ClosedXML.Excel;
 using DocumentFormat.OpenXml.Bibliography;
 using DuoVia.FuzzyStrings;
 using FuzzyString;
 using Microsoft.EntityFrameworkCore;
+using Newtonsoft.Json;
 using Slugify;
 using SupervisorMobility.API.Business;
 using SupervisorMobility.API.Context;
@@ -61,15 +63,16 @@ namespace SupervisorMobility.API.DataAccess.Services.BackgroundProcessServices
                     {
                         try
                         {
-
-
-                            IEnumerable<Plant> Plants = await _context.Plants.Where(u => u.IsActive == true).OrderBy(c => c.PlantId).ToListAsync();
+                            IEnumerable<Plant> Plants = await _context.Plants.Where( u => u.PlantId == plantnameid && u.IsActive == true).OrderBy(c => c.PlantId).ToListAsync();
                             IEnumerable<Product> Products = await _context.Products.OrderBy(c => c.ProductId).Include(p => p.Distributions).ToListAsync();
 
                             Dictionary<int, Plant> PlantsDictionary = new Dictionary<int, Plant>();
                             Dictionary<(int, int), Area> AreasDictionary = new Dictionary<(int, int), Area>();
                             Dictionary<(int, int, int), Distribution> DistributionsDictionary = new Dictionary<(int, int, int), Distribution>();
                             Dictionary<(int, int, int, int), Operation> OperationsDictionary = new Dictionary<(int, int, int, int), Operation>();
+
+                            Dictionary<(int, int), Area> AreasUsedDictionary = new Dictionary<(int, int), Area>();
+                            Dictionary<(int, int, int), Distribution> DistributionsUsedDictionary = new Dictionary<(int, int, int), Distribution>();
                             Dictionary<(int, int, int, int), Operation> OperationsUsedDictionary = new Dictionary<(int, int, int, int), Operation>();
 
                             foreach (Plant plantElement in Plants)
@@ -83,13 +86,13 @@ namespace SupervisorMobility.API.DataAccess.Services.BackgroundProcessServices
                                     {
                                         AreasDictionary.Add((plantElement.PlantId, areaElement.AreaId), areaElement);
 
-                                        IEnumerable<Distribution> distributions = await _context.Distributions.Where(o => o.AreaId == areaElement.AreaId && o.IsActive == true).ToListAsync();
+                                        IEnumerable<Distribution> distributions = await _context.Distributions.Where(o => o.AreaId == areaElement.AreaId ).ToListAsync();
 
                                         foreach (Distribution distribution in distributions)
                                         {
                                             DistributionsDictionary.Add((plantElement.PlantId, areaElement.AreaId, distribution.DistributionId), distribution);
 
-                                            IEnumerable<Operation> operations = await _context.Operations.Where(o => o.DistributionId == distribution.DistributionId && o.IsActive == true).ToListAsync();
+                                            IEnumerable<Operation> operations = await _context.Operations.Where(o => o.DistributionId == distribution.DistributionId).ToListAsync();
                                             foreach (Operation operation in operations)
                                             {
                                                 OperationsDictionary.Add((plantElement.PlantId, areaElement.AreaId, distribution.DistributionId, operation.OperationId), operation);
@@ -286,17 +289,23 @@ namespace SupervisorMobility.API.DataAccess.Services.BackgroundProcessServices
                                         }
                                         //buscar Area coincidencia en Planta
                                         var coincidenciasAreas = AreasDictionary
-                                                          .Where(pair => pair.Key.Item1 == PathResume.PlantId).Select(pair => new
-                                                          {
-                                                              Area = pair.Value,
-                                                              Similarity = _treeService.CombineSimilaritiesArea(pair.Value.Code, pair.Value.Description, ExcelAreaCode)
-                                                          })
-                                                          .OrderByDescending(result => result.Similarity).FirstOrDefault();
+                                                            .Where(pair => pair.Key.Item1 == PathResume.PlantId).Select(pair => new
+                                                            {
+                                                                Area = pair.Value,
+                                                                Similarity = _treeService.CombineSimilaritiesArea(pair.Value.Code, pair.Value.Description, ExcelAreaCode)
+                                                            })
+                                                            .OrderByDescending(result => result.Similarity).FirstOrDefault();
 
                                         if (coincidenciasAreas != null && coincidenciasAreas.Similarity >= 0.70)
                                         {
                                             PathResume.AreaId = coincidenciasAreas.Area.AreaId;
                                             PathResume.DescripcionArea = coincidenciasAreas.Area.Description;
+
+                                            // Add to AreasUsedDictionary if not already present
+                                            if (!AreasUsedDictionary.ContainsKey(((int)PathResume.PlantId, (int)PathResume.AreaId)))
+                                            {
+                                                AreasUsedDictionary.Add(((int)PathResume.PlantId, (int)PathResume.AreaId), coincidenciasAreas.Area);
+                                            }
                                         }
 
                                         // Buscar distribucion coincidencia en Area
@@ -318,17 +327,20 @@ namespace SupervisorMobility.API.DataAccess.Services.BackgroundProcessServices
 
                                             if (coincidenciasDistributions.Distribution.CriticalType != ExcelDistDSRelevant switch { "A" => 1, "B" => 2, "C" => 3, "a" => 1, "b" => 2, "c" => 3, _ => 0 })
                                             {
-                                                coincidenciasDistributions.Distribution.CriticalType = ExcelDistDSRelevant switch
+                                                coincidenciasDistributions.Distribution.CriticalType = ExcelDistDSRelevant.ToLower() switch
                                                 {
-                                                    "A" => 1,
-                                                    "B" => 2,
-                                                    "C" => 3,
                                                     "a" => 1,
                                                     "b" => 2,
                                                     "c" => 3,
-
+                                                    "obc" => 4,
                                                     _ => 0
                                                 };
+                                            }
+
+                                            // Add to DistributionsUsedDictionary if not already present
+                                            if (!DistributionsUsedDictionary.ContainsKey(((int)PathResume.PlantId, (int)PathResume.AreaId, (int)PathResume.DistributionId)))
+                                            {
+                                                DistributionsUsedDictionary.Add(((int)PathResume.PlantId, (int)PathResume.AreaId, (int)PathResume.DistributionId), coincidenciasDistributions.Distribution);
                                             }
                                         }
 
@@ -355,7 +367,7 @@ namespace SupervisorMobility.API.DataAccess.Services.BackgroundProcessServices
                                                 IsActive = true
                                             };
 
-                                            //aqui va la transiction 
+                                            
                                             var finalasssychart = _mapper.Map<AssyChart>(assychartForCreate);
                                             dbContext.AssyCharts.Add(finalasssychart);
                                             dbContext.SaveChanges();
@@ -501,7 +513,7 @@ namespace SupervisorMobility.API.DataAccess.Services.BackgroundProcessServices
                                                 //el area existe
                                                 if (PathResume.DistributionId > 0)
                                                 {
-                                                    
+                                                    //La districucion existe
                                                     string lastOperationName = null; // Para almacenar el último nombre de operación
 
                                                     foreach (var row in rows.SkipWhile(r => r.RowNumber() < startingRow.RowNumber()))
@@ -564,10 +576,10 @@ namespace SupervisorMobility.API.DataAccess.Services.BackgroundProcessServices
                                                             else if (!string.IsNullOrEmpty(ExcelOpCode) && string.IsNullOrEmpty(ExcelOpDescription))
                                                             {
                                                                 DocumentError = true;
-                                                                eMailBody += $"\\n Falta Nombre de operacion..." +
+                                                                eMailBody +=$"\\nError en Pagina: {p} - {pageName} " +
+                                                                    "Falta Nombre de operacion..." +
                                                                     $" Rango de celdas C{row.RowNumber()}" +
-                                                                    $" Pagina: {p} - {pageName}" +
-                                                                    $" Distribucion: {coincidenciasDistributions.Distribution.Description}";
+                                                                   $" Distribucion: {coincidenciasDistributions.Distribution.Description}";
                                                             }
 
                                                             var range = worksheet.Range(row.Cell("G"), row.Cell("Z"));
@@ -658,12 +670,12 @@ namespace SupervisorMobility.API.DataAccess.Services.BackgroundProcessServices
                                                                 if (productsCopy.Count > 0)
                                                                 {
                                                                     //Coincidencia de producto
-                                                                    string productCode = productsCopy[0].Keys.First();
+                                                                    string productsCode = String.Join("§" , productsCopy.Select(pair => pair.Keys.First()).ToArray());
 
                                                                     var coincidenciasProduct = Products.Select(pair => new
                                                                     {
                                                                         Product = pair,
-                                                                        Similarity = 1 - pair.Code.JaccardDistance(productCode)
+                                                                        Similarity = 1 - pair.Code.JaccardDistance(productsCode.Split('§').FirstOrDefault())
                                                                     }).OrderByDescending(result => result.Similarity).FirstOrDefault();
 
                                                                     // Ajusta este umbral según la necesidad
@@ -824,40 +836,78 @@ namespace SupervisorMobility.API.DataAccess.Services.BackgroundProcessServices
 
                                                                     }
 
-
-
                                                                     bool isUpdate = false;
                                                                     OperationForUpdateDto OperationforUpdate = _mapper.Map<OperationForUpdateDto>(coincidenciasOperaciones.Operation);
 
-                                                                    var productToUpdate = productsCopy.FirstOrDefault(product => product.Keys.First() == productCode);
-
-                                                                    if (productToUpdate != null && productCode != OperationforUpdate.ProductName)
+                                                                    if (OperationforUpdate != null && productsCode != OperationforUpdate.ProductName)
                                                                     {
-                                                                        OperationforUpdate.ProductName = productCode;
+                                                                        OperationforUpdate.ProductName = productsCode;
                                                                         isUpdate = true;
                                                                     }
 
-                                                                    if (productToUpdate != null && productToUpdate.Values.First()["NameTime"] != OperationforUpdate.NameTime)
+                                                                    Dictionary<string, string> NameTimeDict = new Dictionary<string, string>();
+                                                                    Dictionary<string, string> TimesDict = new Dictionary<string, string>();
+                                                                    Dictionary<string, string> AdditionalTimeDict = new Dictionary<string, string>();
+                                                                    Dictionary<string, string> StandarTimeDict = new Dictionary<string, string>();
+
+                                                                    foreach (var product in productsCopy)
                                                                     {
-                                                                        OperationforUpdate.NameTime = productToUpdate.Values.First()["NameTime"];
+                                                                        var productName = product.Keys.First();
+                                                                        var nameTime = product[productName]["NameTime"];
+                                                                        NameTimeDict[productName] = nameTime;
+                                                                    }
+
+                                                                    foreach (var product in productsCopy)
+                                                                    {
+                                                                        var productName = product.Keys.First();
+                                                                        var Time = product[productName]["Time"];
+                                                                        TimesDict[productName] = Time;
+                                                                    }
+
+                                                                    foreach (var product in productsCopy)
+                                                                    {
+                                                                        var productName = product.Keys.First();
+                                                                        var aditionalTime = product[productName]["AdditionalTime"];
+                                                                        AdditionalTimeDict[productName] = aditionalTime;
+                                                                    }
+
+                                                                    foreach (var product in productsCopy)
+                                                                    {
+                                                                        var productName = product.Keys.First();
+                                                                        var standarTime = product[productName]["StandardTime"];
+                                                                        StandarTimeDict[productName] = standarTime;
+                                                                    }
+
+
+                                                                    // Convertir el diccionario a JSON
+                                                                    string NameTimeJson = JsonConvert.SerializeObject(NameTimeDict, Formatting.Indented);
+                                                                    string TimesJson = JsonConvert.SerializeObject(TimesDict, Formatting.Indented);
+                                                                    string AditioanalTimeJson = JsonConvert.SerializeObject(AdditionalTimeDict, Formatting.Indented);
+                                                                    string StandarTimeJson = JsonConvert.SerializeObject(StandarTimeDict, Formatting.Indented);
+
+                                                                    
+
+                                                                    if (OperationforUpdate != null && NameTimeJson != OperationforUpdate.NameTime)
+                                                                    {
+                                                                        OperationforUpdate.NameTime = NameTimeJson;
                                                                         isUpdate = true;
                                                                     }
 
-                                                                    if (productToUpdate != null && productToUpdate.Values.First()["Time"] != OperationforUpdate.Time)
+                                                                    if (OperationforUpdate != null && TimesJson != OperationforUpdate.Time)
                                                                     {
-                                                                        OperationforUpdate.Time = productToUpdate.Values.First()["Time"];
+                                                                        OperationforUpdate.Time = TimesJson;
                                                                         isUpdate = true;
                                                                     }
 
-                                                                    if (productToUpdate != null && productToUpdate.Values.First()["AdditionalTime"] != OperationforUpdate.AdditionalTime)
+                                                                    if (OperationforUpdate != null && AditioanalTimeJson != OperationforUpdate.AdditionalTime)
                                                                     {
-                                                                        OperationforUpdate.AdditionalTime = productToUpdate.Values.First()["AdditionalTime"];
+                                                                        OperationforUpdate.AdditionalTime = AditioanalTimeJson;
                                                                         isUpdate = true;
                                                                     }
 
-                                                                    if (productToUpdate != null && productToUpdate.Values.First()["StandardTime"] != OperationforUpdate.StandardTime)
+                                                                    if (OperationforUpdate != null && StandarTimeJson != OperationforUpdate.StandardTime)
                                                                     {
-                                                                        OperationforUpdate.StandardTime = productToUpdate.Values.First()["StandardTime"];
+                                                                        OperationforUpdate.StandardTime = StandarTimeJson;
                                                                         isUpdate = true;
                                                                     }
 
@@ -898,6 +948,11 @@ namespace SupervisorMobility.API.DataAccess.Services.BackgroundProcessServices
                                                                         dbContext.SaveChanges();
                                                                     }
 
+                                                                    // Add to OperationsUsedDictionary if not already present
+                                                                    if (!OperationsUsedDictionary.ContainsKey(((int)PathResume.PlantId, (int)PathResume.AreaId, (int)PathResume.DistributionId, (int)PathResume.OperationId.Value)))
+                                                                    {
+                                                                        OperationsUsedDictionary.Add(((int)PathResume.PlantId, (int)PathResume.AreaId, (int)PathResume.DistributionId, (int)PathResume.OperationId.Value), coincidenciasOperaciones.Operation);
+                                                                    }
 
                                                                 }
                                                                 else
@@ -919,12 +974,12 @@ namespace SupervisorMobility.API.DataAccess.Services.BackgroundProcessServices
                                                                 if (productsCopy.Count > 0)
                                                                 {
                                                                     //Coincidencia de producto
-                                                                    string productCode = productsCopy[0].Keys.First();
+                                                                    string productsCode = String.Join("§" , productsCopy.Select(pair => pair.Keys.First()).ToArray());
 
                                                                     var coincidenciasProduct = Products.Select(pair => new
                                                                     {
                                                                         Product = pair,
-                                                                        Similarity = 1 - pair.Code.JaccardDistance(productCode)
+                                                                        Similarity = 1 - pair.Code.JaccardDistance(productsCode.Split('§').FirstOrDefault())
                                                                     }).OrderByDescending(result => result.Similarity).FirstOrDefault();
 
                                                                     // Ajusta este umbral según la necesidad
@@ -1070,18 +1125,55 @@ namespace SupervisorMobility.API.DataAccess.Services.BackgroundProcessServices
 
                                                                     }
 
-                                                                    var ProductJson = productsCopy.FirstOrDefault(product => product.Keys.First() == productCode);
+                                                                    Dictionary<string, string> NameTimeDict = new Dictionary<string, string>();
+                                                                    Dictionary<string, string> TimesDict = new Dictionary<string, string>();
+                                                                    Dictionary<string, string> AdditionalTimeDict = new Dictionary<string, string>();
+                                                                    Dictionary<string, string> StandarTimeDict = new Dictionary<string, string>();
+
+                                                                    foreach (var product in productsCopy)
+                                                                    {
+                                                                        var productName = product.Keys.First();
+                                                                        var nameTime = product[productName]["NameTime"];
+                                                                        NameTimeDict[productName] = nameTime;
+                                                                    }
+
+                                                                    foreach (var product in productsCopy)
+                                                                    {
+                                                                        var productName = product.Keys.First();
+                                                                        var Time = product[productName]["Time"];
+                                                                        TimesDict[productName] = Time;
+                                                                    }
+
+                                                                    foreach (var product in productsCopy)
+                                                                    {
+                                                                        var productName = product.Keys.First();
+                                                                        var nameTime = product[productName]["AdditionalTime"];
+                                                                        AdditionalTimeDict[productName] = nameTime;
+                                                                    }
+
+                                                                    foreach (var product in productsCopy)
+                                                                    {
+                                                                        var productName = product.Keys.First();
+                                                                        var nameTime = product[productName]["StandardTime"];
+                                                                        StandarTimeDict[productName] = nameTime;
+                                                                    }
+
+                                                                    // Convertir el diccionario a JSON
+                                                                    string NameTimeJson = JsonConvert.SerializeObject(NameTimeDict, Formatting.Indented);
+                                                                    string TimesJson = JsonConvert.SerializeObject(TimesDict, Formatting.Indented);
+                                                                    string AditioanalTimeJson = JsonConvert.SerializeObject(AdditionalTimeDict, Formatting.Indented);
+                                                                    string StandarTimeJson = JsonConvert.SerializeObject(StandarTimeDict, Formatting.Indented);
 
                                                                     var operationForCreate = _mapper.Map<OperationForCreationDto>(new OperationForCreationDto() { Code = ExcelOpCode, Description = ExcelOpDescription, IsActive = true });
 
-
                                                                     operationForCreate.restrictionorcomment = ExcelCommentaryOrRestriction;
 
-                                                                    operationForCreate.ProductName = productCode;
-                                                                    operationForCreate.NameTime = ProductJson.Values.First()["NameTime"];
-                                                                    operationForCreate.Time = ProductJson.Values.First()["Time"];
-                                                                    operationForCreate.AdditionalTime = ProductJson.Values.First()["AdditionalTime"];
-                                                                    operationForCreate.StandardTime = ProductJson.Values.First()["StandardTime"];
+                                                                    operationForCreate.ProductName = productsCode;
+                                                                    operationForCreate.NameTime = NameTimeJson;
+                                                                    operationForCreate.Time = TimesJson;
+                                                                    operationForCreate.AdditionalTime = AditioanalTimeJson;
+                                                                    operationForCreate.StandardTime = StandarTimeJson;
+
                                                                     operationForCreate.CriticalType = ExcelOpDSRelevant switch
                                                                     {
                                                                         "A" => 1,
@@ -1095,7 +1187,6 @@ namespace SupervisorMobility.API.DataAccess.Services.BackgroundProcessServices
                                                                     };
 
                                                                     var finalOperation = _mapper.Map<Operation>(operationForCreate);
-
 
                                                                     if (finalDistribution.CriticalType != ExcelDistDSRelevant switch { "A" => 1, "B" => 2, "C" => 3, "a" => 1, "b" => 2, "c" => 3, _ => 0 })
                                                                     {
@@ -1121,15 +1212,21 @@ namespace SupervisorMobility.API.DataAccess.Services.BackgroundProcessServices
 
                                                                     OperationsDictionary.Add(((int)PathResume.PlantId, (int)PathResume.AreaId, (int)PathResume.DistributionId, finalOperation.OperationId), finalOperation);
                                                                     CountCreateOperation++;
+
+                                                                    // Add to OperationsUsedDictionary if not already present
+                                                                    if (!OperationsUsedDictionary.ContainsKey(((int)PathResume.PlantId, (int)PathResume.AreaId, (int)PathResume.DistributionId, finalOperation.OperationId)))
+                                                                    {
+                                                                        OperationsUsedDictionary.Add(((int)PathResume.PlantId, (int)PathResume.AreaId, (int)PathResume.DistributionId, finalOperation.OperationId), finalOperation);
+                                                                    }
                                                                 }
                                                                 else
                                                                 {
                                                                     //Debug.WriteLine($"La Operacion  NO EXISTE {ExcelOpCode} - {ExcelOpDescription} NO EXISTE :c  ");
                                                                     DocumentError = true;
                                                                     eMailBody += $"\\n Faltan datos en el documento..." +
-                                                                      $" Rango de celdas F{row.RowNumber()}-Y{row.RowNumber()}" +
-                                                                      $" Pagina: {p} - {pageName}" +
-                                                                      $" Distribucion: {coincidenciasDistributions.Distribution.Description} Operacion: {coincidenciasOperaciones.Operation.Code}";
+                                                                        $" Rango de celdas F{row.RowNumber()}-Y{row.RowNumber()}" +
+                                                                        $" Pagina: {p} - {pageName}" +
+                                                                        $" Distribucion: {coincidenciasDistributions.Distribution.Description} Operacion: {coincidenciasOperaciones.Operation.Code}";
                                                                 }
 
                                                             }
@@ -1141,10 +1238,7 @@ namespace SupervisorMobility.API.DataAccess.Services.BackgroundProcessServices
                                                             break;
                                                         }
                                                     }
-                                                    //if (DocumentError) {
-                                                    //    //provicional, busco finalizar rapido la ejecucion al encontrar un error
-                                                    //    break;
-                                                    //}
+                                                
                                                 }//end if distribution >0
                                                 else
                                                 {
@@ -1182,6 +1276,12 @@ namespace SupervisorMobility.API.DataAccess.Services.BackgroundProcessServices
                                                     PathResume.DistributionId = finalDistribution.DistributionId;
                                                     DistributionsDictionary.Add(((int)PathResume.PlantId, (int)PathResume.AreaId, (int)PathResume.DistributionId), finalDistribution);
 
+
+                                                    // Add to DistributionsUsedDictionary if not already present
+                                                    if (!DistributionsUsedDictionary.ContainsKey(((int)PathResume.PlantId, (int)PathResume.AreaId, (int)PathResume.DistributionId)))
+                                                    {
+                                                        DistributionsUsedDictionary.Add(((int)PathResume.PlantId, (int)PathResume.AreaId, (int)PathResume.DistributionId), finalDistribution);
+                                                    }
 
                                                     coincidenciasDistributions = DistributionsDictionary
                                                         .Where(pair => pair.Key.Item1 == PathResume.PlantId && pair.Key.Item2 == PathResume.AreaId && pair.Key.Item3 == PathResume.DistributionId)
@@ -1323,25 +1423,27 @@ namespace SupervisorMobility.API.DataAccess.Services.BackgroundProcessServices
                                                             if (productsCopy.Count > 0)
                                                             {
                                                                 //Coincidencia de producto
-                                                                string productCode = productsCopy[0].Keys.First();
+                                                                string productsCode = String.Join("§" , productsCopy.Select(pair => pair.Keys.First()).ToArray());
+
+                                                                var coincidenciasProduct = Products.Select(pair => new
+                                                                    {
+                                                                        Product = pair,
+                                                                        Similarity = 1 - pair.Code.JaccardDistance(productsCode.Split('§').FirstOrDefault())
+                                                                    }).OrderByDescending(result => result.Similarity).FirstOrDefault();
                                                                 //si es operacion de calidad añadimos el producto antes de cc
+                                                                
                                                                 if (ExcelOpCode == "CC" || ExcelOpCode == "cc")
                                                                 {
-                                                                    ExcelOpCode = $"{productCode} - {ExcelOpCode}";
+                                                                    ExcelOpCode = $"{productsCode.Split('§').FirstOrDefault()} - {ExcelOpCode}";
                                                                 }
 
 
                                                                 if (ExcelOpCode.DiceCoefficient("FALTA GOS") > 0.8)
                                                                 {
-                                                                    ExcelOpCode = $"{productCode} - {ExcelOpCode}";
+                                                                    ExcelOpCode = $"{productsCode.Split('§').FirstOrDefault()} - {ExcelOpCode}";
                                                                 }
 
-                                                                var coincidenciasProduct = Products.Select(pair => new
-                                                                {
-                                                                    Product = pair,
-                                                                    Similarity = 1 - pair.Code.JaccardDistance(productCode)
-                                                                }).OrderByDescending(result => result.Similarity).FirstOrDefault();
-
+                                                            
                                                                 // Ajusta este umbral según la necesidad
                                                                 if (coincidenciasProduct != null && coincidenciasProduct.Similarity > 0.5)
                                                                 {
@@ -1367,17 +1469,56 @@ namespace SupervisorMobility.API.DataAccess.Services.BackgroundProcessServices
                                                                 }
                                                                 await dbContext.SaveChangesAsync();
 
-                                                                var ProductJson = productsCopy.FirstOrDefault(product => product.Keys.First() == productCode);
 
-                                                                var operationForCreate = _mapper.Map<OperationForCreationDto>(new OperationForCreationDto() { Code = ExcelOpCode, Description = ExcelOpDescription, IsActive = true });
-                                                                operationForCreate.restrictionorcomment = ExcelCommentaryOrRestriction;
+                                                                    Dictionary<string, string> NameTimeDict = new Dictionary<string, string>();
+                                                                    Dictionary<string, string> TimesDict = new Dictionary<string, string>();
+                                                                    Dictionary<string, string> AdditionalTimeDict = new Dictionary<string, string>();
+                                                                    Dictionary<string, string> StandarTimeDict = new Dictionary<string, string>();
 
+                                                                    foreach (var product in productsCopy)
+                                                                    {
+                                                                        var productName = product.Keys.First();
+                                                                        var nameTime = product[productName]["NameTime"];
+                                                                        NameTimeDict[productName] = nameTime;
+                                                                    }
 
-                                                                operationForCreate.ProductName = productCode;
-                                                                operationForCreate.NameTime = ProductJson.Values.First()["NameTime"];
-                                                                operationForCreate.Time = ProductJson.Values.First()["Time"];
-                                                                operationForCreate.AdditionalTime = ProductJson.Values.First()["AdditionalTime"];
-                                                                operationForCreate.StandardTime = ProductJson.Values.First()["StandardTime"];
+                                                                    foreach (var product in productsCopy)
+                                                                    {
+                                                                        var productName = product.Keys.First();
+                                                                        var Time = product[productName]["Time"];
+                                                                        TimesDict[productName] = Time;
+                                                                    }
+
+                                                                    foreach (var product in productsCopy)
+                                                                    {
+                                                                        var productName = product.Keys.First();
+                                                                        var nameTime = product[productName]["AdditionalTime"];
+                                                                        AdditionalTimeDict[productName] = nameTime;
+                                                                    }
+
+                                                                    foreach (var product in productsCopy)
+                                                                    {
+                                                                        var productName = product.Keys.First();
+                                                                        var nameTime = product[productName]["StandardTime"];
+                                                                        StandarTimeDict[productName] = nameTime;
+                                                                    }
+
+                                                                    // Convertir el diccionario a JSON
+                                                                    string NameTimeJson = JsonConvert.SerializeObject(NameTimeDict, Formatting.Indented);
+                                                                    string TimesJson = JsonConvert.SerializeObject(TimesDict, Formatting.Indented);
+                                                                    string AditioanalTimeJson = JsonConvert.SerializeObject(AdditionalTimeDict, Formatting.Indented);
+                                                                    string StandarTimeJson = JsonConvert.SerializeObject(StandarTimeDict, Formatting.Indented);
+
+                                                                    var operationForCreate = _mapper.Map<OperationForCreationDto>(new OperationForCreationDto() { Code = ExcelOpCode, Description = ExcelOpDescription, IsActive = true });
+
+                                                                    operationForCreate.restrictionorcomment = ExcelCommentaryOrRestriction;
+
+                                                                    operationForCreate.ProductName = productsCode;
+                                                                    operationForCreate.NameTime = NameTimeJson;
+                                                                    operationForCreate.Time = TimesJson;
+                                                                    operationForCreate.AdditionalTime = AditioanalTimeJson;
+                                                                    operationForCreate.StandardTime = StandarTimeJson;
+
                                                                 operationForCreate.CriticalType = ExcelOpDSRelevant switch
                                                                 {
                                                                     "A" => 1,
@@ -1527,15 +1668,21 @@ namespace SupervisorMobility.API.DataAccess.Services.BackgroundProcessServices
 
                                                                 OperationsDictionary.Add(((int)PathResume.PlantId, (int)PathResume.AreaId, (int)PathResume.DistributionId, finalOperation.OperationId), finalOperation);
                                                                 CountCreateOperation++;
+
+                                                                // Add to OperationsUsedDictionary if not already present
+                                                                if (!OperationsUsedDictionary.ContainsKey(((int)PathResume.PlantId, (int)PathResume.AreaId, (int)PathResume.DistributionId, finalOperation.OperationId)))
+                                                                {
+                                                                    OperationsUsedDictionary.Add(((int)PathResume.PlantId, (int)PathResume.AreaId, (int)PathResume.DistributionId, finalOperation.OperationId), finalOperation);
+                                                                }
                                                             }
                                                             else
                                                             {
                                                                 //Debug.WriteLine($"Distribucio no existe y no hay productos ");
                                                                 DocumentError = true;
                                                                 eMailBody += $"\\n Faltan datos en el documento..." +
-                                                                  $" Rango de celdas F{row.RowNumber()}-Y{row.RowNumber()}" +
-                                                                  $" Pagina: {p} - {pageName}" +
-                                                                  $" Distribucion: {coincidenciasDistributions.Distribution.Description}";
+                                                                    $" Rango de celdas F{row.RowNumber()}-Y{row.RowNumber()}" +
+                                                                    $" Pagina: {p} - {pageName}" +
+                                                                    $" Distribucion: {coincidenciasDistributions.Distribution.Description}";
                                                             }
 
 
@@ -1566,6 +1713,12 @@ namespace SupervisorMobility.API.DataAccess.Services.BackgroundProcessServices
                                                 PathResume.AreaId = finalArea.AreaId;
 
                                                 AreasDictionary.Add(((int)PathResume.PlantId, (int)PathResume.AreaId), finalArea);
+
+                                                // Add to AreasUsedDictionary if not already present
+                                                if (!AreasUsedDictionary.ContainsKey(((int)PathResume.PlantId, (int)PathResume.AreaId)))
+                                                {
+                                                    AreasUsedDictionary.Add(((int)PathResume.PlantId, (int)PathResume.AreaId), finalArea);
+                                                }
 
                                                 //Distribucion desde aqui
                                                 string codeGen = ExcelDistDescription;
@@ -1599,6 +1752,11 @@ namespace SupervisorMobility.API.DataAccess.Services.BackgroundProcessServices
                                                 PathResume.DistributionId = finalDistribution.DistributionId;
                                                 DistributionsDictionary.Add(((int)PathResume.PlantId, (int)PathResume.AreaId, (int)PathResume.DistributionId), finalDistribution);
 
+                                                // Add to DistributionsUsedDictionary if not already present
+                                                if (!DistributionsUsedDictionary.ContainsKey(((int)PathResume.PlantId, (int)PathResume.AreaId, (int)PathResume.DistributionId)))
+                                                {
+                                                    DistributionsUsedDictionary.Add(((int)PathResume.PlantId, (int)PathResume.AreaId, (int)PathResume.DistributionId), finalDistribution);
+                                                }
 
 
                                                 //Si la distribucion no existe, el assy chart tampoco existe
@@ -1725,24 +1883,25 @@ namespace SupervisorMobility.API.DataAccess.Services.BackgroundProcessServices
                                                         if (productsCopy.Count > 0)
                                                         {
                                                             //Coincidencia de producto
-                                                            string productCode = productsCopy[0].Keys.First();
+                                                                string productsCode = String.Join("§" , productsCopy.Select(pair => pair.Keys.First()).ToArray());
+
+                                                                    var coincidenciasProduct = Products.Select(pair => new
+                                                                    {
+                                                                        Product = pair,
+                                                                        Similarity = 1 - pair.Code.JaccardDistance(productsCode.Split('§').FirstOrDefault())
+                                                                    }).OrderByDescending(result => result.Similarity).FirstOrDefault();
                                                             //si es operacion de calidad añadimos el producto antes de cc
                                                             if (ExcelOpCode == "CC" || ExcelOpCode == "cc")
                                                             {
-                                                                ExcelOpCode = $"{productCode} - {ExcelOpCode}";
+                                                                ExcelOpCode = $"{productsCode.Split('§').FirstOrDefault()} - {ExcelOpCode}";
                                                             }
 
                                                             if (ExcelOpCode.DiceCoefficient("FALTA GOS") > 0.8)
                                                             {
-                                                                ExcelOpCode = $"{productCode} - {ExcelOpCode}";
+                                                                ExcelOpCode = $"{productsCode.Split('§').FirstOrDefault()} - {ExcelOpCode}";
                                                             }
 
-                                                            var coincidenciasProduct = Products.Select(pair => new
-                                                            {
-                                                                Product = pair,
-                                                                Similarity = 1 - pair.Code.JaccardDistance(productCode)
-                                                            }).OrderByDescending(result => result.Similarity).FirstOrDefault();
-
+                                                         
                                                             // Ajusta este umbral según la necesidad
                                                             if (coincidenciasProduct != null && coincidenciasProduct.Similarity > 0.5)
                                                             {
@@ -1768,17 +1927,56 @@ namespace SupervisorMobility.API.DataAccess.Services.BackgroundProcessServices
                                                             }
                                                             await dbContext.SaveChangesAsync();
 
-                                                            var ProductJson = productsCopy.FirstOrDefault(product => product.Keys.First() == productCode);
+                                                            
+                                                            
+                                                                Dictionary<string, string> NameTimeDict = new Dictionary<string, string>();
+                                                                Dictionary<string, string> TimesDict = new Dictionary<string, string>();
+                                                                    Dictionary<string, string> AdditionalTimeDict = new Dictionary<string, string>();
+                                                                    Dictionary<string, string> StandarTimeDict = new Dictionary<string, string>();
 
-                                                            var operationForCreate = _mapper.Map<OperationForCreationDto>(new OperationForCreationDto() { Code = ExcelOpCode, Description = ExcelOpDescription, IsActive = true });
-                                                            operationForCreate.restrictionorcomment = ExcelCommentaryOrRestriction;
+                                                                    foreach (var product in productsCopy)
+                                                                    {
+                                                                        var productName = product.Keys.First();
+                                                                        var nameTime = product[productName]["NameTime"];
+                                                                        NameTimeDict[productName] = nameTime;
+                                                                    }
 
+                                                                    foreach (var product in productsCopy)
+                                                                    {
+                                                                        var productName = product.Keys.First();
+                                                                        var Time = product[productName]["Time"];
+                                                                        TimesDict[productName] = Time;
+                                                                    }
 
-                                                            operationForCreate.ProductName = productCode;
-                                                            operationForCreate.NameTime = ProductJson.Values.First()["NameTime"];
-                                                            operationForCreate.Time = ProductJson.Values.First()["Time"];
-                                                            operationForCreate.AdditionalTime = ProductJson.Values.First()["AdditionalTime"];
-                                                            operationForCreate.StandardTime = ProductJson.Values.First()["StandardTime"];
+                                                                    foreach (var product in productsCopy)
+                                                                    {
+                                                                        var productName = product.Keys.First();
+                                                                        var nameTime = product[productName]["AdditionalTime"];
+                                                                        AdditionalTimeDict[productName] = nameTime;
+                                                                    }
+
+                                                                    foreach (var product in productsCopy)
+                                                                    {
+                                                                        var productName = product.Keys.First();
+                                                                        var nameTime = product[productName]["StandardTime"];
+                                                                        StandarTimeDict[productName] = nameTime;
+                                                                    }
+
+                                                                    // Convertir el diccionario a JSON
+                                                                    string NameTimeJson = JsonConvert.SerializeObject(NameTimeDict, Formatting.Indented);
+                                                                    string TimesJson = JsonConvert.SerializeObject(TimesDict, Formatting.Indented);
+                                                                    string AditioanalTimeJson = JsonConvert.SerializeObject(AdditionalTimeDict, Formatting.Indented);
+                                                                    string StandarTimeJson = JsonConvert.SerializeObject(StandarTimeDict, Formatting.Indented);
+
+                                                                    var operationForCreate = _mapper.Map<OperationForCreationDto>(new OperationForCreationDto() { Code = ExcelOpCode, Description = ExcelOpDescription, IsActive = true });
+
+                                                                    operationForCreate.restrictionorcomment = ExcelCommentaryOrRestriction;
+
+                                                                    operationForCreate.ProductName = productsCode;
+                                                                    operationForCreate.NameTime = NameTimeJson;
+                                                                    operationForCreate.Time = TimesJson;
+                                                                    operationForCreate.AdditionalTime = AditioanalTimeJson;
+                                                                    operationForCreate.StandardTime = StandarTimeJson;
                                                             operationForCreate.CriticalType = ExcelOpDSRelevant switch
                                                             {
                                                                 "A" => 1,
@@ -1940,6 +2138,10 @@ namespace SupervisorMobility.API.DataAccess.Services.BackgroundProcessServices
                                                             dbContext.SaveChanges();
 
                                                             OperationsDictionary.Add(((int)PathResume.PlantId, (int)PathResume.AreaId, (int)PathResume.DistributionId, finalOperation.OperationId), finalOperation);
+                                                            if (!OperationsUsedDictionary.ContainsKey(((int)PathResume.PlantId, (int)PathResume.AreaId, (int)PathResume.DistributionId, finalOperation.OperationId)))
+                                                            {
+                                                                OperationsUsedDictionary.Add(((int)PathResume.PlantId, (int)PathResume.AreaId, (int)PathResume.DistributionId, finalOperation.OperationId), finalOperation);
+                                                            }
                                                             CountCreateOperation++;
                                                         }
                                                         else
@@ -1947,21 +2149,15 @@ namespace SupervisorMobility.API.DataAccess.Services.BackgroundProcessServices
                                                             //Debug.WriteLine($"Distribucio no existe y no hay productos ");
                                                             DocumentError = true;
                                                             eMailBody += $"\\n Faltan datos en el documento..." +
-                                                              $" Rango de celdas F{row.RowNumber()}-Y{row.RowNumber()}" +
-                                                              $" Pagina: {p} - {pageName}" +
-                                                              $" Distribucion: {coincidenciasDistributions.Distribution.Description}";
+                                                                $" Rango de celdas F{row.RowNumber()}-Y{row.RowNumber()}" +
+                                                                $" Pagina: {p} - {pageName}" +
+                                                                $" Distribucion: {coincidenciasDistributions.Distribution.Description}";
                                                         }
 
 
                                                     }
 
                                                 }
-
-                                                //if (DocumentError)
-                                                //{
-                                                //    break;
-                                                //}
-
 
                                             }
 
@@ -1975,11 +2171,59 @@ namespace SupervisorMobility.API.DataAccess.Services.BackgroundProcessServices
 
                                 }//end using
 
+                                foreach (var area in AreasUsedDictionary.Select(a => a.Value))
+                                {
+                                    area.IsActive = true;
+
+                                    // Actualizar el área en el contexto
+                                    _context.Areas.Update(area);
+                                }
+
+                                foreach (var distribution in DistributionsUsedDictionary.Select(d => d.Value))
+                                {
+                                    distribution.IsActive = true;
+
+                                    // Actualizar la distribución en el contexto
+                                    _context.Distributions.Update(distribution);
+                                }
+
+                                foreach (var operation in OperationsUsedDictionary.Select(o => o.Value))
+                                {
+                                    operation.IsActive = true;
+
+                                    // Actualizar la operación en el contexto
+                                    _context.Operations.Update(operation);
+                                }
+
+
+                                var noUsedDistributions = GetUnusedDistributions(DistributionsDictionary, DistributionsUsedDictionary, AreasUsedDictionary);
+                                var noUsedOperations = GetUnusedOperations(OperationsDictionary, OperationsUsedDictionary, DistributionsUsedDictionary);
+
+
+                                foreach (var distribution in noUsedDistributions)
+                                {
+                                    distribution.IsActive = false;
+                                    _context.Distributions.Update(distribution);
+                                }
+
+                                foreach (var operation in noUsedOperations)
+                                {
+                                    operation.IsActive = false;
+                                    _context.Operations.Update(operation);
+                                }
+
+                                await _context.SaveChangesAsync();
+
+                                
+
                             }//end try
                             catch (FileNotFoundException ex)
                             {
-                                Console.WriteLine($"Error Tree Data: {ex.Message.ToString()}");
-                                Debug.WriteLine($"Error Tree Data: {ex.Message.ToString()}");
+                                Console.WriteLine($"Error Documento : {ex.Message.ToString()} " +
+                                    $">>{ex.StackTrace}");
+                                Debug.WriteLine($"Error Documento : {ex.Message.ToString()} " +
+                                    $">>{ex.StackTrace}");
+
                                 DocumentError = true;
                                 transaction.Rollback();
                                 //no se pudo abrir el archivo
@@ -2242,5 +2486,40 @@ namespace SupervisorMobility.API.DataAccess.Services.BackgroundProcessServices
             }//end using scope
         }
 
+        public static List<Operation> GetUnusedOperations(
+            Dictionary<(int, int, int, int), Operation> operationsDictionary,
+            Dictionary<(int, int, int, int), Operation> operationsUsedDictionary,
+            Dictionary<(int, int, int), Distribution> distributionsUsedDictionary)
+        {
+            return operationsDictionary
+                .Where(op => !operationsUsedDictionary.ContainsKey(op.Key) && distributionsUsedDictionary.ContainsKey((op.Key.Item1, op.Key.Item2, op.Key.Item3)))
+                .Select(op => op.Value)
+                .ToList();
+        }
+
+        public static List<Distribution> GetUnusedDistributions(
+            Dictionary<(int, int, int), Distribution> distributionsDictionary,
+            Dictionary<(int, int, int), Distribution> distributionsUsedDictionary,
+            Dictionary<(int, int), Area> areasUsedDictionary)
+        {
+            return distributionsDictionary
+                .Where(dist => !distributionsUsedDictionary.ContainsKey(dist.Key) && areasUsedDictionary.ContainsKey((dist.Key.Item1, dist.Key.Item2)))
+                .Select(dist => dist.Value)
+                .ToList();
+        }
+
+        public static List<Area> GetUnusedAreas(
+            Dictionary<(int, int), Area> areasDictionary,
+            Dictionary<(int, int), Area> areasUsedDictionary)
+        {
+            return areasDictionary
+                .Where(area => !areasUsedDictionary.ContainsKey(area.Key))
+                .Select(area => area.Value)
+                .ToList();
+        }
+
     }//end class ProcessWorkLoadService
+
+
+    
 }//end namespace

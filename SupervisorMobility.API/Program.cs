@@ -41,7 +41,7 @@ if (env.IsDevelopment())
     // Usa una ruta completa si es Linux
     if (isLinux)
     {
-        builder.Configuration.AddJsonFile("/home/vanitas/Documentos/GrupoSinco/SupervisorMobility/SupervisorMobility.API/SupervisorMobility.API/appsettings.Development.json", optional: false, reloadOnChange: false);
+        builder.Configuration.AddJsonFile("/home/Vanitas/Documents/GrupoSinco/Supervisor Mobility/SupervisorMobility.API/SupervisorMobility.API/appsettings.Development.json", optional: false, reloadOnChange: false);
     }
     else
     {
@@ -53,7 +53,7 @@ else
     // Usa una ruta completa si es Linux
     if (isLinux)
     {
-        builder.Configuration.AddJsonFile("/home/vanitas/Documentos/GrupoSinco/SupervisorMobility/SupervisorMobility.API/SupervisorMobility.API/appsettings.json", optional: false, reloadOnChange: true);
+        builder.Configuration.AddJsonFile("/home/Vanitas/Documents/GrupoSinco/Supervisor Mobility/SupervisorMobility.API/SupervisorMobility.API/appsettings.json", optional: false, reloadOnChange: true);
     }
     else
     {
