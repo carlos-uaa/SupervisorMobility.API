@@ -22,10 +22,10 @@ namespace SupervisorMobility.API.Controllers
         }
 
         [HttpGet]
-        public async Task<ActionResult<IEnumerable<QuestionTypeWithoutChecklistDto>>> GetAllQuestionTypes()
+        public async Task<ActionResult<IEnumerable<QuestionTypeDto>>> GetAllQuestionTypes()
         {
             var questionTypeEntities = await _supervisorMobilityRepository.GetQuestionTypesAsync();
-            return Ok(_mapper.Map<IEnumerable<QuestionTypeWithoutChecklistDto>>(questionTypeEntities));
+            return Ok(_mapper.Map<IEnumerable<QuestionTypeDto>>(questionTypeEntities));
         }
 
         [HttpGet("{id}")]
@@ -39,10 +39,10 @@ namespace SupervisorMobility.API.Controllers
 
             if (includeChecklistQuestions)
             {
-                return Ok(_mapper.Map<QuestionTypeWithJustChecklistQuestionsDto>(questionTypeEntitie));
+                return Ok(_mapper.Map<QuestionTypeDto>(questionTypeEntitie));
             }
 
-            return Ok(_mapper.Map<QuestionTypeWithoutChecklistDto>(questionTypeEntitie));
+            return Ok(_mapper.Map<QuestionTypeDto>(questionTypeEntitie));
         }
     }
 }

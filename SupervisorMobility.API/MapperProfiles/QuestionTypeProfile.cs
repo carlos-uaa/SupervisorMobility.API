@@ -6,8 +6,7 @@ namespace SupervisorMobility.API.Profiles
     {
         public QuestionTypeProfile()
         {
-            CreateMap<Entities.QuestionType, Models.QuestionTypeDtos.QuestionTypeWithoutChecklistDto>();
-            CreateMap<Entities.QuestionType, Models.QuestionTypeDtos.QuestionTypeWithJustChecklistQuestionsDto>();
+            CreateMap<Entities.QuestionType, Models.QuestionTypeDtos.QuestionTypeDto>();
         }
     }
 }
