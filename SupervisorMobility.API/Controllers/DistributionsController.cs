@@ -76,16 +76,16 @@ namespace SupervisorMobility.API.Controllers
                 return NotFound();
             }
 
-            var areasForPlant = await _supervisorMobilityRepository
-                .GetDistributionsForAreaDetailsAsync(areaId);
+            var DistributionsForArea = await _supervisorMobilityRepository
+                .GetDistributionsForAreaDetailsAsync(areaId, includecollections);
 
             if (includecollections)
             {
-                return Ok(_mapper.Map<IEnumerable<DistributionWithNavigationPropertiesDto>>(areasForPlant));
+                return Ok(_mapper.Map<IEnumerable<DistributionWithNavigationPropertiesDto>>(DistributionsForArea));
             }
             else
             {
-                return Ok(_mapper.Map<IEnumerable<DistributionWithoutNavigationPropertiesDto>>(areasForPlant));
+                return Ok(_mapper.Map<IEnumerable<DistributionWithoutNavigationPropertiesDto>>(DistributionsForArea));
             }
 
 
