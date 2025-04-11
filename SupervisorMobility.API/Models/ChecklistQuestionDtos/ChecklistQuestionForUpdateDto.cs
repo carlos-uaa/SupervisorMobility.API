@@ -12,6 +12,12 @@ namespace SupervisorMobility.API.Models.ChecklistQuestionDtos
         [MaxLength(200)]
         public string NotGood { get; set; } = string.Empty;
         public int CategorySequence { get; set; }
+
+        public int TypeId { get; set; }
+
+        public List<string>? Options { get; set; }
+        public List<string>? Actions { get; set; }
+
         public bool? IsActive { get; set; }
         //FK
         [Required]

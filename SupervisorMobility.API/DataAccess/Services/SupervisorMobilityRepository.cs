@@ -72,6 +72,7 @@ namespace SupervisorMobility.API.Services
             if (includeChecklistQuestion)
             {
                 return await _context.JobCategoryStructures.Include(cq => cq.ChecklistQuestions.Where(cq => cq.IsActive == true).OrderBy(c => c.CategorySequence)).ThenInclude(p => p.Pillars)
+                    .Include(cq => cq.ChecklistQuestions).ThenInclude(t => t.Type)
                     .Where(u => u.IsActive == true).OrderBy(c => c.Sequence).ToListAsync();
             }
             return await _context.JobCategoryStructures.Where(u => u.IsActive == true)
@@ -207,7 +208,7 @@ namespace SupervisorMobility.API.Services
 
             if (includeCollections)
             {
-                return await _context.Areas.Include(a => a.Distributions)
+                return await _context.Areas.Include(a => a.Distributions.Where(d => d.IsActive == true))
               .Where(a => a.PlantId == plantId && a.IsActive == true).ToListAsync();
             }
 
@@ -227,9 +228,10 @@ namespace SupervisorMobility.API.Services
         {
             if (includeOperations)
             {
-                return await _context.Areas.Include(a => a.Distributions)
-                .Where(a => a.PlantId == plantId && a.AreaId == areaId)
-                .FirstOrDefaultAsync();
+                return await _context.Areas
+                    .Include(a => a.Distributions.Where(d => d.IsActive == true))
+                    .Where(a => a.PlantId == plantId && a.AreaId == areaId)
+                    .FirstOrDefaultAsync();
             }
             return await _context.Areas
                 .Where(a => a.PlantId == plantId && a.AreaId == areaId)
@@ -284,13 +286,27 @@ namespace SupervisorMobility.API.Services
 
             if (includecollections)
             {
-                return await _context.Distributions.Include(o => o.Operations).Include(p => p.Products)
+                return await _context.Distributions.Include(o => o.Operations.Where(d => d.IsActive == true)).Include(p => p.Products)
                      .Where(o => o.AreaId == areaId && o.IsActive == true)
                     .ToListAsync();
             }
 
             return await _context.Distributions
                 .Where(o => o.AreaId == areaId && o.IsActive == true).ToListAsync();
+        }
+        
+        public async Task<IEnumerable<Distribution>> GetDistributionsForAreaDetailsAsync(int areaId, bool includecollections = false)
+        {
+
+            if (includecollections)
+            {
+                return await _context.Distributions.Include(o => o.Operations).Include(p => p.Products)
+                     .Where(o => o.AreaId == areaId)
+                    .ToListAsync();
+            }
+
+            return await _context.Distributions
+                .Where(o => o.AreaId == areaId).ToListAsync();
         }
 
         public async Task<IEnumerable<Distribution>> GetAllDistributions()
@@ -304,7 +320,7 @@ namespace SupervisorMobility.API.Services
         {
             if (includeCollections)
             {
-                return await _context.Distributions.Include(o => o.Operations).Include(p => p.Products)
+                return await _context.Distributions.Include(o => o.Operations.Where(d => d.IsActive == true)).Include(p => p.Products)
                      .Where(o => o.AreaId == areaId && o.DistributionId == distributionId)
                     .FirstOrDefaultAsync();
             }
@@ -437,7 +453,7 @@ namespace SupervisorMobility.API.Services
         {
             if (includeChecklistQuestions)
             {
-                return await _context.QuestionTypes.Include(cq => cq.ChecklistQuestions)
+                return await _context.QuestionTypes
                     .Where(q => q.QuestionTypeId == questionTypeId).FirstOrDefaultAsync();
             }
 

@@ -16,10 +16,6 @@ namespace SupervisorMobility.API.Entities
         public string Description { get; set; }
         public bool? IsActive { get; set; }
 
-        //Navigation property
-        public ICollection<ChecklistQuestion> ChecklistQuestions { get; set; }
-            = new List<ChecklistQuestion>();
-
         public QuestionType(string code, string description)
         {
             Code = code;

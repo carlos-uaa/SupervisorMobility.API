@@ -1,4 +1,5 @@
 ﻿using Microsoft.EntityFrameworkCore;
+using SupervisorMobility.API.DataAccess.Entities;
 using System.ComponentModel.DataAnnotations;
 using System.ComponentModel.DataAnnotations.Schema;
 
@@ -17,7 +18,7 @@ namespace SupervisorMobility.API.Entities
         //public int PillarId { get; set; }
 
         public ICollection<Pillar>? Pillars { get; set; } = new List<Pillar>();
-     
+
         public string NotGood { get; set; }
         public string? NotGoodEN { get; set; } = string.Empty;
 
@@ -25,10 +26,15 @@ namespace SupervisorMobility.API.Entities
 
         public bool? IsActive { get; set; }
 
+        public int? TypeId { get; set; }
+        [ForeignKey("TypeId")]
+        public QuestionType Type { get; set; }
+
+        public List<string>? Options { get; set; }
+        public List<string>? Actions { get; set; }
 
         //Navigation properties
         public int JobCategoryStructureId { get; set; }
         public JobCategoryStructure? JobCategoryStructure { get; set; }
-
     }
 }
