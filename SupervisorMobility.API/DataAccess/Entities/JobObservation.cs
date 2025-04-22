@@ -79,6 +79,7 @@ namespace SupervisorMobility.API.Entities
         public string? Waiting { get; set; }
 
         public FileUpload? SignatureImage { get; set; } =  new();
+        public bool WillNotRequireSSVAproval { get; set; } = false;
 
     }
 }
