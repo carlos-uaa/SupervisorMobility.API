@@ -50,6 +50,6 @@ namespace SupervisorMobility.API.Models.JobObservationDtos
         public string? DoubleManagment { get; set; }
         public string? Waiting { get; set; }
         public ICollection<ChecklistAnswerDto>? checklistAnswers { get; set; } = new List<ChecklistAnswerDto>();
-        public bool WillNotRequireSSVAproval { get; set; } = false;
+        public bool WillNotRequireSSVApproval { get; set; } = false;
     }
 }
