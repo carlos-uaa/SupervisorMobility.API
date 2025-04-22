@@ -51,6 +51,6 @@ namespace SupervisorMobility.API.Models.JobObservationDtos
         public string? StepsNumber { get; set; }
         public string? DoubleManagment { get; set; }
         public string? Waiting { get; set; }
-
+        public bool WillNotRequireSSVAproval { get; set; } = false;
     }
 }
