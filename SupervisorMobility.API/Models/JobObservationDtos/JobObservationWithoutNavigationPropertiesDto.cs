@@ -46,6 +46,6 @@
         public string? StepsNumber { get; set; }
         public string? DoubleManagment { get; set; }
         public string? Waiting { get; set; }
-        public bool WillNotRequireSSVAproval { get; set; } = false;
+        public bool WillNotRequireSSVApproval { get; set; } = false;
     }
 }
