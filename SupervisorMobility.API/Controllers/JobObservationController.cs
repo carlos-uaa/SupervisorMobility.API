@@ -72,6 +72,13 @@ namespace SupervisorMobility.API.Controllers
             var finalJobObservation = _mapper.Map<JobObservation>(jobObservation);
 
             //En caso de que no funcione tengo que crear funcion que busque las operaciones y las añada a la lista
+            finalJobObservation.Operations = new List<Operation>();
+
+            foreach (var op in jobObservation.Operations)
+            {
+                Operation opAdd = await _supervisorMobilityRepository.GetOperationForDistributionAsync(jobObservation.DistributionId, op.OperationId);
+                finalJobObservation.Operations.Add(opAdd);
+            }
 
             if (finalJobObservation.OperatorId == 0)
             {
