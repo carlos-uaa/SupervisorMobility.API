@@ -24,6 +24,7 @@ using SupervisorMobility.API.Models.JobPaginationDtos;
 using SupervisorMobility.API.Models.KaizenDtos;
 using SupervisorMobility.API.Models.KaizenTransactionDtos;
 using SupervisorMobility.API.Models.PATDtos;
+using SupervisorMobility.API.Models.ProductiveCalendarDtos;
 using SupervisorMobility.API.Models.SOS.SOSHubDtos.AnalysisDtos;
 using SupervisorMobility.API.Models.SOSReviewDtos;
 using SupervisorMobility.API.Models.Users;
@@ -2983,7 +2984,43 @@ namespace SupervisorMobility.API.Services
         }
         #endregion
 
+        #region Holidays
 
+        public async Task<int> AddHolidayAsync(HolidayForUpdateDto holiday)
+           {
+            Holiday holiday1 = _mapper.Map<Holiday>(holiday);
+            _context.Holidays.Add(holiday1);
+            return await _context.SaveChangesAsync();
+        }
+        public async Task<IEnumerable<Holiday>> GetActiveHolidaysOfYearAsync(int year)
+           {
+            var values = _context.Holidays
+                .Where(h => h.Date.Year == year && h.IsActive == true);
+
+            return await values.ToListAsync();
+        }
+        public async Task<IEnumerable<Holiday>> GetHolidaysOfYearAsync(int year)
+           {
+            var values = _context.Holidays
+                .Where(h => h.Date.Year == year);
+
+            return await values.ToListAsync();
+        }
+        public Task<Holiday> GetHolidayByIdAsync(int id)
+           {
+            return _context.Holidays
+                .Where(h => h.HolidayId == id)
+                .FirstOrDefaultAsync();
+        }
+        public async Task<bool> UpdateHolidayAsync(Holiday existingHoliday, HolidayForUpdateDto holiday)
+        {
+            _mapper.Map(holiday, existingHoliday);
+
+            _context.Holidays.Update(existingHoliday);
+
+            return await _context.SaveChangesAsync() > 0;
+        }
+        #endregion
 
     }
 }
