@@ -24,6 +24,7 @@ using SupervisorMobility.API.Models.JobPaginationDtos;
 using SupervisorMobility.API.Models.KaizenDtos;
 using SupervisorMobility.API.Models.KaizenTransactionDtos;
 using SupervisorMobility.API.Models.PATDtos;
+using SupervisorMobility.API.Models.ProductiveCalendarDtos;
 using SupervisorMobility.API.Models.SOS.SOSHubDtos.AnalysisDtos;
 using SupervisorMobility.API.Models.SOSReviewDtos;
 using SupervisorMobility.API.Models.Users;
@@ -1569,6 +1570,8 @@ namespace SupervisorMobility.API.Services
             return matchingJobs;
         }
 
+       
+
         public async Task<IEnumerable<JobObservation>> GetAllJobObservationsAsync(bool includeTree = false, bool includePeople = false, bool includeLup = false, bool includeHistory = false, bool includeCkAnswers = false, int idPlant = 0, int idArea = 0, bool ForSosProgram = false, int year = 0, int month = 0, int SOSAnualId = 0, int idUser = 0)
         {
 
@@ -1678,9 +1681,33 @@ namespace SupervisorMobility.API.Services
             return await query.OrderBy(c => c.JobObservationId).ToListAsync();
 
         }
-        
 
-         public async Task<IEnumerable<JobObservation>> GetAllNextYearJobsObservations(int plantId, int areaId, int year)
+        public async Task<IEnumerable<JobObservation>> GetAllTrainingJobsObservations(int plantId, int areaId, int month)
+        {
+
+            var query = _context.JobObservations.Where(j => j.IsActive == true && j.Type == 4);
+
+
+            if (plantId != 0)
+            {
+                query = query.Where(p => p.PlantId == plantId);
+            }
+
+            if (areaId != 0)
+            {
+                query = query.Where(p => p.AreaId == areaId);
+            }
+
+            if (month != 0)
+            {
+                query = query.Where(d => d.StartDate.Value.Month == month || d.EndDate.Value.Month == month);
+            }
+
+            return await query.OrderBy(c => c.JobObservationId).ToListAsync();
+
+        }
+
+        public async Task<IEnumerable<JobObservation>> GetAllNextYearJobsObservations(int plantId, int areaId, int year)
         {
 
             var query = _context.JobObservations.Include(jo => jo.Operations).Where(j => j.IsActive == true && j.Type == 5);
@@ -2983,7 +3010,43 @@ namespace SupervisorMobility.API.Services
         }
         #endregion
 
+        #region Holidays
 
+        public async Task<int> AddHolidayAsync(HolidayForUpdateDto holiday)
+           {
+            Holiday holiday1 = _mapper.Map<Holiday>(holiday);
+            _context.Holidays.Add(holiday1);
+            return await _context.SaveChangesAsync();
+        }
+        public async Task<IEnumerable<Holiday>> GetActiveHolidaysOfYearAsync(int year)
+           {
+            var values = _context.Holidays
+                .Where(h => h.Date.Year == year && h.IsActive == true);
+
+            return await values.ToListAsync();
+        }
+        public async Task<IEnumerable<Holiday>> GetHolidaysOfYearAsync(int year)
+           {
+            var values = _context.Holidays
+                .Where(h => h.Date.Year == year);
+
+            return await values.ToListAsync();
+        }
+        public Task<Holiday> GetHolidayByIdAsync(int id)
+           {
+            return _context.Holidays
+                .Where(h => h.HolidayId == id)
+                .FirstOrDefaultAsync();
+        }
+        public async Task<bool> UpdateHolidayAsync(Holiday existingHoliday, HolidayForUpdateDto holiday)
+        {
+            _mapper.Map(holiday, existingHoliday);
+
+            _context.Holidays.Update(existingHoliday);
+
+            return await _context.SaveChangesAsync() > 0;
+        }
+        #endregion
 
     }
 }

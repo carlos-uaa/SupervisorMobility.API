@@ -755,6 +755,20 @@ namespace SupervisorMobility.API.Controllers
             return Ok(_mapper.Map<IEnumerable<JobObservationDto>>(allJobObservations));
         }
 
+        [HttpGet("TrainingMonth")]
+        public async Task<ActionResult<IEnumerable<JobObservationDto>>> GetAllTrainingJobsObservations(int plantId, int areaId, int month)
+        {
+
+            var allJobObservations = await _supervisorMobilityRepository.GetAllTrainingJobsObservations(plantId, areaId, month);
+
+            if (allJobObservations == null)
+            {
+                return NotFound();
+            }
+
+            return Ok(_mapper.Map<IEnumerable<JobObservationDto>>(allJobObservations));
+        }
+
 
 
         [HttpDelete("{jobObservationId}")]
