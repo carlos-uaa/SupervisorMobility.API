@@ -630,7 +630,7 @@ namespace SupervisorMobility.API.Context
                     QuestionTypeId = 1,
                     IsActive = true
                 },
-                new QuestionType("MC", "Multiple Choice")
+                new QuestionType("MC", "Multiple Choice (Single selection)")
                 {
                     QuestionTypeId = 2,
                     IsActive = true
@@ -638,21 +638,26 @@ namespace SupervisorMobility.API.Context
                 new QuestionType("NMB", "Number")
                 {
                     QuestionTypeId = 3,
-                    IsActive = true
+                    IsActive = false
                 },
                 new QuestionType("Date", "Date")
                 {
                     QuestionTypeId = 4,
-                    IsActive = true
+                    IsActive = false
                 },
                 new QuestionType("TM", "Time")
                 {
                     QuestionTypeId = 5,
-                    IsActive = true
+                    IsActive = false
                 },
                 new QuestionType("TF", "Si/No")
                 {
                     QuestionTypeId = 6,
+                    IsActive = true
+                },
+                new QuestionType("MCM", "Multiple Choice (Multiple selection)")
+                {
+                    QuestionTypeId = 7,
                     IsActive = true
                 });
 
@@ -1257,17 +1262,21 @@ namespace SupervisorMobility.API.Context
                     CategorySequence = 1,
                     IsActive = true,
                     JobCategoryStructureId = 2,
+                    TypeId = 6,
+                    Options = new List<string> { "YES", "NG", "N/A" }
                 },
                 new ChecklistQuestion()
                 {
                     QuestionID = 2,
-                    Prompt = "¿Cuál es nivel de ILU del operador?  ¿Está el entrenamiento alineado con el Cuadro de requisitos de Operaicón ? (S/N)",
-                    PromptEN = "What is the operator's ILU level? Is the training aligned with the Operational Requirements Chart (Y/N)?",
+                    Prompt = "¿Está el entrenamiento alineado con el Cuadro de requisitos de Operaicón ? (S/N)",
+                    PromptEN = "Is the training aligned with the Operational Requirements Chart (Y/N)?",
                     NotGood = "Nivel ILU del operador no alineado. Entrenamiento no conforme con el Gráfico de Requisitos Operativos",
                     NotGoodEN = "Operator ILU level not aligned. Training not in accordance with the Operational Requirements Chart.",
                     CategorySequence = 2,
                     IsActive = true,
                     JobCategoryStructureId = 2,
+                    TypeId = 6,
+                    Options = new List<string> { "YES", "NG", "N/A" }
                 }, new ChecklistQuestion()
                 {
                     QuestionID = 3,
@@ -1276,24 +1285,30 @@ namespace SupervisorMobility.API.Context
                     CategorySequence = 3,
                     IsActive = true,
                     JobCategoryStructureId = 2,
+                    TypeId = 6,
+                    Options = new List<string> { "YES", "NG", "N/A" }
                 },
                 new ChecklistQuestion()
                 {
                     QuestionID = 4,
                     Prompt = "¿Seguridad y ergonomía se encuentra sin problemas? Si los hay, especifíquelos",
-                    PromptEN = "Safety and ergonomics are without problems? If there are, specify",
+                    PromptEN = "Is there a Safety and Ergonomics problem identified? If yes, which one?",
                     NotGood = "",
                     CategorySequence = 4,
                     IsActive = true,
                     JobCategoryStructureId = 2,
+                    TypeId = 6,
+                    Options = new List<string> { "NG", "YES", "N/A" }
                 }, new ChecklistQuestion()
                 {
                     QuestionID = 5,
                     Prompt = "¿Hay algún problema de Calidad en la estación de trabajo recientemente? Si existe , ¿Cuál?",
-                    NotGood = "",
+                    NotGood = "Is there any Quality problem in the workstation recently? If yes, which one?",
                     CategorySequence = 5,
                     IsActive = true,
                     JobCategoryStructureId = 2,
+                    TypeId = 6,
+                    Options = new List<string> { "NG", "YES", "N/A" }
                 },
                 new ChecklistQuestion()
                 {
@@ -1303,6 +1318,9 @@ namespace SupervisorMobility.API.Context
                     CategorySequence = 6,
                     IsActive = true,
                     JobCategoryStructureId = 2,
+                    TypeId = 7,
+                    Options = new List<string> { "S&P", "Q", "D", "C", "E", "Other" },
+                    Actions = new List<string> { "4\u00A7=\u00A7YES\u2118SET\u00A7S\u0026P", "5\u00A7=\u00A7YES\u2118SET\u00A7Q", "4\u00A7=\u00A7YES\u20425\u00A7=\u00A7YES\u2118SET\u00A7S\u0026P/Q", "4\u00A7=\u00A7N/A\u2118DBLOPT\u00A7S\u0026P", "5\u00A7=\u00A7N/A\u2118DBLOPT\u00A7Q" }
                 }
                 //Seccion 2 Observacion para el cumlimiento del estandar
                 , new ChecklistQuestion()
@@ -1313,6 +1331,8 @@ namespace SupervisorMobility.API.Context
                     CategorySequence = 1,
                     IsActive = true,
                     JobCategoryStructureId = 3,
+                    TypeId = 6,
+                    Options = new List<string> { "YES", "NG", "N/A" }
                 },
                 new ChecklistQuestion()
                 {
@@ -1322,6 +1342,8 @@ namespace SupervisorMobility.API.Context
                     CategorySequence = 2,
                     IsActive = true,
                     JobCategoryStructureId = 3,
+                    TypeId = 6,
+                    Options = new List<string> { "YES", "NG", "N/A" }
                 }, new ChecklistQuestion()
                 {
                     QuestionID = 9,
@@ -1330,6 +1352,8 @@ namespace SupervisorMobility.API.Context
                     CategorySequence = 3,
                     IsActive = true,
                     JobCategoryStructureId = 3,
+                    TypeId = 6,
+                    Options = new List<string> { "YES", "NG", "N/A" }
                 },
                 new ChecklistQuestion()
                 {
@@ -1339,6 +1363,8 @@ namespace SupervisorMobility.API.Context
                     CategorySequence = 4,
                     IsActive = true,
                     JobCategoryStructureId = 3,
+                    TypeId = 6,
+                    Options = new List<string> { "YES", "NG", "N/A" }
                 }, new ChecklistQuestion()
                 {
                     QuestionID = 11,
@@ -1347,6 +1373,8 @@ namespace SupervisorMobility.API.Context
                     CategorySequence = 5,
                     IsActive = true,
                     JobCategoryStructureId = 3,
+                    TypeId = 6,
+                    Options = new List<string> { "YES", "NG", "N/A" }
                 }
                 //Seccion 4 observacion para cumplimiento del estandar
 
@@ -1358,6 +1386,8 @@ namespace SupervisorMobility.API.Context
                     CategorySequence = 1,
                     IsActive = true,
                     JobCategoryStructureId = 5,
+                    TypeId = 6,
+                    Options = new List<string> { "YES", "NG", "N/A" }
                 },
                 new ChecklistQuestion()
                 {
@@ -1367,6 +1397,8 @@ namespace SupervisorMobility.API.Context
                     CategorySequence = 2,
                     IsActive = true,
                     JobCategoryStructureId = 5,
+                    TypeId = 6,
+                    Options = new List<string> { "YES", "NG", "N/A" }
                 }
                 , new ChecklistQuestion()
                 {
@@ -1376,6 +1408,8 @@ namespace SupervisorMobility.API.Context
                     CategorySequence = 3,
                     IsActive = true,
                     JobCategoryStructureId = 5,
+                    TypeId = 6,
+                    Options = new List<string> { "YES", "NG", "N/A" }
                 },
                 new ChecklistQuestion()
                 {
@@ -1385,6 +1419,8 @@ namespace SupervisorMobility.API.Context
                     CategorySequence = 4,
                     IsActive = true,
                     JobCategoryStructureId = 5,
+                    TypeId = 6,
+                    Options = new List<string> { "YES", "NG", "N/A" }
                 }, new ChecklistQuestion()
                 {
                     QuestionID = 16,
@@ -1393,6 +1429,8 @@ namespace SupervisorMobility.API.Context
                     CategorySequence = 5,
                     IsActive = true,
                     JobCategoryStructureId = 5,
+                    TypeId = 6,
+                    Options = new List<string> { "YES", "NG", "N/A" }
                 },
                 new ChecklistQuestion()
                 {
@@ -1402,6 +1440,8 @@ namespace SupervisorMobility.API.Context
                     CategorySequence = 6,
                     IsActive = true,
                     JobCategoryStructureId = 5,
+                    TypeId = 6,
+                    Options = new List<string> { "YES", "NG", "N/A" }
                 }, new ChecklistQuestion()
                 {
                     QuestionID = 18,
@@ -1410,7 +1450,7 @@ namespace SupervisorMobility.API.Context
                     CategorySequence = 7,
                     IsActive = true,
                     JobCategoryStructureId = 5,
-
+                    TypeId = 1
                 }
                 //seccion 5 trabajo de observacion 
                 , new ChecklistQuestion()
@@ -1421,6 +1461,7 @@ namespace SupervisorMobility.API.Context
                     CategorySequence = 1,
                     IsActive = true,
                     JobCategoryStructureId = 6,
+                    TypeId = 1
                 },
                 new ChecklistQuestion()
                 {
@@ -1430,6 +1471,8 @@ namespace SupervisorMobility.API.Context
                     CategorySequence = 2,
                     IsActive = true,
                     JobCategoryStructureId = 6,
+                    TypeId = 6,
+                    Options = new List<string> { "YES", "NG", "N/A" }
                 }
                 , new ChecklistQuestion()
                 {
@@ -1439,6 +1482,8 @@ namespace SupervisorMobility.API.Context
                     CategorySequence = 3,
                     IsActive = true,
                     JobCategoryStructureId = 6,
+                    TypeId = 6,
+                    Options = new List<string> { "YES", "NG", "N/A" }
                 }, new ChecklistQuestion()
                 {
                     QuestionID = 22,
@@ -1447,6 +1492,8 @@ namespace SupervisorMobility.API.Context
                     CategorySequence = 4,
                     IsActive = true,
                     JobCategoryStructureId = 6,
+                    TypeId = 6,
+                    Options = new List<string> { "YES", "NG", "N/A" }
                 },
                 new ChecklistQuestion()
                 {
@@ -1456,6 +1503,8 @@ namespace SupervisorMobility.API.Context
                     CategorySequence = 5,
                     IsActive = true,
                     JobCategoryStructureId = 6,
+                    TypeId = 6,
+                    Options = new List<string> { "YES", "NG", "N/A" }
                 }
 
                 );
