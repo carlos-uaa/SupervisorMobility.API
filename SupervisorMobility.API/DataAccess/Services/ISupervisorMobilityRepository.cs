@@ -238,6 +238,7 @@ namespace SupervisorMobility.API.Services
         void PermanentDeleteJobObservation(JobObservation jobObservation);
         Task<bool> JobObservationExistAsync(int jobObservationId);
 
+        Task<IEnumerable<JobObservation>> GetAllTrainingJobsObservations(int plantId, int areaId, int month);
         #endregion
         #region GlosaryOperations
 

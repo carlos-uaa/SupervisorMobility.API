@@ -1570,6 +1570,8 @@ namespace SupervisorMobility.API.Services
             return matchingJobs;
         }
 
+       
+
         public async Task<IEnumerable<JobObservation>> GetAllJobObservationsAsync(bool includeTree = false, bool includePeople = false, bool includeLup = false, bool includeHistory = false, bool includeCkAnswers = false, int idPlant = 0, int idArea = 0, bool ForSosProgram = false, int year = 0, int month = 0, int SOSAnualId = 0, int idUser = 0)
         {
 
@@ -1679,9 +1681,33 @@ namespace SupervisorMobility.API.Services
             return await query.OrderBy(c => c.JobObservationId).ToListAsync();
 
         }
-        
 
-         public async Task<IEnumerable<JobObservation>> GetAllNextYearJobsObservations(int plantId, int areaId, int year)
+        public async Task<IEnumerable<JobObservation>> GetAllTrainingJobsObservations(int plantId, int areaId, int month)
+        {
+
+            var query = _context.JobObservations.Where(j => j.IsActive == true && j.Type == 4);
+
+
+            if (plantId != 0)
+            {
+                query = query.Where(p => p.PlantId == plantId);
+            }
+
+            if (areaId != 0)
+            {
+                query = query.Where(p => p.AreaId == areaId);
+            }
+
+            if (month != 0)
+            {
+                query = query.Where(d => d.StartDate.Value.Month == month || d.EndDate.Value.Month == month);
+            }
+
+            return await query.OrderBy(c => c.JobObservationId).ToListAsync();
+
+        }
+
+        public async Task<IEnumerable<JobObservation>> GetAllNextYearJobsObservations(int plantId, int areaId, int year)
         {
 
             var query = _context.JobObservations.Include(jo => jo.Operations).Where(j => j.IsActive == true && j.Type == 5);
