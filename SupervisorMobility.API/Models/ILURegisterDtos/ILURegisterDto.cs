@@ -11,7 +11,7 @@ namespace SupervisorMobility.API.Models.ILURegisterDtos
 
         public DateTime? AcquisitionDate { get; set; } = DateTime.Now;
         public DateTime? EndDate { get; set; }
-
+        public int? JobObservationId { get; set; }
         //public int? OperationId { get; set; }
         //public OperationWithoutNavigationPropertiesDto? Operation { get; set; }
         public int? DistributionId { get; set; }
