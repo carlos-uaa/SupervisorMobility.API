@@ -14,6 +14,7 @@ namespace SupervisorMobility.API.DataAccess.Entities.ILU
         public DateTime? AcquisitionDate { get; set; } = DateTime.Now;
 
         public DateTime? EndDate { get; set; }
+        public int? JobObservationId { get; set; }
 
         //public int? OperationId { get; set; }
         //[ForeignKey("OperationId")]
