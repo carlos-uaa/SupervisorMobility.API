@@ -564,7 +564,7 @@ namespace SupervisorMobility.API.Controllers.Exportation_Controllers
 
                         if (matrix[i, j] == null) { Col = sheetService.GetNextCombination(Col); Col = sheetService.GetNextCombination(Col); continue; }
 
-                        sheet.Cells[$"{Col}{Row}"].Value = matrix[i, j].AcquisitionDate.Value.Day;
+                        sheet.Cells[$"{Col}{Row}"].Value = $"{matrix[i, j].AcquisitionDate?.Day}\n-\n{matrix[i,j].EndDate?.Day}";
 
                         Col = sheetService.GetNextCombination(Col);
 
