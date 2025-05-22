@@ -314,9 +314,9 @@ namespace SupervisorMobility.API.Controllers.Exportation_Controllers
                             double or_p = month.First.OR_P;
 
                             if (or_o != 0)
-                                sheet.Cells[$"{hCol}{hRow}"].Value = or_o;
+                                sheet.Cells[$"{hCol}{hRow}"].Value = or_o/100;
                             if (or_p != 0)
-                                sheet.Cells[$"{hCol}{hRow + 1}"].Value = or_p;
+                                sheet.Cells[$"{hCol}{hRow + 1}"].Value = or_p/100;
 
                             hCol = sheetService.GetNextCombination(hCol);
 
@@ -649,9 +649,9 @@ namespace SupervisorMobility.API.Controllers.Exportation_Controllers
                             double or_p = month.First.OR_P;
 
                             if (or_o != 0)
-                                sheet.Cells[$"{hCol}{hRow}"].Value = or_o;
+                                sheet.Cells[$"{hCol}{hRow}"].Value = or_o/100;
                             if (or_p != 0)
-                                sheet.Cells[$"{hCol}{hRow + 1}"].Value = or_p;
+                                sheet.Cells[$"{hCol}{hRow + 1}"].Value = or_p/100;
 
                             hCol = sheetService.GetNextCombination(hCol);
 
