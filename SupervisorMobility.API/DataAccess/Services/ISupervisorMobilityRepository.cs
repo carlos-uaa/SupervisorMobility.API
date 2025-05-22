@@ -12,6 +12,7 @@ using SupervisorMobility.API.Models.Users;
 using System.Runtime.CompilerServices;
 using SupervisorMobility.API.Models.ILURegisterDtos;
 using SupervisorMobility.API.Models.JobPaginationDtos;
+using SupervisorMobility.API.Models.ProductiveCalendarDtos;
 
 
 namespace SupervisorMobility.API.Services
@@ -237,6 +238,7 @@ namespace SupervisorMobility.API.Services
         void PermanentDeleteJobObservation(JobObservation jobObservation);
         Task<bool> JobObservationExistAsync(int jobObservationId);
 
+        Task<IEnumerable<JobObservation>> GetAllTrainingJobsObservations(int plantId, int areaId, int month);
         #endregion
         #region GlosaryOperations
 
@@ -418,7 +420,20 @@ namespace SupervisorMobility.API.Services
         Task<IEnumerable<HCICategory>> GetHCICategories();
         #endregion
         #region HCI ILU
-        Task<int> AddHciIluReg(HCIILU registry); 
+        Task<int> AddHciIluReg(HCIILU registry);
+        #endregion
+
+        #region Holidays
+
+       
+        Task<int> AddHolidayAsync(HolidayForUpdateDto holiday);
+        Task<IEnumerable<Holiday>> GetActiveHolidaysOfYearAsync(int year);
+        Task<IEnumerable<Holiday>> GetHolidaysOfYearAsync(int year);
+        Task<Holiday> GetHolidayByIdAsync(int id);
+        
+        Task<bool> UpdateHolidayAsync(Holiday existingHoliday, HolidayForUpdateDto holiday);
+
+
         #endregion
     }
 }

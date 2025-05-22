@@ -56,7 +56,48 @@ namespace SupervisorMobility.API.Controllers
 
             if (result > 0)
             {
-                return Ok(finalPat);
+
+
+                if (finalPat != null)
+                {
+                    List<User> all_Users = new();
+
+                    all_Users.AddRange(finalPat.Supervisors);
+                    foreach (var usr in finalPat.Supervisors)
+                    {
+                        all_Users.AddRange(await _supervisorMobilityRepository.GetAllSubordinatesAsync(usr.UserId));
+                    }
+
+                    finalPat.PatSubordinates = new List<PatSubordinate>();
+
+                    foreach (User subordinate in all_Users)
+                    {
+                        PatSubordinate newSubordinate = new PatSubordinate();
+
+                        newSubordinate.PatId = finalPat.PATid;
+                        newSubordinate.UserId = subordinate.UserId;
+                        newSubordinate.StartDate = new DateTime((int)finalPat.AplicationYear, 1, 1);
+
+                        finalPat.PatSubordinates.Add(newSubordinate);
+                    }
+
+                    bool update = await _supervisorMobilityRepository.SaveChangesAsync();
+
+                    return Ok(new
+                    {
+                        success = true,
+                        partialFailure = !update,
+                        message = update
+                         ? "Proceso completado correctamente."
+                         : "El proceso se completó, pero no se pudieron agregar los subordinados.",
+                        data = finalPat
+                    });
+
+                }
+                else
+                    return BadRequest();
+
+               
             }
 
             return NotFound();
