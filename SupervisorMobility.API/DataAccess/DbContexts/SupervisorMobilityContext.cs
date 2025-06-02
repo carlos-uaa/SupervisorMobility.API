@@ -305,6 +305,14 @@ namespace SupervisorMobility.API.Context
                             .OnDelete(DeleteBehavior.NoAction)
                 );
 
+            var jsonPatSubordinateDatesConverter = new ValueConverter<List<PatSubordinateDates>, string>(
+                        v => JsonConvert.SerializeObject(v), // Convert List<string> to JSON string
+                        v => JsonConvert.DeserializeObject<List<PatSubordinateDates>>(v)); // Convert JSON string to List<string>
+
+            modelBuilder.Entity<PatSubordinate>()
+                .Property(e => e.PatSubordinateDates)
+                .HasConversion(jsonPatSubordinateDatesConverter);
+
             modelBuilder.Entity<ILULevel>()
            .Property(e => e.ILULevelId)
            .UseIdentityColumn();
@@ -411,7 +419,7 @@ namespace SupervisorMobility.API.Context
 
             modelBuilder.Entity<Analysis>()
                 .Property(e => e.CriticalPoints)
-                .HasConversion(jsonListConverter);
+                .HasConversion(jsonListConverter); 
 
             modelBuilder.Entity<Analysis>()
                 .Property(e => e.Reasons)
