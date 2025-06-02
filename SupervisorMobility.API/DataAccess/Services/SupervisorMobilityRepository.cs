@@ -976,6 +976,7 @@ namespace SupervisorMobility.API.Services
                 .Include(ILU => ILU.ILURegisers)
                     .ThenInclude(sub => sub.Distribution)
                 .Include(aa => aa.Areas)
+                .Include(dep=>dep.Department)
                 .Where(p => p.UserId == userId).FirstOrDefaultAsync();
             }
             return await _context.Users.Where(p => p.UserId == userId).FirstOrDefaultAsync();

@@ -55,5 +55,7 @@ namespace SupervisorMobility.API.Models.JobObservationDtos
         public ICollection<LupForCreationDto>? Lup { get; set; }
         public ICollection<ChecklistAnswerForCreationDto>? ChecklistAnswers { get; set; }
         public bool WillNotRequireSSVApproval { get; set; } = false;
+        public bool IsReallocated { get; set; } = false;
+        public DateTime? OriginalPlannedDate { get; set; }
     }
 }
