@@ -76,8 +76,11 @@ namespace SupervisorMobility.API.Controllers
 
                         newSubordinate.PatId = finalPat.PATid;
                         newSubordinate.UserId = subordinate.UserId;
-                        newSubordinate.StartDate = new DateTime((int)finalPat.AplicationYear, 1, 1);
+                        
+                        PatSubordinateDates newDate = new PatSubordinateDates();
+                        newDate.StartDate = new DateTime((int)finalPat.AplicationYear, 1, 1);
 
+                        newSubordinate.PatSubordinateDates.Add(newDate);
                         finalPat.PatSubordinates.Add(newSubordinate);
                     }
 
@@ -145,7 +148,11 @@ namespace SupervisorMobility.API.Controllers
 
                         newSubordinate.PatId = PatToCreate.PATid;
                         newSubordinate.UserId = subordinate.UserId;
-                        newSubordinate.StartDate = new DateTime((int)PatToCreate.AplicationYear, 1, 1);
+                      
+                        PatSubordinateDates newDate = new PatSubordinateDates();
+                        newDate.StartDate = new DateTime((int)PatToCreate.AplicationYear, 1, 1);
+
+                        newSubordinate.PatSubordinateDates.Add(newDate);
 
                         PatToCreate.PatSubordinates.Add(newSubordinate);
                     }
