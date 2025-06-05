@@ -146,19 +146,19 @@ namespace SupervisorMobility.API.Controllers
         }
 
         [HttpPost("CodePath")]
-        public async Task<ActionResult<AssyChartWhitInfo>> CreatePathRoute(RouteProductAssyChartForCreationDto _newCodePath)
+        public async Task<ActionResult<RouteProductAssyChartWithOutNavigations>> CreatePathRoute(RouteProductAssyChartForCreationDto _newCodePath)
         {
 
             var assyChartEntity = await _supervisorMobilityRepository.GetAssyChartAsync((int)_newCodePath.AssyChardId);
 
 
-            var finalRouteAssyChart = _mapper.Map<SOSCodePath>(_newCodePath);
+            var newCodePathEntity = _mapper.Map<SOSCodePath>(_newCodePath);
 
-            await _supervisorMobilityRepository.AssychartCreateCodePath(finalRouteAssyChart);
+            await _supervisorMobilityRepository.AssychartCreateCodePath(newCodePathEntity);
 
-            _supervisorMobilityRepository.AssychartAddCodePath(assyChartEntity, finalRouteAssyChart);
+            _supervisorMobilityRepository.AssychartAddCodePath(assyChartEntity, newCodePathEntity);
 
-            return Ok(assyChartEntity);
+            return Ok(newCodePathEntity);
         }
 
         [HttpGet("CodePath")]
