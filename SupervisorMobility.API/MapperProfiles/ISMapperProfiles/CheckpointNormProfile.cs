@@ -14,11 +14,11 @@ namespace SupervisorMobility.API.MapperProfiles.ISMapperProfiles
             //data panel
             CreateMap<Checkpoint, CheckpointDto>().ReverseMap();
             CreateMap<Checkpoint, CheckpointForCreateDto>().ReverseMap();
-            CreateMap<Checkpoint, CheckpointForUpdateDto>().ReverseMap();
+            CreateMap<Checkpoint, CheckpointForUpdateDto>().ReverseMap().ForMember(dest => dest.Sketches, opt => opt.Ignore()); ;
 
             CreateMap<CheckpointNorm, CheckpointNormDto>().ReverseMap();
             CreateMap<CheckpointNorm, CheckpointNormForCreateDto>().ReverseMap();
-            CreateMap<CheckpointNorm, CheckpointNormForUpdateDto>().ReverseMap();
+            CreateMap<CheckpointNorm, CheckpointNormForUpdateDto>().ReverseMap().ForMember(dest => dest.Sketches, opt => opt.Ignore()); ;
 
          
         }
