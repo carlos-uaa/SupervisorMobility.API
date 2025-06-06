@@ -226,7 +226,7 @@ namespace SupervisorMobility.API.DataAccess.Services
 
             if (includeScketes)
             {
-                query = query.Include(pi => pi.Sketches);
+                query = query.Include(pi => pi.Sketches.Where(p => p.IsActive == true));
             }
             if (includeModel)
             {
@@ -254,6 +254,18 @@ namespace SupervisorMobility.API.DataAccess.Services
         public async Task<int> UpdatePart(PartForUpdateDto partForUpdate, Part partentity)
         {
             _mapper.Map(partForUpdate, partentity);
+
+            var incomingIds = partentity.Sketches
+            .Select((item, index) => new { item.FileUploadId, Index = index })
+            .Where(x => !partForUpdate.Sketches.Any(a => a.FileUploadId == x.FileUploadId))
+            .Select(x => x.Index)
+            .ToList();
+
+            // Remove them
+            foreach (var sketch in incomingIds)
+            {
+                partentity.Sketches.ElementAt(sketch).IsActive = false;
+            }
 
             _context.Parts.Update(partentity);
 
@@ -392,18 +404,18 @@ namespace SupervisorMobility.API.DataAccess.Services
 
             if (includeSketches)
             {
-                query = query.Include(dp => dp.Sketches);
+                query = query.Include(dp => dp.Sketches.Where(p=>p.IsActive == true));
             }
 
             if (includeStandars)
             {
                 if (includeSketchesStandars)
                 {
-                    query = query.Include(dp => dp.Standars).ThenInclude(d => d.Sketches);
+                    query = query.Include(dp => dp.Standars.Where(s=>s.IsActive == true)).ThenInclude(d => d.Sketches.Where(p => p.IsActive == true));
                 }
                 else
                 {
-                    query = query.Include(dp => dp.Standars);
+                    query = query.Include(dp => dp.Standars.Where(s => s.IsActive == true));
                 }
             }
           
@@ -474,6 +486,7 @@ namespace SupervisorMobility.API.DataAccess.Services
         {
             _context.CheckpointsNorm.Add(specforCreate);
 
+            Checkpoint.Standars = Checkpoint.Standars ?? new List<CheckpointNorm>();
             Checkpoint.Standars?.Add(specforCreate);
 
             return _context.SaveChanges();
@@ -495,7 +508,7 @@ namespace SupervisorMobility.API.DataAccess.Services
             var query = _context.CheckpointsNorm.Include(ck => ck.Checkpoint).Where(dps => dps.CheckpointNormId == CheckpointNorm_id && dps.IsActive == true);
             if (includeSketches)
             {
-                query = query.Include(dps => dps.Sketches);
+                query = query.Include(dps => dps.Sketches.Where(p=>p.IsActive == true));
             }
             return await query.FirstOrDefaultAsync(); ;
         }
