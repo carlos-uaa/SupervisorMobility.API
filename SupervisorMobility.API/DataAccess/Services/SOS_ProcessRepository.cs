@@ -84,12 +84,13 @@ namespace SupervisorMobility.API.DataAccess.Services
 
                 if (includeImages)
                 {
-                    await _context.Entry(sosHub).Collection(s => s.Images).LoadAsync();
+                    //await _context.Entry(sosHub).Collection(s => s.Images.Where(p=>p.IsActive == true)).LoadAsync();
+                    await _context.Entry(sosHub).Collection(s => s.Images).Query().Where(p => p.IsActive == true).LoadAsync();
                 }
 
                 if (includeVideos)
                 {
-                    await _context.Entry(sosHub).Collection(s => s.Videos).LoadAsync();
+                    await _context.Entry(sosHub).Collection(s => s.Videos).Query().Where(p => p.IsActive == true).LoadAsync();
                 }
 
                 if (includeCommentaries)
