@@ -278,6 +278,7 @@ namespace SupervisorMobility.API.Services
         #endregion
         #region ILURegister
         Task<ILURegister> GetILURegister(int idILUR);
+        Task<ILURegister?> GetILUIdByJobId(int idJobId);
         Task<ILURegister?> GetLastILURegisterForUserAndDistribution(int id_User, int id_dist);
         Task<int> AddILURegister(ILURegister iLURegister);
         Task<int> AddILURegToUser(ILURegister iLURegister, User Master);
@@ -287,6 +288,7 @@ namespace SupervisorMobility.API.Services
         #endregion
         #region PAT
         Task<PAT?> GetPat(int patId);
+        Task<int?> GetPatByRegister(ILURegister iluRegId, int plantid, int areaid);
         Task<int> AddPat(PAT patForAdd);
         //Task<PAT?> GetPatForYearOfSV(int sv, int Year);
         Task<int> UpdatePAT(PATForUpdateDto patForUpdate, PAT PatEntity);
