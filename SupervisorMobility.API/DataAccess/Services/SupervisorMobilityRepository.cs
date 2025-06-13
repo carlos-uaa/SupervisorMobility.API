@@ -2134,6 +2134,12 @@ namespace SupervisorMobility.API.Services
                .Where(p => p.ILURegisterid == idILUR).FirstOrDefaultAsync();
         }
 
+        public async Task<ILURegister?> GetILUIdByJobId(int idJobId)
+        {
+            ILURegister? register = await _context.ILURegisters.FirstOrDefaultAsync(p => p.JobObservationId == idJobId);
+            return register;
+        }
+
         public async Task<ILURegister?> GetLastILURegisterForUserAndDistribution(int id_User, int id_dist)
         {
             return await _context.ILURegisters
@@ -2188,6 +2194,18 @@ namespace SupervisorMobility.API.Services
                    .Include(pd => pd.PatDistributionComments)
                    .Include(pd => pd.PatSubordinates)
                    .Where(p => p.PATid == patId).FirstOrDefaultAsync();
+        }
+
+        public async Task<int?> GetPatByRegister(ILURegister iluReg, int plantid, int areaid)
+        {
+            PAT? pat = await _context.PATs.Include(p => p.Supervisors)
+                .ThenInclude(p => p.ILURegisers)
+                .Where(p => p.Supervisors.Any(c => c.ILURegisers.Any(gc => gc.ILURegisterid == iluReg.ILURegisterid)))
+                .Where(p=>p.PlantId == plantid).Where(p=>p.AreaId == areaid)
+                .OrderBy(p=>p.PATid)
+                .LastOrDefaultAsync(p=>p.AplicationYear == iluReg.AcquisitionDate.Value.Year);
+
+            return pat?.PATid;
         }
 
         //public async Task<PAT?> GetPatForYearOfSV(int sv, int Year)

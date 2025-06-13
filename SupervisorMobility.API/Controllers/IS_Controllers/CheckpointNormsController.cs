@@ -42,7 +42,7 @@ namespace SupervisorMobility.API.Controllers.IS_Controllers
 
             var createdResult = await _stampingRepository.AddCheckpointNorm(DPEntity, DPSpecEntity);
             if (createdResult != null)
-                return Ok(DPEntity);
+                return Ok(DPSpecEntity);
             else
                 return BadRequest(); ;
 
@@ -62,12 +62,12 @@ namespace SupervisorMobility.API.Controllers.IS_Controllers
             return Ok(_mapper.Map<CheckpointNormDto>(CheckpointNormEntiti));
         }
 
-        [HttpPut("{CheckpointId}")]
+        [HttpPut("{CheckpointNormId}")]
         public async Task<ActionResult<CheckpointNormDto>> UpdateCheckpointNorm(int CheckpointNormId, CheckpointNormForUpdateDto _CheckpointForUpdate)
         {
 
             // Obtener el Checkpoint existente junto con sus norms/standars
-            CheckpointNorm entityCheckpoint = await _stampingRepository.getCheckpointNorm(CheckpointNormId);
+            CheckpointNorm entityCheckpoint = await _stampingRepository.getCheckpointNorm(CheckpointNormId, includeSketches:true);
 
             if (entityCheckpoint == null)
             {
@@ -75,6 +75,18 @@ namespace SupervisorMobility.API.Controllers.IS_Controllers
             }
 
             _mapper.Map(_CheckpointForUpdate, entityCheckpoint);
+
+            //var incomingIds = entityCheckpoint.Sketches
+            //.Select((item, index) => new { item.FileUploadId, Index = index })
+            //.Where(x => !_CheckpointForUpdate.Sketches.Any(a => a.FileUploadId == x.FileUploadId))
+            //.Select(x => x.Index)
+            //.ToList();
+
+            //// Remove them
+            //foreach (var sketch in incomingIds)
+            //{
+            //    entityCheckpoint.Sketches.ElementAt(sketch).IsActive = false;
+            //}
 
             // Guardar los cambios en el Checkpoint y sus norms/standars
             _context.CheckpointsNorm.Update(entityCheckpoint);
@@ -193,6 +205,14 @@ namespace SupervisorMobility.API.Controllers.IS_Controllers
             }
             return NotFound("Error File download");
 
+        }
+
+        [HttpGet("{Checkpoint_NormId}/Sketch/{fileUploadId}/remove")]
+        public async Task<ActionResult<int>> RemoveEvidence(int Checkpoint_NormId, int fileUploadId)
+        {
+            await _stampingRepository.RemoveSketchCheckPointNorm(Checkpoint_NormId, fileUploadId);
+            await _stampingRepository.SaveChangesAsync();
+            return Ok();
         }
     }
 }

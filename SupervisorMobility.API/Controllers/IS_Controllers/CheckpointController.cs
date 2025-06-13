@@ -83,7 +83,7 @@ namespace SupervisorMobility.API.Controllers.IS_Controllers
         {
 
             // Obtener el Checkpoint existente junto con sus norms/standars
-            Checkpoint entityCheckpoint = await _stampingRepository.getCheckpoint(CheckpointId, includeStandars: true);
+            Checkpoint entityCheckpoint = await _stampingRepository.getCheckpoint(CheckpointId, includeStandars: true, includeSketches: true);
 
             if (entityCheckpoint == null)
             {
