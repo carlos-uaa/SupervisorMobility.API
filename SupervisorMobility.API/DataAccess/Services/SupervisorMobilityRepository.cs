@@ -1337,7 +1337,7 @@ namespace SupervisorMobility.API.Services
         #endregion
         #region JobObservationOperations
 
-        public async Task<JOPaginationDto> GetJobObservationsByFiltersAsync(DateTime startDate, DateTime endDate, int jobObsId, int plantId, int areaId, int distributionId, int operationId, int supervisorId, int status, int userId, int typeId, string searchString, int page = 1, int entries = 10, int? sortO = 2, string? sortL = "")
+        public async Task<JOPaginationDto> GetJobObservationsByFiltersAsync(DateTime startDate, DateTime endDate, int jobObsId, int plantId, int areaId, int distributionId, int operationId, int operatorId, int status, int userId, int typeId, string searchString, int page = 1, int entries = 10, int? sortO = 2, string? sortL = "")
         {
             Expression<Func<JobObservation, object>>? keySelectorExp = orderingService.BuildJOKeySelector<JobObservation>(sortL);
 
@@ -1399,9 +1399,9 @@ namespace SupervisorMobility.API.Services
                 query = query.Where(j => j.Operations.Any(o => o.OperationId == operationId));
             }
 
-            if (supervisorId != default(int))
+            if (operatorId != default(int))
             {
-                query = query.Where(j => j.SupervisorId == supervisorId);
+                query = query.Where(j => j.OperatorId == operatorId);
             }
 
             if (startDate != default(DateTime))
