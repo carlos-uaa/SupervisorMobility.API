@@ -1684,6 +1684,116 @@ namespace SupervisorMobility.API.Services
 
         }
 
+        public async Task<IEnumerable<JobObservation>> GetAllFinishedJobObservationsAsync(bool includeTree = false, bool includePeople = false, bool includeLup = false, bool includeHistory = false, bool includeCkAnswers = false, int idPlant = 0, int idArea = 0, bool ForSosProgram = false, int year = 0, int month = 0, int SOSAnualId = 0, int idUser = 0)
+        {
+
+            var query = _context.JobObservations.Where(j => j.IsActive == true && j.Type != 5 && j.Status == 6);
+
+            if (includeTree)
+            {
+                query = query.Include(a => a.Area)
+                             .Include(p => p.Plant)
+                             .Include(d => d.Distribution)
+                             .Include(o => o.Operations);
+            }
+
+            if (includePeople)
+            {
+                query = query.Include(s => s.Supervisor)
+                             .Include(o => o.Operator);
+            }
+
+            if (includeLup)
+            {
+                query = query.Include(l => l.Lup.Where(lup => lup.IsActive == true))
+                        .ThenInclude(lup => lup.Evidences)
+                    .Include(l => l.Lup.Where(lup => lup.IsActive == true))
+                        .ThenInclude(lup => lup.Department)
+                    .Where(d => d.IsActive == true);
+
+            }
+
+            if (includeHistory)
+            {
+                query = query.Include(h => h.History);
+            }
+
+            if (includeCkAnswers)
+            {
+                query = query.Include(c => c.checklistAnswers);
+            }
+
+            if (idPlant != 0)
+            {
+                query = query.Where(p => p.PlantId == idPlant);
+            }
+
+            if (idArea != 0)
+            {
+                query = query.Where(p => p.AreaId == idArea);
+            }
+
+            if (ForSosProgram)
+            {
+                query = query.Where(d => d.Type == 3);
+            }
+
+            if (year != 0)
+            {
+                query = query.Where(d => d.StartDate.Value.Year == year || d.EndDate.Value.Year == year);
+            }
+
+            if (month != 0)
+            {
+                query = query.Where(d => d.StartDate.Value.Month == month || d.EndDate.Value.Month == month);
+            }
+
+
+            if (SOSAnualId != 0)
+            {
+                //Jobs que sean regulares (Externas al SOS ID)
+                query = query.Where(d => d.Type != 3);
+                SOSReviewProgram? sos = _context.SOSReviews.Include(r => r.Suggestions).Include(s => s.Supervisors).Where(u => u.SOSid == SOSAnualId).FirstOrDefault();
+                //Jobs que pertenezcan a los SV que partician en la SOS 
+                if (sos != null && sos.Supervisors?.Count > 0)
+                {
+                    List<int> supervisorIds = sos.Supervisors.Select(s => s.UserId).ToList();
+
+                    query = query.Where(j => supervisorIds.Contains((int)j.SupervisorId));
+
+                }
+                else
+                {
+                    return new List<JobObservation>();
+                }
+            }
+
+            if (idUser != 0)
+            {
+                //aqui traemos al user para verificar el tipo
+                User? _user = await _context.Users.Include(u => u.Subordinates).Where(p => p.UserId == idUser).FirstOrDefaultAsync();
+
+                if (_user.UserType == 2)
+                {
+                    //List<int> subordinateIds = _user.Subordinates?.Select(subordinate => subordinate.UserId).ToList();
+
+                    //if(subordinateIds.Count > 0)
+                    //    query = query.Where(j => subordinateIds.Contains((int)j.SupervisorId));
+
+
+                    query = query.Where(j => _user.Subordinates.Any() && _user.Subordinates.Select(subordinate => subordinate.UserId).Contains((int)j.SupervisorId));
+                }
+                else if (_user.UserType == 3)
+                {
+                    query = query.Where(j => j.SupervisorId == idUser);
+                }
+
+            }
+
+            return await query.OrderBy(c => c.JobObservationId).ToListAsync();
+
+        }
+
         public async Task<IEnumerable<JobObservation>> GetAllTrainingJobsObservations(int plantId, int areaId, int month)
         {
 
