@@ -221,6 +221,22 @@ namespace SupervisorMobility.API.Controllers
             return Ok(_mapper.Map<IEnumerable<JobObservationDto>>(allJobObservations));
         }
 
+        [HttpGet("finished")]
+        public async Task<ActionResult<IEnumerable<JobObservationDto>>> GetAllFinishedJobObservationsAsync(bool includeTree = false, bool includePeople = false,
+            bool includeLup = false, bool includeHistory = false, bool includeCkAnswers = false, int idPlant = 0, int idArea = 0, bool ForSosProgram = false,
+            int year = 0, int month = 0, int SOSAnualId = 0, int idUser = 0)
+        {
+
+            var allJobObservations = await _supervisorMobilityRepository.GetAllFinishedJobObservationsAsync(includeTree, includePeople, includeLup, includeHistory, includeCkAnswers, idPlant, idArea, ForSosProgram, year, month, SOSAnualId, idUser);
+
+            if (allJobObservations == null)
+            {
+                return NotFound();
+            }
+
+            return Ok(_mapper.Map<IEnumerable<JobObservationDto>>(allJobObservations));
+        }
+
         [HttpGet("{jobObservationId}/history")]
         public async Task<ActionResult<IEnumerable<JobObservationHistoryDto>>> GetHistoryJobObservationsAsync(int jobObservationId)
         {
