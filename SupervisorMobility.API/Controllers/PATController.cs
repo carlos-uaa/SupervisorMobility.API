@@ -300,8 +300,25 @@ namespace SupervisorMobility.API.Controllers
                 return BadRequest("something wrong");
         }
 
-        
 
+        //GetPATByJob
+        [HttpGet("JOB/{idJob}")]
+        public async Task<ActionResult<int>> getPatByJobId(int idJob, [FromQuery] int plantid, [FromQuery] int areaid)
+        {
+            var registry = await _supervisorMobilityRepository.GetILUIdByJobId(idJob);
+            if (registry == null)
+            {
+                return NotFound();
+            }
+
+            var PatId = await _supervisorMobilityRepository.GetPatByRegister(registry, plantid, areaid);
+            if(PatId == null)
+            {
+                return NotFound();
+            }
+
+            return Ok(PatId);
+        }
 
     }
 }

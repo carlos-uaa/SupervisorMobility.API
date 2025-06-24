@@ -17,6 +17,7 @@ namespace SupervisorMobility.API.Models.IS_Apariencia_PlantillaDtos.CheckpointDt
         public string CheckpointTitle { get; set; } = string.Empty;
         public string CheckpointDescription { get; set; } = string.Empty;
 
+        public ICollection<FileUploadGeneralDto>? Sketches { get; set; } = new List<FileUploadGeneralDto>();
         public ICollection<CheckpointNormForUpdateDto>? Standars { get; set; } = new List<CheckpointNormForUpdateDto>();
     }
 }

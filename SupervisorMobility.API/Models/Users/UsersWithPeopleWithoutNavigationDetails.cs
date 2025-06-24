@@ -18,7 +18,6 @@ namespace SupervisorMobility.API.Models.Users
         public UsersWithoutPeopleWithNavigation? Superior { get; set; }
 
         public string? Management { get; set; }
-        public string? Department { get; set; }
         public string? Process { get; set; }
 
         [Column(TypeName = "Date")]

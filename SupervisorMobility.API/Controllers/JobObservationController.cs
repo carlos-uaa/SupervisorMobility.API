@@ -192,7 +192,7 @@ namespace SupervisorMobility.API.Controllers
             int areaId,
             int distributionId,
             int operationId,
-            int supervisorId,
+            int operatorId,
             int status,
             int userId,
             int typeId,
@@ -200,7 +200,7 @@ namespace SupervisorMobility.API.Controllers
             int page, int entries, int? sortO, string? sortL)
         {
 
-            var allJobObservations = await _supervisorMobilityRepository.GetJobObservationsByFiltersAsync(startDate, endDate, jobObsId, plantId, areaId, distributionId, operationId, supervisorId, status, userId, typeId, searchString, page, entries, sortO, sortL);
+            var allJobObservations = await _supervisorMobilityRepository.GetJobObservationsByFiltersAsync(startDate, endDate, jobObsId, plantId, areaId, distributionId, operationId, operatorId, status, userId, typeId, searchString, page, entries, sortO, sortL);
 
             return Ok(allJobObservations);
         }

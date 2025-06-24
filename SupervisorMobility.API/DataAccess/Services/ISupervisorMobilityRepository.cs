@@ -229,7 +229,7 @@ namespace SupervisorMobility.API.Services
         Task<IEnumerable<JobObservation>> GetAllJobObservationsAsync(bool includeTree = false, bool includePeople = false, bool includeLup = false,
             bool includeHistory = false, bool includeCkAnswers = false, int idPlant = 0, int idArea = 0, bool ForSosProgram = false, int year = 0, int month = 0,
             int SOSAnualId = 0, int idUser = 0);
-        Task<JOPaginationDto> GetJobObservationsByFiltersAsync(DateTime startDate, DateTime endDate, int jobObsId, int plantId, int areaId, int distributionId, int operationId, int supervisorId, int status, int userId, int typeId, string searchString, int page = 1, int entries = 10, int? sortO = 2, string? sortL = "");
+        Task<JOPaginationDto> GetJobObservationsByFiltersAsync(DateTime startDate, DateTime endDate, int jobObsId, int plantId, int areaId, int distributionId, int operationId, int operatorId, int status, int userId, int typeId, string searchString, int page = 1, int entries = 10, int? sortO = 2, string? sortL = "");
         Task<JobObservation?> GetJobObservationAsync(int jobObservationId, bool includeTree = false, bool includePeople = false, bool includeLup = false, bool includeHistory = false, bool includeCkAnswers = false, bool includeOperations = false);
         Task<List<JobObservation>?> FindNextYearJobObservations(int plantId, int areaId, int DistributionId, ICollection<Operation> operationsToFind, int supervisorId, int year);
         Task<IEnumerable<JobObservation>> GetAllNextYearJobsObservations(int plantId, int areaId, int year);
@@ -278,6 +278,7 @@ namespace SupervisorMobility.API.Services
         #endregion
         #region ILURegister
         Task<ILURegister> GetILURegister(int idILUR);
+        Task<ILURegister?> GetILUIdByJobId(int idJobId);
         Task<ILURegister?> GetLastILURegisterForUserAndDistribution(int id_User, int id_dist);
         Task<int> AddILURegister(ILURegister iLURegister);
         Task<int> AddILURegToUser(ILURegister iLURegister, User Master);
@@ -287,6 +288,7 @@ namespace SupervisorMobility.API.Services
         #endregion
         #region PAT
         Task<PAT?> GetPat(int patId);
+        Task<int?> GetPatByRegister(ILURegister iluRegId, int plantid, int areaid);
         Task<int> AddPat(PAT patForAdd);
         //Task<PAT?> GetPatForYearOfSV(int sv, int Year);
         Task<int> UpdatePAT(PATForUpdateDto patForUpdate, PAT PatEntity);

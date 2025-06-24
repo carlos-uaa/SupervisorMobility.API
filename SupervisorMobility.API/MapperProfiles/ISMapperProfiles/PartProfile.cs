@@ -13,7 +13,8 @@ namespace SupervisorMobility.API.MapperProfiles.ISMapperProfiles
             //data panel
             CreateMap<Part, PartDto>().ReverseMap();
             CreateMap<Part, PartForCreateDto>().ReverseMap();
-            CreateMap<Part, PartForUpdateDto>().ReverseMap();
+            CreateMap<Part, PartForUpdateDto>().ReverseMap()
+                .ForMember(dest=>dest.Sketches, opt => opt.Ignore());
 
          
         }
