@@ -73,5 +73,7 @@ namespace SupervisorMobility.API.Models.JobObservationDtos
         public string? DoubleManagment { get; set; }
         public string? Waiting { get; set; }
         public bool WillNotRequireSSVApproval { get; set; } = false;
+        public bool IsReallocated { get; set; } = false;
+        public DateTime? OriginalPlannedDate { get; set; }
     }
 }

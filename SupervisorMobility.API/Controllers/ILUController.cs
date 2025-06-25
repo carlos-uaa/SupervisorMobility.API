@@ -3,9 +3,11 @@ using Microsoft.AspNetCore.Mvc;
 using SupervisorMobility.API.DataAccess.Entities;
 using SupervisorMobility.API.DataAccess.Entities.ILU;
 using SupervisorMobility.API.DataAccess.Entities.LUP;
+using SupervisorMobility.API.Models.HCIDtos;
 using SupervisorMobility.API.Models.ILU;
 using SupervisorMobility.API.Models.ILURegisterDtos;
 using SupervisorMobility.API.Services;
+using System.Diagnostics;
 
 namespace SupervisorMobility.API.Controllers
 {
@@ -123,6 +125,29 @@ namespace SupervisorMobility.API.Controllers
             {
                 Console.WriteLine(ex.ToString());
             }
+
+            //buscar si existe hci del usuario, si no existe crearlo
+
+            var hci = await _supervisorMobilityRepository.GetHCI((int)finalILURegister.OperatorId);
+
+            if(hci == null)
+            {
+                HCI hciEntity = new();
+                hciEntity.User = MasterUser;
+                hciEntity.UserId = userID;
+                hciEntity.ILUs = MasterUser.ILURegisers;
+
+
+                var entityhci = await _supervisorMobilityRepository.AddHCI(hciEntity);
+
+
+
+                Console.WriteLine("Created HCi");
+                Debug.WriteLine("Created HCi");
+
+            }
+                Console.WriteLine("exist HCi");
+                Debug.WriteLine("Exist HCi");
 
             if (Createresult > 0)
                 return Ok(finalILURegister);

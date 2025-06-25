@@ -687,7 +687,8 @@ namespace SupervisorMobility.API.Controllers
                 var path = Path.Combine(_env.ContentRootPath, "uploads\\previousEvidence", FileInfo.StorageFileName);
 
                 var memory = new MemoryStream();
-                using (var stream = new FileStream(path, FileMode.Open))
+                using 
+                    (var stream = new FileStream(path, FileMode.Open))
                 {
                     await stream.CopyToAsync(memory);
                 }

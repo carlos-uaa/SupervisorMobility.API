@@ -23,7 +23,7 @@ namespace SupervisorMobility.API.Models.SOS.SOSHubDtos
         public ICollection<CommonDirectionDto>? CommonDirection { get; set; } = new List<CommonDirectionDto>();
         
         public ICollection<ProductDto>? AppliedModels { get; set; } = new List<ProductDto>();
-
+        public string? RevisedItems { get; set; }
         public string? TrainingTime { get; set; }
         public ICollection<EquipmentDto>? SafetyEquipment { get; set; } = new List<EquipmentDto>();
         public ICollection<ToolUsedForCreateDto>? ToolsUsed { get; set; } = new List<ToolUsedForCreateDto>();

@@ -84,12 +84,13 @@ namespace SupervisorMobility.API.DataAccess.Services
 
                 if (includeImages)
                 {
-                    await _context.Entry(sosHub).Collection(s => s.Images).LoadAsync();
+                    //await _context.Entry(sosHub).Collection(s => s.Images.Where(p=>p.IsActive == true)).LoadAsync();
+                    await _context.Entry(sosHub).Collection(s => s.Images).Query().Where(p => p.IsActive == true).LoadAsync();
                 }
 
                 if (includeVideos)
                 {
-                    await _context.Entry(sosHub).Collection(s => s.Videos).LoadAsync();
+                    await _context.Entry(sosHub).Collection(s => s.Videos).Query().Where(p => p.IsActive == true).LoadAsync();
                 }
 
                 if (includeCommentaries)
@@ -1935,9 +1936,43 @@ namespace SupervisorMobility.API.DataAccess.Services
 
         public async Task<List<Section>> AddRangeSections(List<Section> SectionsToAdd)
         {
+            //foreach (var section in SectionsToAdd)
+            //{
+            //    if (section.Analyses != null)
+            //    {
+            //        var analysesList = section.Analyses.ToList();
+            //        section.Analyses.Clear();
+
+            //        foreach (var analysis in analysesList)
+            //        {
+            //            analysis.IsActive = true;
+            //            // Si el análisis ya existe (tiene un ID válido), adjúntalo al contexto
+            //            if (analysis.AnalysisId > 0)
+            //            {
+            //                var tracked = _context.Analyses.Local.FirstOrDefault(a => a.AnalysisId == analysis.AnalysisId);
+            //                if (tracked != null)
+            //                {
+            //                    tracked.IsActive = true;
+            //                    section.Analyses.Add(tracked);
+            //                }
+            //                else
+            //                {
+            //                    _context.Analyses.Attach(analysis);
+            //                    section.Analyses.Add(analysis);
+            //                }
+            //            }
+            //            else
+            //            {
+            //                // Si es nuevo, simplemente agrégalo
+            //                section.Analyses.Add(analysis);
+            //            }
+            //        }
+            //    }
+            //}
+
             _context.Sections.AddRange(SectionsToAdd);
 
-            await _context.SaveChangesAsync();
+             _context.SaveChanges();
 
             // Desvincular las nuevas secciones del contexto
             foreach (var section in SectionsToAdd)

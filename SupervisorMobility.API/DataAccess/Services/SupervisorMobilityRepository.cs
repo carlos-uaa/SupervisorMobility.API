@@ -974,7 +974,9 @@ namespace SupervisorMobility.API.Services
                 .Include(ss => ss.Subordinates)
                     .ThenInclude(sub => sub.Area)
                 .Include(ILU => ILU.ILURegisers)
+                    .ThenInclude(sub => sub.Distribution)
                 .Include(aa => aa.Areas)
+                .Include(dep=>dep.Department)
                 .Where(p => p.UserId == userId).FirstOrDefaultAsync();
             }
             return await _context.Users.Where(p => p.UserId == userId).FirstOrDefaultAsync();
@@ -1335,7 +1337,7 @@ namespace SupervisorMobility.API.Services
         #endregion
         #region JobObservationOperations
 
-        public async Task<JOPaginationDto> GetJobObservationsByFiltersAsync(DateTime startDate, DateTime endDate, int jobObsId, int plantId, int areaId, int distributionId, int operationId, int supervisorId, int status, int userId, int typeId, string searchString, int page = 1, int entries = 10, int? sortO = 2, string? sortL = "")
+        public async Task<JOPaginationDto> GetJobObservationsByFiltersAsync(DateTime startDate, DateTime endDate, int jobObsId, int plantId, int areaId, int distributionId, int operationId, int operatorId, int status, int userId, int typeId, string searchString, int page = 1, int entries = 10, int? sortO = 2, string? sortL = "")
         {
             Expression<Func<JobObservation, object>>? keySelectorExp = orderingService.BuildJOKeySelector<JobObservation>(sortL);
 
@@ -1397,9 +1399,9 @@ namespace SupervisorMobility.API.Services
                 query = query.Where(j => j.Operations.Any(o => o.OperationId == operationId));
             }
 
-            if (supervisorId != default(int))
+            if (operatorId != default(int))
             {
-                query = query.Where(j => j.SupervisorId == supervisorId);
+                query = query.Where(j => j.OperatorId == operatorId);
             }
 
             if (startDate != default(DateTime))
@@ -1576,6 +1578,116 @@ namespace SupervisorMobility.API.Services
         {
 
             var query = _context.JobObservations.Where(j => j.IsActive == true && j.Type != 5);
+
+            if (includeTree)
+            {
+                query = query.Include(a => a.Area)
+                             .Include(p => p.Plant)
+                             .Include(d => d.Distribution)
+                             .Include(o => o.Operations);
+            }
+
+            if (includePeople)
+            {
+                query = query.Include(s => s.Supervisor)
+                             .Include(o => o.Operator);
+            }
+
+            if (includeLup)
+            {
+                query = query.Include(l => l.Lup.Where(lup => lup.IsActive == true))
+                        .ThenInclude(lup => lup.Evidences)
+                    .Include(l => l.Lup.Where(lup => lup.IsActive == true))
+                        .ThenInclude(lup => lup.Department)
+                    .Where(d => d.IsActive == true);
+
+            }
+
+            if (includeHistory)
+            {
+                query = query.Include(h => h.History);
+            }
+
+            if (includeCkAnswers)
+            {
+                query = query.Include(c => c.checklistAnswers);
+            }
+
+            if (idPlant != 0)
+            {
+                query = query.Where(p => p.PlantId == idPlant);
+            }
+
+            if (idArea != 0)
+            {
+                query = query.Where(p => p.AreaId == idArea);
+            }
+
+            if (ForSosProgram)
+            {
+                query = query.Where(d => d.Type == 3);
+            }
+
+            if (year != 0)
+            {
+                query = query.Where(d => d.StartDate.Value.Year == year || d.EndDate.Value.Year == year);
+            }
+
+            if (month != 0)
+            {
+                query = query.Where(d => d.StartDate.Value.Month == month || d.EndDate.Value.Month == month);
+            }
+
+
+            if (SOSAnualId != 0)
+            {
+                //Jobs que sean regulares (Externas al SOS ID)
+                query = query.Where(d => d.Type != 3);
+                SOSReviewProgram? sos = _context.SOSReviews.Include(r => r.Suggestions).Include(s => s.Supervisors).Where(u => u.SOSid == SOSAnualId).FirstOrDefault();
+                //Jobs que pertenezcan a los SV que partician en la SOS 
+                if (sos != null && sos.Supervisors?.Count > 0)
+                {
+                    List<int> supervisorIds = sos.Supervisors.Select(s => s.UserId).ToList();
+
+                    query = query.Where(j => supervisorIds.Contains((int)j.SupervisorId));
+
+                }
+                else
+                {
+                    return new List<JobObservation>();
+                }
+            }
+
+            if (idUser != 0)
+            {
+                //aqui traemos al user para verificar el tipo
+                User? _user = await _context.Users.Include(u => u.Subordinates).Where(p => p.UserId == idUser).FirstOrDefaultAsync();
+
+                if (_user.UserType == 2)
+                {
+                    //List<int> subordinateIds = _user.Subordinates?.Select(subordinate => subordinate.UserId).ToList();
+
+                    //if(subordinateIds.Count > 0)
+                    //    query = query.Where(j => subordinateIds.Contains((int)j.SupervisorId));
+
+
+                    query = query.Where(j => _user.Subordinates.Any() && _user.Subordinates.Select(subordinate => subordinate.UserId).Contains((int)j.SupervisorId));
+                }
+                else if (_user.UserType == 3)
+                {
+                    query = query.Where(j => j.SupervisorId == idUser);
+                }
+
+            }
+
+            return await query.OrderBy(c => c.JobObservationId).ToListAsync();
+
+        }
+
+        public async Task<IEnumerable<JobObservation>> GetAllFinishedJobObservationsAsync(bool includeTree = false, bool includePeople = false, bool includeLup = false, bool includeHistory = false, bool includeCkAnswers = false, int idPlant = 0, int idArea = 0, bool ForSosProgram = false, int year = 0, int month = 0, int SOSAnualId = 0, int idUser = 0)
+        {
+
+            var query = _context.JobObservations.Where(j => j.IsActive == true && j.Type != 5 && j.Status == 6);
 
             if (includeTree)
             {
@@ -2132,6 +2244,12 @@ namespace SupervisorMobility.API.Services
                .Where(p => p.ILURegisterid == idILUR).FirstOrDefaultAsync();
         }
 
+        public async Task<ILURegister?> GetILUIdByJobId(int idJobId)
+        {
+            ILURegister? register = await _context.ILURegisters.FirstOrDefaultAsync(p => p.JobObservationId == idJobId);
+            return register;
+        }
+
         public async Task<ILURegister?> GetLastILURegisterForUserAndDistribution(int id_User, int id_dist)
         {
             return await _context.ILURegisters
@@ -2186,6 +2304,18 @@ namespace SupervisorMobility.API.Services
                    .Include(pd => pd.PatDistributionComments)
                    .Include(pd => pd.PatSubordinates)
                    .Where(p => p.PATid == patId).FirstOrDefaultAsync();
+        }
+
+        public async Task<int?> GetPatByRegister(ILURegister iluReg, int plantid, int areaid)
+        {
+            PAT? pat = await _context.PATs.Include(p => p.Supervisors)
+                .ThenInclude(p => p.ILURegisers)
+                .Where(p => p.Supervisors.Any(c => c.ILURegisers.Any(gc => gc.ILURegisterid == iluReg.ILURegisterid)))
+                .Where(p=>p.PlantId == plantid).Where(p=>p.AreaId == areaid)
+                .OrderBy(p=>p.PATid)
+                .LastOrDefaultAsync(p=>p.AplicationYear == iluReg.AcquisitionDate.Value.Year);
+
+            return pat?.PATid;
         }
 
         //public async Task<PAT?> GetPatForYearOfSV(int sv, int Year)
