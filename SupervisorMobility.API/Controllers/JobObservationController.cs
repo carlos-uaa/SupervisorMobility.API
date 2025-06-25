@@ -192,7 +192,7 @@ namespace SupervisorMobility.API.Controllers
             int areaId,
             int distributionId,
             int operationId,
-            int supervisorId,
+            int operatorId,
             int status,
             int userId,
             int typeId,
@@ -200,7 +200,7 @@ namespace SupervisorMobility.API.Controllers
             int page, int entries, int? sortO, string? sortL)
         {
 
-            var allJobObservations = await _supervisorMobilityRepository.GetJobObservationsByFiltersAsync(startDate, endDate, jobObsId, plantId, areaId, distributionId, operationId, supervisorId, status, userId, typeId, searchString, page, entries, sortO, sortL);
+            var allJobObservations = await _supervisorMobilityRepository.GetJobObservationsByFiltersAsync(startDate, endDate, jobObsId, plantId, areaId, distributionId, operationId, operatorId, status, userId, typeId, searchString, page, entries, sortO, sortL);
 
             return Ok(allJobObservations);
         }
@@ -212,6 +212,22 @@ namespace SupervisorMobility.API.Controllers
         {
 
             var allJobObservations = await _supervisorMobilityRepository.GetAllJobObservationsAsync(includeTree, includePeople, includeLup, includeHistory, includeCkAnswers, idPlant, idArea, ForSosProgram, year, month, SOSAnualId, idUser);
+
+            if (allJobObservations == null)
+            {
+                return NotFound();
+            }
+
+            return Ok(_mapper.Map<IEnumerable<JobObservationDto>>(allJobObservations));
+        }
+
+        [HttpGet("finished")]
+        public async Task<ActionResult<IEnumerable<JobObservationDto>>> GetAllFinishedJobObservationsAsync(bool includeTree = false, bool includePeople = false,
+            bool includeLup = false, bool includeHistory = false, bool includeCkAnswers = false, int idPlant = 0, int idArea = 0, bool ForSosProgram = false,
+            int year = 0, int month = 0, int SOSAnualId = 0, int idUser = 0)
+        {
+
+            var allJobObservations = await _supervisorMobilityRepository.GetAllFinishedJobObservationsAsync(includeTree, includePeople, includeLup, includeHistory, includeCkAnswers, idPlant, idArea, ForSosProgram, year, month, SOSAnualId, idUser);
 
             if (allJobObservations == null)
             {
