@@ -3016,14 +3016,56 @@ namespace SupervisorMobility.API.Services
             return await query.FirstOrDefaultAsync();
 
         }
+        public async Task<HCI?> GetHciForUserId(int userId)
+        {
+         
+            return await _context.HCIs.Where(k => k.IsActive == true && k.UserId == userId).FirstOrDefaultAsync();
+
+        }
 
         public async Task<bool> SearchExistHciForUserId(int userId)
         {
             return await _context.HCIs.AnyAsync(k => k.IsActive == true && k.UserId == userId);
         }
-        public async Task<IEnumerable<HCI>> GetAllHCIs(bool includeNavigation = false, bool includePeople = false, bool includeCommentaries = false, bool includeTransactions = false)
+        public async Task<IEnumerable<HCI>> GetAllHCIs(int LoginUserId, bool includeNavigation = false, bool includePeople = false, bool includeCommentaries = false, bool includeTransactions = false)
         {
+            User LoginUserEntity = _context.Users.Where(u => u.UserId == LoginUserId).FirstOrDefault();
+
             var query = _context.HCIs.Where(u => u.IsActive == true);
+
+            if (LoginUserEntity.UserType == 2)
+            {
+                // Obtener los IDs de todos los subordinados directos e indirectos (hasta 2 niveles)
+                var subordinatesLevel1 = _context.Users
+                    .Where(u => u.SuperiorId == LoginUserEntity.UserId && u.IsActive == true)
+                    .Select(u => u.UserId)
+                    .ToList();
+
+                var subordinatesLevel2 = _context.Users
+                    .Where(u => subordinatesLevel1.Contains(u.SuperiorId.Value) && u.IsActive == true)
+                    .Select(u => u.UserId)
+                    .ToList();
+
+                var allUserIds = new List<int> { LoginUserEntity.UserId };
+                allUserIds.AddRange(subordinatesLevel1);
+                allUserIds.AddRange(subordinatesLevel2);
+
+                query = query.Where(hci => hci.UserId != null && allUserIds.Contains(hci.UserId.Value));
+            }
+            else if (LoginUserEntity.UserType == 3)
+            {
+                // Solo el usuario y sus subordinados directos
+                var subordinates = _context.Users
+                    .Where(u => u.SuperiorId == LoginUserEntity.UserId && u.IsActive == true)
+                    .Select(u => u.UserId)
+                    .ToList();
+
+                var allUserIds = new List<int> { LoginUserEntity.UserId };
+                allUserIds.AddRange(subordinates);
+
+                query = query.Where(hci => hci.UserId != null && allUserIds.Contains(hci.UserId.Value));
+            }
+
 
             if (includePeople)
             {
@@ -3132,13 +3174,13 @@ namespace SupervisorMobility.API.Services
 
         #endregion
 
-        #region HCI ILU
-        public async Task<int> AddHciIluReg(HCIILU registry)
-        {
-            _context.HCIILUs.Add(registry);
-            return _context.SaveChanges();
-        }
-        #endregion
+        //#region HCI ILU
+        //public async Task<int> AddHciIluReg(HCIILU registry)
+        //{
+        //    _context.HCIILUs.Add(registry);
+        //    return _context.SaveChanges();
+        //}
+        //#endregion
 
         #region Holidays
 
