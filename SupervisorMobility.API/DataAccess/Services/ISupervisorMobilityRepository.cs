@@ -416,16 +416,17 @@ namespace SupervisorMobility.API.Services
         #endregion
         #region HCI
         Task<HCI?> GetHCI(int HCIId, bool includeNavigation = false, bool includePeople = false, bool includeEvidences = false, bool includeTransactions = false);
+        Task<HCI?> GetHciForUserId(int userId);
         Task<bool> SearchExistHciForUserId(int userId);
         Task<int> AddHCI(HCI HCIForAdd);
         Task<int> RemoveHCI(HCI HCIForAdd);
         Task<int> UpdateHCI(UpdateHCIDto HCIForUpdate, HCI HCIEntity);
-        Task<IEnumerable<HCI>> GetAllHCIs(bool includeNavigation = false, bool includePeople = false, bool includeEvidences = false, bool includeTransactions = false);
+        Task<IEnumerable<HCI>> GetAllHCIs(int LoginUserId, bool includeNavigation = false, bool includePeople = false, bool includeEvidences = false, bool includeTransactions = false);
         Task<IEnumerable<User>> GetUsersWithoutHci();
         Task<IEnumerable<HCICategory>> GetHCICategories();
         #endregion
         #region HCI ILU
-        Task<int> AddHciIluReg(HCIILU registry);
+        //Task<int> AddHciIluReg(HCIILU registry);
         #endregion
 
         #region Holidays
