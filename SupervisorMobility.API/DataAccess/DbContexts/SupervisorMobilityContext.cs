@@ -65,7 +65,7 @@ namespace SupervisorMobility.API.Context
         public DbSet<Commentary> Commentaries { get; set; }
         public DbSet<HCITransaction> HCITransactions { get; set; }
         public DbSet<HCICategory> HCICategories { get; set; }
-        public DbSet<HCIILU> HCIILUs { get; set; }
+        //public DbSet<HCIILU> HCIILUs { get; set; }
         public DbSet<Kaizen> Kaizens { get; set; }
         public DbSet<KaizenTransaction> KaizenTransactions { get; set; }
         public DbSet<Holiday> Holidays { get; set; }

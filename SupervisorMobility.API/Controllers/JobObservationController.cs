@@ -391,22 +391,22 @@ namespace SupervisorMobility.API.Controllers
                         }
 
 
-                        try
-                        {
-                            var temp = await _supervisorMobilityRepository.GetDistributionOnlyIdAsync((int)jobObservationEntity.DistributionId);
-                            var temp2 = await _supervisorMobilityRepository.GetILULevel(_newIlu.ILULevelId.Value);
-                            HCIILU toAdd = new HCIILU
-                            {
-                                Description = temp.Description,
-                                level = temp2.ILULevelCode.ToString(),
-                                Register = _newIlu,
-                            };
-                            await _supervisorMobilityRepository.AddHciIluReg(toAdd);
-                        }
-                        catch (Exception ex)
-                        {
-                            Console.WriteLine(ex.ToString());
-                        }
+                        //try
+                        //{
+                        //    var temp = await _supervisorMobilityRepository.GetDistributionOnlyIdAsync((int)jobObservationEntity.DistributionId);
+                        //    var temp2 = await _supervisorMobilityRepository.GetILULevel(_newIlu.ILULevelId.Value);
+                        //    HCIILU toAdd = new HCIILU
+                        //    {
+                        //        Description = temp.Description,
+                        //        level = temp2.ILULevelCode.ToString(),
+                        //        Register = _newIlu,
+                        //    };
+                        //    await _supervisorMobilityRepository.AddHciIluReg(toAdd);
+                        //}
+                        //catch (Exception ex)
+                        //{
+                        //    Console.WriteLine(ex.ToString());
+                        //}
 
 
                     }

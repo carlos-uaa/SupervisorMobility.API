@@ -43,12 +43,12 @@ namespace SupervisorMobility.API.Controllers.IS_Controllers
         }
 
         [HttpGet]
-        public async Task<ActionResult<IEnumerable<HCIDto>>> GetAllDataHCI(bool includeNavigation = false, bool includePeople = false, bool includeCommentaries = false, bool includeTransactions = false)
+        public async Task<ActionResult<IEnumerable<HCIDto>>> GetAllDataHCI(int LoginUserId, bool includeNavigation = false, bool includePeople = false, bool includeCommentaries = false, bool includeTransactions = false)
         {
 
-            var entityhci = await _supervisorMobilityRepository.GetAllHCIs(includeNavigation, includePeople, includeCommentaries, includeTransactions);
+            var entityhci = await _supervisorMobilityRepository.GetAllHCIs(LoginUserId, includeNavigation, includePeople, includeCommentaries, includeTransactions);
             if (entityhci != null)
-                return Ok(entityhci);
+                return Ok(_mapper.Map<List<HCIDto>>(entityhci));
             else
                 return BadRequest();
         }
