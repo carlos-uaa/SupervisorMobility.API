@@ -17,7 +17,7 @@ namespace SupervisorMobility.API.DataAccess.Entities.SOS
 
         public ICollection<Turn>? Turns { get; set; }
         public string? AplicationModels { get; set; } = "§§§§";
-        public ICollection<SOSTime>? Times { get; set; } = new List<SOSTime>();
+        public ICollection<SOSDistributionOperationSequence>? SOSDistributionOperationSequence { get; set; }
 
 
         public string? AdditionalTime { get; set; } = "§§§§";
@@ -33,8 +33,9 @@ namespace SupervisorMobility.API.DataAccess.Entities.SOS
         public SOSDistributionAdditionalTime? SOSDistributionAdditionalTime { get; set; }
 
         public bool? IsActive { get; set; }
+
         public int? SOSHubId { get; set; }
-        public SOSHub? SOSHub { get; set; }
+        public ICollection<SOSHub>? SOSHubs { get; set; } = new List<SOSHub>();
 
         public ICollection<SOSAnalysis>? Analyses { get; set; } = new List<SOSAnalysis>();
         public ICollection<SOSSequence>? Sequences { get; set; } = new List<SOSSequence>();
