@@ -1353,7 +1353,9 @@ namespace SupervisorMobility.API.Controllers.Exportation_Controllers
         [HttpGet("Excel/Distribution/{DistributionId}")]
         public async Task<IActionResult> DistributionExcelExport(int DistributionId)
         {
-            var SosDistribution = await _AnalysisProcessRepository.GetSOSDistribution(DistributionId, true, true, true, true, includeTurns: true, includeTimes: true);
+            var SosDistribution = await _AnalysisProcessRepository.GetSOSDistribution(DistributionId, true, true, true, true, includeTurns: true, includeTimes: true, includeCollections: true);
+
+            SOSHub Sos_Hub = await _AnalysisProcessRepository.GetSOSHub((int)SosDistribution.SOSHubId, true, true, true, true, true, true, true, true, true, true, true, true, true, true, true, true, true);
 
             string templateName = "DataAccess/Templates/Distribution Template.xlsx";
             MemoryStream ms = new MemoryStream();
@@ -1370,17 +1372,17 @@ namespace SupervisorMobility.API.Controllers.Exportation_Controllers
                 sheet.Cells["B8"].Value = SosDistribution.ProcessName;
                 sheet.Cells["G8"].Value = SosDistribution.InternalControlNumber;
 
-                sheet.Cells["B10"].Value = SosDistribution.DistributionLogbooks.First().Approver.Name;
-                sheet.Cells["E10"].Value = SosDistribution.SOSHub.ReviewerEditors.First()?.Name;
-                sheet.Cells["G10"].Value = SosDistribution.SOSHub.ApproverOwners.First().Name;
+                sheet.Cells["B10"].Value = SosDistribution.DistributionLogbooks?.First().Approver?.Name;
+                sheet.Cells["E10"].Value = Sos_Hub?.ReviewerEditors?.First()?.Name;
+                sheet.Cells["G10"].Value = Sos_Hub?.ApproverOwners?.First().Name;
 
                 sheet.Cells["B12"].Value = SosDistribution.CreatedAt?.ToString("dd-MMM-yyyy").Replace(".", "");
                 sheet.Cells["D12"].Value = SosDistribution.ApplicationMonth;
                 //sheet.Cells["G12"].Value = SosDistribution.SOSHub.AppliedModel.Code;
                 sheet.Cells["I12"].Value = SosDistribution.TackTime;
-                sheet.Cells["J12"].Value = SosDistribution.SOSHub.TrainingTime;
-                sheet.Cells["P12"].Value = SosDistribution.SOSHub.Plant.Code;
-                sheet.Cells["U12"].Value = SosDistribution.SOSHub.Department.Code;
+                sheet.Cells["J12"].Value = Sos_Hub?.TrainingTime;
+                sheet.Cells["P12"].Value = Sos_Hub?.Plant?.Code;
+                sheet.Cells["U12"].Value = Sos_Hub?.Department?.Code;
 
                 if (SosDistribution.Turns != null && SosDistribution.Turns.Any())
                 {
@@ -1437,7 +1439,7 @@ namespace SupervisorMobility.API.Controllers.Exportation_Controllers
 
                 bool firstPage = true;
 
-                foreach (var section in SosDistribution.SOSHub.Sections)
+                foreach (var section in SosDistribution.SOSDistributionOperationSequence)
                 {
                     double StepHeight = 0, CriticalHeight = 0;
 
@@ -1446,7 +1448,7 @@ namespace SupervisorMobility.API.Controllers.Exportation_Controllers
                     string fullText = string.Empty;
                     int criticalIndex = 0;
 
-                    foreach (var (analysis, index) in section.Analyses.Select((analysis, index) => (analysis, index)))
+                    foreach (var (analysis, index) in section.Section?.Analyses.Select((analysis, index) => (analysis, index)))
                     {
                         if (analysis.CriticalPoints != null && analysis.CriticalPoints.Any())
                         {
@@ -1456,7 +1458,7 @@ namespace SupervisorMobility.API.Controllers.Exportation_Controllers
                                 string indexString = $"{criticalIndex}.- ";
                                 string critString = $"{cp}\r\n";
                                 string reasonString = $"( {analysis.Reasons[cpIndex]} )";
-                                if (cp != section.Analyses.Last(p => p.CriticalPoints.Any()).CriticalPoints.Last())
+                                if (cp != section.Section.Analyses.Last(p => p.CriticalPoints.Any()).CriticalPoints.Last())
                                 {
                                     reasonString += "\r\n";
                                 }
@@ -1473,7 +1475,7 @@ namespace SupervisorMobility.API.Controllers.Exportation_Controllers
 
                     CriticalHeight = stylesService.CalculateRowHeight(fullText, sheet.Columns[8].Width + sheet.Columns[9].Width + sheet.Columns[10].Width + sheet.Columns[11].Width, ValuesFont.Size);
 
-                    StepHeight = stylesService.CalculateRowHeight(section.Step, sheet.Columns[3].Width + sheet.Columns[4].Width + sheet.Columns[5].Width + sheet.Columns[6].Width + sheet.Columns[7].Width, ValuesFont.Size);
+                    StepHeight = stylesService.CalculateRowHeight(section.Section.Step, sheet.Columns[3].Width + sheet.Columns[4].Width + sheet.Columns[5].Width + sheet.Columns[6].Width + sheet.Columns[7].Width, ValuesFont.Size);
                     var rowheight = Math.Max(21.8, Math.Max(StepHeight, CriticalHeight));
 
                     var chHeightP = (TotalRowHeight + rowheight) * 100 / ChangeHeight;
@@ -1520,11 +1522,11 @@ namespace SupervisorMobility.API.Controllers.Exportation_Controllers
 
                     sheet.Cells[$"B{rowindex}"].Value = indexSection;
 
-                    sheet.Cells[$"C{rowindex}"].Value = section.Step;
+                    sheet.Cells[$"C{rowindex}"].Value = section.Section.Step;
 
-                    if (SosDistribution.Times != null && SosDistribution.Times.Any())
+                    if (SosDistribution.SOSDistributionOperationSequence != null && SosDistribution.SOSDistributionOperationSequence.Any())
                     {
-                        var timeText = SosDistribution.Times.FirstOrDefault(p => p.SectionId == section.SectionId).Time;
+                        var timeText = SosDistribution.SOSDistributionOperationSequence.FirstOrDefault(p => p.SectionId == section.SectionId).Times;
 
                         if (!string.IsNullOrEmpty(timeText) && timeText != "§§§§" && timeText != "0")
                         {
@@ -1881,11 +1883,11 @@ namespace SupervisorMobility.API.Controllers.Exportation_Controllers
 
                 }
 
-                if (!string.IsNullOrEmpty(SosDistribution.SOSHub.OtherInformation))
+                if (!string.IsNullOrEmpty(SosDistribution.SOSHubs.FirstOrDefault().OtherInformation))
                 {
                     double width = sheet.Columns[2].Width + sheet.Columns[3].Width + sheet.Columns[4].Width + sheet.Columns[5].Width;
                     int trueWidth = imgService.WidthToPixels(width);
-                    var text = SosDistribution.SOSHub.OtherInformation;
+                    var text = SosDistribution.SOSHubs.FirstOrDefault().OtherInformation;
                     foreach (var (item, index) in package.Workbook.Worksheets.Where(ws => ws.Name.Contains("DISTRIBUTION")).Select((item, index) => (item, index)))
                     {
                         var result = stylesService.SplitTextByRowHeight(text, trueWidth, ValuesFont.Size, maxRowHeight: 55.6, existingText: "Situación Anormal y/ o Casos Especiales");

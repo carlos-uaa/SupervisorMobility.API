@@ -163,7 +163,7 @@ namespace SupervisorMobility.API.Controllers.SOS_Controllers
                     OperationSequence.IsActive = true;
                 }
 
-                var resultAddOperationSequences = await _ProcessRepository.AddRangeSOSOperationSequences(newSOSOperationSequences);
+                var resultAddOperationSequences = await _ProcessRepository.AddRangeSOSCombinationOperationSequences(newSOSOperationSequences);
 
                 if (resultAddOperationSequences != null)
                 {
