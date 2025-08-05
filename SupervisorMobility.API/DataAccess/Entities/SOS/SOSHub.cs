@@ -67,6 +67,10 @@ namespace SupervisorMobility.API.DataAccess.Entities.SOS
         public ICollection<SOSFlow>? SOSFlow { get; set; } = new List<SOSFlow>();
         public ICollection<SOSSequence>? SOSSequence { get; set; } = new List<SOSSequence>();
 
+        public ICollection<SOSSynopticTableofControlPoints>? SOSSynopticControlPoints { get; set; } = new List<SOSSynopticTableofControlPoints>();
+        public ICollection<SOSSynopticTableofOperatingRequirements>? SOSSynopticOperatingRequirements { get; set; } = new List<SOSSynopticTableofOperatingRequirements>();
+
+
         public ICollection<SOSHubHistory>? History { get; set; } = new List<SOSHubHistory>();
 
         public ICollection<PAT>? PATs { get; set; } = new List<PAT>();
