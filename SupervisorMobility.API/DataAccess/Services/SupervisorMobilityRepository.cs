@@ -2,6 +2,7 @@
 using AutoMapper;
 using DocumentFormat.OpenXml.Bibliography;
 using DocumentFormat.OpenXml.InkML;
+using DocumentFormat.OpenXml.Office2010.Excel;
 using DocumentFormat.OpenXml.Spreadsheet;
 using DocumentFormat.OpenXml.Wordprocessing;
 using Microsoft.AspNetCore.Mvc;
@@ -23,6 +24,7 @@ using SupervisorMobility.API.Models.JobObservationDtos;
 using SupervisorMobility.API.Models.JobPaginationDtos;
 using SupervisorMobility.API.Models.KaizenDtos;
 using SupervisorMobility.API.Models.KaizenTransactionDtos;
+using SupervisorMobility.API.Models.MetricsDtos;
 using SupervisorMobility.API.Models.PATDtos;
 using SupervisorMobility.API.Models.ProductiveCalendarDtos;
 using SupervisorMobility.API.Models.SOS.SOSHubDtos.AnalysisDtos;
@@ -295,7 +297,7 @@ namespace SupervisorMobility.API.Services
             return await _context.Distributions
                 .Where(o => o.AreaId == areaId && o.IsActive == true).ToListAsync();
         }
-        
+
         public async Task<IEnumerable<Distribution>> GetDistributionsForAreaDetailsAsync(int areaId, bool includecollections = false)
         {
 
@@ -857,7 +859,7 @@ namespace SupervisorMobility.API.Services
                 query = query.Include(s => s.Subordinates);
             }
 
-           
+
 
             return await query.OrderBy(c => c.UserId).ToListAsync();
         }
@@ -882,7 +884,7 @@ namespace SupervisorMobility.API.Services
                 query = query.Include(ss => ss.Subordinates);
             }
 
-           
+
 
             return await query.OrderBy(c => c.UserId).ToListAsync();
 
@@ -906,7 +908,7 @@ namespace SupervisorMobility.API.Services
             {
                 query = query.Include(ss => ss.Subordinates);
             }
-         
+
             return await query.OrderBy(c => c.UserId).ToListAsync();
 
         }
@@ -976,7 +978,7 @@ namespace SupervisorMobility.API.Services
                 .Include(ILU => ILU.ILURegisers)
                     .ThenInclude(sub => sub.Distribution)
                 .Include(aa => aa.Areas)
-                .Include(dep=>dep.Department)
+                .Include(dep => dep.Department)
                 .Where(p => p.UserId == userId).FirstOrDefaultAsync();
             }
             return await _context.Users.Where(p => p.UserId == userId).FirstOrDefaultAsync();
@@ -1350,9 +1352,9 @@ namespace SupervisorMobility.API.Services
                 //.Include(s => s.Supervisor)
                 //.Include(o => o.Operator).Where(u => u.IsActive == true)
                 .Where(u => u.IsActive == true);
-            IQueryable < Distribution >? dtquery = null;
-            IQueryable < Operation >? opquery = null;
-            IQueryable < User >? oquery = null;
+            IQueryable<Distribution>? dtquery = null;
+            IQueryable<Operation>? opquery = null;
+            IQueryable<User>? oquery = null;
 
             query = query.Include(a => a.Area)
                              .Include(p => p.Plant)
@@ -1385,14 +1387,14 @@ namespace SupervisorMobility.API.Services
             if (areaId != default(int))
             {
                 query = query.Where(j => j.AreaId == areaId);
-                dtquery = _context.Distributions.Where(p=>p.AreaId == areaId && p.IsActive==true);
+                dtquery = _context.Distributions.Where(p => p.AreaId == areaId && p.IsActive == true);
                 oquery = _context.Users.Where(u => u.IsActive == true && u.UserType == 4 && u.PlantId == plantId && u.AreaId == areaId);
             }
 
             if (distributionId != default(int))
             {
                 query = query.Where(j => j.DistributionId == distributionId);
-                opquery = _context.Operations.Where(p=>p.DistributionId == distributionId && p.IsActive == true);
+                opquery = _context.Operations.Where(p => p.DistributionId == distributionId && p.IsActive == true);
             }
             if (operationId != default(int))
             {
@@ -1419,7 +1421,7 @@ namespace SupervisorMobility.API.Services
                 query = query.Where(p =>
                     p.JobObservationId.ToString().ToLower().Contains(searchString.ToLower()) ||
                     p.Distribution.Description.ToLower().Contains(searchString.ToLower()) ||
-                    p.Operations.Any(o=>o.Description.ToLower().Contains(searchString.ToLower())) ||
+                    p.Operations.Any(o => o.Description.ToLower().Contains(searchString.ToLower())) ||
                     p.StartDate.ToString().ToLower().Contains(searchString.ToLower()) ||
                     p.Operator.Name.ToLower().Contains(searchString.ToLower()) ||
                     p.Supervisor.Name.ToLower().Contains(searchString.ToLower())
@@ -1469,7 +1471,7 @@ namespace SupervisorMobility.API.Services
                              .Include(o => o.Operations)
                              .Include(s => s.Supervisor)
                                  .Include(o => o.Operator)
-                    .FirstOrDefaultAsync(p=>p.JobObservationId == jobObsId));
+                    .FirstOrDefaultAsync(p => p.JobObservationId == jobObsId));
             }
 
             JOCountPaginationDto counts = new();
@@ -1478,9 +1480,9 @@ namespace SupervisorMobility.API.Services
             if (dtquery != null)
             {
                 var dist = await dtquery.ToListAsync();
-                foreach(var item in dist)
+                foreach (var item in dist)
                 {
-                    JOCount jOCount = new JOCount { id = item.DistributionId, count = query.Count(j=>j.DistributionId == item.DistributionId) };
+                    JOCount jOCount = new JOCount { id = item.DistributionId, count = query.Count(j => j.DistributionId == item.DistributionId) };
                     counts.DistributionCount.Add(jOCount);
                 }
             }
@@ -1491,7 +1493,7 @@ namespace SupervisorMobility.API.Services
                 var oper = await opquery.ToListAsync();
                 foreach (var item in oper)
                 {
-                    JOCount jOCount = new JOCount { id = item.OperationId, count = query.Count(j => j.Operations.Any(e=> e.OperationId == item.OperationId)) };
+                    JOCount jOCount = new JOCount { id = item.OperationId, count = query.Count(j => j.Operations.Any(e => e.OperationId == item.OperationId)) };
                     counts.OperationCount.Add(jOCount);
                 }
             }
@@ -1510,11 +1512,11 @@ namespace SupervisorMobility.API.Services
             counts.StatusCount = new();
             foreach (var sts in new[] { 1, 2, 3, 4, 5, 6, 7 })
             {
-                JOCount jOCount = new JOCount { id = sts, count = queryWoutStatus.Count(j=>j.Status == sts) };
+                JOCount jOCount = new JOCount { id = sts, count = queryWoutStatus.Count(j => j.Status == sts) };
                 counts.StatusCount.Add(jOCount);
             }
 
-            JOCount typeCount = new JOCount { id=44, count = queryWoutStatus.Count(j=>j.Type == 4) };
+            JOCount typeCount = new JOCount { id = 44, count = queryWoutStatus.Count(j => j.Type == 4) };
             counts.StatusCount.Add(typeCount);
 
             JOPaginationDto response = new JOPaginationDto
@@ -1564,15 +1566,15 @@ namespace SupervisorMobility.API.Services
                     JobObservation = j,
                     MatchCount = j.Operations.Count(op => operationIds.Contains(op.OperationId))
                 })
-                .Where(x => x.MatchCount > 0)  
+                .Where(x => x.MatchCount > 0)
                 .OrderByDescending(x => x.MatchCount)
-                .Select(x => x.JobObservation)  
+                .Select(x => x.JobObservation)
         .ToListAsync();
 
             return matchingJobs;
         }
 
-       
+
 
         public async Task<IEnumerable<JobObservation>> GetAllJobObservationsAsync(bool includeTree = false, bool includePeople = false, bool includeLup = false, bool includeHistory = false, bool includeCkAnswers = false, int idPlant = 0, int idArea = 0, bool ForSosProgram = false, int year = 0, int month = 0, int SOSAnualId = 0, int idUser = 0)
         {
@@ -1824,7 +1826,7 @@ namespace SupervisorMobility.API.Services
 
             var query = _context.JobObservations.Include(jo => jo.Operations).Where(j => j.IsActive == true && j.Type == 5);
 
-            
+
             if (plantId != 0)
             {
                 query = query.Where(p => p.PlantId == plantId);
@@ -1857,8 +1859,8 @@ namespace SupervisorMobility.API.Services
                              .Include(d => d.Distribution)
                              .Include(o => o.Operations)
                              .Include(s => s.SignatureImage);
-            }   
-            
+            }
+
             if (includeOperations)
             {
                 query = query.Include(o => o.Operations);
@@ -1900,8 +1902,8 @@ namespace SupervisorMobility.API.Services
             //_context.JobObservations.Remove(jobObservation);
             jobObservation.IsActive = false;
             _context.SaveChanges();
-        }  
-        
+        }
+
         public void PermanentDeleteJobObservation(JobObservation jobObservation)
         {
             _context.JobObservations.Remove(jobObservation);
@@ -1922,6 +1924,178 @@ namespace SupervisorMobility.API.Services
                 jobObservation.SignatureImage = evidence;
 
             }
+
+        }
+
+        public async Task<JOPaginationDto> GetLateJobObservationsByFiltersAsync(DateTime? today, DateTime?startDate, DateTime? endDate, int? plantId, int? areaId, int? distributionId, int? operationId, string searchString, int page = 1, int entries = 10, int? sortO = 2, string? sortL = "")
+        {
+            Expression<Func<JobObservation, object>>? keySelectorExp = orderingService.BuildJOKeySelector<JobObservation>(sortL);
+
+            var query = _context.JobObservations
+                .Where(u => u.IsActive == true);
+
+            query = query.Include(a => a.Area)
+                             .Include(p => p.Plant)
+                             .Include(d => d.Distribution)
+                             .Include(o => o.Operations);
+            query = query.Include(s => s.Supervisor)
+                             .Include(o => o.Operator);
+
+            query = query.Where(p => p.Status != 6 && p.Status != 5);
+
+            if (plantId != null)
+            {
+                query = query.Where(j => j.PlantId == plantId);
+            }
+            if (areaId != null)
+            {
+                query = query.Where(j => j.AreaId == areaId);
+            }
+
+            if (distributionId != null)
+            {
+                query = query.Where(j => j.DistributionId == distributionId);
+            }
+            if (operationId != null)
+            {
+                query = query.Where(j => j.Operations.Any(o => o.OperationId == operationId));
+            }
+            if (startDate != null)
+            {
+                query = query.Where(j => j.StartDate.HasValue && j.StartDate.Value.Date >= startDate.Value.Date /*|| (j.StartDate.HasValue && j.StartDate.Value.Date >= startDate.Date && (j.EndDate.HasValue && j.EndDate.Value.Date <= startDate.Date))*/);
+            }
+            else if (endDate != null)
+            {
+                endDate = endDate.Value.AddDays(1);
+                query = query.Where(j => j.StartDate.HasValue && j.StartDate.Value < endDate);
+            }
+            if (today != null)
+            {
+                query = query.Where(j =>
+                (j.PlannedEndDate ?? j.EndDate) != null && (j.PlannedEndDate ?? j.EndDate) < today ||
+                (j.PlannedStartDate ?? j.StartDate) != null && (j.PlannedStartDate ?? j.StartDate) < today);
+            }
+            if (!string.IsNullOrEmpty(searchString))
+            {
+                query = query.Where(p =>
+                p.JobObservationId.ToString().ToLower().Contains(searchString.ToLower()) ||
+                    p.Distribution.Description.ToLower().Contains(searchString.ToLower()) ||
+                    p.Operations.Any(o => o.Description.ToLower().Contains(searchString.ToLower())) ||
+                    p.StartDate.ToString().ToLower().Contains(searchString.ToLower()) ||
+                    p.Operator.Name.ToLower().Contains(searchString.ToLower()) ||
+                    p.Supervisor.Name.ToLower().Contains(searchString.ToLower())
+                );
+            }
+
+            var orderedQuery = query.OrderBy(x => x.Status == 1 ? 0
+               : x.Status == 7 ? 1
+               : 2);
+
+            if (sortL != "id_field" && sortL != "")
+            {
+                query = orderedQuery.ThenByDynamic(keySelectorExp, sortO).ThenByDescending(p => p.JobObservationId);
+            }
+            else
+            {
+                query = orderedQuery.ThenByDynamic(keySelectorExp, sortO);
+            }
+
+            //previously returned query.OrderBy(c => c.StartDate)
+            int count = query.Count();
+            var list = await query.Skip((page - 1) * entries)
+                        .Take(entries).ToListAsync();
+
+            JOPaginationDto response = new JOPaginationDto
+            {
+                JobObservations = _mapper.Map<IEnumerable<JobObservationDto>>(list),
+                Total = count,
+                CountPagination = new()
+            };
+
+            return response;
+
+        }
+
+
+        public async Task<JOPaginationDto> GetReprogrammedJobObservationsByFiltersAsync(DateTime? startDate, DateTime? endDate, int? plantId, int? areaId, int? distributionId, int? operationId, string searchString, int page = 1, int entries = 10, int? sortO = 2, string? sortL = "")
+        {
+            Expression<Func<JobObservation, object>>? keySelectorExp = orderingService.BuildJOKeySelector<JobObservation>(sortL);
+
+            var query = _context.JobObservations
+                .Where(u => u.IsActive == true);
+
+            query = query.Include(a => a.Area)
+                             .Include(p => p.Plant)
+                             .Include(d => d.Distribution)
+                             .Include(o => o.Operations);
+            query = query.Include(s => s.Supervisor)
+                             .Include(o => o.Operator);
+
+            query = query.Where(p => p.Status != 6 && p.Status != 5);
+            query = query.Where(p => p.IsReallocated);
+
+            if (plantId != null)
+            {
+                query = query.Where(j => j.PlantId == plantId);
+            }
+            if (areaId != null)
+            {
+                query = query.Where(j => j.AreaId == areaId);
+            }
+
+            if (distributionId != null)
+            {
+                query = query.Where(j => j.DistributionId == distributionId);
+            }
+            if (operationId != null)
+            {
+                query = query.Where(j => j.Operations.Any(o => o.OperationId == operationId));
+            }
+
+            if (startDate != null)
+            {
+                query = query.Where(j => j.StartDate.HasValue && j.StartDate.Value.Date >= startDate.Value.Date /*|| (j.StartDate.HasValue && j.StartDate.Value.Date >= startDate.Date && (j.EndDate.HasValue && j.EndDate.Value.Date <= startDate.Date))*/);
+            }
+            else if (endDate != null)
+            {
+                endDate = endDate.Value.AddDays(1);
+                query = query.Where(j => j.StartDate.HasValue && j.StartDate.Value < endDate);
+            }
+
+            if (!string.IsNullOrEmpty(searchString))
+            {
+                query = query.Where(p =>
+                p.JobObservationId.ToString().ToLower().Contains(searchString.ToLower()) ||
+                    p.Distribution.Description.ToLower().Contains(searchString.ToLower()) ||
+                    p.Operations.Any(o => o.Description.ToLower().Contains(searchString.ToLower())) ||
+                    p.StartDate.ToString().ToLower().Contains(searchString.ToLower()) ||
+                    p.Operator.Name.ToLower().Contains(searchString.ToLower()) ||
+                    p.Supervisor.Name.ToLower().Contains(searchString.ToLower())
+                );
+            }
+
+            if (sortL != "id_field" && sortL != "")
+            {
+                query = query.OrderByDynamic(keySelectorExp, sortO).ThenByDescending(p => p.JobObservationId);
+            }
+            else
+            {
+                query = query.OrderByDynamic(keySelectorExp, sortO);
+            }
+
+            //previously returned query.OrderBy(c => c.StartDate)
+            int count = query.Count();
+            var list = await query.Skip((page - 1) * entries)
+                        .Take(entries).ToListAsync();
+
+            JOPaginationDto response = new JOPaginationDto
+            {
+                JobObservations = _mapper.Map<IEnumerable<JobObservationDto>>(list),
+                Total = count,
+                CountPagination = new()
+            };
+
+            return response;
 
         }
         #endregion
@@ -1997,12 +2171,12 @@ namespace SupervisorMobility.API.Services
                 .SelectMany(j => j.Lup.Where(lup => lup.IsActive == true))
                 .ToListAsync();
 
-            return lups.Where(u => (u.Status == 1 || u.Status == 2) && u.CreatedDate > DateTime.Now.AddDays(-14) && u.ChecklistQuestionId == QuestionId && u.EndDate == null )
+            return lups.Where(u => (u.Status == 1 || u.Status == 2) && u.CreatedDate > DateTime.Now.AddDays(-14) && u.ChecklistQuestionId == QuestionId && u.EndDate == null)
                  .OrderBy(c => c.LupId);
 
-                //.Include(j => j.JobObservation)
-                //.Include(f => f.Evidences)
-                //.Include(d => d.Department)
+            //.Include(j => j.JobObservation)
+            //.Include(f => f.Evidences)
+            //.Include(d => d.Department)
         }
 
         [HttpGet("lups")]
@@ -2254,7 +2428,7 @@ namespace SupervisorMobility.API.Services
         {
             return await _context.ILURegisters
                .Where(p => p.OperatorId == id_User && p.DistributionId == id_dist)
-            .OrderByDescending(p => p.AcquisitionDate) 
+            .OrderByDescending(p => p.AcquisitionDate)
             .FirstOrDefaultAsync();
         }
 
@@ -2311,9 +2485,9 @@ namespace SupervisorMobility.API.Services
             PAT? pat = await _context.PATs.Include(p => p.Supervisors)
                 .ThenInclude(p => p.ILURegisers)
                 .Where(p => p.Supervisors.Any(c => c.ILURegisers.Any(gc => gc.ILURegisterid == iluReg.ILURegisterid)))
-                .Where(p=>p.PlantId == plantid).Where(p=>p.AreaId == areaid)
-                .OrderBy(p=>p.PATid)
-                .LastOrDefaultAsync(p=>p.AplicationYear == iluReg.AcquisitionDate.Value.Year);
+                .Where(p => p.PlantId == plantid).Where(p => p.AreaId == areaid)
+                .OrderBy(p => p.PATid)
+                .LastOrDefaultAsync(p => p.AplicationYear == iluReg.AcquisitionDate.Value.Year);
 
             return pat?.PATid;
         }
@@ -2328,7 +2502,7 @@ namespace SupervisorMobility.API.Services
             _mapper.Map(patForUpdate, PatEntity);
 
             PatEntity.Supervisors.Clear();
-           foreach (var usr in patForUpdate.Supervisors)
+            foreach (var usr in patForUpdate.Supervisors)
             {
                 PatEntity.Supervisors.Add(await GetUserAsync(usr.UserId));
             }
@@ -2890,7 +3064,7 @@ namespace SupervisorMobility.API.Services
         }
         public async Task<int> UpdateKaizen(UpdateKaizenDto KaizenForUpdate, Kaizen KaizenEntity)
         {
-            
+
             _mapper.Map(KaizenForUpdate, KaizenEntity);
 
             return await _context.SaveChangesAsync();
@@ -3009,7 +3183,7 @@ namespace SupervisorMobility.API.Services
 
             if (includeTransactions)
             {
-                query = query.Include(p => p.Categories).ThenInclude(p=>p.ChosenCategory);
+                query = query.Include(p => p.Categories).ThenInclude(p => p.ChosenCategory);
             }
 
 
@@ -3018,7 +3192,7 @@ namespace SupervisorMobility.API.Services
         }
         public async Task<HCI?> GetHciForUserId(int userId)
         {
-         
+
             return await _context.HCIs.Where(k => k.IsActive == true && k.UserId == userId).FirstOrDefaultAsync();
 
         }
@@ -3084,7 +3258,7 @@ namespace SupervisorMobility.API.Services
 
                 query = query
                  .Include(t => t.User).ThenInclude(u => u.Area);
-                
+
                 query = query
                  .Include(t => t.User).ThenInclude(u => u.ILURegisers);
             }
@@ -3137,7 +3311,7 @@ namespace SupervisorMobility.API.Services
         }
 
 
-        public async  Task<IEnumerable<User>> GetUsersWithoutHci()
+        public async Task<IEnumerable<User>> GetUsersWithoutHci()
         {
             var usuariosSinHCI = _context.Users.Where(u => !_context.HCIs.Any(hci => hci.UserId == u.UserId));
             return await usuariosSinHCI.ToListAsync();
@@ -3185,27 +3359,27 @@ namespace SupervisorMobility.API.Services
         #region Holidays
 
         public async Task<int> AddHolidayAsync(HolidayForUpdateDto holiday)
-           {
+        {
             Holiday holiday1 = _mapper.Map<Holiday>(holiday);
             _context.Holidays.Add(holiday1);
             return await _context.SaveChangesAsync();
         }
         public async Task<IEnumerable<Holiday>> GetActiveHolidaysOfYearAsync(int year)
-           {
+        {
             var values = _context.Holidays
                 .Where(h => h.Date.Year == year && h.IsActive == true);
 
             return await values.ToListAsync();
         }
         public async Task<IEnumerable<Holiday>> GetHolidaysOfYearAsync(int year)
-           {
+        {
             var values = _context.Holidays
                 .Where(h => h.Date.Year == year);
 
             return await values.ToListAsync();
         }
         public Task<Holiday> GetHolidayByIdAsync(int id)
-           {
+        {
             return _context.Holidays
                 .Where(h => h.HolidayId == id)
                 .FirstOrDefaultAsync();
@@ -3218,6 +3392,197 @@ namespace SupervisorMobility.API.Services
 
             return await _context.SaveChangesAsync() > 0;
         }
+        #endregion
+
+        #region Metrics
+        public async Task<int> GetTotalJobs(MetricsFiltersDto filters)
+        {
+            var query = _context.JobObservations.Where(p => p.IsActive == true);
+
+            query = ApplyJobFilters(query, filters);
+
+            var result = await query.CountAsync();
+            return result;
+        }
+
+        public async Task<Dictionary<string, int>> GetJobsStatusChartData(MetricsFiltersDto filters)
+        {
+            var query = _context.JobObservations.Where(p => p.IsActive == true);
+
+            query = ApplyJobFilters(query, filters);
+            
+            Dictionary<string, int> result = new Dictionary<string, int>();
+
+            result.Add("programmed", await query.Where(p => p.Status == 7).CountAsync());
+            result.Add("planned",await query.Where(p => p.Status == 1).CountAsync());
+            result.Add("inProgress",await query.Where(p => p.Status == 2).CountAsync());
+            result.Add("underReview",await query.Where(p => p.Status == 4).CountAsync());
+            result.Add("finished",await query.Where(p => p.Status == 6).CountAsync());
+            result.Add("rejected",await query.Where(p => p.Status == 5).CountAsync());
+
+
+            return result;
+        }
+
+        public async Task<Dictionary<string, int>> GetJobsTypeChartData(MetricsFiltersDto filters)
+        {
+            var query = _context.JobObservations.Where(p => p.IsActive == true);
+
+            query = ApplyJobFilters(query, filters);
+
+            Dictionary<string, int> result = new Dictionary<string, int>();
+
+            var query2 = query.Where(p => p.Status != 6 && p.Status != 5);
+            result.Add("late", await query2.Where(p => p.PlannedEndDate < filters.today || p.FinishedDate < filters.today).CountAsync());
+            result.Add("reprogrammed", await query.Where(p => p.IsReallocated).CountAsync());
+            result.Add("ILU Training", await query.Where(p => p.Type == 4 && p.Status != 6 && p.Status != 5).CountAsync());
+            result.Add("ILU Training_F", await query.Where(p => p.Type == 4 && (p.Status == 6 || p.Status == 5)).CountAsync());
+
+
+            return result;
+        }
+
+        public async Task<int> GetTotalLUPs(MetricsFiltersDto filters)
+        {
+            var query = _context.Lup.Include(p => p.JobObservation).Where(p => p.IsActive == true);
+
+            query = ApplyJobFilters(query, filters, p=>p.JobObservation);
+
+            var result = await query.CountAsync();
+            return result;
+        }
+
+        public async Task<Dictionary<string, int>> GetLUPData(MetricsFiltersDto filters)
+        {
+            int _case = (filters.plantId != null ? 1 : 0) + (filters.areaId != null ? 1 : 0);
+
+            var query = _context.Lup.Include(p => p.JobObservation).Where(p => p.IsActive == true);
+            query = ApplyJobFilters(query, filters, p => p.JobObservation);
+
+            Dictionary<string, int> result = new();
+            switch (_case)
+            {
+                case 0:
+                    result = await query.Include(p => p.JobObservation)
+                        .ThenInclude(j => j.Plant)
+                        .GroupBy(p => p.JobObservation.Plant.Description)
+                        .Select(g => new
+                        {
+                            PlantName = g.Key,
+                            Count = g.Count()
+                        })
+                        .ToDictionaryAsync(x => x.PlantName, x => x.Count);
+                    break;
+                case 1:
+                    result = await query.Include(p => p.JobObservation)
+                        .ThenInclude(j => j.Area)
+                        .GroupBy(p => p.JobObservation.Area.Description)
+                        .Select(g => new
+                        {
+                            PlantName = g.Key,
+                            Count = g.Count()
+                        })
+                        .ToDictionaryAsync(x => x.PlantName, x => x.Count);
+                    break;
+                case 2:
+                    result = await query.Include(p => p.JobObservation)
+                        .ThenInclude(j => j.Distribution)
+                        .GroupBy(p => p.JobObservation.Distribution.Description)
+                        .Select(g => new
+                        {
+                            PlantName = g.Key,
+                            Count = g.Count()
+                        })
+                        .ToDictionaryAsync(x => x.PlantName, x => x.Count);
+                    break;
+            }
+
+            return result;
+        }
+
+            public async Task<Dictionary<string, int>> GetLUPProgressData(MetricsFiltersDto filters)
+        {
+            var query = _context.Lup.Include(p=>p.JobObservation).Where(p => p.IsActive == true);
+
+            query = ApplyJobFilters(query, filters, p=>p.JobObservation);
+
+            Dictionary<string, int> result = new Dictionary<string, int>();
+
+            result.Add("0%", await query.Where(p=>p.StatusOKNG == LUPStatus.Percent0).CountAsync());
+            result.Add("25%", await query.Where(p => p.StatusOKNG == LUPStatus.Percent25).CountAsync());
+            result.Add("50%", await query.Where(p => p.StatusOKNG == LUPStatus.Percent50).CountAsync());
+            result.Add("75%", await query.Where(p => p.StatusOKNG == LUPStatus.Percent75).CountAsync());
+            result.Add("100%", await query.Where(p => p.StatusOKNG == LUPStatus.Percent100).CountAsync());
+
+
+            return result;
+        }
+
+        private IQueryable<JobObservation> ApplyJobFilters( IQueryable<JobObservation> query, MetricsFiltersDto filters )
+        {
+            if (filters.plantId != null)
+                query = query.Where(p => p.PlantId == filters.plantId);
+            if (filters.areaId != null)
+                query = query.Where(p => p.AreaId == filters.areaId);
+            if (filters.distributionId != null)
+                query = query.Where(p => p.DistributionId == filters.distributionId);
+            if (filters.operationId != null)
+            {
+                query = query.Include(p => p.Operations).Where(p => p.Operations.Any(o => o.OperationId == filters.operationId));
+            }
+
+            var inferior = filters.inferiorDate?.Date;
+            var superior = filters.superiorDate?.Date;
+
+            if (inferior != null)
+            {
+                query = query.Where(p => p.StartDate != null && p.StartDate >= inferior);
+            }
+            if (superior != null)
+            {
+                query = query.Where(p => p.StartDate != null && p.StartDate < superior.Value.AddDays(1));
+            }
+            return query;
+        }
+
+        public IQueryable<T> ApplyJobFilters<T>(
+            IQueryable<T> query,
+            MetricsFiltersDto filters,
+            Expression<Func<T, JobObservation>> jobObsSelector)
+        {
+            var param = jobObsSelector.Parameters[0];
+            var jobObs = jobObsSelector.Body;
+
+            Expression<Func<T, bool>> BuildPredicate(Expression<Func<JobObservation, bool>> predicate)
+            {
+                // Invoke predicate on jobObs expression
+                var invokedPredicate = Expression.Invoke(predicate, jobObs);
+                return Expression.Lambda<Func<T, bool>>(invokedPredicate, param);
+            }
+
+            if (filters.plantId != null)
+                query = query.Where(BuildPredicate(p => p.PlantId == filters.plantId));
+
+            if (filters.areaId != null)
+                query = query.Where(BuildPredicate(p => p.AreaId == filters.areaId));
+
+            if (filters.distributionId != null)
+                query = query.Where(BuildPredicate(p => p.DistributionId == filters.distributionId));
+
+            if (filters.operationId != null)
+                query = query.Where(BuildPredicate(p => p.Operations.Any(o => o.OperationId == filters.operationId)));
+
+            var inferior = filters.inferiorDate?.Date;
+            if (inferior != null)
+                query = query.Where(BuildPredicate(p => p.StartDate != null && p.StartDate >= inferior));
+
+            var superior = filters.superiorDate?.Date;
+            if (superior != null)
+                query = query.Where(BuildPredicate(p => p.StartDate != null && p.StartDate < superior.Value.AddDays(1)));
+
+            return query;
+        }
+
         #endregion
 
     }

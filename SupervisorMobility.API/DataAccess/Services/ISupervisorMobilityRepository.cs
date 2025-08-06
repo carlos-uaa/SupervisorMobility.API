@@ -13,6 +13,7 @@ using System.Runtime.CompilerServices;
 using SupervisorMobility.API.Models.ILURegisterDtos;
 using SupervisorMobility.API.Models.JobPaginationDtos;
 using SupervisorMobility.API.Models.ProductiveCalendarDtos;
+using SupervisorMobility.API.Models.MetricsDtos;
 
 
 namespace SupervisorMobility.API.Services
@@ -242,6 +243,8 @@ namespace SupervisorMobility.API.Services
         Task<bool> JobObservationExistAsync(int jobObservationId);
 
         Task<IEnumerable<JobObservation>> GetAllTrainingJobsObservations(int plantId, int areaId, int month);
+        Task<JOPaginationDto> GetLateJobObservationsByFiltersAsync(DateTime? today, DateTime? startDate, DateTime? endDate, int? plantId, int? areaId, int? distributionId, int? operationId, string searchString, int page = 1, int entries = 10, int? sortO = 2, string? sortL = "");
+        Task<JOPaginationDto> GetReprogrammedJobObservationsByFiltersAsync(DateTime? startDate, DateTime? endDate, int? plantId, int? areaId, int? distributionId, int? operationId, string searchString, int page = 1, int entries = 10, int? sortO = 2, string? sortL = "");
         #endregion
         #region GlosaryOperations
 
@@ -440,6 +443,16 @@ namespace SupervisorMobility.API.Services
         Task<bool> UpdateHolidayAsync(Holiday existingHoliday, HolidayForUpdateDto holiday);
 
 
+        #endregion
+
+        #region Metrics
+        Task<int> GetTotalJobs(MetricsFiltersDto filters);
+        Task<Dictionary<string, int>> GetJobsStatusChartData(MetricsFiltersDto filters);
+        Task<Dictionary<string, int>> GetJobsTypeChartData(MetricsFiltersDto filters);
+
+        Task<int> GetTotalLUPs(MetricsFiltersDto filters);
+        Task<Dictionary<string, int>> GetLUPData(MetricsFiltersDto filters);
+        Task<Dictionary<string, int>> GetLUPProgressData(MetricsFiltersDto filters);
         #endregion
     }
 }

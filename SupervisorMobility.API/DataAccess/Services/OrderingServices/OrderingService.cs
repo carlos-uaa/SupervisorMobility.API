@@ -36,6 +36,11 @@ namespace SupervisorMobility.API.DataAccess.Services.OrderingServices
                     convertedExp = Expression.Convert(propExp, typeof(object));
                     keySelectorExp = Expression.Lambda<Func<T, object>>(convertedExp, paramExp);
                     break;
+                case "ed_field":
+                    propExp = Expression.PropertyOrField(paramExp, "EndDate");
+                    convertedExp = Expression.Convert(propExp, typeof(object));
+                    keySelectorExp = Expression.Lambda<Func<T, object>>(convertedExp, paramExp);
+                    break;
                 case "o_field":
                     propExp = Expression.PropertyOrField(paramExp, "Operator");
                     var innerPropExO = Expression.PropertyOrField(propExp, "Name");

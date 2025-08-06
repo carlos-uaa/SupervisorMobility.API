@@ -803,6 +803,39 @@ namespace SupervisorMobility.API.Controllers
             return Ok();
         }
 
+        [HttpGet("lateJobs")]
+        public async Task<ActionResult<JOPaginationDto>> GetLateJobObservationsByFilters(
+            DateTime? today,
+            DateTime? startDate,
+            DateTime? endDate,
+            int? plantId,
+            int? areaId,
+            int? distributionId,
+            int? operationId,
+            string? searchString,
+            int page, int entries, int? sortO, string? sortL)
+        {
 
+            var allJobObservations = await _supervisorMobilityRepository.GetLateJobObservationsByFiltersAsync(today, startDate, endDate, plantId, areaId, distributionId, operationId, searchString, page, entries, sortO, sortL);
+
+            return Ok(allJobObservations);
+        }
+
+        [HttpGet("reprogrammedJobs")]
+        public async Task<ActionResult<JOPaginationDto>> GetReprogrammedJobObservationsByFilters(
+            DateTime? startDate,
+            DateTime? endDate,
+            int? plantId,
+            int? areaId,
+            int? distributionId,
+            int? operationId,
+            string? searchString,
+            int page, int entries, int? sortO, string? sortL)
+        {
+
+            var allJobObservations = await _supervisorMobilityRepository.GetReprogrammedJobObservationsByFiltersAsync(startDate, endDate, plantId, areaId, distributionId, operationId, searchString, page, entries, sortO, sortL);
+
+            return Ok(allJobObservations);
+        }
     }
 }
