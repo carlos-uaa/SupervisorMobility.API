@@ -19,7 +19,7 @@ namespace SupervisorMobility.API.Controllers.SOS_Controllers
 {
     [Route("api/SOS/Distribution")]
     [ApiController]
-    public class DistributionController : Controller
+    public class DistributionController : ControllerBase
     {
         private readonly IMapper _mapper;
         private readonly IWebHostEnvironment _env;

@@ -29,6 +29,9 @@ using SupervisorMobility.API.Models.SOS.SOSHubDtos.AnalysisDtos;
 using SupervisorMobility.API.Models.SOS.SOSHubDtos.SectionDtos;
 using SupervisorMobility.API.Models.SOS.SOSSequenceDtos;
 using SupervisorMobility.API.Models.SOS.SOSSequenceLogbookDtos;
+using SupervisorMobility.API.Models.SOS.SOSSynopticTableofOperatingRequirementsDtos;
+using SupervisorMobility.API.Models.SOS.SOSSynopticTableofOperatingRequirementsLogbookDtos;
+using SupervisorMobility.API.Models.SOS.SOSSynopticTableofOperatingRequirementsOperationSequenceDtos;
 using SupervisorMobility.API.Models.SOS.SOSTimeDtos;
 using SupervisorMobility.API.Models.SOS.ToolDtos;
 using SupervisorMobility.API.Models.SOS.ToolsUsedDtos;
@@ -168,7 +171,7 @@ namespace SupervisorMobility.API.DataAccess.Services
                     await _context.Entry(sosHub).Collection(o => o.PATs).LoadAsync();
                     foreach (var pat in sosHub.PATs)
                     {
-                        
+
                         await _context.Entry(pat).Collection(aa => aa.Supervisors).LoadAsync();
                     }
                 }
@@ -1974,7 +1977,7 @@ namespace SupervisorMobility.API.DataAccess.Services
 
             _context.Sections.AddRange(SectionsToAdd);
 
-             _context.SaveChanges();
+            _context.SaveChanges();
 
             // Desvincular las nuevas secciones del contexto
             foreach (var section in SectionsToAdd)
@@ -2375,7 +2378,7 @@ namespace SupervisorMobility.API.DataAccess.Services
             }
             return new AsyncVoidMethodBuilder();
         }
-       
+
         public async Task<AsyncVoidMethodBuilder> RemoveAllTimesFromSOSAnalysis(SOSAnalysis Master)
         {
             Master.Times?.Clear();
@@ -2520,7 +2523,7 @@ namespace SupervisorMobility.API.DataAccess.Services
             }
             return new AsyncVoidMethodBuilder();
         }
-        
+
         public async Task<AsyncVoidMethodBuilder> AddTurnToSOSDistribution(SOSDistribution master, Turn slave)
         {
             try
@@ -2589,7 +2592,7 @@ namespace SupervisorMobility.API.DataAccess.Services
             return new AsyncVoidMethodBuilder();
         }
 
-     
+
         #endregion
         #region SOSAnalysis
         public async Task<int> CreateSOSAnalysis(SOSAnalysis SOS_AnalysisToCreate)
@@ -2722,7 +2725,7 @@ namespace SupervisorMobility.API.DataAccess.Services
         }
         public async Task<IEnumerable<SOSAnalysis>> GetAllSOSAnalysisByDistribution(int Distribution_Id, bool includeImages = false, bool includeNotes = false, bool includeLogbooks = false, bool includeSpecialCases = false, bool includeSOS = false)
         {
-            
+
             var query = _context.SOSAnalyses.AsNoTracking()
                   .Where(analysis => analysis.SOSHub.DistributionId == Distribution_Id && analysis.IsActive == true);
 
@@ -3183,7 +3186,7 @@ namespace SupervisorMobility.API.DataAccess.Services
 
             var sosSequences = await query.OrderBy(s => s.SOSHubId).ToListAsync();
 
-         
+
             return sosSequences;
         }
 
@@ -3644,7 +3647,7 @@ namespace SupervisorMobility.API.DataAccess.Services
             return await _context.SaveChangesAsync();
         }
 
-        public async Task<SOSDistribution> GetSOSDistribution(int SOSDistributionId,bool includeImages = false,bool includeNotes = false,bool includeLogbooks = false,bool includeSOS = false,bool includeImagesSOS = false,bool includeTurns = false,bool includeTimes = false,bool includeCollections = false)
+        public async Task<SOSDistribution> GetSOSDistribution(int SOSDistributionId, bool includeImages = false, bool includeNotes = false, bool includeLogbooks = false, bool includeSOS = false, bool includeImagesSOS = false, bool includeTurns = false, bool includeTimes = false, bool includeCollections = false)
         {
             var query = _context.SOSDistributions.AsNoTracking()
                 .Where(SOS => SOS.SOSDistributionId == SOSDistributionId && SOS.IsActive == true);
@@ -4419,7 +4422,7 @@ namespace SupervisorMobility.API.DataAccess.Services
 
         public async Task<AsyncVoidMethodBuilder> SOSDataRemoveAllSequencesFromSOSDistribution(SOSDistribution Master)
         {
-            foreach(var sec in Master.Sequences)
+            foreach (var sec in Master.Sequences)
             {
                 SOSSequence item = _context.SOSSequences.Where(ss => ss.SOSSequenceId == sec.SOSSequenceId).Include(d => d.Distributions).FirstOrDefault();
                 SOSDistribution dis = item.Distributions.First(dis => dis.SOSDistributionId == Master.SOSDistributionId);
@@ -4717,14 +4720,14 @@ namespace SupervisorMobility.API.DataAccess.Services
             return _context.SaveChanges();
         }
 
-        public async Task<SOSCombination> GetSOSCombination( int SOSCombinationId, bool includeImages = false, bool includeNotes = false, bool includeLogbooks = false, bool includeSOS = false, bool includeImagesSOS = false, bool includeProcess = false)
+        public async Task<SOSCombination> GetSOSCombination(int SOSCombinationId, bool includeImages = false, bool includeNotes = false, bool includeLogbooks = false, bool includeSOS = false, bool includeImagesSOS = false, bool includeProcess = false)
         {
             // Consulta inicial para encontrar la combinación
             var sosCombination = await _context.SOSCombinations.AsNoTracking()
                 .Where(c => c.SOSCombinationId == SOSCombinationId && c.IsActive == true)
                 .FirstOrDefaultAsync();
 
-           
+
             // Verificar si sosCombination es nulo antes de cargar relaciones
             if (sosCombination != null)
             {
@@ -4751,7 +4754,7 @@ namespace SupervisorMobility.API.DataAccess.Services
                         await _context.Entry(logbook).Reference(l => l.Approver).LoadAsync();
                         await _context.Entry(logbook).Reference(l => l.Reviewer).LoadAsync();
                     }
-                   
+
                     await _context.Entry(sosCombination).Reference(c => c.ReviewerHS).LoadAsync();
                 }
 
@@ -4877,7 +4880,7 @@ namespace SupervisorMobility.API.DataAccess.Services
                 }
                 else
                 {
-                   
+
                     _mapper.Map(CombinationUpdate, CombinationEntity);
                     _context.SOSCombinations.Update(CombinationEntity);
                 }
@@ -4954,7 +4957,7 @@ namespace SupervisorMobility.API.DataAccess.Services
             }
 
             return SOSCombinationLogbooksToAdd;
-        } 
+        }
         public async Task<List<SOSCombinationOperationSequence>> AddRangeSOSCombinationOperationSequences(List<SOSCombinationOperationSequence> SOSOperationSequencesToAdd)
         {
             _context.SOSCombinationOperationSequences.AddRange(SOSOperationSequencesToAdd);
@@ -5385,7 +5388,7 @@ namespace SupervisorMobility.API.DataAccess.Services
         {
             try
             {
-               
+
 
                 var localEntry = _context.SOSFlows.Local.FirstOrDefault(entry => entry.SOSFlowId == FlowEntity.SOSFlowId);
                 if (localEntry != null)
@@ -5648,6 +5651,133 @@ namespace SupervisorMobility.API.DataAccess.Services
             _context.SOSFlowLogbooks.Add(LogBook_ToCreate);
             return await _context.SaveChangesAsync();
         }
+        #endregion
+
+        //SynopticTableofOperatingRequirements
+
+        #region SOSSynopticTableofOperatingRequirements
+        public async Task<int> CreateSOSSynopticTableofOperatingRequirements(SOSSynopticTableofOperatingRequirements SOS_SynopticTableofOperatingRequirementsToCreate)
+        {
+            throw new NotImplementedException();
+        }
+        public async Task<SOSSynopticTableofOperatingRequirements> GetSOSSynopticTableofOperatingRequirements(int SOSSynopticTableofOperatingRequirementsId, bool includeImages = false, bool includeNotes = false, bool includeLogbooks = false, bool includeSOS = false, bool includeImagesSOS = false, bool includeTurns = false, bool includeTimes = false, bool includeCollections = false)
+        {
+            throw new NotImplementedException();
+        }
+        public async Task<IEnumerable<SOSSynopticTableofOperatingRequirements>> GetAllSOSSynopticTableofOperatingRequirements(bool includeImages = false, bool includeNotes = false, bool includeLogbooks = false, bool includeSOS = false)
+        {
+            throw new NotImplementedException();
+        }
+        public async Task<int> UpdateSOSSynopticTableofOperatingRequirements(SOSSynopticRequirementsForUpdateDto SynopticTableofOperatingRequirementsUpdate, SOSSynopticTableofOperatingRequirements SynopticTableofOperatingRequirementsEntity)
+        {
+            throw new NotImplementedException();
+        }
+        public async Task<int> RemoveSOSSynopticTableofOperatingRequirements(int SOS_SynopticTableofOperatingRequirements_id)
+        {
+            throw new NotImplementedException();
+        }
+        public async Task AddIlustrationToSOSSynopticTableofOperatingRequirements(int SOS_SynopticTableofOperatingRequirements_id, FileUpload evidence)
+        {
+            throw new NotImplementedException();
+        }
+        public async Task<int> RemoveIlustrationFromSOSSynopticTableofOperatingRequirements(int SOS_SynopticTableofOperatingRequirements_id, int ImageFile_id)
+        {
+            throw new NotImplementedException();
+        }
+
+        #endregion
+
+        #region Add To Sos SynopticTableofOperatingRequirements
+        public async Task<AsyncVoidMethodBuilder> AddSOSHubToSOSSynopticTableofOperatingRequirements(SOSSynopticTableofOperatingRequirements master, SOSHub slave)
+        {
+            throw new NotImplementedException();
+        }
+        public async Task<AsyncVoidMethodBuilder> AddSOSSynopticRequirementsLogbookToSOSSynopticTableofOperatingRequirements(SOSSynopticTableofOperatingRequirements Master, SOSSynopticRequirementsLogbook Slave)
+        {
+            throw new NotImplementedException();
+        }
+        public async Task<AsyncVoidMethodBuilder> AddNoteToSOSSynopticTableofOperatingRequirements(SOSSynopticTableofOperatingRequirements Master, Commentary Slave)
+        {
+            throw new NotImplementedException();
+        }
+        public async Task<AsyncVoidMethodBuilder> AddAnalysisToSOSSynopticTableofOperatingRequirements(SOSSynopticTableofOperatingRequirements master, SOSAnalysis slave)
+        {
+            throw new NotImplementedException();
+        }
+        public async Task<AsyncVoidMethodBuilder> AddSequenceToSOSSynopticTableofOperatingRequirements(SOSSynopticTableofOperatingRequirements master, SOSSequence slave)
+        {
+            throw new NotImplementedException();
+        }
+        public async Task<AsyncVoidMethodBuilder> AddOperationSequenceToSOSSynopticTableofOperatingRequirements(SOSSynopticTableofOperatingRequirements Master, SOSSynopticRequirementsOperationSequence Slave)
+        {
+            throw new NotImplementedException();
+        }
+        public async Task<List<SOSSynopticRequirementsLogbook>> AddRangeSOSSynopticRequirementsLogbook(List<SOSSynopticRequirementsLogbook> SOSSynopticRequirementsLogbooksToAdd)
+        {
+            throw new NotImplementedException();
+        }
+
+        #endregion
+        #region Remove from SosSynopticTableofOperatingRequirements
+        public async Task<AsyncVoidMethodBuilder> SOSDataRemoveAllSOSSynopticRequirementsLogbookFromSOSSynopticTableofOperatingRequirements(SOSSynopticTableofOperatingRequirements Master)
+        {
+            throw new NotImplementedException();
+        }
+        public async Task<AsyncVoidMethodBuilder> SOSDataRemoveAllNotesFromSOSSynopticTableofOperatingRequirements(SOSSynopticTableofOperatingRequirements Master)
+        {
+            throw new NotImplementedException();
+        }
+        public async Task<AsyncVoidMethodBuilder> SOSDataRemoveAllSOSHubsFromSOSSynopticTableofOperatingRequirements(SOSSynopticTableofOperatingRequirements Master)
+        {
+            throw new NotImplementedException();
+        }
+        public async Task<AsyncVoidMethodBuilder> SOSDataRemoveAllSequencesFromSOSSynopticTableofOperatingRequirements(SOSSynopticTableofOperatingRequirements Master)
+        {
+            throw new NotImplementedException();
+        }
+        public async Task<AsyncVoidMethodBuilder> SOSDataRemoveAllAnalysisFromSOSSynopticTableofOperatingRequirements(SOSSynopticTableofOperatingRequirements Master)
+        {
+            throw new NotImplementedException();
+        }
+        public async Task<AsyncVoidMethodBuilder> SOSDataRemoveAllSOSSynopticTableofOperatingRequirementsAdditionalTimeFromSOSSynopticTableofOperatingRequirements(SOSSynopticTableofOperatingRequirements Master)
+        {
+            throw new NotImplementedException();
+        }
+        #endregion
+        #region SOSSynopticRequirementsLogbook
+        public async Task<SOSSynopticRequirementsLogbook> GetSOSSynopticRequirementsLogbookById(int id)
+        {
+            throw new NotImplementedException();
+        }
+        public async Task<int> UpdateSynopticRequirementsLogbook(SOSSynopticRequirementsLogbookForUpdateDto SynopticTableofOperatingRequirementsForUpdate)
+        {
+            throw new NotImplementedException();
+        }
+
+        public async Task<int> CreateSOSSynopticRequirementsLogbook(SOSSynopticRequirementsLogbook LogBook_ToCreate)
+        {
+            throw new NotImplementedException();
+        }
+        #endregion
+
+        #region SOSSynopticRequirementsOperationSequences
+        public async Task<SOSSynopticRequirementsOperationSequence> GetSOSSynopticRequirementsOperationSequencesById(int id)
+        {
+            throw new NotImplementedException();
+        }
+        public async Task<int> UpdateSOSSynopticRequirementsOperationSequences(SOSSynopticRequirementsOperationSequenceForUpdateDto OperationSequenceForUpdate)
+        {
+            throw new NotImplementedException();
+        }
+        public async Task<List<SOSSynopticRequirementsOperationSequence>> AddRangeSOSSynopticRequirementsOperationSequences(List<SOSSynopticRequirementsOperationSequence> SOSOperationSequencesToAdd)
+        {
+            throw new NotImplementedException();
+        }
+        public async Task<AsyncVoidMethodBuilder> RemoveAllOperationsSequenceFromSOSSynopticTableofOperatingRequirements(SOSSynopticTableofOperatingRequirements Master, List<SOSSynopticRequirementsOperationSequence> operationSequences)
+             {
+            throw new NotImplementedException();
+        }
+
         #endregion
 
         //CommonOper

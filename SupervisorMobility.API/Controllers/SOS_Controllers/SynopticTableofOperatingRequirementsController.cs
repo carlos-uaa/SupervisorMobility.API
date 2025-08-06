@@ -1,6 +1,5 @@
 ﻿using AutoMapper;
 using Microsoft.AspNetCore.Mvc;
-using SupervisorMobility.API.DataAccess.Entities;
 using SupervisorMobility.API.DataAccess.Entities.SOS;
 using SupervisorMobility.API.DataAccess.Services;
 using SupervisorMobility.API.Models.CommentaryDtos;
@@ -10,15 +9,13 @@ using SupervisorMobility.API.Models.SOS.SOSSynopticTableofOperatingRequirementsL
 using SupervisorMobility.API.Models.SOS.SOSSynopticTableofOperatingRequirementsOperationSequenceDtos;
 using SupervisorMobility.API.Models.SOS.SOSHubDtos;
 using SupervisorMobility.API.Models.SOS.SOSHubDtos.SectionDtos;
-using SupervisorMobility.API.Models.SOS.SOSTimeDtos;
-using SupervisorMobility.API.Models.SOS.TurnDtos;
 using System.Diagnostics;
 
 namespace SupervisorMobility.API.Controllers.SOS_Controllers
 {
     [Route("api/SOS/SynopticTableofOperatingRequirements")]
     [ApiController]
-    public class SynopticTableofOperatingRequirementsController : Controller
+    public class SynopticTableofOperatingRequirementsController : ControllerBase
     {
         private readonly IMapper _mapper;
         private readonly IWebHostEnvironment _env;
@@ -32,58 +29,66 @@ namespace SupervisorMobility.API.Controllers.SOS_Controllers
         }
 
         [HttpPost]
-        public async Task<ActionResult<SOSSynopticRequirementsDto>> GenerateSynopticTableofOperatingRequirements(SOSSynopticRequirementsForCreateDto sOSSynopticTableofOperatingRequirementsToCreate, int SOSHubCollection_Id)
+        public async Task<ActionResult<SOSSynopticRequirementsDto>> GenerateSynopticTableofOperatingRequirements(SOSSynopticTableofOperatingRequirementsForCreateDto sOSSynopticTableofOperatingRequirementsToCreate, int SOSHubCollection_Id)
         {
 
-            //if (sOSSynopticTableofOperatingRequirementsToCreate.SOSSynopticTableofOperatingRequirementsId == 0)
-            //{
-            //    //Nombre del documento GOS o processShet
-            //    //sOSSynopticTableofOperatingRequirementsToCreate.InternalControlNumber = SOSEntity.Folio;
-            //    //sOSSynopticTableofOperatingRequirementsToCreate.ProcessName = SOSEntity.ProcessSheet;
+            if (sOSSynopticTableofOperatingRequirementsToCreate.SOSSynopticTableofOperatingRequirementsId == 0)
+            {
+                sOSSynopticTableofOperatingRequirementsToCreate.CreatedAt = DateTime.Now;
+                sOSSynopticTableofOperatingRequirementsToCreate.IsActive = true;
 
-            //    sOSSynopticTableofOperatingRequirementsToCreate.CreatedAt = DateTime.Now;
-            //    sOSSynopticTableofOperatingRequirementsToCreate.IsActive = true;
+                sOSSynopticTableofOperatingRequirementsToCreate.SOSHubId = SOSHubCollection_Id;
+                
+                SOSSynopticTableofOperatingRequirements SynopticTableofOperatingRequirementsToCreate = _mapper.Map<SOSSynopticTableofOperatingRequirements>(sOSSynopticTableofOperatingRequirementsToCreate);
 
-            //    sOSSynopticTableofOperatingRequirementsToCreate.SOSHubId = SOSHubCollection_Id;
-            //    //cambiar por la adicion de los soshub de las analisis y secuencias elegidos
+                SynopticTableofOperatingRequirementsToCreate.Analyses =  new  List<SOSAnalysis>();
+                SynopticTableofOperatingRequirementsToCreate.Sequences = new List<SOSSequence>();
 
+                foreach (var sequence in sOSSynopticTableofOperatingRequirementsToCreate.Sequences)
+                {
+                    SOSSequence sequenceToAdd = await _ProcessRepository.GetSOSSequence(sequence.SOSSequenceId);
+                    SynopticTableofOperatingRequirementsToCreate.Sequences.ToList().Add(sequenceToAdd);
+                }
 
-
-            //    SOSSynopticTableofOperatingRequirements SynopticTableofOperatingRequirementsToCreate = _mapper.Map<SOSSynopticTableofOperatingRequirements>(sOSSynopticTableofOperatingRequirementsToCreate);
-
-            //    var createdResult = await _ProcessRepository.CreateSOSSynopticTableofOperatingRequirements(SynopticTableofOperatingRequirementsToCreate);
-            //    if (createdResult != null)
-            //        return Ok(SynopticTableofOperatingRequirementsToCreate);
-            //    else
-            //        return BadRequest();
-            //}
-            //else
-            //{
-            //    //only add revision
-            //    SOSSynopticTableofOperatingRequirements _sosSynopticTableofOperatingRequirements = await _ProcessRepository.GetSOSSynopticTableofOperatingRequirements(sOSSynopticTableofOperatingRequirementsToCreate.SOSSynopticTableofOperatingRequirementsId, true, true, true, true);
-
-            //    SOSSynopticRequirementsLogbookDto _logbookToCreate = _mapper.Map<SOSSynopticRequirementsLogbookDto>(sOSSynopticTableofOperatingRequirementsToCreate.SynopticTableofOperatingRequirementsLogbooks?.Last());
-            //    _logbookToCreate.SOSSynopticRequirementsLogbookId = _sosSynopticTableofOperatingRequirements.SOSSynopticTableofOperatingRequirementsId;
-
-            //    var resultAddSections = await _ProcessRepository.CreateSOSSynopticTableofOperatingRequirementsLogbook(_logbookToCreate);
-
-            //    if (resultAddSections > 0)
-            //    {
-            //        Debug.WriteLine("SOSSynopticTableofOperatingRequirementsLogbook añadidas con exito");
-            //        await _ProcessRepository.AddSOSSynopticTableofOperatingRequirementsLogbookToSOSSynopticTableofOperatingRequirements(_sosSynopticTableofOperatingRequirements, _logbookToCreate);
-            //    }
-            //    else
-            //    {
-            //        Debug.WriteLine("Error Sections añadidos");
-            //        return BadRequest();
-            //    }
+                foreach (var analysis in sOSSynopticTableofOperatingRequirementsToCreate.Analyses)
+                {
+                    SOSAnalysis analysisToAdd = await _ProcessRepository.GetSOSAnalysis(analysis.SOSAnalysisId);
+                    SynopticTableofOperatingRequirementsToCreate.Analyses.ToList().Add(analysisToAdd);
+                }
 
 
+                var createdResult = await _ProcessRepository.CreateSOSSynopticTableofOperatingRequirements(SynopticTableofOperatingRequirementsToCreate);
+                if (createdResult != null)
+                    return Ok(SynopticTableofOperatingRequirementsToCreate);
+                else
+                    return BadRequest();
+            }
+            else
+            {
+                //only add revision
+                SOSSynopticTableofOperatingRequirements _sosSynopticTableofOperatingRequirements = await _ProcessRepository.GetSOSSynopticTableofOperatingRequirements(sOSSynopticTableofOperatingRequirementsToCreate.SOSSynopticTableofOperatingRequirementsId, true, true, true, true);
 
-            //    return Ok("Revision");
-            //}
-            return Ok();
+                SOSSynopticRequirementsLogbook _logbookToCreate = _mapper.Map<SOSSynopticRequirementsLogbook>(sOSSynopticTableofOperatingRequirementsToCreate.SynopticRequirementsLogbooks?.Last());
+                _logbookToCreate.SOSSynopticRequirementsLogbookId = _sosSynopticTableofOperatingRequirements.SOSSynopticTableofOperatingRequirementsId;
 
+                var resultAddSections = await _ProcessRepository.CreateSOSSynopticRequirementsLogbook(_logbookToCreate);
+
+                if (resultAddSections > 0)
+                {
+                    Debug.WriteLine("SOSSynopticRequirementsLogbook añadidas con exito");
+                    await _ProcessRepository.AddSOSSynopticRequirementsLogbookToSOSSynopticTableofOperatingRequirements(_sosSynopticTableofOperatingRequirements, _logbookToCreate);
+                }
+                else
+                {
+                    Debug.WriteLine("Error Sections añadidos");
+                    return BadRequest();
+                }
+
+
+
+                return Ok("Revision");
+            }
+            
         }
 
         [HttpGet("{id}", Name = "GetSOSSynopticTableofOperatingRequirements")]
@@ -125,13 +130,13 @@ namespace SupervisorMobility.API.Controllers.SOS_Controllers
 
         //    List<Commentary> Bkup_Notes = new List<Commentary>();
         //    List<Turn> Bkup_Turn = new List<Turn>();
-        //    List<SOSSynopticTableofOperatingRequirementsLogbook> Bkup_SynopticTableofOperatingRequirementsLogbook = new List<SOSSynopticTableofOperatingRequirementsLogbook>();
+        //    List<SOSSynopticRequirementsLogbook> Bkup_SynopticRequirementsLogbook = new List<SOSSynopticRequirementsLogbook>();
         //    List<SOSSynopticTableofOperatingRequirementsOperationSequence> Backup_SynopticTableofOperatingRequirementsOperationSequence = new List<SOSSynopticTableofOperatingRequirementsOperationSequence>();
 
         //    // Filtrar nuevos Comentarios
         //    List<UpdateCommentaryDto> filteredCommentaryList = sosUpdateEntity.Notes.Where(t => t.CommentaryId <= 0).ToList();
-        //    // Filtrar nuevos SynopticTableofOperatingRequirementsLogbooks
-        //    List<SOSSynopticTableofOperatingRequirementsLogbookForUpdateDto> filteredSynopticTableofOperatingRequirementsLogbooksList = sosUpdateEntity.SynopticTableofOperatingRequirementsLogbooks.Where(t => t.SOSSynopticTableofOperatingRequirementsLogbookId <= 0).ToList();
+        //    // Filtrar nuevos SynopticRequirementsLogbooks
+        //    List<SOSSynopticRequirementsLogbookForUpdateDto> filteredSynopticRequirementsLogbooksList = sosUpdateEntity.SynopticRequirementsLogbooks.Where(t => t.SOSSynopticRequirementsLogbookId <= 0).ToList();
         //    // Filtrar nuevos Tiempos
         //    List<SOSSynopticTableofOperatingRequirementsOperationSequenceForUpdateDto> filteredSOSOperationSequenceList = sosUpdateEntity.SOSSynopticTableofOperatingRequirementsOperationSequence.Where(t => t.SOSSynopticTableofOperatingRequirementsOperationSequenceId <= 0).ToList();
         //    // Filtrar nuevos Turnos
@@ -167,34 +172,34 @@ namespace SupervisorMobility.API.Controllers.SOS_Controllers
 
 
 
-        //    // Remover nuevos SynopticTableofOperatingRequirementsLogbooks de la lista principal para evitar duplicados
-        //    if (filteredSynopticTableofOperatingRequirementsLogbooksList.Any())
+        //    // Remover nuevos SynopticRequirementsLogbooks de la lista principal para evitar duplicados
+        //    if (filteredSynopticRequirementsLogbooksList.Any())
         //    {
-        //        sosUpdateEntity.SynopticTableofOperatingRequirementsLogbooks.RemoveAll(t => t.SOSSynopticTableofOperatingRequirementsLogbookId == null || t.SOSSynopticTableofOperatingRequirementsLogbookId <= 0);
+        //        sosUpdateEntity.SynopticRequirementsLogbooks.RemoveAll(t => t.SOSSynopticRequirementsLogbookId == null || t.SOSSynopticRequirementsLogbookId <= 0);
 
         //        // Mapear nuevas norms/standars
-        //        List<SOSSynopticTableofOperatingRequirementsLogbook> newSOSSynopticTableofOperatingRequirementsLogbook = _mapper.Map<List<SOSSynopticTableofOperatingRequirementsLogbook>>(filteredSynopticTableofOperatingRequirementsLogbooksList);
+        //        List<SOSSynopticRequirementsLogbook> newSOSSynopticRequirementsLogbook = _mapper.Map<List<SOSSynopticRequirementsLogbook>>(filteredSynopticRequirementsLogbooksList);
 
-        //        foreach (var SynopticTableofOperatingRequirementsLogbook in newSOSSynopticTableofOperatingRequirementsLogbook)
+        //        foreach (var SynopticRequirementsLogbook in newSOSSynopticRequirementsLogbook)
         //        {
-        //            SynopticTableofOperatingRequirementsLogbook.SOSSynopticTableofOperatingRequirementsLogbookId = 0;
-        //            SynopticTableofOperatingRequirementsLogbook.IsActive = true;
+        //            SynopticRequirementsLogbook.SOSSynopticRequirementsLogbookId = 0;
+        //            SynopticRequirementsLogbook.IsActive = true;
         //        }
 
-        //        var resultAddSOSSynopticTableofOperatingRequirementsLogbook = await _ProcessRepository.AddRangeSOSSynopticTableofOperatingRequirementsLogbook(newSOSSynopticTableofOperatingRequirementsLogbook);
+        //        var resultAddSOSSynopticRequirementsLogbook = await _ProcessRepository.AddRangeSOSSynopticRequirementsLogbook(newSOSSynopticRequirementsLogbook);
 
-        //        if (resultAddSOSSynopticTableofOperatingRequirementsLogbook != null)
+        //        if (resultAddSOSSynopticRequirementsLogbook != null)
         //        {
-        //            Debug.WriteLine("SynopticTableofOperatingRequirementsLogbooks añadidos con exitop");
-        //            Bkup_SynopticTableofOperatingRequirementsLogbook.AddRange(resultAddSOSSynopticTableofOperatingRequirementsLogbook);
+        //            Debug.WriteLine("SynopticRequirementsLogbooks añadidos con exitop");
+        //            Bkup_SynopticRequirementsLogbook.AddRange(resultAddSOSSynopticRequirementsLogbook);
         //        }
         //        else
         //        {
-        //            Debug.WriteLine("Error SynopticTableofOperatingRequirementsLogbooks añadidos");
+        //            Debug.WriteLine("Error SynopticRequirementsLogbooks añadidos");
         //        }
         //    }
 
-        //    //aqui añadiremos los nuevos sequencias
+        //    //aqui añadiremos las nuevas OperationSequence
         //    if (filteredSOSOperationSequenceList.Any())
         //    {
         //        sosUpdateEntity.SOSSynopticTableofOperatingRequirementsOperationSequence.RemoveAll(t => t.SOSSynopticTableofOperatingRequirementsOperationSequenceId == null || t.SOSSynopticTableofOperatingRequirementsOperationSequenceId <= 0);
@@ -293,11 +298,11 @@ namespace SupervisorMobility.API.Controllers.SOS_Controllers
         //    var AdditionalTimeUpdate = await _ProcessRepository.UpdateSOSSynopticTableofOperatingRequirementsAdditionalTime(sosUpdateEntity.SOSSynopticTableofOperatingRequirementsAdditionalTime);
         //    additionalTime = await _ProcessRepository.GetSOSSynopticTableofOperatingRequirementsAdditionalTimeId(sosUpdateEntity.SOSSynopticTableofOperatingRequirementsAdditionalTime.SOSSynopticTableofOperatingRequirementsAdditionalTimeId);
 
-        //    foreach (var logbook in sosUpdateEntity.SynopticTableofOperatingRequirementsLogbooks)
+        //    foreach (var logbook in sosUpdateEntity.SynopticRequirementsLogbooks)
         //    {
-        //        var SynopticTableofOperatingRequirementsUpdate = await _ProcessRepository.UpdateSynopticTableofOperatingRequirementsLogbook(logbook);
-        //        SOSSynopticTableofOperatingRequirementsLogbook SynopticTableofOperatingRequirementsBkaux = await _ProcessRepository.GetSOSSynopticTableofOperatingRequirementsLogbookById(logbook.SOSSynopticTableofOperatingRequirementsLogbookId);
-        //        Bkup_SynopticTableofOperatingRequirementsLogbook.Add(SynopticTableofOperatingRequirementsBkaux);
+        //        var SynopticTableofOperatingRequirementsUpdate = await _ProcessRepository.UpdateSynopticRequirementsLogbook(logbook);
+        //        SOSSynopticRequirementsLogbook SynopticTableofOperatingRequirementsBkaux = await _ProcessRepository.GetSOSSynopticRequirementsLogbookById(logbook.SOSSynopticRequirementsLogbookId);
+        //        Bkup_SynopticRequirementsLogbook.Add(SynopticTableofOperatingRequirementsBkaux);
         //    }
 
         //    //Update 
@@ -341,7 +346,7 @@ namespace SupervisorMobility.API.Controllers.SOS_Controllers
 
         //    sosUpdateEntity.Notes = null;
         //    sosUpdateEntity.Turns = null;
-        //    sosUpdateEntity.SynopticTableofOperatingRequirementsLogbooks = null;
+        //    sosUpdateEntity.SynopticRequirementsLogbooks = null;
         //    sosUpdateEntity.SOSSynopticTableofOperatingRequirementsOperationSequence = null;
         //    sosUpdateEntity.SOSSynopticTableofOperatingRequirementsAdditionalTime = null;
 
@@ -352,7 +357,7 @@ namespace SupervisorMobility.API.Controllers.SOS_Controllers
 
         //    await _ProcessRepository.RemoveAllTurnsFromSOSSynopticTableofOperatingRequirements(_sosSynopticTableofOperatingRequirements);
         //    await _ProcessRepository.SOSDataRemoveAllNotesFromSOSSynopticTableofOperatingRequirements(_sosSynopticTableofOperatingRequirements);
-        //    await _ProcessRepository.SOSDataRemoveAllSOSSynopticTableofOperatingRequirementsLogbookFromSOSSynopticTableofOperatingRequirements(_sosSynopticTableofOperatingRequirements);
+        //    await _ProcessRepository.SOSDataRemoveAllSOSSynopticRequirementsLogbookFromSOSSynopticTableofOperatingRequirements(_sosSynopticTableofOperatingRequirements);
         //    await _ProcessRepository.SOSDataRemoveAllSOSSynopticTableofOperatingRequirementsAdditionalTimeFromSOSSynopticTableofOperatingRequirements(_sosSynopticTableofOperatingRequirements);
 
         //    await _ProcessRepository.SOSDataRemoveAllSOSHubsFromSOSSynopticTableofOperatingRequirements(_sosSynopticTableofOperatingRequirements);
@@ -390,11 +395,11 @@ namespace SupervisorMobility.API.Controllers.SOS_Controllers
         //    }
 
         //    //SynopticTableofOperatingRequirements Logbook
-        //    if (Bkup_SynopticTableofOperatingRequirementsLogbook.Any())
+        //    if (Bkup_SynopticRequirementsLogbook.Any())
         //    {
-        //        foreach (SOSSynopticTableofOperatingRequirementsLogbook logbook in Bkup_SynopticTableofOperatingRequirementsLogbook)
+        //        foreach (SOSSynopticRequirementsLogbook logbook in Bkup_SynopticRequirementsLogbook)
         //        {
-        //            await _ProcessRepository.AddSOSSynopticTableofOperatingRequirementsLogbookToSOSSynopticTableofOperatingRequirements(_sosSynopticTableofOperatingRequirements, logbook);
+        //            await _ProcessRepository.AddSOSSynopticRequirementsLogbookToSOSSynopticTableofOperatingRequirements(_sosSynopticTableofOperatingRequirements, logbook);
         //        }
         //    }
 

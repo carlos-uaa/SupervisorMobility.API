@@ -27,7 +27,7 @@ namespace SupervisorMobility.API.Models.SOS.SOSSynopticTableofOperatingRequireme
 
         public ICollection<SOSSynopticRequirementsOperationSequenceForUpdateDto>? SOSSynopticRequirementsOperationSequence { get; set; }
 
-        public ICollection<SOSSynopticRequirementsLogbookForUpdate>? SynopticRequirementsLogbooks { get; set; } = new List<SOSSynopticRequirementsLogbookForUpdate>();
+        public ICollection<SOSSynopticRequirementsLogbookForUpdateDto>? SynopticRequirementsLogbooks { get; set; } = new List<SOSSynopticRequirementsLogbookForUpdateDto>();
 
 
         public bool? IsActive { get; set; }

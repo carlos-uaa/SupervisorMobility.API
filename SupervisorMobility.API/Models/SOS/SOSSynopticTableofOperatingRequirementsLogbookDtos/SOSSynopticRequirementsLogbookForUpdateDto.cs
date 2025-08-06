@@ -4,7 +4,7 @@ using SupervisorMobility.API.Models.Users;
 
 namespace SupervisorMobility.API.Models.SOS.SOSSynopticTableofOperatingRequirementsLogbookDtos
 {
-    public class SOSSynopticRequirementsLogbookForUpdate
+    public class SOSSynopticRequirementsLogbookForUpdateDto
     {
         public int SOSSynopticRequirementsLogbookId { get; set; }
         public string? Changes { get; set; }
