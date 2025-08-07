@@ -5658,15 +5658,140 @@ namespace SupervisorMobility.API.DataAccess.Services
         #region SOSSynopticTableofOperatingRequirements
         public async Task<int> CreateSOSSynopticTableofOperatingRequirements(SOSSynopticTableofOperatingRequirements SOS_SynopticTableofOperatingRequirementsToCreate)
         {
-            throw new NotImplementedException();
+            var analysesCopy = SOS_SynopticTableofOperatingRequirementsToCreate.Analyses.ToList();
+
+            for (int j = 0; j < analysesCopy.Count; j++)
+            {
+                var Analysis = analysesCopy[j];
+                var localMasterEntry = _context.SOSAnalyses.Local
+                    .FirstOrDefault(entry => entry.SOSAnalysisId == Analysis.SOSAnalysisId);
+
+                if (localMasterEntry != null)
+                {
+                    SOS_SynopticTableofOperatingRequirementsToCreate.Analyses.Remove(Analysis);
+                    SOS_SynopticTableofOperatingRequirementsToCreate.Analyses.Add(localMasterEntry);
+                }
+                else
+                {
+                    if (_context.Entry(Analysis).State == EntityState.Detached)
+                    {
+                        _context.SOSAnalyses.Attach(Analysis);
+                    }
+                }
+            }
+
+            var sequencesCopy = SOS_SynopticTableofOperatingRequirementsToCreate.Sequences.ToList();
+
+            for (int j = 0; j < sequencesCopy.Count; j++)
+            {
+                var sequence = sequencesCopy[j];
+                var localMasterEntry = _context.SOSSequences.Local
+                    .FirstOrDefault(entry => entry.SOSSequenceId == sequence.SOSSequenceId);
+
+                if (localMasterEntry != null)
+                {
+                    SOS_SynopticTableofOperatingRequirementsToCreate.Sequences.Remove(sequence);
+                    SOS_SynopticTableofOperatingRequirementsToCreate.Sequences.Add(localMasterEntry);
+                }
+                else
+                {
+                    if (_context.Entry(sequence).State == EntityState.Detached)
+                    {
+                        _context.SOSSequences.Attach(sequence);
+                    }
+                }
+            }
+
+            _context.SOSSynopticTableofOperatingRequirements.Add(SOS_SynopticTableofOperatingRequirementsToCreate);
+            return _context.SaveChanges();
         }
-        public async Task<SOSSynopticTableofOperatingRequirements> GetSOSSynopticTableofOperatingRequirements(int SOSSynopticTableofOperatingRequirementsId, bool includeImages = false, bool includeNotes = false, bool includeLogbooks = false, bool includeSOS = false, bool includeImagesSOS = false, bool includeTurns = false, bool includeTimes = false, bool includeCollections = false)
+        public async Task<SOSSynopticTableofOperatingRequirements> GetSOSSynopticTableofOperatingRequirements(int SOSSynopticTableofOperatingRequirementsId, bool includeLogbooks = false, bool includeSOS = false, bool includeCollections = false)
         {
-            throw new NotImplementedException();
+            var query = _context.SOSSynopticTableofOperatingRequirements.AsNoTracking()
+               .Where(SOS => SOS.SOSSynopticTableofOperatingRequirementsId == SOSSynopticTableofOperatingRequirementsId && SOS.IsActive == true);
+
+            var sosSynopticRequirements = await query.FirstOrDefaultAsync();
+
+            if (sosSynopticRequirements != null)
+            {
+                await _context.Entry(sosSynopticRequirements).Collection(t => t.SOSSynopticRequirementsOperationSequence).LoadAsync();
+
+                foreach (var operationSequence in sosSynopticRequirements.SOSSynopticRequirementsOperationSequence)
+                {
+                    await _context.Entry(operationSequence).Reference(t => t.Section).LoadAsync();
+                    await _context.Entry(operationSequence?.Section).Collection(a => a.Analyses).LoadAsync();
+                }
+                         
+
+                if (includeLogbooks)
+                {
+                    await _context.Entry(sosSynopticRequirements)
+                        .Collection(d => d.SynopticRequirementsLogbooks)
+                        .LoadAsync();
+
+                    foreach (var logbook in sosSynopticRequirements.SynopticRequirementsLogbooks)
+                    {
+                        await _context.Entry(logbook).Reference(l => l.Approver).LoadAsync();
+                        await _context.Entry(logbook).Reference(l => l.Reviewer).LoadAsync();
+                    }
+                }
+
+                if (includeSOS)
+                {
+                    await _context.Entry(sosSynopticRequirements).Collection(d => d.SOSHubs).LoadAsync();  
+                }
+
+                if (includeCollections)
+                {
+                    sosSynopticRequirements.Sequences = await _context.SOSSequences
+                        .Where(s => s.SOSSynopticOperatingRequirements.Any(d => d.SOSSynopticTableofOperatingRequirementsId == SOSSynopticTableofOperatingRequirementsId))
+                        .Include(sh => sh.SOSHub)
+                        .ThenInclude(shs => shs.Sections)
+                        .ThenInclude(shsa => shsa.Analyses)
+                        .ToListAsync();
+
+                    sosSynopticRequirements.Analyses = await _context.SOSAnalyses
+                        .Where(s => s.SOSSynopticOperatingRequirements.Any(d => d.SOSSynopticTableofOperatingRequirementsId == SOSSynopticTableofOperatingRequirementsId))
+                        .Include(sh => sh.SOSHub)
+                        .ThenInclude(shs => shs.Sections)
+                        .ThenInclude(shsa => shsa.Analyses)
+                        .ToListAsync();
+                }
+            }
+
+            return sosSynopticRequirements;
         }
-        public async Task<IEnumerable<SOSSynopticTableofOperatingRequirements>> GetAllSOSSynopticTableofOperatingRequirements(bool includeImages = false, bool includeNotes = false, bool includeLogbooks = false, bool includeSOS = false)
+        public async Task<IEnumerable<SOSSynopticTableofOperatingRequirements>> GetAllSOSSynopticTableofOperatingRequirements(bool includeLogbooks = false, bool includeSOS = false, bool includeCollections = false)
         {
-            throw new NotImplementedException();
+            var query = _context.SOSSynopticTableofOperatingRequirements.AsNoTracking().Where(SOS => SOS.IsActive == true);
+
+           
+            if (includeLogbooks)
+            {
+                query = query.Include(t => t.SynopticRequirementsLogbooks);
+            }
+
+
+
+            if (includeSOS)
+            {
+                query = query.Include(m => m.SOSHubs);
+            }
+
+            var sosSynopticRequirements = await query.ToListAsync();
+
+            
+
+            if (includeLogbooks)
+            {
+                foreach (var SOSSynoptic in sosSynopticRequirements)
+                {
+                    SOSSynoptic.SynopticRequirementsLogbooks = SOSSynoptic.SynopticRequirementsLogbooks.Where(t => t.IsActive == true).ToList();
+                }
+            }
+
+
+            return sosSynopticRequirements;
         }
         public async Task<int> UpdateSOSSynopticTableofOperatingRequirements(SOSSynopticRequirementsForUpdateDto SynopticTableofOperatingRequirementsUpdate, SOSSynopticTableofOperatingRequirements SynopticTableofOperatingRequirementsEntity)
         {

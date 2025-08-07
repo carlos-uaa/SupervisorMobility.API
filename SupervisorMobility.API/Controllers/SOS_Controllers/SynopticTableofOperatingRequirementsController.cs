@@ -66,7 +66,7 @@ namespace SupervisorMobility.API.Controllers.SOS_Controllers
             else
             {
                 //only add revision
-                SOSSynopticTableofOperatingRequirements _sosSynopticTableofOperatingRequirements = await _ProcessRepository.GetSOSSynopticTableofOperatingRequirements(sOSSynopticTableofOperatingRequirementsToCreate.SOSSynopticTableofOperatingRequirementsId, true, true, true, true);
+                SOSSynopticTableofOperatingRequirements _sosSynopticTableofOperatingRequirements = await _ProcessRepository.GetSOSSynopticTableofOperatingRequirements(sOSSynopticTableofOperatingRequirementsToCreate.SOSSynopticTableofOperatingRequirementsId, true, true, true);
 
                 SOSSynopticRequirementsLogbook _logbookToCreate = _mapper.Map<SOSSynopticRequirementsLogbook>(sOSSynopticTableofOperatingRequirementsToCreate.SynopticRequirementsLogbooks?.Last());
                 _logbookToCreate.SOSSynopticRequirementsLogbookId = _sosSynopticTableofOperatingRequirements.SOSSynopticTableofOperatingRequirementsId;
@@ -92,31 +92,29 @@ namespace SupervisorMobility.API.Controllers.SOS_Controllers
         }
 
         [HttpGet("{id}", Name = "GetSOSSynopticTableofOperatingRequirements")]
-        public async Task<ActionResult<SOSSynopticRequirementsDto>> GetSOSSynopticTableofOperatingRequirements(int id, bool includeImages = false, bool includeNotes = false, bool includeLogbooks = false, bool includeSOS = false, bool includeImagesSOS = false, bool includeTurns = false, bool includeTimes = false, bool includeCollections = false)
+        public async Task<ActionResult<SOSSynopticRequirementsDto>> GetSOSSynopticTableofOperatingRequirements(int id, bool includeLogbooks = false, bool includeSOS = false, bool includeCollections = false)
         {
 
-            //var SOSSynopticTableofOperatingRequirements = await _ProcessRepository.GetSOSSynopticTableofOperatingRequirements(id, includeImages, includeNotes, includeLogbooks, includeSOS, includeImagesSOS, includeTurns, includeTimes, includeCollections: includeCollections);
-            //if (SOSSynopticTableofOperatingRequirements == null)
-            //{
-            //    return NotFound("SOSSynopticTableofOperatingRequirements not found!");
-            //}
+            var SOSSynopticTableofOperatingRequirements = await _ProcessRepository.GetSOSSynopticTableofOperatingRequirements(id, includeLogbooks, includeSOS, includeCollections);
+            if (SOSSynopticTableofOperatingRequirements == null)
+            {
+                return NotFound("SOSSynopticTableofOperatingRequirements not found!");
+            }
 
-            //return Ok(_mapper.Map<SOSSynopticRequirementsDto>(SOSSynopticTableofOperatingRequirements));
-            return Ok();
+            return Ok(_mapper.Map<SOSSynopticRequirementsDto>(SOSSynopticTableofOperatingRequirements));
         }
 
         [HttpGet("all")]
-        public async Task<ActionResult<IEnumerable<SOSSynopticRequirementsDto>>> GetAllSOSSynopticTableofOperatingRequirements(bool includeImages = false, bool includeNotes = false, bool includeLogbooks = false, bool includeSOS = false)
+        public async Task<ActionResult<IEnumerable<SOSSynopticRequirementsDto>>> GetAllSOSSynopticTableofOperatingRequirements(bool includeLogbooks = false, bool includeSOS = false, bool includeCollections = false)
         {
 
-            //var CheckpointEntities = await _ProcessRepository.GetAllSOSSynopticTableofOperatingRequirements(includeImages, includeNotes, includeLogbooks, includeSOS);
-            //if (CheckpointEntities == null)
-            //{
-            //    return NotFound("Get All Sos Analisis not found!");
-            //}
+            var CheckpointEntities = await _ProcessRepository.GetAllSOSSynopticTableofOperatingRequirements(includeLogbooks, includeSOS, includeCollections);
+            if (CheckpointEntities == null)
+            {
+                return NotFound("Get All Sos Analisis not found!");
+            }
 
-            //return Ok(_mapper.Map<IEnumerable<SOSSynopticRequirementsDto>>(CheckpointEntities));
-            return Ok();
+            return Ok(_mapper.Map<IEnumerable<SOSSynopticRequirementsDto>>(CheckpointEntities));
 
         }
 
