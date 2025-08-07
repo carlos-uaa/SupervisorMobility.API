@@ -7,6 +7,8 @@ using SupervisorMobility.API.Models.SOS.SOSDistributionLogbookDtos;
 using SupervisorMobility.API.DataAccess.Entities.SOS;
 using SupervisorMobility.API.Models.SOS.SOSAnalysisDtos;
 using SupervisorMobility.API.Models.SOS.SOSSequenceDtos;
+using SupervisorMobility.API.Models.SOS.SOSDistributionOperationSequenceDtos;
+using SupervisorMobility.API.Models.SOS.SOSHubDtos;
 
 namespace SupervisorMobility.API.Models.SOS.SOSDistributionDtos
 {
@@ -22,7 +24,9 @@ namespace SupervisorMobility.API.Models.SOS.SOSDistributionDtos
 
         public ICollection<TurnForCreateDto>? Turns { get; set; }
         public string? AplicationModels { get; set; } = "§§§§";
-        public ICollection<SOSTimeForCreateDto>? Times { get; set; }
+
+        public ICollection<SOSDistributionOperationSequenceForCreateDto>? SOSDistributionOperationSequence { get; set; }
+
 
         public ICollection<SOSDistributionLogbookForCreateDto>? DistributionLogbooks { get; set; } = new List<SOSDistributionLogbookForCreateDto>();
         public ICollection<FileUploadGeneralDto>? Illustrations { get; set; } = new List<FileUploadGeneralDto>();
@@ -41,6 +45,8 @@ namespace SupervisorMobility.API.Models.SOS.SOSDistributionDtos
         public bool? IsActive { get; set; }
 
         public int? SOSHubId { get; set; }
+
+        public ICollection<SOSHubDto>? SOSHubs { get; set; } = new List<SOSHubDto>();
 
         public ICollection<SOSAnalysisDto>? Analyses { get; set; } = new List<SOSAnalysisDto>();
         public ICollection<SOSSequenceDto>? Sequences { get; set; } = new List<SOSSequenceDto>();

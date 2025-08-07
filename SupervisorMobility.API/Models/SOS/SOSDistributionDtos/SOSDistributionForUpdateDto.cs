@@ -10,6 +10,7 @@ using SupervisorMobility.API.Models.SOS.SOSDistributionAdditionalTimeDtos;
 using SupervisorMobility.API.Models.SOS.SOSAnalysisDtos;
 using SupervisorMobility.API.Models.SOS.SOSSequenceDtos;
 using SupervisorMobility.API.Models.SOS.SOSHubDtos;
+using SupervisorMobility.API.Models.SOS.SOSDistributionOperationSequenceDtos;
 
 namespace SupervisorMobility.API.Models.SOS.SOSDistributionDtos
 {
@@ -25,7 +26,7 @@ namespace SupervisorMobility.API.Models.SOS.SOSDistributionDtos
 
         public List<TurnForUpdateDto>? Turns { get; set; }
         public string? AplicationModels { get; set; } = "§§§§";
-        public List<SOSTimeForUpdateDto>? Times { get; set; }
+        public List<SOSDistributionOperationSequenceForUpdateDto>? SOSDistributionOperationSequence { get; set; }
 
         public List<SOSDistributionLogbookForUpdateDto>? DistributionLogbooks { get; set; } = new List<SOSDistributionLogbookForUpdateDto>();
         public ICollection<FileUploadGeneralDto>? Illustrations { get; set; } = new List<FileUploadGeneralDto>();
@@ -42,9 +43,8 @@ namespace SupervisorMobility.API.Models.SOS.SOSDistributionDtos
         public SOSDistributionAdditionalTimeForUpdateDto? SOSDistributionAdditionalTime { get; set; }
 
         public bool? IsActive { get; set; }
-
         public int? SOSHubId { get; set; }
-        public SOSHubForUpdateDto? SOSHub { get; set; }
+        public ICollection<SOSHubForUpdateDto>? SOSHubs { get; set; } 
 
         public ICollection<SOSAnalysisDto>? Analyses { get; set; } = new List<SOSAnalysisDto>();
         public ICollection<SOSSequenceDto>? Sequences { get; set; } = new List<SOSSequenceDto>();

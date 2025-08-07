@@ -19,5 +19,21 @@ namespace SupervisorMobility.API.DataAccess.Services.OrderingServices
                     return source.OrderBy(x => 1);
             }
         }
+
+        public static IOrderedQueryable<T> ThenByDynamic<T>(
+            this IOrderedQueryable<T> source,
+            Expression<Func<T, object>> keySelector,
+            int? order)
+        {
+            switch (order)
+            {
+                case 1:
+                    return source.ThenBy(keySelector);
+                case 2:
+                    return source.ThenByDescending(keySelector);
+                default:
+                    return source.ThenBy(x => 1);
+            }
+        }
     }
 }
