@@ -212,9 +212,24 @@ namespace SupervisorMobility.API.DataAccess.Services
                     {
                         await _context.Entry(sequence).Collection(aa => aa.SequenceLogbooks).LoadAsync();
                     }
-                }
-                if (includePeopleCollections)
-                {
+
+                    await _context.Entry(sosHub).Collection(d => d.SOSSynopticControlPoints).Query().Where(d => d.IsActive == true).LoadAsync(); foreach (var synoptic in sosHub.SOSSynopticControlPoints)
+                    {
+                        await _context.Entry(synoptic).Collection(aa => aa.SynopticPointsLogbooks).LoadAsync();
+
+                        await _context.Entry(synoptic).Collection(aa => aa.Analyses).LoadAsync();
+                        await _context.Entry(synoptic).Collection(aa => aa.Sequences).LoadAsync();
+                    }
+
+                    await _context.Entry(sosHub).Collection(d => d.SOSSynopticOperatingRequirements).Query().Where(d => d.IsActive == true).LoadAsync(); foreach (var synoptic in sosHub.SOSSynopticOperatingRequirements)
+                    {
+                        await _context.Entry(synoptic).Collection(aa => aa.SynopticRequirementsLogbooks).LoadAsync();
+
+                        await _context.Entry(synoptic).Collection(aa => aa.Analyses).LoadAsync();
+                        await _context.Entry(synoptic).Collection(aa => aa.Sequences).LoadAsync();
+                    }
+
+
                     await _context.Entry(sosHub).Collection(a => a.SOSAnalysis).LoadAsync();
                     foreach (var analysis in sosHub.SOSAnalysis)
                     {
@@ -5743,6 +5758,12 @@ namespace SupervisorMobility.API.DataAccess.Services
 
                 if (includeCollections)
                 {
+                    await _context.Entry(sosSynopticRequirements).Reference(d => d.Reviewer).LoadAsync();
+                    await _context.Entry(sosSynopticRequirements).Reference(d => d.Approver).LoadAsync();
+                    await _context.Entry(sosSynopticRequirements).Reference(d => d.Creator).LoadAsync();
+
+
+
                     sosSynopticRequirements.Sequences = await _context.SOSSequences
                         .Where(s => s.SOSSynopticOperatingRequirements.Any(d => d.SOSSynopticTableofOperatingRequirementsId == SOSSynopticTableofOperatingRequirementsId))
                         .Include(sh => sh.SOSHub)
