@@ -1,7 +1,8 @@
-﻿using System.ComponentModel.DataAnnotations.Schema;
-using System.ComponentModel.DataAnnotations;
+﻿using SupervisorMobility.API.DataAccess.Entities.ILU;
+using SupervisorMobility.API.DataAccess.Entities.SOS;
 using SupervisorMobility.API.Entities;
-using SupervisorMobility.API.DataAccess.Entities.ILU;
+using System.ComponentModel.DataAnnotations;
+using System.ComponentModel.DataAnnotations.Schema;
 
 namespace SupervisorMobility.API.DataAccess.Entities
 {
@@ -12,7 +13,8 @@ namespace SupervisorMobility.API.DataAccess.Entities
 
         public int? UserId { get; set; }
         public User? User { get; set; }
-
+        public int? SOSHubId { get; set; }
+        public SOSHub? SOSHub { get; set; }
         public ICollection<HCITransaction>? Transactions { get; set; }
         public ICollection<HCICategory>? Categories { get; set; }
         public ICollection<UserCareerPath>? CareerPaths { get; set; }

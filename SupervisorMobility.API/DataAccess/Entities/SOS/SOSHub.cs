@@ -70,6 +70,7 @@ namespace SupervisorMobility.API.DataAccess.Entities.SOS
         public ICollection<SOSSynopticTableofControlPoints>? SOSSynopticControlPoints { get; set; } = new List<SOSSynopticTableofControlPoints>();
         public ICollection<SOSSynopticTableofOperatingRequirements>? SOSSynopticOperatingRequirements { get; set; } = new List<SOSSynopticTableofOperatingRequirements>();
 
+        public HCI? Hci { get; set; }
 
         public ICollection<SOSHubHistory>? History { get; set; } = new List<SOSHubHistory>();
 

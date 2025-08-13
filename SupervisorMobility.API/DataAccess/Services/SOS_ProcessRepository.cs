@@ -179,6 +179,9 @@ namespace SupervisorMobility.API.DataAccess.Services
 
                 if (includeCollections)
                 {
+                    await _context.Entry(sosHub).Reference(a => a.Hci).Query().Where(d => d.IsActive == true).LoadAsync();
+
+
                     await _context.Entry(sosHub).Collection(a => a.SOSAnalysis).Query().Where(d => d.IsActive == true).LoadAsync();
                     foreach (var analysis in sosHub.SOSAnalysis)
                     {
@@ -618,6 +621,50 @@ namespace SupervisorMobility.API.DataAccess.Services
         #endregion
 
         #region AddTo Sos Hub
+
+        public async Task<AsyncVoidMethodBuilder> AddHCISOSCollection(SOSHub master, HCI slave)
+        {
+
+            try
+            {
+                // Verifica si el master ya está siendo rastreado en el contexto
+                var localMasterEntry = _context.SOSHubs.Local.FirstOrDefault(entry => entry.SOSHubId == master.SOSHubId);
+                if (localMasterEntry == null)
+                {
+                    // Si no está rastreado, adjunta el master al contexto
+                    if (_context.Entry(master).State == EntityState.Detached)
+                    {
+                        _context.SOSHubs.Attach(master);
+                    }
+                }
+                else
+                {
+                    master = localMasterEntry;
+                }
+
+
+                // Agrega el slave a la colección del master
+                if (master.Hci == null)
+                {
+                    master.Hci = slave;
+                }
+
+                if (! (master.Hci.HCIId == slave.HCIId))
+                {
+                    master.Hci = slave;
+                }
+
+                // Guarda los cambios
+                await _context.SaveChangesAsync();
+            }
+            catch (Exception ex)
+            {
+                // Manejar el error apropiadamente, puedes loguearlo o lanzar una excepción personalizada
+                Debug.WriteLine("An error occurred while updating the SOSHub: " + ex.Message);
+            }
+            return new AsyncVoidMethodBuilder();
+        }
+
         public async Task<AsyncVoidMethodBuilder> AddProcessSheetCommentaryToSOSCollection(SOSHub master, Commentary slave)
         {
             try

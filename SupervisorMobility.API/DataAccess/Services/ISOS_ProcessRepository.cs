@@ -49,6 +49,7 @@ namespace SupervisorMobility.API.DataAccess.Services
         #region AddTo Sos Hub
         Task<AsyncVoidMethodBuilder> AddProcessSheetCommentaryToSOSCollection(SOSHub Master, Commentary Slave);
         Task<AsyncVoidMethodBuilder> AddAnaysisBkupToSOSCollection(SOSHub Master, AnalysisBkup Slave);
+        Task<AsyncVoidMethodBuilder> AddHCISOSCollection(SOSHub master, HCI slave);
         Task<AsyncVoidMethodBuilder> AddSectionSOSCollection(SOSHub Master, Section Slave);
         Task<AsyncVoidMethodBuilder> AddMaterialToSOSCollection(SOSHub Master, MaterialUsed Slave);
         Task<AsyncVoidMethodBuilder> AddEquipmentToSOSCollection(SOSHub Master, Equipment Slave);

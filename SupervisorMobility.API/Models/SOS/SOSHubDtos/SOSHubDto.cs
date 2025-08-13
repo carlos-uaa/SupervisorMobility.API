@@ -1,23 +1,25 @@
 ﻿using SupervisorMobility.API.DataAccess.Entities;
-using SupervisorMobility.API.Models.FileUploadDto;
-using SupervisorMobility.API.Models.CommentaryDtos;
-using SupervisorMobility.API.Models.SOS.EquipmentDtos;
-using SupervisorMobility.API.Models.SOS.ToolDtos;
-using SupervisorMobility.API.Models.SOS.MaterialDtos;
-using SupervisorMobility.API.Models.PlantDtos;
-using SupervisorMobility.API.Models.AreaDtos;
-using SupervisorMobility.API.Models.DepartmentDtos;
-using SupervisorMobility.API.Models.Users;
-using SupervisorMobility.API.Models.ProductDtos;
 using SupervisorMobility.API.DataAccess.Entities.SOS;
+using SupervisorMobility.API.DataAccess.Entities.SOS.History;
+using SupervisorMobility.API.Models.AreaDtos;
+using SupervisorMobility.API.Models.CommentaryDtos;
+using SupervisorMobility.API.Models.DepartmentDtos;
+using SupervisorMobility.API.Models.DistributionDtos;
+using SupervisorMobility.API.Models.FileUploadDto;
+using SupervisorMobility.API.Models.HCIDtos;
+using SupervisorMobility.API.Models.PATDtos;
+using SupervisorMobility.API.Models.PlantDtos;
+using SupervisorMobility.API.Models.ProductDtos;
+using SupervisorMobility.API.Models.SOS.EquipmentDtos;
+using SupervisorMobility.API.Models.SOS.MaterialDtos;
+using SupervisorMobility.API.Models.SOS.SOSAnalysisDtos;
 using SupervisorMobility.API.Models.SOS.SOSHubDtos.AnalysisBkupDtos;
 using SupervisorMobility.API.Models.SOS.SOSHubDtos.SectionDtos;
-using SupervisorMobility.API.Models.DistributionDtos;
-using SupervisorMobility.API.Models.StationDtos;
+using SupervisorMobility.API.Models.SOS.ToolDtos;
 using SupervisorMobility.API.Models.SOS.ToolsUsedDtos;
-using SupervisorMobility.API.DataAccess.Entities.SOS.History;
-using SupervisorMobility.API.Models.SOS.SOSAnalysisDtos;
-using SupervisorMobility.API.Models.PATDtos;
+using SupervisorMobility.API.Models.StationDtos;
+using SupervisorMobility.API.Models.Users;
+using System.ComponentModel.DataAnnotations.Schema;
 
 namespace SupervisorMobility.API.Models.SOS.SOSHubDtos
 {
@@ -86,7 +88,8 @@ namespace SupervisorMobility.API.Models.SOS.SOSHubDtos
         public ICollection<SOSSequence>? SOSSequence { get; set; } = new List<SOSSequence>();
         public ICollection<SOSHubHistory>? History { get; set; } = new List<SOSHubHistory>();
         public ICollection<PATDto>? PATs { get; set; } = new List<PATDto>();
-
+        public int? HciId => Hci?.HCIId;
+        public HCIDto? Hci { get; set; }
 
         public bool? IsActive { get; set; }
     }
