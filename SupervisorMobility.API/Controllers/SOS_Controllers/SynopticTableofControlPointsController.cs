@@ -87,5 +87,17 @@ namespace SupervisorMobility.API.Controllers.SOS_Controllers
 
         }
 
+        [HttpGet("{id}", Name = "GetSOSSynopticTableofControlPoints")]
+        public async Task<ActionResult<SOSSynopticControlPointsDto>> GetSOSSynopticTableofControlPoints(int id, bool includeLogbooks = false, bool includeSOS = false, bool includeCollections = false)
+        {
+
+            var SOSSynopticTableofControlPoints = await _ProcessRepository.GetSOSSynopticTableofControlPoints(id, includeLogbooks, includeSOS, includeCollections);
+            if (SOSSynopticTableofControlPoints == null)
+            {
+                return NotFound("SOSSynopticTableofControlPoints not found!");
+            }
+
+            return Ok(_mapper.Map<SOSSynopticControlPointsDto>(SOSSynopticTableofControlPoints));
+        }
     }
 }
