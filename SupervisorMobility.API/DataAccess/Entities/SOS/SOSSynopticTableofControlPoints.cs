@@ -34,8 +34,8 @@ namespace SupervisorMobility.API.DataAccess.Entities.SOS
 
         public IEnumerable<SOSHub>? SOSHubs { get; set; } = new List<SOSHub>();
         //las analisis y las secuencias de las que se sacaran los puntos principal
-        public IEnumerable<SOSAnalysis>? Analyses { get; set; } = new List<SOSAnalysis>();
-        public IEnumerable<SOSSequence>? Sequences { get; set; } = new List<SOSSequence>();
+        public ICollection<SOSAnalysis>? Analyses { get; set; } = new List<SOSAnalysis>();
+        public ICollection<SOSSequence>? Sequences { get; set; } = new List<SOSSequence>();
 
     }
 }
