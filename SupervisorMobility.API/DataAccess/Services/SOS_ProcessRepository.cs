@@ -5926,6 +5926,169 @@ namespace SupervisorMobility.API.DataAccess.Services
 
         #endregion
 
+        #region SOSSynopticTableofControlPoints
+        public async Task<int> CreateSOSSynopticTableofControlPoints(SOSSynopticTableofControlPoints SOS_SynopticTableofControlPointsToCreate)
+        {
+            var analysesCopy = SOS_SynopticTableofControlPointsToCreate.Analyses.ToList();
+
+            for (int j = 0; j < analysesCopy.Count; j++)
+            {
+                var Analysis = analysesCopy[j];
+                var localMasterEntry = _context.SOSAnalyses.Local
+                    .FirstOrDefault(entry => entry.SOSAnalysisId == Analysis.SOSAnalysisId);
+
+                if (localMasterEntry != null)
+                {
+                    SOS_SynopticTableofControlPointsToCreate.Analyses.Remove(Analysis);
+                    SOS_SynopticTableofControlPointsToCreate.Analyses.Add(localMasterEntry);
+                }
+                else
+                {
+                    if (_context.Entry(Analysis).State == EntityState.Detached)
+                    {
+                        _context.SOSAnalyses.Attach(Analysis);
+                    }
+                }
+            }
+
+            var sequencesCopy = SOS_SynopticTableofControlPointsToCreate.Sequences.ToList();
+
+            for (int j = 0; j < sequencesCopy.Count; j++)
+            {
+                var sequence = sequencesCopy[j];
+                var localMasterEntry = _context.SOSSequences.Local
+                    .FirstOrDefault(entry => entry.SOSSequenceId == sequence.SOSSequenceId);
+
+                if (localMasterEntry != null)
+                {
+                    SOS_SynopticTableofControlPointsToCreate.Sequences.Remove(sequence);
+                    SOS_SynopticTableofControlPointsToCreate.Sequences.Add(localMasterEntry);
+                }
+                else
+                {
+                    if (_context.Entry(sequence).State == EntityState.Detached)
+                    {
+                        _context.SOSSequences.Attach(sequence);
+                    }
+                }
+            }
+
+            _context.SOSSynopticTableofControlPoints.Add(SOS_SynopticTableofControlPointsToCreate);
+            return _context.SaveChanges();
+        }
+
+        public async Task<SOSSynopticTableofControlPoints> GetSOSSynopticTableofControlPoints(int SOSSynopticTableofControlPointsId, bool includeLogbooks = false, bool includeSOS = false, bool includeCollections = false)
+        {
+            var query = _context.SOSSynopticTableofControlPoints.AsNoTracking()
+               .Where(SOS => SOS.SOSSynopticTableofControlPointsId == SOSSynopticTableofControlPointsId && SOS.IsActive == true);
+
+            var sosSynopticControlPoints = await query.FirstOrDefaultAsync();
+
+            if (sosSynopticControlPoints != null)
+            {
+                await _context.Entry(sosSynopticControlPoints).Collection(t => t.SOSSynopticPointsOperationSequence).LoadAsync();
+
+                foreach (var operationSequence in sosSynopticControlPoints.SOSSynopticPointsOperationSequence)
+                {
+                    await _context.Entry(operationSequence).Reference(t => t.Section).LoadAsync();
+                    await _context.Entry(operationSequence?.Section).Collection(a => a.Analyses).LoadAsync();
+                }
+
+
+                if (includeLogbooks)
+                {
+                    await _context.Entry(sosSynopticControlPoints)
+                        .Collection(d => d.SynopticPointsLogbooks)
+                        .LoadAsync();
+
+                    foreach (var logbook in sosSynopticControlPoints.SynopticPointsLogbooks)
+                    {
+                        await _context.Entry(logbook).Reference(l => l.Approver).LoadAsync();
+                    }
+                }
+
+                if (includeSOS)
+                {
+                    await _context.Entry(sosSynopticControlPoints).Collection(d => d.SOSHubs).LoadAsync();
+                }
+
+                if (includeCollections)
+                {
+                    await _context.Entry(sosSynopticControlPoints).Reference(d => d.Reviewer).LoadAsync();
+                    await _context.Entry(sosSynopticControlPoints).Reference(d => d.Approver).LoadAsync();
+                    await _context.Entry(sosSynopticControlPoints).Reference(d => d.Creator).LoadAsync();
+
+
+
+                    sosSynopticControlPoints.Sequences = await _context.SOSSequences
+                        .Where(s => s.SOSSynopticOperatingRequirements.Any(d => d.SOSSynopticTableofOperatingRequirementsId == SOSSynopticTableofControlPointsId))
+                        .Include(sh => sh.SOSHub)
+                        .ThenInclude(shs => shs.Sections)
+                        .ThenInclude(shsa => shsa.Analyses)
+                        .ToListAsync();
+
+                    sosSynopticControlPoints.Analyses = await _context.SOSAnalyses
+                        .Where(s => s.SOSSynopticOperatingRequirements.Any(d => d.SOSSynopticTableofOperatingRequirementsId == SOSSynopticTableofControlPointsId))
+                        .Include(sh => sh.SOSHub)
+                        .ThenInclude(shs => shs.Sections)
+                        .ThenInclude(shsa => shsa.Analyses)
+                        .ToListAsync();
+                }
+            }
+
+            return sosSynopticControlPoints;
+        }
+
+        public async Task<IEnumerable<SOSSynopticTableofControlPoints>> GetAllSOSSynopticTableofControlPoints(bool includeLogbooks = false, bool includeSOS = false, bool includeCollections = false)
+        {
+            var query = _context.SOSSynopticTableofControlPoints.AsNoTracking().Where(SOS => SOS.IsActive == true);
+
+
+            if (includeLogbooks)
+            {
+                query = query.Include(t => t.SynopticPointsLogbooks);
+            }
+
+
+
+            if (includeSOS)
+            {
+                query = query.Include(m => m.SOSHubs);
+            }
+
+            var sosSynopticControlPoints = await query.ToListAsync();
+
+
+
+            if (includeLogbooks)
+            {
+                foreach (var SOSSynoptic in sosSynopticControlPoints)
+                {
+                    SOSSynoptic.SynopticPointsLogbooks = SOSSynoptic.SynopticPointsLogbooks.Where(t => t.IsActive == true).ToList();
+                }
+            }
+
+
+            return sosSynopticControlPoints;
+        }
+
+        #endregion
+
+        #region Add To Sos SynopticTableofControlPoints
+        public async Task<AsyncVoidMethodBuilder> AddSOSSynopticPointsLogbookToSOSSynopticTableofControlPoints(SOSSynopticTableofControlPoints Master, SOSSynopticPointsLogbook Slave)
+        {
+            throw new NotImplementedException();
+        }
+
+        #endregion
+
+        #region SOSSynopticPointsLogbook
+        public async Task<int> CreateSOSSynopticPointsLogbook(SOSSynopticPointsLogbook LogBook_ToCreate)
+        {
+            throw new NotImplementedException();
+        }
+
+        #endregion
         //CommonOper
         #region CommonOperations
         public async Task<FileUpload?> FetchFileAsync(int fileid)

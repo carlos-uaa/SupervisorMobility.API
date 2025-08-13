@@ -397,6 +397,20 @@ namespace SupervisorMobility.API.DataAccess.Services
         Task<AsyncVoidMethodBuilder> RemoveAllOperationsSequenceFromSOSSynopticTableofOperatingRequirements(SOSSynopticTableofOperatingRequirements Master, List<SOSSynopticRequirementsOperationSequence> operationSequences);
         #endregion
 
+        #region SOSSynopticTableofControlPoints
+        Task<int> CreateSOSSynopticTableofControlPoints(SOSSynopticTableofControlPoints SOS_SynopticTableofControlPointsToCreate);
+        Task<SOSSynopticTableofControlPoints> GetSOSSynopticTableofControlPoints(int SOSSynopticTableofControlPointsId, bool includeLogbooks = false, bool includeSOS = false, bool includeCollections = false);
+        #endregion
+
+        #region Add To Sos SynopticTableofControlPoints
+        Task<AsyncVoidMethodBuilder> AddSOSSynopticPointsLogbookToSOSSynopticTableofControlPoints(SOSSynopticTableofControlPoints Master, SOSSynopticPointsLogbook Slave);
+        
+        #endregion
+
+        #region SOSSynopticPointsLogbook
+        Task<int> CreateSOSSynopticPointsLogbook(SOSSynopticPointsLogbook LogBook_ToCreate);
+        
+        #endregion
 
         #region commonOperations
         Task<FileUpload?> FetchFileAsync(int fileid);
