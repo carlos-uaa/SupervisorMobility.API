@@ -99,5 +99,19 @@ namespace SupervisorMobility.API.Controllers.SOS_Controllers
 
             return Ok(_mapper.Map<SOSSynopticControlPointsDto>(SOSSynopticTableofControlPoints));
         }
+
+        [HttpGet("all")]
+        public async Task<ActionResult<IEnumerable<SOSSynopticControlPointsDto>>> GetAllSOSSynopticTableofOperatingControlPoints(bool includeLogbooks = false, bool includeSOS = false, bool includeCollections = false)
+        {
+
+            var CheckpointEntities = await _ProcessRepository.GetAllSOSSynopticTableofControlPoints(includeLogbooks, includeSOS, includeCollections);
+            if (CheckpointEntities == null)
+            {
+                return NotFound("Get All Sos Analisis not found!");
+            }
+
+            return Ok(_mapper.Map<IEnumerable<SOSSynopticControlPointsDto>>(CheckpointEntities));
+
+        }
     }
 }
