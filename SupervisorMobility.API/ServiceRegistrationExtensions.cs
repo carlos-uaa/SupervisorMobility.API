@@ -1,20 +1,35 @@
-﻿using Microsoft.AspNetCore.ResponseCompression;
+﻿// ====================== CORE / SYSTEM IMPORTS ====================== //
+using System.Runtime.InteropServices;
+
+// ====================== MICROSOFT / FRAMEWORK ====================== //
+using Microsoft.AspNetCore.ResponseCompression;
 using Microsoft.EntityFrameworkCore;
+using Microsoft.Extensions.DependencyInjection;
+
+// ====================== THIRD-PARTY LIBRARIES ====================== //
 using Newtonsoft.Json;
-using SupervisorMobility.API.Business;
+using AutoMapper;
+using Quartz;
+using Quartz.Impl;
+using Quartz.Spi;
+
+// ====================== DATA ACCESS IMPORTS ====================== //
 using SupervisorMobility.API.Context;
 using SupervisorMobility.API.DataAccess.Entities;
 using SupervisorMobility.API.DataAccess.Services;
 using SupervisorMobility.API.DataAccess.Services.TreeServices;
-using SupervisorMobility.API.Services;
-using Quartz;
-using Quartz.Impl;
-using Quartz.Spi;
-using SupervisorMobility.API.Models.NotificationDtos;
-using Microsoft.Extensions.DependencyInjection;
-using AutoMapper;
-using System.Runtime.InteropServices;
 using SupervisorMobility.API.DataAccess.Services.OrderingServices;
+
+// ====================== BUSINESS / SERVICES ====================== //
+using SupervisorMobility.API.Business;
+using SupervisorMobility.API.Services;
+using SupervisorMobility.API.Services.SOS;
+
+// ====================== INTERFACES ====================== //
+using SupervisorMobility.API.Interfaces.SOS;
+
+// ====================== MODELS / DTOs ====================== //
+using SupervisorMobility.API.Models.NotificationDtos;
 
 
 namespace SupervisorMobility.API
@@ -45,6 +60,7 @@ namespace SupervisorMobility.API
             services.AddScoped<IEmailService, EmailService>();
             services.AddScoped<ITreeService, TreeService>();
             services.AddScoped<IOrderingService, OrderingService>();
+            services.AddScoped<ISTOperatingRequirementsService, STOperatingRequirementsService>();
 
 
 
