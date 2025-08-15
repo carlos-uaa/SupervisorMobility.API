@@ -218,6 +218,13 @@ namespace SupervisorMobility.API.Services
             return await _context.Areas
                 .Where(a => a.PlantId == plantId && a.IsActive == true).ToListAsync();
         }
+        public async Task<IEnumerable<Area>> GetAreasForIdsAsync(List<int> ids)
+        {
+            if (ids == null || ids.Count == 0)
+                return new List<Area>();
+
+            return await _context.Areas.Where(a => ids.Contains(a.AreaId) && a.IsActive == true).ToListAsync();
+        }
 
         public async Task<Area?> GetAreaOnlyIdAsync(int areaId)
         {
