@@ -1,15 +1,28 @@
-﻿using AutoMapper;
+﻿// ====================== CORE / SYSTEM IMPORTS ====================== //
+using System.Diagnostics;
+
+// ====================== MICROSOFT / FRAMEWORK ====================== //
 using Microsoft.AspNetCore.Mvc;
+
+// ====================== THIRD-PARTY LIBRARIES ====================== //
+using AutoMapper;
+
+// ======================= DATA ACCESS IMPORTS ======================= //
 using SupervisorMobility.API.DataAccess.Entities.SOS;
 using SupervisorMobility.API.DataAccess.Services;
+
+// ============================ INTERFACES =========================== //
+using SupervisorMobility.API.Interfaces.SOS;
+
+// ========================== MODELS / DTOs ========================== //
+using SupervisorMobility.API.Models.SOS.SOSSynopticTableofOperatingRequirementsOperationSequenceDtos;
+using SupervisorMobility.API.Models.SOS.SOSSynopticTableofOperatingRequirementsLogbookDtos;
+using SupervisorMobility.API.Models.SOS.SOSSynopticTableofOperatingRequirementsDtos;
+using SupervisorMobility.API.Models.SOS.SOSHubDtos.SectionDtos;
+using SupervisorMobility.API.Models.SOS.SOSHubDtos;
 using SupervisorMobility.API.Models.CommentaryDtos;
 using SupervisorMobility.API.Models.FileUploadDto;
-using SupervisorMobility.API.Models.SOS.SOSSynopticTableofOperatingRequirementsDtos;
-using SupervisorMobility.API.Models.SOS.SOSSynopticTableofOperatingRequirementsLogbookDtos;
-using SupervisorMobility.API.Models.SOS.SOSSynopticTableofOperatingRequirementsOperationSequenceDtos;
-using SupervisorMobility.API.Models.SOS.SOSHubDtos;
-using SupervisorMobility.API.Models.SOS.SOSHubDtos.SectionDtos;
-using System.Diagnostics;
+
 
 namespace SupervisorMobility.API.Controllers.SOS_Controllers
 {
@@ -20,9 +33,20 @@ namespace SupervisorMobility.API.Controllers.SOS_Controllers
         private readonly IMapper _mapper;
         private readonly IWebHostEnvironment _env;
         private readonly ISOS_ProcessRepository _ProcessRepository;
-        public SynopticTableofOperatingRequirementsController(IWebHostEnvironment env, IMapper mapper, ISOS_ProcessRepository repository)
+        private readonly ISTOperatingRequirementsService _STOperatingRequirementsService;
+
+        /// <summary>
+        /// Initializes a new instance of the <see cref="SynopticTableofOperatingRequirementsController"/> class.
+        /// </summary>
+        /// <param name="env">Provides information about the web hosting environment.</param>
+        /// <param name="mapper">Automapper instance for mapping entities to DTOs and vice versa.</param>
+        /// <param name="repository">Repository used to access SOS process data.</param>
+        /// <param name="STOperatingRequirementsService">Service used to manage Synoptic Table of Operating Requirements (STRO) operations.</param>
+        /// <exception cref="ArgumentNullException">Thrown if <paramref name="mapper"/> or <paramref name="env"/> is null.</exception>
+        public SynopticTableofOperatingRequirementsController(IWebHostEnvironment env, IMapper mapper, ISOS_ProcessRepository repository, ISTOperatingRequirementsService STOperatingRequirementsService)
         {
             _ProcessRepository = repository;
+            _STOperatingRequirementsService = STOperatingRequirementsService;
             _mapper = mapper ??
                   throw new ArgumentNullException(nameof(mapper));
             _env = env ?? throw new ArgumentNullException(nameof(env));
@@ -38,10 +62,10 @@ namespace SupervisorMobility.API.Controllers.SOS_Controllers
                 sOSSynopticTableofOperatingRequirementsToCreate.IsActive = true;
 
                 sOSSynopticTableofOperatingRequirementsToCreate.SOSHubId = SOSHubCollection_Id;
-                
+
                 SOSSynopticTableofOperatingRequirements SynopticTableofOperatingRequirementsToCreate = _mapper.Map<SOSSynopticTableofOperatingRequirements>(sOSSynopticTableofOperatingRequirementsToCreate);
 
-                SynopticTableofOperatingRequirementsToCreate.Analyses =  new  List<SOSAnalysis>();
+                SynopticTableofOperatingRequirementsToCreate.Analyses = new List<SOSAnalysis>();
                 SynopticTableofOperatingRequirementsToCreate.Sequences = new List<SOSSequence>();
 
                 foreach (var sequence in sOSSynopticTableofOperatingRequirementsToCreate.Sequences)
@@ -88,7 +112,7 @@ namespace SupervisorMobility.API.Controllers.SOS_Controllers
 
                 return Ok("Revision");
             }
-            
+
         }
 
         [HttpGet("{id}", Name = "GetSOSSynopticTableofOperatingRequirements")]
@@ -116,6 +140,22 @@ namespace SupervisorMobility.API.Controllers.SOS_Controllers
 
             return Ok(_mapper.Map<IEnumerable<SOSSynopticRequirementsDto>>(CheckpointEntities));
 
+        }
+
+        /// <summary>
+        /// Generates an Excel file for the Synoptic Table of Operating Requirements (STOR)
+        /// for the specified <paramref name="id"/>.
+        /// </summary>
+        /// <param name="id">The STOR record identifier.</param>
+        /// <returns>A file result containing the Excel file named "STOR.xlsx".</returns>
+        /// <response code="200">The Excel file was generated successfully.</response>
+        /// <response code="400">If the provided <paramref name="id"/> is invalid or the generation fails.</response>
+        [HttpGet("GenerateExcelSTOperatingRequirements/{id}")]
+        public async Task<ActionResult<int>> GenerateExcelSTOperatingRequirements(int id)
+        {
+            byte[] resGenerate = await _STOperatingRequirementsService.GenerateExcelSTOperatingRequirements(id);
+
+            return File(resGenerate, "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet", "STOR.xlsx");
         }
 
         //Update
