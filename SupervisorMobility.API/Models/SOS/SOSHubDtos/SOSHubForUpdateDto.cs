@@ -27,7 +27,7 @@ namespace SupervisorMobility.API.Models.SOS.SOSHubDtos
 
 
 
-        public string? TrainingTime { get; set; }
+        public int? TrainingTime { get; set; }
         public string? RevisedItems { get; set; }
         public string? OtherInformation { get; set; }
 
