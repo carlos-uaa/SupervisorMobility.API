@@ -31,7 +31,7 @@ namespace SupervisorMobility.API.DataAccess.Entities.SOS
         public ICollection<FileUpload>? Videos { get; set; } = new List<FileUpload>();
         public string? RevisedItems { get; set; }
 
-        public string? TrainingTime { get; set; }
+        public int? TrainingTime { get; set; }
         public ICollection<Equipment>? SafetyEquipment { get; set; } = new List<Equipment>();
         public ICollection<ToolUsed>? ToolsUsed { get; set; } = new List<ToolUsed>();
         public ICollection<MaterialUsed>? MaterialsUsed { get; set; } = new List<MaterialUsed>();
