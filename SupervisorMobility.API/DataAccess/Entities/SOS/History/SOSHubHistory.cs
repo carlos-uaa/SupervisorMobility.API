@@ -27,7 +27,7 @@ namespace SupervisorMobility.API.DataAccess.Entities.SOS.History
         public ICollection<FileUpload>? Videos { get; set; } = new List<FileUpload>();
         public string RevisedItems { get; set; }
 
-        public string? TrainingTime { get; set; }
+        public int? TrainingTime { get; set; }
         public ICollection<Equipment>? SafetyEquipment { get; set; } 
         public ICollection<Tool>? ToolsUsed { get; set; } 
         public ICollection<Material>? MaterialsUsed { get; set; }
