@@ -3507,8 +3507,78 @@ namespace SupervisorMobility.API.DataAccess.Services
                 }
             }
 
+            // Populate operation sequences with actual times from analyses/sequences
+            if (SOS_DistributionToCreate.SOSDistributionOperationSequence != null)
+            {
+                foreach (var opSeq in SOS_DistributionToCreate.SOSDistributionOperationSequence)
+                {
+                    if (opSeq.IsAnalysis && opSeq.SequenceId.HasValue)
+                    {
+                        // Find the corresponding analysis
+                        var analysis = SOS_DistributionToCreate.Analyses
+                            .FirstOrDefault(a => a.SOSAnalysisId == opSeq.SequenceId);
+                        
+                        if (analysis != null)
+                        {
+                            // Load Times collection if not already loaded
+                            if (analysis.Times == null)
+                            {
+                                await _context.Entry(analysis).Collection(a => a.Times).LoadAsync();
+                            }
+                            
+                            if (analysis.Times != null && analysis.Times.Any())
+                            {
+                                // Extract times for this section
+                                var sectionTimes = analysis.Times
+                                    .Where(t => t.SectionId == opSeq.SectionId)
+                                    .OrderBy(t => t.SOSTimeId)
+                                    .Select(t => t.Time ?? "0")
+                                    .Take(5); // Max 5 times per section
+                                
+                                // Create the time string (e.g., "2.5§3.2§1.8§0§0")
+                                var timeValues = sectionTimes.ToList();
+                                while (timeValues.Count < 5)
+                                    timeValues.Add("0");
+                                
+                                opSeq.Times = string.Join("§", timeValues);
+                            }
+                        }
+                    }
+                    else if (!opSeq.IsAnalysis && opSeq.SequenceId.HasValue)
+                    {
+                        // Similar logic for sequences
+                        var sequence = SOS_DistributionToCreate.Sequences
+                            .FirstOrDefault(s => s.SOSSequenceId == opSeq.SequenceId);
+                        
+                        if (sequence != null)
+                        {
+                            // Load Times collection if not already loaded
+                            if (sequence.Times == null)
+                            {
+                                await _context.Entry(sequence).Collection(s => s.Times).LoadAsync();
+                            }
+                            
+                            if (sequence.Times != null && sequence.Times.Any())
+                            {
+                                var sectionTimes = sequence.Times
+                                    .Where(t => t.SectionId == opSeq.SectionId)
+                                    .OrderBy(t => t.SOSTimeId)
+                                    .Select(t => t.Time ?? "0")
+                                    .Take(5);
+                                
+                                var timeValues = sectionTimes.ToList();
+                                while (timeValues.Count < 5)
+                                    timeValues.Add("0");
+                                
+                                opSeq.Times = string.Join("§", timeValues);
+                            }
+                        }
+                    }
+                }
+            }
+
             _context.SOSDistributions.Add(SOS_DistributionToCreate);
-            return _context.SaveChanges();
+            return await _context.SaveChangesAsync();
         }
 
         public async Task<SOSDistribution> GetSOSDistribution(int SOSDistributionId,bool includeImages = false,bool includeNotes = false,bool includeLogbooks = false,bool includeSOS = false,bool includeImagesSOS = false,bool includeTurns = false,bool includeTimes = false,bool includeCollections = false)
