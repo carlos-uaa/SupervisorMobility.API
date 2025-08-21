@@ -265,15 +265,17 @@ namespace SupervisorMobility.API.Controllers.Exportation_Controllers
                                 if (!string.IsNullOrEmpty(timeText))
                                 {
                                     string[] times = timeText.Split('.');
-                                    double minutes = double.Parse(times[0]) / 60;
+                                    double minutes = 0;
+                                    if (double.TryParse(times[0], out double minutesResult))
+                                        minutes = minutesResult / 60;
 
                                     sheet.Cells[$"H{rowindex}"].Style.Numberformat.Format = "0.##";
                                     sheet.Cells[$"I{rowindex}"].Style.Numberformat.Format = "0.###";
 
                                     if (minutes > 0)
                                         sheet.Cells[$"H{rowindex}"].Value = minutes;
-                                    if (times.Length > 1)
-                                        sheet.Cells[$"I{rowindex}"].Value = double.Parse(times[1]) / 100;
+                                    if (times.Length > 1 && double.TryParse(times[1], out double secondsResult))
+                                        sheet.Cells[$"I{rowindex}"].Value = secondsResult / 100;
                                 }
                             }
 
@@ -909,13 +911,17 @@ namespace SupervisorMobility.API.Controllers.Exportation_Controllers
                         if (!string.IsNullOrEmpty(timeText))
                         {
                             string[] times = timeText.Split('.');
-                            double minutes = double.Parse(times[0]) / 60;
+                            double minutes = 0;
+                            if (double.TryParse(times[0], out double minutesResult))
+                                minutes = minutesResult / 60;
+                            
                             sheet.Cells[$"H{rowindex}"].Style.Numberformat.Format = "0.##";
                             sheet.Cells[$"I{rowindex}"].Style.Numberformat.Format = "0.###";
 
-                            sheet.Cells[$"H{rowindex}"].Value = minutes;
-                            if (times.Length > 1)
-                                sheet.Cells[$"I{rowindex}"].Value = double.Parse(times[1]) / 100;
+                            if (minutes > 0)
+                                sheet.Cells[$"H{rowindex}"].Value = minutes;
+                            if (times.Length > 1 && double.TryParse(times[1], out double secondsResult))
+                                sheet.Cells[$"I{rowindex}"].Value = secondsResult / 100;
                         }
                     }
 
@@ -1353,7 +1359,11 @@ namespace SupervisorMobility.API.Controllers.Exportation_Controllers
         [HttpGet("Excel/Distribution/{DistributionId}")]
         public async Task<IActionResult> DistributionExcelExport(int DistributionId)
         {
-            var SosDistribution = await _AnalysisProcessRepository.GetSOSDistribution(DistributionId, true, true, true, true, includeTurns: true, includeTimes: true, includeCollections: true);
+            try
+            {
+                Console.WriteLine($"DEBUG EXPORT: Starting DistributionExcelExport for ID {DistributionId}");
+                var SosDistribution = await _AnalysisProcessRepository.GetSOSDistribution(DistributionId, true, true, true, true, includeTurns: true, includeTimes: true, includeCollections: true);
+                Console.WriteLine($"DEBUG EXPORT: Retrieved SOSDistribution: {SosDistribution?.SOSDistributionId}");
 
             SOSHub Sos_Hub = await _AnalysisProcessRepository.GetSOSHub((int)SosDistribution.SOSHubId, true, true, true, true, true, true, true, true, true, true, true, true, true, true, true, true, true);
 
@@ -1401,13 +1411,18 @@ namespace SupervisorMobility.API.Controllers.Exportation_Controllers
                     } while (i < max);
                 }
 
+                Console.WriteLine($"DEBUG EXPORT: Processing application models");
                 string[] models = SosDistribution.AplicationModels.Split("§", StringSplitOptions.RemoveEmptyEntries);
+                Console.WriteLine($"DEBUG EXPORT: Models count: {models.Length}");
                 if (models.Any())
                 {
                     string[] cols = { "L15", "M15", "N15", "O15", "Q15" };
-                    for (int j = 0; j < models.Length; j++)
+                    Console.WriteLine($"DEBUG EXPORT: Cols count: {cols.Length}");
+                    for (int j = 0; j < Math.Min(models.Length, cols.Length); j++)
                     {
-                        sheet.Cells[$"{cols[j]}"].Value = models[j];
+                        Console.WriteLine($"DEBUG EXPORT: Processing model {j}: '{models[j]}'");
+                        if (!string.IsNullOrWhiteSpace(models[j]) && !models[j].Contains("§"))
+                            sheet.Cells[$"{cols[j]}"].Value = models[j];
                     }
                 }
 
@@ -1415,6 +1430,7 @@ namespace SupervisorMobility.API.Controllers.Exportation_Controllers
 
                 #region distribution
 
+                Console.WriteLine($"DEBUG EXPORT: Starting distribution section");
                 double TotalRowHeight = 0;//to be able to know when to jump to next sheet
 
                 Dictionary<string, double> rowHeights = new Dictionary<string, double> { { "DISTRIBUTION", 0 } };//page index, total rows height
@@ -1428,7 +1444,9 @@ namespace SupervisorMobility.API.Controllers.Exportation_Controllers
                                                                                                                                  //int startingRow = 14;//the row where the analyses start in an empty template
                                                                                                                                  //int startingRowB = 7;
 
+                Console.WriteLine($"DEBUG EXPORT: Created rowIndexes dictionary with key 'DISTRIBUTION'");
                 int sheetStartRow = rowIndexes["DISTRIBUTION"].Item1;
+                Console.WriteLine($"DEBUG EXPORT: Sheet start row: {sheetStartRow}");
 
                 int rowindex = 0;//to get where the final row ended
 
@@ -1439,8 +1457,20 @@ namespace SupervisorMobility.API.Controllers.Exportation_Controllers
 
                 bool firstPage = true;
 
+                Console.WriteLine($"DEBUG EXPORT: Processing {SosDistribution.SOSDistributionOperationSequence?.Count() ?? 0} operation sequences");
                 foreach (var section in SosDistribution.SOSDistributionOperationSequence)
                 {
+                    Console.WriteLine($"DEBUG EXPORT: Processing section ID: {section.SOSDistributionOperationSequenceId}, SectionId: {section.SectionId}");
+                    Console.WriteLine($"DEBUG EXPORT: Section is null: {section.Section == null}");
+                    Console.WriteLine($"DEBUG EXPORT: Section.Analyses is null: {section.Section?.Analyses == null}");
+                    Console.WriteLine($"DEBUG EXPORT: Section.Analyses count: {section.Section?.Analyses?.Count() ?? 0}");
+                    
+                    if (section.Section?.Analyses == null)
+                    {
+                        Console.WriteLine($"DEBUG EXPORT: Skipping section due to null analyses");
+                        continue;
+                    }
+                    
                     double StepHeight = 0, CriticalHeight = 0;
 
                     rowindex = sheetStartRow + indexSection++;
@@ -1448,7 +1478,7 @@ namespace SupervisorMobility.API.Controllers.Exportation_Controllers
                     string fullText = string.Empty;
                     int criticalIndex = 0;
 
-                    foreach (var (analysis, index) in section.Section?.Analyses.Select((analysis, index) => (analysis, index)))
+                    foreach (var (analysis, index) in section.Section.Analyses.Select((analysis, index) => (analysis, index)))
                     {
                         if (analysis.CriticalPoints != null && analysis.CriticalPoints.Any())
                         {
@@ -1530,20 +1560,26 @@ namespace SupervisorMobility.API.Controllers.Exportation_Controllers
 
                         if (!string.IsNullOrEmpty(timeText) && timeText != "§§§§" && timeText != "0")
                         {
-                            double[] times = Array.ConvertAll(timeText.Split("§"), s => string.IsNullOrEmpty(s) ? 0.0 : double.Parse(s));
+                            double[] times = Array.ConvertAll(timeText.Split("§"), s => 
+                            {
+                                if (string.IsNullOrEmpty(s) || s.Contains("§") || s.Contains("?") || !double.TryParse(s, out double result))
+                                    return 0.0;
+                                return result;
+                            });
 
                             char col = 'K';
-                            for (int j = 0; j < models.Length; j++)
+                            int maxIndex = Math.Min(models.Length, times.Length);
+                            for (int j = 0; j < maxIndex; j++)
                             {
                                 col = (char)(col + 1);
 
-                                if (times[j] == 0)
+                                if (j < times.Length && times[j] == 0)
                                 {
                                     //sheet.Cells[$"H{rowindex}"].Style.Numberformat.Format = "0.##";
                                     //sheet.Cells[$"I{rowindex}"].Style.Numberformat.Format = "0.###";
                                     stylesService.DistTimesNullStyle(sheet, firstPage, rowindex, ref col);
                                 }
-                                else
+                                else if (j < times.Length)
                                 {
                                     sheet.Cells[$"{col}{rowindex}"].Style.Numberformat.Format = "0.###";
                                     sheet.Cells[$"{col}{rowindex}"].Value = times[j];
@@ -1561,9 +1597,21 @@ namespace SupervisorMobility.API.Controllers.Exportation_Controllers
 
                 }
 
+                Console.WriteLine($"DEBUG EXPORT: Finished processing operation sequences, now processing sheet name");
                 const double DefaultRowH = 43.6;
 
-                string currentWorkingIndex = sheet.Name.Split(" ", 2)[1];
+                Console.WriteLine($"DEBUG EXPORT: Sheet name: '{sheet.Name}'");
+                var sheetNameParts = sheet.Name.Split(" ", 2);
+                Console.WriteLine($"DEBUG EXPORT: Sheet name parts count: {sheetNameParts.Length}");
+                
+                if (sheetNameParts.Length < 2)
+                {
+                    Console.WriteLine($"DEBUG EXPORT: Error - sheet name doesn't have expected format with space separator");
+                    throw new InvalidOperationException($"Sheet name '{sheet.Name}' doesn't have expected format");
+                }
+                
+                string currentWorkingIndex = sheetNameParts[1];
+                Console.WriteLine($"DEBUG EXPORT: Current working index: '{currentWorkingIndex}'");
 
                 rowHeights[currentWorkingIndex] += TotalRowHeight + 21.8; // + 21.8 due to last row
                 rowIndexes[currentWorkingIndex] = (rowIndexes[currentWorkingIndex].Item1, rowindex);
@@ -1584,14 +1632,40 @@ namespace SupervisorMobility.API.Controllers.Exportation_Controllers
                     rowHeights[currentWorkingIndex] = height;
                 }
 
+                Console.WriteLine($"DEBUG EXPORT: Processing distribution worksheets");
                 foreach (var worksheet in package.Workbook.Worksheets.Where(ws => ws.Name.Contains("DISTRIBUTION")))
                 {
-                    string currentChar = worksheet.Name.Split(" ", 2)[1];
+                    Console.WriteLine($"DEBUG EXPORT: Processing worksheet: '{worksheet.Name}'");
+                    var worksheetNameParts = worksheet.Name.Split(" ", 2);
+                    Console.WriteLine($"DEBUG EXPORT: Worksheet name parts count: {worksheetNameParts.Length}");
+                    
+                    if (worksheetNameParts.Length < 2)
+                    {
+                        Console.WriteLine($"DEBUG EXPORT: Skipping worksheet with invalid name format: '{worksheet.Name}'");
+                        continue;
+                    }
+                    
+                    string currentChar = worksheetNameParts[1];
+                    Console.WriteLine($"DEBUG EXPORT: Current char: '{currentChar}'");
+
+                    // Ensure the key exists in the dictionary before accessing it
+                    if (!rowIndexes.ContainsKey(currentChar))
+                    {
+                        Console.WriteLine($"DEBUG EXPORT: Skipping - key '{currentChar}' not found in rowIndexes dictionary");
+                        continue;
+                    }
 
                     rowIndexes[currentChar] = (rowIndexes[currentChar].Item1, rowIndexes[currentChar].Item2 + 2);
 
-                    double[] times = Array.ConvertAll(SosDistribution.AdditionalTime.Split("§"), s => string.IsNullOrEmpty(s) ? 0.0 : double.Parse(s));
+                    Console.WriteLine($"DEBUG EXPORT: Processing AdditionalTime: '{SosDistribution.AdditionalTime}'");
+                    double[] times = Array.ConvertAll(SosDistribution.AdditionalTime.Split("§"), s => 
+                    {
+                        if (string.IsNullOrEmpty(s) || s.Contains("§") || s.Contains("?") || !double.TryParse(s, out double result))
+                            return 0.0;
+                        return result;
+                    });
 
+                    Console.WriteLine($"DEBUG EXPORT: Times array length: {times.Length}");
                     if (times.Any())
                     {
                         char col = 'K';
@@ -1620,9 +1694,12 @@ namespace SupervisorMobility.API.Controllers.Exportation_Controllers
                         if (!string.IsNullOrEmpty(prevSheetName))
                         {
                             string prevChar = prevSheetName.Split(" ", 2)[1];
-                            var pcellt = package.Workbook.Worksheets[prevSheetName].Cells[$"{column}{rowIndexes[prevChar]}"];
-                            if (pcellt.Value != null && !string.IsNullOrWhiteSpace(pcellt.Text))
-                                formula += $"+'{prevSheetName}'!{column}{rowIndexes[prevChar].Item2}";
+                            if (rowIndexes.ContainsKey(prevChar))
+                            {
+                                var pcellt = package.Workbook.Worksheets[prevSheetName].Cells[$"{column}{rowIndexes[prevChar].Item2}"];
+                                if (pcellt.Value != null && !string.IsNullOrWhiteSpace(pcellt.Text))
+                                    formula += $"+'{prevSheetName}'!{column}{rowIndexes[prevChar].Item2}";
+                            }
                         }
 
                         cell.Formula = formula;
@@ -1639,25 +1716,82 @@ namespace SupervisorMobility.API.Controllers.Exportation_Controllers
                     stylesService.SetDistributionImgsStyles(worksheet, rowIndexes[currentChar].Item1, rowIndexes[currentChar].Item2 - 3, isFirst);
                 }
 
+                Console.WriteLine($"DEBUG EXPORT: Getting first sheet");
                 sheet = package.Workbook.Worksheets[0];
-                string firstSheetIndex = sheet.Name.Split(" ")[1];
+                Console.WriteLine($"DEBUG EXPORT: First sheet name: '{sheet.Name}'");
+                
+                var firstSheetNameParts = sheet.Name.Split(" ");
+                Console.WriteLine($"DEBUG EXPORT: First sheet name parts count: {firstSheetNameParts.Length}");
+                
+                if (firstSheetNameParts.Length < 2)
+                {
+                    Console.WriteLine($"DEBUG EXPORT: Error - first sheet name doesn't have expected format");
+                    throw new InvalidOperationException($"First sheet name '{sheet.Name}' doesn't have expected format");
+                }
+                
+                string firstSheetIndex = firstSheetNameParts[1];
+                Console.WriteLine($"DEBUG EXPORT: First sheet index: '{firstSheetIndex}'");
 
                 #endregion
 
                 #region images and notes
-                double imgCellWidthDefTmplt = sheet.Columns[18].Width + sheet.Columns[19].Width + sheet.Columns[20].Width + sheet.Columns[21].Width + sheet.Columns[22].Width + sheet.Columns[23].Width + sheet.Columns[24].Width + sheet.Columns[25].Width + sheet.Columns[26].Width;
+                Console.WriteLine($"DEBUG EXPORT: Starting images and notes section");
+                Console.WriteLine($"DEBUG EXPORT: Sheet columns count: {sheet.Columns?.Count() ?? 0}");
+                
+                // Safe column width calculation with bounds checking
+                double imgCellWidthDefTmplt = 0;
+                int maxColumns = sheet.Dimension?.End?.Column ?? 0;
+                Console.WriteLine($"DEBUG EXPORT: Max columns in sheet: {maxColumns}");
+                
+                for (int colIndex = 18; colIndex <= 26; colIndex++)
+                {
+                    if (colIndex <= maxColumns)
+                    {
+                        imgCellWidthDefTmplt += sheet.Columns[colIndex].Width;
+                    }
+                    else
+                    {
+                        Console.WriteLine($"DEBUG EXPORT: Column {colIndex} does not exist, using default width");
+                        imgCellWidthDefTmplt += 8.43; // Default column width
+                    }
+                }
+                Console.WriteLine($"DEBUG EXPORT: Calculated imgCellWidthDefTmplt: {imgCellWidthDefTmplt}");
 
                 double imgCellWidthExtTmplt = 0;
                 if (package.Workbook.Worksheets.Count > 1)
                 {
                     if (package.Workbook.Worksheets[1].Name.Contains("DISTRIBUTION"))
                     {
-                        imgCellWidthExtTmplt = package.Workbook.Worksheets[1].Columns[17].Width + package.Workbook.Worksheets[1].Columns[18].Width + package.Workbook.Worksheets[1].Columns[19].Width + package.Workbook.Worksheets[1].Columns[20].Width + package.Workbook.Worksheets[1].Columns[21].Width + package.Workbook.Worksheets[1].Columns[22].Width + package.Workbook.Worksheets[1].Columns[23].Width;
+                        Console.WriteLine($"DEBUG EXPORT: Processing second worksheet columns");
+                        var secondSheet = package.Workbook.Worksheets[1];
+                        Console.WriteLine($"DEBUG EXPORT: Second sheet columns count: {secondSheet.Columns?.Count() ?? 0}");
+                        
+                        // Safe column width calculation for second sheet
+                        int maxColumnsSecond = secondSheet.Dimension?.End?.Column ?? 0;
+                        Console.WriteLine($"DEBUG EXPORT: Max columns in second sheet: {maxColumnsSecond}");
+                        
+                        for (int colIndex = 17; colIndex <= 23; colIndex++)
+                        {
+                            if (colIndex <= maxColumnsSecond)
+                            {
+                                imgCellWidthExtTmplt += secondSheet.Columns[colIndex].Width;
+                            }
+                            else
+                            {
+                                Console.WriteLine($"DEBUG EXPORT: Second sheet column {colIndex} does not exist, using default width");
+                                imgCellWidthExtTmplt += 8.43; // Default column width
+                            }
+                        }
+                        Console.WriteLine($"DEBUG EXPORT: Calculated imgCellWidthExtTmplt: {imgCellWidthExtTmplt}");
                     }
                 }
 
-                double changeHeightP = imgService.HeightToPixels(rowHeights.First().Value) - 40;
+                if (!rowHeights.Any())
+                {
+                    throw new InvalidOperationException("rowHeights dictionary is empty - cannot calculate changeHeightP");
+                }
 
+                double changeHeightP = imgService.HeightToPixels(rowHeights.First().Value) - 40;
                 int currentSheetColumnWidth = imgService.WidthToPixels(imgCellWidthDefTmplt);
 
                 int offsetY = 2;
@@ -1665,7 +1799,6 @@ namespace SupervisorMobility.API.Controllers.Exportation_Controllers
                 //if anything is moved in template this needs to be updated
                 double globalXoffsetA = imgService.WidthToPixels(105.31) + 95/*105.31*/, globalYoffsetA = imgService.HeightToPixels(230.5) + 6/*230.5*/;
                 double globalXoffsetB = imgService.WidthToPixels(107.22) + 95/*107.22*/, globalYoffsetB = imgService.HeightToPixels(128.7) + 6/*90.6*/;
-
                 var list = SosDistribution.Illustrations.ToList();
                 byte[] bytes = { };
 
@@ -1689,14 +1822,15 @@ namespace SupervisorMobility.API.Controllers.Exportation_Controllers
                     string[] side = { "TOMA", "DEJA", "PASOS" };
 
                     Dictionary<int, double[]> quant = new Dictionary<int, double[]>{
-                        { 0, Array.ConvertAll(SosDistribution.SOSDistributionAdditionalTime.TakeQuantity.Split("§",StringSplitOptions.RemoveEmptyEntries), s => double.Parse(s)) },
-                        { 1, Array.ConvertAll(SosDistribution.SOSDistributionAdditionalTime.LeaveQuantity.Split("§",StringSplitOptions.RemoveEmptyEntries), s => double.Parse(s)) },
-                        { 2, Array.ConvertAll(SosDistribution.SOSDistributionAdditionalTime.StepsQuantity.Split("§",StringSplitOptions.RemoveEmptyEntries), s => double.Parse(s)) }
+                        { 0, Array.ConvertAll(SosDistribution.SOSDistributionAdditionalTime.TakeQuantity.Split("§",StringSplitOptions.RemoveEmptyEntries), s => double.TryParse(s, out double result) && !s.Contains("§") && !s.Contains("?") ? result : 0.0) },
+                        { 1, Array.ConvertAll(SosDistribution.SOSDistributionAdditionalTime.LeaveQuantity.Split("§",StringSplitOptions.RemoveEmptyEntries), s => double.TryParse(s, out double result) && !s.Contains("§") && !s.Contains("?") ? result : 0.0) },
+                        { 2, Array.ConvertAll(SosDistribution.SOSDistributionAdditionalTime.StepsQuantity.Split("§",StringSplitOptions.RemoveEmptyEntries), s => double.TryParse(s, out double result) && !s.Contains("§") && !s.Contains("?") ? result : 0.0) }
                     };
+                    
                     Dictionary<int, double[]> mtime = new Dictionary<int, double[]>{
-                        { 0, Array.ConvertAll(SosDistribution.SOSDistributionAdditionalTime.TakeTime.Split("§",StringSplitOptions.RemoveEmptyEntries), s => double.Parse(s)) },
-                        { 1, Array.ConvertAll(SosDistribution.SOSDistributionAdditionalTime.LeaveTime.Split("§",StringSplitOptions.RemoveEmptyEntries), s => double.Parse(s)) },
-                        { 2, Array.ConvertAll(SosDistribution.SOSDistributionAdditionalTime.StepsTime.Split("§",StringSplitOptions.RemoveEmptyEntries), s => double.Parse(s)) }
+                        { 0, Array.ConvertAll(SosDistribution.SOSDistributionAdditionalTime.TakeTime.Split("§",StringSplitOptions.RemoveEmptyEntries), s => double.TryParse(s, out double result) && !s.Contains("§") && !s.Contains("?") ? result : 0.0) },
+                        { 1, Array.ConvertAll(SosDistribution.SOSDistributionAdditionalTime.LeaveTime.Split("§",StringSplitOptions.RemoveEmptyEntries), s => double.TryParse(s, out double result) && !s.Contains("§") && !s.Contains("?") ? result : 0.0) },
+                        { 2, Array.ConvertAll(SosDistribution.SOSDistributionAdditionalTime.StepsTime.Split("§",StringSplitOptions.RemoveEmptyEntries), s => double.TryParse(s, out double result) && !s.Contains("§") && !s.Contains("?") ? result : 0.0) }
                     };
 
                     for (int i = 0; i < 3; i++)
@@ -1717,7 +1851,12 @@ namespace SupervisorMobility.API.Controllers.Exportation_Controllers
                     html += $"<tr><td style='border: 1px solid black;' colspan={2 + models.Length}></td>";
                     for (int i = 1; i < models.Length + 1; i++)
                     {
-                        html += $"<td style='border: 1px solid black;'>{(mtime[0][i] + mtime[1][i] + mtime[2][i]).ToString("F2")}</td>";
+                        // Check bounds before accessing arrays
+                        double val0 = i < mtime[0].Length ? mtime[0][i] : 0.0;
+                        double val1 = i < mtime[1].Length ? mtime[1][i] : 0.0;
+                        double val2 = i < mtime[2].Length ? mtime[2][i] : 0.0;
+                        
+                        html += $"<td style='border: 1px solid black;'>{(val0 + val1 + val2).ToString("F2")}</td>";
                     }
                     html += $"</tr>";
 
@@ -1935,6 +2074,13 @@ namespace SupervisorMobility.API.Controllers.Exportation_Controllers
             var res = File(ms, "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet", !string.IsNullOrEmpty(SosDistribution.InternalControlNumber) ? $"{SosDistribution.InternalControlNumber} Distribution Report.xlsx" : "Distribution Report.xlsx");
             res.EnableRangeProcessing = true;
             return res;
+            }
+            catch (Exception ex)
+            {
+                Console.WriteLine($"DEBUG EXPORT ERROR: {ex.Message}");
+                Console.WriteLine($"DEBUG EXPORT STACK TRACE: {ex.StackTrace}");
+                throw;
+            }
         }
 
         [HttpGet("Excel/Combination/{CombinationId}")]

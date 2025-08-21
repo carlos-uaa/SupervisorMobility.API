@@ -109,7 +109,9 @@ namespace SupervisorMobility.API.Controllers.SOS_Controllers
                 return NotFound("SOSDistribution not found!");
             }
 
-            return Ok(_mapper.Map<SOSDistributionDto>(SOSDistribution));
+            var mappedDto = _mapper.Map<SOSDistributionDto>(SOSDistribution);
+
+            return Ok(mappedDto);
         }
 
         [HttpGet("all")]

@@ -3507,8 +3507,141 @@ namespace SupervisorMobility.API.DataAccess.Services
                 }
             }
 
+            // Populate operation sequences with actual times from analyses/sequences
+            if (SOS_DistributionToCreate.SOSDistributionOperationSequence != null)
+            {
+                foreach (var opSeq in SOS_DistributionToCreate.SOSDistributionOperationSequence)
+                {
+                    if (opSeq.IsAnalysis && opSeq.SequenceId.HasValue)
+                    {
+                        // Find the corresponding analysis
+                        var analysis = SOS_DistributionToCreate.Analyses
+                            .FirstOrDefault(a => a.SOSAnalysisId == opSeq.SequenceId);
+                        
+                        if (analysis != null)
+                        {
+                            // Load Times collection if not already loaded
+                            if (analysis.Times == null)
+                            {
+                                await _context.Entry(analysis).Collection(a => a.Times).LoadAsync();
+                            }
+                            
+                            if (analysis.Times != null && analysis.Times.Any())
+                            {
+                                // Extract times for this section
+                                var sectionTimes = analysis.Times
+                                    .Where(t => t.SectionId == opSeq.SectionId)
+                                    .OrderBy(t => t.SOSTimeId)
+                                    .Select(t => t.Time ?? "0")
+                                    .Take(5); // Max 5 times per section
+                                
+                                // Create the time string (e.g., "2.5§3.2§1.8§0§0")
+                                var timeValues = sectionTimes.ToList();
+                                while (timeValues.Count < 5)
+                                    timeValues.Add("0");
+                                
+                                opSeq.Times = string.Join("§", timeValues);
+                            }
+                        }
+                    }
+                    else if (!opSeq.IsAnalysis && opSeq.SequenceId.HasValue)
+                    {
+                        // Similar logic for sequences
+                        var sequence = SOS_DistributionToCreate.Sequences
+                            .FirstOrDefault(s => s.SOSSequenceId == opSeq.SequenceId);
+                        
+                        if (sequence != null)
+                        {
+                            // Load Times collection if not already loaded
+                            if (sequence.Times == null)
+                            {
+                                await _context.Entry(sequence).Collection(s => s.Times).LoadAsync();
+                            }
+                            
+                            if (sequence.Times != null && sequence.Times.Any())
+                            {
+                                var sectionTimes = sequence.Times
+                                    .Where(t => t.SectionId == opSeq.SectionId)
+                                    .OrderBy(t => t.SOSTimeId)
+                                    .Select(t => t.Time ?? "0")
+                                    .Take(5);
+                                
+                                var timeValues = sectionTimes.ToList();
+                                while (timeValues.Count < 5)
+                                    timeValues.Add("0");
+                                
+                                opSeq.Times = string.Join("§", timeValues);
+                            }
+                        }
+                    }
+                }
+            }
+
+            // Populate SOSHubs collection from Analyses and Sequences
+            var allSOSHubIds = new HashSet<int>();
+            
+            // Collect SOSHub IDs from Analyses
+            foreach (var analysis in SOS_DistributionToCreate.Analyses)
+            {
+                if (analysis.SOSHubId > 0)
+                    allSOSHubIds.Add(analysis.SOSHubId);
+            }
+            
+            // Collect SOSHub IDs from Sequences
+            foreach (var sequence in SOS_DistributionToCreate.Sequences)
+            {
+                if (sequence.SOSHubId > 0)
+                    allSOSHubIds.Add(sequence.SOSHubId);
+            }
+            
+            // Load and assign unique SOSHubs with their sections
+            if (allSOSHubIds.Any())
+            {
+                var sosHubs = await _context.SOSHubs
+                    .Where(h => allSOSHubIds.Contains(h.SOSHubId))
+                    .Include(h => h.Sections)
+                    .ToListAsync();
+                
+                SOS_DistributionToCreate.SOSHubs = sosHubs;
+                
+                // Create SOSDistributionOperationSequence records for each section
+                var operationSequences = new List<SOSDistributionOperationSequence>();
+                
+                foreach (var sosHub in sosHubs)
+                {
+                    if (sosHub.Sections != null)
+                    {
+                        foreach (var section in sosHub.Sections)
+                        {
+                            // Only create if not already exists (avoid duplicates)
+                            if (!SOS_DistributionToCreate.SOSDistributionOperationSequence.Any(seq => seq.SectionId == section.SectionId))
+                            {
+                                var operationSequence = new SOSDistributionOperationSequence
+                                {
+                                    SectionId = section.SectionId,
+                                    SequenceId = null, // This can be set later if needed
+                                    Times = "", // Default empty times
+                                    IsActive = true
+                                };
+                                
+                                operationSequences.Add(operationSequence);
+                                Console.WriteLine($"DEBUG CreateSOSDistribution: Creating OperationSequence for Section {section.SectionId}");
+                            }
+                        }
+                    }
+                }
+                
+                // Add the operation sequences to the distribution
+                foreach (var opSeq in operationSequences)
+                {
+                    SOS_DistributionToCreate.SOSDistributionOperationSequence.Add(opSeq);
+                }
+                
+                Console.WriteLine($"DEBUG CreateSOSDistribution: Created {operationSequences.Count} operation sequences");
+            }
+
             _context.SOSDistributions.Add(SOS_DistributionToCreate);
-            return _context.SaveChanges();
+            return await _context.SaveChangesAsync();
         }
 
         public async Task<SOSDistribution> GetSOSDistribution(int SOSDistributionId,bool includeImages = false,bool includeNotes = false,bool includeLogbooks = false,bool includeSOS = false,bool includeImagesSOS = false,bool includeTurns = false,bool includeTimes = false,bool includeCollections = false)
@@ -3527,7 +3660,6 @@ namespace SupervisorMobility.API.DataAccess.Services
                     await _context.Entry(operationSequence).Reference(t => t.Section).LoadAsync();
                     await _context.Entry(operationSequence?.Section).Collection(a => a.Analyses).LoadAsync();
                 }
-
 
                 if (includeImages)
                 {
@@ -3624,6 +3756,141 @@ namespace SupervisorMobility.API.DataAccess.Services
                         .ThenInclude(shs => shs.Sections)
                         .ThenInclude(shsa => shsa.Analyses)
                         .ToListAsync();
+
+                    // Fix for existing distributions: Create missing operation sequences
+                    if (sosDistribution.SOSDistributionOperationSequence?.Count() == 0 && sosDistribution.SOSHubs?.Any() == true)
+                    {
+                        Console.WriteLine($"DEBUG GetSOSDistribution: No operation sequences found, creating them for distribution {SOSDistributionId}");
+                        
+                        var newOperationSequences = new List<SOSDistributionOperationSequence>();
+                        
+                        foreach (var sosHub in sosDistribution.SOSHubs)
+                        {
+                            if (sosHub.Sections != null)
+                            {
+                                foreach (var section in sosHub.Sections)
+                                {
+                                    var operationSequence = new SOSDistributionOperationSequence
+                                    {
+                                        SectionId = section.SectionId,
+                                        SequenceId = null,
+                                        Times = "",
+                                        IsActive = true
+                                    };
+                                    
+                                    sosDistribution.SOSDistributionOperationSequence.Add(operationSequence);
+                                    _context.SOSDistributionOperationSequence.Add(operationSequence);
+                                    newOperationSequences.Add(operationSequence);
+                                    
+                                    Console.WriteLine($"DEBUG GetSOSDistribution: Created OperationSequence for Section {section.SectionId}");
+                                }
+                            }
+                        }
+                        
+                        if (newOperationSequences.Any())
+                        {
+                            await _context.SaveChangesAsync();
+                            Console.WriteLine($"DEBUG GetSOSDistribution: Saved {newOperationSequences.Count} new operation sequences");
+                            
+                            // Reload the operation sequences with their sections and analyses
+                            await _context.Entry(sosDistribution).Collection(t => t.SOSDistributionOperationSequence).LoadAsync();
+                            foreach (var operationSequence in sosDistribution.SOSDistributionOperationSequence)
+                            {
+                                await _context.Entry(operationSequence).Reference(t => t.Section).LoadAsync();
+                                await _context.Entry(operationSequence?.Section).Collection(a => a.Analyses).LoadAsync();
+                            }
+                        }
+                    }
+
+                    // Load SOSHubs collection for the distribution
+                    var allSOSHubIds = new HashSet<int>();
+                    
+                    // Collect SOSHub IDs from Sequences
+                    foreach (var sequence in sosDistribution.Sequences)
+                    {
+                        if (sequence.SOSHubId > 0)
+                            allSOSHubIds.Add(sequence.SOSHubId);
+                    }
+                    
+                    // Collect SOSHub IDs from Analyses
+                    foreach (var analysis in sosDistribution.Analyses)
+                    {
+                        if (analysis.SOSHubId > 0)
+                            allSOSHubIds.Add(analysis.SOSHubId);
+                    }
+                    
+                    // Load unique SOSHubs with their related data
+                    if (allSOSHubIds.Any())
+                    {
+                        sosDistribution.SOSHubs = await _context.SOSHubs
+                            .Where(h => allSOSHubIds.Contains(h.SOSHubId))
+                            .Include(s => s.Sections)
+                            .ThenInclude(sec => sec.Analyses)
+                            .Include(s => s.AppliedModels)
+                            .Include(s => s.ToolsUsed)
+                            .ThenInclude(t => t.Tool)
+                            .Include(s => s.MaterialsUsed)
+                            .ThenInclude(m => m.Material)
+                            .Include(s => s.SafetyEquipment)
+                            .ToListAsync();
+
+                        // Sync critical points from SOSHubs to SOSDistributionOperationSequence analyses
+                        Console.WriteLine($"DEBUG: SOSHubs count: {sosDistribution.SOSHubs?.Count() ?? 0}");
+                        Console.WriteLine($"DEBUG: SOSDistributionOperationSequence count: {sosDistribution.SOSDistributionOperationSequence?.Count() ?? 0}");
+                        
+                        // First, log all available hub analyses
+                        var allHubAnalyses = sosDistribution.SOSHubs
+                            .SelectMany(h => h.Sections)
+                            .SelectMany(s => s.Analyses)
+                            .ToList();
+                        
+                        Console.WriteLine($"DEBUG: Total hub analyses available: {allHubAnalyses.Count}");
+                        foreach (var hubAnalysis in allHubAnalyses)
+                        {
+                            Console.WriteLine($"DEBUG: Hub Analysis ID: {hubAnalysis.AnalysisId}, Text: '{hubAnalysis.Text}', CriticalPoints: {hubAnalysis.CriticalPoints?.Count() ?? 0}");
+                            if (hubAnalysis.CriticalPoints?.Any() == true)
+                            {
+                                Console.WriteLine($"DEBUG:   Critical Points: [{string.Join(", ", hubAnalysis.CriticalPoints)}]");
+                            }
+                        }
+                        
+                        foreach (var operationSequence in sosDistribution.SOSDistributionOperationSequence)
+                        {
+                            Console.WriteLine($"DEBUG: Processing OpSeq {operationSequence.SOSDistributionOperationSequenceId}, SectionId: {operationSequence.SectionId}");
+                            Console.WriteLine($"DEBUG: Section.Analyses count: {operationSequence.Section?.Analyses?.Count() ?? 0}");
+                            
+                            if (operationSequence.Section?.Analyses != null)
+                            {
+                                foreach (var opAnalysis in operationSequence.Section.Analyses)
+                                {
+                                    Console.WriteLine($"DEBUG: Processing OpSeq Analysis ID: {opAnalysis.AnalysisId}, Text: '{opAnalysis.Text}', current CriticalPoints: {opAnalysis.CriticalPoints?.Count() ?? 0}");
+                                    
+                                    // Find the corresponding analysis in SOSHubs with critical points
+                                    var hubAnalysis = allHubAnalyses.FirstOrDefault(a => a.AnalysisId == opAnalysis.AnalysisId);
+
+                                    Console.WriteLine($"DEBUG: Found hubAnalysis: {hubAnalysis != null}");
+                                    if (hubAnalysis != null)
+                                    {
+                                        Console.WriteLine($"DEBUG:   Hub Analysis Text: '{hubAnalysis.Text}', CriticalPoints: {hubAnalysis.CriticalPoints?.Count() ?? 0}");
+                                        if (hubAnalysis.CriticalPoints?.Any() == true)
+                                        {
+                                            opAnalysis.CriticalPoints = hubAnalysis.CriticalPoints;
+                                            opAnalysis.Reasons = hubAnalysis.Reasons;
+                                            Console.WriteLine($"DEBUG: ✓ Successfully synchronized {hubAnalysis.CriticalPoints.Count} critical points to analysis {opAnalysis.AnalysisId}");
+                                        }
+                                        else
+                                        {
+                                            Console.WriteLine($"DEBUG: ✗ Hub analysis {hubAnalysis.AnalysisId} has no critical points to sync");
+                                        }
+                                    }
+                                    else
+                                    {
+                                        Console.WriteLine($"DEBUG: ✗ No matching hub analysis found for OpSeq Analysis ID {opAnalysis.AnalysisId}");
+                                    }
+                                }
+                            }
+                        }
+                    }
                 }
             }
 

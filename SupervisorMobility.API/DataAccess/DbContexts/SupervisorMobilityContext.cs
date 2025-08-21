@@ -525,6 +525,16 @@ namespace SupervisorMobility.API.Context
                     l => l.HasOne<SOSDistribution>().WithMany().HasForeignKey("SOSDistributionId").OnDelete(DeleteBehavior.NoAction)
                 );
 
+            // Configure SOSDistribution ↔ SOSHub many-to-many relationship
+            modelBuilder.Entity<SOSDistribution>()
+                .HasMany(d => d.SOSHubs)
+                .WithMany(h => h.SOSDistribution)
+                .UsingEntity<Dictionary<string, object>>(
+                    "SOSDistributionSOSHub",
+                    r => r.HasOne<SOSHub>().WithMany().HasForeignKey("SOSHubsSOSHubId").OnDelete(DeleteBehavior.NoAction),
+                    l => l.HasOne<SOSDistribution>().WithMany().HasForeignKey("SOSDistributionId").OnDelete(DeleteBehavior.NoAction)
+                );
+
 
 
             modelBuilder.Entity<SOSFlow>()
