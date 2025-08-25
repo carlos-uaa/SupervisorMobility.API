@@ -129,6 +129,15 @@ namespace SupervisorMobility.API.Context
         public DbSet<SOSSequence> SOSSequences { get; set; }
         public DbSet<SOSSequenceLogbook> SOSSequenceLogbooks { get; set; }
 
+        public DbSet<SOSSynopticTableofOperatingRequirements> SOSSynopticTableofOperatingRequirements { get; set; }
+        public DbSet<SOSSynopticRequirementsOperationSequence> SOSSynopticRequirementsOperationSequences { get; set; }
+        public DbSet<SOSSynopticRequirementsLogbook> SOSSynopticRequirementsLogbooks { get; set; }
+
+        public DbSet<SOSSynopticTableofControlPoints> SOSSynopticTableofControlPoints { get; set; }
+        public DbSet<SOSSynopticPointsOperationSequence> SOSSynopticPointsOperationSequences { get; set; }
+        public DbSet<SOSSynopticPointsLogbook> SOSSynopticPointsLogbooks { get; set; }
+
+
         #endregion
 
         public SupervisorMobilityContext(DbContextOptions<SupervisorMobilityContext> options)
@@ -506,25 +515,16 @@ namespace SupervisorMobility.API.Context
                 .Property(p => p.IsActive)
                 .HasDefaultValue(true);
 
-            modelBuilder.Entity<SOSDistribution>()
-                   .HasMany(d => d.Sequences)
-                   .WithMany(s => s.Distributions)
-                   .UsingEntity<Dictionary<string, object>>(
-                       "SOSDistributionSequence",
-                       r => r.HasOne<SOSSequence>().WithMany().HasForeignKey("SOSSequenceId").OnDelete(DeleteBehavior.NoAction),
-                       l => l.HasOne<SOSDistribution>().WithMany().HasForeignKey("SOSDistributionId").OnDelete(DeleteBehavior.NoAction)
-                   );
+            modelBuilder.Entity<SOSSynopticTableofControlPoints>()
+                .Property(p => p.IsActive)
+                .HasDefaultValue(true);
 
-            // Configuración adicional para otras relaciones potenciales
-            modelBuilder.Entity<SOSDistribution>()
-                .HasMany(d => d.Analyses)
-                .WithMany(a => a.Distributions)
-                .UsingEntity<Dictionary<string, object>>(
-                    "SOSDistributionAnalysis",
-                    r => r.HasOne<SOSAnalysis>().WithMany().HasForeignKey("SOSAnalysisId").OnDelete(DeleteBehavior.NoAction),
-                    l => l.HasOne<SOSDistribution>().WithMany().HasForeignKey("SOSDistributionId").OnDelete(DeleteBehavior.NoAction)
-                );
+        
+            modelBuilder.Entity<SOSSynopticTableofOperatingRequirements>()
+                .Property(p => p.IsActive)
+                .HasDefaultValue(true);
 
+        
             // Configure SOSDistribution ↔ SOSHub many-to-many relationship
             modelBuilder.Entity<SOSDistribution>()
                 .HasMany(d => d.SOSHubs)

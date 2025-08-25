@@ -11,7 +11,8 @@
 	</PropertyGroup>
 
 	<PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Debug|AnyCPU'">
-	  <Optimize>True</Optimize>
+	  <Optimize>false</Optimize>
+	  <DebugType>full</DebugType>
 	</PropertyGroup>
 
 	<ItemGroup>

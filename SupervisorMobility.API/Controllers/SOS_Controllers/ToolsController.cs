@@ -8,7 +8,7 @@ namespace SupervisorMobility.API.Controllers.SOS_Controllers
 {
     [Route("api/Analysis_Process/Tools")]
     [ApiController]
-    public class ToolsController : Controller
+    public class ToolsController : ControllerBase
     {
         private readonly ISOS_ProcessRepository _toolService;
         private readonly IMapper _mapper;

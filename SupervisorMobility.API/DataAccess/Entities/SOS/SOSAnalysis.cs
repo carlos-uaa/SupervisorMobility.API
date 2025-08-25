@@ -30,6 +30,9 @@ namespace SupervisorMobility.API.DataAccess.Entities.SOS
         public SOSHub? SOSHub { get; set; }
 
         public ICollection<SOSDistribution>? Distributions { get; set; } = new List<SOSDistribution>();
+        public ICollection<SOSSynopticTableofControlPoints>? SOSSynopticControlPoints { get; set; } = new List<SOSSynopticTableofControlPoints>();
+        public ICollection<SOSSynopticTableofOperatingRequirements>? SOSSynopticOperatingRequirements { get; set; } = new List<SOSSynopticTableofOperatingRequirements>();
+
 
     }
 }

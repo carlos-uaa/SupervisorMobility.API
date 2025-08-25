@@ -14,7 +14,7 @@ namespace SupervisorMobility.API.Controllers.SOS_Controllers
 {
     [Route("api/SOS/Sequence")]
     [ApiController]
-    public class SequenceController : Controller
+    public class SequenceController : ControllerBase
     {
         private readonly ISOS_ProcessRepository _ProcessRepository;
         private readonly IMapper _mapper;

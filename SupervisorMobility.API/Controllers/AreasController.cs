@@ -42,8 +42,7 @@ namespace SupervisorMobility.API.Controllers
 
        
         [HttpGet]
-        public async Task<ActionResult<IEnumerable<AreaWithJustOperationsDto>>> GetAreas(
-                    int plantId, bool includeCollections = false)
+        public async Task<ActionResult<IEnumerable<AreaWithJustOperationsDto>>> GetAreas(int plantId, bool includeCollections = false)
         {
             if (!await _supervisorMobilityRepository.PlantExistAsync(plantId))
             {
@@ -64,6 +63,15 @@ namespace SupervisorMobility.API.Controllers
 
             }
 
+
+        }
+
+        [HttpPost("byIds")]
+        public async Task<ActionResult<IEnumerable<AreaWithoutNavigationPropertiesDto>>> GetAreasByIds(List<int> ids)
+        {
+          
+                var areasForPlant = await _supervisorMobilityRepository.GetAreasForIdsAsync(ids);
+                return Ok(_mapper.Map<IEnumerable<AreaWithoutNavigationPropertiesDto>>(areasForPlant));
 
         }
 

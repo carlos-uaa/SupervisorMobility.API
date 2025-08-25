@@ -6,6 +6,8 @@ using SupervisorMobility.API.Services;
 using SupervisorMobility.API.Models.Users;
 using SupervisorMobility.API.Models.HCICategoryDtos;
 using SupervisorMobility.API.DataAccess.Entities.LUP;
+using SupervisorMobility.API.DataAccess.Services;
+using SupervisorMobility.API.DataAccess.Entities.SOS;
 
 namespace SupervisorMobility.API.Controllers.IS_Controllers
 {
@@ -15,10 +17,13 @@ namespace SupervisorMobility.API.Controllers.IS_Controllers
     {
         private readonly IMapper _mapper;
         private readonly ISupervisorMobilityRepository _supervisorMobilityRepository;
+        private readonly ISOS_ProcessRepository _sosProcessRepository;
         private readonly IWebHostEnvironment _env;
         public HCIController(ISupervisorMobilityRepository supervisorMobilityRepository, IWebHostEnvironment env,
-            IMapper mapper)
+            IMapper mapper, ISOS_ProcessRepository processRepository)
         {
+            _sosProcessRepository= processRepository ??
+                throw new ArgumentNullException(nameof(processRepository));
             _supervisorMobilityRepository = supervisorMobilityRepository ??
                 throw new ArgumentNullException(nameof(supervisorMobilityRepository));
             _mapper = mapper ??
@@ -35,6 +40,10 @@ namespace SupervisorMobility.API.Controllers.IS_Controllers
             hciEntity.User = await _supervisorMobilityRepository.GetUserAsync((int)hciForCreate.UserId);
 
             var entityhci = await _supervisorMobilityRepository.AddHCI(hciEntity);
+
+            SOSHub sOSHub = await _sosProcessRepository.GetSOSHub((int)hciForCreate.SOSHubId);
+
+            await _sosProcessRepository.AddHCISOSCollection(sOSHub, hciEntity);
 
             if (entityhci != null)
                 return Ok(_mapper.Map<HCIDto>(hciEntity));

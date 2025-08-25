@@ -24,7 +24,7 @@ namespace SupervisorMobility.API.Controllers.SOS_Controllers
 {
     [Route("api/SOS/DataPool")]
     [ApiController]
-    public class SOSDataHubController : Controller
+    public class SOSDataHubController : ControllerBase
     {
         private readonly ISOS_ProcessRepository _AnalysisProcessRepository;
         private readonly IMapper _mapper;
