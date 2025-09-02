@@ -10,7 +10,7 @@ namespace SupervisorMobility.API.MapperProfiles.SOSMapperProfiles
         {
             CreateMap<SOSAnalysis, SOSAnalysisDto>().ReverseMap();
             CreateMap<SOSAnalysis, SOSAnalysisForCreateDto>().ReverseMap();
-            CreateMap<SOSAnalysis, SOSAnalysisForUpdateDto>().ReverseMap();
+            CreateMap<SOSAnalysis, SOSAnalysisForUpdateDto>().ReverseMap().ForMember(dest => dest.SOSHub, opt => opt.Ignore());
         }
     }
 }
