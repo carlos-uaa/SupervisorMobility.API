@@ -649,7 +649,7 @@ namespace SupervisorMobility.API.DataAccess.Services
                     master.Hci = slave;
                 }
 
-                if (! (master.Hci.HCIId == slave.HCIId))
+                if (!(master.Hci.HCIId == slave.HCIId))
                 {
                     master.Hci = slave;
                 }
@@ -2450,7 +2450,6 @@ namespace SupervisorMobility.API.DataAccess.Services
         public async Task<AsyncVoidMethodBuilder> RemoveAllOperationsSequenceFromSOSDistribution(SOSDistribution Master, List<SOSDistributionOperationSequence> operationSequences)
         {
             var validIds = operationSequences.Select(x => x.SOSDistributionOperationSequenceId).ToList();
-
             // Buscar en la base de datos todas las OperationSequences que NO estén en la lista de IDs válidos
             var toRemove = await _context.SOSDistributionOperationSequence
                 .Where(x => !validIds.Contains(x.SOSDistributionOperationSequenceId))
@@ -2822,6 +2821,12 @@ namespace SupervisorMobility.API.DataAccess.Services
         {
             try
             {
+                SOSHub? SOShub = AnalysisUpdate.SOSHub;
+                if (AnalysisUpdate.SOSHubId == null)
+                {
+                    throw new Exception("SOSHubId is required");
+                }
+
                 // Adjunta la entidad al contexto si no está ya adjunta
                 if (_context.Entry(AnalysisEntity).State == EntityState.Detached)
                 {
@@ -2835,10 +2840,25 @@ namespace SupervisorMobility.API.DataAccess.Services
                 }
                 else
                 {
+
                     _mapper.Map(AnalysisUpdate, AnalysisEntity);
                     _context.SOSAnalyses.Update(AnalysisEntity);
                 }
 
+
+                if (SOShub == null) throw new Exception("SOSHub not found");
+
+                IEnumerable<Section> allSections = AnalysisUpdate.SOSHub.Sections.ToList();
+
+                foreach (var section in allSections)
+                {
+                    Section? trackedSection = _context.Sections.FirstOrDefault(s => s.SectionId == section.SectionId);
+                    if (trackedSection != null)
+                    {
+                        trackedSection.IsMachineOperation = section.IsMachineOperation;
+                        _context.Entry(trackedSection).Property(a => a.IsMachineOperation).IsModified = true;
+                    }
+                }
                 return await _context.SaveChangesAsync();
             }
             catch (Exception ex)
@@ -3582,7 +3602,7 @@ namespace SupervisorMobility.API.DataAccess.Services
                         // Find the corresponding analysis
                         var analysis = SOS_DistributionToCreate.Analyses
                             .FirstOrDefault(a => a.SOSAnalysisId == opSeq.SequenceId);
-                        
+
                         if (analysis != null)
                         {
                             // Load Times collection if not already loaded
@@ -3590,7 +3610,7 @@ namespace SupervisorMobility.API.DataAccess.Services
                             {
                                 await _context.Entry(analysis).Collection(a => a.Times).LoadAsync();
                             }
-                            
+
                             if (analysis.Times != null && analysis.Times.Any())
                             {
                                 // Extract times for this section
@@ -3599,12 +3619,12 @@ namespace SupervisorMobility.API.DataAccess.Services
                                     .OrderBy(t => t.SOSTimeId)
                                     .Select(t => t.Time ?? "0")
                                     .Take(5); // Max 5 times per section
-                                
+
                                 // Create the time string (e.g., "2.5§3.2§1.8§0§0")
                                 var timeValues = sectionTimes.ToList();
                                 while (timeValues.Count < 5)
                                     timeValues.Add("0");
-                                
+
                                 opSeq.Times = string.Join("§", timeValues);
                             }
                         }
@@ -3614,7 +3634,7 @@ namespace SupervisorMobility.API.DataAccess.Services
                         // Similar logic for sequences
                         var sequence = SOS_DistributionToCreate.Sequences
                             .FirstOrDefault(s => s.SOSSequenceId == opSeq.SequenceId);
-                        
+
                         if (sequence != null)
                         {
                             // Load Times collection if not already loaded
@@ -3622,7 +3642,7 @@ namespace SupervisorMobility.API.DataAccess.Services
                             {
                                 await _context.Entry(sequence).Collection(s => s.Times).LoadAsync();
                             }
-                            
+
                             if (sequence.Times != null && sequence.Times.Any())
                             {
                                 var sectionTimes = sequence.Times
@@ -3630,11 +3650,11 @@ namespace SupervisorMobility.API.DataAccess.Services
                                     .OrderBy(t => t.SOSTimeId)
                                     .Select(t => t.Time ?? "0")
                                     .Take(5);
-                                
+
                                 var timeValues = sectionTimes.ToList();
                                 while (timeValues.Count < 5)
                                     timeValues.Add("0");
-                                
+
                                 opSeq.Times = string.Join("§", timeValues);
                             }
                         }
@@ -3644,21 +3664,21 @@ namespace SupervisorMobility.API.DataAccess.Services
 
             // Populate SOSHubs collection from Analyses and Sequences
             var allSOSHubIds = new HashSet<int>();
-            
+
             // Collect SOSHub IDs from Analyses
             foreach (var analysis in SOS_DistributionToCreate.Analyses)
             {
                 if (analysis.SOSHubId > 0)
                     allSOSHubIds.Add(analysis.SOSHubId);
             }
-            
+
             // Collect SOSHub IDs from Sequences
             foreach (var sequence in SOS_DistributionToCreate.Sequences)
             {
                 if (sequence.SOSHubId > 0)
                     allSOSHubIds.Add(sequence.SOSHubId);
             }
-            
+
             // Load and assign unique SOSHubs with their sections
             if (allSOSHubIds.Any())
             {
@@ -3666,12 +3686,12 @@ namespace SupervisorMobility.API.DataAccess.Services
                     .Where(h => allSOSHubIds.Contains(h.SOSHubId))
                     .Include(h => h.Sections)
                     .ToListAsync();
-                
+
                 SOS_DistributionToCreate.SOSHubs = sosHubs;
-                
+
                 // Create SOSDistributionOperationSequence records for each section
                 var operationSequences = new List<SOSDistributionOperationSequence>();
-                
+
                 foreach (var sosHub in sosHubs)
                 {
                     if (sosHub.Sections != null)
@@ -3688,20 +3708,20 @@ namespace SupervisorMobility.API.DataAccess.Services
                                     Times = "", // Default empty times
                                     IsActive = true
                                 };
-                                
+
                                 operationSequences.Add(operationSequence);
                                 Console.WriteLine($"DEBUG CreateSOSDistribution: Creating OperationSequence for Section {section.SectionId}");
                             }
                         }
                     }
                 }
-                
+
                 // Add the operation sequences to the distribution
                 foreach (var opSeq in operationSequences)
                 {
                     SOS_DistributionToCreate.SOSDistributionOperationSequence.Add(opSeq);
                 }
-                
+
                 Console.WriteLine($"DEBUG CreateSOSDistribution: Created {operationSequences.Count} operation sequences");
             }
 
@@ -3773,31 +3793,31 @@ namespace SupervisorMobility.API.DataAccess.Services
 
                     //if (sosDistribution.SOSHub != null)
                     //{
-                    //    await _context.Entry(sosDistribution.SOSHub).Collection(s => s.Sections).LoadAsync();
+                    //   await _context.Entry(sosDistribution.SOSHub).Collection(s => s.Sections).LoadAsync();
 
-                    //    foreach (var section in sosDistribution.SOSHub.Sections)
-                    //    {
-                    //        await _context.Entry(section).Collection(s => s.Analyses).LoadAsync();
-                    //    }
+                    //   foreach (var section in sosDistribution.SOSHub.Sections)
+                    //   {
+                    //       await _context.Entry(section).Collection(s => s.Analyses).LoadAsync();
+                    //   }
 
-                    //    await _context.Entry(sosDistribution.SOSHub).Collection(s => s.AppliedModels).LoadAsync();
-                    //    await _context.Entry(sosDistribution.SOSHub).Collection(s => s.ToolsUsed).LoadAsync();
-                    //    foreach (var toolUsed in sosDistribution.SOSHub.ToolsUsed)
-                    //    {
-                    //        await _context.Entry(toolUsed).Reference(t => t.Tool).LoadAsync();
-                    //    }
+                    //   await _context.Entry(sosDistribution.SOSHub).Collection(s => s.AppliedModels).LoadAsync();
+                    //   await _context.Entry(sosDistribution.SOSHub).Collection(s => s.ToolsUsed).LoadAsync();
+                    //   foreach (var toolUsed in sosDistribution.SOSHub.ToolsUsed)
+                    //   {
+                    //       await _context.Entry(toolUsed).Reference(t => t.Tool).LoadAsync();
+                    //   }
 
-                    //    await _context.Entry(sosDistribution.SOSHub).Collection(s => s.MaterialsUsed).LoadAsync();
-                    //    foreach (var materialUsed in sosDistribution.SOSHub.MaterialsUsed)
-                    //    {
-                    //        await _context.Entry(materialUsed).Reference(m => m.Material).LoadAsync();
-                    //    }
+                    //   await _context.Entry(sosDistribution.SOSHub).Collection(s => s.MaterialsUsed).LoadAsync();
+                    //   foreach (var materialUsed in sosDistribution.SOSHub.MaterialsUsed)
+                    //   {
+                    //       await _context.Entry(materialUsed).Reference(m => m.Material).LoadAsync();
+                    //   }
 
-                    //    await _context.Entry(sosDistribution.SOSHub).Collection(s => s.SafetyEquipment).LoadAsync();
-                    //    await _context.Entry(sosDistribution.SOSHub).Reference(s => s.Plant).LoadAsync();
-                    //    await _context.Entry(sosDistribution.SOSHub).Reference(s => s.Department).LoadAsync();
-                    //    await _context.Entry(sosDistribution.SOSHub).Collection(s => s.ApproverOwners).LoadAsync();
-                    //    await _context.Entry(sosDistribution.SOSHub).Collection(s => s.ReviewerEditors).LoadAsync();
+                    //   await _context.Entry(sosDistribution.SOSHub).Collection(s => s.SafetyEquipment).LoadAsync();
+                    //   await _context.Entry(sosDistribution.SOSHub).Reference(s => s.Plant).LoadAsync();
+                    //   await _context.Entry(sosDistribution.SOSHub).Reference(s => s.Department).LoadAsync();
+                    //   await _context.Entry(sosDistribution.SOSHub).Collection(s => s.ApproverOwners).LoadAsync();
+                    //   await _context.Entry(sosDistribution.SOSHub).Collection(s => s.ReviewerEditors).LoadAsync();
                     //}
                 }
 
@@ -3826,9 +3846,9 @@ namespace SupervisorMobility.API.DataAccess.Services
                     if (sosDistribution.SOSDistributionOperationSequence?.Count() == 0 && sosDistribution.SOSHubs?.Any() == true)
                     {
                         Console.WriteLine($"DEBUG GetSOSDistribution: No operation sequences found, creating them for distribution {SOSDistributionId}");
-                        
+
                         var newOperationSequences = new List<SOSDistributionOperationSequence>();
-                        
+
                         foreach (var sosHub in sosDistribution.SOSHubs)
                         {
                             if (sosHub.Sections != null)
@@ -3842,21 +3862,21 @@ namespace SupervisorMobility.API.DataAccess.Services
                                         Times = "",
                                         IsActive = true
                                     };
-                                    
+
                                     sosDistribution.SOSDistributionOperationSequence.Add(operationSequence);
                                     _context.SOSDistributionOperationSequence.Add(operationSequence);
                                     newOperationSequences.Add(operationSequence);
-                                    
+
                                     Console.WriteLine($"DEBUG GetSOSDistribution: Created OperationSequence for Section {section.SectionId}");
                                 }
                             }
                         }
-                        
+
                         if (newOperationSequences.Any())
                         {
                             await _context.SaveChangesAsync();
                             Console.WriteLine($"DEBUG GetSOSDistribution: Saved {newOperationSequences.Count} new operation sequences");
-                            
+
                             // Reload the operation sequences with their sections and analyses
                             await _context.Entry(sosDistribution).Collection(t => t.SOSDistributionOperationSequence).LoadAsync();
                             foreach (var operationSequence in sosDistribution.SOSDistributionOperationSequence)
@@ -3869,21 +3889,21 @@ namespace SupervisorMobility.API.DataAccess.Services
 
                     // Load SOSHubs collection for the distribution
                     var allSOSHubIds = new HashSet<int>();
-                    
+
                     // Collect SOSHub IDs from Sequences
                     foreach (var sequence in sosDistribution.Sequences)
                     {
                         if (sequence.SOSHubId > 0)
                             allSOSHubIds.Add(sequence.SOSHubId);
                     }
-                    
+
                     // Collect SOSHub IDs from Analyses
                     foreach (var analysis in sosDistribution.Analyses)
                     {
                         if (analysis.SOSHubId > 0)
                             allSOSHubIds.Add(analysis.SOSHubId);
                     }
-                    
+
                     // Load unique SOSHubs with their related data
                     if (allSOSHubIds.Any())
                     {
@@ -3902,13 +3922,13 @@ namespace SupervisorMobility.API.DataAccess.Services
                         // Sync critical points from SOSHubs to SOSDistributionOperationSequence analyses
                         Console.WriteLine($"DEBUG: SOSHubs count: {sosDistribution.SOSHubs?.Count() ?? 0}");
                         Console.WriteLine($"DEBUG: SOSDistributionOperationSequence count: {sosDistribution.SOSDistributionOperationSequence?.Count() ?? 0}");
-                        
+
                         // First, log all available hub analyses
                         var allHubAnalyses = sosDistribution.SOSHubs
                             .SelectMany(h => h.Sections)
                             .SelectMany(s => s.Analyses)
                             .ToList();
-                        
+
                         Console.WriteLine($"DEBUG: Total hub analyses available: {allHubAnalyses.Count}");
                         foreach (var hubAnalysis in allHubAnalyses)
                         {
@@ -3918,18 +3938,18 @@ namespace SupervisorMobility.API.DataAccess.Services
                                 Console.WriteLine($"DEBUG:   Critical Points: [{string.Join(", ", hubAnalysis.CriticalPoints)}]");
                             }
                         }
-                        
+
                         foreach (var operationSequence in sosDistribution.SOSDistributionOperationSequence)
                         {
                             Console.WriteLine($"DEBUG: Processing OpSeq {operationSequence.SOSDistributionOperationSequenceId}, SectionId: {operationSequence.SectionId}");
                             Console.WriteLine($"DEBUG: Section.Analyses count: {operationSequence.Section?.Analyses?.Count() ?? 0}");
-                            
+
                             if (operationSequence.Section?.Analyses != null)
                             {
                                 foreach (var opAnalysis in operationSequence.Section.Analyses)
                                 {
                                     Console.WriteLine($"DEBUG: Processing OpSeq Analysis ID: {opAnalysis.AnalysisId}, Text: '{opAnalysis.Text}', current CriticalPoints: {opAnalysis.CriticalPoints?.Count() ?? 0}");
-                                    
+
                                     // Find the corresponding analysis in SOSHubs with critical points
                                     var hubAnalysis = allHubAnalyses.FirstOrDefault(a => a.AnalysisId == opAnalysis.AnalysisId);
 
@@ -4152,7 +4172,6 @@ namespace SupervisorMobility.API.DataAccess.Services
                 {
                     master.SOSHubs = new List<SOSHub>();
                 }
-
                 // Verificar si el soshub ya está en la colección
                 if (!master.SOSHubs.Any(c => c.SOSHubId == slave.SOSHubId))
                 {
@@ -5783,7 +5802,7 @@ namespace SupervisorMobility.API.DataAccess.Services
                     await _context.Entry(operationSequence).Reference(t => t.Section).LoadAsync();
                     await _context.Entry(operationSequence?.Section).Collection(a => a.Analyses).LoadAsync();
                 }
-                         
+
 
                 if (includeLogbooks)
                 {
@@ -5800,7 +5819,7 @@ namespace SupervisorMobility.API.DataAccess.Services
 
                 if (includeSOS)
                 {
-                    await _context.Entry(sosSynopticRequirements).Collection(d => d.SOSHubs).LoadAsync();  
+                    await _context.Entry(sosSynopticRequirements).Collection(d => d.SOSHubs).LoadAsync();
                 }
 
                 if (includeCollections)
@@ -5833,7 +5852,7 @@ namespace SupervisorMobility.API.DataAccess.Services
         {
             var query = _context.SOSSynopticTableofOperatingRequirements.AsNoTracking().Where(SOS => SOS.IsActive == true);
 
-           
+
             if (includeLogbooks)
             {
                 query = query.Include(t => t.SynopticRequirementsLogbooks);
@@ -5848,7 +5867,7 @@ namespace SupervisorMobility.API.DataAccess.Services
 
             var sosSynopticRequirements = await query.ToListAsync();
 
-            
+
 
             if (includeLogbooks)
             {
@@ -5967,7 +5986,7 @@ namespace SupervisorMobility.API.DataAccess.Services
             throw new NotImplementedException();
         }
         public async Task<AsyncVoidMethodBuilder> RemoveAllOperationsSequenceFromSOSSynopticTableofOperatingRequirements(SOSSynopticTableofOperatingRequirements Master, List<SOSSynopticRequirementsOperationSequence> operationSequences)
-             {
+        {
             throw new NotImplementedException();
         }
 
