@@ -2852,6 +2852,7 @@ namespace SupervisorMobility.API.DataAccess.Services
 
                 foreach (var section in allSections)
                 {
+                    //var tracked = _context.Analyses.Local.FirstOrDefault(a => a.AnalysisId == analysis.AnalysisId);
                     Section? trackedSection = _context.Sections.FirstOrDefault(s => s.SectionId == section.SectionId);
                     if (trackedSection != null)
                     {
@@ -3727,6 +3728,15 @@ namespace SupervisorMobility.API.DataAccess.Services
 
             _context.SOSDistributions.Add(SOS_DistributionToCreate);
             return await _context.SaveChangesAsync();
+        }
+
+        public async Task<int> GetIdDistributionBySosHub(int IdSosHub)
+        {
+            var SOSDis = await _context.SOSHubs.Include(s => s.SOSDistribution.Where(d => d.IsActive == true)).Where(s => s.SOSHubId == IdSosHub).FirstOrDefaultAsync();
+            if (SOSDis == null) return 0;
+
+            if (SOSDis.SOSDistribution == null || !SOSDis.SOSDistribution.Any()) return 0;
+            return SOSDis.SOSDistribution.FirstOrDefault(d => d.SOSHubId == IdSosHub)?.SOSDistributionId ?? 0;
         }
 
         public async Task<SOSDistribution> GetSOSDistribution(int SOSDistributionId, bool includeImages = false, bool includeNotes = false, bool includeLogbooks = false, bool includeSOS = false, bool includeImagesSOS = false, bool includeTurns = false, bool includeTimes = false, bool includeCollections = false)

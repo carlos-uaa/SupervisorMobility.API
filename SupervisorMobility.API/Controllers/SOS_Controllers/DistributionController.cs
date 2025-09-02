@@ -13,6 +13,7 @@ using SupervisorMobility.API.Models.SOS.SOSHubDtos;
 using SupervisorMobility.API.Models.SOS.SOSHubDtos.SectionDtos;
 using SupervisorMobility.API.Models.SOS.SOSTimeDtos;
 using SupervisorMobility.API.Models.SOS.TurnDtos;
+using System.Collections.Generic;
 using System.Diagnostics;
 
 namespace SupervisorMobility.API.Controllers.SOS_Controllers
@@ -104,6 +105,22 @@ namespace SupervisorMobility.API.Controllers.SOS_Controllers
         {
 
             var SOSDistribution = await _ProcessRepository.GetSOSDistribution(id, includeImages, includeNotes, includeLogbooks, includeSOS, includeImagesSOS, includeTurns, includeTimes, includeCollections: includeCollections);
+            if (SOSDistribution == null)
+            {
+                return NotFound("SOSDistribution not found!");
+            }
+
+            var mappedDto = _mapper.Map<SOSDistributionDto>(SOSDistribution);
+
+            return Ok(mappedDto);
+        }
+
+        [HttpGet("bySosHub/{idSOSHub}", Name = "GetDistributionBySOSHub")]
+        public async Task<ActionResult<SOSDistributionDto>> GetDistributionBySOSHub(int idSOSHub, bool includeImages = false, bool includeNotes = false, bool includeLogbooks = false, bool includeSOS = false, bool includeImagesSOS = false, bool includeTurns = false, bool includeTimes = false, bool includeCollections = false)
+        {
+            var idDistribution = await _ProcessRepository.GetIdDistributionBySosHub(idSOSHub);
+
+            var SOSDistribution = await _ProcessRepository.GetSOSDistribution(idDistribution, includeImages, includeNotes, includeLogbooks, includeSOS, includeImagesSOS, includeTurns, includeTimes, includeCollections: includeCollections);
             if (SOSDistribution == null)
             {
                 return NotFound("SOSDistribution not found!");
@@ -265,17 +282,17 @@ namespace SupervisorMobility.API.Controllers.SOS_Controllers
 
             SOSDistribution _sosDistribution = await _ProcessRepository.GetSOSDistribution(sosDistribution_Id, true, true, true, true, includeTurns: true, includeTimes: true, includeCollections: true);
 
-            ////Aqui va el historico de ser necesario en  un futuro 
+            //Aqui va el historico de ser necesario en  un futuro 
 
-            ////Ejemplo de uso 
-            ////Compare genera un string que menciona las diferencias
-            ////string jsonResult = CompareAndGenerateJson(_mapper.Map<SOSHubForUpdateDto>(entitySOSHub), _SOSHubForUpdate);
-            ////se crea un entity 
-            ////SOSHubHistory newHistory = new SOSHubHistory();
-            ////_mapper.Map(entitySOSHub, newHistory);
-            ////newHistory.VersionChanges = jsonResult;
-            ////se almacena la entity anterior y se le añade el resumen de cambios
-            ////await _ProcessRepository.CreateHistorySOScollection(newHistory);
+            //Ejemplo de uso 
+            //Compare genera un string que menciona las diferencias
+            //string jsonResult = CompareAndGenerateJson(_mapper.Map<SOSHubForUpdateDto>(entitySOSHub), _SOSHubForUpdate);
+            //se crea un entity 
+            //SOSHubHistory newHistory = new SOSHubHistory();
+            //_mapper.Map(entitySOSHub, newHistory);
+            //newHistory.VersionChanges = jsonResult;
+            //se almacena la entity anterior y se le añade el resumen de cambios
+            //await _ProcessRepository.CreateHistorySOScollection(newHistory);
 
 
 
@@ -314,11 +331,42 @@ namespace SupervisorMobility.API.Controllers.SOS_Controllers
             }
 
             //Update 
-            foreach (var operationsequence in sosUpdateEntity.SOSDistributionOperationSequence)
+            //var validIds = operationSequences.Select(x => x.SOSDistributionOperationSequenceId).ToList();
+            //Console.WriteLine(validIds);
+            // Buscar en la base de datos todas las OperationSequences que NO estén en la lista de IDs válidos
+            //var toRemove = await _context.SOSDistributionOperationSequence
+            //    .Where(x => !validIds.Contains(x.SOSDistributionOperationSequenceId))
+            //    .ToListAsync();
+
+            List<int> idsNewPerSection = filteredSOSOperationSequenceList.Where(os => os.SectionId.HasValue).Select(os => os.SectionId.Value).ToList();
+
+            List<SOSDistributionOperationSequence> AllOperationSequences = _sosDistribution.SOSDistributionOperationSequence.Where(so => !idsNewPerSection.Contains(so.SOSDistributionOperationSequenceId)).ToList();
+            List<SOSDistributionOperationSequence> OperationSequencesDelete = new List<SOSDistributionOperationSequence>();
+            List<SOSDistributionOperationSequenceForUpdateDto> OperationSequencesUpdate = new List<SOSDistributionOperationSequenceForUpdateDto>();
+
+
+            foreach (var operationSequence in AllOperationSequences)
+            {
+                var findOperation = sosUpdateEntity.SOSDistributionOperationSequence.FirstOrDefault(a => a.SectionId == operationSequence.SectionId);
+                if (findOperation == null)
+                {
+                    OperationSequencesDelete.Add(operationSequence);
+                }
+                else
+                {
+                    OperationSequencesUpdate.Add(findOperation);
+                }
+            }
+
+            foreach (var operationsequence in OperationSequencesUpdate)
             {
                 var operationsequenceUpdate = await _ProcessRepository.UpdateSOSDistributionOperationSequences(operationsequence);
                 SOSDistributionOperationSequence timeBkaux = await _ProcessRepository.GetSOSDistributionOperationSequencesById(operationsequence.SOSDistributionOperationSequenceId);
                 Backup_DistributionOperationSequence.Add(timeBkaux);
+            }
+
+            foreach (var operationsequence in OperationSequencesDelete) {
+                await _ProcessRepository.DeleteSOSDistributionOperationSequencesById(operationsequence.SOSDistributionOperationSequenceId);
             }
 
             foreach (var turn in sosUpdateEntity.Turns)
@@ -333,7 +381,6 @@ namespace SupervisorMobility.API.Controllers.SOS_Controllers
             var hubIdsFromSequences = Bkup_Sequence.Select(s => s.SOSHubId);
 
             var allHubIds = hubIdsFromAnalyses.Concat(hubIdsFromSequences).Distinct().ToList();
-
             var hubsToAssociate = new List<SOSHub>();
             foreach (var hubId in allHubIds)
             {
@@ -342,10 +389,8 @@ namespace SupervisorMobility.API.Controllers.SOS_Controllers
                     hubsToAssociate.Add(hub);
             }
 
-
             //if (_sosDistribution.SOSHubs == null)
             //    _sosDistribution.SOSHubs = new List<SOSHub>();
-
 
             //Nulleamos el update para evitar errores
             sosUpdateEntity.SOSHubs = null;
@@ -361,7 +406,7 @@ namespace SupervisorMobility.API.Controllers.SOS_Controllers
             await _ProcessRepository.SOSDataRemoveAllSequencesFromSOSDistribution(_sosDistribution);
             await _ProcessRepository.SOSDataRemoveAllAnalysisFromSOSDistribution(_sosDistribution);
 
-            await _ProcessRepository.RemoveAllOperationsSequenceFromSOSDistribution(_sosDistribution, Backup_DistributionOperationSequence);
+            // await _ProcessRepository.RemoveAllOperationsSequenceFromSOSDistribution(_sosDistribution, Backup_DistributionOperationSequence);
  
             await _ProcessRepository.RemoveAllTurnsFromSOSDistribution(_sosDistribution);
             await _ProcessRepository.SOSDataRemoveAllNotesFromSOSDistribution(_sosDistribution);
@@ -390,7 +435,6 @@ namespace SupervisorMobility.API.Controllers.SOS_Controllers
                     await _ProcessRepository.AddSequenceToSOSDistribution(_sosDistribution, Sequence);
                 }
             }
-
 
 
 
@@ -431,17 +475,19 @@ namespace SupervisorMobility.API.Controllers.SOS_Controllers
 
             await _ProcessRepository.AddSOSDistributionAdditionalTimeToSOSDistribution(_sosDistribution, additionalTime);
 
+
              if (hubsToAssociate.Any())
             {
                 foreach (SOSHub hub in hubsToAssociate)
                 {
-                    if (!_sosDistribution.SOSHubs.Any(h => h.SOSHubId == hub.SOSHubId))
+                    if (_sosDistribution.SOSHubs.Any(h => h.SOSHubId == hub.SOSHubId))
                         await _ProcessRepository.AddSOSHubToSOSDistribution(_sosDistribution, hub);
                 }
             }
 
             // aqui me falta una verificacion para que se añada la relacioncon los soshubs
             // si hay soscombinationoperations o analisis o secuencia debe haber 1 sos hub
+
 
 
             if (_sosDistribution.SOSHubs == null || !_sosDistribution.SOSHubs.Any())
