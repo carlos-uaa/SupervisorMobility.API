@@ -283,6 +283,7 @@ namespace SupervisorMobility.API.DataAccess.Services
         #region SOSDistributionOperationSequences
         Task<SOSDistributionOperationSequence> GetSOSDistributionOperationSequencesById(int id);
         Task<int> UpdateSOSDistributionOperationSequences(SOSDistributionOperationSequenceForUpdateDto OperationSequenceForUpdate);
+        Task<AsyncVoidMethodBuilder> DeleteSOSDistributionOperationSequencesById(int OperationSequenceId);
         Task<List<SOSDistributionOperationSequence>> AddRangeSOSDistributionOperationSequences(List<SOSDistributionOperationSequence> SOSOperationSequencesToAdd);
         Task<AsyncVoidMethodBuilder> RemoveAllOperationsSequenceFromSOSDistribution(SOSDistribution Master, List<SOSDistributionOperationSequence> operationSequences);
         #endregion

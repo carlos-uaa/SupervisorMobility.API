@@ -4733,6 +4733,31 @@ namespace SupervisorMobility.API.DataAccess.Services
             }
         }
 
+        public async Task<AsyncVoidMethodBuilder> DeleteSOSDistributionOperationSequencesById(int OperationSequenceId)
+        {
+            try
+            {
+                var localEntry = _context.SOSDistributionOperationSequence.Local.FirstOrDefault(entry => entry.SOSDistributionOperationSequenceId == OperationSequenceId);
+
+                if (localEntry != null)
+                {
+                    _context.SOSDistributionOperationSequence.Remove(localEntry);
+                }
+                else
+                {
+                    var dbEntry = await _context.SOSDistributionOperationSequence.FirstOrDefaultAsync(entry => entry.SOSDistributionOperationSequenceId == OperationSequenceId);
+                    if (dbEntry != null){ _context.SOSDistributionOperationSequence.Remove(dbEntry);}
+                }
+
+                await _context.SaveChangesAsync();
+                return new AsyncVoidMethodBuilder();
+            }
+            catch (Exception ex)
+            {
+                Debug.WriteLine("An error occurred while updating the operationSequence: " + ex.Message);
+                return new AsyncVoidMethodBuilder();
+            }
+        }
         public async Task<List<SOSDistributionOperationSequence>> AddRangeSOSDistributionOperationSequences(List<SOSDistributionOperationSequence> SOSOperationSequencesToAdd)
         {
             _context.SOSDistributionOperationSequence.AddRange(SOSOperationSequencesToAdd);
