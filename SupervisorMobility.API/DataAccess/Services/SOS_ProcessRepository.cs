@@ -3927,6 +3927,8 @@ namespace SupervisorMobility.API.DataAccess.Services
                             .Include(s => s.MaterialsUsed)
                             .ThenInclude(m => m.Material)
                             .Include(s => s.SafetyEquipment)
+                            .Include(p => p.Plant)
+                            .Include(d => d.Department)
                             .ToListAsync();
 
                         // Sync critical points from SOSHubs to SOSDistributionOperationSequence analyses
