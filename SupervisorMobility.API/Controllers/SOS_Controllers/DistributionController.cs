@@ -330,43 +330,12 @@ namespace SupervisorMobility.API.Controllers.SOS_Controllers
                 Bkup_DistributionLogbook.Add(distributionBkaux);
             }
 
-            //Update 
-            //var validIds = operationSequences.Select(x => x.SOSDistributionOperationSequenceId).ToList();
-            //Console.WriteLine(validIds);
-            // Buscar en la base de datos todas las OperationSequences que NO estén en la lista de IDs válidos
-            //var toRemove = await _context.SOSDistributionOperationSequence
-            //    .Where(x => !validIds.Contains(x.SOSDistributionOperationSequenceId))
-            //    .ToListAsync();
-
-            List<int> idsNewPerSection = filteredSOSOperationSequenceList.Where(os => os.SectionId.HasValue).Select(os => os.SectionId.Value).ToList();
-
-            List<SOSDistributionOperationSequence> AllOperationSequences = _sosDistribution.SOSDistributionOperationSequence.Where(so => !idsNewPerSection.Contains(so.SOSDistributionOperationSequenceId)).ToList();
-            List<SOSDistributionOperationSequence> OperationSequencesDelete = new List<SOSDistributionOperationSequence>();
-            List<SOSDistributionOperationSequenceForUpdateDto> OperationSequencesUpdate = new List<SOSDistributionOperationSequenceForUpdateDto>();
-
-
-            foreach (var operationSequence in AllOperationSequences)
-            {
-                var findOperation = sosUpdateEntity.SOSDistributionOperationSequence.FirstOrDefault(a => a.SectionId == operationSequence.SectionId);
-                if (findOperation == null)
-                {
-                    OperationSequencesDelete.Add(operationSequence);
-                }
-                else
-                {
-                    OperationSequencesUpdate.Add(findOperation);
-                }
-            }
-
-            foreach (var operationsequence in OperationSequencesUpdate)
+            //Update
+            foreach (var operationsequence in sosUpdateEntity.SOSDistributionOperationSequence)
             {
                 var operationsequenceUpdate = await _ProcessRepository.UpdateSOSDistributionOperationSequences(operationsequence);
                 SOSDistributionOperationSequence timeBkaux = await _ProcessRepository.GetSOSDistributionOperationSequencesById(operationsequence.SOSDistributionOperationSequenceId);
                 Backup_DistributionOperationSequence.Add(timeBkaux);
-            }
-
-            foreach (var operationsequence in OperationSequencesDelete) {
-                await _ProcessRepository.DeleteSOSDistributionOperationSequencesById(operationsequence.SOSDistributionOperationSequenceId);
             }
 
             foreach (var turn in sosUpdateEntity.Turns)
@@ -405,8 +374,6 @@ namespace SupervisorMobility.API.Controllers.SOS_Controllers
 
             await _ProcessRepository.SOSDataRemoveAllSequencesFromSOSDistribution(_sosDistribution);
             await _ProcessRepository.SOSDataRemoveAllAnalysisFromSOSDistribution(_sosDistribution);
-
-            // await _ProcessRepository.RemoveAllOperationsSequenceFromSOSDistribution(_sosDistribution, Backup_DistributionOperationSequence);
  
             await _ProcessRepository.RemoveAllTurnsFromSOSDistribution(_sosDistribution);
             await _ProcessRepository.SOSDataRemoveAllNotesFromSOSDistribution(_sosDistribution);
