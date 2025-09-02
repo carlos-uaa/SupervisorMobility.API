@@ -330,12 +330,36 @@ namespace SupervisorMobility.API.Controllers.SOS_Controllers
                 Bkup_DistributionLogbook.Add(distributionBkaux);
             }
 
-            //Update
-            foreach (var operationsequence in sosUpdateEntity.SOSDistributionOperationSequence)
+            //Update 
+            List<int> idsNewPerSection = filteredSOSOperationSequenceList.Where(os => os.SectionId.HasValue).Select(os => os.SectionId.Value).ToList();
+
+            List<SOSDistributionOperationSequence> AllOperationSequences = _sosDistribution.SOSDistributionOperationSequence.Where(so => !idsNewPerSection.Contains(so.SOSDistributionOperationSequenceId)).ToList();
+            List<SOSDistributionOperationSequence> OperationSequencesDelete = new List<SOSDistributionOperationSequence>();
+            List<SOSDistributionOperationSequenceForUpdateDto> OperationSequencesUpdate = new List<SOSDistributionOperationSequenceForUpdateDto>();
+
+
+            foreach (var operationSequence in AllOperationSequences)
+            {
+                var findOperation = sosUpdateEntity.SOSDistributionOperationSequence.FirstOrDefault(a => a.SectionId == operationSequence.SectionId);
+                if (findOperation == null)
+                {
+                    OperationSequencesDelete.Add(operationSequence);
+                }
+                else
+                {
+                    OperationSequencesUpdate.Add(findOperation);
+                }
+            }
+
+            foreach (var operationsequence in OperationSequencesUpdate)
             {
                 var operationsequenceUpdate = await _ProcessRepository.UpdateSOSDistributionOperationSequences(operationsequence);
                 SOSDistributionOperationSequence timeBkaux = await _ProcessRepository.GetSOSDistributionOperationSequencesById(operationsequence.SOSDistributionOperationSequenceId);
                 Backup_DistributionOperationSequence.Add(timeBkaux);
+            }
+
+            foreach (var operationsequence in OperationSequencesDelete) {
+                await _ProcessRepository.DeleteSOSDistributionOperationSequencesById(operationsequence.SOSDistributionOperationSequenceId);
             }
 
             foreach (var turn in sosUpdateEntity.Turns)
