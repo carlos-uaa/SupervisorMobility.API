@@ -4475,34 +4475,64 @@ namespace SupervisorMobility.API.DataAccess.Services
 
         public async Task<AsyncVoidMethodBuilder> SOSDataRemoveAllSOSHubsFromSOSDistribution(SOSDistribution master)
         {
-            // 1. Busca la instancia rastreada en el contexto local
+            // Check if entity is already being tracked
             var localMaster = _context.SOSDistributions.Local
                 .FirstOrDefault(d => d.SOSDistributionId == master.SOSDistributionId);
 
             if (localMaster != null)
             {
-                master = localMaster;
+                // Use the tracked instance
+                if (!_context.Entry(localMaster).Collection(d => d.SOSHubs).IsLoaded)
+                    await _context.Entry(localMaster).Collection(d => d.SOSHubs).LoadAsync();
+
+                localMaster.SOSHubs?.Clear();
+                await _context.SaveChangesAsync();
             }
             else
             {
-                // 2. Adjunta solo si el estado es Detached y no hay otra instancia rastreada
-                if (_context.Entry(master).State == EntityState.Detached)
+                // For untracked entities, use a completely separate context to avoid any conflicts
+                // This isolates the operation from any existing tracking state
+                var connectionString = _context.Database.GetConnectionString();
+                var optionsBuilder = new DbContextOptionsBuilder<SupervisorMobilityContext>();
+                optionsBuilder.UseSqlServer(connectionString);
+                
+                using (var isolatedContext = new SupervisorMobilityContext(optionsBuilder.Options))
                 {
-                    _context.SOSDistributions.Attach(master);
+                    // Load the distribution with only hubs in the clean context
+                    var distributionWithHubs = await isolatedContext.SOSDistributions
+                        .Include(d => d.SOSHubs)
+                        .FirstOrDefaultAsync(d => d.SOSDistributionId == master.SOSDistributionId);
+
+                    if (distributionWithHubs?.SOSHubs?.Any() == true)
+                    {
+                        // Clear the hubs in the isolated context
+                        distributionWithHubs.SOSHubs.Clear();
+                        await isolatedContext.SaveChangesAsync();
+                    }
                 }
             }
 
-            // 3. Carga la colección de hubs si es necesario
-            if (!_context.Entry(master).Collection(d => d.SOSHubs).IsLoaded)
-                await _context.Entry(master).Collection(d => d.SOSHubs).LoadAsync();
-
-            // 4. Limpia la colección (esto elimina las filas de la tabla de unión)
-            master.SOSHubs?.Clear();
-
-            // 5. Guarda los cambios
-            await _context.SaveChangesAsync();
-
             return new AsyncVoidMethodBuilder();
+        }
+
+        private void DetachAllConflictingEntities()
+        {
+            // Detach all potentially conflicting entities
+            var entriesToDetach = _context.ChangeTracker.Entries()
+                .Where(e => 
+                    e.Entity.GetType().Name.Contains("Section") ||
+                    e.Entity.GetType().Name.Contains("SOSHub") ||
+                    e.Entity.GetType().Name.Contains("SOSDistributionOperationSequence") ||
+                    e.Entity.GetType().Name.Contains("Distribution") ||
+                    e.Entity.GetType().Name.Contains("Operation") ||
+                    e.Entity.GetType().Name.Contains("Area") ||
+                    e.Entity.GetType().Name.Contains("Plant"))
+                .ToList();
+
+            foreach (var entry in entriesToDetach)
+            {
+                entry.State = EntityState.Detached;
+            }
         }
 
 

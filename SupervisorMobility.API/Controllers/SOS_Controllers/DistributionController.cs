@@ -330,23 +330,27 @@ namespace SupervisorMobility.API.Controllers.SOS_Controllers
                 Bkup_DistributionLogbook.Add(distributionBkaux);
             }
 
-            //Update 
-            List<int> idsNewPerSection = filteredSOSOperationSequenceList.Where(os => os.SectionId.HasValue).Select(os => os.SectionId.Value).ToList();
-
-            List<SOSDistributionOperationSequence> AllOperationSequences = _sosDistribution.SOSDistributionOperationSequence.Where(so => !idsNewPerSection.Contains(so.SOSDistributionOperationSequenceId)).ToList();
+            //Update - Process ALL sequences from the request, not just new ones
             List<SOSDistributionOperationSequence> OperationSequencesDelete = new List<SOSDistributionOperationSequence>();
             List<SOSDistributionOperationSequenceForUpdateDto> OperationSequencesUpdate = new List<SOSDistributionOperationSequenceForUpdateDto>();
 
+            // Get all existing sequences
+            var existingSequences = _sosDistribution.SOSDistributionOperationSequence?.ToList() ?? new List<SOSDistributionOperationSequence>();
+            
+            // Get all sequences from the request (both new and existing)
+            var requestSequences = sosUpdateEntity.SOSDistributionOperationSequence?.ToList() ?? new List<SOSDistributionOperationSequenceForUpdateDto>();
 
-            foreach (var operationSequence in AllOperationSequences)
+            foreach (var existingSequence in existingSequences)
             {
-                var findOperation = sosUpdateEntity.SOSDistributionOperationSequence.FirstOrDefault(a => a.SectionId == operationSequence.SectionId);
+                var findOperation = requestSequences.FirstOrDefault(a => a.SOSDistributionOperationSequenceId == existingSequence.SOSDistributionOperationSequenceId);
                 if (findOperation == null)
                 {
-                    OperationSequencesDelete.Add(operationSequence);
+                    // Sequence not in request - mark for deletion
+                    OperationSequencesDelete.Add(existingSequence);
                 }
                 else
                 {
+                    // Sequence found in request - mark for update
                     OperationSequencesUpdate.Add(findOperation);
                 }
             }
@@ -384,6 +388,23 @@ namespace SupervisorMobility.API.Controllers.SOS_Controllers
 
             //if (_sosDistribution.SOSHubs == null)
             //    _sosDistribution.SOSHubs = new List<SOSHub>();
+
+            // Store the sequence ordering information from the request before nullifying
+            Dictionary<int, int> sequenceOrderMap = new Dictionary<int, int>();
+            if (sosUpdateEntity.SOSDistributionOperationSequence != null)
+            {
+                foreach (var opSeq in sosUpdateEntity.SOSDistributionOperationSequence)
+                {
+                    if (opSeq.SOSDistributionOperationSequenceId > 0 && opSeq.SequenceId.HasValue)
+                    {
+                        // Use the sequenceId from the request as-is (it represents the desired order)
+                        sequenceOrderMap[opSeq.SOSDistributionOperationSequenceId] = opSeq.SequenceId.Value;
+                    }
+                }
+                
+                // Debug: Log what we captured
+                System.Diagnostics.Debug.WriteLine($"Captured sequence mappings: {string.Join(", ", sequenceOrderMap.Select(kvp => $"ID{kvp.Key}=>{kvp.Value}"))}");
+            }
 
             //Nulleamos el update para evitar errores
             sosUpdateEntity.SOSHubs = null;
@@ -446,11 +467,30 @@ namespace SupervisorMobility.API.Controllers.SOS_Controllers
                 }
             }
 
-            //Times
+            //Times - Apply updated sequence ordering
             if (Backup_DistributionOperationSequence.Any())
             {
-                foreach (SOSDistributionOperationSequence operationSequence in Backup_DistributionOperationSequence)
+                // Debug: Log the sequence order map
+                System.Diagnostics.Debug.WriteLine($"Sequence Order Map: {string.Join(", ", sequenceOrderMap.Select(kvp => $"{kvp.Key}={kvp.Value}"))}");
+                
+                // Sort backup sequences by their new order to ensure proper insertion sequence
+                var orderedBackupSequences = Backup_DistributionOperationSequence
+                    .OrderBy(ops => sequenceOrderMap.ContainsKey(ops.SOSDistributionOperationSequenceId) 
+                        ? sequenceOrderMap[ops.SOSDistributionOperationSequenceId] 
+                        : int.MaxValue)
+                    .ToList();
+
+                foreach (SOSDistributionOperationSequence operationSequence in orderedBackupSequences)
                 {
+                    var oldSequenceId = operationSequence.SequenceId;
+                    
+                    // Apply the updated sequence order if it was provided in the request
+                    if (sequenceOrderMap.ContainsKey(operationSequence.SOSDistributionOperationSequenceId))
+                    {
+                        operationSequence.SequenceId = sequenceOrderMap[operationSequence.SOSDistributionOperationSequenceId];
+                        System.Diagnostics.Debug.WriteLine($"Updated sequence {operationSequence.SOSDistributionOperationSequenceId}: {oldSequenceId} -> {operationSequence.SequenceId}");
+                    }
+                    
                     await _ProcessRepository.AddOperationSequenceToSOSDistribution(_sosDistribution, operationSequence);
                 }
             }
