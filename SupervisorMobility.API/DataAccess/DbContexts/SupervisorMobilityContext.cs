@@ -130,6 +130,7 @@ namespace SupervisorMobility.API.Context
         public DbSet<SOSSequenceLogbook> SOSSequenceLogbooks { get; set; }
 
         public DbSet<SOSSynopticTableofOperatingRequirements> SOSSynopticTableofOperatingRequirements { get; set; }
+        public DbSet<SOSSynopticTableRequirementOperationDifficulty> SOSSynopticTableRequirementOperationDifficulty { get; set; }
         public DbSet<SOSSynopticRequirementsOperationSequence> SOSSynopticRequirementsOperationSequences { get; set; }
         public DbSet<SOSSynopticRequirementsLogbook> SOSSynopticRequirementsLogbooks { get; set; }
 
