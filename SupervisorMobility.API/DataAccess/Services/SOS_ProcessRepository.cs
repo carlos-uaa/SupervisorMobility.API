@@ -8,6 +8,8 @@ using SupervisorMobility.API.Context;
 using SupervisorMobility.API.DataAccess.Entities;
 using SupervisorMobility.API.DataAccess.Entities.SOS;
 using SupervisorMobility.API.DataAccess.Entities.SOS.History;
+using SupervisorMobility.API.DataAccess.Entities.SOS.STRO.Dtos;
+using SupervisorMobility.API.DataAccess.Entities.SOS.STRO.Enums;
 using SupervisorMobility.API.Models.CommentaryDtos;
 using SupervisorMobility.API.Models.FileUploadDto;
 using SupervisorMobility.API.Models.SOS.EquipmentDtos;
@@ -5808,57 +5810,14 @@ namespace SupervisorMobility.API.DataAccess.Services
         {
             var analysesCopy = SOS_SynopticTableofOperatingRequirementsToCreate.Analyses.ToList();
 
-            for (int j = 0; j < analysesCopy.Count; j++)
-            {
-                var Analysis = analysesCopy[j];
-                var localMasterEntry = _context.SOSAnalyses.Local
-                    .FirstOrDefault(entry => entry.SOSAnalysisId == Analysis.SOSAnalysisId);
-
-                if (localMasterEntry != null)
-                {
-                    SOS_SynopticTableofOperatingRequirementsToCreate.Analyses.Remove(Analysis);
-                    SOS_SynopticTableofOperatingRequirementsToCreate.Analyses.Add(localMasterEntry);
-                }
-                else
-                {
-                    if (_context.Entry(Analysis).State == EntityState.Detached)
-                    {
-                        _context.SOSAnalyses.Attach(Analysis);
-                    }
-                }
-            }
-
-            var sequencesCopy = SOS_SynopticTableofOperatingRequirementsToCreate.Sequences.ToList();
-
-            for (int j = 0; j < sequencesCopy.Count; j++)
-            {
-                var sequence = sequencesCopy[j];
-                var localMasterEntry = _context.SOSSequences.Local
-                    .FirstOrDefault(entry => entry.SOSSequenceId == sequence.SOSSequenceId);
-
-                if (localMasterEntry != null)
-                {
-                    SOS_SynopticTableofOperatingRequirementsToCreate.Sequences.Remove(sequence);
-                    SOS_SynopticTableofOperatingRequirementsToCreate.Sequences.Add(localMasterEntry);
-                }
-                else
-                {
-                    if (_context.Entry(sequence).State == EntityState.Detached)
-                    {
-                        _context.SOSSequences.Attach(sequence);
-                    }
-                }
-            }
-
             _context.SOSSynopticTableofOperatingRequirements.Add(SOS_SynopticTableofOperatingRequirementsToCreate);
             return _context.SaveChanges();
         }
         public async Task<SOSSynopticTableofOperatingRequirements> GetSOSSynopticTableofOperatingRequirements(int SOSSynopticTableofOperatingRequirementsId, bool includeLogbooks = false, bool includeSOS = false, bool includeCollections = false)
         {
-            var query = _context.SOSSynopticTableofOperatingRequirements.AsNoTracking()
-               .Where(SOS => SOS.SOSSynopticTableofOperatingRequirementsId == SOSSynopticTableofOperatingRequirementsId && SOS.IsActive == true);
+            var query = _context.SOSSynopticTableofOperatingRequirements.AsNoTracking().Where(SOS => SOS.SOSSynopticTableofOperatingRequirementsId == SOSSynopticTableofOperatingRequirementsId && SOS.IsActive == true);
 
-            var sosSynopticRequirements = await query.FirstOrDefaultAsync();
+            var sosSynopticRequirements = await query.Include(d=>d.RequirementDifficulties).FirstOrDefaultAsync();
 
             if (sosSynopticRequirements != null)
             {
@@ -5947,9 +5906,69 @@ namespace SupervisorMobility.API.DataAccess.Services
 
             return sosSynopticRequirements;
         }
-        public async Task<int> UpdateSOSSynopticTableofOperatingRequirements(SOSSynopticRequirementsForUpdateDto SynopticTableofOperatingRequirementsUpdate, SOSSynopticTableofOperatingRequirements SynopticTableofOperatingRequirementsEntity)
+        public async Task<SOSSynopticTableofOperatingRequirements> UpdateSOSSynopticTableofOperatingRequirements(int sosSynopticTableofOperatingRequirements_Id, SOSSynopticTableofOperatingRequirementsForUpdateDto STROUpdate)
         {
-            throw new NotImplementedException();
+            var entity = await _context.SOSSynopticTableofOperatingRequirements
+                .Include(s => s.SOSHubs)
+                .Include(e => e.RequirementDifficulties)
+                .FirstOrDefaultAsync(e => e.SOSSynopticTableofOperatingRequirementsId == sosSynopticTableofOperatingRequirements_Id);
+
+
+            if (entity == null) throw new Exception("STRO not found");
+
+            _context.Entry(entity).CurrentValues.SetValues(STROUpdate);
+
+            if (STROUpdate.SOSHubIds != null)
+            {
+                var currentSosHubs = entity.SOSHubs.Select(a => a.SOSHubId).ToList();
+
+                var RemoveSOSHubs = entity.SOSHubs.Where(h => !STROUpdate.SOSHubIds.Contains(h.SOSHubId)).ToList();
+
+                foreach (var hub in RemoveSOSHubs) entity.SOSHubs.Remove(hub);
+
+                var ToAddNewSOSHubs = STROUpdate.SOSHubIds.Except(currentSosHubs);
+
+                foreach (var HubId in ToAddNewSOSHubs)
+                {
+                    var FindHub = await _context.SOSHubs.FindAsync(HubId);
+                    if (FindHub != null) entity.SOSHubs.Add(FindHub);
+                }
+            }
+
+            if (STROUpdate.RequirementDifficulties != null)
+            {
+                var currentRD = entity.RequirementDifficulties!.ToList();
+
+                var ToRemoveRD = currentRD.Where(d => !STROUpdate.RequirementDifficulties.Any(dd => dd.SOSHubId == d.SOSHubId)).ToList();
+
+                _context.SOSSynopticTableRequirementOperationDifficulty.RemoveRange(ToRemoveRD);
+
+                foreach(var requirementDiff in STROUpdate.RequirementDifficulties) {
+                    var existing = currentRD.FirstOrDefault(sd => sd.SOSHubId == requirementDiff.SOSHubId);
+
+                    if(existing == null)
+                    {
+                        var addRequirementDiff = new SOSSynopticTableRequirementOperationDifficulty
+                        {
+                            SOSSynopticTableofOperatingRequirementsId = entity.SOSSynopticTableofOperatingRequirementsId,
+                            SOSHubId = requirementDiff.SOSHubId,
+                            DifficultyLevel = requirementDiff.DifficultyLevel
+                        };
+
+                        entity.RequirementDifficulties!.Add(addRequirementDiff);
+                    }
+                    else
+                    {
+                        existing.DifficultyLevel = requirementDiff.DifficultyLevel;
+                    }
+                }
+
+            }
+
+            await _context.SaveChangesAsync();
+
+            return entity;
+
         }
         public async Task<int> RemoveSOSSynopticTableofOperatingRequirements(int SOS_SynopticTableofOperatingRequirements_id)
         {
