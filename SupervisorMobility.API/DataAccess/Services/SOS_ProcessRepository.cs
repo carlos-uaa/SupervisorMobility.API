@@ -8,6 +8,7 @@ using SupervisorMobility.API.Context;
 using SupervisorMobility.API.DataAccess.Entities;
 using SupervisorMobility.API.DataAccess.Entities.SOS;
 using SupervisorMobility.API.DataAccess.Entities.SOS.History;
+using SupervisorMobility.API.DataAccess.Entities.SOS.STRO;
 using SupervisorMobility.API.DataAccess.Entities.SOS.STRO.Dtos;
 using SupervisorMobility.API.DataAccess.Entities.SOS.STRO.Enums;
 using SupervisorMobility.API.Models.CommentaryDtos;
@@ -4497,7 +4498,7 @@ namespace SupervisorMobility.API.DataAccess.Services
                 var connectionString = _context.Database.GetConnectionString();
                 var optionsBuilder = new DbContextOptionsBuilder<SupervisorMobilityContext>();
                 optionsBuilder.UseSqlServer(connectionString);
-                
+
                 using (var isolatedContext = new SupervisorMobilityContext(optionsBuilder.Options))
                 {
                     // Load the distribution with only hubs in the clean context
@@ -4521,7 +4522,7 @@ namespace SupervisorMobility.API.DataAccess.Services
         {
             // Detach all potentially conflicting entities
             var entriesToDetach = _context.ChangeTracker.Entries()
-                .Where(e => 
+                .Where(e =>
                     e.Entity.GetType().Name.Contains("Section") ||
                     e.Entity.GetType().Name.Contains("SOSHub") ||
                     e.Entity.GetType().Name.Contains("SOSDistributionOperationSequence") ||
@@ -4778,7 +4779,7 @@ namespace SupervisorMobility.API.DataAccess.Services
                 else
                 {
                     var dbEntry = await _context.SOSDistributionOperationSequence.FirstOrDefaultAsync(entry => entry.SOSDistributionOperationSequenceId == OperationSequenceId);
-                    if (dbEntry != null){ _context.SOSDistributionOperationSequence.Remove(dbEntry);}
+                    if (dbEntry != null) { _context.SOSDistributionOperationSequence.Remove(dbEntry); }
                 }
 
                 await _context.SaveChangesAsync();
@@ -5817,7 +5818,7 @@ namespace SupervisorMobility.API.DataAccess.Services
         {
             var query = _context.SOSSynopticTableofOperatingRequirements.AsNoTracking().Where(SOS => SOS.SOSSynopticTableofOperatingRequirementsId == SOSSynopticTableofOperatingRequirementsId && SOS.IsActive == true);
 
-            var sosSynopticRequirements = await query.Include(d=>d.RequirementDifficulties).FirstOrDefaultAsync();
+            var sosSynopticRequirements = await query.Include(d => d.RequirementDifficulties).Include(k => k.SOSSTROKnowledge).Include(s => s.SOSSTROSkill).FirstOrDefaultAsync();
 
             if (sosSynopticRequirements != null)
             {
@@ -5906,26 +5907,42 @@ namespace SupervisorMobility.API.DataAccess.Services
 
             return sosSynopticRequirements;
         }
+
+        /// <summary>
+        /// Updates an existing SOSSynopticTableofOperatingRequirements entity with the provided DTO data.
+        /// Handles updates to related SOS hubs, requirement difficulties, knowledge, and skills.
+        /// </summary>
+        /// <param name="sosSynopticTableofOperatingRequirements_Id">The ID of the STRO entity to update.</param>
+        /// <param name="STROUpdate">The DTO containing updated fields and related entities.</param>
+        /// <returns>The updated <see cref="SOSSynopticTableofOperatingRequirements"/> entity.</returns>
+        /// <exception cref="Exception">Thrown if the specified STRO entity is not found.</exception>
         public async Task<SOSSynopticTableofOperatingRequirements> UpdateSOSSynopticTableofOperatingRequirements(int sosSynopticTableofOperatingRequirements_Id, SOSSynopticTableofOperatingRequirementsForUpdateDto STROUpdate)
         {
+            // NOTE: Load the STRO entity with all related collections to ensure full update
             var entity = await _context.SOSSynopticTableofOperatingRequirements
                 .Include(s => s.SOSHubs)
                 .Include(e => e.RequirementDifficulties)
+                .Include(k => k.SOSSTROKnowledge)
+                .Include(s => s.SOSSTROSkill)
                 .FirstOrDefaultAsync(e => e.SOSSynopticTableofOperatingRequirementsId == sosSynopticTableofOperatingRequirements_Id);
 
 
             if (entity == null) throw new Exception("STRO not found");
 
+            // NOTE: Update main entity properties
             _context.Entry(entity).CurrentValues.SetValues(STROUpdate);
 
+            // +============ SOS HUBS UPDATE =============+
             if (STROUpdate.SOSHubIds != null)
             {
                 var currentSosHubs = entity.SOSHubs.Select(a => a.SOSHubId).ToList();
 
+                // NOTE: Remove hubs no longer present
                 var RemoveSOSHubs = entity.SOSHubs.Where(h => !STROUpdate.SOSHubIds.Contains(h.SOSHubId)).ToList();
 
                 foreach (var hub in RemoveSOSHubs) entity.SOSHubs.Remove(hub);
 
+                // NOTE: Add new hubs
                 var ToAddNewSOSHubs = STROUpdate.SOSHubIds.Except(currentSosHubs);
 
                 foreach (var HubId in ToAddNewSOSHubs)
@@ -5935,18 +5952,21 @@ namespace SupervisorMobility.API.DataAccess.Services
                 }
             }
 
+            // +============ REQUIREMENT DIFFICULTIES UPDATE =============+
             if (STROUpdate.RequirementDifficulties != null)
             {
-                var currentRD = entity.RequirementDifficulties!.ToList();
+                var currentRD = entity.RequirementDifficulties.ToList();
 
+                // NOTE: Remove difficulties no longer present
                 var ToRemoveRD = currentRD.Where(d => !STROUpdate.RequirementDifficulties.Any(dd => dd.SOSHubId == d.SOSHubId)).ToList();
-
                 _context.SOSSynopticTableRequirementOperationDifficulty.RemoveRange(ToRemoveRD);
 
-                foreach(var requirementDiff in STROUpdate.RequirementDifficulties) {
+                // NOTE: Update existing or add new difficulties
+                foreach (var requirementDiff in STROUpdate.RequirementDifficulties)
+                {
                     var existing = currentRD.FirstOrDefault(sd => sd.SOSHubId == requirementDiff.SOSHubId);
 
-                    if(existing == null)
+                    if (existing == null)
                     {
                         var addRequirementDiff = new SOSSynopticTableRequirementOperationDifficulty
                         {
@@ -5965,6 +5985,61 @@ namespace SupervisorMobility.API.DataAccess.Services
 
             }
 
+            // +============ KNOWLEDGE UPDATE =============+
+            if (STROUpdate.SOSSTROKnowledge != null)
+            {
+                var currentK = entity.SOSSTROKnowledge?.Where(sk => sk.SOSSynopticTableofOperatingRequirementsId == entity.SOSSynopticTableofOperatingRequirementsId).ToList() ?? new List<SOSSTROKnowledgeHub>();
+
+                // NOTE: Remove knowledge entries no longer present
+                var toRemove = currentK.Where(d => !STROUpdate.SOSSTROKnowledge.Any(k => k.SOSHubId == d.SOSHubId && k.KnowledgeId == d.KnowledgeId)).ToList();
+                _context.SOSSTROKnowledgeHub.RemoveRange(toRemove);
+
+                // NOTE: Add new knowledge entries if they don't exist
+                foreach (var Knowledge in STROUpdate.SOSSTROKnowledge)
+                {
+                    var existing = currentK.FirstOrDefault(k => k.KnowledgeId == Knowledge.KnowledgeId && k.SOSHubId == Knowledge.SOSHubId);
+                    if (existing == null)
+                    {
+                        var addKnowledge = new SOSSTROKnowledgeHub
+                        {
+                            SOSSynopticTableofOperatingRequirementsId = entity.SOSSynopticTableofOperatingRequirementsId,
+                            KnowledgeId = Knowledge.KnowledgeId,
+                            SOSHubId = Knowledge.SOSHubId
+                        };
+
+                        entity.SOSSTROKnowledge?.Add(addKnowledge);
+                    }
+                }
+            }
+
+            // +============ SKILL UPDATE =============+
+            if (STROUpdate.SOSSTROSkill != null)
+            {
+                var currentS = entity.SOSSTROSkill?.Where(sk => sk.SOSSynopticTableofOperatingRequirementsId == entity.SOSSynopticTableofOperatingRequirementsId).ToList() ?? new List<SOSSTROSkillHub>();
+
+                // NOTE: Remove skill entries no longer present
+                var ToRemoveS = currentS.Where(s => !STROUpdate.SOSSTROSkill.Any(ss => ss.SOSHubId == s.SOSHubId && ss.SkillId == s.SkillId));
+                _context.SOSSTROSkillHub.RemoveRange(ToRemoveS);
+
+                // NOTE: Add new skill entries if they don't exist
+                foreach (var Skill in STROUpdate.SOSSTROSkill)
+                {
+                    var existing = currentS.FirstOrDefault(k => k.SkillId == Skill.SkillId && k.SOSHubId == Skill.SOSHubId);
+                    if (existing == null)
+                    {
+                        var addSkill = new SOSSTROSkillHub
+                        {
+                            SOSSynopticTableofOperatingRequirementsId = entity.SOSSynopticTableofOperatingRequirementsId,
+                            SkillId = Skill.SkillId,
+                            SOSHubId = Skill.SOSHubId
+                        };
+
+                        entity.SOSSTROSkill?.Add(addSkill);
+                    }
+                }
+            }
+
+            // NOTE: Save all changes to the database
             await _context.SaveChangesAsync();
 
             return entity;
