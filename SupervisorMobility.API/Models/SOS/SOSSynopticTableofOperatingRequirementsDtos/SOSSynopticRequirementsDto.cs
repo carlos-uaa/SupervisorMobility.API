@@ -1,12 +1,18 @@
-﻿using SupervisorMobility.API.DataAccess.Entities;
+﻿// - Core .NET imports
+using System.Text.Json.Serialization;
+
+// - Entity imports
+using SupervisorMobility.API.DataAccess.Entities;
 using SupervisorMobility.API.DataAccess.Entities.SOS;
-using SupervisorMobility.API.Models.SOS.SOSAnalysisDtos;
+
+// - DTO imports
+using SupervisorMobility.API.Models.Users;
 using SupervisorMobility.API.Models.SOS.SOSHubDtos;
 using SupervisorMobility.API.Models.SOS.SOSSequenceDtos;
+using SupervisorMobility.API.Models.SOS.SOSAnalysisDtos;
 using SupervisorMobility.API.Models.SOS.SOSSynopticTableofOperatingRequirementsLogbookDtos;
 using SupervisorMobility.API.Models.SOS.SOSSynopticTableofOperatingRequirementsOperationSequenceDtos;
-using SupervisorMobility.API.Models.Users;
-using System.Text.Json.Serialization;
+
 
 namespace SupervisorMobility.API.Models.SOS.SOSSynopticTableofOperatingRequirementsDtos
 {
@@ -48,5 +54,7 @@ namespace SupervisorMobility.API.Models.SOS.SOSSynopticTableofOperatingRequireme
         public IEnumerable<SOSAnalysisDto>? Analyses { get; set; } = new List<SOSAnalysisDto>();
      
         public IEnumerable<SOSSequenceDto>? Sequences { get; set; } = new List<SOSSequenceDto>();
+        public IEnumerable<SOSSTROKnowledgeHub>? SOSSTROKnowledge { get; set; } = new List<SOSSTROKnowledgeHub>();
+        public IEnumerable<SOSSTROSkillHub>? SOSSTROSkill { get; set; } = new List<SOSSTROSkillHub>();
     }
 }
