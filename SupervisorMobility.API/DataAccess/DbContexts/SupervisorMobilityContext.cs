@@ -1,6 +1,7 @@
 ﻿using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 using Newtonsoft.Json;
+using SupervisorMobility.API.DataAccess.Entities.SOS.STRO;
 using SupervisorMobility.API.DataAccess.Entities;
 using SupervisorMobility.API.DataAccess.Entities.ILU;
 using SupervisorMobility.API.DataAccess.Entities.IS;
@@ -138,6 +139,11 @@ namespace SupervisorMobility.API.Context
         public DbSet<SOSSynopticPointsOperationSequence> SOSSynopticPointsOperationSequences { get; set; }
         public DbSet<SOSSynopticPointsLogbook> SOSSynopticPointsLogbooks { get; set; }
 
+        public DbSet<Knowledge> Knowledge { get; set; }
+        public DbSet<Skill> Skill { get; set; }
+
+        public DbSet<SOSSTROKnowledgeHub> SOSSTROKnowledgeHub { get; set; }
+        public DbSet<SOSSTROSkillHub> SOSSTROSkillHub { get; set; }
 
         #endregion
 
