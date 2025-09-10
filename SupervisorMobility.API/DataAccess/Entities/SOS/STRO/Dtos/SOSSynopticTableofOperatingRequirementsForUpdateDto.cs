@@ -16,5 +16,7 @@ namespace SupervisorMobility.API.DataAccess.Entities.SOS.STRO.Dtos
         public List<int>? SOSHubIds { get; set; } = new List<int>();
 
         public List<SOSSynopticTableRequirementOperationDifficulty>? RequirementDifficulties { get; set; } = new List<SOSSynopticTableRequirementOperationDifficulty>();
+        public ICollection<SOSSTROKnowledgeHub>? SOSSTROKnowledge { get; set; } = new List<SOSSTROKnowledgeHub>();
+        public ICollection<SOSSTROSkillHub>? SOSSTROSkill { get; set; } = new List<SOSSTROSkillHub>();
     }
 }
