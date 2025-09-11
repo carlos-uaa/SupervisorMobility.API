@@ -418,6 +418,12 @@ namespace SupervisorMobility.API.Context
                 .UsingEntity(join => join.ToTable("SOSHubHistoryApproverOwners"));
 
             modelBuilder.Entity<SOSHubHistory>()
+            .HasOne(s => s.Creator)
+            .WithMany()
+            .HasForeignKey(s => s.CreatorId)
+            .OnDelete(DeleteBehavior.SetNull);
+
+            modelBuilder.Entity<SOSHubHistory>()
                 .HasMany(sh => sh.ReviewerEditors)
                 .WithMany(u => u.SOSHubHistoriesReviewerEditors)
                 .UsingEntity(join => join.ToTable("SOSHubHistoryReviewerEditors"));
@@ -436,7 +442,7 @@ namespace SupervisorMobility.API.Context
 
             modelBuilder.Entity<Analysis>()
                 .Property(e => e.CriticalPoints)
-                .HasConversion(jsonListConverter); 
+                .HasConversion(jsonListConverter);
 
             modelBuilder.Entity<Analysis>()
                 .Property(e => e.Reasons)
@@ -455,6 +461,11 @@ namespace SupervisorMobility.API.Context
                     x => x.HasOne<CommonDirection>().WithMany().OnDelete(DeleteBehavior.Cascade),
                     x => x.HasOne<SOSHub>().WithMany().OnDelete(DeleteBehavior.Cascade)
                     );
+
+                p.HasOne(s => s.Creator)
+                 .WithMany()
+                 .HasForeignKey(s => s.CreatorId)
+                 .OnDelete(DeleteBehavior.SetNull);
             });
 
             //Sos hub History
@@ -526,12 +537,12 @@ namespace SupervisorMobility.API.Context
                 .Property(p => p.IsActive)
                 .HasDefaultValue(true);
 
-        
+
             modelBuilder.Entity<SOSSynopticTableofOperatingRequirements>()
                 .Property(p => p.IsActive)
                 .HasDefaultValue(true);
 
-        
+
             // Configure SOSDistribution ↔ SOSHub many-to-many relationship
             modelBuilder.Entity<SOSDistribution>()
                 .HasMany(d => d.SOSHubs)
