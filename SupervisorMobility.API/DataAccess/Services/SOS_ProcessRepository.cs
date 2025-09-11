@@ -141,6 +141,7 @@ namespace SupervisorMobility.API.DataAccess.Services
 
                 if (includePeople)
                 {
+                    await _context.Entry(sosHub).Reference(o => o.Creator).LoadAsync();
                     await _context.Entry(sosHub).Collection(o => o.ApproverOwners).LoadAsync();
                     foreach (var approverOwner in sosHub.ApproverOwners)
                     {
@@ -355,7 +356,7 @@ namespace SupervisorMobility.API.DataAccess.Services
 
             if (includePeople)
             {
-                query = query.Include(o => o.ApproverOwners).Include(e => e.ReviewerEditors);
+                query = query.Include(o => o.Creator).Include(o => o.ApproverOwners).Include(e => e.ReviewerEditors);
             }
 
             var sosHubs = await query.OrderBy(s => s.SOSHubId).ToListAsync();
@@ -535,7 +536,7 @@ namespace SupervisorMobility.API.DataAccess.Services
 
             if (includePeople)
             {
-                query = query.Include(o => o.ApproverOwners).Include(e => e.ReviewerEditors);
+                query = query.Include(o => o.Creator).Include(o => o.ApproverOwners).Include(e => e.ReviewerEditors);
             }
 
             var sosHubs = await query.OrderBy(s => s.SOSHubId).ToListAsync();
@@ -3804,34 +3805,38 @@ namespace SupervisorMobility.API.DataAccess.Services
                 {
                     await _context.Entry(sosDistribution).Collection(d => d.SOSHubs).LoadAsync();
 
-                    //if (sosDistribution.SOSHub != null)
-                    //{
-                    //   await _context.Entry(sosDistribution.SOSHub).Collection(s => s.Sections).LoadAsync();
+                    if (sosDistribution.SOSHubs != null && sosDistribution.SOSHubs.Any())
+                    {
+                        foreach (var sosHub in sosDistribution.SOSHubs)
+                        {
+                            await _context.Entry(sosHub).Collection(s => s.Sections).LoadAsync();
 
-                    //   foreach (var section in sosDistribution.SOSHub.Sections)
-                    //   {
-                    //       await _context.Entry(section).Collection(s => s.Analyses).LoadAsync();
-                    //   }
+                            foreach (var section in sosHub.Sections)
+                            {
+                                await _context.Entry(section).Collection(s => s.Analyses).LoadAsync();
+                            }
 
-                    //   await _context.Entry(sosDistribution.SOSHub).Collection(s => s.AppliedModels).LoadAsync();
-                    //   await _context.Entry(sosDistribution.SOSHub).Collection(s => s.ToolsUsed).LoadAsync();
-                    //   foreach (var toolUsed in sosDistribution.SOSHub.ToolsUsed)
-                    //   {
-                    //       await _context.Entry(toolUsed).Reference(t => t.Tool).LoadAsync();
-                    //   }
+                            await _context.Entry(sosHub).Collection(s => s.AppliedModels).LoadAsync();
+                            await _context.Entry(sosHub).Collection(s => s.ToolsUsed).LoadAsync();
+                            foreach (var toolUsed in sosHub.ToolsUsed)
+                            {
+                                await _context.Entry(toolUsed).Reference(t => t.Tool).LoadAsync();
+                            }
 
-                    //   await _context.Entry(sosDistribution.SOSHub).Collection(s => s.MaterialsUsed).LoadAsync();
-                    //   foreach (var materialUsed in sosDistribution.SOSHub.MaterialsUsed)
-                    //   {
-                    //       await _context.Entry(materialUsed).Reference(m => m.Material).LoadAsync();
-                    //   }
+                            await _context.Entry(sosHub).Collection(s => s.MaterialsUsed).LoadAsync();
+                            foreach (var materialUsed in sosHub.MaterialsUsed)
+                            {
+                                await _context.Entry(materialUsed).Reference(m => m.Material).LoadAsync();
+                            }
 
-                    //   await _context.Entry(sosDistribution.SOSHub).Collection(s => s.SafetyEquipment).LoadAsync();
-                    //   await _context.Entry(sosDistribution.SOSHub).Reference(s => s.Plant).LoadAsync();
-                    //   await _context.Entry(sosDistribution.SOSHub).Reference(s => s.Department).LoadAsync();
-                    //   await _context.Entry(sosDistribution.SOSHub).Collection(s => s.ApproverOwners).LoadAsync();
-                    //   await _context.Entry(sosDistribution.SOSHub).Collection(s => s.ReviewerEditors).LoadAsync();
-                    //}
+                            await _context.Entry(sosHub).Collection(s => s.SafetyEquipment).LoadAsync();
+                            await _context.Entry(sosHub).Reference(s => s.Plant).LoadAsync();
+                            await _context.Entry(sosHub).Reference(s => s.Department).LoadAsync();
+                            await _context.Entry(sosHub).Reference(s => s.Creator).LoadAsync();
+                            await _context.Entry(sosHub).Collection(s => s.ApproverOwners).LoadAsync();
+                            await _context.Entry(sosHub).Collection(s => s.ReviewerEditors).LoadAsync();
+                        }
+                    }
                 }
 
                 if (includeImagesSOS && sosDistribution.SOSHubs != null)
@@ -3843,6 +3848,7 @@ namespace SupervisorMobility.API.DataAccess.Services
                 {
                     sosDistribution.Sequences = await _context.SOSSequences
                         .Where(s => s.Distributions.Any(d => d.SOSDistributionId == SOSDistributionId))
+                        .Include(sh => sh.SOSHub).ThenInclude(shs => shs.Creator)
                         .Include(sh => sh.SOSHub)
                         .ThenInclude(shs => shs.Sections)
                         .ThenInclude(shsa => shsa.Analyses)
@@ -3850,6 +3856,7 @@ namespace SupervisorMobility.API.DataAccess.Services
 
                     sosDistribution.Analyses = await _context.SOSAnalyses
                         .Where(s => s.Distributions.Any(d => d.SOSDistributionId == SOSDistributionId))
+                        .Include(sh => sh.SOSHub).ThenInclude(shs => shs.Creator)
                         .Include(sh => sh.SOSHub)
                         .ThenInclude(shs => shs.Sections)
                         .ThenInclude(shsa => shsa.Analyses)
