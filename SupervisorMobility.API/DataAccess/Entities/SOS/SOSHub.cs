@@ -52,6 +52,9 @@ namespace SupervisorMobility.API.DataAccess.Entities.SOS
         public DateTime? CreatedDate { get; set; }
         public DateTime? ModifiedDate { get; set; }
 
+        public int? CreatorId { get; set; }
+        public User? Creator { get; set; }
+
         public ICollection<User>? ApproverOwners { get; set; } = new List<User>();
         public ICollection<User>? ReviewerEditors { get; set; } = new List<User>();
 
