@@ -80,6 +80,12 @@ namespace SupervisorMobility.API.Controllers.SOS_Controllers
 
             _mapper.Map(SOSHubForCreate, SOSEntity);
 
+            SOSEntity.CreatedDate = DateTime.Now;
+            if (SOSHubForCreate.CreatorId.HasValue)
+            {
+                SOSEntity.CreatorId = SOSHubForCreate.CreatorId;
+            }
+
             SOSHub createdResult = await _AnalysisProcessRepository.CreateSOScollection(SOSEntity);
 
 
