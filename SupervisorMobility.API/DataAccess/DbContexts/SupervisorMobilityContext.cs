@@ -144,6 +144,7 @@ namespace SupervisorMobility.API.Context
 
         public DbSet<SOSSTROKnowledgeHub> SOSSTROKnowledgeHub { get; set; }
         public DbSet<SOSSTROSkillHub> SOSSTROSkillHub { get; set; }
+        public DbSet<EstablishedConditions> EstablishedConditions { get; set; }
 
         #endregion
 
