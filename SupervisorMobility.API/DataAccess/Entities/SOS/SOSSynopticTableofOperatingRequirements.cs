@@ -1,5 +1,10 @@
-﻿using System.ComponentModel.DataAnnotations;
+﻿// - Core .NET imports
+using System.ComponentModel.DataAnnotations;
 using System.ComponentModel.DataAnnotations.Schema;
+
+// - Custom project imports
+using SupervisorMobility.API.DataAccess.Entities.SOS.STRO;
+
 
 namespace SupervisorMobility.API.DataAccess.Entities.SOS
 {
@@ -27,6 +32,7 @@ namespace SupervisorMobility.API.DataAccess.Entities.SOS
 
         public ICollection<SOSSynopticRequirementsLogbook>? SynopticRequirementsLogbooks { get; set; } = new List<SOSSynopticRequirementsLogbook>();
 
+        public ICollection<SOSSynopticTableRequirementOperationDifficulty>? RequirementDifficulties { get; set; } = new List<SOSSynopticTableRequirementOperationDifficulty>();
 
         public bool? IsActive { get; set; }
         public int? SOSHubId { get; set; }
@@ -35,5 +41,9 @@ namespace SupervisorMobility.API.DataAccess.Entities.SOS
         //las analisis y las secuencias de las que se sacaran los puntos principal
         public ICollection<SOSAnalysis>? Analyses { get; set; } = new List<SOSAnalysis>();
         public ICollection<SOSSequence>? Sequences { get; set; } = new List<SOSSequence>();
+
+        public ICollection<SOSSTROKnowledgeHub>? SOSSTROKnowledge { get; set; } = new List<SOSSTROKnowledgeHub>();
+        public ICollection<SOSSTROSkillHub>? SOSSTROSkill { get; set; } = new List<SOSSTROSkillHub>();
+        public ICollection<EstablishedConditions>? EstablishedConditions { get; set; } = new List<EstablishedConditions>();
     }
 }

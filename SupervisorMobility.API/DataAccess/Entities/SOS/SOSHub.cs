@@ -52,6 +52,9 @@ namespace SupervisorMobility.API.DataAccess.Entities.SOS
         public DateTime? CreatedDate { get; set; }
         public DateTime? ModifiedDate { get; set; }
 
+        public int? CreatorId { get; set; }
+        public User? Creator { get; set; }
+
         public ICollection<User>? ApproverOwners { get; set; } = new List<User>();
         public ICollection<User>? ReviewerEditors { get; set; } = new List<User>();
 
@@ -69,7 +72,7 @@ namespace SupervisorMobility.API.DataAccess.Entities.SOS
 
         public ICollection<SOSSynopticTableofControlPoints>? SOSSynopticControlPoints { get; set; } = new List<SOSSynopticTableofControlPoints>();
         public ICollection<SOSSynopticTableofOperatingRequirements>? SOSSynopticOperatingRequirements { get; set; } = new List<SOSSynopticTableofOperatingRequirements>();
-
+        public ICollection<SOSSynopticTableRequirementOperationDifficulty>? SOSSynopticOperatingRequirementsDifficulties { get; set; } = new List<SOSSynopticTableRequirementOperationDifficulty>();
         public HCI? Hci { get; set; }
 
         public ICollection<SOSHubHistory>? History { get; set; } = new List<SOSHubHistory>();

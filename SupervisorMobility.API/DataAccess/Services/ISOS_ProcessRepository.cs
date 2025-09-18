@@ -3,6 +3,7 @@ using Microsoft.EntityFrameworkCore.Query;
 using SupervisorMobility.API.DataAccess.Entities;
 using SupervisorMobility.API.DataAccess.Entities.SOS;
 using SupervisorMobility.API.DataAccess.Entities.SOS.History;
+using SupervisorMobility.API.DataAccess.Entities.SOS.STRO.Dtos;
 using SupervisorMobility.API.Models.CommentaryDtos;
 using SupervisorMobility.API.Models.FileUploadDto;
 using SupervisorMobility.API.Models.SOS.EquipmentDtos;
@@ -240,6 +241,7 @@ namespace SupervisorMobility.API.DataAccess.Services
         #region SOSDistribution
         Task<int> CreateSOSDistribution(SOSDistribution SOS_DistributionToCreate);
         Task<SOSDistribution> GetSOSDistribution(int SOSDistributionId, bool includeImages = false, bool includeNotes = false, bool includeLogbooks = false, bool includeSOS = false, bool includeImagesSOS = false, bool includeTurns = false, bool includeTimes = false, bool includeCollections = false);
+        Task<int> GetIdDistributionBySosHub(int IdSosHub);
         Task<IEnumerable<SOSDistribution>> GetAllSOSDistribution(bool includeImages = false, bool includeNotes = false, bool includeLogbooks = false, bool includeSOS = false);
 
         Task<int> UpdateSOSDistribution(SOSDistributionForUpdateDto DistributionUpdate, SOSDistribution DistributionEntity);
@@ -282,6 +284,7 @@ namespace SupervisorMobility.API.DataAccess.Services
         #region SOSDistributionOperationSequences
         Task<SOSDistributionOperationSequence> GetSOSDistributionOperationSequencesById(int id);
         Task<int> UpdateSOSDistributionOperationSequences(SOSDistributionOperationSequenceForUpdateDto OperationSequenceForUpdate);
+        Task<AsyncVoidMethodBuilder> DeleteSOSDistributionOperationSequencesById(int OperationSequenceId);
         Task<List<SOSDistributionOperationSequence>> AddRangeSOSDistributionOperationSequences(List<SOSDistributionOperationSequence> SOSOperationSequencesToAdd);
         Task<AsyncVoidMethodBuilder> RemoveAllOperationsSequenceFromSOSDistribution(SOSDistribution Master, List<SOSDistributionOperationSequence> operationSequences);
         #endregion
@@ -358,7 +361,7 @@ namespace SupervisorMobility.API.DataAccess.Services
         Task<SOSSynopticTableofOperatingRequirements> GetSOSSynopticTableofOperatingRequirements(int SOSSynopticTableofOperatingRequirementsId, bool includeLogbooks = false, bool includeSOS = false, bool includeCollections = false);
         Task<IEnumerable<SOSSynopticTableofOperatingRequirements>> GetAllSOSSynopticTableofOperatingRequirements(bool includeLogbooks = false, bool includeSOS = false, bool includeCollections = false);
 
-        Task<int> UpdateSOSSynopticTableofOperatingRequirements(SOSSynopticRequirementsForUpdateDto SynopticTableofOperatingRequirementsUpdate, SOSSynopticTableofOperatingRequirements SynopticTableofOperatingRequirementsEntity);
+        Task<SOSSynopticTableofOperatingRequirements> UpdateSOSSynopticTableofOperatingRequirements(int sosSynopticTableofOperatingRequirements_Id, SOSSynopticTableofOperatingRequirementsForUpdateDto sosUpdateEntity);
         Task<int> RemoveSOSSynopticTableofOperatingRequirements(int SOS_SynopticTableofOperatingRequirements_id);
 
         Task AddIlustrationToSOSSynopticTableofOperatingRequirements(int SOS_SynopticTableofOperatingRequirements_id, FileUpload evidence);

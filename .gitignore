@@ -41,7 +41,6 @@ SupervisorMobility.API/[Uu]ploads/[Pp]reviousEvidence/*
 SupervisorMobility.API/[Uu]ploads/[Oo]peratorSignature/*
 SupervisorMobility.API/[Uu]ploads/[Uu]sers/*
 SupervisorMobility.API/[Uu]ploads/[Tt]est[Uu]ploads/*
-SupervisorMobility.API/[Mm]igrations/
 SupervisorMobility.API/[Uu]ploads/*
 [Oo]bj/
 [Oo]ut/
@@ -380,7 +379,6 @@ SupervisorMobility.API/appsettings.json
 SupervisorMobility.API/appsettings.Development.json
 appsettings.Development.json
 appsettings.json
-SupervisorMobility.API/Migrations/SupervisorMobilityContextModelSnapshot.cs
 *.xlsx
 *.csv
 /SupervisorMobility.API/uploads
