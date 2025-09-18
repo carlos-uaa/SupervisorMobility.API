@@ -5825,7 +5825,7 @@ namespace SupervisorMobility.API.DataAccess.Services
         {
             var query = _context.SOSSynopticTableofOperatingRequirements.AsNoTracking().Where(SOS => SOS.SOSSynopticTableofOperatingRequirementsId == SOSSynopticTableofOperatingRequirementsId && SOS.IsActive == true);
 
-            var sosSynopticRequirements = await query.Include(d => d.RequirementDifficulties).Include(k => k.SOSSTROKnowledge).Include(s => s.SOSSTROSkill).FirstOrDefaultAsync();
+            var sosSynopticRequirements = await query.Include(d => d.RequirementDifficulties).Include(k => k.SOSSTROKnowledge).Include(s => s.SOSSTROSkill).Include(e => e.EstablishedConditions).FirstOrDefaultAsync();
 
             if (sosSynopticRequirements != null)
             {
@@ -5916,8 +5916,8 @@ namespace SupervisorMobility.API.DataAccess.Services
         }
 
         /// <summary>
-        /// Updates an existing SOSSynopticTableofOperatingRequirements entity with the provided DTO data.
-        /// Handles updates to related SOS hubs, requirement difficulties, knowledge, and skills.
+        /// Updates an existing <c>SOSSynopticTableofOperatingRequirements</c> entity with the provided DTO data.
+        /// Handles updates to related SOS hubs, requirement difficulties, knowledge, skills, and established conditions.
         /// </summary>
         /// <param name="sosSynopticTableofOperatingRequirements_Id">The ID of the STRO entity to update.</param>
         /// <param name="STROUpdate">The DTO containing updated fields and related entities.</param>
@@ -5931,6 +5931,7 @@ namespace SupervisorMobility.API.DataAccess.Services
                 .Include(e => e.RequirementDifficulties)
                 .Include(k => k.SOSSTROKnowledge)
                 .Include(s => s.SOSSTROSkill)
+                .Include(c => c.EstablishedConditions)
                 .FirstOrDefaultAsync(e => e.SOSSynopticTableofOperatingRequirementsId == sosSynopticTableofOperatingRequirements_Id);
 
 
@@ -5939,7 +5940,7 @@ namespace SupervisorMobility.API.DataAccess.Services
             // NOTE: Update main entity properties
             _context.Entry(entity).CurrentValues.SetValues(STROUpdate);
 
-            // +============ SOS HUBS UPDATE =============+
+            //+============ SOS HUBS UPDATE =============+\\
             if (STROUpdate.SOSHubIds != null)
             {
                 var currentSosHubs = entity.SOSHubs.Select(a => a.SOSHubId).ToList();
@@ -5959,7 +5960,7 @@ namespace SupervisorMobility.API.DataAccess.Services
                 }
             }
 
-            // +============ REQUIREMENT DIFFICULTIES UPDATE =============+
+            //+============ REQUIREMENT DIFFICULTIES UPDATE =============+\\
             if (STROUpdate.RequirementDifficulties != null)
             {
                 var currentRD = entity.RequirementDifficulties.ToList();
@@ -5992,7 +5993,7 @@ namespace SupervisorMobility.API.DataAccess.Services
 
             }
 
-            // +============ KNOWLEDGE UPDATE =============+
+            //+============ KNOWLEDGE UPDATE =============+\\
             if (STROUpdate.SOSSTROKnowledge != null)
             {
                 var currentK = entity.SOSSTROKnowledge?.Where(sk => sk.SOSSynopticTableofOperatingRequirementsId == entity.SOSSynopticTableofOperatingRequirementsId).ToList() ?? new List<SOSSTROKnowledgeHub>();
@@ -6019,7 +6020,7 @@ namespace SupervisorMobility.API.DataAccess.Services
                 }
             }
 
-            // +============ SKILL UPDATE =============+
+            //+============ SKILL UPDATE =============+\\
             if (STROUpdate.SOSSTROSkill != null)
             {
                 var currentS = entity.SOSSTROSkill?.Where(sk => sk.SOSSynopticTableofOperatingRequirementsId == entity.SOSSynopticTableofOperatingRequirementsId).ToList() ?? new List<SOSSTROSkillHub>();
@@ -6042,6 +6043,35 @@ namespace SupervisorMobility.API.DataAccess.Services
                         };
 
                         entity.SOSSTROSkill?.Add(addSkill);
+                    }
+                }
+            }
+
+            //+======= ESTABLISHED CONDITIONS ========+\\
+            if (STROUpdate.EstablishedConditions != null)
+            {
+                var currentEC = entity.EstablishedConditions.Where(e => e.SOSSynopticTableofOperatingRequirementsId == entity.SOSSynopticTableofOperatingRequirementsId).ToList() ?? new List<EstablishedConditions>();
+
+                var ToRemoveEC = currentEC.Where(e => !STROUpdate.EstablishedConditions.Any(ec => ec.Id == e.Id && ec.Id != 0)).ToList();
+                _context.EstablishedConditions.RemoveRange(ToRemoveEC);
+
+                foreach (var EstaCon in STROUpdate.EstablishedConditions)
+                {
+                    var existing = currentEC.FirstOrDefault(e => e.Id == EstaCon.Id);
+                    if (existing == null)
+                    {
+                        var AddEstablishedCondition = new EstablishedConditions
+                        {
+                            Condition = EstaCon.Condition,
+                            SectionId = EstaCon.SectionId,
+                            SOSSynopticTableofOperatingRequirementsId = EstaCon.SOSSynopticTableofOperatingRequirementsId
+                        };
+
+                        entity.EstablishedConditions?.Add(AddEstablishedCondition);
+                    }
+                    else
+                    {
+                        existing.Condition = EstaCon.Condition;
                     }
                 }
             }
