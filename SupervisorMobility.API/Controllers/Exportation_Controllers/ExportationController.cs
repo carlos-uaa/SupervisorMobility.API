@@ -76,7 +76,8 @@ namespace SupervisorMobility.API.Controllers.Exportation_Controllers
                     Tools = string.Join(", ", SosAnalysis.SOSHub.ToolsUsed.Select(tu => $"{tu.Tool.ToolName} ({tu.Quantity})"));
                 }
                 sheet.Cells["D8"].Value = Tools;
-                //sheet.Cells["D9"].Value = SosAnalysis.SOSHub.AppliedModel?.Description;
+                sheet.Cells["D9"].Value = string.Join(",",SosAnalysis.SOSHub?.AppliedModels?.Select(a => a.Description) ?? Enumerable.Empty<string>());
+
                 sheet.Cells["D10"].Value = SosAnalysis.SOSHub.TrainingTime;
 
                 #region revitions
@@ -191,9 +192,9 @@ namespace SupervisorMobility.API.Controllers.Exportation_Controllers
                             }
                         }
 
-                        analysisHeight = stylesService.CalculateRowHeight(analysis.Text, sheet.Columns[3].Width + sheet.Columns[4].Width, sheet.Cells["B14"].Style.Font.Size);
-                        StepHeight = stylesService.CalculateRowHeight(section.Step, sheet.Columns[6].Width + sheet.Columns[7].Width, sheet.Cells["F14"].Style.Font.Size);
-                        CriticalHeight = stylesService.CalculateRowHeight(fullText, sheet.Columns[10].Width + sheet.Columns[11].Width + sheet.Columns[12].Width, sheet.Cells["J14"].Style.Font.Size);
+                        analysisHeight = stylesService.CalculateRowHeightSimple(analysis.Text, 45);
+                        StepHeight = stylesService.CalculateRowHeightSimple(section.Step, 45);
+                        CriticalHeight = stylesService.CalculateRowHeightByChars(fullText, 40);
 
                         var rowheight = Math.Max(20, Math.Max(analysisHeight, Math.Max(StepHeight, CriticalHeight)));
 
