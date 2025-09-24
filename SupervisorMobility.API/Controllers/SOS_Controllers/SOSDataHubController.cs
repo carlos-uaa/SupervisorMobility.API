@@ -24,7 +24,7 @@ namespace SupervisorMobility.API.Controllers.SOS_Controllers
 {
     [Route("api/SOS/DataPool")]
     [ApiController]
-    public class SOSDataHubController : Controller
+    public class SOSDataHubController : ControllerBase
     {
         private readonly ISOS_ProcessRepository _AnalysisProcessRepository;
         private readonly IMapper _mapper;
@@ -79,6 +79,12 @@ namespace SupervisorMobility.API.Controllers.SOS_Controllers
             SOSHub SOSEntity = new SOSHub();
 
             _mapper.Map(SOSHubForCreate, SOSEntity);
+
+            SOSEntity.CreatedDate = DateTime.Now;
+            if (SOSHubForCreate.CreatorId.HasValue)
+            {
+                SOSEntity.CreatorId = SOSHubForCreate.CreatorId;
+            }
 
             SOSHub createdResult = await _AnalysisProcessRepository.CreateSOScollection(SOSEntity);
 

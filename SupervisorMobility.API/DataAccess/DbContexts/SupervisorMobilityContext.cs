@@ -1,6 +1,7 @@
 ﻿using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 using Newtonsoft.Json;
+using SupervisorMobility.API.DataAccess.Entities.SOS.STRO;
 using SupervisorMobility.API.DataAccess.Entities;
 using SupervisorMobility.API.DataAccess.Entities.ILU;
 using SupervisorMobility.API.DataAccess.Entities.IS;
@@ -128,6 +129,22 @@ namespace SupervisorMobility.API.Context
         public DbSet<SOSFlowLogbook> SOSFlowLogbooks { get; set; }
         public DbSet<SOSSequence> SOSSequences { get; set; }
         public DbSet<SOSSequenceLogbook> SOSSequenceLogbooks { get; set; }
+
+        public DbSet<SOSSynopticTableofOperatingRequirements> SOSSynopticTableofOperatingRequirements { get; set; }
+        public DbSet<SOSSynopticTableRequirementOperationDifficulty> SOSSynopticTableRequirementOperationDifficulty { get; set; }
+        public DbSet<SOSSynopticRequirementsOperationSequence> SOSSynopticRequirementsOperationSequences { get; set; }
+        public DbSet<SOSSynopticRequirementsLogbook> SOSSynopticRequirementsLogbooks { get; set; }
+
+        public DbSet<SOSSynopticTableofControlPoints> SOSSynopticTableofControlPoints { get; set; }
+        public DbSet<SOSSynopticPointsOperationSequence> SOSSynopticPointsOperationSequences { get; set; }
+        public DbSet<SOSSynopticPointsLogbook> SOSSynopticPointsLogbooks { get; set; }
+
+        public DbSet<Knowledge> Knowledge { get; set; }
+        public DbSet<Skill> Skill { get; set; }
+
+        public DbSet<SOSSTROKnowledgeHub> SOSSTROKnowledgeHub { get; set; }
+        public DbSet<SOSSTROSkillHub> SOSSTROSkillHub { get; set; }
+        public DbSet<EstablishedConditions> EstablishedConditions { get; set; }
 
         #endregion
 
@@ -402,6 +419,12 @@ namespace SupervisorMobility.API.Context
                 .UsingEntity(join => join.ToTable("SOSHubHistoryApproverOwners"));
 
             modelBuilder.Entity<SOSHubHistory>()
+            .HasOne(s => s.Creator)
+            .WithMany()
+            .HasForeignKey(s => s.CreatorId)
+            .OnDelete(DeleteBehavior.SetNull);
+
+            modelBuilder.Entity<SOSHubHistory>()
                 .HasMany(sh => sh.ReviewerEditors)
                 .WithMany(u => u.SOSHubHistoriesReviewerEditors)
                 .UsingEntity(join => join.ToTable("SOSHubHistoryReviewerEditors"));
@@ -420,7 +443,7 @@ namespace SupervisorMobility.API.Context
 
             modelBuilder.Entity<Analysis>()
                 .Property(e => e.CriticalPoints)
-                .HasConversion(jsonListConverter); 
+                .HasConversion(jsonListConverter);
 
             modelBuilder.Entity<Analysis>()
                 .Property(e => e.Reasons)
@@ -439,6 +462,11 @@ namespace SupervisorMobility.API.Context
                     x => x.HasOne<CommonDirection>().WithMany().OnDelete(DeleteBehavior.Cascade),
                     x => x.HasOne<SOSHub>().WithMany().OnDelete(DeleteBehavior.Cascade)
                     );
+
+                p.HasOne(s => s.Creator)
+                 .WithMany()
+                 .HasForeignKey(s => s.CreatorId)
+                 .OnDelete(DeleteBehavior.SetNull);
             });
 
             //Sos hub History
@@ -506,24 +534,15 @@ namespace SupervisorMobility.API.Context
                 .Property(p => p.IsActive)
                 .HasDefaultValue(true);
 
-            modelBuilder.Entity<SOSDistribution>()
-                   .HasMany(d => d.Sequences)
-                   .WithMany(s => s.Distributions)
-                   .UsingEntity<Dictionary<string, object>>(
-                       "SOSDistributionSequence",
-                       r => r.HasOne<SOSSequence>().WithMany().HasForeignKey("SOSSequenceId").OnDelete(DeleteBehavior.NoAction),
-                       l => l.HasOne<SOSDistribution>().WithMany().HasForeignKey("SOSDistributionId").OnDelete(DeleteBehavior.NoAction)
-                   );
+            modelBuilder.Entity<SOSSynopticTableofControlPoints>()
+                .Property(p => p.IsActive)
+                .HasDefaultValue(true);
 
-            // Configuración adicional para otras relaciones potenciales
-            modelBuilder.Entity<SOSDistribution>()
-                .HasMany(d => d.Analyses)
-                .WithMany(a => a.Distributions)
-                .UsingEntity<Dictionary<string, object>>(
-                    "SOSDistributionAnalysis",
-                    r => r.HasOne<SOSAnalysis>().WithMany().HasForeignKey("SOSAnalysisId").OnDelete(DeleteBehavior.NoAction),
-                    l => l.HasOne<SOSDistribution>().WithMany().HasForeignKey("SOSDistributionId").OnDelete(DeleteBehavior.NoAction)
-                );
+
+            modelBuilder.Entity<SOSSynopticTableofOperatingRequirements>()
+                .Property(p => p.IsActive)
+                .HasDefaultValue(true);
+
 
             // Configure SOSDistribution ↔ SOSHub many-to-many relationship
             modelBuilder.Entity<SOSDistribution>()

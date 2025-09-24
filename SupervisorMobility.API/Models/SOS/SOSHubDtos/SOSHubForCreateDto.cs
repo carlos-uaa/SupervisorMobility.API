@@ -21,10 +21,10 @@ namespace SupervisorMobility.API.Models.SOS.SOSHubDtos
         public string? ProcessSheet { get; set; }
         public ICollection<CreateCommentaryDto>? ProcessSheetCommentary { get; set; } = new List<CreateCommentaryDto>();
         public ICollection<CommonDirectionDto>? CommonDirection { get; set; } = new List<CommonDirectionDto>();
-        
+
         public ICollection<ProductDto>? AppliedModels { get; set; } = new List<ProductDto>();
         public string? RevisedItems { get; set; }
-        public string? TrainingTime { get; set; }
+        public int? TrainingTime { get; set; }
         public ICollection<EquipmentDto>? SafetyEquipment { get; set; } = new List<EquipmentDto>();
         public ICollection<ToolUsedForCreateDto>? ToolsUsed { get; set; } = new List<ToolUsedForCreateDto>();
         public ICollection<MaterialsUsedForCreateDto>? MaterialsUsed { get; set; } = new List<MaterialsUsedForCreateDto>();
@@ -39,9 +39,11 @@ namespace SupervisorMobility.API.Models.SOS.SOSHubDtos
 
         public DateTime? CreatedDate { get; set; }
 
+        public int? CreatorId { get; set; }
+
         public List<UsersWithoutNavigationWithoutPeopleDetails>? ApproverOwners { get; set; }
         public List<UsersWithoutNavigationWithoutPeopleDetails>? ReviewerEditors { get; set; }
-        
+
         public DateTime? ModifiedDate { get; set; }
 
         public string? Plan { get; set; }

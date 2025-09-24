@@ -31,7 +31,7 @@ namespace SupervisorMobility.API.DataAccess.Entities.SOS
         public ICollection<FileUpload>? Videos { get; set; } = new List<FileUpload>();
         public string? RevisedItems { get; set; }
 
-        public string? TrainingTime { get; set; }
+        public int? TrainingTime { get; set; }
         public ICollection<Equipment>? SafetyEquipment { get; set; } = new List<Equipment>();
         public ICollection<ToolUsed>? ToolsUsed { get; set; } = new List<ToolUsed>();
         public ICollection<MaterialUsed>? MaterialsUsed { get; set; } = new List<MaterialUsed>();
@@ -52,6 +52,9 @@ namespace SupervisorMobility.API.DataAccess.Entities.SOS
         public DateTime? CreatedDate { get; set; }
         public DateTime? ModifiedDate { get; set; }
 
+        public int? CreatorId { get; set; }
+        public User? Creator { get; set; }
+
         public ICollection<User>? ApproverOwners { get; set; } = new List<User>();
         public ICollection<User>? ReviewerEditors { get; set; } = new List<User>();
 
@@ -66,6 +69,11 @@ namespace SupervisorMobility.API.DataAccess.Entities.SOS
         public ICollection<SOSDistribution>? SOSDistribution { get; set; } = new List<SOSDistribution>();
         public ICollection<SOSFlow>? SOSFlow { get; set; } = new List<SOSFlow>();
         public ICollection<SOSSequence>? SOSSequence { get; set; } = new List<SOSSequence>();
+
+        public ICollection<SOSSynopticTableofControlPoints>? SOSSynopticControlPoints { get; set; } = new List<SOSSynopticTableofControlPoints>();
+        public ICollection<SOSSynopticTableofOperatingRequirements>? SOSSynopticOperatingRequirements { get; set; } = new List<SOSSynopticTableofOperatingRequirements>();
+        public ICollection<SOSSynopticTableRequirementOperationDifficulty>? SOSSynopticOperatingRequirementsDifficulties { get; set; } = new List<SOSSynopticTableRequirementOperationDifficulty>();
+        public HCI? Hci { get; set; }
 
         public ICollection<SOSHubHistory>? History { get; set; } = new List<SOSHubHistory>();
 

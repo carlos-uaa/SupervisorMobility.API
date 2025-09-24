@@ -13,7 +13,7 @@ namespace SupervisorMobility.API.Controllers.SOS_Controllers
 {
     [Route("api/SOS/Flow")]
     [ApiController]
-    public class FlowController : Controller
+    public class FlowController : ControllerBase
     {
         private readonly IMapper _mapper;
         private readonly ISOS_ProcessRepository _ProcessRepository;

@@ -55,6 +55,7 @@ namespace SupervisorMobility.API.Services
         #endregion
         #region AreaOperations
         Task<IEnumerable<Area>> GetAreasForPlantAsync(int plantId, bool includeCollections = false);
+        Task<IEnumerable<Area>> GetAreasForIdsAsync(List<int> ids);
         Task<Area?> GetAreaForPlantAsync(int plantId,
             int areaId, bool includeOperations = false);
 

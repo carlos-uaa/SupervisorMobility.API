@@ -1,5 +1,6 @@
 using DocumentFormat.OpenXml.Office2016.Drawing.ChartDrawing;
 using Microsoft.EntityFrameworkCore;
+using Microsoft.OpenApi.Models;
 using Serilog;
 using SupervisorMobility.API;
 using SupervisorMobility.API.Business;
@@ -70,7 +71,6 @@ builder.Services.AddControllers(options =>
  .AddXmlDataContractSerializerFormatters();
 
 builder.Services.AddEndpointsApiExplorer();
-builder.Services.AddSwaggerGen();
 builder.Services.AddSwaggerGen(options =>
 {
     options.CustomSchemaIds(type =>
@@ -88,7 +88,11 @@ var app = builder.Build();
 if (app.Environment.IsDevelopment() || app.Environment.IsProduction())
 {
     app.UseSwagger();
-    app.UseSwaggerUI();
+    app.UseSwaggerUI(c =>
+    {
+        c.DocExpansion(Swashbuckle.AspNetCore.SwaggerUI.DocExpansion.None); // contrae todo
+    });
+
 }
 
 //app.Use(async (context, next) =>

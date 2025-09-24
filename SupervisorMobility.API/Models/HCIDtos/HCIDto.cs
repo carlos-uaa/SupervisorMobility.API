@@ -14,7 +14,7 @@ namespace SupervisorMobility.API.Models.HCIDtos
         public string? HCIName { get; set; }
         public string? HCISectionName { get; set; }
         public int? HCINo { get; set; }
-
+        public int? SOSHubId { get; set; }
         public int? UserId { get; set; }
         public UsersWithNavigationAndPeopleDetails? User { get; set; }
 

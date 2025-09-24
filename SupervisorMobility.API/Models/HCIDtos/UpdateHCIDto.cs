@@ -14,6 +14,7 @@ namespace SupervisorMobility.API.Models.HCIDtos
         public string? HCISectionName { get; set; }
         public int? HCINo { get; set; }
         public int? UserId { get; set; }
+        public int? SOSHubId { get; set; }
         public ICollection<UpdateHCITransactionDto>? Transactions { get; set; }
           = new List<UpdateHCITransactionDto>();
         public ICollection<HCICategoryDto>? Categories { get; set; }

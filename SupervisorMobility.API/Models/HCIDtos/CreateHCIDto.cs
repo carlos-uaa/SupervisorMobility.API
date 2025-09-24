@@ -11,7 +11,7 @@ namespace SupervisorMobility.API.Models.HCIDtos
 
         public int? UserId { get; set; }
         public User? User { get; set; }
-
+        public int? SOSHubId { get; set; }
         public ICollection<CreateHCITransactionDto>? Transactions { get; set; }
           = new List<CreateHCITransactionDto>();
      

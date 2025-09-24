@@ -1,20 +1,41 @@
-﻿using Microsoft.AspNetCore.ResponseCompression;
+﻿// - Core .NET imports
+using System.Runtime.InteropServices;
+
+// - Microsoft imports
 using Microsoft.EntityFrameworkCore;
+using Microsoft.AspNetCore.ResponseCompression;
+using Microsoft.Extensions.DependencyInjection;
+
+// - External imports
+using Quartz;
+using AutoMapper;
+using Quartz.Spi;
+using Quartz.Impl;
 using Newtonsoft.Json;
-using SupervisorMobility.API.Business;
+
+// - Context imports
 using SupervisorMobility.API.Context;
+
+// - Entity imports
 using SupervisorMobility.API.DataAccess.Entities;
+
+// - Data access / Service imports
 using SupervisorMobility.API.DataAccess.Services;
 using SupervisorMobility.API.DataAccess.Services.TreeServices;
-using SupervisorMobility.API.Services;
-using Quartz;
-using Quartz.Impl;
-using Quartz.Spi;
-using SupervisorMobility.API.Models.NotificationDtos;
-using Microsoft.Extensions.DependencyInjection;
-using AutoMapper;
-using System.Runtime.InteropServices;
 using SupervisorMobility.API.DataAccess.Services.OrderingServices;
+
+// - Business / Service imports
+using SupervisorMobility.API.Business;
+using SupervisorMobility.API.Services;
+using SupervisorMobility.API.Services.SOS;
+
+// - Interface imports
+using SupervisorMobility.API.Interfaces.SOS;
+
+// - Model / DTO imports
+using SupervisorMobility.API.Models.NotificationDtos;
+using SupervisorMobility.API.infrastructure.repositories.STRO.Collections.Skills;
+using SupervisorMobility.API.infrastructure.repositories.STRO.Collections.Knowledges;
 
 
 namespace SupervisorMobility.API
@@ -32,6 +53,8 @@ namespace SupervisorMobility.API
             // HOE/SOS Analysis_Process
             services.AddScoped<ISOS_ProcessRepository, SOS_ProcessRepository>();
 
+            services.AddScoped<IKnowledgeRepository, KnowledgeRepository>();
+            services.AddScoped<ISkillRepository, SkillRepository>();
             //services.AddSingleton<ISOSAnalysis_ProcessRepository, SOSAnalysis_ProcessRepository>(sp =>
             //{
             //    var scopeFactory = sp.GetRequiredService<ContextFactory>();
@@ -45,6 +68,7 @@ namespace SupervisorMobility.API
             services.AddScoped<IEmailService, EmailService>();
             services.AddScoped<ITreeService, TreeService>();
             services.AddScoped<IOrderingService, OrderingService>();
+            services.AddScoped<ISTOperatingRequirementsService, STOperatingRequirementsService>();
 
 
 

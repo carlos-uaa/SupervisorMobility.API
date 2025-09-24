@@ -20,7 +20,7 @@ namespace SupervisorMobility.API.Controllers.SOS_Controllers
 {
     [Route("api/SOS/Combination")]
     [ApiController]
-    public class CombinationController : Controller
+    public class CombinationController : ControllerBase
     {
         private readonly IMapper _mapper;
         private readonly IWebHostEnvironment _env;

@@ -27,9 +27,9 @@ namespace SupervisorMobility.API.DataAccess.Entities.SOS.History
         public ICollection<FileUpload>? Videos { get; set; } = new List<FileUpload>();
         public string RevisedItems { get; set; }
 
-        public string? TrainingTime { get; set; }
-        public ICollection<Equipment>? SafetyEquipment { get; set; } 
-        public ICollection<Tool>? ToolsUsed { get; set; } 
+        public int? TrainingTime { get; set; }
+        public ICollection<Equipment>? SafetyEquipment { get; set; }
+        public ICollection<Tool>? ToolsUsed { get; set; }
         public ICollection<Material>? MaterialsUsed { get; set; }
         public string OtherInformation { get; set; }
 
@@ -45,6 +45,9 @@ namespace SupervisorMobility.API.DataAccess.Entities.SOS.History
 
         public int? StationId { get; set; }
         public Station? Station { get; set; }
+
+        public int? CreatorId { get; set; }
+        public User? Creator { get; set; }
 
         public ICollection<User>? ApproverOwners { get; set; }
         public ICollection<User>? ReviewerEditors { get; set; }
