@@ -9,7 +9,6 @@ namespace SupervisorMobility.API.DataAccess.Entities.SOS
         public int SectionId { get; set; }
         public ICollection<Analysis> Analyses { get; set; } = new List<Analysis>();
         public string Step { get; set; } = "";
-        public bool IsMachineOperation { get; set; } = false;
         public int SecuenceDist { get; set; }
         public bool? IsActive { get; set; }
 
