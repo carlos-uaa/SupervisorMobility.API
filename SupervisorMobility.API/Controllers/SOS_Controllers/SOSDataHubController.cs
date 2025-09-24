@@ -101,7 +101,7 @@ namespace SupervisorMobility.API.Controllers.SOS_Controllers
             {
                 foreach (User userApprover in usersApproverOwners)
                 {
-                  await  _AnalysisProcessRepository.AddApproverOwnersToSOSCollection(createdResult, userApprover);
+                    await _AnalysisProcessRepository.AddApproverOwnersToSOSCollection(createdResult, userApprover);
                 }
             }
 
@@ -109,7 +109,7 @@ namespace SupervisorMobility.API.Controllers.SOS_Controllers
             {
                 foreach (User userReviewer in usersReviewerEditors)
                 {
-                 await   _AnalysisProcessRepository.AddReviewerEditorToSOSCollection(createdResult, userReviewer);
+                    await _AnalysisProcessRepository.AddReviewerEditorToSOSCollection(createdResult, userReviewer);
                 }
             }
 
@@ -145,10 +145,10 @@ namespace SupervisorMobility.API.Controllers.SOS_Controllers
         }
 
         [HttpGet]
-        public async Task<ActionResult<IEnumerable<SOSHubDto>>> GetAllSOSHub(bool includeImages = false, bool includeVideos = false, bool includeCommentaries = false, bool includeTools = false, bool includeEquipments = false, bool includeMaterials = false, bool includeInformation = false, bool includePeople = false, bool includeDocuments = false)
+        public async Task<ActionResult<IEnumerable<SOSHubDto>>> GetAllSOSHub(bool includeImages = false, bool includeVideos = false, bool includeCommentaries = false, bool includeTools = false, bool includeEquipments = false, bool includeMaterials = false, bool includeInformation = false, bool includePeople = false, bool includeDocuments = false, bool includeSOSDistribution = false)
         {
 
-            var CheckpointEntities = await _AnalysisProcessRepository.GetAllSOSHub(includeImages: includeImages, includeVideos: includeVideos, includeCommentaries: includeCommentaries, includeTools: includeTools, includeEquipments: includeEquipments, includeMaterials: includeMaterials, includeInformation: includeInformation, includePeople: includePeople, includeDocuments: includeDocuments);
+            var CheckpointEntities = await _AnalysisProcessRepository.GetAllSOSHub(includeImages: includeImages, includeVideos: includeVideos, includeCommentaries: includeCommentaries, includeTools: includeTools, includeEquipments: includeEquipments, includeMaterials: includeMaterials, includeInformation: includeInformation, includePeople: includePeople, includeDocuments: includeDocuments, includeSOSDistribution: includeSOSDistribution);
             if (CheckpointEntities == null)
             {
                 return NotFound("Get All Sos Hub not found!");
@@ -541,7 +541,7 @@ namespace SupervisorMobility.API.Controllers.SOS_Controllers
             _SOSHubForUpdate.SafetyEquipment = null;
             _SOSHubForUpdate.CommonDirection = null;
             _SOSHubForUpdate.ApproverOwners = null;
-            _SOSHubForUpdate.ReviewerEditors= null;
+            _SOSHubForUpdate.ReviewerEditors = null;
             _SOSHubForUpdate.AppliedModels = null;
 
             //if (_SOSHubForUpdate.ApproverOwnerId <= 0)

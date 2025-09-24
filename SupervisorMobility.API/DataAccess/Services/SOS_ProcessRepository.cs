@@ -306,8 +306,7 @@ namespace SupervisorMobility.API.DataAccess.Services
             return sosHub;
         }
 
-        public async Task<IEnumerable<SOSHub>> GetAllSOSHub(bool includeAnalysesBkup = false, bool includeSections = false, bool includeImages = false, bool includeVideos = false, bool includeCommentaries = false, bool includeTools = false, bool includeEquipments = false, bool includeMaterials = false, bool includeInformation = false, bool includePeople = false, bool includeDocuments = false)
-        {
+        public async Task<IEnumerable<SOSHub>> GetAllSOSHub(bool includeAnalysesBkup = false, bool includeSections = false, bool includeImages = false, bool includeVideos = false, bool includeCommentaries = false, bool includeTools = false, bool includeEquipments = false, bool includeMaterials = false, bool includeInformation = false, bool includePeople = false, bool includeDocuments = false,bool includeSOSDistribution = false){
             var query = _context.SOSHubs.AsNoTracking().Where(h => h.IsActive == true);
 
             if (includeAnalysesBkup)
@@ -357,6 +356,11 @@ namespace SupervisorMobility.API.DataAccess.Services
             if (includePeople)
             {
                 query = query.Include(o => o.Creator).Include(o => o.ApproverOwners).Include(e => e.ReviewerEditors);
+            }
+
+            if (includeSOSDistribution)
+            {
+                query = query.Include(d => d.SOSDistribution);
             }
 
             var sosHubs = await query.OrderBy(s => s.SOSHubId).ToListAsync();
@@ -2849,21 +2853,6 @@ namespace SupervisorMobility.API.DataAccess.Services
                     _context.SOSAnalyses.Update(AnalysisEntity);
                 }
 
-
-                if (SOShub == null) throw new Exception("SOSHub not found");
-
-                IEnumerable<Section> allSections = AnalysisUpdate.SOSHub.Sections.ToList();
-
-                foreach (var section in allSections)
-                {
-                    //var tracked = _context.Analyses.Local.FirstOrDefault(a => a.AnalysisId == analysis.AnalysisId);
-                    Section? trackedSection = _context.Sections.FirstOrDefault(s => s.SectionId == section.SectionId);
-                    if (trackedSection != null)
-                    {
-                        trackedSection.IsMachineOperation = section.IsMachineOperation;
-                        _context.Entry(trackedSection).Property(a => a.IsMachineOperation).IsModified = true;
-                    }
-                }
                 return await _context.SaveChangesAsync();
             }
             catch (Exception ex)
