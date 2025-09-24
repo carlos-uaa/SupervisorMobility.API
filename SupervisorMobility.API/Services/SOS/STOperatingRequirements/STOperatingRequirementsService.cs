@@ -150,22 +150,7 @@ namespace SupervisorMobility.API.Services.SOS
                         SetRowBackground(sheet, startRow, "H", "U", Color.White);
 
                         // Operation column
-                        var operationRange = stepSection.IsMachineOperation ? sheet.Cells[$"K{startRow}:M{startRow}"] : sheet.Cells[$"H{startRow}:J{startRow}"];
-                        MergeAndStyleCell(operationRange, ExcelHorizontalAlignment.Left, ExcelVerticalAlignment.Center, wrapText: true, border: false);
-                        operationRange.Value = stepSection.Step;
 
-                        // Borders for operation
-                        if (stepSection.IsMachineOperation)
-                        {
-                            MergeAndStyleCell(sheet.Cells[$"H{startRow}:J{startRow}"], ExcelHorizontalAlignment.Left, ExcelVerticalAlignment.Center, border: false);
-                            SetLeftRightBorder(sheet.Cells[$"H{startRow}:J{startRow}"]);
-
-                        }
-                        else
-                        {
-                            MergeAndStyleCell(sheet.Cells[$"K{startRow}:M{startRow}"], ExcelHorizontalAlignment.Left, ExcelVerticalAlignment.Center, border: false);
-                            SetLeftRightBorder(sheet.Cells[$"K{startRow}:M{startRow}"]);
-                        }
 
                         // Conditions
                         var conditions = GetEstablishedCondition(stepSection.SectionId, SOSSTRO!);
@@ -360,7 +345,7 @@ namespace SupervisorMobility.API.Services.SOS
 
             // NOTE: Find the section matching the operation sequence
             Section? findStep = sections.FirstOrDefault(s => s.SectionId == operationSequence.SectionId);
-            return findStep ?? new Section { Step = "", IsMachineOperation = false };
+            return findStep ?? new Section { Step = "" };
         }
 
         /// <summary>
