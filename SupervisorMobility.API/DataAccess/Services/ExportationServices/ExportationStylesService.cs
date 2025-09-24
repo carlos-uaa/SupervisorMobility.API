@@ -407,7 +407,7 @@ namespace SupervisorMobility.API.DataAccess.Services.ExportationServices
         public double CalculateRowHeightSimple(string text, int maxCharsPerLine, double lineHeight = 15, double padding = 5)
         {
             // NOTE: Return minimal height if text is null or whitespace
-            if (string.IsNullOrWhiteSpace(text))
+            if (string.IsNullOrWhiteSpace(text) || maxCharsPerLine <= 0)
                 return lineHeight + padding;
 
             // NOTE: Calculate number of lines needed based on character count
@@ -428,7 +428,7 @@ namespace SupervisorMobility.API.DataAccess.Services.ExportationServices
         public double CalculateRowHeightByChars(string text, int maxCharsPerLine, double lineHeight = 15, double padding = 5)
         {
             // NOTE: Return minimal height if text is null or whitespace
-            if (string.IsNullOrWhiteSpace(text))
+            if (string.IsNullOrWhiteSpace(text) || maxCharsPerLine <= 0)
                 return lineHeight + padding;
 
             // NOTE: Split text into separate lines to evaluate individually
