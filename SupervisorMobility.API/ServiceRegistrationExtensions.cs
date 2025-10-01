@@ -20,9 +20,9 @@ using SupervisorMobility.API.Context;
 using SupervisorMobility.API.DataAccess.Entities;
 
 // - Data access / Service imports
-using SupervisorMobility.API.DataAccess.Services;
-using SupervisorMobility.API.DataAccess.Services.TreeServices;
 using SupervisorMobility.API.DataAccess.Services.OrderingServices;
+using SupervisorMobility.API.DataAccess.Services.TreeServices;
+using SupervisorMobility.API.DataAccess.Services;
 
 // - Business / Service imports
 using SupervisorMobility.API.Business;
@@ -33,9 +33,10 @@ using SupervisorMobility.API.Services.SOS;
 using SupervisorMobility.API.Interfaces.SOS;
 
 // - Model / DTO imports
-using SupervisorMobility.API.Models.NotificationDtos;
-using SupervisorMobility.API.infrastructure.repositories.STRO.Collections.Skills;
 using SupervisorMobility.API.infrastructure.repositories.STRO.Collections.Knowledges;
+using SupervisorMobility.API.infrastructure.repositories.STRO.Collections.Skills;
+using SupervisorMobility.API.infrastructure.repositories.STRO;
+using SupervisorMobility.API.Models.NotificationDtos;
 
 
 namespace SupervisorMobility.API
@@ -55,6 +56,7 @@ namespace SupervisorMobility.API
 
             services.AddScoped<IKnowledgeRepository, KnowledgeRepository>();
             services.AddScoped<ISkillRepository, SkillRepository>();
+            services.AddScoped<ISTROSequencesRepository, STROSequencesRepository>();
             //services.AddSingleton<ISOSAnalysis_ProcessRepository, SOSAnalysis_ProcessRepository>(sp =>
             //{
             //    var scopeFactory = sp.GetRequiredService<ContextFactory>();
@@ -69,6 +71,7 @@ namespace SupervisorMobility.API
             services.AddScoped<ITreeService, TreeService>();
             services.AddScoped<IOrderingService, OrderingService>();
             services.AddScoped<ISTOperatingRequirementsService, STOperatingRequirementsService>();
+            services.AddScoped<ISTROSyncDistributionService, STROSyncDistributionService>();
 
 
 
