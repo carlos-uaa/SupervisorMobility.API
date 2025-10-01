@@ -47,7 +47,8 @@ namespace SupervisorMobility.API.Models.SOS.SOSHubDtos
 
         public DateTime? CreatedDate { get; set; }
         public DateTime? ModifiedDate { get; set; }
- 
+        public int? CreatorId { get; set; }
+
         public List<UsersWithoutPeopleWithNavigation>? ApproverOwners { get; set; }
         public List<UsersWithoutPeopleWithNavigation>? ReviewerEditors { get; set; }
 
