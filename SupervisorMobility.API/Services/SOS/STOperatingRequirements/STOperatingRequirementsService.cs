@@ -144,31 +144,35 @@ namespace SupervisorMobility.API.Services.SOS
                     // === Operation Sections === \\
                     foreach (var (section, secIdx) in sections.Select((s, i) => (s, i)))
                     {
-                        var stepSection = GetStepSection(distribution, section);
+                        var STROSequence = GetOperationSequence((int)distribution.SOSHubId, (int)section.SectionId!, SOSSTRO!);
+                        if (STROSequence == null) continue;
 
                         // Background row style
                         SetRowBackground(sheet, startRow, "H", "U", Color.White);
 
-                        // Operation column
-                        var operationRange = stepSection.IsMachineOperation ? sheet.Cells[$"K{startRow}:M{startRow}"] : sheet.Cells[$"H{startRow}:J{startRow}"];
-                        MergeAndStyleCell(operationRange, ExcelHorizontalAlignment.Left, ExcelVerticalAlignment.Center, wrapText: true, border: false);
-                        operationRange.Value = stepSection.Step;
+                        // Operation person column
+                        var operationRangePerson = sheet.Cells[$"H{startRow}:J{startRow}"];
+                        MergeAndStyleCell(operationRangePerson, ExcelHorizontalAlignment.Left, ExcelVerticalAlignment.Center, wrapText: true, border: false);
 
-                        // Borders for operation
-                        if (stepSection.IsMachineOperation)
+                        if ((bool)STROSequence.IsOperationPersonRequired!)
                         {
-                            MergeAndStyleCell(sheet.Cells[$"H{startRow}:J{startRow}"], ExcelHorizontalAlignment.Left, ExcelVerticalAlignment.Center, border: false);
+                            operationRangePerson.Value = STROSequence.OperationPersonText;
                             SetLeftRightBorder(sheet.Cells[$"H{startRow}:J{startRow}"]);
-
                         }
-                        else
+
+                        // Operation machine column
+                        var operationRangeMachine = sheet.Cells[$"K{startRow}:M{startRow}"];
+                        MergeAndStyleCell(operationRangeMachine, ExcelHorizontalAlignment.Left, ExcelVerticalAlignment.Center, wrapText: true, border: false);
+
+                        if ((bool)STROSequence.IsOperationMachineRequired!)
                         {
-                            MergeAndStyleCell(sheet.Cells[$"K{startRow}:M{startRow}"], ExcelHorizontalAlignment.Left, ExcelVerticalAlignment.Center, border: false);
+                            operationRangeMachine.Value = STROSequence.OperationMachineText;
                             SetLeftRightBorder(sheet.Cells[$"K{startRow}:M{startRow}"]);
                         }
 
+
                         // Conditions
-                        var conditions = GetEstablishedCondition(stepSection.SectionId, SOSSTRO!);
+                        var conditions = GetEstablishedCondition((int)STROSequence.SectionId!, SOSSTRO!);
                         MergeAndStyleCell(sheet.Cells[$"N{startRow}:Q{startRow}"], ExcelHorizontalAlignment.Right, ExcelVerticalAlignment.Center, wrapText: true, border: false);
                         sheet.Cells[$"N{startRow}:Q{startRow}"].Value = string.Join("\n", conditions.Select(c => $"🔹{c.Condition}"));
                         SetLeftRightBorder(sheet.Cells[$"N{startRow}:Q{startRow}"]);
@@ -189,7 +193,7 @@ namespace SupervisorMobility.API.Services.SOS
                         }
 
                         // Row height calculation
-                        int heightRow = new[] { CalculateHeightRowOperation(stepSection), CalculateHeightRowEstablishedCondition(conditions), CalculateHeightRowQuality(criticalPoints) }.Max();
+                        int heightRow = new[] { CalculateHeightRowOperation(STROSequence.Section!), CalculateHeightRowEstablishedCondition(conditions), CalculateHeightRowQuality(criticalPoints) }.Max();
 
 
                         sheet.Row(startRow++).Height = heightRow;
@@ -348,19 +352,19 @@ namespace SupervisorMobility.API.Services.SOS
         }
 
         /// <summary>
-        /// Gets the <see cref="Section"/> for a given operation sequence, or a default empty section if none exists.
+        /// Retrieves an existing operation sequence for a given SOS Hub and section.
+        /// If no matching sequence exists, returns a new instance.
         /// </summary>
-        /// <param name="distribution">The SOS distribution containing analyses and sequences.</param>
-        /// <param name="operationSequence">The operation sequence to match.</param>
-        /// <returns>The matching <see cref="Section"/> or a new default <see cref="Section"/>.</returns>
-        public Section GetStepSection(SOSDistribution distribution, SOSDistributionOperationSequence operationSequence)
+        /// <param name="sosHubId">The SOS Hub ID.</param>
+        /// <param name="sectionId">The section ID.</param>
+        /// <param name="SOSSynopticRequeriments">The synoptic table of operating requirements containing sequences.</param>
+        /// <returns>
+        /// An existing <see cref="SOSSynopticRequirementsOperationSequence"/> if found; otherwise, a new instance.
+        /// </returns>
+        private SOSSynopticRequirementsOperationSequence GetOperationSequence(int sosHubId, int sectionId, SOSSynopticTableofOperatingRequirements SOSSynopticRequeriments)
         {
-            // Combine sections from analyses and sequences
-            List<Section> sections = distribution.Analyses!.SelectMany(a => a.SOSHub?.Sections ?? Enumerable.Empty<Section>()).Concat(distribution.Sequences!.SelectMany(s => s.SOSHub?.Sections ?? Enumerable.Empty<Section>())).ToList();
-
-            // NOTE: Find the section matching the operation sequence
-            Section? findStep = sections.FirstOrDefault(s => s.SectionId == operationSequence.SectionId);
-            return findStep ?? new Section { Step = "", IsMachineOperation = false };
+            // NOTE: Return the first matching sequence or a new instance if none exists
+            return SOSSynopticRequeriments?.SOSSynopticRequirementsOperationSequence?.FirstOrDefault(s => s.SosHubId == sosHubId && s.SectionId == sectionId) ?? new SOSSynopticRequirementsOperationSequence();
         }
 
         /// <summary>

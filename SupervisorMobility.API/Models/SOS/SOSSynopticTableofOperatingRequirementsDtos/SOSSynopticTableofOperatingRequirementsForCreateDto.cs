@@ -26,6 +26,8 @@ namespace SupervisorMobility.API.Models.SOS.SOSSynopticTableofOperatingRequireme
         public List<SOSAnalysisDto>? Analyses { get; set; } 
         [JsonIgnore]
         public List<SOSSequenceDto>? Sequences { get; set; } 
+        [JsonIgnore]
+        public List<SOSHub>? SOSHubs { get; set; }
 
         public bool? IsActive { get; set; }
         public int SOSHubId { get; set; }

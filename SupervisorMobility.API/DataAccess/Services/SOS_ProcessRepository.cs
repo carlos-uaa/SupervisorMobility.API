@@ -5805,8 +5805,7 @@ namespace SupervisorMobility.API.DataAccess.Services
         #region SOSSynopticTableofOperatingRequirements
         public async Task<int> CreateSOSSynopticTableofOperatingRequirements(SOSSynopticTableofOperatingRequirements SOS_SynopticTableofOperatingRequirementsToCreate)
         {
-            var analysesCopy = SOS_SynopticTableofOperatingRequirementsToCreate.Analyses.ToList();
-
+            
             _context.SOSSynopticTableofOperatingRequirements.Add(SOS_SynopticTableofOperatingRequirementsToCreate);
             return _context.SaveChanges();
         }
@@ -5921,6 +5920,7 @@ namespace SupervisorMobility.API.DataAccess.Services
                 .Include(k => k.SOSSTROKnowledge)
                 .Include(s => s.SOSSTROSkill)
                 .Include(c => c.EstablishedConditions)
+                .Include(s => s.SOSSynopticRequirementsOperationSequence)
                 .FirstOrDefaultAsync(e => e.SOSSynopticTableofOperatingRequirementsId == sosSynopticTableofOperatingRequirements_Id);
 
 
@@ -6064,6 +6064,42 @@ namespace SupervisorMobility.API.DataAccess.Services
                     }
                 }
             }
+
+            //+=========== STRO SEQUENCES ============+\\
+            foreach (var updatedItem in STROUpdate.SOSSynopticRequirementsOperationSequence!)
+            {
+                // NOTE: Add new sequence if it does not exist (ID = 0)
+                if (updatedItem.SOSSynopticRequirementsOperationSequenceId == 0)
+                {
+                    var AddSTROSequence = new SOSSynopticRequirementsOperationSequence
+                    {
+                        Sequence = updatedItem.Sequence,
+                        SectionId = updatedItem.SectionId,
+                        SosHubId = updatedItem.SosHubId,
+                        OperationPersonText = updatedItem?.OperationPersonText,
+                        OperationMachineText = updatedItem?.OperationMachineText,
+                        IsOperationPersonRequired = updatedItem?.IsOperationPersonRequired,
+                        IsOperationMachineRequired = updatedItem?.IsOperationMachineRequired,
+                        IsActive = true,
+                        SOSSynopticTableofOperatingRequirementsId = entity.SOSSynopticTableofOperatingRequirementsId
+                    };
+
+                    // NOTE: Link sequence to the current Synoptic Table of Operating Requirements
+                    entity.SOSSynopticRequirementsOperationSequence!.Add(AddSTROSequence);
+                }
+                else
+                {
+                    // NOTE: Update existing sequence if it already exists
+                    var existingItem = entity.SOSSynopticRequirementsOperationSequence!.FirstOrDefault(x => x.SOSSynopticRequirementsOperationSequenceId == updatedItem.SOSSynopticRequirementsOperationSequenceId);
+                    if (existingItem != null)
+                    {
+                        // NOTE: Update entity values with the updated DTO values
+                        _context.Entry(existingItem).CurrentValues.SetValues(updatedItem);
+                    }
+                }
+            }
+
+
 
             // NOTE: Save all changes to the database
             await _context.SaveChangesAsync();

@@ -3,6 +3,7 @@ using System;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Infrastructure;
 using Microsoft.EntityFrameworkCore.Metadata;
+using Microsoft.EntityFrameworkCore.Migrations;
 using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 using SupervisorMobility.API.Context;
 
@@ -11,9 +12,11 @@ using SupervisorMobility.API.Context;
 namespace SupervisorMobility.API.Migrations
 {
     [DbContext(typeof(SupervisorMobilityContext))]
-    partial class SupervisorMobilityContextModelSnapshot : ModelSnapshot
+    [Migration("20250924233311_removeIsMachineOperationColumnSection")]
+    partial class removeIsMachineOperationColumnSection
     {
-        protected override void BuildModel(ModelBuilder modelBuilder)
+        /// <inheritdoc />
+        protected override void BuildTargetModel(ModelBuilder modelBuilder)
         {
 #pragma warning disable 612, 618
             modelBuilder
@@ -3334,28 +3337,13 @@ namespace SupervisorMobility.API.Migrations
                     b.Property<bool?>("IsActive")
                         .HasColumnType("bit");
 
-                    b.Property<bool?>("IsOperationMachineRequired")
-                        .HasColumnType("bit");
-
-                    b.Property<bool?>("IsOperationPersonRequired")
-                        .HasColumnType("bit");
-
-                    b.Property<string>("OperationMachineText")
-                        .HasColumnType("nvarchar(max)");
-
-                    b.Property<string>("OperationPersonText")
-                        .HasColumnType("nvarchar(max)");
-
-                    b.Property<int>("SOSSynopticTableofOperatingRequirementsId")
+                    b.Property<int?>("SOSSynopticTableofOperatingRequirementsId")
                         .HasColumnType("int");
 
                     b.Property<int?>("SectionId")
                         .HasColumnType("int");
 
                     b.Property<int?>("Sequence")
-                        .HasColumnType("int");
-
-                    b.Property<int?>("SosHubId")
                         .HasColumnType("int");
 
                     b.Property<string>("Times")
@@ -4028,7 +4016,7 @@ namespace SupervisorMobility.API.Migrations
                         new
                         {
                             UserId = 1,
-                            CreatedDate = new DateTime(2025, 9, 26, 0, 59, 7, 168, DateTimeKind.Local).AddTicks(4672),
+                            CreatedDate = new DateTime(2025, 9, 24, 17, 33, 9, 939, DateTimeKind.Local).AddTicks(3784),
                             Email = "maguayo@gruposinco.com.mx",
                             IsActive = true,
                             LastUpdated = new DateTime(1, 1, 1, 0, 0, 0, 0, DateTimeKind.Unspecified),
@@ -4039,7 +4027,7 @@ namespace SupervisorMobility.API.Migrations
                         new
                         {
                             UserId = 2,
-                            CreatedDate = new DateTime(2025, 9, 26, 0, 59, 7, 168, DateTimeKind.Local).AddTicks(4696),
+                            CreatedDate = new DateTime(2025, 9, 24, 17, 33, 9, 939, DateTimeKind.Local).AddTicks(3812),
                             Email = "maguayo@gruposinco.com.mx",
                             IsActive = true,
                             LastUpdated = new DateTime(1, 1, 1, 0, 0, 0, 0, DateTimeKind.Unspecified),
@@ -4050,7 +4038,7 @@ namespace SupervisorMobility.API.Migrations
                         new
                         {
                             UserId = 3,
-                            CreatedDate = new DateTime(2025, 9, 26, 0, 59, 7, 168, DateTimeKind.Local).AddTicks(4698),
+                            CreatedDate = new DateTime(2025, 9, 24, 17, 33, 9, 939, DateTimeKind.Local).AddTicks(3814),
                             Email = "pmunoz@gruposinco.com.mx",
                             IsActive = true,
                             LastUpdated = new DateTime(1, 1, 1, 0, 0, 0, 0, DateTimeKind.Unspecified),
@@ -4062,7 +4050,7 @@ namespace SupervisorMobility.API.Migrations
                         {
                             UserId = 4,
                             AreaId = 1,
-                            CreatedDate = new DateTime(2025, 9, 26, 0, 59, 7, 168, DateTimeKind.Local).AddTicks(4700),
+                            CreatedDate = new DateTime(2025, 9, 24, 17, 33, 9, 939, DateTimeKind.Local).AddTicks(3816),
                             Email = "",
                             GroupId = 1,
                             IsActive = true,
@@ -4077,7 +4065,7 @@ namespace SupervisorMobility.API.Migrations
                         {
                             UserId = 5,
                             AreaId = 1,
-                            CreatedDate = new DateTime(2025, 9, 26, 0, 59, 7, 168, DateTimeKind.Local).AddTicks(4704),
+                            CreatedDate = new DateTime(2025, 9, 24, 17, 33, 9, 939, DateTimeKind.Local).AddTicks(3819),
                             Email = "",
                             GroupId = 1,
                             IsActive = true,
@@ -4093,7 +4081,7 @@ namespace SupervisorMobility.API.Migrations
                         {
                             UserId = 6,
                             AreaId = 1,
-                            CreatedDate = new DateTime(2025, 9, 26, 0, 59, 7, 168, DateTimeKind.Local).AddTicks(4707),
+                            CreatedDate = new DateTime(2025, 9, 24, 17, 33, 9, 939, DateTimeKind.Local).AddTicks(3822),
                             Email = "",
                             GroupId = 1,
                             IsActive = true,
@@ -4108,7 +4096,7 @@ namespace SupervisorMobility.API.Migrations
                         {
                             UserId = 7,
                             AreaId = 1,
-                            CreatedDate = new DateTime(2025, 9, 26, 0, 59, 7, 168, DateTimeKind.Local).AddTicks(4709),
+                            CreatedDate = new DateTime(2025, 9, 24, 17, 33, 9, 939, DateTimeKind.Local).AddTicks(3829),
                             Email = "",
                             GroupId = 1,
                             IsActive = true,
@@ -4123,7 +4111,7 @@ namespace SupervisorMobility.API.Migrations
                         {
                             UserId = 8,
                             AreaId = 1,
-                            CreatedDate = new DateTime(2025, 9, 26, 0, 59, 7, 168, DateTimeKind.Local).AddTicks(4711),
+                            CreatedDate = new DateTime(2025, 9, 24, 17, 33, 9, 939, DateTimeKind.Local).AddTicks(3832),
                             Email = "",
                             GroupId = 1,
                             IsActive = true,
@@ -5467,7 +5455,7 @@ namespace SupervisorMobility.API.Migrations
                         new
                         {
                             NotificationID = 2,
-                            EntryDate = new DateTime(2025, 9, 26, 0, 59, 7, 168, DateTimeKind.Local).AddTicks(5080),
+                            EntryDate = new DateTime(2025, 9, 24, 17, 33, 9, 939, DateTimeKind.Local).AddTicks(4050),
                             IsAccepted = true,
                             IsActive = true,
                             MadeBy = "Marco Aguayo",
@@ -5478,7 +5466,7 @@ namespace SupervisorMobility.API.Migrations
                         new
                         {
                             NotificationID = 3,
-                            EntryDate = new DateTime(2025, 9, 26, 0, 59, 7, 168, DateTimeKind.Local).AddTicks(5083),
+                            EntryDate = new DateTime(2025, 9, 24, 17, 33, 9, 939, DateTimeKind.Local).AddTicks(4053),
                             IsAccepted = false,
                             IsActive = true,
                             MadeBy = "Marco Aguayo",
@@ -5489,7 +5477,7 @@ namespace SupervisorMobility.API.Migrations
                         new
                         {
                             NotificationID = 4,
-                            EntryDate = new DateTime(2025, 9, 26, 0, 59, 7, 168, DateTimeKind.Local).AddTicks(5085),
+                            EntryDate = new DateTime(2025, 9, 24, 17, 33, 9, 939, DateTimeKind.Local).AddTicks(4055),
                             IsAccepted = true,
                             IsActive = false,
                             MadeBy = "Marco Aguayo",
@@ -5500,7 +5488,7 @@ namespace SupervisorMobility.API.Migrations
                         new
                         {
                             NotificationID = 5,
-                            EntryDate = new DateTime(2025, 9, 26, 0, 59, 7, 168, DateTimeKind.Local).AddTicks(5086),
+                            EntryDate = new DateTime(2025, 9, 24, 17, 33, 9, 939, DateTimeKind.Local).AddTicks(4057),
                             IsAccepted = false,
                             IsActive = false,
                             MadeBy = "Marco Aguayo",
@@ -5511,7 +5499,7 @@ namespace SupervisorMobility.API.Migrations
                         new
                         {
                             NotificationID = 6,
-                            EntryDate = new DateTime(2025, 9, 26, 0, 59, 7, 168, DateTimeKind.Local).AddTicks(5088),
+                            EntryDate = new DateTime(2025, 9, 24, 17, 33, 9, 939, DateTimeKind.Local).AddTicks(4059),
                             IsAccepted = true,
                             IsActive = true,
                             MadeBy = "Marco Aguayo",
@@ -5522,7 +5510,7 @@ namespace SupervisorMobility.API.Migrations
                         new
                         {
                             NotificationID = 7,
-                            EntryDate = new DateTime(2025, 9, 26, 0, 59, 7, 168, DateTimeKind.Local).AddTicks(5090),
+                            EntryDate = new DateTime(2025, 9, 24, 17, 33, 9, 939, DateTimeKind.Local).AddTicks(4061),
                             IsAccepted = false,
                             IsActive = true,
                             MadeBy = "Marco Aguayo",
@@ -5533,7 +5521,7 @@ namespace SupervisorMobility.API.Migrations
                         new
                         {
                             NotificationID = 8,
-                            EntryDate = new DateTime(2025, 9, 26, 0, 59, 7, 168, DateTimeKind.Local).AddTicks(5092),
+                            EntryDate = new DateTime(2025, 9, 24, 17, 33, 9, 939, DateTimeKind.Local).AddTicks(4063),
                             IsAccepted = true,
                             IsActive = false,
                             MadeBy = "Marco Aguayo",
@@ -5544,7 +5532,7 @@ namespace SupervisorMobility.API.Migrations
                         new
                         {
                             NotificationID = 9,
-                            EntryDate = new DateTime(2025, 9, 26, 0, 59, 7, 168, DateTimeKind.Local).AddTicks(5094),
+                            EntryDate = new DateTime(2025, 9, 24, 17, 33, 9, 939, DateTimeKind.Local).AddTicks(4064),
                             IsAccepted = false,
                             IsActive = false,
                             MadeBy = "Marco Aguayo",
@@ -7345,17 +7333,13 @@ namespace SupervisorMobility.API.Migrations
 
             modelBuilder.Entity("SupervisorMobility.API.DataAccess.Entities.SOS.SOSSynopticRequirementsOperationSequence", b =>
                 {
-                    b.HasOne("SupervisorMobility.API.DataAccess.Entities.SOS.SOSSynopticTableofOperatingRequirements", "SOSSynopticTableofOperatingRequirements")
+                    b.HasOne("SupervisorMobility.API.DataAccess.Entities.SOS.SOSSynopticTableofOperatingRequirements", null)
                         .WithMany("SOSSynopticRequirementsOperationSequence")
-                        .HasForeignKey("SOSSynopticTableofOperatingRequirementsId")
-                        .OnDelete(DeleteBehavior.Cascade)
-                        .IsRequired();
+                        .HasForeignKey("SOSSynopticTableofOperatingRequirementsId");
 
                     b.HasOne("SupervisorMobility.API.DataAccess.Entities.SOS.Section", "Section")
                         .WithMany()
                         .HasForeignKey("SectionId");
-
-                    b.Navigation("SOSSynopticTableofOperatingRequirements");
 
                     b.Navigation("Section");
                 });
