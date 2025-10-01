@@ -1,20 +1,36 @@
-﻿using AutoMapper;
-using Microsoft.AspNetCore.Mvc;
-using SupervisorMobility.API.DataAccess.Entities;
-using SupervisorMobility.API.DataAccess.Entities.SOS;
-using SupervisorMobility.API.DataAccess.Services;
-using SupervisorMobility.API.Models.CommentaryDtos;
-using SupervisorMobility.API.Models.FileUploadDto;
-using SupervisorMobility.API.Models.SOS.SOSDistributionAdditionalTimeDtos;
-using SupervisorMobility.API.Models.SOS.SOSDistributionDtos;
-using SupervisorMobility.API.Models.SOS.SOSDistributionLogbookDtos;
-using SupervisorMobility.API.Models.SOS.SOSDistributionOperationSequenceDtos;
-using SupervisorMobility.API.Models.SOS.SOSHubDtos;
-using SupervisorMobility.API.Models.SOS.SOSHubDtos.SectionDtos;
-using SupervisorMobility.API.Models.SOS.SOSTimeDtos;
-using SupervisorMobility.API.Models.SOS.TurnDtos;
-using System.Collections.Generic;
+﻿// - Core .NET imports
 using System.Diagnostics;
+using System.Collections.Generic;
+
+// - External imports
+using AutoMapper;
+using Microsoft.AspNetCore.Mvc;
+
+// - Context imports
+using SupervisorMobility.API.DataAccess.Services;
+
+// - Entity imports
+using SupervisorMobility.API.DataAccess.Entities.SOS;
+using SupervisorMobility.API.DataAccess.Entities;
+
+// - Interface imports
+using SupervisorMobility.API.Interfaces.SOS;
+
+// - Service imports
+using SupervisorMobility.API.Services.SOS;
+
+// - Model imports
+using SupervisorMobility.API.Models.SOS.SOSDistributionOperationSequenceDtos;
+using SupervisorMobility.API.Models.SOS.SOSDistributionAdditionalTimeDtos;
+using SupervisorMobility.API.Models.SOS.SOSDistributionLogbookDtos;
+using SupervisorMobility.API.Models.SOS.SOSHubDtos.SectionDtos;
+using SupervisorMobility.API.Models.SOS.SOSDistributionDtos;
+using SupervisorMobility.API.Models.SOS.SOSTimeDtos;
+using SupervisorMobility.API.Models.CommentaryDtos;
+using SupervisorMobility.API.Models.SOS.SOSHubDtos;
+using SupervisorMobility.API.Models.FileUploadDto;
+using SupervisorMobility.API.Models.SOS.TurnDtos;
+
 
 namespace SupervisorMobility.API.Controllers.SOS_Controllers
 {
@@ -22,34 +38,62 @@ namespace SupervisorMobility.API.Controllers.SOS_Controllers
     [ApiController]
     public class DistributionController : ControllerBase
     {
+        // +=============== DEPENDENCIES ===============+\\
         private readonly IMapper _mapper;
         private readonly IWebHostEnvironment _env;
         private readonly ISOS_ProcessRepository _ProcessRepository;
-        public DistributionController(IWebHostEnvironment env, IMapper mapper, ISOS_ProcessRepository repository)
+        private readonly ISTROSyncDistributionService _STROSyncDistributionService;
+
+        /// <summary>
+        /// Initializes dependencies required by the DistributionController.
+        /// </summary>
+        /// <param name="env">Provides information about the web hosting environment.</param>
+        /// <param name="mapper">AutoMapper instance for DTO-to-entity mapping.</param>
+        /// <param name="repository">Repository for handling SOS process operations.</param>
+        /// <param name="STROSyncDistributionService">Service for synchronizing SOS distribution sequences.</param>
+        /// <exception cref="ArgumentNullException">
+        /// Thrown when <paramref name="mapper"/> or <paramref name="env"/> is null.
+        /// </exception>
+        public DistributionController(IWebHostEnvironment env, IMapper mapper, ISOS_ProcessRepository repository, ISTROSyncDistributionService STROSyncDistributionService)
         {
             _ProcessRepository = repository;
-            _mapper = mapper ??
-                  throw new ArgumentNullException(nameof(mapper));
+            _mapper = mapper ??throw new ArgumentNullException(nameof(mapper));
             _env = env ?? throw new ArgumentNullException(nameof(env));
+            _STROSyncDistributionService = STROSyncDistributionService;
+
         }
 
+        // +============ ROUTES / ENDPOINTS ============+\\
+
+        /// <summary>
+        /// Creates a new SOS Distribution or adds a revision to an existing one.
+        /// </summary>
+        /// <param name="sOSDistributionToCreate">Data for the distribution to create or update.</param>
+        /// <param name="SOSHubCollection_Id">ID of the SOS Hub Collection.</param>
+        /// <returns>
+        /// Created distribution data or revision confirmation message.
+        /// </returns>
+        /// <response code="200">Operation succeeded.</response>
+        /// <response code="400">Invalid input or failed operation.</response>
         [HttpPost]
         public async Task<ActionResult<SOSDistributionDto>> GenerateDistribution(SOSDistributionForCreateDto sOSDistributionToCreate, int SOSHubCollection_Id)
         {
 
+            // ============ CREATE NEW DISTRIBUTION =============\\
             if (sOSDistributionToCreate.SOSDistributionId == 0)
             {
                 //Nombre del documento GOS o processShet
                 //sOSDistributionToCreate.InternalControlNumber = SOSEntity.Folio;
                 //sOSDistributionToCreate.ProcessName = SOSEntity.ProcessSheet;
 
+                // NOTE: Setting metadata for creation
                 sOSDistributionToCreate.CreatedAt = DateTime.Now;
                 sOSDistributionToCreate.IsActive = true;
 
                 sOSDistributionToCreate.SOSHubId = SOSHubCollection_Id;
-                //cambiar por la adicion de los soshub de las analisis y secuencias elegidos
+                // NOTE: Replace with logic to add SOS hubs from selected analyses and sequences
 
-
+                // NOTE: Ensure additional time details are initialized if missing
                 if (sOSDistributionToCreate.SOSDistributionAdditionalTime == null)
                 {
                     sOSDistributionToCreate.SOSDistributionAdditionalTime = new SOSDistributionAdditionalTime
@@ -64,8 +108,10 @@ namespace SupervisorMobility.API.Controllers.SOS_Controllers
                     };
                 }
 
+                // NOTE: Map DTO to entity before creation
                 SOSDistribution DistributionToCreate = _mapper.Map<SOSDistribution>(sOSDistributionToCreate);
 
+                // NOTE: Create new distribution in repository
                 var createdResult = await _ProcessRepository.CreateSOSDistribution(DistributionToCreate);
                 if (createdResult != null)
                     return Ok(DistributionToCreate);
@@ -74,22 +120,23 @@ namespace SupervisorMobility.API.Controllers.SOS_Controllers
             }
             else
             {
-                //only add revision
+                // NOTE: Fetch existing distribution with all related data
                 SOSDistribution _sosDistribution = await _ProcessRepository.GetSOSDistribution(sOSDistributionToCreate.SOSDistributionId, true, true, true, true);
 
+                // NOTE: Map the last logbook entry from DTO
                 SOSDistributionLogbook _logbookToCreate = _mapper.Map<SOSDistributionLogbook>(sOSDistributionToCreate.DistributionLogbooks?.Last());
                 _logbookToCreate.SOSDistributionId = _sosDistribution.SOSDistributionId;
 
+                // NOTE: Add logbook entry to repository
                 var resultAddSections = await _ProcessRepository.CreateSOSDistributionLogbook(_logbookToCreate);
 
                 if (resultAddSections > 0)
                 {
-                    Debug.WriteLine("SOSDistributionLogbook añadidas con exito");
+                    // NOTE: Link logbook entry to distribution
                     await _ProcessRepository.AddSOSDistributionLogbookToSOSDistribution(_sosDistribution, _logbookToCreate);
                 }
                 else
                 {
-                    Debug.WriteLine("Error Sections añadidos");
                     return BadRequest();
                 }
 
@@ -100,47 +147,90 @@ namespace SupervisorMobility.API.Controllers.SOS_Controllers
 
         }
 
+
+        /// <summary>
+        /// Retrieves a specific SOS Distribution by its ID, with optional related data.
+        /// </summary>
+        /// <param name="id">Identifier of the SOS Distribution to retrieve.</param>
+        /// <param name="includeImages">Include associated images if true.</param>
+        /// <param name="includeNotes">Include associated notes if true.</param>
+        /// <param name="includeLogbooks">Include related logbooks if true.</param>
+        /// <param name="includeSOS">Include related SOS data if true.</param>
+        /// <param name="includeImagesSOS">Include SOS-related images if true.</param>
+        /// <param name="includeTurns">Include associated turns if true.</param>
+        /// <param name="includeTimes">Include associated time details if true.</param>
+        /// <param name="includeCollections">Include related collections if true.</param>
+        /// <returns>Returns the SOS Distribution with optional related data.</returns>
+        /// <response code="200">Returns the SOS Distribution data.</response>
+        /// <response code="404">If the SOS Distribution is not found.</response>
         [HttpGet("{id}", Name = "GetSOSDistribution")]
         public async Task<ActionResult<SOSDistributionDto>> GetSOSDistribution(int id, bool includeImages = false, bool includeNotes = false, bool includeLogbooks = false, bool includeSOS = false, bool includeImagesSOS = false, bool includeTurns = false, bool includeTimes = false, bool includeCollections = false)
         {
-
+            // NOTE: Retrieve the SOS distribution with requested related data
             var SOSDistribution = await _ProcessRepository.GetSOSDistribution(id, includeImages, includeNotes, includeLogbooks, includeSOS, includeImagesSOS, includeTurns, includeTimes, includeCollections: includeCollections);
-            if (SOSDistribution == null)
-            {
-                return NotFound("SOSDistribution not found!");
-            }
 
+            // NOTE: Return 404 if distribution is not found
+            if (SOSDistribution == null) { return NotFound("SOSDistribution not found!"); }
+
+            // NOTE: Map entity to DTO for return
             var mappedDto = _mapper.Map<SOSDistributionDto>(SOSDistribution);
-
             return Ok(mappedDto);
         }
 
+        /// <summary>
+        /// Retrieves the SOS Distribution associated with a specific SOS Hub ID,
+        /// optionally including related data.
+        /// </summary>
+        /// <param name="idSOSHub">Identifier of the SOS Hub.</param>
+        /// <param name="includeImages">Include associated images if true.</param>
+        /// <param name="includeNotes">Include associated notes if true.</param>
+        /// <param name="includeLogbooks">Include related logbooks if true.</param>
+        /// <param name="includeSOS">Include related SOS data if true.</param>
+        /// <param name="includeImagesSOS">Include SOS-related images if true.</param>
+        /// <param name="includeTurns">Include associated turns if true.</param>
+        /// <param name="includeTimes">Include associated time details if true.</param>
+        /// <param name="includeCollections">Include related collections if true.</param>
+        /// <returns>Returns the SOS Distribution linked to the given SOS Hub.</returns>
+        /// <response code="200">Returns the SOS Distribution data.</response>
+        /// <response code="404">If no distribution is found for the given SOS Hub ID.</response>
         [HttpGet("bySosHub/{idSOSHub}", Name = "GetDistributionBySOSHub")]
         public async Task<ActionResult<SOSDistributionDto>> GetDistributionBySOSHub(int idSOSHub, bool includeImages = false, bool includeNotes = false, bool includeLogbooks = false, bool includeSOS = false, bool includeImagesSOS = false, bool includeTurns = false, bool includeTimes = false, bool includeCollections = false)
         {
+            // NOTE: Retrieve the distribution ID associated with the SOS Hub
             var idDistribution = await _ProcessRepository.GetIdDistributionBySosHub(idSOSHub);
 
+            // NOTE: Retrieve the distribution with requested related data
             var SOSDistribution = await _ProcessRepository.GetSOSDistribution(idDistribution, includeImages, includeNotes, includeLogbooks, includeSOS, includeImagesSOS, includeTurns, includeTimes, includeCollections: includeCollections);
-            if (SOSDistribution == null)
-            {
-                return NotFound("SOSDistribution not found!");
-            }
 
+            // NOTE: Return 404 if distribution is not found
+            if (SOSDistribution == null) return NotFound("SOSDistribution not found!");
+
+            // NOTE: Map entity to DTO for return
             var mappedDto = _mapper.Map<SOSDistributionDto>(SOSDistribution);
-
             return Ok(mappedDto);
         }
 
+
+        /// <summary>
+        /// Retrieves all SOS Distributions, optionally including related data.
+        /// </summary>
+        /// <param name="includeImages">Include associated images if true.</param>
+        /// <param name="includeNotes">Include associated notes if true.</param>
+        /// <param name="includeLogbooks">Include related logbooks if true.</param>
+        /// <param name="includeSOS">Include related SOS data if true.</param>
+        /// <returns>Returns a list of SOS Distributions with optional related data.</returns>
+        /// <response code="200">Returns the list of SOS Distributions.</response>
+        /// <response code="404">If no SOS Distributions are found.</response>
         [HttpGet("all")]
         public async Task<ActionResult<IEnumerable<SOSDistributionDto>>> GetAllSOSDistribution(bool includeImages = false, bool includeNotes = false, bool includeLogbooks = false, bool includeSOS = false)
         {
-
+            // NOTE: Retrieve all distributions with requested related data
             var CheckpointEntities = await _ProcessRepository.GetAllSOSDistribution(includeImages, includeNotes, includeLogbooks, includeSOS);
-            if (CheckpointEntities == null)
-            {
-                return NotFound("Get All Sos Analisis not found!");
-            }
 
+            // NOTE: Return 404 if no distributions found
+            if (CheckpointEntities == null) return NotFound("Get All Sos Analisis not found!");
+
+            // NOTE: Map entity collection to DTO collection
             return Ok(_mapper.Map<IEnumerable<SOSDistributionDto>>(CheckpointEntities));
         }
 
@@ -336,7 +426,7 @@ namespace SupervisorMobility.API.Controllers.SOS_Controllers
 
             // Get all existing sequences
             var existingSequences = _sosDistribution.SOSDistributionOperationSequence?.ToList() ?? new List<SOSDistributionOperationSequence>();
-            
+
             // Get all sequences from the request (both new and existing)
             var requestSequences = sosUpdateEntity.SOSDistributionOperationSequence?.ToList() ?? new List<SOSDistributionOperationSequenceForUpdateDto>();
 
@@ -362,7 +452,8 @@ namespace SupervisorMobility.API.Controllers.SOS_Controllers
                 Backup_DistributionOperationSequence.Add(timeBkaux);
             }
 
-            foreach (var operationsequence in OperationSequencesDelete) {
+            foreach (var operationsequence in OperationSequencesDelete)
+            {
                 await _ProcessRepository.DeleteSOSDistributionOperationSequencesById(operationsequence.SOSDistributionOperationSequenceId);
             }
 
@@ -401,7 +492,7 @@ namespace SupervisorMobility.API.Controllers.SOS_Controllers
                         sequenceOrderMap[opSeq.SOSDistributionOperationSequenceId] = opSeq.SequenceId.Value;
                     }
                 }
-                
+
                 // Debug: Log what we captured
                 System.Diagnostics.Debug.WriteLine($"Captured sequence mappings: {string.Join(", ", sequenceOrderMap.Select(kvp => $"ID{kvp.Key}=>{kvp.Value}"))}");
             }
@@ -419,7 +510,7 @@ namespace SupervisorMobility.API.Controllers.SOS_Controllers
 
             await _ProcessRepository.SOSDataRemoveAllSequencesFromSOSDistribution(_sosDistribution);
             await _ProcessRepository.SOSDataRemoveAllAnalysisFromSOSDistribution(_sosDistribution);
- 
+
             await _ProcessRepository.RemoveAllTurnsFromSOSDistribution(_sosDistribution);
             await _ProcessRepository.SOSDataRemoveAllNotesFromSOSDistribution(_sosDistribution);
             await _ProcessRepository.SOSDataRemoveAllSOSDistributionLogbookFromSOSDistribution(_sosDistribution);
@@ -429,7 +520,7 @@ namespace SupervisorMobility.API.Controllers.SOS_Controllers
 
             var result = await _ProcessRepository.UpdateSOSDistribution(sosUpdateEntity, _sosDistribution);
 
-          
+
 
 
             //Notes - Volver a añádir las notas
@@ -472,25 +563,25 @@ namespace SupervisorMobility.API.Controllers.SOS_Controllers
             {
                 // Debug: Log the sequence order map
                 System.Diagnostics.Debug.WriteLine($"Sequence Order Map: {string.Join(", ", sequenceOrderMap.Select(kvp => $"{kvp.Key}={kvp.Value}"))}");
-                
+
                 // Sort backup sequences by their new order to ensure proper insertion sequence
                 var orderedBackupSequences = Backup_DistributionOperationSequence
-                    .OrderBy(ops => sequenceOrderMap.ContainsKey(ops.SOSDistributionOperationSequenceId) 
-                        ? sequenceOrderMap[ops.SOSDistributionOperationSequenceId] 
+                    .OrderBy(ops => sequenceOrderMap.ContainsKey(ops.SOSDistributionOperationSequenceId)
+                        ? sequenceOrderMap[ops.SOSDistributionOperationSequenceId]
                         : int.MaxValue)
                     .ToList();
 
                 foreach (SOSDistributionOperationSequence operationSequence in orderedBackupSequences)
                 {
                     var oldSequenceId = operationSequence.SequenceId;
-                    
+
                     // Apply the updated sequence order if it was provided in the request
                     if (sequenceOrderMap.ContainsKey(operationSequence.SOSDistributionOperationSequenceId))
                     {
                         operationSequence.SequenceId = sequenceOrderMap[operationSequence.SOSDistributionOperationSequenceId];
                         System.Diagnostics.Debug.WriteLine($"Updated sequence {operationSequence.SOSDistributionOperationSequenceId}: {oldSequenceId} -> {operationSequence.SequenceId}");
                     }
-                    
+
                     await _ProcessRepository.AddOperationSequenceToSOSDistribution(_sosDistribution, operationSequence);
                 }
             }
@@ -507,7 +598,7 @@ namespace SupervisorMobility.API.Controllers.SOS_Controllers
             await _ProcessRepository.AddSOSDistributionAdditionalTimeToSOSDistribution(_sosDistribution, additionalTime);
 
 
-             if (hubsToAssociate.Any())
+            if (hubsToAssociate.Any())
             {
                 foreach (SOSHub hub in hubsToAssociate)
                 {
@@ -529,7 +620,7 @@ namespace SupervisorMobility.API.Controllers.SOS_Controllers
                     Backup_DistributionOperationSequence
                         .Select(op =>
                         {
-                          
+
                             return (int?)null;
                         })
                         .FirstOrDefault(id => id.HasValue);
@@ -544,6 +635,8 @@ namespace SupervisorMobility.API.Controllers.SOS_Controllers
                 }
             }
 
+            var isUpdateSTROSequencesRelated = await _STROSyncDistributionService.SyncDistributionsWithSTROs(_sosDistribution.SOSDistributionId);
+            if (!isUpdateSTROSequencesRelated) throw new Exception("STRO Sequences not sync");
 
             if (result != null)
             {
