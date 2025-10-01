@@ -3540,6 +3540,25 @@ namespace SupervisorMobility.API.DataAccess.Services
         #endregion
         //Distribution
         #region SOSDistribution
+        public async Task<string> GetDistributionName(int distributionID)
+        {
+            if(distributionID == 0) return string.Empty;
+            try
+            {
+                var name = _context.SOSDistributions
+                    .Where(d => d.SOSDistributionId == distributionID)
+                    .Select(d => d.InternalControlNumber)
+                    .FirstOrDefault();
+
+                return name ?? string.Empty;
+            }
+            catch (Exception ex)
+            {
+                Debug.WriteLine("An error occurred while retrieving the distribution name: " + ex.Message);
+                return string.Empty;
+            }
+        }
+
         public async Task<int> CreateSOSDistribution(SOSDistribution SOS_DistributionToCreate)
         {
             var analysesCopy = SOS_DistributionToCreate.Analyses.ToList();

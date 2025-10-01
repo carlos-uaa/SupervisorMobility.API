@@ -19,7 +19,6 @@ using SupervisorMobility.API.DataAccess.Entities.SOS.STRO.Enums;
 using SupervisorMobility.API.infrastructure.repositories.STRO.Collections.Skills;
 using SupervisorMobility.API.infrastructure.repositories.STRO.Collections.Knowledges;
 
-
 namespace SupervisorMobility.API.Services.SOS
 {
     /// <summary>
@@ -269,11 +268,11 @@ namespace SupervisorMobility.API.Services.SOS
         /// </summary>
         /// <param name="SOSSynopticRequeriments">The Synoptic Table containing SOS hubs.</param>
         /// <returns>List of <see cref="SOSDistribution"/> for hubs with valid distributions.</returns>
-        private async Task<List<SOSDistribution>> GetDistributionsComplete(SOSSynopticTableofOperatingRequirements SOSSynopticRequeriments)
+        private async Task<List<SupervisorMobility.API.DataAccess.Entities.SOS.SOSDistribution>> GetDistributionsComplete(SOSSynopticTableofOperatingRequirements SOSSynopticRequeriments)
         {
 
             IEnumerable<int> SOSHubsId = SOSSynopticRequeriments.SOSHubs!.Select(s => s.SOSHubId);
-            var distributions = new List<SOSDistribution>();
+            var distributions = new List<SupervisorMobility.API.DataAccess.Entities.SOS.SOSDistribution>();
 
             foreach (var HubId in SOSHubsId)
             {
@@ -297,7 +296,7 @@ namespace SupervisorMobility.API.Services.SOS
         /// <returns>List of <see cref="SOSHub"/> with attached distributions.</returns>
         private async Task<List<SOSHub>> GetHubsWithDistribution(SOSSynopticTableofOperatingRequirements SOSSynopticRequeriments)
         {
-            List<SOSDistribution> Distributions = await GetDistributionsComplete(SOSSynopticRequeriments);
+            List<SupervisorMobility.API.DataAccess.Entities.SOS.SOSDistribution> Distributions = await GetDistributionsComplete(SOSSynopticRequeriments);
             var SOSHubsSTRO = SOSSynopticRequeriments.SOSHubs ?? new List<SOSHub>();
 
             var selectedSosHubs = new List<SOSHub>();
@@ -310,7 +309,7 @@ namespace SupervisorMobility.API.Services.SOS
                 if (distribution == null) continue;
 
                 // Attach the found distribution to the hub
-                SOSHub.SOSDistribution = new List<SOSDistribution> { distribution };
+                SOSHub.SOSDistribution = new List<SupervisorMobility.API.DataAccess.Entities.SOS.SOSDistribution> { distribution };
                 selectedSosHubs.Add(SOSHub);
             }
 
@@ -323,10 +322,10 @@ namespace SupervisorMobility.API.Services.SOS
         /// </summary>
         /// <param name="SOSSynopticRequeriments">The Synoptic Table containing SOS hubs.</param>
         /// <returns>List of <see cref="SOSDistribution"/> from all hubs.</returns>
-        public List<SOSDistribution> GetDistributions(SOSSynopticTableofOperatingRequirements SOSSynopticRequeriments)
+        public List<SupervisorMobility.API.DataAccess.Entities.SOS.SOSDistribution> GetDistributions(SOSSynopticTableofOperatingRequirements SOSSynopticRequeriments)
         {
             // NOTE: Uses SelectMany to flatten distributions from multiple hubs
-            return SOSSynopticRequeriments?.SOSHubs?.SelectMany(s => s.SOSDistribution ?? new List<SOSDistribution>()).ToList() ?? new List<SOSDistribution>();
+            return SOSSynopticRequeriments?.SOSHubs?.SelectMany(s => s.SOSDistribution ?? new List<SupervisorMobility.API.DataAccess.Entities.SOS.SOSDistribution>()).ToList() ?? new List<SupervisorMobility.API.DataAccess.Entities.SOS.SOSDistribution>();
         }
 
         // =================================================== \\
@@ -338,7 +337,7 @@ namespace SupervisorMobility.API.Services.SOS
         /// </summary>
         /// <param name="distribution">The SOS distribution to process.</param>
         /// <returns>List of <see cref="SOSDistributionOperationSequence"/> including placeholders if sequences are missing.</returns>
-        private List<SOSDistributionOperationSequence> BuildOperationSequences(SOSDistribution distribution)
+        private List<SOSDistributionOperationSequence> BuildOperationSequences(SupervisorMobility.API.DataAccess.Entities.SOS.SOSDistribution distribution)
         {
             // Order existing sequences by SequenceId, or use empty if none exist
             var sequences = (distribution.SOSDistributionOperationSequence ?? Enumerable.Empty<SOSDistributionOperationSequence>()).OrderBy(s => s.SequenceId).ToList();
@@ -372,7 +371,7 @@ namespace SupervisorMobility.API.Services.SOS
         /// </summary>
         /// <param name="distribution">The SOS distribution containing analyses, sequences, and operation sequences.</param>
         /// <returns>A list of integers representing the number of rows each analysis or sequence should occupy.</returns>
-        private List<int> GenerateArraySeqAndAnalyses(SOSDistribution distribution)
+        private List<int> GenerateArraySeqAndAnalyses(SupervisorMobility.API.DataAccess.Entities.SOS.SOSDistribution distribution)
         {
             int totalSeqAndAna = (distribution.Analyses?.Count() ?? 0) + (distribution.Sequences?.Count() ?? 0);
 
@@ -499,7 +498,7 @@ namespace SupervisorMobility.API.Services.SOS
         /// <param name="distribution">The distribution to check.</param>
         /// <param name="SOSSynopticRequeriments">The synoptic table containing difficulty levels.</param>
         /// <returns>The <see cref="DifficultyLevel"/> assigned, or <see cref="DifficultyLevel.A"/> if none found.</returns>
-        private DifficultyLevel GetDifficultyLevel(SOSDistribution distribution, SOSSynopticTableofOperatingRequirements SOSSynopticRequeriments)
+        private DifficultyLevel GetDifficultyLevel(SupervisorMobility.API.DataAccess.Entities.SOS.SOSDistribution distribution, SOSSynopticTableofOperatingRequirements SOSSynopticRequeriments)
         {
             // NOTE: Default to DifficultyLevel.A if no specific difficulty is assigned
             var difficulty = SOSSynopticRequeriments.RequirementDifficulties?.FirstOrDefault(r => r.SOSHubId == distribution.SOSHubId);
@@ -511,7 +510,7 @@ namespace SupervisorMobility.API.Services.SOS
         /// </summary>
         /// <param name="distribution">The distribution to check.</param>
         /// <returns>Training time in days.</returns>
-        public int GetTrainingTime(SOSDistribution distribution)
+        public int GetTrainingTime(SupervisorMobility.API.DataAccess.Entities.SOS.SOSDistribution distribution)
         {
             return distribution.SOSHubs!.FirstOrDefault(s => s.SOSHubId == distribution.SOSHubId)?.TrainingTime ?? 0;
         }

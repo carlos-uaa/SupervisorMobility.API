@@ -34,6 +34,8 @@ using SupervisorMobility.API.Interfaces.SOS;
 
 // - Model / DTO imports
 using SupervisorMobility.API.infrastructure.repositories.STRO.Collections.Knowledges;
+using SupervisorMobility.API.Interfaces.SOSDistribution.SOSDistributionExcel;
+using SupervisorMobility.API.Services.SOSDistribution.SOSDistributionExcel;
 using SupervisorMobility.API.infrastructure.repositories.STRO.Collections.Skills;
 using SupervisorMobility.API.infrastructure.repositories.STRO;
 using SupervisorMobility.API.Models.NotificationDtos;
@@ -53,6 +55,7 @@ namespace SupervisorMobility.API
             services.AddScoped<IStampingRepository, StampingRepository>();
             // HOE/SOS Analysis_Process
             services.AddScoped<ISOS_ProcessRepository, SOS_ProcessRepository>();
+            services.AddScoped<ISOSDistributionExcelService, SOSDistributionExcelService>();
 
             services.AddScoped<IKnowledgeRepository, KnowledgeRepository>();
             services.AddScoped<ISkillRepository, SkillRepository>();
