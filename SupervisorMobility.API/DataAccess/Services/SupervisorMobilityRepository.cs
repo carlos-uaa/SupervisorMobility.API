@@ -1071,6 +1071,8 @@ namespace SupervisorMobility.API.Services
         public async Task UpdateUser(UsersForUpdateDto user, int userId)
         {
             var entityUser = await _context.Users.FirstOrDefaultAsync(u => u.UserId == userId);
+            entityUser.Department = await _context.Departments.FirstOrDefaultAsync(d => d.DepartmentId == user.DepartmentId);
+            entityUser.DepartmentId = entityUser.Department.DepartmentId;
 
             _mapper.Map(user, entityUser);
 
