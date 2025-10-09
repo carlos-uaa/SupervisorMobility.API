@@ -23,6 +23,7 @@ using SupervisorMobility.API.Models.SOS.SOSHubDtos.SectionDtos;
 using SupervisorMobility.API.Models.CommentaryDtos;
 using SupervisorMobility.API.Models.SOS.SOSHubDtos;
 using SupervisorMobility.API.Models.FileUploadDto;
+using SupervisorMobility.API.DataAccess.Entities.SOS.STRO;
 
 
 
@@ -66,7 +67,7 @@ namespace SupervisorMobility.API.Controllers.SOS_Controllers
         [HttpPost]
         public async Task<ActionResult<SOSSynopticRequirementsDto>> GenerateSynopticTableofOperatingRequirements(SOSSynopticTableofOperatingRequirementsForCreateDto sOSSynopticTableofOperatingRequirementsToCreate, int SOSHubCollection_Id)
         {
-             // ============ CREATE NEW SYNOPTIC TABLE ============= \\
+            // ============ CREATE NEW SYNOPTIC TABLE ============= \\
             if (sOSSynopticTableofOperatingRequirementsToCreate.SOSSynopticTableofOperatingRequirementsId == 0)
             {
                 // NOTE: Set creation metadata
@@ -99,11 +100,28 @@ namespace SupervisorMobility.API.Controllers.SOS_Controllers
                                     SectionId = sequenceDistribution.SectionId,
                                     SosHubId = SOSHub?.SOSHubId,
                                     OperationPersonText = sequenceDistribution?.Section?.Step,
-                                    OperationMachineText = sequenceDistribution?.Section?.Step,
+                                    OperationMachineText = "",
                                     IsOperationPersonRequired = true,
                                     IsOperationMachineRequired = false,
                                 }
                             );
+
+                        var Analysis = sequenceDistribution?.Section?.Analyses?? new List<Analysis>();
+
+                        foreach(var Aly in Analysis)
+                        {
+                            Aly.CriticalPoints?.ForEach(item =>
+                            {
+                                SynopticTableofOperatingRequirementsToCreate?.InsuranceFeatures?.Add(
+                                    new InsuranceFeatures
+                                    {
+                                        Insurance = item,
+                                        SectionId = sequenceDistribution?.SectionId ?? 0,
+                                    }
+                                );
+                            });
+                        }
+
                     }
                 }
 
