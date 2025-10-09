@@ -5832,7 +5832,7 @@ namespace SupervisorMobility.API.DataAccess.Services
         {
             var query = _context.SOSSynopticTableofOperatingRequirements.AsNoTracking().Where(SOS => SOS.SOSSynopticTableofOperatingRequirementsId == SOSSynopticTableofOperatingRequirementsId && SOS.IsActive == true);
 
-            var sosSynopticRequirements = await query.Include(d => d.RequirementDifficulties).Include(k => k.SOSSTROKnowledge).Include(s => s.SOSSTROSkill).Include(e => e.EstablishedConditions).FirstOrDefaultAsync();
+            var sosSynopticRequirements = await query.Include(d => d.RequirementDifficulties).Include(k => k.SOSSTROKnowledge).Include(s => s.SOSSTROSkill).Include(e => e.EstablishedConditions).Include(i => i.InsuranceFeatures).FirstOrDefaultAsync();
 
             if (sosSynopticRequirements != null)
             {
@@ -5940,6 +5940,7 @@ namespace SupervisorMobility.API.DataAccess.Services
                 .Include(s => s.SOSSTROSkill)
                 .Include(c => c.EstablishedConditions)
                 .Include(s => s.SOSSynopticRequirementsOperationSequence)
+                .Include(i=> i.InsuranceFeatures)
                 .FirstOrDefaultAsync(e => e.SOSSynopticTableofOperatingRequirementsId == sosSynopticTableofOperatingRequirements_Id);
 
 
@@ -6080,6 +6081,35 @@ namespace SupervisorMobility.API.DataAccess.Services
                     else
                     {
                         existing.Condition = EstaCon.Condition;
+                    }
+                }
+            }
+
+            //+======= ESTABLISHED CONDITIONS ========+\\
+            if (STROUpdate.InsuranceFeatures != null)
+            {
+                var currentEC = entity.InsuranceFeatures.Where(e => e.SOSSynopticTableofOperatingRequirementsId == entity.SOSSynopticTableofOperatingRequirementsId).ToList() ?? new List<InsuranceFeatures>();
+
+                var ToRemoveEC = currentEC.Where(e => !STROUpdate.InsuranceFeatures.Any(ec => ec.Id == e.Id && ec.Id != 0)).ToList();
+                _context.InsuranceFeatures.RemoveRange(ToRemoveEC);
+
+                foreach (var EstaCon in STROUpdate.InsuranceFeatures)
+                {
+                    var existing = currentEC.FirstOrDefault(e => e.Id == EstaCon.Id);
+                    if (existing == null)
+                    {
+                        var AddInsuranceFeatures = new InsuranceFeatures
+                        {
+                            Insurance = EstaCon.Insurance,
+                            SectionId = EstaCon.SectionId,
+                            SOSSynopticTableofOperatingRequirementsId = EstaCon.SOSSynopticTableofOperatingRequirementsId
+                        };
+
+                        entity.InsuranceFeatures?.Add(AddInsuranceFeatures);
+                    }
+                    else
+                    {
+                        existing.Insurance = EstaCon.Insurance;
                     }
                 }
             }
