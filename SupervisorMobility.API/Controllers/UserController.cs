@@ -236,6 +236,9 @@ namespace SupervisorMobility.API.Controllers
                 }
             }
 
+            if (newUser.DepartmentId == 0)
+                newUser.DepartmentId = null;
+
             if (newUser.AreaId == 0)
             {
                 newUser.AreaId = null;
@@ -368,6 +371,11 @@ namespace SupervisorMobility.API.Controllers
                 }
             }
 
+            if ( user.DepartmentId == null || user.DepartmentId == 0)
+            {
+                user.DepartmentId = null;
+            }
+
             if (user.GroupId == 0)
             {
                 user.GroupId = null;
@@ -477,7 +485,8 @@ namespace SupervisorMobility.API.Controllers
           
             User? UserToReturn = await _assyChartService.FetchUserAsync(userId);
 
-
+            //if (user.DepartmentId != null) 
+            //    user.Department = await 
 
             if (haveUsers)
             {

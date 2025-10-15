@@ -41,7 +41,7 @@ namespace SupervisorMobility.API.DataAccess.Services
         #region SOS_DataPool
         Task<SOSHub> CreateSOScollection(SOSHub SOS_EntityToCreate);
         Task<SOSHub> GetSOSHub(int HubId, bool includeAnalysesBkup = false, bool includeSections = false, bool includeImages = false, bool includeVideos = false, bool includeCommentaries = false, bool includeTools = false, bool includeEquipments = false, bool includeMaterials = false, bool includeInformation = false, bool includePeople = false, bool includeDocuments = false, bool includeModel = false, bool includeHistory = false, bool includeDeleteds = false, bool includeCollections = false, bool includePeopleCollections = false, bool includePats = false);
-        Task<IEnumerable<SOSHub>> GetAllSOSHub(bool includeAnalysesBkup = false, bool includeSections = false, bool includeImages = false, bool includeVideos = false, bool includeCommentaries = false, bool includeTools = false, bool includeEquipments = false, bool includeMaterials = false, bool includeInformation = false, bool includePeople = false, bool includeDocuments = false);
+        Task<IEnumerable<SOSHub>> GetAllSOSHub(bool includeAnalysesBkup = false, bool includeSections = false, bool includeImages = false, bool includeVideos = false, bool includeCommentaries = false, bool includeTools = false, bool includeEquipments = false, bool includeMaterials = false, bool includeInformation = false, bool includePeople = false, bool includeDocuments = false,bool includeSOSDistribution = false);
         Task<int> UpdateSOSHub(SOSHubForUpdateDto HubUpdate, SOSHub SosEntity);
         Task<int> UpdateSOSHub(SOSHub SosEntity);
         Task<int> RemoveSOSHub(int SOS_DataPool_id);
@@ -240,6 +240,7 @@ namespace SupervisorMobility.API.DataAccess.Services
         //SOS Distribution
         #region SOSDistribution
         Task<int> CreateSOSDistribution(SOSDistribution SOS_DistributionToCreate);
+        Task<string> GetDistributionName(int distributionID);
         Task<SOSDistribution> GetSOSDistribution(int SOSDistributionId, bool includeImages = false, bool includeNotes = false, bool includeLogbooks = false, bool includeSOS = false, bool includeImagesSOS = false, bool includeTurns = false, bool includeTimes = false, bool includeCollections = false);
         Task<int> GetIdDistributionBySosHub(int IdSosHub);
         Task<IEnumerable<SOSDistribution>> GetAllSOSDistribution(bool includeImages = false, bool includeNotes = false, bool includeLogbooks = false, bool includeSOS = false);

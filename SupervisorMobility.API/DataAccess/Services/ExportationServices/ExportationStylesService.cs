@@ -7,6 +7,7 @@ using DocumentFormat.OpenXml.Bibliography;
 using DocumentFormat.OpenXml.Office2016.Excel;
 using DocumentFormat.OpenXml;
 using System.Text;
+using DrawingFont = System.Drawing.Font;
 
 namespace SupervisorMobility.API.DataAccess.Services.ExportationServices
 {
@@ -124,7 +125,7 @@ namespace SupervisorMobility.API.DataAccess.Services.ExportationServices
             sheet.Cells[$"C{rownumber}:G{rownumber}"].Style.Border.Bottom.Style = /*!last ? ExcelBorderStyle.Dashed :*/ ExcelBorderStyle.Thin;
             sheet.Cells[$"C{rownumber}:G{rownumber}"].Style.VerticalAlignment = ExcelVerticalAlignment.Center;
             sheet.Cells[$"C{rownumber}:G{rownumber}"].Style.HorizontalAlignment = ExcelHorizontalAlignment.Left;
-            
+
             sheet.Cells[$"H{rownumber}:K{rownumber}"].Merge = true;
             sheet.Cells[$"H{rownumber}:K{rownumber}"].Style.WrapText = true;
             sheet.Cells[$"H{rownumber}:K{rownumber}"].Style.Border.Left.Style = ExcelBorderStyle.Thin;
@@ -132,25 +133,25 @@ namespace SupervisorMobility.API.DataAccess.Services.ExportationServices
             sheet.Cells[$"H{rownumber}:K{rownumber}"].Style.Border.Bottom.Style = /*!last ? ExcelBorderStyle.Dashed :*/ ExcelBorderStyle.Thin;
             sheet.Cells[$"H{rownumber}:K{rownumber}"].Style.VerticalAlignment = ExcelVerticalAlignment.Center;
             sheet.Cells[$"H{rownumber}:K{rownumber}"].Style.HorizontalAlignment = ExcelHorizontalAlignment.Left;
-            
+
             sheet.Cells[$"L{rownumber}"].Style.Border.Left.Style = ExcelBorderStyle.Thin;
             sheet.Cells[$"L{rownumber}"].Style.Border.Right.Style = ExcelBorderStyle.Thin;
             sheet.Cells[$"L{rownumber}"].Style.Border.Bottom.Style = /*!last ? ExcelBorderStyle.Dashed :*/ ExcelBorderStyle.Thin;
             sheet.Cells[$"L{rownumber}"].Style.VerticalAlignment = ExcelVerticalAlignment.Center;
             sheet.Cells[$"L{rownumber}"].Style.HorizontalAlignment = ExcelHorizontalAlignment.Center;
-            
+
             sheet.Cells[$"M{rownumber}"].Style.Border.Left.Style = ExcelBorderStyle.Thin;
             sheet.Cells[$"M{rownumber}"].Style.Border.Right.Style = ExcelBorderStyle.Thin;
             sheet.Cells[$"M{rownumber}"].Style.Border.Bottom.Style = /*!last ? ExcelBorderStyle.Dashed :*/ ExcelBorderStyle.Thin;
             sheet.Cells[$"M{rownumber}"].Style.VerticalAlignment = ExcelVerticalAlignment.Center;
             sheet.Cells[$"M{rownumber}"].Style.HorizontalAlignment = ExcelHorizontalAlignment.Center;
-            
+
             sheet.Cells[$"N{rownumber}"].Style.Border.Left.Style = ExcelBorderStyle.Thin;
             sheet.Cells[$"N{rownumber}"].Style.Border.Right.Style = ExcelBorderStyle.Thin;
             sheet.Cells[$"N{rownumber}"].Style.Border.Bottom.Style = /*!last ? ExcelBorderStyle.Dashed :*/ ExcelBorderStyle.Thin;
             sheet.Cells[$"N{rownumber}"].Style.VerticalAlignment = ExcelVerticalAlignment.Center;
             sheet.Cells[$"N{rownumber}"].Style.HorizontalAlignment = ExcelHorizontalAlignment.Center;
-            
+
             if (firstPage)
             {
                 sheet.Cells[$"O{rownumber}:P{rownumber}"].Merge = true;
@@ -159,7 +160,7 @@ namespace SupervisorMobility.API.DataAccess.Services.ExportationServices
                 sheet.Cells[$"O{rownumber}:P{rownumber}"].Style.Border.Bottom.Style = /*!last ? ExcelBorderStyle.Dashed :*/ ExcelBorderStyle.Thin;
                 sheet.Cells[$"O{rownumber}:P{rownumber}"].Style.VerticalAlignment = ExcelVerticalAlignment.Center;
                 sheet.Cells[$"O{rownumber}:P{rownumber}"].Style.HorizontalAlignment = ExcelHorizontalAlignment.Center;
-                
+
                 sheet.Cells[$"Q{rownumber}"].Style.Border.Left.Style = ExcelBorderStyle.Thin;
                 sheet.Cells[$"Q{rownumber}"].Style.Border.Right.Style = ExcelBorderStyle.Thin;
                 sheet.Cells[$"Q{rownumber}"].Style.Border.Bottom.Style = /*!last ? ExcelBorderStyle.Dashed :*/ ExcelBorderStyle.Thin;
@@ -181,7 +182,7 @@ namespace SupervisorMobility.API.DataAccess.Services.ExportationServices
                 sheet.Cells[$"P{rownumber}"].Style.HorizontalAlignment = ExcelHorizontalAlignment.Center;
             }
 
-            applyDistFonts(sheet,rownumber,usedFont,firstPage);
+            applyDistFonts(sheet, rownumber, usedFont, firstPage);
         }
 
         private void applyDistFonts(ExcelWorksheet sheet, int rownumber, ExcelFont usedFont, bool firstPage)
@@ -394,6 +395,61 @@ namespace SupervisorMobility.API.DataAccess.Services.ExportationServices
             return lineHeight * lineCount;
         }
 
+
+        /// <summary>
+        /// Calculates the height of a row using a simple estimation based on total character count.
+        /// </summary>
+        /// <param name="text">The text content to measure.</param>
+        /// <param name="maxCharsPerLine">Maximum number of characters allowed per line.</param>
+        /// <param name="lineHeight">Height of a single line. Default is 15.</param>
+        /// <param name="padding">Extra padding to add to the row height. Default is 5.</param>
+        /// <returns>The calculated row height.</returns>
+        public double CalculateRowHeightSimple(string text, int maxCharsPerLine, double lineHeight = 15, double padding = 5)
+        {
+            // NOTE: Return minimal height if text is null or whitespace
+            if (string.IsNullOrWhiteSpace(text) || maxCharsPerLine <= 0)
+                return lineHeight + padding;
+
+            // NOTE: Calculate number of lines needed based on character count
+            int lineCount = (int)Math.Ceiling((double)text.Length / maxCharsPerLine);
+
+            // NOTE: Return total height including padding
+            return lineCount * lineHeight + padding;
+        }
+
+        /// <summary>
+        /// Calculates the height of a row by evaluating each line of text individually.
+        /// </summary>
+        /// <param name="text">The text content to measure.</param>
+        /// <param name="maxCharsPerLine">Maximum number of characters allowed per line.</param>
+        /// <param name="lineHeight">Height of a single line. Default is 15.</param>
+        /// <param name="padding">Extra padding to add to the row height. Default is 5.</param>
+        /// <returns>The calculated row height.</returns>
+        public double CalculateRowHeightByChars(string text, int maxCharsPerLine, double lineHeight = 15, double padding = 5)
+        {
+            // NOTE: Return minimal height if text is null or whitespace
+            if (string.IsNullOrWhiteSpace(text) || maxCharsPerLine <= 0)
+                return lineHeight + padding;
+
+            // NOTE: Split text into separate lines to evaluate individually
+            var lines = text.Split(new[] { '\n' }, StringSplitOptions.None);
+            int totalLines = 0;
+
+            foreach (var line in lines)
+            {
+                string trimmedLine = line.TrimEnd();
+
+                // NOTE: Ensure at least one line is counted even if line is empty
+                int lineCount = Math.Max(1, (int)Math.Ceiling((double)trimmedLine.Length / maxCharsPerLine));
+                totalLines += lineCount;
+            }
+
+            // NOTE: Return total height including padding
+            return totalLines * lineHeight + padding;
+        }
+
+
+
         public (string fittingLines, string overflowText) SplitTextByRowHeight(string newText, double columnWidth, double fontsize = 11, double lineSpacing = 1.2, double maxRowHeight = 20, string existingText = "")
         {
             List<string> lines = new List<string>();
@@ -461,7 +517,7 @@ namespace SupervisorMobility.API.DataAccess.Services.ExportationServices
 
             var joined = string.Join(" ", lines);
 
-            return (string.Join("",firstLine,joined), overflowText.ToString().Trim());
+            return (string.Join("", firstLine, joined), overflowText.ToString().Trim());
         }
     }
 }

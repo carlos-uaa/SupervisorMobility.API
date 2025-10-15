@@ -34,6 +34,8 @@ namespace SupervisorMobility.API.Models.SOS.SOSHubDtos
         public int? AreaId { get; set; }
         public int? DepartmentId { get; set; }
         public int? StationId { get; set; }
+        public int? CreatorId { get; set; }
+        public User? Creator { get; set; }
 
         //public int? ApproverOwner { get; set; }
         public List<UsersWithoutNavigationWithoutPeopleDetails>? ApproversOwners { get; set; }

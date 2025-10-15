@@ -1,28 +1,30 @@
-﻿// ====================== CORE / SYSTEM IMPORTS ====================== //
+﻿// - Core .NET imports
 using System.Diagnostics;
 
-// ====================== MICROSOFT / FRAMEWORK ====================== //
+// - External imports
 using Microsoft.AspNetCore.Mvc;
-
-// ====================== THIRD-PARTY LIBRARIES ====================== //
 using AutoMapper;
 
-// ======================= DATA ACCESS IMPORTS ======================= //
-using SupervisorMobility.API.DataAccess.Entities.SOS;
+// - Context imports
 using SupervisorMobility.API.DataAccess.Services;
 
-// ============================ INTERFACES =========================== //
+// - Entity's imports
+using SupervisorMobility.API.DataAccess.Entities.SOS.STRO.Dtos;
+using SupervisorMobility.API.DataAccess.Entities.SOS;
+
+// - Interface's imports
 using SupervisorMobility.API.Interfaces.SOS;
 
-// ========================== MODELS / DTOs ========================== //
+// - Model's imports
 using SupervisorMobility.API.Models.SOS.SOSSynopticTableofOperatingRequirementsOperationSequenceDtos;
 using SupervisorMobility.API.Models.SOS.SOSSynopticTableofOperatingRequirementsLogbookDtos;
 using SupervisorMobility.API.Models.SOS.SOSSynopticTableofOperatingRequirementsDtos;
-using SupervisorMobility.API.DataAccess.Entities.SOS.STRO.Dtos;
 using SupervisorMobility.API.Models.SOS.SOSHubDtos.SectionDtos;
-using SupervisorMobility.API.Models.SOS.SOSHubDtos;
 using SupervisorMobility.API.Models.CommentaryDtos;
+using SupervisorMobility.API.Models.SOS.SOSHubDtos;
 using SupervisorMobility.API.Models.FileUploadDto;
+using SupervisorMobility.API.DataAccess.Entities.SOS.STRO;
+
 
 
 namespace SupervisorMobility.API.Controllers.SOS_Controllers
@@ -48,40 +50,82 @@ namespace SupervisorMobility.API.Controllers.SOS_Controllers
         {
             _ProcessRepository = repository;
             _STOperatingRequirementsService = STOperatingRequirementsService;
-            _mapper = mapper ??
-                  throw new ArgumentNullException(nameof(mapper));
+            _mapper = mapper ?? throw new ArgumentNullException(nameof(mapper));
             _env = env ?? throw new ArgumentNullException(nameof(env));
         }
 
+        /// <summary>
+        /// Creates a new Synoptic Table of Operating Requirements or adds a revision to an existing one.
+        /// </summary>
+        /// <param name="sOSSynopticTableofOperatingRequirementsToCreate">
+        /// DTO containing data for creating or updating the Synoptic Table of Operating Requirements.
+        /// </param>
+        /// <param name="SOSHubCollection_Id">Identifier of the SOS Hub Collection.</param>
+        /// <returns> Returns the created Synoptic Table or a revision confirmation message.</returns>
+        /// <response code="200">Creation or revision was successful.</response>
+        /// <response code="400">Invalid request or failed creation/revision.</response>
         [HttpPost]
         public async Task<ActionResult<SOSSynopticRequirementsDto>> GenerateSynopticTableofOperatingRequirements(SOSSynopticTableofOperatingRequirementsForCreateDto sOSSynopticTableofOperatingRequirementsToCreate, int SOSHubCollection_Id)
         {
-
+            // ============ CREATE NEW SYNOPTIC TABLE ============= \\
             if (sOSSynopticTableofOperatingRequirementsToCreate.SOSSynopticTableofOperatingRequirementsId == 0)
             {
+                // NOTE: Set creation metadata
                 sOSSynopticTableofOperatingRequirementsToCreate.CreatedAt = DateTime.Now;
                 sOSSynopticTableofOperatingRequirementsToCreate.IsActive = true;
-
                 sOSSynopticTableofOperatingRequirementsToCreate.SOSHubId = SOSHubCollection_Id;
 
+                // NOTE: Map DTO to entity
                 SOSSynopticTableofOperatingRequirements SynopticTableofOperatingRequirementsToCreate = _mapper.Map<SOSSynopticTableofOperatingRequirements>(sOSSynopticTableofOperatingRequirementsToCreate);
 
-                SynopticTableofOperatingRequirementsToCreate.Analyses = new List<SOSAnalysis>();
-                SynopticTableofOperatingRequirementsToCreate.Sequences = new List<SOSSequence>();
+                SynopticTableofOperatingRequirementsToCreate.SOSHubs = new List<SOSHub>();
+                SynopticTableofOperatingRequirementsToCreate.SOSSynopticRequirementsOperationSequence = new List<SOSSynopticRequirementsOperationSequence>();
 
-                foreach (var sequence in sOSSynopticTableofOperatingRequirementsToCreate.Sequences)
+                // NOTE: Populate SOSHubs and operation sequences
+                foreach (var SOSHub in sOSSynopticTableofOperatingRequirementsToCreate.SOSHubs!)
                 {
-                    SOSSequence sequenceToAdd = await _ProcessRepository.GetSOSSequence(sequence.SOSSequenceId);
-                    SynopticTableofOperatingRequirementsToCreate.Sequences.ToList().Add(sequenceToAdd);
+                    SOSHub SOSHubDb = await _ProcessRepository.GetSOSHub(SOSHub.SOSHubId);
+                    SynopticTableofOperatingRequirementsToCreate.SOSHubs.Add(SOSHubDb);
+
+                    SOSDistribution distribution = SOSHub?.SOSDistribution?.FirstOrDefault()!;
+                    SOSDistribution SOSdistributionComplete = await _ProcessRepository.GetSOSDistribution(distribution.SOSDistributionId);
+
+
+                    foreach (var sequenceDistribution in SOSdistributionComplete.SOSDistributionOperationSequence!)
+                    {
+                        SynopticTableofOperatingRequirementsToCreate.SOSSynopticRequirementsOperationSequence.Add(
+                                new SOSSynopticRequirementsOperationSequence
+                                {
+                                    Sequence = sequenceDistribution.SequenceId,
+                                    SectionId = sequenceDistribution.SectionId,
+                                    SosHubId = SOSHub?.SOSHubId,
+                                    OperationPersonText = sequenceDistribution?.Section?.Step,
+                                    OperationMachineText = "",
+                                    IsOperationPersonRequired = true,
+                                    IsOperationMachineRequired = false,
+                                }
+                            );
+
+                        var Analysis = sequenceDistribution?.Section?.Analyses?? new List<Analysis>();
+
+                        foreach(var Aly in Analysis)
+                        {
+                            Aly.CriticalPoints?.ForEach(item =>
+                            {
+                                SynopticTableofOperatingRequirementsToCreate?.InsuranceFeatures?.Add(
+                                    new InsuranceFeatures
+                                    {
+                                        Insurance = item,
+                                        SectionId = sequenceDistribution?.SectionId ?? 0,
+                                    }
+                                );
+                            });
+                        }
+
+                    }
                 }
 
-                foreach (var analysis in sOSSynopticTableofOperatingRequirementsToCreate.Analyses)
-                {
-                    SOSAnalysis analysisToAdd = await _ProcessRepository.GetSOSAnalysis(analysis.SOSAnalysisId);
-                    SynopticTableofOperatingRequirementsToCreate.Analyses.ToList().Add(analysisToAdd);
-                }
-
-
+                // NOTE: Create synoptic table in repository
                 var createdResult = await _ProcessRepository.CreateSOSSynopticTableofOperatingRequirements(SynopticTableofOperatingRequirementsToCreate);
                 if (createdResult != null)
                     return Ok(SynopticTableofOperatingRequirementsToCreate);
@@ -90,22 +134,23 @@ namespace SupervisorMobility.API.Controllers.SOS_Controllers
             }
             else
             {
-                //only add revision
+                // NOTE: Fetch existing synoptic table with all related data
                 SOSSynopticTableofOperatingRequirements _sosSynopticTableofOperatingRequirements = await _ProcessRepository.GetSOSSynopticTableofOperatingRequirements(sOSSynopticTableofOperatingRequirementsToCreate.SOSSynopticTableofOperatingRequirementsId, true, true, true);
 
+                // NOTE: Map the last logbook entry from DTO
                 SOSSynopticRequirementsLogbook _logbookToCreate = _mapper.Map<SOSSynopticRequirementsLogbook>(sOSSynopticTableofOperatingRequirementsToCreate.SynopticRequirementsLogbooks?.Last());
                 _logbookToCreate.SOSSynopticRequirementsLogbookId = _sosSynopticTableofOperatingRequirements.SOSSynopticTableofOperatingRequirementsId;
 
+                // NOTE: Add logbook entry to repository
                 var resultAddSections = await _ProcessRepository.CreateSOSSynopticRequirementsLogbook(_logbookToCreate);
 
                 if (resultAddSections > 0)
                 {
-                    Debug.WriteLine("SOSSynopticRequirementsLogbook añadidas con exito");
+                    // NOTE: Link logbook entry to synoptic table
                     await _ProcessRepository.AddSOSSynopticRequirementsLogbookToSOSSynopticTableofOperatingRequirements(_sosSynopticTableofOperatingRequirements, _logbookToCreate);
                 }
                 else
                 {
-                    Debug.WriteLine("Error Sections añadidos");
                     return BadRequest();
                 }
 
@@ -170,7 +215,7 @@ namespace SupervisorMobility.API.Controllers.SOS_Controllers
                 return Ok(_sosSynopticTableofOperatingRequirements);
 
             }
-            catch(Exception error)
+            catch (Exception error)
             {
                 return BadRequest(error);
             }
