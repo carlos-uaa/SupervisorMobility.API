@@ -309,30 +309,31 @@ namespace SupervisorMobility.API.DataAccess.Services
         public async Task<IEnumerable<SOSHub>> GetAllSOSHub(bool includeAnalysesBkup = false, bool includeSections = false, bool includeImages = false, bool includeVideos = false, bool includeCommentaries = false, bool includeTools = false, bool includeEquipments = false, bool includeMaterials = false, bool includeInformation = false, bool includePeople = false, bool includeDocuments = false, bool includeSOSDistribution = false, int userId=0)
         {
             IQueryable<SOSHub> query;
-            //buscamos si el usuario tiene solo una area asignada 
-            var areaId = await _context.Users.AsNoTracking().Where(u => u.UserId == userId).Select(a => a.AreaId).FirstOrDefaultAsync();
 
-            //si solo tiene una sola area hacemos el filtrado sencillo
-            if (areaId != null && areaId!=0)
+            //si tiene mas de una area asignada hacemos el filtrado por las areas asignadas
+            var areaIds = await _context.Users.AsNoTracking().Where(u => u.UserId == userId).Select(u => u.Areas.Select(a => a.AreaId).ToList()).FirstOrDefaultAsync();
+
+            if (areaIds != null && areaIds.Count>0)
             {
-                query = _context.SOSHubs.AsNoTracking().Where(h => h.IsActive == true && h.AreaId == areaId);
+
+                query = _context.SOSHubs.AsNoTracking().Where(h => h.IsActive == true && areaIds.Contains((int)h.AreaId));
             }
             else
             {
-                //si tiene mas de una area asignada hacemos el filtrado por las areas asignadas
-                var areaIds =await _context.Users.AsNoTracking().Where(u=>u.UserId==userId).Select(u=>u.Areas.Select(a=>a.AreaId).ToList()).FirstOrDefaultAsync();
-               
-                if (areaIds!=null)
+                //buscamos si el usuario tiene solo una area asignada 
+                var areaId = await _context.Users.AsNoTracking().Where(u => u.UserId == userId).Select(a => a.AreaId).FirstOrDefaultAsync();
+
+                //si solo tiene una sola area hacemos el filtrado sencillo
+                if (areaId != null && areaId != 0)
                 {
-                    
-                    query = _context.SOSHubs.AsNoTracking().Where(h => h.IsActive == true && areaIds.Contains((int)h.AreaId));
+                    query = _context.SOSHubs.AsNoTracking().Where(h => h.IsActive == true && h.AreaId == areaId);
                 }
                 else
                 {
                     query = _context.SOSHubs.AsNoTracking().Where(h => h.IsActive == true);
                 }
-
             }
+           
            
            
 
