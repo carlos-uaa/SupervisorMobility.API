@@ -97,13 +97,13 @@ namespace SupervisorMobility.API.Services.SOSDistribution.SOSDistributionExcel
                     }
 
                     // Aplication Models
-                    string[] models = SosDistribution.AplicationModels.Split("�", StringSplitOptions.RemoveEmptyEntries);
+                    string[] models = SosDistribution.AplicationModels.Split("§", StringSplitOptions.RemoveEmptyEntries);
                     string[] modelsCols = { "L15", "M15", "N15", "O15", "Q15" };
                     if (models.Any())
                     {   
                         for (int j = 0; j < Math.Min(models.Length, modelsCols.Length); j++)
                         {
-                            if (!string.IsNullOrWhiteSpace(models[j]) && !models[j].Contains("�"))
+                            if (!string.IsNullOrWhiteSpace(models[j]) && !models[j].Contains("§"))
                                 sheet.Cells[$"{modelsCols[j]}"].Value = models[j];
                         }
                     }
@@ -123,7 +123,7 @@ namespace SupervisorMobility.API.Services.SOSDistribution.SOSDistributionExcel
                         sheet.Cells[$"C{current_row}"].Value = sequence.Section.Step;
 
                         // Standard Time per model
-                        var times = SosDistribution.SOSDistributionOperationSequence.ToList()[count - 1].Times.Split("�");
+                        var times = SosDistribution.SOSDistributionOperationSequence.ToList()[count - 1].Times.Split("§");
 
                         if (times.Any())
                         {
@@ -245,7 +245,7 @@ namespace SupervisorMobility.API.Services.SOSDistribution.SOSDistributionExcel
                     }
 
                     // Set Aditional Total Time & Cycle time
-                    var aditionalTimes = SosDistribution.AdditionalTime.Split("�");
+                    var aditionalTimes = SosDistribution.AdditionalTime.Split("§");
                     var currentItemColumn = last_row + 2 + addedCount;
                     if (aditionalTimes.Any())
                     {
@@ -258,7 +258,7 @@ namespace SupervisorMobility.API.Services.SOSDistribution.SOSDistributionExcel
                             }
                         }
                     }
-                    var cyclesTimes = SosDistribution.CycleTime.Split("�");
+                    var cyclesTimes = SosDistribution.CycleTime.Split("§");
                     if (cyclesTimes.Any())
                     {
                         for (int j = 0; j < Math.Min(cyclesTimes.Length, columns.Length); j++)
@@ -280,33 +280,33 @@ namespace SupervisorMobility.API.Services.SOSDistribution.SOSDistributionExcel
                     if (models.Any())
                     {
                         for (int j = 0; j < Math.Min(models.Length, cols.Length); j++)
-                            if (!string.IsNullOrWhiteSpace(models[j]) && !models[j].Contains("�"))
+                            if (!string.IsNullOrWhiteSpace(models[j]) && !models[j].Contains("§"))
                                 sheet.Cells[$"{cols[j]}{currentAlternativeRow}"].Value = models[j];
                     }
                     //Quantities
-                    var takeQuanitties = SosDistribution.SOSDistributionAdditionalTime.TakeQuantity.Split("�");
-                    var leaveQuanitties = SosDistribution.SOSDistributionAdditionalTime.LeaveQuantity.Split("�");
-                    var stepQuanitties = SosDistribution.SOSDistributionAdditionalTime.StepsQuantity.Split("�");
-                    var takeTime = SosDistribution.SOSDistributionAdditionalTime.TakeTime.Split("�").First();
-                    var leaveTime = SosDistribution.SOSDistributionAdditionalTime.LeaveTime.Split("�").First();
-                    var stepTime = SosDistribution.SOSDistributionAdditionalTime.StepsTime.Split("�").First();
+                    var takeQuanitties = SosDistribution.SOSDistributionAdditionalTime.TakeQuantity.Split("§");
+                    var leaveQuanitties = SosDistribution.SOSDistributionAdditionalTime.LeaveQuantity.Split("§");
+                    var stepQuanitties = SosDistribution.SOSDistributionAdditionalTime.StepsQuantity.Split("§");
+                    var takeTime = SosDistribution.SOSDistributionAdditionalTime.TakeTime.Split("§").First();
+                    var leaveTime = SosDistribution.SOSDistributionAdditionalTime.LeaveTime.Split("§").First();
+                    var stepTime = SosDistribution.SOSDistributionAdditionalTime.StepsTime.Split("§").First();
 
                     if (takeQuanitties.Any())
                     {
                         for (int j = 0; j < Math.Min(takeQuanitties.Length, cols.Length); j++)
-                            if (!string.IsNullOrWhiteSpace(takeQuanitties[j]) && !takeQuanitties[j].Contains("�"))
+                            if (!string.IsNullOrWhiteSpace(takeQuanitties[j]) && !takeQuanitties[j].Contains("§"))
                                 sheet.Cells[$"{cols[j]}{currentAlternativeRow + 1}"].Value = takeQuanitties[j];
                     }
                     if (leaveQuanitties.Any())
                     {
                         for (int j = 0; j < Math.Min(leaveQuanitties.Length, cols.Length); j++)
-                            if (!string.IsNullOrWhiteSpace(leaveQuanitties[j]) && !leaveQuanitties[j].Contains("�"))
+                            if (!string.IsNullOrWhiteSpace(leaveQuanitties[j]) && !leaveQuanitties[j].Contains("§"))
                                 sheet.Cells[$"{cols[j]}{currentAlternativeRow + 2}"].Value = leaveQuanitties[j];
                     }
                     if (stepQuanitties.Any())
                     {
                         for (int j = 0; j < Math.Min(stepQuanitties.Length, cols.Length); j++)
-                            if (!string.IsNullOrWhiteSpace(stepQuanitties[j]) && !stepQuanitties[j].Contains("�"))
+                            if (!string.IsNullOrWhiteSpace(stepQuanitties[j]) && !stepQuanitties[j].Contains("§"))
                                 sheet.Cells[$"{cols[j]}{currentAlternativeRow + 3}"].Value = stepQuanitties[j];
                     }
                     // Total Quantities
