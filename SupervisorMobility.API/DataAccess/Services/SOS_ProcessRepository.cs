@@ -326,9 +326,9 @@ namespace SupervisorMobility.API.DataAccess.Services
                     var areaId = await _context.Users.AsNoTracking().Where(u => u.UserId == userId).Select(a => a.AreaId).FirstOrDefaultAsync();
 
                     //si solo tiene una sola area hacemos el filtrado sencillo
-                    if (areaId != null && areaId != 0)
+                    if (areaId.HasValue && areaId.Value != 0)
                     {
-                        query = _context.SOSHubs.AsNoTracking().Where(h => h.IsActive == true && h.AreaId == areaId);
+                        query = _context.SOSHubs.AsNoTracking().Where(h => h.IsActive == true && h.AreaId == areaId.Value);
                     }
                     else
                     {
