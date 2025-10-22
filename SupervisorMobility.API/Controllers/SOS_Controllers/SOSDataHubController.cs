@@ -145,10 +145,11 @@ namespace SupervisorMobility.API.Controllers.SOS_Controllers
         }
 
         [HttpGet]
-        public async Task<ActionResult<IEnumerable<SOSHubDto>>> GetAllSOSHub(bool includeImages = false, bool includeVideos = false, bool includeCommentaries = false, bool includeTools = false, bool includeEquipments = false, bool includeMaterials = false, bool includeInformation = false, bool includePeople = false, bool includeDocuments = false, bool includeSOSDistribution = false)
+        
+        public async Task<ActionResult<IEnumerable<SOSHubDto>>> GetAllSOSHub(bool includeImages = false, bool includeVideos = false, bool includeCommentaries = false, bool includeTools = false, bool includeEquipments = false, bool includeMaterials = false, bool includeInformation = false, bool includePeople = false, bool includeDocuments = false, bool includeSOSDistribution = false, int userId = 0)
         {
 
-            var CheckpointEntities = await _AnalysisProcessRepository.GetAllSOSHub(includeImages: includeImages, includeVideos: includeVideos, includeCommentaries: includeCommentaries, includeTools: includeTools, includeEquipments: includeEquipments, includeMaterials: includeMaterials, includeInformation: includeInformation, includePeople: includePeople, includeDocuments: includeDocuments, includeSOSDistribution: includeSOSDistribution);
+            var CheckpointEntities = await _AnalysisProcessRepository.GetAllSOSHub(includeImages: includeImages, includeVideos: includeVideos, includeCommentaries: includeCommentaries, includeTools: includeTools, includeEquipments: includeEquipments, includeMaterials: includeMaterials, includeInformation: includeInformation, includePeople: includePeople, includeDocuments: includeDocuments, includeSOSDistribution: includeSOSDistribution, userId : userId);
             if (CheckpointEntities == null)
             {
                 return NotFound("Get All Sos Hub not found!");
