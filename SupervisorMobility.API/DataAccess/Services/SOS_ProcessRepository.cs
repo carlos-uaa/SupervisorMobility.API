@@ -318,7 +318,7 @@ namespace SupervisorMobility.API.DataAccess.Services
                 if (areaIds != null && areaIds.Count > 0)
                 {
 
-                    query = _context.SOSHubs.AsNoTracking().Where(h => h.IsActive == true && h.AreaId!=null && areaIds.Contains(h.AreaId.Value));
+                    query = _context.SOSHubs.AsNoTracking().Where(h => h.IsActive == true && h.AreaId.HasValue && areaIds.Contains(h.AreaId.Value));
                 }
                 else
                 {
