@@ -310,21 +310,21 @@ namespace SupervisorMobility.API.DataAccess.Services
         {
             IQueryable<SOSHub> query;
             //buscamos si el usuario tiene solo una area asignada 
-            var areaId = _context.Users.AsNoTracking().Where(u => u.UserId == userId).Select(a => a.AreaId).FirstOrDefault();
+            var areaId = await _context.Users.AsNoTracking().Where(u => u.UserId == userId).Select(a => a.AreaId).FirstOrDefaultAsync();
 
             //si solo tiene una sola area hacemos el filtrado sencillo
-            if (areaId != null)
+            if (areaId != null && areaId!=0)
             {
-                query = _context.SOSHubs.AsNoTracking().Where(h => h.IsActive == true & h.AreaId == areaId);
+                query = _context.SOSHubs.AsNoTracking().Where(h => h.IsActive == true && h.AreaId == areaId);
             }
             else
             {
                 //si tiene mas de una area asignada hacemos el filtrado por las areas asignadas
-                var areaIds =await _context.Users.AsNoTracking().Where(u=>u.UserId==userId).Select(u=>u.Areas.Select(a=>a.AreaId)).FirstOrDefaultAsync();
+                var areaIds =await _context.Users.AsNoTracking().Where(u=>u.UserId==userId).Select(u=>u.Areas.Select(a=>a.AreaId).ToList()).FirstOrDefaultAsync();
                
                 if (areaIds!=null)
                 {
-                    //var ids = areaIds.ToList();
+                    
                     query = _context.SOSHubs.AsNoTracking().Where(h => h.IsActive == true && areaIds.Contains((int)h.AreaId));
                 }
                 else
