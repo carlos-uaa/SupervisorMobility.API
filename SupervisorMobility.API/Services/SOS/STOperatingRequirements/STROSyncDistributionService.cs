@@ -71,7 +71,7 @@ namespace SupervisorMobility.API.Services.SOS
         /// <param name="distributionId">The ID of the distribution.</param>
         /// <returns>The found <see cref="SOSDistribution"/>.</returns>
         /// <exception cref="InvalidOperationException">Thrown if distribution or HubId is not found.</exception>P
-        private async Task<SOSDistribution> GetDistribution(int distributionId)
+        private async Task<SupervisorMobility.API.DataAccess.Entities.SOS.SOSDistribution> GetDistribution(int distributionId)
         {
             var distribution = await _sosProcessRepository.GetSOSDistribution(distributionId, false, false, false, true, false, false, false, true);
             if (distribution == null || distribution.SOSHubId == null) throw new InvalidOperationException("SOS Distribution not found or invalid HubId.");
@@ -98,7 +98,7 @@ namespace SupervisorMobility.API.Services.SOS
         /// <returns>
         /// A list of <see cref="SOSSynopticRequirementsOperationSequence"/> that should be deleted.
         /// </returns>
-        private static List<SOSSynopticRequirementsOperationSequence> DetectSequencesToDelete(IEnumerable<IGrouping<int, SOSSynopticRequirementsOperationSequence>> stroGroups, SOSDistribution distribution)
+        private static List<SOSSynopticRequirementsOperationSequence> DetectSequencesToDelete(IEnumerable<IGrouping<int, SOSSynopticRequirementsOperationSequence>> stroGroups, SupervisorMobility.API.DataAccess.Entities.SOS.SOSDistribution distribution)
         {
             // NOTE: Flatten all STRO groups and filter sequences not present in the distribution
             return stroGroups.SelectMany(group => group).Where(stroSeq => distribution.SOSDistributionOperationSequence?.All(d => d.SectionId != stroSeq.SectionId) ?? true).ToList();
@@ -112,7 +112,7 @@ namespace SupervisorMobility.API.Services.SOS
         /// <returns>
         /// A list of <see cref="SOSSynopticRequirementsOperationSequence"/> that should be updated.
         /// </returns>
-        private static List<SOSSynopticRequirementsOperationSequence> DetectSequencesToUpdate(IEnumerable<IGrouping<int, SOSSynopticRequirementsOperationSequence>> stroGroups, SOSDistribution distribution)
+        private static List<SOSSynopticRequirementsOperationSequence> DetectSequencesToUpdate(IEnumerable<IGrouping<int, SOSSynopticRequirementsOperationSequence>> stroGroups, SupervisorMobility.API.DataAccess.Entities.SOS.SOSDistribution distribution)
         {
             var toUpdate = new List<SOSSynopticRequirementsOperationSequence>();
 
@@ -141,7 +141,7 @@ namespace SupervisorMobility.API.Services.SOS
         /// <returns>
         /// A list of new <see cref="SOSSynopticRequirementsOperationSequence"/> to be added.
         /// </returns>
-        private static List<SOSSynopticRequirementsOperationSequence> DetectSequencesToAdd(IEnumerable<IGrouping<int, SOSSynopticRequirementsOperationSequence>> stroGroups, SOSDistribution distribution)
+        private static List<SOSSynopticRequirementsOperationSequence> DetectSequencesToAdd(IEnumerable<IGrouping<int, SOSSynopticRequirementsOperationSequence>> stroGroups, SupervisorMobility.API.DataAccess.Entities.SOS.SOSDistribution distribution)
         {
             var toAdd = new List<SOSSynopticRequirementsOperationSequence>();
 
