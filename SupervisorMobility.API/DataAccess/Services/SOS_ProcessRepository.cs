@@ -311,14 +311,14 @@ namespace SupervisorMobility.API.DataAccess.Services
             IQueryable<SOSHub> query;
 
             //si tiene mas de una area asignada hacemos el filtrado por las areas asignadas
-            if (userId != 0 && userId>0)
+            if ( userId>0)
             {
                 var areaIds = await _context.Users.AsNoTracking().Where(u => u.UserId == userId).Select(u => u.Areas.Select(a => a.AreaId).ToList()).FirstOrDefaultAsync();
 
                 if (areaIds != null && areaIds.Count > 0)
                 {
 
-                    query = _context.SOSHubs.AsNoTracking().Where(h => h.IsActive == true && h.AreaId!=null && areaIds.Contains((int)h.AreaId));
+                    query = _context.SOSHubs.AsNoTracking().Where(h => h.IsActive == true && h.AreaId!=null && areaIds.Contains(h.AreaId.Value));
                 }
                 else
                 {
