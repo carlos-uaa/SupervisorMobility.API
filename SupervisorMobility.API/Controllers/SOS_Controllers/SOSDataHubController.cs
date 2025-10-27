@@ -86,8 +86,11 @@ namespace SupervisorMobility.API.Controllers.SOS_Controllers
                 SOSEntity.CreatorId = SOSHubForCreate.CreatorId;
             }
             //se envia la distribucion id en null para que no genere conflicto al crear la sos hub
-            SOSEntity.DistributionId = null;
-            SOSHub createdResult = await _AnalysisProcessRepository.CreateSOScollection(SOSEntity);
+            if (SOSEntity.DistributionId != null)
+            {
+                SOSEntity.DistributionId = null;
+            }
+                SOSHub createdResult = await _AnalysisProcessRepository.CreateSOScollection(SOSEntity);
 
 
             if (equipments.Any())
