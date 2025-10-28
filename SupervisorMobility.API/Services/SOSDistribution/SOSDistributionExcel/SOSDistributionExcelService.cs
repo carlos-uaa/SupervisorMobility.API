@@ -5,7 +5,7 @@ using SupervisorMobility.API.DataAccess.Services;
 using SupervisorMobility.API.Interfaces.SOSDistribution.SOSDistributionExcel;
 using OfficeOpenXml.Drawing;
 
-namespace SupervisorMobility.API.Services.SOSDistributionSer.SOSDistributionExcel
+namespace SupervisorMobility.API.Services.SOSDistribution.SOSDistributionExcel
 {
     public class SOSDistributionExcelService : ISOSDistributionExcelService
     {
