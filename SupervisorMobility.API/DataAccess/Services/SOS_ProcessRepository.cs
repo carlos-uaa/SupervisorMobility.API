@@ -60,10 +60,18 @@ namespace SupervisorMobility.API.DataAccess.Services
         #region SOS_DataPool
         public async Task<SOSHub> CreateSOScollection(SOSHub SOS_EntityToCreate)
         {
-            _context.SOSHubs.Add(SOS_EntityToCreate);
-            await _context.SaveChangesAsync();
+            try
+            {
+                _context.SOSHubs.Add(SOS_EntityToCreate);
+                await _context.SaveChangesAsync();
 
-            return SOS_EntityToCreate;
+                return SOS_EntityToCreate;
+            }
+            catch (Exception ex)
+            {
+                Debug.WriteLine("An error occurred while creating the SOSHub: " + ex.Message);
+                throw;
+            }
         }
         public async Task<SOSHub> GetSOSHub(int HubId, bool includeAnalysesBkup = false, bool includeSections = false, bool includeImages = false, bool includeVideos = false, bool includeCommentaries = false, bool includeTools = false, bool includeEquipments = false, bool includeMaterials = false, bool includeInformation = false, bool includePeople = false, bool includeDocuments = false, bool includeModel = false, bool includeHistory = false, bool includeDeleteds = false, bool includeCollections = false, bool includePeopleCollections = false, bool includePats = false)
         {
@@ -463,18 +471,26 @@ namespace SupervisorMobility.API.DataAccess.Services
         }
         public async Task<int> UpdateSOSHub(SOSHubForUpdateDto HubUpdate, SOSHub SosEntity)
         {
-            // Adjunta la entidad al contexto si no está ya adjunta
-            if (_context.Entry(SosEntity).State == EntityState.Detached)
+            try
             {
-                _context.SOSHubs.Attach(SosEntity);
+                // Adjunta la entidad al contexto si no está ya adjunta
+                if (_context.Entry(SosEntity).State == EntityState.Detached)
+                {
+                    _context.SOSHubs.Attach(SosEntity);
+                }
+
+                _mapper.Map(HubUpdate, SosEntity);
+
+                // Marca la entidad como modificada
+                _context.Entry(SosEntity).State = EntityState.Modified;
+
+                return await _context.SaveChangesAsync();
             }
-
-            _mapper.Map(HubUpdate, SosEntity);
-
-            // Marca la entidad como modificada
-            _context.Entry(SosEntity).State = EntityState.Modified;
-
-            return await _context.SaveChangesAsync();
+            catch (Exception ex)
+            {
+                Debug.WriteLine("An error occurred while creating the SOSHub: " + ex.Message);
+                throw;
+            }
         }
 
         public async Task<int> UpdateSOSHub(SOSHub SosEntity)
