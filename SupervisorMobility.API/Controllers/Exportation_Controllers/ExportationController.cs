@@ -1382,7 +1382,145 @@ namespace SupervisorMobility.API.Controllers.Exportation_Controllers
         [HttpGet("Excel/Combination/{CombinationId}")]
         public async Task<IActionResult> CombinationExcelExport(int CombinationId)
         {
-            return Ok();
+
+            try
+            {
+                var sosCombination = await _AnalysisProcessRepository.GetSOSCombination(CombinationId);
+                if (sosCombination != null)
+                {
+                    string templateName = "DataAccess/Templates/Combination Template.xlsx";
+                    MemoryStream ms = new MemoryStream();
+                    using var templateStream = System.IO.File.OpenRead(templateName);
+                    using (var packcage = new ExcelPackage(templateStream))
+                    {
+                        packcage.Workbook.CalcMode = ExcelCalcMode.Automatic;
+                        var sheet = packcage.Workbook.Worksheets.First();
+                        #region information table
+                        //Nombre de la operacion
+                        sheet.Cells["B7"].Value = sosCombination.OperationName;
+                        //grupo/operador/supervisor 
+                        if (sosCombination.Turns?.Any() ?? false)
+                        {
+                            var cellNumber = 7;
+                            foreach (var turn in sosCombination.Turns)
+                            {
+                                sheet.Cells[$"V{cellNumber}"].Value = turn.TurnType != null ? "" : turn.TurnType;
+                                sheet.Cells[$"AD{cellNumber}"].Value = turn.Operator?.Name != null ? " " : turn.Operator?.Name;
+                                sheet.Cells[$"BA{cellNumber}"].Value = turn.Supervisor?.Name != null ? " " : turn.Supervisor?.Name;
+                                cellNumber++;
+                            }
+                        }
+                        //elaboro
+                        sheet.Cells["B9"].Value = sosCombination.SOSHub?.ApproverOwners?.FirstOrDefault()?.Name != null ? " " : sosCombination.SOSHub?.ApproverOwners?.FirstOrDefault()?.Name;
+                        //reviso
+                        sheet.Cells["D9"].Value = sosCombination.SOSHub?.ReviewerEditors?.FirstOrDefault()?.Name != null ? " " : sosCombination.SOSHub?.ReviewerEditors?.FirstOrDefault()?.Name;
+                        //aprobo
+                        sheet.Cells["H9"].Value = sosCombination.CombinationLogbooks?.FirstOrDefault()?.Approver?.Name != null ? " " : sosCombination.CombinationLogbooks?.FirstOrDefault()?.Approver.Name;
+                        //fecha de emision
+                        sheet.Cells["B11"].Value = sosCombination.CreatedAt?.ToString("dd-MMM-yyyy").Replace(".", "");
+                        //mes de aplicacion
+                        sheet.Cells["D11"].Value = sosCombination.ApplicationMonth != null ? "" : sosCombination.ApplicationMonth;
+                        //modelos
+                        string Models = "";
+                        if (sosCombination.SOSHub?.AppliedModels != null && sosCombination.SOSHub.AppliedModels.Any())
+                        {
+                            Models = string.Join(", ", sosCombination.SOSHub.AppliedModels.Select(am => am.Description));
+                        }
+                        sheet.Cells["H11"].Value = Models;
+                        //tiempo de aprendizaje
+                        sheet.Cells["V11"].Value = sosCombination.SOSHub?.TrainingTime != null ? " " : $"{sosCombination.SOSHub.TrainingTime} DIAS ";
+                        //planta
+                        sheet.Cells["C5"].Value = sosCombination.SOSHub.Plant?.Description;
+                        //departamento (gerencia)
+                        sheet.Cells["L6"].Value = sosCombination.SOSHub.Department?.Description;
+
+                        //img de diagrama
+                        if (sosCombination.Illustrations != null && sosCombination.Illustrations.Count > 0)
+                        {
+                            var fileid = sosCombination.Illustrations.First().FileUploadId;
+                            var FileInfo = await _AnalysisProcessRepository.FetchFileAsync(fileid);
+
+                            if (FileInfo is not null)
+                            {
+                               // var path = System.IO.Path.Combine(_env.ContentRootPath, "uploads\\SOSCombination\\Ilustrations", FileInfo.StorageFileName);
+                                var path = System.IO.Path.Combine("C:\\", "Users\\zkril\\source\\repos\\SupervisorMobility.API\\upload\\SOSCombination\\Ilustrations", FileInfo.StorageFileName);
+                                // Cargar la imagen desde el archivo
+                                //var image = Image.FromFile(path);
+
+                                // Insertar la imagen en el Excel
+                                var picture = sheet.Drawings.AddPicture("ImagenInsertada", path);
+
+                                // Posicionar la imagen (columna 2, fila 2)
+                                picture.SetPosition(12, 0, 2, 0); // Fila, offsetY, Columna, offsetX
+                                // Opcional: redimensionar
+                                picture.SetSize(300); // ancho en píxeles (mantiene proporción)
+
+
+
+                            }
+                        }
+                        //volumen de produccion por turno
+                        sheet.Cells["B29"].Value = sosCombination.ProductionVolumePerShift != null ? " " : sosCombination.ProductionVolumePerShift;
+                        //tiempo tacto
+                        sheet.Cells["E29"].Value = sosCombination.TackTime != null ? " " : sosCombination.TackTime;
+                        //numero de control
+                        sheet.Cells["R6"].Value = sosCombination.ControlNumber != null ? "" : sosCombination.ControlNumber;
+                        //parte fea
+                        var operationSecuence = sosCombination.SOSCombinationOperationSequence?.OrderBy(so => so.SequenceId).ToList();
+                        if ( operationSecuence!=null && operationSecuence.Count > 0)
+                        {
+                            var startRow = 38;
+                            foreach (var operation in operationSecuence)
+                            {
+                                //secuencia de operacion
+                                sheet.Cells[$"B{startRow}"].Value = operation.SequenceId != null ? " " : operation.SectionId;
+                                //nombre de la operacion
+                                sheet.Cells[$"C{startRow}"].Value = operation.ProcessName != null ? " " : operation.ProcessName;
+                                //partes por ciclo
+                                sheet.Cells[$"D{startRow}"].Value = operation.PartsPerCycle != null ? " " : operation.PartsPerCycle;
+                                //tiempo de operacion manual
+                                sheet.Cells[$"E{startRow}"].Value = operation.ManualOperationTime != null ? " " : operation.ManualOperationTime;
+                                //tiempo de operacion manual con maquina en automatico
+                                sheet.Cells[$"F{startRow}"].Value = operation.ManualOperationTimeWithMachineInAutomatic != null ? " " : operation.ManualOperationTimeWithMachineInAutomatic;
+                                //tiempo de operacion de maquina en automatico
+                                sheet.Cells[$"G{startRow}"].Value = operation.AutomaticMachineOperationTime != null ? " " : operation.AutomaticMachineOperationTime;
+                                
+                                startRow++;
+
+                            }
+                        }
+                        //plan de produccion y observaciones
+                        var shape = sheet.Drawings["Texto 66"] as ExcelShape;
+                        if (shape != null)
+                        {
+                            var tt = sosCombination.TackTime != null ? " " : sosCombination.TackTime;
+
+                            shape.Text = $"T.T={tt}          T.C={tt}";
+                        }
+                        sheet.Cells["C54"].Value = sosCombination.ProductionPlanAndObservations != null ? " " : sosCombination.ProductionPlanAndObservations;
+                        #endregion
+
+                        //retornar el archivo excel
+                        packcage.Workbook.Calculate();
+                        sheetService.SetPrintingOptions(packcage.Workbook);
+                        packcage.SaveAs(ms);
+
+
+                    }
+                        ms.Position = 0;
+                        var res = File(ms, "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet", $"{sosCombination.OperationName}-{sosCombination.SOSHub.Plant?.Description}-COMB.xlsx");
+                        res.EnableRangeProcessing = true;
+                        return res;
+                }
+                else
+                {
+                    return StatusCode(404, $"This SOSCombination desn't exist");
+                }
+            }
+            catch (Exception ex)
+            {
+                return StatusCode(500, $"Internal server error: {ex.Message}");
+            }
         }
 
         [HttpPost("Excel/Flow/{FlowId}")]
