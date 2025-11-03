@@ -1397,42 +1397,44 @@ namespace SupervisorMobility.API.Controllers.Exportation_Controllers
                         var sheet = packcage.Workbook.Worksheets.First();
                         #region information table
                         //Nombre de la operacion
-                        sheet.Cells["B7"].Value = sosCombination.OperationName;
+                        sheet.Cells["B8"].Value = sosCombination.OperationName;
                         //grupo/operador/supervisor 
                         if (sosCombination.Turns?.Any() ?? false)
                         {
-                            var cellNumber = 7;
+                            var cellNumber = 8;
                             foreach (var turn in sosCombination.Turns)
                             {
-                                sheet.Cells[$"V{cellNumber}"].Value = turn.TurnType != null ? "" : turn.TurnType;
-                                sheet.Cells[$"AD{cellNumber}"].Value = turn.Operator?.Name != null ? " " : turn.Operator?.Name;
-                                sheet.Cells[$"BA{cellNumber}"].Value = turn.Supervisor?.Name != null ? " " : turn.Supervisor?.Name;
+                                sheet.Cells[$"Z{cellNumber+1}"].Value = turn.TurnType != null ? "" : turn.TurnType;
+                                sheet.Cells[$"AH{cellNumber+1}"].Value = turn.Operator?.Name != null ? " " : turn.Operator?.Name;
+                                sheet.Cells[$"BE{cellNumber + 1}"].Value = turn.Supervisor?.Name != null ? " " : turn.Supervisor?.Name;
                                 cellNumber++;
                             }
                         }
                         //elaboro
-                        sheet.Cells["B9"].Value = sosCombination.SOSHub?.ApproverOwners?.FirstOrDefault()?.Name != null ? " " : sosCombination.SOSHub?.ApproverOwners?.FirstOrDefault()?.Name;
+                        sheet.Cells["B13"].Value = sosCombination.SOSHub?.ApproverOwners?.FirstOrDefault()?.Name != null ? " " : sosCombination.SOSHub?.ApproverOwners?.FirstOrDefault()?.Name;
                         //reviso
-                        sheet.Cells["D9"].Value = sosCombination.SOSHub?.ReviewerEditors?.FirstOrDefault()?.Name != null ? " " : sosCombination.SOSHub?.ReviewerEditors?.FirstOrDefault()?.Name;
+                        sheet.Cells["F13"].Value = sosCombination.SOSHub?.ReviewerEditors?.FirstOrDefault()?.Name != null ? " " : sosCombination.SOSHub?.ReviewerEditors?.FirstOrDefault()?.Name;
+                        //reviso (H y S)
+                        sheet.Cells["J13"].Value = sosCombination.ReviewerHS?.Name != null ? " " : sosCombination.ReviewerHS?.Name;
                         //aprobo
-                        sheet.Cells["H9"].Value = sosCombination.CombinationLogbooks?.FirstOrDefault()?.Approver?.Name != null ? " " : sosCombination.CombinationLogbooks?.FirstOrDefault()?.Approver.Name;
+                        sheet.Cells["O13"].Value = sosCombination.CombinationLogbooks?.FirstOrDefault()?.Approver?.Name != null ? " " : sosCombination.CombinationLogbooks?.FirstOrDefault()?.Approver.Name;
                         //fecha de emision
-                        sheet.Cells["B11"].Value = sosCombination.CreatedAt?.ToString("dd-MMM-yyyy").Replace(".", "");
+                        sheet.Cells["B15"].Value = sosCombination.CreatedAt?.ToString("dd-MMM-yyyy").Replace(".", "");
                         //mes de aplicacion
-                        sheet.Cells["D11"].Value = sosCombination.ApplicationMonth != null ? "" : sosCombination.ApplicationMonth;
+                        sheet.Cells["H15"].Value = sosCombination.ApplicationMonth != null ? "" : sosCombination.ApplicationMonth;
                         //modelos
                         string Models = "";
                         if (sosCombination.SOSHub?.AppliedModels != null && sosCombination.SOSHub.AppliedModels.Any())
                         {
                             Models = string.Join(", ", sosCombination.SOSHub.AppliedModels.Select(am => am.Description));
                         }
-                        sheet.Cells["H11"].Value = Models;
+                        sheet.Cells["L15"].Value = Models;
                         //tiempo de aprendizaje
-                        sheet.Cells["V11"].Value = sosCombination.SOSHub?.TrainingTime != null ? " " : $"{sosCombination.SOSHub.TrainingTime} DIAS ";
+                        sheet.Cells["Z15"].Value = sosCombination.SOSHub?.TrainingTime != null ? " " : $"{sosCombination.SOSHub.TrainingTime} DIAS ";
                         //planta
-                        sheet.Cells["C5"].Value = sosCombination.SOSHub.Plant?.Description;
+                        sheet.Cells["AP15"].Value = sosCombination.SOSHub.Plant?.Description;
                         //departamento (gerencia)
-                        sheet.Cells["L6"].Value = sosCombination.SOSHub.Department?.Description;
+                        sheet.Cells["BE15"].Value = sosCombination.SOSHub.Department?.Description;
 
                         //img de diagrama
                         if (sosCombination.Illustrations != null && sosCombination.Illustrations.Count > 0)
@@ -1451,7 +1453,7 @@ namespace SupervisorMobility.API.Controllers.Exportation_Controllers
                                 var picture = sheet.Drawings.AddPicture("ImagenInsertada", path);
 
                                 // Posicionar la imagen (columna 2, fila 2)
-                                picture.SetPosition(12, 0, 2, 0); // Fila, offsetY, Columna, offsetX
+                                picture.SetPosition(16, 0, 2, 0); // Fila, offsetY, Columna, offsetX
                                 // Opcional: redimensionar
                                 picture.SetSize(300); // ancho en píxeles (mantiene proporción)
 
@@ -1462,14 +1464,14 @@ namespace SupervisorMobility.API.Controllers.Exportation_Controllers
                         //volumen de produccion por turno
                         sheet.Cells["B29"].Value = sosCombination.ProductionVolumePerShift != null ? " " : sosCombination.ProductionVolumePerShift;
                         //tiempo tacto
-                        sheet.Cells["E29"].Value = sosCombination.TackTime != null ? " " : sosCombination.TackTime;
+                        sheet.Cells["I29"].Value = sosCombination.TackTime != null ? " " : sosCombination.TackTime;
                         //numero de control
-                        sheet.Cells["R6"].Value = sosCombination.ControlNumber != null ? "" : sosCombination.ControlNumber;
+                        sheet.Cells["L29"].Value = sosCombination.ControlNumber != null ? "" : sosCombination.ControlNumber;
                         //parte fea
                         var operationSecuence = sosCombination.SOSCombinationOperationSequence?.OrderBy(so => so.SequenceId).ToList();
                         if ( operationSecuence!=null && operationSecuence.Count > 0)
                         {
-                            var startRow = 38;
+                            var startRow = 39;
                             foreach (var operation in operationSecuence)
                             {
                                 //secuencia de operacion
@@ -1489,14 +1491,8 @@ namespace SupervisorMobility.API.Controllers.Exportation_Controllers
 
                             }
                         }
-                        //plan de produccion y observaciones
-                        var shape = sheet.Drawings["Texto 66"] as ExcelShape;
-                        if (shape != null)
-                        {
-                            var tt = sosCombination.TackTime != null ? " " : sosCombination.TackTime;
+                        
 
-                            shape.Text = $"T.T={tt}          T.C={tt}";
-                        }
                         sheet.Cells["C54"].Value = sosCombination.ProductionPlanAndObservations != null ? " " : sosCombination.ProductionPlanAndObservations;
                         #endregion
 
