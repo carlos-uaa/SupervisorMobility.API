@@ -47,29 +47,33 @@ namespace SupervisorMobility.API.Controllers.SOS_Controllers
             List<User> usersApproverOwners = new List<User>();
             List<User> usersReviewerEditors = new List<User>();
 
-            foreach (var equipment in SOSHubForCreate.SafetyEquipment)
-            {
-                Equipment equipmentaux = await _AnalysisProcessRepository.GetEquipmentById(equipment.EquipmentId);
-                equipments.Add(equipmentaux);
-            }
+            if (SOSHubForCreate.SafetyEquipment != null)
+                foreach (var equipment in SOSHubForCreate.SafetyEquipment)
+                {
+                    Equipment equipmentaux = await _AnalysisProcessRepository.GetEquipmentById(equipment.EquipmentId);
+                    equipments.Add(equipmentaux);
+                }
 
-            foreach (var user in SOSHubForCreate.ApproverOwners)
-            {
-                User useraux = await _AnalysisProcessRepository.GetUserById(user.UserId);
-                usersApproverOwners.Add(useraux);
-            }
+            if(SOSHubForCreate.ApproverOwners != null)
+                foreach (var user in SOSHubForCreate.ApproverOwners)
+                {
+                    User useraux = await _AnalysisProcessRepository.GetUserById(user.UserId);
+                    usersApproverOwners.Add(useraux);
+                }
 
-            foreach (var user in SOSHubForCreate.ReviewerEditors)
-            {
-                User useraux = await _AnalysisProcessRepository.GetUserById(user.UserId);
-                usersReviewerEditors.Add(useraux);
-            }
+            if (SOSHubForCreate.ReviewerEditors != null)
+                foreach (var user in SOSHubForCreate.ReviewerEditors)
+                {
+                    User useraux = await _AnalysisProcessRepository.GetUserById(user.UserId);
+                    usersReviewerEditors.Add(useraux);
+                }
 
-            foreach (var applymodel in SOSHubForCreate.AppliedModels)
-            {
-                Product productaux = await _AnalysisProcessRepository.GetProductById(applymodel.ProductId);
-                applyModels.Add(productaux);
-            }
+            if (SOSHubForCreate.AppliedModels != null)
+                foreach (var applymodel in SOSHubForCreate.AppliedModels)
+                {
+                    Product productaux = await _AnalysisProcessRepository.GetProductById(applymodel.ProductId);
+                    applyModels.Add(productaux);
+                }
 
             SOSHubForCreate.SafetyEquipment = null;
             SOSHubForCreate.ApproverOwners = null;
@@ -85,13 +89,18 @@ namespace SupervisorMobility.API.Controllers.SOS_Controllers
             {
                 SOSEntity.CreatorId = SOSHubForCreate.CreatorId;
             }
-            //se envia la distribucion id en null para que no genere conflicto al crear la sos hub
-            if (SOSEntity.DistributionId != null)
-            {
-                SOSEntity.DistributionId = null;
-            }
-                SOSHub createdResult = await _AnalysisProcessRepository.CreateSOScollection(SOSEntity);
 
+            // IF is draft auto set null ids
+            if (SOSEntity.AreaId == 0) SOSEntity.AreaId = null;
+            if (SOSEntity.DepartmentId == 0) SOSEntity.DepartmentId = null;
+            if (SOSEntity.DistributionId == 0) SOSEntity.DistributionId = null;
+            if (SOSEntity.PlantId == 0) SOSEntity.PlantId = null;
+            if (SOSEntity.StationId == 0) SOSEntity.StationId = null;
+
+            //se envia la distribucion id en null para que no genere conflicto al crear la sos hub
+            if (SOSEntity.DistributionId != null) SOSEntity.DistributionId = null;
+
+            SOSHub createdResult = await _AnalysisProcessRepository.CreateSOScollection(SOSEntity);
 
             if (equipments.Any())
             {
@@ -166,7 +175,6 @@ namespace SupervisorMobility.API.Controllers.SOS_Controllers
         [HttpPut("{SOSHubId}")]
         public async Task<ActionResult<SOSHubDto>> UpdateSOSHub(int SOSHubId, SOSHubForUpdateDto _SOSHubForUpdate)
         {
-
             SOSHub entitySOSHub = await _AnalysisProcessRepository.GetSOSHub(SOSHubId, true, true, true, true, true, true, true, true, true, true, true, includeDeleteds: true);
 
             List<Commentary> ProcessSheetCommentaries = new List<Commentary>();
@@ -428,20 +436,6 @@ namespace SupervisorMobility.API.Controllers.SOS_Controllers
 
             }
 
-
-
-            //var auxEntity = ObjectCloner.ObjectCloner.DeepClone(entitySOSHub);
-            //Compare objects
-            //string jsonResult = CompareAndGenerateJson(_mapper.Map<SOSHubForUpdateDto>(entitySOSHub), _SOSHubForUpdate);
-            //Start Create History
-            //SOSHubHistoryForCreateDto newHistory = new SOSHubHistoryForCreateDto();
-            //_mapper.Map(auxEntity, newHistory);
-            //newHistory.VersionChanges = jsonResult;
-            //Create History
-            //SOSHubHistory sOSHubHistory = new SOSHubHistory();
-            //_ = await _AnalysisProcessRepository.CreateHistorySOScollection(sOSHubHistory);
-
-            //Guardar viejos registros
             ProcessSheetCommentaries.AddRange(entitySOSHub.ProcessSheetCommentary?.Where(p => p.IsActive == false));
             AnalysisBkups.AddRange(entitySOSHub.AnalysesBkup?.Where(p => p.IsActive == false));
             Sections.AddRange(entitySOSHub.Sections?.Where(p => p.IsActive == false));
@@ -558,6 +552,13 @@ namespace SupervisorMobility.API.Controllers.SOS_Controllers
             //    _SOSHubForUpdate.ReviewerEditorId = null;
             //}
             //update base entity
+            if (entitySOSHub.AreaId == 0) entitySOSHub.AreaId = null;
+            if (entitySOSHub.DepartmentId == 0) entitySOSHub.DepartmentId = null;
+            if (entitySOSHub.DistributionId == 0) entitySOSHub.DistributionId = null;
+            if (entitySOSHub.PlantId == 0) entitySOSHub.PlantId = null;
+            if (entitySOSHub.StationId == 0) entitySOSHub.StationId = null;
+            //se envia la distribucion id en null para que no genere conflicto al crear la sos hub
+            if (entitySOSHub.DistributionId != null) entitySOSHub.DistributionId = null;
             var result = await _AnalysisProcessRepository.UpdateSOSHub(_SOSHubForUpdate, entitySOSHub);
 
             //restore all relationships
