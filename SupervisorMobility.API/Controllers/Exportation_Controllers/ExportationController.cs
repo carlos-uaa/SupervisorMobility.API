@@ -24,6 +24,8 @@ using Aspose.Cells;
 using Aspose.Cells.Drawing;
 using System.Drawing.Drawing2D;
 using SupervisorMobility.API.TestingsDtos;
+using DocumentFormat.OpenXml.Drawing.Charts;
+using static System.Net.Mime.MediaTypeNames;
 
 namespace SupervisorMobility.API.Controllers.Exportation_Controllers
 {
@@ -530,7 +532,7 @@ namespace SupervisorMobility.API.Controllers.Exportation_Controllers
                         int horizontalOffset = 0;
                         using (FileStream stream = System.IO.File.OpenRead($"{imgPath[0]}{imgPath[1]}"))
                         {
-                            Image imgObj = Image.FromStream(stream);
+                            System.Drawing.Image imgObj = System.Drawing.Image.FromStream(stream);
 
                             int w = imgObj.Width, h = imgObj.Height;
 
@@ -1168,7 +1170,7 @@ namespace SupervisorMobility.API.Controllers.Exportation_Controllers
                         int horizontalOffset = 0;
                         using (FileStream stream = System.IO.File.OpenRead($"{imgPath[0]}{imgPath[1]}"))
                         {
-                            Image imgObj = Image.FromStream(stream);
+                            System.Drawing.Image imgObj = System.Drawing.Image.FromStream(stream);
 
                             int w = imgObj.Width, h = imgObj.Height;
 
@@ -1408,7 +1410,7 @@ namespace SupervisorMobility.API.Controllers.Exportation_Controllers
                 if (operationSecuence != null && operationSecuence.Count > 0)
                 {
                     FillLineDiagram(workbook, operationSecuence);
-                   
+
                 }
                 else
                 {
@@ -1418,17 +1420,16 @@ namespace SupervisorMobility.API.Controllers.Exportation_Controllers
                 var worksheet = workbook.Worksheets[0];
                 //colocar la img
                 //img de diagrama
-                // if (sosCombination.Illustrations != null && sosCombination.Illustrations.Count > 0)
-                // {
-                //  var fileid = sosCombination.Illustrations.First().FileUploadId;
-                // var FileInfo = await _AnalysisProcessRepository.FetchFileAsync(fileid);
+                if (sosCombination.Illustrations != null && sosCombination.Illustrations.Count > 0)
+                {
+                    var fileid = sosCombination.Illustrations.First().FileUploadId;
+                    var FileInfo = await _AnalysisProcessRepository.FetchFileAsync(fileid);
 
-                //  if (FileInfo is not null)
-                // {
-                // var path = System.IO.Path.Combine(_env.ContentRootPath, "uploads\\SOSCombination\\Ilustrations", FileInfo.StorageFileName);
-                var path = System.IO.Path.Combine("C:\\", "Users\\zkril\\source\\repos\\SupervisorMobility.API\\upload\\SOSCombination\\Ilustrations", "ejemplo.png");
-                byte[] imageBytes = await System.IO.File.ReadAllBytesAsync(path);
-                var imageStream = new MemoryStream(imageBytes);
+                    if (FileInfo is not null)
+                    {
+                        var path = System.IO.Path.Combine(_env.ContentRootPath, "uploads\\SOSCombination\\Ilustrations", FileInfo.StorageFileName);                        
+                        byte[] imageBytes = await System.IO.File.ReadAllBytesAsync(path);
+                        var imageStream = new MemoryStream(imageBytes);
 
                 // Cargar la imagen desde el archivo
                 //var image = Image.FromFile(path);
@@ -1440,8 +1441,8 @@ namespace SupervisorMobility.API.Controllers.Exportation_Controllers
                 picture.Height = 380;
 
 
-                //  }
-                // }
+                    }
+                }
             }
 
 
@@ -1451,7 +1452,7 @@ namespace SupervisorMobility.API.Controllers.Exportation_Controllers
             stream.Position = 0;
 
             // Retornar como archivo descargable
-            return File(stream.ToArray(), "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet", "grafico_con_linea.xlsx");
+            return File(stream.ToArray(), "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet", $"{sosCombination.ProcessName}.xlsx");
         }
 
 
@@ -1618,6 +1619,9 @@ namespace SupervisorMobility.API.Controllers.Exportation_Controllers
         private void FillTemplate(Aspose.Cells.Workbook workbook, SOSCombination sosCombination)
         {
             var sheet = workbook.Worksheets[0];
+
+           
+
             #region information table
             //Nombre de la operacion
             sheet.Cells["B8"].Value = sosCombination.OperationName;
@@ -1720,9 +1724,28 @@ namespace SupervisorMobility.API.Controllers.Exportation_Controllers
             #endregion
 
         }
-        private void FillLineDiagram(Aspose.Cells.Workbook workbook, List<SOSCombinationOperationSequence>? operations)
+        private async void FillLineDiagram(Aspose.Cells.Workbook workbook, List<SOSCombinationOperationSequence>? operations)
         {
             var sheet = workbook.Worksheets[0];
+
+            // Copiar el shape "Freeform 4" y dibujar uno nuevo con las mismas propiedades
+            Aspose.Cells.Drawing.Shape lineaOriginal = sheet.Shapes["Freeform 4"];
+            //imagen de linea senoidal 
+            var path = System.IO.Path.Combine("Assets/SenoidalLines", "imagenSenH.png");
+            byte[] imageBytes = await System.IO.File.ReadAllBytesAsync(path);
+            var imageStreamSenH = new MemoryStream(imageBytes);
+
+            var path2 = System.IO.Path.Combine("Assets/SenoidalLines", "imagenSenV.png");
+            byte[] imageBytes2 = await System.IO.File.ReadAllBytesAsync(path2);
+            var imageStreamSenV = new MemoryStream(imageBytes2);
+
+
+
+
+
+            // Si el shape original tiene más propiedades específicas que necesitas copiar, agrégalas aquí.
+
+            // El nuevo shape aparecerá en la hoja de Excel en la posición indicada.
 
 
             // Obtener celdas dodne se empieza a dibujar
@@ -1805,12 +1828,12 @@ namespace SupervisorMobility.API.Controllers.Exportation_Controllers
 
             };
 
-                //proceso de dibujado del grafico
+                //proceso de dibujado del grafico ejemplo
                 foreach (var operation in operationsExample)
                 {
                     //dibujar linea de tiempo de operacion manual
-                    int desplazamientoEnY = (int)(((50 * operation.ManualOperationTime) / 0.1));//calculo del desplazamiento en Y
-                    var line = sheet.Shapes.AddLine(filaInicio, offsetY, columnaInicio, 10, 0, desplazamientoEnY);//row inicio/offsetY/columna inicio de dibujo/desplaamientoX/alto/desplazamientoY
+                    int desplazamientoEnX = (int)(((50 * operation.ManualOperationTime) / 0.1));//calculo del desplazamiento en Y
+                    var line = sheet.Shapes.AddLine(filaInicio, offsetY, columnaInicio, 10, 0, desplazamientoEnX);//row inicio/offsetY/columna inicio de dibujo/desplaamientoX/alto/desplazamientoY
                     line.Line.DashStyle = MsoLineDashStyle.Solid;
                     line.Line.Weight = 2;
                     line.Line.SolidFill.Color = lineColor;
@@ -1829,15 +1852,15 @@ namespace SupervisorMobility.API.Controllers.Exportation_Controllers
                         int totalCells = (area.EndRow - area.StartRow + 1) * (area.EndColumn - area.StartColumn + 1);
 
                         //calculamos la distancia total desde la celda de inicio hasta la celda final de la linea
-                        desplazamientoEnY = (int)(((50 * operation.AutomaticMachineOperationTime) / 0.1));
+                        desplazamientoEnX = (int)(((50 * operation.AutomaticMachineOperationTime) / 0.1));
                         int totalDistanceFromStartCell = totalCells * 10;//10 unidades por celda
-                        int totalDistanceWithDotLine = totalDistanceFromStartCell + desplazamientoEnY;
+                        int totalDistanceWithDotLine = totalDistanceFromStartCell + desplazamientoEnX;
                         if (totalDistanceWithDotLine > totalUnitsByRow)
                         {
                             int excedente = totalDistanceWithDotLine - totalUnitsByRow;
 
-                            desplazamientoEnY = totalUnitsByRow - totalDistanceFromStartCell;
-                            line = sheet.Shapes.AddLine(sheet.Cells[celdaFinalLinea].Row, offsetY, sheet.Cells[celdaFinalLinea].Column, 10, 0, desplazamientoEnY);
+                            desplazamientoEnX = totalUnitsByRow - totalDistanceFromStartCell;
+                            line = sheet.Shapes.AddLine(sheet.Cells[celdaFinalLinea].Row, offsetY, sheet.Cells[celdaFinalLinea].Column, 10, 0, desplazamientoEnX);
                             line.Line.DashStyle = MsoLineDashStyle.RoundDot;
                             line.Line.SolidFill.Color = lineColor;
                             line.Line.Weight = 2;
@@ -1847,7 +1870,7 @@ namespace SupervisorMobility.API.Controllers.Exportation_Controllers
                         }
                         else
                         {
-                            line = sheet.Shapes.AddLine(sheet.Cells[celdaFinalLinea].Row, offsetY, sheet.Cells[celdaFinalLinea].Column, 10, 0, desplazamientoEnY);
+                            line = sheet.Shapes.AddLine(sheet.Cells[celdaFinalLinea].Row, offsetY, sheet.Cells[celdaFinalLinea].Column, 10, 0, desplazamientoEnX);
 
                         }
                         line.Line.DashStyle = MsoLineDashStyle.RoundDot;
@@ -1868,9 +1891,9 @@ namespace SupervisorMobility.API.Controllers.Exportation_Controllers
                         line.Line.Weight = 2;
 
                         //linea de tiempo manual de la maquina en automatico
-                        desplazamientoEnY = (int)(((50 * operation.ManualOperationTimeWithMachineInAutomatic) / 0.1));
-                        line = sheet.Shapes.AddLine(sheet.Cells[celdaFinalLinea].Row, offsetY + 12, sheet.Cells[celdaFinalLinea].Column, 10, 0, desplazamientoEnY);
-                        line.Line.DashStyle = MsoLineDashStyle.Custom;
+                        desplazamientoEnX = (int)(((50 * operation.ManualOperationTimeWithMachineInAutomatic) / 0.1));
+                        line = sheet.Shapes.AddLine(sheet.Cells[celdaFinalLinea].Row, offsetY + 12, sheet.Cells[celdaFinalLinea].Column, 10, 0, desplazamientoEnX);
+                        line.Line.DashStyle = MsoLineDashStyle.Custom;  
                         line.Line.SolidFill.Color = lineColor;
                         line.Line.Weight = 2;
                         //asignamos a celdaFinalLinea la columna donde termino la linea de tiempo manual con maquina en automatico
@@ -1882,21 +1905,114 @@ namespace SupervisorMobility.API.Controllers.Exportation_Controllers
                     //dibujamos la linea de los pasos para la siguiente operacion.
                     if (operation.StepsToNextProcess > 0)
                     {
-                        desplazamientoEnY = (int)(((50 * operation.StepsToNextProcess) / 0.1));
+                        int indiceImagen = 0;
+                        Aspose.Cells.Drawing.Picture imagen = null;
+                        desplazamientoEnX = (int)(((50 * operation.StepsToNextProcess) / 0.1));
+                        Aspose.Cells.Drawing.Shape rectangleForm = null;
                         if (isOffSetY)
                         {
-                            line = sheet.Shapes.AddLine(sheet.Cells[celdaFinalLinea].Row, offsetY + 12, sheet.Cells[celdaFinalLinea].Column, 10, 21, desplazamientoEnY);
+                            //line = sheet.Shapes.AddLine(sheet.Cells[celdaFinalLinea].Row, offsetY + 12, sheet.Cells[celdaFinalLinea].Column, 10, 21, desplazamientoEnX);
+                            rectangleForm = sheet.Shapes.AddShape(lineaOriginal.MsoDrawingType, sheet.Cells[celdaFinalLinea].Row, offsetY + 12, sheet.Cells[celdaFinalLinea].Column, 10, 21, desplazamientoEnX);
+                            int fila = rectangleForm.UpperLeftRow;
+                            int columna = rectangleForm.UpperLeftColumn + 1;
+                            int ancho = rectangleForm.Width;
+                            int alto = rectangleForm.Height;
+
+                            if (ancho < alto)
+                            {
+                                indiceImagen = sheet.Pictures.Add(fila,columna, imageStreamSenV);
+                                imagen = sheet.Pictures[indiceImagen];
+
+                                imagen.Width = ancho;
+                                imagen.Height = alto;
+                                imagen.Top = offsetY + 12;
+
+                                double anguloDiagonal = Math.Atan((double)alto / ancho) * (180 / Math.PI);
+                                imagen.RotationAngle = 360-(90-anguloDiagonal);
+
+                            }
+                            else
+                            {
+                                indiceImagen = sheet.Pictures.Add(fila, columna, imageStreamSenH);
+                                imagen = sheet.Pictures[indiceImagen];
+
+                                // Ajustar tamaño para que coincida con la forma
+
+
+                                imagen.Width = ancho;
+                                imagen.Height = alto;
+
+                                //desplazamiento en Y 
+                                imagen.Top = offsetY + 12;
+
+
+                                //calcular la diagonal de la forma para la inclinacion de la img
+                                double anguloDiagonal = Math.Atan((double)alto / ancho) * (180 / Math.PI);
+                                imagen.RotationAngle = anguloDiagonal;
+                            }
+                            
+                          
+
+                            // Opcional: enviar forma al fondo para que la imagen quede encima
+                            rectangleForm.ZOrderPosition = 0;
+                            rectangleForm.Fill.FillType = FillType.None;
+                            rectangleForm.IsHidden = true; // Oculta el shape en la hoja
+                            imagen.ZOrderPosition = 1;
+
+
+
                         }
                         else
                         {
-                            line = sheet.Shapes.AddLine(sheet.Cells[celdaFinalLinea].Row, offsetY, sheet.Cells[celdaFinalLinea].Column, 10, 35, desplazamientoEnY);
-                        }
+                            rectangleForm = sheet.Shapes.AddShape(lineaOriginal.MsoDrawingType,sheet.Cells[celdaFinalLinea].Row, offsetY, sheet.Cells[celdaFinalLinea].Column, 10, 35, desplazamientoEnX);
+                            int fila = rectangleForm.UpperLeftRow;
+                            int columna = rectangleForm.UpperLeftColumn + 1;
+                            int ancho = rectangleForm.Width;
+                            int alto = rectangleForm.Height;
 
-                        line.Line.DashStyle = MsoLineDashStyle.Custom;
-                        line.Line.SolidFill.Color = lineColor;
-                        line.Line.Weight = 2;
+
+                            if (ancho < alto)
+                            {
+                                indiceImagen = sheet.Pictures.Add(fila, columna, imageStreamSenV);
+                                imagen = sheet.Pictures[indiceImagen];
+
+                                imagen.Width = ancho;
+                                imagen.Height = alto;
+                                imagen.Top = offsetY;
+
+                                double anguloDiagonal = Math.Atan((double)alto / ancho) * (180 / Math.PI);
+                                imagen.RotationAngle = 360 - (90 - anguloDiagonal);
+
+                            }
+                            else
+                            {
+                                indiceImagen = sheet.Pictures.Add(fila, columna, imageStreamSenH);
+                                imagen = sheet.Pictures[indiceImagen];
+
+                                // Ajustar tamaño para que coincida con la forma
+
+
+                                imagen.Width = ancho;
+                                imagen.Height = alto;
+
+                                //desplazamiento en Y 
+                                imagen.Top = offsetY;
+
+
+                                //calcular la diagonal de la forma para la inclinacion de la img
+                                double anguloDiagonal = Math.Atan((double)alto / ancho) * (180 / Math.PI);
+                                imagen.RotationAngle = anguloDiagonal;
+                            }
+                            // Opcional: enviar forma al fondo para que la imagen quede encima
+                            rectangleForm.ZOrderPosition = 0;
+                            rectangleForm.Fill.FillType = FillType.None;
+                           
+                           
+                            
+                            imagen.ZOrderPosition = 1;
+                        }
                         //asignamos a filaInicio la columna donde termino la linea de pasos
-                        celdaFinalLinea = Aspose.Cells.CellsHelper.CellIndexToName(line.LowerRightRow, line.LowerRightColumn - 1);
+                        celdaFinalLinea = Aspose.Cells.CellsHelper.CellIndexToName(rectangleForm.LowerRightRow, rectangleForm.LowerRightColumn - 1);
                     }
 
                     filaInicio = sheet.Cells[celdaFinalLinea].Row;
@@ -1906,15 +2022,15 @@ namespace SupervisorMobility.API.Controllers.Exportation_Controllers
             }
             else
             {
-                int desplazamientoEnY = 0;
+                int desplazamientoEnX = 0;
                 LineShape line = null;
                 foreach (var operation in operations)
                 {
                     //dibujar linea de tiempo de operacion manual
                     if(operation.ManualOperationTime!=null && double.Parse(operation.ManualOperationTime.Replace(",",".")) > 0)
                     {
-                        desplazamientoEnY = (int)(((50 * double.Parse(operation.ManualOperationTime.Replace(",", "."))) / 0.1));//calculo del desplazamiento en Y
-                        line = sheet.Shapes.AddLine(filaInicio, offsetY, columnaInicio, 10, 0, desplazamientoEnY);//row inicio/offsetY/columna inicio de dibujo/desplaamientoX/alto/desplazamientoY
+                        desplazamientoEnX = (int)(((50 * double.Parse(operation.ManualOperationTime.Replace(",", "."))) / 0.1));//calculo del desplazamiento en Y
+                        line = sheet.Shapes.AddLine(filaInicio, offsetY, columnaInicio, 10, 0, desplazamientoEnX);//row inicio/offsetY/columna inicio de dibujo/desplaamientoX/alto/desplazamientoY
                         line.Line.DashStyle = MsoLineDashStyle.Solid;
                         line.Line.Weight = 2;
                         line.Line.SolidFill.Color = lineColor;
@@ -1936,15 +2052,15 @@ namespace SupervisorMobility.API.Controllers.Exportation_Controllers
                         int totalCells = (area.EndRow - area.StartRow + 1) * (area.EndColumn - area.StartColumn + 1);
 
                         //calculamos la distancia total desde la celda de inicio hasta la celda final de la linea
-                        desplazamientoEnY = (int)(((50 * double.Parse(operation.AutomaticMachineOperationTime.Replace(",", "."))) / 0.1));
+                        desplazamientoEnX = (int)(((50 * double.Parse(operation.AutomaticMachineOperationTime.Replace(",", "."))) / 0.1));
                         int totalDistanceFromStartCell = totalCells * 10;//10 unidades por celda
-                        int totalDistanceWithDotLine = totalDistanceFromStartCell + desplazamientoEnY;
+                        int totalDistanceWithDotLine = totalDistanceFromStartCell + desplazamientoEnX;
                         if (totalDistanceWithDotLine > totalUnitsByRow)
                         {
                             int excedente = totalDistanceWithDotLine - totalUnitsByRow;
 
-                            desplazamientoEnY = totalUnitsByRow - totalDistanceFromStartCell;
-                            line = sheet.Shapes.AddLine(sheet.Cells[celdaFinalLinea].Row, offsetY, sheet.Cells[celdaFinalLinea].Column, 10, 0, desplazamientoEnY);
+                            desplazamientoEnX = totalUnitsByRow - totalDistanceFromStartCell;
+                            line = sheet.Shapes.AddLine(sheet.Cells[celdaFinalLinea].Row, offsetY, sheet.Cells[celdaFinalLinea].Column, 10, 0, desplazamientoEnX);
                             line.Line.DashStyle = MsoLineDashStyle.RoundDot;
                             line.Line.SolidFill.Color = lineColor;
                             line.Line.Weight = 2;
@@ -1954,7 +2070,7 @@ namespace SupervisorMobility.API.Controllers.Exportation_Controllers
                         }
                         else
                         {
-                            line = sheet.Shapes.AddLine(sheet.Cells[celdaFinalLinea].Row, offsetY, sheet.Cells[celdaFinalLinea].Column, 10, 0, desplazamientoEnY);
+                            line = sheet.Shapes.AddLine(sheet.Cells[celdaFinalLinea].Row, offsetY, sheet.Cells[celdaFinalLinea].Column, 10, 0, desplazamientoEnX);
 
                         }
                         line.Line.DashStyle = MsoLineDashStyle.RoundDot;
@@ -1975,8 +2091,8 @@ namespace SupervisorMobility.API.Controllers.Exportation_Controllers
                         line.Line.Weight = 2;
 
                         //linea de tiempo manual de la maquina en automatico
-                        desplazamientoEnY = (int)(((50 * double.Parse(operation.ManualOperationTimeWithMachineInAutomatic.Replace(",", "."))) / 0.1));
-                        line = sheet.Shapes.AddLine(sheet.Cells[celdaFinalLinea].Row, offsetY + 12, sheet.Cells[celdaFinalLinea].Column, 10, 0, desplazamientoEnY);
+                        desplazamientoEnX = (int)(((50 * double.Parse(operation.ManualOperationTimeWithMachineInAutomatic.Replace(",", "."))) / 0.1));
+                        line = sheet.Shapes.AddLine(sheet.Cells[celdaFinalLinea].Row, offsetY + 12, sheet.Cells[celdaFinalLinea].Column, 10, 0, desplazamientoEnX);
                         line.Line.DashStyle = MsoLineDashStyle.Custom;
                         line.Line.SolidFill.Color = lineColor;
                         line.Line.Weight = 2;
@@ -1987,23 +2103,114 @@ namespace SupervisorMobility.API.Controllers.Exportation_Controllers
 
 
                     //dibujamos la linea de los pasos para la siguiente operacion.
-                    if (operation.StepsToNextProcess != null && double.Parse(operation.StepsToNextProcess.Replace(",", ".")) > 0)
+                    if (operation.StepsToNextProcess!=null && double.Parse(operation.StepsToNextProcess.Replace(",", ".")) > 0)
                     {
-                        desplazamientoEnY = (int)(((50 * double.Parse(operation.StepsToNextProcess.Replace(",", "."))) / 0.1));
+                        int indiceImagen = 0;
+                        Aspose.Cells.Drawing.Picture imagen = null;
+                        desplazamientoEnX = (int)(((50 * double.Parse(operation.StepsToNextProcess.Replace(",", "."))) / 0.1));
+                        Aspose.Cells.Drawing.Shape rectangleForm = null;
                         if (isOffSetY)
                         {
-                            line = sheet.Shapes.AddLine(sheet.Cells[celdaFinalLinea].Row, offsetY + 12, sheet.Cells[celdaFinalLinea].Column, 10, 21, desplazamientoEnY);
+                            //line = sheet.Shapes.AddLine(sheet.Cells[celdaFinalLinea].Row, offsetY + 12, sheet.Cells[celdaFinalLinea].Column, 10, 21, desplazamientoEnX);
+                            rectangleForm = sheet.Shapes.AddShape(lineaOriginal.MsoDrawingType, sheet.Cells[celdaFinalLinea].Row, offsetY + 12, sheet.Cells[celdaFinalLinea].Column, 10, 21, desplazamientoEnX);
+                            int fila = rectangleForm.UpperLeftRow;
+                            int columna = rectangleForm.UpperLeftColumn + 1;
+                            int ancho = rectangleForm.Width;
+                            int alto = rectangleForm.Height;
+
+                            if (ancho < alto)
+                            {
+                                indiceImagen = sheet.Pictures.Add(fila, columna, imageStreamSenV);
+                                imagen = sheet.Pictures[indiceImagen];
+
+                                imagen.Width = ancho;
+                                imagen.Height = alto;
+                                imagen.Top = offsetY + 12;
+
+                                double anguloDiagonal = Math.Atan((double)alto / ancho) * (180 / Math.PI);
+                                imagen.RotationAngle = 360 - (90 - anguloDiagonal);
+
+                            }
+                            else
+                            {
+                                indiceImagen = sheet.Pictures.Add(fila, columna, imageStreamSenH);
+                                imagen = sheet.Pictures[indiceImagen];
+
+                                // Ajustar tamaño para que coincida con la forma
+
+
+                                imagen.Width = ancho;
+                                imagen.Height = alto;
+
+                                //desplazamiento en Y 
+                                imagen.Top = offsetY + 12;
+
+
+                                //calcular la diagonal de la forma para la inclinacion de la img
+                                double anguloDiagonal = Math.Atan((double)alto / ancho) * (180 / Math.PI);
+                                imagen.RotationAngle = anguloDiagonal;
+                            }
+
+
+
+                            // Opcional: enviar forma al fondo para que la imagen quede encima
+                            rectangleForm.ZOrderPosition = 0;
+                            rectangleForm.Fill.FillType = FillType.None;
+                            rectangleForm.IsHidden = true; // Oculta el shape en la hoja
+                            imagen.ZOrderPosition = 1;
+
+
+
                         }
                         else
                         {
-                            line = sheet.Shapes.AddLine(sheet.Cells[celdaFinalLinea].Row, offsetY, sheet.Cells[celdaFinalLinea].Column, 10, 35, desplazamientoEnY);
-                        }
+                            rectangleForm = sheet.Shapes.AddShape(lineaOriginal.MsoDrawingType, sheet.Cells[celdaFinalLinea].Row, offsetY, sheet.Cells[celdaFinalLinea].Column, 10, 35, desplazamientoEnX);
+                            int fila = rectangleForm.UpperLeftRow;
+                            int columna = rectangleForm.UpperLeftColumn + 1;
+                            int ancho = rectangleForm.Width;
+                            int alto = rectangleForm.Height;
 
-                        line.Line.DashStyle = MsoLineDashStyle.Custom;
-                        line.Line.SolidFill.Color = lineColor;
-                        line.Line.Weight = 2;
+
+                            if (ancho < alto)
+                            {
+                                indiceImagen = sheet.Pictures.Add(fila, columna, imageStreamSenV);
+                                imagen = sheet.Pictures[indiceImagen];
+
+                                imagen.Width = ancho;
+                                imagen.Height = alto;
+                                imagen.Top = offsetY;
+
+                                double anguloDiagonal = Math.Atan((double)alto / ancho) * (180 / Math.PI);
+                                imagen.RotationAngle = 360 - (90 - anguloDiagonal);
+
+                            }
+                            else
+                            {
+                                indiceImagen = sheet.Pictures.Add(fila, columna, imageStreamSenH);
+                                imagen = sheet.Pictures[indiceImagen];
+
+                                // Ajustar tamaño para que coincida con la forma
+
+
+                                imagen.Width = ancho;
+                                imagen.Height = alto;
+
+                                //desplazamiento en Y 
+                                imagen.Top = offsetY;
+
+
+                                //calcular la diagonal de la forma para la inclinacion de la img
+                                double anguloDiagonal = Math.Atan((double)alto / ancho) * (180 / Math.PI);
+                                imagen.RotationAngle = anguloDiagonal;
+                            }
+                            // Opcional: enviar forma al fondo para que la imagen quede encima
+                            rectangleForm.ZOrderPosition = 0;
+                            rectangleForm.Fill.FillType = FillType.None;
+                            rectangleForm.IsHidden = true; // Oculta el shape en la hoja
+                            imagen.ZOrderPosition = 1;
+                        }
                         //asignamos a filaInicio la columna donde termino la linea de pasos
-                        celdaFinalLinea = Aspose.Cells.CellsHelper.CellIndexToName(line.LowerRightRow, line.LowerRightColumn - 1);
+                        celdaFinalLinea = Aspose.Cells.CellsHelper.CellIndexToName(rectangleForm.LowerRightRow, rectangleForm.LowerRightColumn - 1);
                     }
 
                     filaInicio = sheet.Cells[celdaFinalLinea].Row;
