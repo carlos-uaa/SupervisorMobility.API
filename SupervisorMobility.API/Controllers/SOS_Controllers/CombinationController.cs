@@ -351,8 +351,8 @@ namespace SupervisorMobility.API.Controllers.SOS_Controllers
 
             trustedFileNameForStorage = Path.GetRandomFileName();
 
-            //var path = Path.Combine(_env.ContentRootPath, "uploads\\SOSCombination\\Ilustrations", trustedFileNameForStorage);
-            var path = Path.Combine("C:\\", "Users\\zkril\\source\\repos\\SupervisorMobility.API\\upload\\SOSCombination\\Ilustrations", trustedFileNameForStorage);
+            var path = Path.Combine(_env.ContentRootPath, "uploads\\SOSCombination\\Ilustrations", trustedFileNameForStorage);
+            //var path = Path.Combine("C:\\", "Users\\zkril\\source\\repos\\SupervisorMobility.API\\upload\\SOSCombination\\Ilustrations", trustedFileNameForStorage);
           
             // Asegurarse de que el directorio de destino exista
             var directory = Path.GetDirectoryName(path);
@@ -386,8 +386,8 @@ namespace SupervisorMobility.API.Controllers.SOS_Controllers
 
             if (FileInfo is not null)
             {
-               // var path = Path.Combine(_env.ContentRootPath, "uploads\\SOSCombination\\Ilustrations", FileInfo.StorageFileName);
-                var path = Path.Combine("C:\\", "Users\\zkril\\source\\repos\\SupervisorMobility.API\\upload\\SOSCombination\\Ilustrations", FileInfo.StorageFileName);
+                var path = Path.Combine(_env.ContentRootPath, "uploads\\SOSCombination\\Ilustrations", FileInfo.StorageFileName);
+                //var path = Path.Combine("C:\\", "Users\\zkril\\source\\repos\\SupervisorMobility.API\\upload\\SOSCombination\\Ilustrations", FileInfo.StorageFileName);
                 var memory = new MemoryStream();
                 using (var stream = new FileStream(path, FileMode.Open))
                 {

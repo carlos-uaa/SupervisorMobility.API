@@ -2037,9 +2037,9 @@ namespace SupervisorMobility.API.Controllers.Exportation_Controllers
                 foreach (var operation in operations)
                 {
                     //dibujar linea de tiempo de operacion manual
-                    if(operation.ManualOperationTime!=null && double.Parse(operation.ManualOperationTime.Replace(",",".")) > 0)
+                    if(operation.ManualOperationTime!=null && operation.ManualOperationTime > 0)
                     {
-                        desplazamientoEnX = (int)(((50 * double.Parse(operation.ManualOperationTime.Replace(",", "."))) / 0.1));//calculo del desplazamiento en Y
+                        desplazamientoEnX = (int)(((50 * operation.ManualOperationTime) / 0.1));//calculo del desplazamiento en Y
                         line = sheet.Shapes.AddLine(filaInicio, offsetY, columnaInicio, 10, 0, desplazamientoEnX);//row inicio/offsetY/columna inicio de dibujo/desplaamientoX/alto/desplazamientoY
                         line.Line.DashStyle = MsoLineDashStyle.Solid;
                         line.Line.Weight = 2;
@@ -2053,7 +2053,7 @@ namespace SupervisorMobility.API.Controllers.Exportation_Controllers
                     
 
                     //con eso dibujamos la linea puntuada que representa el tiempo de operacion con maquina en automatico
-                    if (operation.AutomaticMachineOperationTime!=null && double.Parse(operation.AutomaticMachineOperationTime.Replace(",", ".")) > 0)
+                    if (operation.AutomaticMachineOperationTime!=null && operation.AutomaticMachineOperationTime > 0)
                     {
                         var totalUnitsByRow = 850;//puntos maximos por renglon
                         string startCell = $"O{sheet.Cells[celdaFinalLinea].Row + 1}";
@@ -2062,7 +2062,7 @@ namespace SupervisorMobility.API.Controllers.Exportation_Controllers
                         int totalCells = (area.EndRow - area.StartRow + 1) * (area.EndColumn - area.StartColumn + 1);
 
                         //calculamos la distancia total desde la celda de inicio hasta la celda final de la linea
-                        desplazamientoEnX = (int)(((50 * double.Parse(operation.AutomaticMachineOperationTime.Replace(",", "."))) / 0.1));
+                        desplazamientoEnX = (int)(((50 * operation.AutomaticMachineOperationTime) / 0.1));
                         int totalDistanceFromStartCell = totalCells * 10;//10 unidades por celda
                         int totalDistanceWithDotLine = totalDistanceFromStartCell + desplazamientoEnX;
                         if (totalDistanceWithDotLine > totalUnitsByRow)
@@ -2093,7 +2093,7 @@ namespace SupervisorMobility.API.Controllers.Exportation_Controllers
 
                     //dibujamos la linea  en vertical para despues dibujar la linea de tiempo manual de la maquina en automatico
                     //linea de separacion
-                    if (operation.ManualOperationTimeWithMachineInAutomatic!=null && double.Parse(operation.ManualOperationTimeWithMachineInAutomatic.Replace(",", ".")) > 0)
+                    if (operation.ManualOperationTimeWithMachineInAutomatic!=null && operation.ManualOperationTimeWithMachineInAutomatic > 0)
                     {
                         line = sheet.Shapes.AddLine(sheet.Cells[celdaFinalLinea].Row, offsetY, sheet.Cells[celdaFinalLinea].Column, 10, 10, 0);
                         line.Line.DashStyle = MsoLineDashStyle.Solid;
@@ -2101,7 +2101,7 @@ namespace SupervisorMobility.API.Controllers.Exportation_Controllers
                         line.Line.Weight = 2;
 
                         //linea de tiempo manual de la maquina en automatico
-                        desplazamientoEnX = (int)(((50 * double.Parse(operation.ManualOperationTimeWithMachineInAutomatic.Replace(",", "."))) / 0.1));
+                        desplazamientoEnX = (int)(((50 * operation.ManualOperationTimeWithMachineInAutomatic) / 0.1));
                         line = sheet.Shapes.AddLine(sheet.Cells[celdaFinalLinea].Row, offsetY + 12, sheet.Cells[celdaFinalLinea].Column, 10, 0, desplazamientoEnX);
                         line.Line.DashStyle = MsoLineDashStyle.Custom;
                         line.Line.SolidFill.Color = lineColor;
@@ -2113,11 +2113,11 @@ namespace SupervisorMobility.API.Controllers.Exportation_Controllers
 
 
                     //dibujamos la linea de los pasos para la siguiente operacion.
-                    if (operation.StepsToNextProcess!=null && double.Parse(operation.StepsToNextProcess.Replace(",", ".")) > 0)
+                    if (operation.StepsToNextProcess!=null && operation.StepsToNextProcess > 0)
                     {
                         int indiceImagen = 0;
                         Aspose.Cells.Drawing.Picture imagen = null;
-                        desplazamientoEnX = (int)(((50 * double.Parse(operation.StepsToNextProcess.Replace(",", "."))) / 0.1));
+                        desplazamientoEnX = (int)(((50 * operation.StepsToNextProcess) / 0.1));
                         Aspose.Cells.Drawing.Shape rectangleForm = null;
                         if (isOffSetY)
                         {
