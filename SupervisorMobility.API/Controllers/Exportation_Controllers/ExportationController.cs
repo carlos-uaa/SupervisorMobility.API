@@ -1412,10 +1412,10 @@ namespace SupervisorMobility.API.Controllers.Exportation_Controllers
                     FillLineDiagram(workbook, operationSecuence);
 
                 }
-                else
-                {
-                    FillLineDiagram(workbook, null);
-                }
+                //else
+                //{
+                //    FillLineDiagram(workbook, null);
+                //}
 
                 var worksheet = workbook.Worksheets[0];
                 //colocar la img
@@ -1949,7 +1949,7 @@ namespace SupervisorMobility.API.Controllers.Exportation_Controllers
                                 // Ajustar tamaño para que coincida con la forma
 
 
-                                imagen.Width = ancho;
+                                imagen.Width = ancho+5;
                                 imagen.Height = alto;
 
                                 //desplazamiento en Y 
@@ -2002,7 +2002,7 @@ namespace SupervisorMobility.API.Controllers.Exportation_Controllers
                                 // Ajustar tamaño para que coincida con la forma
 
 
-                                imagen.Width = ancho;
+                                imagen.Width = ancho+5;
                                 imagen.Height = alto;
 
                                 //desplazamiento en Y 
@@ -2016,9 +2016,10 @@ namespace SupervisorMobility.API.Controllers.Exportation_Controllers
                             // Opcional: enviar forma al fondo para que la imagen quede encima
                             rectangleForm.ZOrderPosition = 0;
                             rectangleForm.Fill.FillType = FillType.None;
-                           
-                           
-                            
+                            rectangleForm.IsHidden = true; // Oculta el shape en la hoja
+
+
+
                             imagen.ZOrderPosition = 1;
                         }
                         //asignamos a filaInicio la columna donde termino la linea de pasos
@@ -2149,7 +2150,7 @@ namespace SupervisorMobility.API.Controllers.Exportation_Controllers
                                 // Ajustar tamaño para que coincida con la forma
 
 
-                                imagen.Width = ancho;
+                                imagen.Width = ancho + 5;
                                 imagen.Height = alto;
 
                                 //desplazamiento en Y 
@@ -2202,7 +2203,7 @@ namespace SupervisorMobility.API.Controllers.Exportation_Controllers
                                 // Ajustar tamaño para que coincida con la forma
 
 
-                                imagen.Width = ancho;
+                                imagen.Width = ancho + 5;
                                 imagen.Height = alto;
 
                                 //desplazamiento en Y 
