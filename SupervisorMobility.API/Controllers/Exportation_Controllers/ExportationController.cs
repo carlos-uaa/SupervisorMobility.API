@@ -1409,7 +1409,7 @@ namespace SupervisorMobility.API.Controllers.Exportation_Controllers
 
                 if (operationSecuence != null && operationSecuence.Count > 0)
                 {
-                    FillLineDiagram(workbook, operationSecuence);
+                    await FillLineDiagram(workbook, operationSecuence);
 
                 }
                 //else
@@ -1734,7 +1734,7 @@ namespace SupervisorMobility.API.Controllers.Exportation_Controllers
             #endregion
 
         }
-        private async void FillLineDiagram(Aspose.Cells.Workbook workbook, List<SOSCombinationOperationSequence>? operations)
+        private async Task FillLineDiagram(Aspose.Cells.Workbook workbook, List<SOSCombinationOperationSequence>? operations)
         {
             var sheet = workbook.Worksheets[0];
 
