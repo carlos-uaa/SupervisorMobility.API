@@ -1688,7 +1688,7 @@ namespace SupervisorMobility.API.Controllers.Exportation_Controllers
                 foreach (var operation in operationSecuence)
                 {
                     //secuencia de operacion
-                    sheet.Cells[$"B{startRow}"].Value = operation.SequenceId == null ? " " : operation.SectionId;
+                    sheet.Cells[$"B{startRow}"].Value = operation.SequenceId == null ? " " : operation.SequenceId;
                     //nombre de la operacion
                     sheet.Cells[$"C{startRow}"].Value = operation.ProcessName == null ? " " : operation.ProcessName;
                     //partes por ciclo
