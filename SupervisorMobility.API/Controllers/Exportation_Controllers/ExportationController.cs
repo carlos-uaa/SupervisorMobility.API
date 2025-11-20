@@ -1409,6 +1409,11 @@ namespace SupervisorMobility.API.Controllers.Exportation_Controllers
 
                 if (operationSecuence != null && operationSecuence.Count > 0)
                 {
+                    //si el numero de operaciones es mayor que 11 tenemos que enviar solo las primeras 11 ya que el diagrama solo soporta 11 operaciones
+                    if (operationSecuence.Count > 11)
+                    {
+                        operationSecuence = operationSecuence.Take(11).ToList();
+                    }
                     await FillLineDiagram(workbook, operationSecuence);
 
                 }
@@ -1669,9 +1674,9 @@ namespace SupervisorMobility.API.Controllers.Exportation_Controllers
             //tiempo de aprendizaje
             sheet.Cells["Z15"].Value = sosCombination.SOSHub?.TrainingTime == null ? " " : $"{sosCombination.SOSHub.TrainingTime} DIAS ";
             //planta
-            sheet.Cells["AP15"].Value = sosCombination.SOSHub.Plant?.Description;
+            sheet.Cells["AP15"].Value = sosCombination.SOSHub?.Plant?.Description == null ? " " : sosCombination.SOSHub.Plant?.Description;
             //departamento (gerencia)
-            sheet.Cells["BE15"].Value = sosCombination.SOSHub.Department?.Description;
+            sheet.Cells["BE15"].Value = sosCombination.SOSHub?.Department?.Description == null ? " " : sosCombination.SOSHub?.Department?.Description;
 
             
             //volumen de produccion por turno

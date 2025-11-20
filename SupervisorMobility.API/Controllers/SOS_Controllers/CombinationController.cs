@@ -47,19 +47,27 @@ namespace SupervisorMobility.API.Controllers.SOS_Controllers
 
                 sOSCombinationToCreate.SOSHubId = SOSHubCollection_Id;
 
-                sOSCombinationToCreate.SOSCombinationOperationSequence = new List<SOSCombinationOperationSequenceForCreateDto>();
-
-                foreach(Section sec in SOSEntity.Sections)
+                if(sOSCombinationToCreate.SOSCombinationOperationSequence == null || sOSCombinationToCreate.SOSCombinationOperationSequence.Count==0)
                 {
-                    SOSCombinationOperationSequenceForCreateDto CombinationOperationToAdd = new();
-
-                    CombinationOperationToAdd.SectionId = sec.SectionId;
-                    CombinationOperationToAdd.ProcessName = sec.Step;
-                    CombinationOperationToAdd.SequenceId = SOSEntity.Sections.ToList().IndexOf(sec) + 1;
-                    CombinationOperationToAdd.IsActive = true;
-
-                    sOSCombinationToCreate.SOSCombinationOperationSequence?.Add(CombinationOperationToAdd);
+                    sOSCombinationToCreate.SOSCombinationOperationSequence = new List<SOSCombinationOperationSequenceForCreateDto>();
                 }
+
+                    //sOSCombinationToCreate.SOSCombinationOperationSequence = new List<SOSCombinationOperationSequenceForCreateDto>();
+                if (SOSEntity != null && (SOSEntity.Sections!=null && SOSEntity.Sections.Count > 0))
+                {
+                    foreach (Section sec in SOSEntity.Sections)
+                    {
+                        SOSCombinationOperationSequenceForCreateDto CombinationOperationToAdd = new();
+
+                        CombinationOperationToAdd.SectionId = sec.SectionId;
+                        CombinationOperationToAdd.ProcessName = sec.Step;
+                        CombinationOperationToAdd.SequenceId = SOSEntity.Sections.ToList().IndexOf(sec) + 1;
+                        CombinationOperationToAdd.IsActive = true;
+
+                        sOSCombinationToCreate.SOSCombinationOperationSequence?.Add(CombinationOperationToAdd);
+                    }
+                }
+               
 
                 SOSCombination CombinationToCreate = _mapper.Map<SOSCombination>(sOSCombinationToCreate);
 
