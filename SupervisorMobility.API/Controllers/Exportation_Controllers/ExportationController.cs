@@ -1779,7 +1779,7 @@ namespace SupervisorMobility.API.Controllers.Exportation_Controllers
             //color de linea
             var lineColor = System.Drawing.Color.Black;
 
-            if(operations==null || operations.Count < 0)
+            if(operations==null || operations.Count == 0)
             {
                 //info de ejemplo
                 List<OperationsDto> operationsExample = new List<OperationsDto>
