@@ -1398,7 +1398,7 @@ namespace SupervisorMobility.API.Controllers.Exportation_Controllers
                   return NotFound("Excel template not found.");
                }
 
-            var workbook = new Aspose.Cells.Workbook("DataAccess/Templates/Combination Template.xlsx");
+            var workbook = new Aspose.Cells.Workbook(templatePath);
             var sheet = workbook.Worksheets[0];
             //metodo que dibuja el diagrama de lineas
             var sosCombination = await _AnalysisProcessRepository.GetSOSCombination(CombinationId, true, true, true, true, true, true);
