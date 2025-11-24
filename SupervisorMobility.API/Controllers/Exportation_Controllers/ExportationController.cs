@@ -26,6 +26,7 @@ using System.Drawing.Drawing2D;
 using SupervisorMobility.API.TestingsDtos;
 using DocumentFormat.OpenXml.Drawing.Charts;
 using static System.Net.Mime.MediaTypeNames;
+using Microsoft.AspNetCore.Routing.Template;
 
 namespace SupervisorMobility.API.Controllers.Exportation_Controllers
 {
@@ -1391,6 +1392,12 @@ namespace SupervisorMobility.API.Controllers.Exportation_Controllers
             //Aspose.Cells.License license = new Aspose.Cells.License();
             //license.SetLicense("AsposeLicense/Aspose.PDF.NET.lic");
             // Cargar plantilla
+            var templatePath = "DataAccess/Templates/Combination Template.xlsx";
+                if (!System.IO.File.Exists(templatePath))
+               {
+                  return NotFound("Excel template not found.");
+               }
+
             var workbook = new Aspose.Cells.Workbook("DataAccess/Templates/Combination Template.xlsx");
             var sheet = workbook.Worksheets[0];
             //metodo que dibuja el diagrama de lineas
@@ -1456,6 +1463,13 @@ namespace SupervisorMobility.API.Controllers.Exportation_Controllers
             stream.Position = 0;
             //checar que la hoe tenga un proccess name de lo contrario colocarle el default
             var processName = string.IsNullOrEmpty(sosCombination.ProcessName) ? "Combination Report" : sosCombination.ProcessName;
+
+            // Sanitize processName for filename safety
+            foreach (var c in System.IO.Path.GetInvalidFileNameChars())
+            {
+            processName = processName.Replace(c, '_');
+            }
+
             // Retornar como archivo descargable
             return File(stream.ToArray(), "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet", $"{processName}.xlsx");
         }
