@@ -1432,19 +1432,18 @@ namespace SupervisorMobility.API.Controllers.Exportation_Controllers
 
                     if (FileInfo is not null)
                     {
-                        var path = System.IO.Path.Combine(_env.ContentRootPath, "uploads\\SOSCombination\\Ilustrations", FileInfo.StorageFileName);                        
-                        byte[] imageBytes = await System.IO.File.ReadAllBytesAsync(path);
-                        var imageStream = new MemoryStream(imageBytes);
-
-                // Cargar la imagen desde el archivo
-                //var image = Image.FromFile(path);
-
-                // Insertar la imagen en el Excel
-                int pictureIndex = worksheet.Pictures.Add(16, 8, imageStream);
-                Aspose.Cells.Drawing.Picture picture = worksheet.Pictures[pictureIndex];
-                picture.Width = 612;  // en píxeles
-                picture.Height = 380;
-
+                        var path = System.IO.Path.Combine(_env.ContentRootPath, "uploads\\SOSCombination\\Ilustrations", FileInfo.StorageFileName);     
+                        if(System.IO.File.Exists(path))
+                        {
+                            byte[] imageBytes = await System.IO.File.ReadAllBytesAsync(path);
+                            var imageStream = new MemoryStream(imageBytes);
+                            // Insertar la imagen en el Excel
+                            int pictureIndex = worksheet.Pictures.Add(16, 8, imageStream);
+                            Aspose.Cells.Drawing.Picture picture = worksheet.Pictures[pictureIndex];
+                            picture.Width = 612;  // en píxeles
+                            picture.Height = 380;
+                        }
+                       
 
                     }
                 }
@@ -1455,9 +1454,10 @@ namespace SupervisorMobility.API.Controllers.Exportation_Controllers
             using var stream = new MemoryStream();
             workbook.Save(stream, Aspose.Cells.SaveFormat.Xlsx);
             stream.Position = 0;
-
+            //checar que la hoe tenga un proccess name de lo contrario colocarle el default
+            var processName = string.IsNullOrEmpty(sosCombination.ProcessName) ? "Combination Report" : sosCombination.ProcessName;
             // Retornar como archivo descargable
-            return File(stream.ToArray(), "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet", $"{sosCombination.ProcessName}.xlsx");
+            return File(stream.ToArray(), "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet", $"{processName}.xlsx");
         }
 
 
