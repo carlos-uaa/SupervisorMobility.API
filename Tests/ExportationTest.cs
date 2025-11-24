@@ -26,11 +26,6 @@ namespace Tests
 
         }
 
-        [Test,Order(2)]
-        public void Test1()
-        {
-            Assert.Pass();
-        }
 
         [Test,Order(1)]
         public async Task ExportationOfARegularHOESecuence()
@@ -170,6 +165,18 @@ namespace Tests
             Assert.IsTrue(bytes.Length > 0);
         }
 
+        [Test, Order(5)]
+        public async Task ExportationOfARegularHOEDistribution()
+        {
+            int distributionId = 1;
+            var response = await _client.GetAsync($"api/Exportation/Excel/Distribution/{distributionId}");
+            var res = await response.Content.ReadAsStringAsync();
+            Assert.That(response.StatusCode, Is.EqualTo(HttpStatusCode.OK));
+            Assert.That(response.Content.Headers.ContentType?.MediaType, Is.EqualTo("application/vnd.openxmlformats-officedocument.spreadsheetml.sheet"));
+
+            var bytes = await response.Content.ReadAsByteArrayAsync();
+            Assert.IsTrue(bytes.Length > 0);
+        }
 
 
         [OneTimeTearDown]
