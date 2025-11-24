@@ -1,4 +1,6 @@
 ﻿using AutoMapper;
+using DocumentFormat.OpenXml.Bibliography;
+using DocumentFormat.OpenXml.Spreadsheet;
 using Microsoft.AspNetCore.Mvc;
 using Quartz.Core;
 using SupervisorMobility.API.DataAccess.Entities;
@@ -45,19 +47,27 @@ namespace SupervisorMobility.API.Controllers.SOS_Controllers
 
                 sOSCombinationToCreate.SOSHubId = SOSHubCollection_Id;
 
-                sOSCombinationToCreate.SOSCombinationOperationSequence = new List<SOSCombinationOperationSequenceForCreateDto>();
-
-                foreach(Section sec in SOSEntity.Sections)
+                if(sOSCombinationToCreate.SOSCombinationOperationSequence == null || sOSCombinationToCreate.SOSCombinationOperationSequence.Count==0)
                 {
-                    SOSCombinationOperationSequenceForCreateDto CombinationOperationToAdd = new();
-
-                    CombinationOperationToAdd.SectionId = sec.SectionId;
-                    CombinationOperationToAdd.ProcessName = sec.Step;
-                    CombinationOperationToAdd.SequenceId = SOSEntity.Sections.ToList().IndexOf(sec) + 1;
-                    CombinationOperationToAdd.IsActive = true;
-
-                    sOSCombinationToCreate.SOSCombinationOperationSequence?.Add(CombinationOperationToAdd);
+                    sOSCombinationToCreate.SOSCombinationOperationSequence = new List<SOSCombinationOperationSequenceForCreateDto>();
                 }
+
+                    //sOSCombinationToCreate.SOSCombinationOperationSequence = new List<SOSCombinationOperationSequenceForCreateDto>();
+                if (SOSEntity != null && (SOSEntity.Sections!=null && SOSEntity.Sections.Count > 0))
+                {
+                    foreach (Section sec in SOSEntity.Sections)
+                    {
+                        SOSCombinationOperationSequenceForCreateDto CombinationOperationToAdd = new();
+
+                        CombinationOperationToAdd.SectionId = sec.SectionId;
+                        CombinationOperationToAdd.ProcessName = sec.Step;
+                        CombinationOperationToAdd.SequenceId = SOSEntity.Sections.ToList().IndexOf(sec) + 1;
+                        CombinationOperationToAdd.IsActive = true;
+
+                        sOSCombinationToCreate.SOSCombinationOperationSequence?.Add(CombinationOperationToAdd);
+                    }
+                }
+               
 
                 SOSCombination CombinationToCreate = _mapper.Map<SOSCombination>(sOSCombinationToCreate);
 
@@ -350,6 +360,8 @@ namespace SupervisorMobility.API.Controllers.SOS_Controllers
             trustedFileNameForStorage = Path.GetRandomFileName();
 
             var path = Path.Combine(_env.ContentRootPath, "uploads\\SOSCombination\\Ilustrations", trustedFileNameForStorage);
+            //var path = Path.Combine("C:\\", "Users\\zkril\\source\\repos\\SupervisorMobility.API\\upload\\SOSCombination\\Ilustrations", trustedFileNameForStorage);
+          
             // Asegurarse de que el directorio de destino exista
             var directory = Path.GetDirectoryName(path);
             if (!Directory.Exists(directory))
@@ -383,7 +395,7 @@ namespace SupervisorMobility.API.Controllers.SOS_Controllers
             if (FileInfo is not null)
             {
                 var path = Path.Combine(_env.ContentRootPath, "uploads\\SOSCombination\\Ilustrations", FileInfo.StorageFileName);
-
+                //var path = Path.Combine("C:\\", "Users\\zkril\\source\\repos\\SupervisorMobility.API\\upload\\SOSCombination\\Ilustrations", FileInfo.StorageFileName);
                 var memory = new MemoryStream();
                 using (var stream = new FileStream(path, FileMode.Open))
                 {
