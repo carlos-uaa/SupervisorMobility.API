@@ -27,7 +27,7 @@ namespace SupervisorMobility.API.DataAccess.Services.SOS_CombinationRepository
         public async Task<int> CreateSOSCombination(SOSCombination SOS_CombinationToCreate)
         {
             _context.SOSCombinations.Add(SOS_CombinationToCreate);
-            return _context.SaveChanges();
+            return await _context.SaveChangesAsync();
         }
 
         public async Task<SOSCombination> GetSOSCombination(int SOSCombinationId, bool includeImages = false, bool includeNotes = false, bool includeLogbooks = false, bool includeSOS = false, bool includeImagesSOS = false, bool includeProcess = false)
