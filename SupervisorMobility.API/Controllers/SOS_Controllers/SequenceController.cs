@@ -3,6 +3,7 @@ using Microsoft.AspNetCore.Mvc;
 using SupervisorMobility.API.DataAccess.Entities;
 using SupervisorMobility.API.DataAccess.Entities.SOS;
 using SupervisorMobility.API.DataAccess.Services;
+using SupervisorMobility.API.DataAccess.Services.SOS_SequenceRepository;
 using SupervisorMobility.API.Models.CommentaryDtos;
 using SupervisorMobility.API.Models.FileUploadDto;
 using SupervisorMobility.API.Models.SOS.SOSSequenceDtos;
@@ -17,14 +18,16 @@ namespace SupervisorMobility.API.Controllers.SOS_Controllers
     public class SequenceController : ControllerBase
     {
         private readonly ISOS_ProcessRepository _ProcessRepository;
+        private readonly ISOS_SequenceRepository _SequenceRepository;
         private readonly IMapper _mapper;
         private readonly IWebHostEnvironment _env;
-        public SequenceController(IWebHostEnvironment env, IMapper mapper, ISOS_ProcessRepository repository)
+        public SequenceController(IWebHostEnvironment env, IMapper mapper, ISOS_ProcessRepository repository, ISOS_SequenceRepository sequenceRepository)
         {
             _ProcessRepository = repository;
             _mapper = mapper ??
                   throw new ArgumentNullException(nameof(mapper));
             _env = env ?? throw new ArgumentNullException(nameof(env));
+            _SequenceRepository = sequenceRepository;
         }
 
         [HttpPost]
@@ -44,7 +47,7 @@ namespace SupervisorMobility.API.Controllers.SOS_Controllers
 
                 SOSSequence SequenceToCreate = _mapper.Map<SOSSequence>(sOSSequenceToCreate);
 
-                var createdResult = await _ProcessRepository.CreateSOSSequence(SequenceToCreate);
+                var createdResult = await _SequenceRepository.CreateSOSSequence(SequenceToCreate);
                 if (createdResult != null)
                     return Ok(SequenceToCreate);
                 else
@@ -53,17 +56,17 @@ namespace SupervisorMobility.API.Controllers.SOS_Controllers
             else
             {
                 //only add revision
-                SOSSequence _sosSequence = await _ProcessRepository.GetSOSSequence(sOSSequenceToCreate.SOSSequenceId, true, true, true, true, true, true);
+                SOSSequence _sosSequence = await _SequenceRepository.GetSOSSequence(sOSSequenceToCreate.SOSSequenceId, true, true, true, true, true, true);
 
                 SOSSequenceLogbook _logbookToCreate = _mapper.Map<SOSSequenceLogbook>(sOSSequenceToCreate.SequenceLogbooks?.Last());
                 _logbookToCreate.SOSSequenceId = _sosSequence.SOSSequenceId;
 
-                var resultAddSections = await _ProcessRepository.CreateSOSSequenceLogbook(_logbookToCreate);
+                var resultAddSections = await _SequenceRepository.CreateSOSSequenceLogbook(_logbookToCreate);
 
                 if (resultAddSections > 0)
                 {
                     Debug.WriteLine("SOSSequenceLogbook añadidas con exito");
-                    await _ProcessRepository.AddSOSSequenceLogbookToSOSSequence(_sosSequence, _logbookToCreate);
+                    await _SequenceRepository.AddSOSSequenceLogbookToSOSSequence(_sosSequence, _logbookToCreate);
                 }
                 else
                 {
@@ -82,7 +85,7 @@ namespace SupervisorMobility.API.Controllers.SOS_Controllers
         public async Task<ActionResult<SOSSequenceDto>> GetSOSSequence(int id, bool includeImages = false, bool includeNotes = false, bool includeLogbooks = false, bool includeSpecialCases = false, bool includeSOS = false, bool includeImagesSOS = false)
         {
 
-            var SOSSequence = await _ProcessRepository.GetSOSSequence(id, includeImages, includeNotes, includeLogbooks, includeSpecialCases, includeSOS, includeImagesSOS);
+            var SOSSequence = await _SequenceRepository.GetSOSSequence(id, includeImages, includeNotes, includeLogbooks, includeSpecialCases, includeSOS, includeImagesSOS);
             if (SOSSequence == null)
             {
                 return NotFound("SOSSequence not found!");
@@ -97,7 +100,7 @@ namespace SupervisorMobility.API.Controllers.SOS_Controllers
         public async Task<ActionResult<IEnumerable<SOSSequenceDto>>> GetAllSOSSequence(bool includeImages = false, bool includeNotes = false, bool includeLogbooks = false, bool includeSpecialCases = false, bool includeSOS = false)
         {
 
-            var CheckpointEntities = await _ProcessRepository.GetAllSOSSequence(includeImages, includeNotes, includeLogbooks, includeSpecialCases, includeSOS);
+            var CheckpointEntities = await _SequenceRepository.GetAllSOSSequence(includeImages, includeNotes, includeLogbooks, includeSpecialCases, includeSOS);
             if (CheckpointEntities == null)
             {
                 return NotFound("Get All Sos Analisis not found!");
@@ -110,7 +113,7 @@ namespace SupervisorMobility.API.Controllers.SOS_Controllers
         public async Task<ActionResult<IEnumerable<SOSSequenceDto>>> GetByDistributionSOSSequence(int Distribution_Id, bool includeImages = false, bool includeNotes = false, bool includeLogbooks = false, bool includeSpecialCases = false, bool includeSOS = false)
         {
 
-            var CheckpointEntities = await _ProcessRepository.GetAllSOSSequenceByDistribution(Distribution_Id, includeImages, includeNotes, includeLogbooks, includeSpecialCases, includeSOS);
+            var CheckpointEntities = await _SequenceRepository.GetAllSOSSequenceByDistribution(Distribution_Id, includeImages, includeNotes, includeLogbooks, includeSpecialCases, includeSOS);
             if (CheckpointEntities == null)
             {
                 return NotFound("Get All Sos Analisis not found!");
@@ -178,7 +181,7 @@ namespace SupervisorMobility.API.Controllers.SOS_Controllers
                     SequenceLogbook.IsActive = true;
                 }
 
-                var resultAddSOSSequenceLogbook = await _ProcessRepository.AddRangeSOSSequenceLogbook(newSOSSequenceLogbook);
+                var resultAddSOSSequenceLogbook = await _SequenceRepository.AddRangeSOSSequenceLogbook(newSOSSequenceLogbook);
 
                 if (resultAddSOSSequenceLogbook != null)
                 {
@@ -220,7 +223,7 @@ namespace SupervisorMobility.API.Controllers.SOS_Controllers
             }
 
 
-            SOSSequence _sosSequence = await _ProcessRepository.GetSOSSequence(sosSequence_Id, true, true, true, true);
+            SOSSequence _sosSequence = await _SequenceRepository.GetSOSSequence(sosSequence_Id, true, true, true, true);
 
             ////Aqui va el historico de ser necesario en  un futuro 
 
@@ -248,8 +251,8 @@ namespace SupervisorMobility.API.Controllers.SOS_Controllers
 
             foreach (var logbook in sosUpdateEntity.SequenceLogbooks)
             {
-                var SequenceUpdate = await _ProcessRepository.UpdateSequenceLogbook(logbook);
-                SOSSequenceLogbook SequenceBkaux = await _ProcessRepository.GetSOSSequenceLogbookById(logbook.SOSSequenceLogbookId);
+                var SequenceUpdate = await _SequenceRepository.UpdateSequenceLogbook(logbook);
+                SOSSequenceLogbook SequenceBkaux = await _SequenceRepository.GetSOSSequenceLogbookById(logbook.SOSSequenceLogbookId);
                 Bkup_SequenceLogbook.Add(SequenceBkaux);
             }
 
@@ -265,19 +268,19 @@ namespace SupervisorMobility.API.Controllers.SOS_Controllers
             sosUpdateEntity.Times = null;
             sosUpdateEntity.SequenceLogbooks = null;
 
-            await _ProcessRepository.SOSDataRemoveAllNotesFromSOSSequence(_sosSequence);
-            await _ProcessRepository.SOSDataRemoveAllSOSSequenceLogbookFromSOSSequence(_sosSequence);
+            await _SequenceRepository.SOSDataRemoveAllNotesFromSOSSequence(_sosSequence);
+            await _SequenceRepository.SOSDataRemoveAllSOSSequenceLogbookFromSOSSequence(_sosSequence);
             await _ProcessRepository.RemoveAllTimesFromSOSSequence(_sosSequence);
 
 
-            var result = await _ProcessRepository.UpdateSOSSequence(sosUpdateEntity, _sosSequence);
+            var result = await _SequenceRepository.UpdateSOSSequence(sosUpdateEntity, _sosSequence);
 
             //Notes - Volver a añádir las notas
             if (Bkup_Notes.Any())
             {
                 foreach (Commentary Comment in Bkup_Notes)
                 {
-                    await _ProcessRepository.AddNoteToSOSSequence(_sosSequence, Comment);
+                    await _SequenceRepository.AddNoteToSOSSequence(_sosSequence, Comment);
                 }
             }
 
@@ -286,7 +289,7 @@ namespace SupervisorMobility.API.Controllers.SOS_Controllers
             {
                 foreach (SOSSequenceLogbook logbook in Bkup_SequenceLogbook)
                 {
-                    await _ProcessRepository.AddSOSSequenceLogbookToSOSSequence(_sosSequence, logbook);
+                    await _SequenceRepository.AddSOSSequenceLogbookToSOSSequence(_sosSequence, logbook);
                 }
             }
 
@@ -312,7 +315,7 @@ namespace SupervisorMobility.API.Controllers.SOS_Controllers
         [HttpDelete("{SOSSequenceId}")]
         public async Task<ActionResult<int>> RemoveSOSHub(int SOSSequenceId)
         {
-            var result = await _ProcessRepository.RemoveSOSSequence(SOSSequenceId);
+            var result = await _SequenceRepository.RemoveSOSSequence(SOSSequenceId);
 
             if (result > 0)
                 return Ok();
@@ -353,7 +356,7 @@ namespace SupervisorMobility.API.Controllers.SOS_Controllers
 
             var fileToReturn = await _ProcessRepository.CreateFileAsync(uploadResult);
 
-            await _ProcessRepository.AddIlustrationToSOSSequence(Sequence_id, fileToReturn);
+            await _SequenceRepository.AddIlustrationToSOSSequence(Sequence_id, fileToReturn);
             await _ProcessRepository.SaveChangesAsync();
 
             return Ok(fileToReturn);
@@ -386,7 +389,7 @@ namespace SupervisorMobility.API.Controllers.SOS_Controllers
         [HttpDelete("Ilustrations/{SOS_SOSSequence_id}/remove/{ImageFile_id}")]
         public async Task<ActionResult<int>> RemoveImage(int SOS_SOSSequence_id, int ImageFile_id)
         {
-            var result = await _ProcessRepository.RemoveIlustrationFromSOSSequence(SOS_SOSSequence_id, ImageFile_id);
+            var result = await _SequenceRepository.RemoveIlustrationFromSOSSequence(SOS_SOSSequence_id, ImageFile_id);
 
             if (result > 0)
                 return Ok();

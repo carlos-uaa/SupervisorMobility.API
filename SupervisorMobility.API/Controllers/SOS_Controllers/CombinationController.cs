@@ -6,6 +6,7 @@ using Quartz.Core;
 using SupervisorMobility.API.DataAccess.Entities;
 using SupervisorMobility.API.DataAccess.Entities.SOS;
 using SupervisorMobility.API.DataAccess.Services;
+using SupervisorMobility.API.DataAccess.Services.SOS_Combination;
 using SupervisorMobility.API.Models.CommentaryDtos;
 using SupervisorMobility.API.Models.FileUploadDto;
 using SupervisorMobility.API.Models.SOS.SOSAnalysisDtos;
@@ -27,12 +28,14 @@ namespace SupervisorMobility.API.Controllers.SOS_Controllers
         private readonly IMapper _mapper;
         private readonly IWebHostEnvironment _env;
         private readonly ISOS_ProcessRepository _ProcessRepository;
-        public CombinationController(IWebHostEnvironment env, IMapper mapper, ISOS_ProcessRepository repository)
+        private readonly ISOS_CombinationRepository _CombinationRepository;
+        public CombinationController(IWebHostEnvironment env, IMapper mapper, ISOS_ProcessRepository repository, ISOS_CombinationRepository combinationRepository)
         {
             _ProcessRepository = repository;
             _mapper = mapper ??
                   throw new ArgumentNullException(nameof(mapper));
             _env = env ?? throw new ArgumentNullException(nameof(env));
+            _CombinationRepository = combinationRepository;
         }
 
         [HttpPost]
@@ -76,7 +79,7 @@ namespace SupervisorMobility.API.Controllers.SOS_Controllers
                     CombinationToCreate.ReviewerHSId = null;
                 }
 
-                var createdResult = await _ProcessRepository.CreateSOSCombination(CombinationToCreate);
+                var createdResult = await _CombinationRepository.CreateSOSCombination(CombinationToCreate);
                 if (createdResult != null)
                     return Ok(CombinationToCreate);
                 else
@@ -85,7 +88,7 @@ namespace SupervisorMobility.API.Controllers.SOS_Controllers
             else
             {
                 //only add revision
-                SOSCombination _sosCombination = await _ProcessRepository.GetSOSCombination(sOSCombinationToCreate.SOSCombinationId, true, true, true, true );
+                SOSCombination _sosCombination = await _CombinationRepository.GetSOSCombination(sOSCombinationToCreate.SOSCombinationId, true, true, true, true );
 
                 if (sOSCombinationToCreate.ReviewerHSId <= 0)
                 {
@@ -98,12 +101,12 @@ namespace SupervisorMobility.API.Controllers.SOS_Controllers
                 SOSCombinationLogbook _logbookToCreate = _mapper.Map<SOSCombinationLogbook>(sOSCombinationToCreate.CombinationLogbooks?.Last());
                 _logbookToCreate.SOSCombinationId = _sosCombination.SOSCombinationId;
 
-                var resultAddSections = await _ProcessRepository.CreateSOSCombinationLogbook(_logbookToCreate);
+                var resultAddSections = await _CombinationRepository.CreateSOSCombinationLogbook(_logbookToCreate);
 
                 if (resultAddSections > 0)
                 {
                     Debug.WriteLine("SOSCombinationLogbook añadidas con exito");
-                    await _ProcessRepository.AddSOSCombinationLogbookToSOSCombination(_sosCombination, _logbookToCreate);
+                    await _CombinationRepository.AddSOSCombinationLogbookToSOSCombination(_sosCombination, _logbookToCreate);
                 }
                 else
                 {
@@ -122,7 +125,7 @@ namespace SupervisorMobility.API.Controllers.SOS_Controllers
         public async Task<ActionResult<SOSCombinationDto>> GetSOSCombination(int id, bool includeImages = false, bool includeNotes = false, bool includeLogbooks = false, bool includeSpecialCases = false, bool includeSOS = false, bool includeImagesSOS = false, bool includeProcess = false)
         {
 
-            var SOSCombination = await _ProcessRepository.GetSOSCombination(id, includeImages, includeNotes, includeLogbooks,  includeSOS, includeImagesSOS, includeProcess);
+            var SOSCombination = await _CombinationRepository.GetSOSCombination(id, includeImages, includeNotes, includeLogbooks,  includeSOS, includeImagesSOS, includeProcess);
             if (SOSCombination == null)
             {
                 return NotFound("SOSCombination not found!");
@@ -135,7 +138,7 @@ namespace SupervisorMobility.API.Controllers.SOS_Controllers
         public async Task<ActionResult<IEnumerable<SOSCombinationDto>>> GetAllSOSCombination(bool includeImages = false, bool includeNotes = false, bool includeLogbooks = false, bool includeSpecialCases = false, bool includeSOS = false)
         {
 
-            var CheckpointEntities = await _ProcessRepository.GetAllSOSCombination(includeImages, includeNotes, includeLogbooks, includeSOS);
+            var CheckpointEntities = await _CombinationRepository.GetAllSOSCombination(includeImages, includeNotes, includeLogbooks, includeSOS);
             if (CheckpointEntities == null)
             {
                 return NotFound("Get All Sos Analisis not found!");
@@ -173,7 +176,7 @@ namespace SupervisorMobility.API.Controllers.SOS_Controllers
                     OperationSequence.IsActive = true;
                 }
 
-                var resultAddOperationSequences = await _ProcessRepository.AddRangeSOSCombinationOperationSequences(newSOSOperationSequences);
+                var resultAddOperationSequences = await _CombinationRepository.AddRangeSOSCombinationOperationSequences(newSOSOperationSequences);
 
                 if (resultAddOperationSequences != null)
                 {
@@ -201,7 +204,7 @@ namespace SupervisorMobility.API.Controllers.SOS_Controllers
                     CombinationLogbook.IsActive = true;
                 }
 
-                var resultAddSOSCombinationLogbook = await _ProcessRepository.AddRangeSOSCombinationLogbook(newSOSCombinationLogbook);
+                var resultAddSOSCombinationLogbook = await _CombinationRepository.AddRangeSOSCombinationLogbook(newSOSCombinationLogbook);
 
                 if (resultAddSOSCombinationLogbook != null)
                 {
@@ -243,7 +246,7 @@ namespace SupervisorMobility.API.Controllers.SOS_Controllers
             }
 
 
-            SOSCombination _sosCombination = await _ProcessRepository.GetSOSCombination(sosCombination_Id, true, true, true);
+            SOSCombination _sosCombination = await _CombinationRepository.GetSOSCombination(sosCombination_Id, true, true, true);
 
             ////Aqui va el historico de ser necesario en  un futuro 
 
@@ -263,8 +266,8 @@ namespace SupervisorMobility.API.Controllers.SOS_Controllers
       
             foreach (var logbook in sosUpdateEntity.CombinationLogbooks)
             {
-                var CombinationUpdate = await _ProcessRepository.UpdateCombinationLogbook(logbook);
-                SOSCombinationLogbook CombinationBkaux = await _ProcessRepository.GetSOSCombinationLogbookById(logbook.SOSCombinationLogbookId);
+                var CombinationUpdate = await _CombinationRepository.UpdateCombinationLogbook(logbook);
+                SOSCombinationLogbook CombinationBkaux = await _CombinationRepository.GetSOSCombinationLogbookById(logbook.SOSCombinationLogbookId);
                 Bkup_CombinationLogbook.Add(CombinationBkaux);
             }
 
@@ -277,8 +280,8 @@ namespace SupervisorMobility.API.Controllers.SOS_Controllers
 
             foreach (var operationSequence in sosUpdateEntity.SOSCombinationOperationSequence)
             {
-                var operationSequenceUpdate = await _ProcessRepository.UpdateSOSCombinationOperationSequences(operationSequence);
-                SOSCombinationOperationSequence operationSequenceBkaux = await _ProcessRepository.GetSOSCombinationOperationSequencesById(operationSequence.SOSCombinationOperationSequenceId);
+                var operationSequenceUpdate = await _CombinationRepository.UpdateSOSCombinationOperationSequences(operationSequence);
+                SOSCombinationOperationSequence operationSequenceBkaux = await _CombinationRepository.GetSOSCombinationOperationSequencesById(operationSequence.SOSCombinationOperationSequenceId);
                 Bkup_OperationSequence.Add(operationSequenceBkaux);
             }
 
@@ -290,10 +293,10 @@ namespace SupervisorMobility.API.Controllers.SOS_Controllers
             sosUpdateEntity.SOSCombinationOperationSequence = null;
 
             await _ProcessRepository.RemoveAllTurnsFromSOSCombination(_sosCombination);
-            await _ProcessRepository.RemoveAllOperationsSequenceFromSOSCombination(_sosCombination);
-            await _ProcessRepository.SOSDataRemoveAllSOSCombinationLogbookFromSOSCombination(_sosCombination);
+            await _CombinationRepository.RemoveAllOperationsSequenceFromSOSCombination(_sosCombination);
+            await _CombinationRepository.SOSDataRemoveAllSOSCombinationLogbookFromSOSCombination(_sosCombination);
 
-            var result = await _ProcessRepository.UpdateSOSCombination(sosUpdateEntity, _sosCombination);
+            var result = await _CombinationRepository.UpdateSOSCombination(sosUpdateEntity, _sosCombination);
 
             // Volver a añádir bkup
 
@@ -302,7 +305,7 @@ namespace SupervisorMobility.API.Controllers.SOS_Controllers
             {
                 foreach (SOSCombinationLogbook logbook in Bkup_CombinationLogbook)
                 {
-                    await _ProcessRepository.AddSOSCombinationLogbookToSOSCombination(_sosCombination, logbook);
+                    await _CombinationRepository.AddSOSCombinationLogbookToSOSCombination(_sosCombination, logbook);
                 }
             }
 
@@ -320,7 +323,7 @@ namespace SupervisorMobility.API.Controllers.SOS_Controllers
             {
                 foreach (SOSCombinationOperationSequence operationSequence in Bkup_OperationSequence)
                 {
-                    await _ProcessRepository.AddOperationSequenceToSOSCombination(_sosCombination, operationSequence);
+                    await _CombinationRepository.AddOperationSequenceToSOSCombination(_sosCombination, operationSequence);
                 }
             }
 
@@ -338,7 +341,7 @@ namespace SupervisorMobility.API.Controllers.SOS_Controllers
         [HttpDelete("{SOSCombinationId}")]
         public async Task<ActionResult<int>> RemoveSOSHub(int SOSCombinationId)
         {
-            var result = await _ProcessRepository.RemoveSOSCombination(SOSCombinationId);
+            var result = await _CombinationRepository.RemoveSOSCombination(SOSCombinationId);
 
             if (result > 0)
                 return Ok();
@@ -381,7 +384,7 @@ namespace SupervisorMobility.API.Controllers.SOS_Controllers
 
             var fileToReturn = await _ProcessRepository.CreateFileAsync(uploadResult);
 
-            await _ProcessRepository.AddIlustrationToSOSCombination(Combination_id, fileToReturn);
+            await _CombinationRepository.AddIlustrationToSOSCombination(Combination_id, fileToReturn);
             await _ProcessRepository.SaveChangesAsync();
 
             return Ok(fileToReturn);
@@ -414,7 +417,7 @@ namespace SupervisorMobility.API.Controllers.SOS_Controllers
         [HttpDelete("Ilustrations/{SOS_SOSCombination_id}/remove/{ImageFile_id}")]
         public async Task<ActionResult<int>> RemoveImage(int SOS_SOSCombination_id, int ImageFile_id)
         {
-            var result = await _ProcessRepository.RemoveIlustrationFromSOSCombination(SOS_SOSCombination_id, ImageFile_id);
+            var result = await _CombinationRepository.RemoveIlustrationFromSOSCombination(SOS_SOSCombination_id, ImageFile_id);
 
             if (result > 0)
                 return Ok();

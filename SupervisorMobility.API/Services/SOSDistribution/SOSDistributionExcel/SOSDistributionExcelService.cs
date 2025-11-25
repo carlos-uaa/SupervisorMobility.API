@@ -4,22 +4,25 @@ using SupervisorMobility.API.DataAccess.Entities.SOS;
 using SupervisorMobility.API.DataAccess.Services;
 using SupervisorMobility.API.Interfaces.SOSDistribution.SOSDistributionExcel;
 using OfficeOpenXml.Drawing;
+using SupervisorMobility.API.DataAccess.Services.SOS_DistributionRepository;
 
 namespace SupervisorMobility.API.Services.SOSDistribution.SOSDistributionExcel
 {
     public class SOSDistributionExcelService : ISOSDistributionExcelService
     {
         private readonly ISOS_ProcessRepository _AnalysisProcessRepository;
-        public SOSDistributionExcelService(ISOS_ProcessRepository analysisProcessRepository)
+        private readonly ISOS_DistributionRepository _DistributionRepository;
+        public SOSDistributionExcelService(ISOS_ProcessRepository analysisProcessRepository, ISOS_DistributionRepository distributionRepository)
         {
             _AnalysisProcessRepository = analysisProcessRepository;
+            _DistributionRepository = distributionRepository;
         }
 
         public async Task<string?> GetFileName(int sosDistributionId)
         {
             try
             {
-                var response = await _AnalysisProcessRepository.GetDistributionName(sosDistributionId);
+                var response = await _DistributionRepository.GetDistributionName(sosDistributionId);
                 return response;
             }
             catch (Exception ex)
@@ -36,7 +39,7 @@ namespace SupervisorMobility.API.Services.SOSDistribution.SOSDistributionExcel
             try
             {
                 // Get the SOS Distribution
-                var SosDistribution = await _AnalysisProcessRepository.GetSOSDistribution(sosDistributionId, true, true, true, true, includeTurns: true, includeTimes: true, includeCollections: true);
+                var SosDistribution = await _DistributionRepository.GetSOSDistribution(sosDistributionId, true, true, true, true, includeTurns: true, includeTimes: true, includeCollections: true);
                 if (SosDistribution == null)
                 {
                     return null;
