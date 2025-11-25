@@ -25,7 +25,11 @@ using Aspose.Cells.Drawing;
 using System.Drawing.Drawing2D;
 using SupervisorMobility.API.TestingsDtos;
 using DocumentFormat.OpenXml.Drawing.Charts;
+using SupervisorMobility.API.DataAccess.Services.SOS_AnalysisRepository;
 using static System.Net.Mime.MediaTypeNames;
+using SupervisorMobility.API.DataAccess.Services.SOS_SequenceRepository;
+using SupervisorMobility.API.DataAccess.Services.SOS_Combination;
+using SupervisorMobility.API.DataAccess.Services.SOS_FlowRepository;
 using Microsoft.AspNetCore.Routing.Template;
 
 namespace SupervisorMobility.API.Controllers.Exportation_Controllers
@@ -35,13 +39,17 @@ namespace SupervisorMobility.API.Controllers.Exportation_Controllers
     public class ExportationController : ControllerBase
     {
         private readonly ISOS_ProcessRepository _AnalysisProcessRepository;
+        private readonly ISOS_AnalysisRepository _AnalysisRepository;
+        private readonly ISOS_SequenceRepository _SequenceRepository;
+        private readonly ISOS_CombinationRepository _CombinationRepository;
+        private readonly ISOS_FlowRepository _FlowRepository;
         private readonly IWebHostEnvironment _env;
         private readonly ISOSDistributionExcelService _sosDistributionExcelService;
         private readonly ExportationStylesService stylesService;
         private readonly ExportationImgService imgService;
         private readonly ExportationSheetService sheetService;
 
-        public ExportationController(ISOS_ProcessRepository repository, IWebHostEnvironment env, ISOSDistributionExcelService sosDistributionExcelService)
+        public ExportationController(ISOS_ProcessRepository repository, IWebHostEnvironment env, ISOSDistributionExcelService sosDistributionExcelService, ISOS_AnalysisRepository analysisRepository, ISOS_SequenceRepository sequenceRepository, ISOS_CombinationRepository combinationRepository, ISOS_FlowRepository flowRepository)
         {
             _AnalysisProcessRepository = repository;
             _env = env ?? throw new ArgumentNullException(nameof(env));
@@ -49,6 +57,10 @@ namespace SupervisorMobility.API.Controllers.Exportation_Controllers
             imgService = new ExportationImgService();
             sheetService = new ExportationSheetService();
             _sosDistributionExcelService = sosDistributionExcelService;
+            _AnalysisRepository = analysisRepository;
+            _SequenceRepository = sequenceRepository;
+            _CombinationRepository = combinationRepository;
+            _FlowRepository = flowRepository;
         }
 
         /*
@@ -57,7 +69,7 @@ namespace SupervisorMobility.API.Controllers.Exportation_Controllers
         [HttpGet("Excel/Analyses/{AnalysisId}")]
         public async Task<IActionResult> AnalysesExcelExport(int AnalysisId)
         {
-            var SosAnalysis = await _AnalysisProcessRepository.GetSOSAnalysis(AnalysisId, true, true, true, true, true, true);
+            var SosAnalysis = await _AnalysisRepository.GetSOSAnalysis(AnalysisId, true, true, true, true, true, true);
 
             string templateName = "DataAccess/Templates/Analysis Template.xlsx";
             MemoryStream ms = new MemoryStream();
@@ -731,7 +743,7 @@ namespace SupervisorMobility.API.Controllers.Exportation_Controllers
         [HttpGet("Excel/Sequence/{SequenceId}")]
         public async Task<IActionResult> SequenceExcelExport(int SequenceId)
         {
-            var SosSequence = await _AnalysisProcessRepository.GetSOSSequence(SequenceId, true, true, true, true, true, true);
+            var SosSequence = await _SequenceRepository.GetSOSSequence(SequenceId, true, true, true, true, true, true);
 
             string templateName = "DataAccess/Templates/Sequence Template.xlsx";
             MemoryStream ms = new MemoryStream();
@@ -1401,7 +1413,7 @@ namespace SupervisorMobility.API.Controllers.Exportation_Controllers
             var workbook = new Aspose.Cells.Workbook(templatePath);
             var sheet = workbook.Worksheets[0];
             //metodo que dibuja el diagrama de lineas
-            var sosCombination = await _AnalysisProcessRepository.GetSOSCombination(CombinationId, true, true, true, true, true, true);
+            var sosCombination = await _CombinationRepository.GetSOSCombination(CombinationId, true, true, true, true, true, true);
             if(sosCombination == null)
             {
                 return NotFound("Combination not found.");
@@ -1480,7 +1492,7 @@ namespace SupervisorMobility.API.Controllers.Exportation_Controllers
         {
             try
             {
-                var SosFlow = await _AnalysisProcessRepository.GetSOSFlow(FlowId, includePeople: true, includeLogbooks: true, includeSOS: true);
+                var SosFlow = await _FlowRepository.GetSOSFlow(FlowId, includePeople: true, includeLogbooks: true, includeSOS: true);
 
                 string templateName = "DataAccess/Templates/Flow Template.xlsx";
                 MemoryStream ms = new MemoryStream();
