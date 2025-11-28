@@ -148,17 +148,21 @@ namespace SupervisorMobility.API.DataAccess.Services.SOS_DistributionRepository
                     // NOTE: Load times from first analysis if exists
                     if (sosHub?.SOSAnalysis?.Count > 0)
                     {
-                        var analysis = sosHub.SOSAnalysis!.First(); // TODO: Replace First() with FirstOrDefault() for safety
-                        var analysisComplete = await _context.SOSAnalyses.Include(t => t.Times).FirstOrDefaultAsync(a => a.SOSAnalysisId == analysis.SOSAnalysisId);
-
-                        if (analysisComplete?.Times != null) allTimes = analysisComplete.Times.ToList();
+                        var analysis = sosHub.SOSAnalysis!.FirstOrDefault();
+                        if (analysis != null)
+                        {
+                            var analysisComplete = await _context.SOSAnalyses.Include(t => t.Times).FirstOrDefaultAsync(a => a.SOSAnalysisId == analysis.SOSAnalysisId);
+                            if (analysisComplete?.Times != null) allTimes = analysisComplete.Times.ToList();
+                        }
                     }
                     else if (sosHub?.SOSSequence?.Count > 0)
                     {
-                        var sequence = sosHub.SOSSequence!.First(); // TODO: Replace First() with FirstOrDefault() for safety
-                        var sequenceComplete = await _context.SOSSequences.Include(t => t.Times).FirstOrDefaultAsync(s => s.SOSSequenceId == sequence.SOSSequenceId);
-
-                        if (sequenceComplete?.Times != null) allTimes = sequenceComplete.Times.ToList();
+                        var sequence = sosHub.SOSSequence!.FirstOrDefault();
+                        if (sequence != null)
+                        {
+                            var sequenceComplete = await _context.SOSSequences.Include(t => t.Times).FirstOrDefaultAsync(s => s.SOSSequenceId == sequence.SOSSequenceId);
+                            if (sequenceComplete?.Times != null) allTimes = sequenceComplete.Times.ToList();
+                        }
                     }
 
                     // =============== TIMES FOR SECTION =============== \\
@@ -217,6 +221,11 @@ namespace SupervisorMobility.API.DataAccess.Services.SOS_DistributionRepository
                     SOS_DistributionToCreate.SOSDistributionOperationSequence.Add(opSeq);
 
                     var timesOpSeq = opSeq.Times.Split("§").Take(5).ToList();
+                    // Pad with "0" if less than 5 elements
+                     while (timesOpSeq.Count < 5)
+                     {
+                        timesOpSeq.Add("0");
+                     }
                     for (int i = 0; i < allTimesCycle.Length; i++)
                     {
                         allTimesCycle[i] += double.TryParse(timesOpSeq[i], out var val) ? val : 0;

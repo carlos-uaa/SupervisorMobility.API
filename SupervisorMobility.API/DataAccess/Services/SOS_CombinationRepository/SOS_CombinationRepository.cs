@@ -26,6 +26,8 @@ namespace SupervisorMobility.API.DataAccess.Services.SOS_CombinationRepository
         #region SOSCombination
         public async Task<int> CreateSOSCombination(SOSCombination SOS_CombinationToCreate)
         {
+            if (SOS_CombinationToCreate == null)
+                throw new ArgumentNullException(nameof(SOS_CombinationToCreate));
             _context.SOSCombinations.Add(SOS_CombinationToCreate);
             return await _context.SaveChangesAsync();
         }
