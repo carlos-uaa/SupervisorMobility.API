@@ -7,6 +7,7 @@ using Microsoft.AspNetCore.Mvc;
 using SpreadsheetLight;
 using SupervisorMobility.API.Business;
 using SupervisorMobility.API.DataAccess.Entities;
+using SupervisorMobility.API.DataAccess.SPModels;
 using SupervisorMobility.API.Entities;
 using SupervisorMobility.API.Models.FileUploadDto;
 using SupervisorMobility.API.Models.HCIDtos;
@@ -2859,6 +2860,20 @@ namespace SupervisorMobility.API.Controllers
             return res;
 
         }//end download file function 
+
+        [HttpGet("GetPersonalInfoByPersonalNumber")]
+        [ProducesResponseType(StatusCodes.Status200OK)]
+        [ProducesResponseType(StatusCodes.Status404NotFound)]
+        [ProducesResponseType(StatusCodes.Status500InternalServerError)]
+        public async Task<ActionResult<ServiceResponse<WFMInfoSP>>> GetPersonalInfoByPersonalNumber(int personalNumber)
+        {
+           var response = await _supervisorMobilityRepository.GetPersonalInfoForUserByPersonalNumber(personalNumber);
+            if (response.Data == null)
+            {
+                return NotFound(response);
+            }
+            return Ok(response);
+        }
 
     }
 }

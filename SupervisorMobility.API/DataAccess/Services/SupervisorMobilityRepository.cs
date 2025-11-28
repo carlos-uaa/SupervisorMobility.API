@@ -16,6 +16,7 @@ using SupervisorMobility.API.DataAccess.Entities.Paths;
 using SupervisorMobility.API.DataAccess.Entities.SOS;
 using SupervisorMobility.API.DataAccess.Entities.SOS_Review;
 using SupervisorMobility.API.DataAccess.Services.OrderingServices;
+using SupervisorMobility.API.DataAccess.SPModels;
 using SupervisorMobility.API.Entities;
 using SupervisorMobility.API.Models.ADUser;
 using SupervisorMobility.API.Models.HCIDtos;
@@ -1220,6 +1221,38 @@ namespace SupervisorMobility.API.Services
             //_context.Users.Remove(user);
             user.IsActive = false;
             _context.SaveChanges();
+        }
+
+        //metodo para obtener la informacion personal del usario en WFM
+        public async Task<ServiceResponse<WFMInfoSP>>GetPersonalInfoForUserByPersonalNumber(int personalNumber)
+        {
+            var response = new ServiceResponse<WFMInfoSP>();
+            try
+            {
+                var personalInfo = await _context.WFMInfoSPs
+                .FromSqlRaw("dbo.Get_Personal_Info_By_Personal_Number {0}", personalNumber)
+                .AsNoTracking()
+                .ToListAsync();
+
+                if(personalInfo !=null && personalInfo.Count>0)
+                {
+                    response.Data = personalInfo[0];
+                    response.Success = true;
+                    response.Message = "Informacion personal obtenida correctamente.";
+                }
+                else
+                {
+                    response.Success = false;
+                    response.Message = "No se encontro informacion personal para el numero proporcionado.";
+                }
+            }
+            catch(Exception ex)
+            {
+                response.Success = false;
+                response.Message = $"Error al obtener la informacion personal: {ex.Message + ex.InnerException.Message}";
+            }
+            
+            return response;
         }
         #endregion
         #region RouteAssychart

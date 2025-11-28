@@ -14,6 +14,7 @@ using SupervisorMobility.API.Models.ILURegisterDtos;
 using SupervisorMobility.API.Models.JobPaginationDtos;
 using SupervisorMobility.API.Models.ProductiveCalendarDtos;
 using SupervisorMobility.API.Models.MetricsDtos;
+using SupervisorMobility.API.DataAccess.SPModels;
 
 
 namespace SupervisorMobility.API.Services
@@ -191,6 +192,7 @@ namespace SupervisorMobility.API.Services
         Task UpdateUser(UsersForUpdateDto user, int userId);
 
         Task AddUserAsync(User user);
+        Task<ServiceResponse<WFMInfoSP>> GetPersonalInfoForUserByPersonalNumber(int personalNumber);
 
         void DeleteUserAsync(User user);
         #endregion
