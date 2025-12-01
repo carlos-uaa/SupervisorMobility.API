@@ -58,6 +58,7 @@ namespace SupervisorMobility.API.DataAccess.Services.SOS_DistributionRepository
             // +============ ANALYSES =============+ \\
             // NOTE: Ensure that all Analyses are properly tracked by the EF Core context.
             var analysesCopy = SOS_DistributionToCreate.Analyses.ToList();
+            var trackedAnalyses = new List<SOSAnalysis>();
 
             for (int j = 0; j < analysesCopy.Count; j++)
             {
@@ -66,9 +67,7 @@ namespace SupervisorMobility.API.DataAccess.Services.SOS_DistributionRepository
 
                 if (localMasterEntry != null)
                 {
-                    // NOTE: Replace with tracked entity to avoid EF duplicate tracking issues
-                    SOS_DistributionToCreate.Analyses.Remove(Analysis);
-                    SOS_DistributionToCreate.Analyses.Add(localMasterEntry);
+                    trackedAnalyses.Add(localMasterEntry);
                 }
                 else
                 {
@@ -77,8 +76,10 @@ namespace SupervisorMobility.API.DataAccess.Services.SOS_DistributionRepository
                         // TODO: Consider handling concurrency if multiple threads/contexts attach the same entity
                         _context.SOSAnalyses.Attach(Analysis);
                     }
+                    trackedAnalyses.Add(Analysis);
                 }
             }
+            SOS_DistributionToCreate.Analyses = trackedAnalyses;
 
             // +============ SEQUENCES =============+ \\
             // NOTE: Similar to Analyses, ensure Sequences are managed consistently by EF Core.
@@ -220,9 +221,9 @@ namespace SupervisorMobility.API.DataAccess.Services.SOS_DistributionRepository
                 {
                     SOS_DistributionToCreate.SOSDistributionOperationSequence.Add(opSeq);
 
-                    var timesOpSeq = opSeq.Times.Split("§").Take(5).ToList();
+                    var timesOpSeq = string.IsNullOrEmpty(opSeq.Times) ? new List<string>() : opSeq.Times.Split("§").Take(5).ToList();
                     // Pad with "0" if less than 5 elements
-                     while (timesOpSeq.Count < 5)
+                    while (timesOpSeq.Count < 5)
                      {
                         timesOpSeq.Add("0");
                      }
