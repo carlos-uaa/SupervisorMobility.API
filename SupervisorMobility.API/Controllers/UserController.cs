@@ -244,13 +244,13 @@ namespace SupervisorMobility.API.Controllers
             {
                 newUser.AreaId = null;
             }
-            else if (newUser.AreaId != null)
-            {
-                if (!await _supervisorMobilityRepository.AreaExistAsync((int)newUser.AreaId))
-                {
-                    return NotFound("No Area");
-                }
-            }
+            //else if (newUser.AreaId != null)
+            //{
+            //    if (!await _supervisorMobilityRepository.AreaExistAsync((int)newUser.AreaId))
+            //    {
+            //        return NotFound("No Area");
+            //    }
+            //}
 
             if (newUser.GroupId == 0)
             {
@@ -364,13 +364,13 @@ namespace SupervisorMobility.API.Controllers
             {
                 user.AreaId = null;
             }
-            else if (user.AreaId != null)
-            {
-                if (!await _supervisorMobilityRepository.AreaExistAsync((int)user.AreaId))
-                {
-                    return NotFound("No Area");
-                }
-            }
+            //else if (user.AreaId != null)
+            //{
+            //    if (!await _supervisorMobilityRepository.AreaExistAsync((int)user.AreaId))
+            //    {
+            //        return NotFound("No Area");
+            //    }
+            //}
 
             if ( user.DepartmentId == null || user.DepartmentId == 0)
             {
@@ -417,8 +417,9 @@ namespace SupervisorMobility.API.Controllers
                 foreach (var Sub in user.Subordinates)
                 {
                     var userInDB = await _assyChartService.FetchUserAsync(Sub.UserId);
-
-                    if (userInDB.AreaId != Sub.AreaId || userInDB.SuperiorId != Sub.SuperiorId)
+                    //para saber si el subordinado no sufrio cambios verificamos que todas las areas y el superior sean iguales
+                    var idsAreasUserInDb = userInDB?.Areas?.Select(a => a.AreaId).ToList() ?? new List<int>();
+                    if ((idsAreasUserInDb.Count!=Sub.AreasIds?.Count && !idsAreasUserInDb.Except(Sub.AreasIds).Any()) || userInDB?.SuperiorId != Sub.SuperiorId)
                     {
                         _mapper.Map(Sub, userInDB);
                         UsersInUser.Add(userInDB);
@@ -467,8 +468,8 @@ namespace SupervisorMobility.API.Controllers
                         user.PlantId = actualSuperior.PlantId;
                         user.GroupId = actualSuperior.GroupId;
 
-                        if (user.UserType == 4)
-                            user.AreaId = actualSuperior.AreaId;
+                        //if (user.UserType == 4)
+                        //    user.AreaId = actualSuperior.AreaId;
                     }
                 }else if (userToCompare.SuperiorId is null && entityentity.SuperiorId != null)
                 {
@@ -520,7 +521,7 @@ namespace SupervisorMobility.API.Controllers
                             { 
                                 elementAux.GroupId = UserToReturn.GroupId;
                                 elementAux.PlantId = UserToReturn.PlantId;
-                                elementAux.AreaId = UserToReturn.AreaId;
+                               // elementAux.AreaId = UserToReturn.AreaId;
                             }
                             await _assyChartService.UpdateUserAsync(elementAux, elementUserInList.UserId);
 
@@ -563,6 +564,25 @@ namespace SupervisorMobility.API.Controllers
             return Ok();
         }
 
+        [HttpPut("ReasignnToNewSuperiorV2")]
+        public async Task<ActionResult<ServiceResponse<bool>>> ReasingnnToNewSuperior()
+        {
+            var response = new ServiceResponse<bool>();
+            try
+            {
+               
+                response.Data = true;
+                response.Message = "Reasignacion completada";
+            }
+            catch (Exception ex)
+            {
+                response.Data = false;
+                response.Success = false;
+                response.Message = ex.Message;
+            }
+            return Ok(response);
+        }
+
         [HttpPut("ReassingToNewSuperior")]
         public async Task<ActionResult> RessignNewSuperior(List<UsersWithoutNavigationWithoutPeopleDetails> users, int reasignType)
         {
@@ -602,7 +622,20 @@ namespace SupervisorMobility.API.Controllers
                             {
                                 var SubSubEntity = await _supervisorMobilityRepository.GetUserAsync(SubInuser.UserId);
                                 var SubSubUpdate = _mapper.Map<UsersForUpdateDto>(elemntUser);
-                                SubSubUpdate.AreaId = elemntUser.AreaId;
+                               
+                                if(elemntUser.AreasIds != null)
+                                {
+                                    //Limpio las areas actuales
+                                    await _supervisorMobilityRepository.UserRemoveAllAreas(SubSubEntity);
+                                    foreach (var areaId in elemntUser.AreasIds)
+                                    {
+                                        var areaToAdd = await _supervisorMobilityRepository.GetAreaOnlyIdAsync(areaId);
+                                        if(areaToAdd != null)
+                                            await _supervisorMobilityRepository.UserAddArea(SubSubEntity, areaToAdd);
+                                    }
+                                }
+                                
+                                //SubSubUpdate.AreaId = elemntUser.AreaId;
 
                                 await _assyChartService.UpdateUserAsync(SubSubUpdate, SubSubEntity.UserId);
                             }
