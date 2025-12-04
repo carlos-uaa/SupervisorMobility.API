@@ -3,12 +3,14 @@ using DocumentFormat.OpenXml;
 using DocumentFormat.OpenXml.Packaging;
 using DocumentFormat.OpenXml.Spreadsheet;
 using Microsoft.AspNetCore.Cors;
+using Microsoft.AspNetCore.Identity;
 using Microsoft.AspNetCore.Mvc;
 using SpreadsheetLight;
 using SupervisorMobility.API.Business;
 using SupervisorMobility.API.DataAccess.Entities;
 using SupervisorMobility.API.DataAccess.SPModels;
 using SupervisorMobility.API.Entities;
+using SupervisorMobility.API.Models.AreaDtos;
 using SupervisorMobility.API.Models.FileUploadDto;
 using SupervisorMobility.API.Models.HCIDtos;
 using SupervisorMobility.API.Models.ReturnResults;
@@ -565,12 +567,136 @@ namespace SupervisorMobility.API.Controllers
         }
 
         [HttpPut("ReasignnToNewSuperiorV2")]
-        public async Task<ActionResult<ServiceResponse<bool>>> ReasingnnToNewSuperior()
+        public async Task<ActionResult<ServiceResponse<bool>>> ReasingnnToNewSuperior(List<UsersToReasignnDto> usersToReasignns, int reasignType)
         {
             var response = new ServiceResponse<bool>();
             try
             {
-               
+                foreach (var userToReasing in usersToReasignns)
+                {
+                    User newSuperiorUser= new User();
+                    //obtenemos el nuevo superior
+                    if (userToReasing.SuperiorId.HasValue)
+                    {
+                         newSuperiorUser = await _assyChartService.FetchUserAsync(userToReasing.SuperiorId.Value);
+                        if(newSuperiorUser == null)
+                        {
+                            response.Message = $"Nuevo superior con ID {userToReasing.SuperiorId.Value} no encontrado.";
+                            response.Success = false;
+                            return BadRequest(response);
+                        }
+
+                    }
+                    else
+                    {
+                        // Handle the case where SuperiorId is null, if necessary
+                        response.Message = "SuperiorId is null for one or more users.";
+                        response.Success = false;
+                        return BadRequest(response);
+                    }
+                    //obtenemos el usuario a reasignar
+                    var userEntity = await _supervisorMobilityRepository.GetUserAsync(userToReasing.UserId);
+                    if (userEntity != null)
+                    {
+                        //si el superior actual es diferente al nuevo, removemos la relacion
+                        if (userEntity.SuperiorId != userToReasing.SuperiorId)
+                        {
+                            var currentSuperior = await _supervisorMobilityRepository.GetUserAsync(userEntity.SuperiorId.Value, true);
+                            await _supervisorMobilityRepository.UserRemoveSubordinated(currentSuperior, userEntity);
+                        }
+
+                    }
+                    else
+                    {
+                        response.Message = $"Usuario a reasignar con ID {userToReasing.UserId} no encontrado.";
+                        response.Success = false;
+                        return BadRequest(response);
+                    }
+                        var userToUpdate = _mapper.Map<UsersForUpdateDto>(userToReasing);
+
+                    //ahora dependiendo del tipo de usuario del nuevo superior, actualizamos los datos del usuario a reasignar
+                    switch (newSuperiorUser.UserType) 
+                    { 
+                    
+                    case 2:
+                            //Si el nuevo jefe es un SSV, estoy manejando un SV
+                            userToUpdate.SuperiorId = newSuperiorUser.UserId;
+                            if (reasignType != 2)
+                            {
+                                userToUpdate.GroupId = newSuperiorUser.GroupId;
+                                userToUpdate.PlantId = newSuperiorUser.PlantId;
+                            }
+                            //actualizamos la info de los operadores
+                            if(userEntity.Subordinates?.Count > 0)
+                            {
+                                foreach (var subInuser in userEntity.Subordinates)
+                                {
+                                    //obtenemos el subordinado
+                                    var subEntity = await _supervisorMobilityRepository.GetUserAsync(subInuser.UserId);
+                                    if (subEntity != null)
+                                    {
+                                       
+                                        //obtenemos las areas para el subordinado de la lista SubordinateNewAreasList
+                                        var subordinateAreaInfo = userToReasing.SubordinateNewAreasList?.FirstOrDefault(s => s.UserId == subEntity.UserId);
+                                        if (subordinateAreaInfo!=null && subordinateAreaInfo.AreasId != null)
+                                        {
+                                            //Limpio las areas actuales
+                                            await _supervisorMobilityRepository.UserRemoveAllAreas(subEntity);
+                                            foreach (var areaId in subordinateAreaInfo.AreasId)
+                                            {
+                                                var areaToAdd = await _supervisorMobilityRepository.GetAreaOnlyIdAsync(areaId);
+                                                if (areaToAdd != null)
+                                                    await _supervisorMobilityRepository.UserAddArea(subEntity, areaToAdd);
+                                            }
+                                        }
+                                        
+                                        
+                                    }
+                                   
+                                }
+                            }
+                            break;
+                    case 3:
+                            //Si el nuevo jefe es un SV, estoy manejando un operador
+                            userToUpdate.SuperiorId = newSuperiorUser.UserId;
+                            if (reasignType != 2)
+                            {
+                                userToUpdate.GroupId = newSuperiorUser.GroupId;
+                                userToUpdate.PlantId = newSuperiorUser.PlantId;
+                                //si el usuario a reasignar tiene areas se eliminan para asignar las nuevas
+                                if (userToUpdate.Areas != null)
+                                {
+                                    userToUpdate.Areas.Clear();
+                                }
+                                foreach(var areaId in userToReasing.AreasIds)
+                                {
+                                    var areaToAdd = await _supervisorMobilityRepository.GetAreaOnlyIdAsync(areaId);
+                                    if (areaToAdd != null)
+                                    {
+                                        if (userToUpdate.Areas == null)
+                                        {
+                                            userToUpdate.Areas = new List<AreaWithoutNavigationPropertiesDto>();
+                                        }
+                                        userToUpdate.Areas.Add(new AreaWithoutNavigationPropertiesDto
+                                        {
+                                            AreaId = areaToAdd.AreaId,
+                                            Code = areaToAdd.Code,
+                                            Description = areaToAdd.Description,
+                                            PlantId = areaToAdd.PlantId,
+                                            IsActive = areaToAdd.IsActive
+                                        });
+                                    }
+                                }
+                            }
+                            break;
+
+                    }
+                    await _assyChartService.UpdateUserAsync(userToUpdate, userEntity.UserId);
+                    await _supervisorMobilityRepository.UserAddSubordinated(newSuperiorUser, userEntity);
+
+                }
+
+
                 response.Data = true;
                 response.Message = "Reasignacion completada";
             }

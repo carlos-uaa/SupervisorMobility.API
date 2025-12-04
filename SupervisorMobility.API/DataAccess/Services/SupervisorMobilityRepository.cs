@@ -1203,7 +1203,7 @@ namespace SupervisorMobility.API.Services
                 Master.Areas = new List<Area>();
                 Master.Areas.Add(Slave);
             }
-            _context.SaveChanges();
+            await _context.SaveChangesAsync();
 
             return new AsyncVoidMethodBuilder();
 

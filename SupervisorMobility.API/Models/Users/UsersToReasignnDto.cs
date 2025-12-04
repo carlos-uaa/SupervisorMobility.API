@@ -1,5 +1,6 @@
 ﻿using SupervisorMobility.API.Models.FileUploadDto;
 using SupervisorMobility.API.Models.ILURegisterDtos;
+using System.ComponentModel.DataAnnotations;
 using System.ComponentModel.DataAnnotations.Schema;
 
 namespace SupervisorMobility.API.Models.Users
@@ -29,7 +30,8 @@ namespace SupervisorMobility.API.Models.Users
 
         public int? PlantId { get; set; }
         public int? AreaId { get; set; }
-        public List<int>? AreasIds { get; set; }
+        [Required]
+        public List<int> AreasIds { get; set; } = new List<int>();
         public int? GroupId { get; set; }
         public int? DistributionId { get; set; }
         public int? DepartmentId { get; set; }
