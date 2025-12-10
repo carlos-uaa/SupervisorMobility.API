@@ -1071,9 +1071,30 @@ namespace SupervisorMobility.API.Services
 
         public async Task UpdateUser(UsersForUpdateDto user, int userId)
         {
-            var entityUser = await _context.Users.FirstOrDefaultAsync(u => u.UserId == userId);
-            entityUser.Department = await _context.Departments.FirstOrDefaultAsync(d => d.DepartmentId == user.DepartmentId);
-            entityUser.DepartmentId = entityUser.Department.DepartmentId;
+            var entityUser = new User();
+            try
+            {
+                 entityUser = await _context.Users.FirstOrDefaultAsync(u => u.UserId == userId);
+                if (entityUser == null)
+                {
+                    throw new Exception($"User with ID {userId} not found.");
+                }
+                else
+                {
+                    if (user.DepartmentId != null)
+                    {
+                        entityUser.Department = await _context.Departments.FirstOrDefaultAsync(d => d.DepartmentId == user.DepartmentId);
+                        entityUser.DepartmentId = entityUser.Department?.DepartmentId;
+                    }
+                }
+              
+            }
+            catch (Exception ex)
+            {
+                Debug.WriteLine("Error en UpdateUser: " + ex.Message);
+            }
+            
+                
 
             _mapper.Map(user, entityUser);
 
@@ -1084,7 +1105,7 @@ namespace SupervisorMobility.API.Services
             //}
 
 
-            _context.SaveChanges();
+            await _context.SaveChangesAsync();
         }
         public async Task<AsyncVoidMethodBuilder> UserAddSubordinated(User Master, User Slave)
         {
@@ -1100,14 +1121,14 @@ namespace SupervisorMobility.API.Services
                 Slave.SuperiorId = Master.UserId;
                 Master.Subordinates.Add(Slave);
             }
-            _context.SaveChanges();
+            await _context.SaveChangesAsync();
             return new AsyncVoidMethodBuilder();
         }
 
         public async Task<AsyncVoidMethodBuilder> UserRemoveSubordinated(User Master, User Slave)
         {
             Master.Subordinates?.Remove(Slave);
-            _context.SaveChanges();
+            await _context.SaveChangesAsync();
             return new AsyncVoidMethodBuilder();
         }
         public async Task<AsyncVoidMethodBuilder> UserRemoveAllSubordinated(User Master)
@@ -1124,7 +1145,7 @@ namespace SupervisorMobility.API.Services
                 }
 
                 Master.Subordinates?.Clear();
-                _context.SaveChanges();
+                await _context.SaveChangesAsync();
             }
 
             return new AsyncVoidMethodBuilder();
@@ -1138,7 +1159,7 @@ namespace SupervisorMobility.API.Services
             {
                 userWithAreas.Areas?.Clear();
 
-                _context.SaveChanges();
+                await _context.SaveChangesAsync();
             }
         }
         public async Task<AsyncVoidMethodBuilder> UserUpdateAllSubordinated(User Master)
@@ -1170,7 +1191,7 @@ namespace SupervisorMobility.API.Services
                     }
                 }
 
-                _context.SaveChanges();
+                await _context.SaveChangesAsync();
             }
 
             return new AsyncVoidMethodBuilder();
@@ -1187,7 +1208,7 @@ namespace SupervisorMobility.API.Services
 
             Debug.WriteLine($"Este es executeCount: {executeCount}");
 
-            _context.SaveChanges();
+            await _context.SaveChangesAsync();
             return new AsyncVoidMethodBuilder();
 
         }
@@ -1220,7 +1241,7 @@ namespace SupervisorMobility.API.Services
         {
             //_context.Users.Remove(user);
             user.IsActive = false;
-            _context.SaveChanges();
+           _context.SaveChangesAsync();
         }
 
         //metodo para obtener la informacion personal del usario en WFM

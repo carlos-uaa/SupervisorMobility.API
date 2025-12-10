@@ -5,6 +5,7 @@ using DocumentFormat.OpenXml.Spreadsheet;
 using Microsoft.AspNetCore.Cors;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.AspNetCore.Mvc;
+using OfficeOpenXml;
 using SpreadsheetLight;
 using SupervisorMobility.API.Business;
 using SupervisorMobility.API.DataAccess.Entities;
@@ -855,17 +856,17 @@ namespace SupervisorMobility.API.Controllers
                     }
                 }
 
-                if (ItemInUserList.AreaId == 0 || ItemInUserList.AreaId == -1)
-                {
-                    ItemInUserList.AreaId = null;
-                }
-                else if (ItemInUserList.AreaId != null)
-                {
-                    if (!await _supervisorMobilityRepository.AreaExistAsync((int)ItemInUserList.AreaId))
-                    {
-                        return NotFound("No Area");
-                    }
-                }
+                //if (ItemInUserList.AreaId == 0 || ItemInUserList.AreaId == -1)
+                //{
+                //    ItemInUserList.AreaId = null;
+                //}
+                //else if (ItemInUserList.AreaId != null)
+                //{
+                //    if (!await _supervisorMobilityRepository.AreaExistAsync((int)ItemInUserList.AreaId))
+                //    {
+                //        return NotFound("No Area");
+                //    }
+                //}
 
                 if (ItemInUserList.GroupId == 0 || ItemInUserList.GroupId == -1)
                 {
@@ -1120,9 +1121,15 @@ namespace SupervisorMobility.API.Controllers
                                         }
                                         else
                                         {
+                                            
+                                            
                                             User actualSuperior = await _supervisorMobilityRepository.GetUserAsync((int)InComingUserToCompare.SuperiorId, true);
+                                            //saber si las areas del usuario entrante estan contenidas en las areas del superior
+                                            var areasInSuperior = InComingUserToCompare.Areas.All(a => actualSuperior.Areas.All(a2 => a.AreaId == a2.AreaId));
+
+
                                             if (InComingUserToCompare.PlantId != actualSuperior.PlantId ||
-                                                InComingUserToCompare.AreaId != actualSuperior.AreaId ||
+                                                 areasInSuperior||
                                                 InComingUserToCompare.GroupId != actualSuperior.GroupId)
                                             {
                                                 InComingUserToCompare.PlantId = actualSuperior.PlantId;
@@ -1154,8 +1161,9 @@ namespace SupervisorMobility.API.Controllers
                                     //el usuario es el mismo en la base de datos, pero la comparacion no valida que siga siendo la misma informacion del superior y el usuario
 
                                     User actualSuperior = await _supervisorMobilityRepository.GetUserAsync((int)UserInDb.SuperiorId, true);
-
-                                    if (InComingUserToCompare.PlantId != actualSuperior.PlantId || InComingUserToCompare.AreaId != actualSuperior.AreaId || InComingUserToCompare.GroupId != actualSuperior.GroupId)
+                                    //saber si las areas del usuario entrante estan contenidas en las areas del superior
+                                    var areasInSuperior = InComingUserToCompare.Areas.All(a => actualSuperior.Areas.All(a2 => a.AreaId == a2.AreaId));
+                                    if (InComingUserToCompare.PlantId != actualSuperior.PlantId || areasInSuperior || InComingUserToCompare.GroupId != actualSuperior.GroupId)
                                     {
                                         InComingUserToCompare.PlantId = actualSuperior.PlantId;
                                         InComingUserToCompare.GroupId = actualSuperior.GroupId;
@@ -1787,31 +1795,36 @@ namespace SupervisorMobility.API.Controllers
 
                     List<string> RowsInFile = new List<string>();
 
-                    using (SpreadsheetDocument document = SpreadsheetDocument.Open(file, false))
+                    using (var  document = new ExcelPackage(new FileInfo(file)))
                     {
                         // Obtener la primera hoja de trabajo
-                        WorkbookPart workbookPart = document.WorkbookPart;
-                        Sheet sheet = workbookPart.Workbook.Sheets.Elements<Sheet>().FirstOrDefault();
-                        if (sheet != null)
+                        var ws = document.Workbook.Worksheets[0];
+                        int totalRowWithInfo = ws.Dimension.End.Row;
+                       
+                        for(int row= ws.Dimension.Start.Row; row<=totalRowWithInfo;row++)
                         {
-                            WorksheetPart worksheetPart = (WorksheetPart)workbookPart.GetPartById(sheet.Id);
-                            SheetData sheetData = worksheetPart.Worksheet.Elements<SheetData>().FirstOrDefault();
-
-                            if (sheetData != null)
+                            for(int i = 1; i <= 12; i++)
                             {
-                                foreach (var row in sheetData.Elements<Row>())
+                                if (ws.Cells[row, i].Value != null)
                                 {
-                                   
-                                    foreach (var cell in row.Elements<Cell>().Take(13)) // Leer hasta la columna 13
-                                    {
-                                        string cellValue = GetCellValue(workbookPart, cell);
-                                        RowsInFile.Add(string.IsNullOrEmpty(cellValue) ? "§" : cellValue);
-                                    }
-
-                                    DataInFile.Add(RowsInFile.ToArray());
+                                    // Updated line to ensure null safety by adding a null-coalescing operator to provide a default value.
+                                    RowsInFile.Add(ws.Cells[row, i].Value?.ToString() ?? "§");
+                                }
+                                else
+                                {
+                                    RowsInFile.Add("§");
                                 }
                             }
+                           
+                       
+                           
+                            
+
+                            DataInFile.Add(RowsInFile.ToArray());
+                            RowsInFile.Clear();
                         }
+                            
+                        
                     }
 
                 }
@@ -1907,6 +1920,14 @@ namespace SupervisorMobility.API.Controllers
                                         {
 
                                             break;
+                                        }
+                                        //se asigna el payroll
+                                        try
+                                        {
+                                            ToInsertIntoList.Payroll = row[2] != "§" ? int.Parse(row[2]) : int.Parse(row[403]);
+                                        }
+                                        catch (Exception ex)
+                                        {
                                         }
 
                                         try
@@ -2082,7 +2103,7 @@ namespace SupervisorMobility.API.Controllers
                                     }
                                     break;
                                 case 3:
-                                    try
+                                    try  
                                     {
                                         ToInsertIntoList.UserId = row[0] != "§" ? int.Parse(row[0]) : -1;
 
@@ -2113,8 +2134,16 @@ namespace SupervisorMobility.API.Controllers
                                         {
 
                                         }
-
+                                        //se asigna el payroll
                                         try
+                                        {
+                                            ToInsertIntoList.Payroll = row[2] != "§" ? int.Parse(row[2]) : int.Parse(row[403]);
+                                        }
+                                        catch (Exception ex)
+                                        {
+                                        }
+
+                                            try
                                         {
                                             ToInsertIntoList.SuperiorId = row[6] != "§" ? int.Parse(row[6]) : int.Parse(row[403]);
 
@@ -2205,19 +2234,54 @@ namespace SupervisorMobility.API.Controllers
 
                                         try
                                         {
-                                            ToInsertIntoList.AreaId = row[9] != "§" ? int.Parse(row[9]) : int.Parse(row[403]);
-                                            try
+                                            if (row[9].Contains(','))
                                             {
-                                                ToInsertIntoList.Area = ToInsertIntoList.Superior?.Areas.ToList().Find(a => a.AreaId == ToInsertIntoList.AreaId);
-                                            }
-                                            catch (Exception ex)
-                                            {
+                                                string[]? SplitedAreas = row[9] != "§" ? row[9].Split(',') : null;
 
+                                                if (SplitedAreas != null)
+                                                {
+                                                    if (ToInsertIntoList.Areas != null)
+                                                    {
+                                                        foreach (var item in SplitedAreas)
+                                                        {
+                                                            ToInsertIntoList.Areas.Add(_areas[_plants.ToList().FindIndex(e => e.PlantId == ToInsertIntoList.PlantId)].ToList().Find(a => a.AreaId == int.Parse(item)));
+                                                        }
+                                                    }
+                                                    else
+                                                    {
+                                                        ToInsertIntoList.Areas = new List<Area>();
+                                                        foreach (var item in SplitedAreas)
+                                                        {
+                                                            ToInsertIntoList.Areas.Add(_areas[_plants.ToList().FindIndex(e => e.PlantId == ToInsertIntoList.PlantId)].ToList().Find(a => a.AreaId == int.Parse(item)));
+                                                        }
+                                                    }
+
+                                                }
+                                            }
+                                            else
+                                            {
+                                                if (row[9] != "§")
+                                                {
+                                                    if (ToInsertIntoList.Areas != null)
+                                                    {
+
+                                                        ToInsertIntoList.Areas.Add(_areas[_plants.ToList().FindIndex(e => e.PlantId == ToInsertIntoList.PlantId)].ToList().Find(a => a.AreaId == int.Parse(row[9])));
+
+                                                    }
+                                                    else
+                                                    {
+                                                        ToInsertIntoList.Areas = new List<Area>();
+                                                        ToInsertIntoList.Areas.Add(_areas[_plants.ToList().FindIndex(e => e.PlantId == ToInsertIntoList.PlantId)].ToList().Find(a => a.AreaId == int.Parse(row[9])));
+
+                                                    }
+                                                }
                                             }
                                         }
                                         catch (Exception ex)
                                         {
 
+
+                                            break;
                                         }
                                     }
                                     catch (Exception ex)
@@ -2267,12 +2331,54 @@ namespace SupervisorMobility.API.Controllers
 
                                                 try
                                                 {
-                                                    ToInsertIntoList.AreaId = ToInsertIntoList.Superior?.AreaId;
-                                                    ToInsertIntoList.Area = ToInsertIntoList.Superior?.Area;
+                                                    if (row[9].Contains(','))
+                                                    {
+                                                        string[]? SplitedAreas = row[9] != "§" ? row[9].Split(',') : null;
+
+                                                        if (SplitedAreas != null)
+                                                        {
+                                                            if (ToInsertIntoList.Areas != null)
+                                                            {
+                                                                foreach (var item in SplitedAreas)
+                                                                {
+                                                                    ToInsertIntoList.Areas.Add(_areas[_plants.ToList().FindIndex(e => e.PlantId == ToInsertIntoList.PlantId)].ToList().Find(a => a.AreaId == int.Parse(item)));
+                                                                }
+                                                            }
+                                                            else
+                                                            {
+                                                                ToInsertIntoList.Areas = new List<Area>();
+                                                                foreach (var item in SplitedAreas)
+                                                                {
+                                                                    ToInsertIntoList.Areas.Add(_areas[_plants.ToList().FindIndex(e => e.PlantId == ToInsertIntoList.PlantId)].ToList().Find(a => a.AreaId == int.Parse(item)));
+                                                                }
+                                                            }
+
+                                                        }
+                                                    }
+                                                    else
+                                                    {
+                                                        if (row[9] != "§")
+                                                        {
+                                                            if (ToInsertIntoList.Areas != null)
+                                                            {
+
+                                                                ToInsertIntoList.Areas.Add(_areas[_plants.ToList().FindIndex(e => e.PlantId == ToInsertIntoList.PlantId)].ToList().Find(a => a.AreaId == int.Parse(row[9])));
+
+                                                            }
+                                                            else
+                                                            {
+                                                                ToInsertIntoList.Areas = new List<Area>();
+                                                                ToInsertIntoList.Areas.Add(_areas[_plants.ToList().FindIndex(e => e.PlantId == ToInsertIntoList.PlantId)].ToList().Find(a => a.AreaId == int.Parse(row[9])));
+
+                                                            }
+                                                        }
+                                                    }
                                                 }
                                                 catch (Exception ex)
                                                 {
 
+
+                                                    break;
                                                 }
 
                                                 try
@@ -2352,7 +2458,7 @@ namespace SupervisorMobility.API.Controllers
                 bool haveUsers = false;
 
                 var UserToReturn = new User();
-
+                item.IsActive = true;
                 if (item.PlantId == 0)
                 {
                     item.PlantId = null;
@@ -2467,10 +2573,10 @@ namespace SupervisorMobility.API.Controllers
                         else
                         {
                             var userToCompare = _mapper.Map<User>(item);
-
+                            userToCompare.IsActive = entityentity.IsActive;
                             if (!entityentity.Equals(userToCompare))
                             {
-
+                                
                                 if (userToCompare.SuperiorId != entityentity.SuperiorId)
                                 {
                                     if (userToCompare.SuperiorId != null && entityentity.SuperiorId != null)
@@ -2478,17 +2584,17 @@ namespace SupervisorMobility.API.Controllers
                                         User exsuperior = await _supervisorMobilityRepository.GetUserAsync((int)entityentity.SuperiorId, true);
                                         var usertoRemove = _mapper.Map<User>(entityentity);
 
-                                        _supervisorMobilityRepository.UserRemoveSubordinated(exsuperior, usertoRemove);
+                                        await _supervisorMobilityRepository.UserRemoveSubordinated(exsuperior, usertoRemove);
 
                                         User actualSuperior = await _supervisorMobilityRepository.GetUserAsync((int)item.SuperiorId, true);
-                                        _supervisorMobilityRepository.UserAddSubordinated(actualSuperior, usertoRemove);
+                                        await _supervisorMobilityRepository.UserAddSubordinated(actualSuperior, usertoRemove);
 
                                         item.SuperiorId = actualSuperior.UserId;
                                         item.PlantId = actualSuperior.PlantId;
                                         item.GroupId = actualSuperior.GroupId;
 
-                                        if (item.UserType == 4)
-                                            item.AreaId = actualSuperior.AreaId;
+                                        //if (item.UserType == 4)
+                                        //    item.AreaId = actualSuperior.AreaId;
 
                                         userToCompare = _mapper.Map<User>(item);
                                     }
@@ -2513,7 +2619,7 @@ namespace SupervisorMobility.API.Controllers
                     }
                     else
                     {
-                        var usertoCreate = _mapper.Map<UsersForCreation>(item);
+                        var usertoCreate = _mapper.Map<UsersForCreation>(item);                     
                         var finalUser = await _assyChartService.CreateUserAsync(usertoCreate);
                         if (finalUser != null)
                             ResultToReturn.UsersCreated++;
@@ -2561,7 +2667,7 @@ namespace SupervisorMobility.API.Controllers
                             else
                             {
                                 var userToCompare = _mapper.Map<User>(item);
-
+                               
                                 if (!entityentity.Equals(userToCompare))
                                 {
                                     if (userToCompare.SuperiorId != entityentity.SuperiorId)
@@ -2571,17 +2677,17 @@ namespace SupervisorMobility.API.Controllers
                                             User exsuperior = await _supervisorMobilityRepository.GetUserAsync((int)entityentity.SuperiorId, true);
                                             var usertoRemove = _mapper.Map<User>(entityentity);
 
-                                            _supervisorMobilityRepository.UserRemoveSubordinated(exsuperior, usertoRemove);
+                                            await _supervisorMobilityRepository.UserRemoveSubordinated(exsuperior, usertoRemove);
 
                                             User actualSuperior = await _supervisorMobilityRepository.GetUserAsync((int)item.SuperiorId, true);
-                                            _supervisorMobilityRepository.UserAddSubordinated(actualSuperior, usertoRemove);
+                                            await _supervisorMobilityRepository.UserAddSubordinated(actualSuperior, usertoRemove);
 
                                             item.SuperiorId = actualSuperior.UserId;
                                             item.PlantId = actualSuperior.PlantId;
                                             item.GroupId = actualSuperior.GroupId;
 
-                                            if (item.UserType == 4)
-                                                item.AreaId = actualSuperior.AreaId;
+                                            //if (item.UserType == 4)
+                                            //    item.AreaId = actualSuperior.AreaId;
 
                                             userToCompare = _mapper.Map<User>(item);
                                         }
@@ -2606,6 +2712,7 @@ namespace SupervisorMobility.API.Controllers
                         else
                         {
                             var usertoCreate = _mapper.Map<UsersForCreation>(item);
+                            usertoCreate.IsActive = true;
                             var finalUser = await _assyChartService.CreateUserAsync(usertoCreate);
                             if (finalUser != null)
                                 ResultToReturn.UsersCreated++;
@@ -2616,6 +2723,7 @@ namespace SupervisorMobility.API.Controllers
                     else
                     {
                         var userToCompare = _mapper.Map<User>(item);
+                        
                         if (!entityUserwhitId.Equals(userToCompare))
                         {
                             if (userToCompare.SuperiorId != entityUserwhitId.SuperiorId)
@@ -2625,17 +2733,17 @@ namespace SupervisorMobility.API.Controllers
                                     User exsuperior = await _supervisorMobilityRepository.GetUserAsync((int)entityUserwhitId.SuperiorId, true);
                                     var usertoRemove = _mapper.Map<User>(entityUserwhitId);
 
-                                    _supervisorMobilityRepository.UserRemoveSubordinated(exsuperior, usertoRemove);
+                                    await _supervisorMobilityRepository.UserRemoveSubordinated(exsuperior, usertoRemove);
 
                                     User actualSuperior = await _supervisorMobilityRepository.GetUserAsync((int)item.SuperiorId, true);
-                                    _supervisorMobilityRepository.UserAddSubordinated(actualSuperior, usertoRemove);
+                                    await _supervisorMobilityRepository.UserAddSubordinated(actualSuperior, usertoRemove);
 
                                     item.SuperiorId = actualSuperior.UserId;
                                     item.PlantId = actualSuperior.PlantId;
                                     item.GroupId = actualSuperior.GroupId;
 
-                                    if (item.UserType == 4)
-                                        item.AreaId = actualSuperior.AreaId;
+                                    //if (item.UserType == 4)
+                                    //    item.AreaId = actualSuperior.AreaId;
 
                                     userToCompare = _mapper.Map<User>(item);
                                 }
@@ -2662,7 +2770,7 @@ namespace SupervisorMobility.API.Controllers
                 {
                     foreach (var elemntUser in UsersInUser)
                     {
-                        _supervisorMobilityRepository.UserAddSubordinated(UserToReturn, elemntUser);
+                        await _supervisorMobilityRepository.UserAddSubordinated(UserToReturn, elemntUser);
                     }
                 }
 
@@ -2670,7 +2778,7 @@ namespace SupervisorMobility.API.Controllers
                 {
                     foreach (var elemntArea in AreasInUser)
                     {
-                        _supervisorMobilityRepository.UserAddArea(UserToReturn, elemntArea);
+                        await _supervisorMobilityRepository.UserAddArea(UserToReturn, elemntArea);
                     }
                 }
 
