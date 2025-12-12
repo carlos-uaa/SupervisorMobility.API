@@ -12,6 +12,7 @@ using SupervisorMobility.API.infrastructure.repositories.STRO;
 
 // - Interface's imports
 using SupervisorMobility.API.Interfaces.SOS;
+using SupervisorMobility.API.DataAccess.Services.SOS_DistributionRepository;
 
 
 namespace SupervisorMobility.API.Services.SOS
@@ -23,6 +24,7 @@ namespace SupervisorMobility.API.Services.SOS
     {
         // +========================= DEPENDENCIES =========================+ \\
         private readonly ISOS_ProcessRepository _sosProcessRepository;
+        private readonly ISOS_DistributionRepository _DistributionsRepository;
         private readonly ISTROSequencesRepository _stroSequencesRepository;
 
         /// <summary>
@@ -30,10 +32,11 @@ namespace SupervisorMobility.API.Services.SOS
         /// </summary>
         /// <param name="sosProcessRepository">Repository for SOS process data access.</param>
         /// <param name="stroSequencesRepository">Repository for STRO sequences data access.</param>
-        public STROSyncDistributionService(ISOS_ProcessRepository sosProcessRepository, ISTROSequencesRepository stroSequencesRepository)
+        public STROSyncDistributionService(ISOS_ProcessRepository sosProcessRepository, ISTROSequencesRepository stroSequencesRepository, ISOS_DistributionRepository distributionRepository)
         {
             _sosProcessRepository = sosProcessRepository;
             _stroSequencesRepository = stroSequencesRepository;
+            _DistributionsRepository = distributionRepository;
         }
 
         // +======================== PUBLIC METHODS ========================+ \\
@@ -73,7 +76,7 @@ namespace SupervisorMobility.API.Services.SOS
         /// <exception cref="InvalidOperationException">Thrown if distribution or HubId is not found.</exception>P
         private async Task<SupervisorMobility.API.DataAccess.Entities.SOS.SOSDistribution> GetDistribution(int distributionId)
         {
-            var distribution = await _sosProcessRepository.GetSOSDistribution(distributionId, false, false, false, true, false, false, false, true);
+            var distribution = await _DistributionsRepository.GetSOSDistribution(distributionId, false, false, false, true, false, false, false, true);
             if (distribution == null || distribution.SOSHubId == null) throw new InvalidOperationException("SOS Distribution not found or invalid HubId.");
 
             return distribution;

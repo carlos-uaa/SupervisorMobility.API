@@ -18,6 +18,9 @@ using SupervisorMobility.API.DataAccess.Entities.SOS.STRO;
 using SupervisorMobility.API.DataAccess.Entities.SOS.STRO.Enums;
 using SupervisorMobility.API.infrastructure.repositories.STRO.Collections.Skills;
 using SupervisorMobility.API.infrastructure.repositories.STRO.Collections.Knowledges;
+using SupervisorMobility.API.DataAccess.Services.SOS_SynopticTableRepository;
+using SupervisorMobility.API.Interfaces.SOSDistribution.SOSDistributionExcel;
+using SupervisorMobility.API.DataAccess.Services.SOS_DistributionRepository;
 
 namespace SupervisorMobility.API.Services.SOS
 {
@@ -29,6 +32,8 @@ namespace SupervisorMobility.API.Services.SOS
     {
         //+====================== SERVICES ======================+\\
         private readonly ISOS_ProcessRepository _Sos_ProcessRepository;
+        private readonly ISOS_SynopticTableRepository _SynopticTableRepository;
+        private readonly ISOS_DistributionRepository _DistributionRepository;
         private readonly IKnowledgeRepository _KnowledgeRepository;
         private readonly ISkillRepository _SkillRepository;
 
@@ -38,11 +43,13 @@ namespace SupervisorMobility.API.Services.SOS
         /// <param name="Sos_ProcessRepository">Repository used to access SOS process data.</param>
         /// <param name="knowledgeRepository">Repository used to access knowledge data.</param>
         /// <param name="skillRepository">Repository used to access skill data.</param>
-        public STOperatingRequirementsService(ISOS_ProcessRepository Sos_ProcessRepository, IKnowledgeRepository knowledgeRepository, ISkillRepository skillRepository)
+        public STOperatingRequirementsService(ISOS_ProcessRepository Sos_ProcessRepository, IKnowledgeRepository knowledgeRepository, ISkillRepository skillRepository, ISOS_SynopticTableRepository synopticTableRepository, ISOS_DistributionRepository distributionRepository)
         {
             _Sos_ProcessRepository = Sos_ProcessRepository;
             _KnowledgeRepository = knowledgeRepository;
             _SkillRepository = skillRepository;
+            _SynopticTableRepository = synopticTableRepository;
+            _DistributionRepository = distributionRepository;
         }
 
         // =================================================== \\
@@ -60,7 +67,7 @@ namespace SupervisorMobility.API.Services.SOS
         public async Task<byte[]> GenerateExcelSTOperatingRequirements(int id)
         {
             //-============ DATA FETCHING =============-\\
-            SOSSynopticTableofOperatingRequirements SOSSTRO = await _Sos_ProcessRepository.GetSOSSynopticTableofOperatingRequirements(id, true, true, true) ?? throw new Exception("Data not found");
+            SOSSynopticTableofOperatingRequirements SOSSTRO = await _SynopticTableRepository.GetSOSSynopticTableofOperatingRequirements(id, true, true, true) ?? throw new Exception("Data not found");
             SOSSTRO.SOSHubs = await GetHubsWithDistribution(SOSSTRO);
 
             if (SOSSTRO.SOSHubId == null) throw new Exception("SOSHubId is null");
@@ -276,12 +283,12 @@ namespace SupervisorMobility.API.Services.SOS
 
             foreach (var HubId in SOSHubsId)
             {
-                var distributionId = await _Sos_ProcessRepository.GetIdDistributionBySosHub(HubId);
+                var distributionId = await _DistributionRepository.GetIdDistributionBySosHub(HubId);
 
                 // NOTE: Skips hubs without a valid distribution (distributionId = 0)
                 if (distributionId == 0) continue;
 
-                var SOSDistribution = await _Sos_ProcessRepository.GetSOSDistribution(distributionId, includeSOS: true, includeCollections: true);
+                var SOSDistribution = await _DistributionRepository.GetSOSDistribution(distributionId, includeSOS: true, includeCollections: true);
                 distributions.Add(SOSDistribution);
 
             }

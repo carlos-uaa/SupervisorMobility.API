@@ -58,6 +58,7 @@ namespace SupervisorMobility.API.DataAccess.Services.SOS_DistributionRepository
             // +============ ANALYSES =============+ \\
             // NOTE: Ensure that all Analyses are properly tracked by the EF Core context.
             var analysesCopy = SOS_DistributionToCreate.Analyses.ToList();
+            var trackedAnalyses = new List<SOSAnalysis>();
 
             for (int j = 0; j < analysesCopy.Count; j++)
             {
@@ -66,9 +67,7 @@ namespace SupervisorMobility.API.DataAccess.Services.SOS_DistributionRepository
 
                 if (localMasterEntry != null)
                 {
-                    // NOTE: Replace with tracked entity to avoid EF duplicate tracking issues
-                    SOS_DistributionToCreate.Analyses.Remove(Analysis);
-                    SOS_DistributionToCreate.Analyses.Add(localMasterEntry);
+                    trackedAnalyses.Add(localMasterEntry);
                 }
                 else
                 {
@@ -77,8 +76,10 @@ namespace SupervisorMobility.API.DataAccess.Services.SOS_DistributionRepository
                         // TODO: Consider handling concurrency if multiple threads/contexts attach the same entity
                         _context.SOSAnalyses.Attach(Analysis);
                     }
+                    trackedAnalyses.Add(Analysis);
                 }
             }
+            SOS_DistributionToCreate.Analyses = trackedAnalyses;
 
             // +============ SEQUENCES =============+ \\
             // NOTE: Similar to Analyses, ensure Sequences are managed consistently by EF Core.
@@ -148,17 +149,21 @@ namespace SupervisorMobility.API.DataAccess.Services.SOS_DistributionRepository
                     // NOTE: Load times from first analysis if exists
                     if (sosHub?.SOSAnalysis?.Count > 0)
                     {
-                        var analysis = sosHub.SOSAnalysis!.First(); // TODO: Replace First() with FirstOrDefault() for safety
-                        var analysisComplete = await _context.SOSAnalyses.Include(t => t.Times).FirstOrDefaultAsync(a => a.SOSAnalysisId == analysis.SOSAnalysisId);
-
-                        if (analysisComplete?.Times != null) allTimes = analysisComplete.Times.ToList();
+                        var analysis = sosHub.SOSAnalysis!.FirstOrDefault();
+                        if (analysis != null)
+                        {
+                            var analysisComplete = await _context.SOSAnalyses.Include(t => t.Times).FirstOrDefaultAsync(a => a.SOSAnalysisId == analysis.SOSAnalysisId);
+                            if (analysisComplete?.Times != null) allTimes = analysisComplete.Times.ToList();
+                        }
                     }
                     else if (sosHub?.SOSSequence?.Count > 0)
                     {
-                        var sequence = sosHub.SOSSequence!.First(); // TODO: Replace First() with FirstOrDefault() for safety
-                        var sequenceComplete = await _context.SOSSequences.Include(t => t.Times).FirstOrDefaultAsync(s => s.SOSSequenceId == sequence.SOSSequenceId);
-
-                        if (sequenceComplete?.Times != null) allTimes = sequenceComplete.Times.ToList();
+                        var sequence = sosHub.SOSSequence!.FirstOrDefault();
+                        if (sequence != null)
+                        {
+                            var sequenceComplete = await _context.SOSSequences.Include(t => t.Times).FirstOrDefaultAsync(s => s.SOSSequenceId == sequence.SOSSequenceId);
+                            if (sequenceComplete?.Times != null) allTimes = sequenceComplete.Times.ToList();
+                        }
                     }
 
                     // =============== TIMES FOR SECTION =============== \\
@@ -216,7 +221,12 @@ namespace SupervisorMobility.API.DataAccess.Services.SOS_DistributionRepository
                 {
                     SOS_DistributionToCreate.SOSDistributionOperationSequence.Add(opSeq);
 
-                    var timesOpSeq = opSeq.Times.Split("§").Take(5).ToList();
+                    var timesOpSeq = string.IsNullOrEmpty(opSeq.Times) ? new List<string>() : opSeq.Times.Split("§").Take(5).ToList();
+                    // Pad with "0" if less than 5 elements
+                    while (timesOpSeq.Count < 5)
+                     {
+                        timesOpSeq.Add("0");
+                     }
                     for (int i = 0; i < allTimesCycle.Length; i++)
                     {
                         allTimesCycle[i] += double.TryParse(timesOpSeq[i], out var val) ? val : 0;

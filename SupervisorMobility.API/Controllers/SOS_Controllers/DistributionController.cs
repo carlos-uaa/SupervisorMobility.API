@@ -30,6 +30,9 @@ using SupervisorMobility.API.Models.CommentaryDtos;
 using SupervisorMobility.API.Models.SOS.SOSHubDtos;
 using SupervisorMobility.API.Models.FileUploadDto;
 using SupervisorMobility.API.Models.SOS.TurnDtos;
+using SupervisorMobility.API.DataAccess.Services.SOS_DistributionRepository;
+using SupervisorMobility.API.DataAccess.Services.SOS_SequenceRepository;
+using SupervisorMobility.API.DataAccess.Services.SOS_AnalysisRepository;
 
 
 namespace SupervisorMobility.API.Controllers.SOS_Controllers
@@ -42,6 +45,9 @@ namespace SupervisorMobility.API.Controllers.SOS_Controllers
         private readonly IMapper _mapper;
         private readonly IWebHostEnvironment _env;
         private readonly ISOS_ProcessRepository _ProcessRepository;
+        private readonly ISOS_DistributionRepository _DistributionRepository;
+        private readonly ISOS_SequenceRepository _SequenceRepository;
+        private readonly ISOS_AnalysisRepository _AnalysisRepository;
         private readonly ISTROSyncDistributionService _STROSyncDistributionService;
 
         /// <summary>
@@ -54,13 +60,15 @@ namespace SupervisorMobility.API.Controllers.SOS_Controllers
         /// <exception cref="ArgumentNullException">
         /// Thrown when <paramref name="mapper"/> or <paramref name="env"/> is null.
         /// </exception>
-        public DistributionController(IWebHostEnvironment env, IMapper mapper, ISOS_ProcessRepository repository, ISTROSyncDistributionService STROSyncDistributionService)
+        public DistributionController(IWebHostEnvironment env, IMapper mapper, ISOS_ProcessRepository repository, ISTROSyncDistributionService STROSyncDistributionService, ISOS_DistributionRepository distributionRepository, ISOS_AnalysisRepository analysisRepository, ISOS_SequenceRepository sequenceRepository)
         {
             _ProcessRepository = repository;
             _mapper = mapper ??throw new ArgumentNullException(nameof(mapper));
             _env = env ?? throw new ArgumentNullException(nameof(env));
             _STROSyncDistributionService = STROSyncDistributionService;
-
+            _DistributionRepository = distributionRepository;
+            _SequenceRepository = sequenceRepository;
+            _AnalysisRepository = analysisRepository;
         }
 
         // +============ ROUTES / ENDPOINTS ============+\\
@@ -112,7 +120,7 @@ namespace SupervisorMobility.API.Controllers.SOS_Controllers
                 SOSDistribution DistributionToCreate = _mapper.Map<SOSDistribution>(sOSDistributionToCreate);
 
                 // NOTE: Create new distribution in repository
-                var createdResult = await _ProcessRepository.CreateSOSDistribution(DistributionToCreate);
+                var createdResult = await _DistributionRepository.CreateSOSDistribution(DistributionToCreate);
                 if (createdResult != null)
                     return Ok(DistributionToCreate);
                 else
@@ -121,19 +129,19 @@ namespace SupervisorMobility.API.Controllers.SOS_Controllers
             else
             {
                 // NOTE: Fetch existing distribution with all related data
-                SOSDistribution _sosDistribution = await _ProcessRepository.GetSOSDistribution(sOSDistributionToCreate.SOSDistributionId, true, true, true, true);
+                SOSDistribution _sosDistribution = await _DistributionRepository.GetSOSDistribution(sOSDistributionToCreate.SOSDistributionId, true, true, true, true);
 
                 // NOTE: Map the last logbook entry from DTO
                 SOSDistributionLogbook _logbookToCreate = _mapper.Map<SOSDistributionLogbook>(sOSDistributionToCreate.DistributionLogbooks?.Last());
                 _logbookToCreate.SOSDistributionId = _sosDistribution.SOSDistributionId;
 
                 // NOTE: Add logbook entry to repository
-                var resultAddSections = await _ProcessRepository.CreateSOSDistributionLogbook(_logbookToCreate);
+                var resultAddSections = await _DistributionRepository.CreateSOSDistributionLogbook(_logbookToCreate);
 
                 if (resultAddSections > 0)
                 {
                     // NOTE: Link logbook entry to distribution
-                    await _ProcessRepository.AddSOSDistributionLogbookToSOSDistribution(_sosDistribution, _logbookToCreate);
+                    await _DistributionRepository.AddSOSDistributionLogbookToSOSDistribution(_sosDistribution, _logbookToCreate);
                 }
                 else
                 {
@@ -167,7 +175,7 @@ namespace SupervisorMobility.API.Controllers.SOS_Controllers
         public async Task<ActionResult<SOSDistributionDto>> GetSOSDistribution(int id, bool includeImages = false, bool includeNotes = false, bool includeLogbooks = false, bool includeSOS = false, bool includeImagesSOS = false, bool includeTurns = false, bool includeTimes = false, bool includeCollections = false)
         {
             // NOTE: Retrieve the SOS distribution with requested related data
-            var SOSDistribution = await _ProcessRepository.GetSOSDistribution(id, includeImages, includeNotes, includeLogbooks, includeSOS, includeImagesSOS, includeTurns, includeTimes, includeCollections: includeCollections);
+            var SOSDistribution = await _DistributionRepository.GetSOSDistribution(id, includeImages, includeNotes, includeLogbooks, includeSOS, includeImagesSOS, includeTurns, includeTimes, includeCollections: includeCollections);
 
             // NOTE: Return 404 if distribution is not found
             if (SOSDistribution == null) { return NotFound("SOSDistribution not found!"); }
@@ -197,10 +205,10 @@ namespace SupervisorMobility.API.Controllers.SOS_Controllers
         public async Task<ActionResult<SOSDistributionDto>> GetDistributionBySOSHub(int idSOSHub, bool includeImages = false, bool includeNotes = false, bool includeLogbooks = false, bool includeSOS = false, bool includeImagesSOS = false, bool includeTurns = false, bool includeTimes = false, bool includeCollections = false)
         {
             // NOTE: Retrieve the distribution ID associated with the SOS Hub
-            var idDistribution = await _ProcessRepository.GetIdDistributionBySosHub(idSOSHub);
+            var idDistribution = await _DistributionRepository.GetIdDistributionBySosHub(idSOSHub);
 
             // NOTE: Retrieve the distribution with requested related data
-            var SOSDistribution = await _ProcessRepository.GetSOSDistribution(idDistribution, includeImages, includeNotes, includeLogbooks, includeSOS, includeImagesSOS, includeTurns, includeTimes, includeCollections: includeCollections);
+            var SOSDistribution = await _DistributionRepository.GetSOSDistribution(idDistribution, includeImages, includeNotes, includeLogbooks, includeSOS, includeImagesSOS, includeTurns, includeTimes, includeCollections: includeCollections);
 
             // NOTE: Return 404 if distribution is not found
             if (SOSDistribution == null) return NotFound("SOSDistribution not found!");
@@ -225,7 +233,7 @@ namespace SupervisorMobility.API.Controllers.SOS_Controllers
         public async Task<ActionResult<IEnumerable<SOSDistributionDto>>> GetAllSOSDistribution(bool includeImages = false, bool includeNotes = false, bool includeLogbooks = false, bool includeSOS = false)
         {
             // NOTE: Retrieve all distributions with requested related data
-            var CheckpointEntities = await _ProcessRepository.GetAllSOSDistribution(includeImages, includeNotes, includeLogbooks, includeSOS);
+            var CheckpointEntities = await _DistributionRepository.GetAllSOSDistribution(includeImages, includeNotes, includeLogbooks, includeSOS);
 
             // NOTE: Return 404 if no distributions found
             if (CheckpointEntities == null) return NotFound("Get All Sos Analisis not found!");
@@ -301,7 +309,7 @@ namespace SupervisorMobility.API.Controllers.SOS_Controllers
                     DistributionLogbook.IsActive = true;
                 }
 
-                var resultAddSOSDistributionLogbook = await _ProcessRepository.AddRangeSOSDistributionLogbook(newSOSDistributionLogbook);
+                var resultAddSOSDistributionLogbook = await _DistributionRepository.AddRangeSOSDistributionLogbook(newSOSDistributionLogbook);
 
                 if (resultAddSOSDistributionLogbook != null)
                 {
@@ -328,7 +336,7 @@ namespace SupervisorMobility.API.Controllers.SOS_Controllers
                     time.IsActive = true;
                 }
 
-                var resultAddSOSTime = await _ProcessRepository.AddRangeSOSDistributionOperationSequences(newSOSTime);
+                var resultAddSOSTime = await _DistributionRepository.AddRangeSOSDistributionOperationSequences(newSOSTime);
 
 
                 if (resultAddSOSTime != null)
@@ -370,7 +378,7 @@ namespace SupervisorMobility.API.Controllers.SOS_Controllers
             }
 
 
-            SOSDistribution _sosDistribution = await _ProcessRepository.GetSOSDistribution(sosDistribution_Id, true, true, true, true, includeTurns: true, includeTimes: true, includeCollections: true);
+            SOSDistribution _sosDistribution = await _DistributionRepository.GetSOSDistribution(sosDistribution_Id, true, true, true, true, includeTurns: true, includeTimes: true, includeCollections: true);
 
             //Aqui va el historico de ser necesario en  un futuro 
 
@@ -391,13 +399,13 @@ namespace SupervisorMobility.API.Controllers.SOS_Controllers
 
             foreach (var sequence in sosUpdateEntity.Sequences)
             {
-                SOSSequence sequenceToAdd = await _ProcessRepository.GetSOSSequence(sequence.SOSSequenceId);
+                SOSSequence sequenceToAdd = await _SequenceRepository.GetSOSSequence(sequence.SOSSequenceId);
                 Bkup_Sequence.Add(sequenceToAdd);
             }
 
             foreach (var analysis in sosUpdateEntity.Analyses)
             {
-                SOSAnalysis analysisToAdd = await _ProcessRepository.GetSOSAnalysis(analysis.SOSAnalysisId);
+                SOSAnalysis analysisToAdd = await _AnalysisRepository.GetSOSAnalysis(analysis.SOSAnalysisId);
                 Bkup_Analysis.Add(analysisToAdd);
             }
 
@@ -410,13 +418,13 @@ namespace SupervisorMobility.API.Controllers.SOS_Controllers
                 Bkup_Notes.Add(CommentaryToAdd);
             }
 
-            var AdditionalTimeUpdate = await _ProcessRepository.UpdateSOSDistributionAdditionalTime(sosUpdateEntity.SOSDistributionAdditionalTime);
-            additionalTime = await _ProcessRepository.GetSOSDistributionAdditionalTimeId(sosUpdateEntity.SOSDistributionAdditionalTime.SOSDistributionAdditionalTimeId);
+            var AdditionalTimeUpdate = await _DistributionRepository.UpdateSOSDistributionAdditionalTime(sosUpdateEntity.SOSDistributionAdditionalTime);
+            additionalTime = await _DistributionRepository.GetSOSDistributionAdditionalTimeId(sosUpdateEntity.SOSDistributionAdditionalTime.SOSDistributionAdditionalTimeId);
 
             foreach (var logbook in sosUpdateEntity.DistributionLogbooks)
             {
-                var distributionUpdate = await _ProcessRepository.UpdateDistributionLogbook(logbook);
-                SOSDistributionLogbook distributionBkaux = await _ProcessRepository.GetSOSDistributionLogbookById(logbook.SOSDistributionLogbookId);
+                var distributionUpdate = await _DistributionRepository.UpdateDistributionLogbook(logbook);
+                SOSDistributionLogbook distributionBkaux = await _DistributionRepository.GetSOSDistributionLogbookById(logbook.SOSDistributionLogbookId);
                 Bkup_DistributionLogbook.Add(distributionBkaux);
             }
 
@@ -447,14 +455,14 @@ namespace SupervisorMobility.API.Controllers.SOS_Controllers
 
             foreach (var operationsequence in OperationSequencesUpdate)
             {
-                var operationsequenceUpdate = await _ProcessRepository.UpdateSOSDistributionOperationSequences(operationsequence);
-                SOSDistributionOperationSequence timeBkaux = await _ProcessRepository.GetSOSDistributionOperationSequencesById(operationsequence.SOSDistributionOperationSequenceId);
+                var operationsequenceUpdate = await _DistributionRepository.UpdateSOSDistributionOperationSequences(operationsequence);
+                SOSDistributionOperationSequence timeBkaux = await _DistributionRepository.GetSOSDistributionOperationSequencesById(operationsequence.SOSDistributionOperationSequenceId);
                 Backup_DistributionOperationSequence.Add(timeBkaux);
             }
 
             foreach (var operationsequence in OperationSequencesDelete)
             {
-                await _ProcessRepository.DeleteSOSDistributionOperationSequencesById(operationsequence.SOSDistributionOperationSequenceId);
+                await _DistributionRepository.DeleteSOSDistributionOperationSequencesById(operationsequence.SOSDistributionOperationSequenceId);
             }
 
             foreach (var turn in sosUpdateEntity.Turns)
@@ -508,17 +516,17 @@ namespace SupervisorMobility.API.Controllers.SOS_Controllers
             sosUpdateEntity.SOSDistributionOperationSequence = null;
             sosUpdateEntity.SOSDistributionAdditionalTime = null;
 
-            await _ProcessRepository.SOSDataRemoveAllSequencesFromSOSDistribution(_sosDistribution);
-            await _ProcessRepository.SOSDataRemoveAllAnalysisFromSOSDistribution(_sosDistribution);
+            await _DistributionRepository.SOSDataRemoveAllSequencesFromSOSDistribution(_sosDistribution);
+            await _DistributionRepository.SOSDataRemoveAllAnalysisFromSOSDistribution(_sosDistribution);
 
             await _ProcessRepository.RemoveAllTurnsFromSOSDistribution(_sosDistribution);
-            await _ProcessRepository.SOSDataRemoveAllNotesFromSOSDistribution(_sosDistribution);
-            await _ProcessRepository.SOSDataRemoveAllSOSDistributionLogbookFromSOSDistribution(_sosDistribution);
-            await _ProcessRepository.SOSDataRemoveAllSOSDistributionAdditionalTimeFromSOSDistribution(_sosDistribution);
+            await _DistributionRepository.SOSDataRemoveAllNotesFromSOSDistribution(_sosDistribution);
+            await _DistributionRepository.SOSDataRemoveAllSOSDistributionLogbookFromSOSDistribution(_sosDistribution);
+            await _DistributionRepository.SOSDataRemoveAllSOSDistributionAdditionalTimeFromSOSDistribution(_sosDistribution);
 
-            await _ProcessRepository.SOSDataRemoveAllSOSHubsFromSOSDistribution(_sosDistribution);
+            await _DistributionRepository.SOSDataRemoveAllSOSHubsFromSOSDistribution(_sosDistribution);
 
-            var result = await _ProcessRepository.UpdateSOSDistribution(sosUpdateEntity, _sosDistribution);
+            var result = await _DistributionRepository.UpdateSOSDistribution(sosUpdateEntity, _sosDistribution);
 
 
 
@@ -528,14 +536,14 @@ namespace SupervisorMobility.API.Controllers.SOS_Controllers
             {
                 foreach (SOSAnalysis Analysis in Bkup_Analysis)
                 {
-                    await _ProcessRepository.AddAnalysisToSOSDistribution(_sosDistribution, Analysis);
+                    await _DistributionRepository.AddAnalysisToSOSDistribution(_sosDistribution, Analysis);
                 }
             }
             if (Bkup_Sequence.Any())
             {
                 foreach (SOSSequence Sequence in Bkup_Sequence)
                 {
-                    await _ProcessRepository.AddSequenceToSOSDistribution(_sosDistribution, Sequence);
+                    await _DistributionRepository.AddSequenceToSOSDistribution(_sosDistribution, Sequence);
                 }
             }
 
@@ -545,7 +553,7 @@ namespace SupervisorMobility.API.Controllers.SOS_Controllers
             {
                 foreach (Commentary Comment in Bkup_Notes)
                 {
-                    await _ProcessRepository.AddNoteToSOSDistribution(_sosDistribution, Comment);
+                    await _DistributionRepository.AddNoteToSOSDistribution(_sosDistribution, Comment);
                 }
             }
 
@@ -554,7 +562,7 @@ namespace SupervisorMobility.API.Controllers.SOS_Controllers
             {
                 foreach (SOSDistributionLogbook logbook in Bkup_DistributionLogbook)
                 {
-                    await _ProcessRepository.AddSOSDistributionLogbookToSOSDistribution(_sosDistribution, logbook);
+                    await _DistributionRepository.AddSOSDistributionLogbookToSOSDistribution(_sosDistribution, logbook);
                 }
             }
 
@@ -582,7 +590,7 @@ namespace SupervisorMobility.API.Controllers.SOS_Controllers
                         System.Diagnostics.Debug.WriteLine($"Updated sequence {operationSequence.SOSDistributionOperationSequenceId}: {oldSequenceId} -> {operationSequence.SequenceId}");
                     }
 
-                    await _ProcessRepository.AddOperationSequenceToSOSDistribution(_sosDistribution, operationSequence);
+                    await _DistributionRepository.AddOperationSequenceToSOSDistribution(_sosDistribution, operationSequence);
                 }
             }
 
@@ -595,7 +603,7 @@ namespace SupervisorMobility.API.Controllers.SOS_Controllers
                 }
             }
 
-            await _ProcessRepository.AddSOSDistributionAdditionalTimeToSOSDistribution(_sosDistribution, additionalTime);
+            await _DistributionRepository.AddSOSDistributionAdditionalTimeToSOSDistribution(_sosDistribution, additionalTime);
 
 
             if (hubsToAssociate.Any())
@@ -603,7 +611,7 @@ namespace SupervisorMobility.API.Controllers.SOS_Controllers
                 foreach (SOSHub hub in hubsToAssociate)
                 {
                     if (_sosDistribution.SOSHubs.Any(h => h.SOSHubId == hub.SOSHubId))
-                        await _ProcessRepository.AddSOSHubToSOSDistribution(_sosDistribution, hub);
+                        await _DistributionRepository.AddSOSHubToSOSDistribution(_sosDistribution, hub);
                 }
             }
 
@@ -630,7 +638,7 @@ namespace SupervisorMobility.API.Controllers.SOS_Controllers
                     var hub = await _ProcessRepository.GetSOSHub(hubId.Value);
                     if (hub != null)
                     {
-                        await _ProcessRepository.AddSOSHubToSOSDistribution(_sosDistribution, hub);
+                        await _DistributionRepository.AddSOSHubToSOSDistribution(_sosDistribution, hub);
                     }
                 }
             }
@@ -650,7 +658,7 @@ namespace SupervisorMobility.API.Controllers.SOS_Controllers
         [HttpDelete("{SOSDistributionId}")]
         public async Task<ActionResult<int>> RemoveSOSHub(int SOSDistributionId)
         {
-            var result = await _ProcessRepository.RemoveSOSDistribution(SOSDistributionId);
+            var result = await _DistributionRepository.RemoveSOSDistribution(SOSDistributionId);
 
             if (result > 0)
                 return Ok();
@@ -691,7 +699,7 @@ namespace SupervisorMobility.API.Controllers.SOS_Controllers
 
             var fileToReturn = await _ProcessRepository.CreateFileAsync(uploadResult);
 
-            await _ProcessRepository.AddIlustrationToSOSDistribution(Distribution_id, fileToReturn);
+            await _DistributionRepository.AddIlustrationToSOSDistribution(Distribution_id, fileToReturn);
             await _ProcessRepository.SaveChangesAsync();
 
             return Ok(fileToReturn);
@@ -724,7 +732,7 @@ namespace SupervisorMobility.API.Controllers.SOS_Controllers
         [HttpDelete("Ilustrations/{SOS_SOSDistribution_id}/remove/{ImageFile_id}")]
         public async Task<ActionResult<int>> RemoveImage(int SOS_SOSDistribution_id, int ImageFile_id)
         {
-            var result = await _ProcessRepository.RemoveIlustrationFromSOSDistribution(SOS_SOSDistribution_id, ImageFile_id);
+            var result = await _DistributionRepository.RemoveIlustrationFromSOSDistribution(SOS_SOSDistribution_id, ImageFile_id);
 
             if (result > 0)
                 return Ok();
