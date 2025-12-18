@@ -8,6 +8,7 @@ namespace SupervisorMobility.API.Models.DistributionDtos
         public string Code { get; set; } = string.Empty;
         public string Description { get; set; } = string.Empty;
         public bool? IsActive { get; set; }
+        public int AreaId { get; set; }
         public int CriticalType { get; set; }
         public ICollection<ProductDtos.ProductDto> Products { get; set; }
             = new List<ProductDtos.ProductDto>();

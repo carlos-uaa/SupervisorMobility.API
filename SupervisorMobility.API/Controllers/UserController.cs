@@ -801,7 +801,7 @@ namespace SupervisorMobility.API.Controllers
 
                 User exsuperior = await _supervisorMobilityRepository.GetUserAsync((int)usertoRemove.SuperiorId, true);
 
-                _supervisorMobilityRepository.UserRemoveSubordinated(exsuperior, usertoRemove);
+               await  _supervisorMobilityRepository.UserRemoveSubordinated(exsuperior, usertoRemove);
             }
 
             return Ok();
@@ -914,13 +914,21 @@ namespace SupervisorMobility.API.Controllers
                     ItemInUserList.Subordinates = null;
                 }
 
-                if (ItemInUserList.Areas != null)
+                if (ItemInUserList.Areas != null || ItemInUserList.AreaId!=null)
                 {
                     haveAreas = true;
-                    foreach (var AreainList in ItemInUserList.Areas)
+                    if (ItemInUserList.Areas != null)
                     {
-                        AreasInUser.Add(await _supervisorMobilityRepository.GetAreaForPlantAsync((int)ItemInUserList.PlantId, AreainList.AreaId));
+                        foreach (var AreainList in ItemInUserList.Areas)
+                        {
+                            AreasInUser.Add(await _supervisorMobilityRepository.GetAreaForPlantAsync((int)ItemInUserList.PlantId, AreainList.AreaId));
+                        }
                     }
+                    if (ItemInUserList.AreaId != null)
+                    {
+                        AreasInUser.Add(await _supervisorMobilityRepository.GetAreaForPlantAsync((int)ItemInUserList.PlantId, (int)ItemInUserList.AreaId));
+                    }
+
                     ItemInUserList.Areas = null;
                 }
 
@@ -978,8 +986,8 @@ namespace SupervisorMobility.API.Controllers
                                         ItemInUserList.PlantId = actualSuperior.PlantId;
                                         ItemInUserList.GroupId = actualSuperior.GroupId;
 
-                                        if (ItemInUserList.UserType == 4)
-                                            ItemInUserList.AreaId = actualSuperior.AreaId;
+                                        //if (ItemInUserList.UserType == 4)
+                                        //    ItemInUserList.AreaId = actualSuperior.AreaId;
 
                                         InComingUserToCompare = _mapper.Map<User>(ItemInUserList);
                                     }
@@ -1071,8 +1079,8 @@ namespace SupervisorMobility.API.Controllers
                                             InComingUserToCompare.PlantId = actualSuperior?.PlantId;
                                             InComingUserToCompare.GroupId = actualSuperior?.GroupId;
 
-                                            if (ItemInUserList.UserType == 4)
-                                                InComingUserToCompare.AreaId = actualSuperior.AreaId;
+                                            //if (ItemInUserList.UserType == 4)
+                                            //    InComingUserToCompare.AreaId = actualSuperior.AreaId;
 
                                             await _supervisorMobilityRepository.UserAddSubordinated(actualSuperior, UserInDb);
 
@@ -1285,8 +1293,9 @@ namespace SupervisorMobility.API.Controllers
                                 else
                                 {
                                     User actualSuperior = await _supervisorMobilityRepository.GetUserAsync((int)InComingUserToCompare.SuperiorId, true);
+                                    var areasInSuperior = InComingUserToCompare.Areas.All(a => actualSuperior.Areas.All(a2 => a.AreaId == a2.AreaId));
                                     if (InComingUserToCompare.PlantId != actualSuperior.PlantId ||
-                                        InComingUserToCompare.AreaId != actualSuperior.AreaId ||
+                                        areasInSuperior ||
                                         InComingUserToCompare.GroupId != actualSuperior.GroupId)
                                     {
                                         InComingUserToCompare.PlantId = actualSuperior.PlantId;
@@ -1323,8 +1332,9 @@ namespace SupervisorMobility.API.Controllers
                             else
                             {
                                 User actualSuperior = await _supervisorMobilityRepository.GetUserAsync((int)InComingUserToCompare.SuperiorId, true);
+                                var areasInSuperior = InComingUserToCompare.Areas.All(a => actualSuperior.Areas.All(a2 => a.AreaId == a2.AreaId));
                                 if (InComingUserToCompare.PlantId != actualSuperior.PlantId ||
-                                    InComingUserToCompare.AreaId != actualSuperior.AreaId ||
+                                    areasInSuperior ||
                                     InComingUserToCompare.GroupId != actualSuperior.GroupId)
                                 {
                                     InComingUserToCompare.PlantId = actualSuperior.PlantId;
@@ -1413,8 +1423,8 @@ namespace SupervisorMobility.API.Controllers
                         item.PlantId = MasterUser.PlantId;
                         item.GroupId = MasterUser.GroupId;
 
-                        if (item.UserType == 4)
-                            item.AreaId = MasterUser.AreaId;
+                        //if (item.UserType == 4)
+                        //    item.AreaId = MasterUser.AreaId;
 
                     }
 
@@ -1438,17 +1448,17 @@ namespace SupervisorMobility.API.Controllers
                     }
                 }
 
-                if (item.AreaId == 0 || item.AreaId == -1)
-                {
-                    item.AreaId = null;
-                }
-                else if (item.AreaId != null)
-                {
-                    if (!await _supervisorMobilityRepository.AreaExistAsync((int)item.AreaId))
-                    {
-                        return NotFound("No Area");
-                    }
-                }
+                //if (item.AreaId == 0 || item.AreaId == -1)
+                //{
+                //    item.AreaId = null;
+                //}
+                //else if (item.AreaId != null)
+                //{
+                //    if (!await _supervisorMobilityRepository.AreaExistAsync((int)item.AreaId))
+                //    {
+                //        return NotFound("No Area");
+                //    }
+                //}
 
                 if (item.GroupId == 0 || item.GroupId == -1)
                 {
@@ -1674,7 +1684,7 @@ namespace SupervisorMobility.API.Controllers
                 {
                     foreach (var elemntUser in UsersInUser)
                     {
-                        _supervisorMobilityRepository.UserAddSubordinated(UserToReturn, elemntUser);
+                        await _supervisorMobilityRepository.UserAddSubordinated(UserToReturn, elemntUser);
                     }
                 }
 
@@ -1682,7 +1692,7 @@ namespace SupervisorMobility.API.Controllers
                 {
                     foreach (var elemntArea in AreasInUser)
                     {
-                        _supervisorMobilityRepository.UserAddArea(UserToReturn, elemntArea);
+                        await _supervisorMobilityRepository.UserAddArea(UserToReturn, elemntArea);
                     }
                 }
 
@@ -1695,7 +1705,7 @@ namespace SupervisorMobility.API.Controllers
                     var entityhci = await _supervisorMobilityRepository.AddHCI(hciEntity);
                 }
 
-                _supervisorMobilityRepository.UserAddSubordinated(MasterUser, UserToReturn);
+                await _supervisorMobilityRepository.UserAddSubordinated(MasterUser, UserToReturn);
             }
 
             return Ok(ResultToReturn);
