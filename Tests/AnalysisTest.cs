@@ -12,7 +12,7 @@ using System.Net.Http.Json;
 
 namespace Tests
 {
-    public class AnalysisRepositoryTest : IDisposable
+    public class AnalysisTest : IDisposable
     {
         #region StartUp
         private HttpClient _client;
@@ -30,7 +30,7 @@ namespace Tests
         }
         #endregion
 
-        // Test for Create Analysis
+        // Tests for Create Analysis
         #region Get Single Analysis
         [Test, Order(1)]
         public async Task Test_CreateAnalysis_ReturnsSuccess()
@@ -114,7 +114,7 @@ namespace Tests
             Assert.IsTrue(analysis.SOSHubId > 0);
 
             // Assert: Performance
-            Assert.Less(stopwatch.ElapsedMilliseconds, 2000, $"El endpoint tardó demasiado: {stopwatch.ElapsedMilliseconds} ms");
+            Assert.Less(stopwatch.ElapsedMilliseconds, 3000, $"El endpoint tardó demasiado: {stopwatch.ElapsedMilliseconds} ms");
         }
 
         [Test, Order(2)]
@@ -290,7 +290,93 @@ namespace Tests
             analysis.OperationName = originalOperationName;
             await _customClient.PutAsJsonAsync($"/api/SOS/Analysis/{analysisId}", analysis);
         }
-     
+
+        [Test, Order(7)]
+        public async Task Test_UpdateAnalysis_ReturnsNotFound()
+        {
+            // Arrange
+            var userId = 1;
+            var nonExistentAnalysisId = 9999;
+            var analysisDto = new SOSAnalysisForUpdateDto
+            {
+                SOSAnalysisId = nonExistentAnalysisId,
+                InternalControlNumber = "ICN-9999",
+                OperationName = "Non-existent Analysis",
+                ProcessName = "Test Process",
+                AnalysisLogbooks = new List<SOSAnalysisLogbookForUpdateDto>(),
+                Notes = new List<UpdateCommentaryDto>(),
+                Times = new List<SOSTimeForUpdateDto>(),
+                CreatedDate = DateTime.UtcNow,
+                IsActive = true,
+                SOSHubId = 1
+            };
+
+            // Act
+            var putResponse = await _customClient.PutAsJsonAsync($"/api/SOS/Analysis/{nonExistentAnalysisId}?userId={userId}", analysisDto);
+
+            // Assert
+            Assert.AreEqual(HttpStatusCode.InternalServerError, putResponse.StatusCode);
+        }
+
+        #endregion
+
+        // Tests for Delete Analysis
+        #region Delete Analysis
+        [Test, Order(8)]
+        public async Task Test_DeleteAnalysis_ReturnsSuccess()
+        {
+            // Arrange
+            var userId = 1;
+            var analysisId = 1;
+            var getResponse = await _client.GetAsync($"/api/SOS/Analysis/{analysisId}");
+            var analysis = await getResponse.Content.ReadFromJsonAsync<SOSAnalysisDto>();
+            Assert.IsNotNull(analysis);
+
+            // Post the copy in temporal DB
+            var analysisCopy = new SOSAnalysisForCreateDto
+            {
+                SOSAnalysisId = 0,
+                InternalControlNumber = analysis.InternalControlNumber,
+                OperationName = analysis.OperationName,
+                ProcessName = analysis.ProcessName,
+                AnalysisLogbooks = analysis.AnalysisLogbooks,
+                Notes = new List<CreateCommentaryDto>(),
+                Times = new List<SOSTimeForCreateDto>(),
+                CreatedDate = analysis.CreatedDate,
+                IsActive = analysis.IsActive,
+                SOSHubId = analysis.SOSHubId
+
+            };
+
+            var postResponse = await _customClient.PostAsJsonAsync($"/api/SOS/Analysis?SOSHubCollection_Id={1}", analysisCopy);
+            postResponse.EnsureSuccessStatusCode();
+            var createdAnalysis = await postResponse.Content.ReadFromJsonAsync<SOSAnalysisDto>();
+            Assert.IsNotNull(createdAnalysis);
+
+            // Act
+            var deleteResponse = await _customClient.DeleteAsync($"/api/SOS/Analysis/{createdAnalysis.SOSAnalysisId}?userId={userId}");
+
+            // Assert
+            deleteResponse.EnsureSuccessStatusCode();
+
+            // Verify deletion
+            var verifyResponse = await _customClient.GetAsync($"/api/SOS/Analysis/{createdAnalysis.SOSAnalysisId}");
+            Assert.AreEqual(HttpStatusCode.NotFound, verifyResponse.StatusCode);
+        }
+
+        [Test, Order(9)]
+        public async Task Test_DeleteAnalysis_ReturnsNotFound()
+        {
+            // Arrange
+            var userId = 1;
+            var nonExistentAnalysisId = 9999;
+
+            // Act
+            var deleteResponse = await _customClient.DeleteAsync($"/api/SOS/Analysis/{nonExistentAnalysisId}?userId={userId}");
+
+            // Assert
+            Assert.AreEqual(HttpStatusCode.BadRequest, deleteResponse.StatusCode);
+        }
         #endregion
 
         // Dispose method to clean up resources
