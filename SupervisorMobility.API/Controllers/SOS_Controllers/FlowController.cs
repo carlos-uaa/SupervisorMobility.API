@@ -2,6 +2,7 @@
 using Microsoft.AspNetCore.Mvc;
 using SupervisorMobility.API.DataAccess.Entities.SOS;
 using SupervisorMobility.API.DataAccess.Services;
+using SupervisorMobility.API.DataAccess.Services.SOS_FlowRepository;
 using SupervisorMobility.API.Models.SOS.SOSCombinationDtos;
 using SupervisorMobility.API.Models.SOS.SOSCombinationLogbookDtos;
 using SupervisorMobility.API.Models.SOS.SOSFlowDtos;
@@ -17,13 +18,15 @@ namespace SupervisorMobility.API.Controllers.SOS_Controllers
     {
         private readonly IMapper _mapper;
         private readonly ISOS_ProcessRepository _ProcessRepository;
+        private readonly ISOS_FlowRepository _FlowRepository;
         private readonly IWebHostEnvironment _env;
-        public FlowController(IWebHostEnvironment env, IMapper mapper, ISOS_ProcessRepository repository)
+        public FlowController(IWebHostEnvironment env, IMapper mapper, ISOS_ProcessRepository repository, ISOS_FlowRepository flowRepository)
         {
             _ProcessRepository = repository;
             _mapper = mapper ??
                   throw new ArgumentNullException(nameof(mapper));
             _env = env ?? throw new ArgumentNullException(nameof(env));
+            _FlowRepository = flowRepository;
         }
 
         [HttpPost]
@@ -46,7 +49,7 @@ namespace SupervisorMobility.API.Controllers.SOS_Controllers
                 }
 
 
-                var createdResult = await _ProcessRepository.CreateSOSFlow(FlowToCreate);
+                var createdResult = await _FlowRepository.CreateSOSFlow(FlowToCreate);
                 if (createdResult != null)
                     return Ok(FlowToCreate);
                 else
@@ -55,7 +58,7 @@ namespace SupervisorMobility.API.Controllers.SOS_Controllers
             else
             {
                 //only add revision
-                SOSFlow _sosFlow = await _ProcessRepository.GetSOSFlow(sOSFlowToCreate.SOSFlowId, true, true, true, true);
+                SOSFlow _sosFlow = await _FlowRepository.GetSOSFlow(sOSFlowToCreate.SOSFlowId, true, true, true, true);
 
                 // si el hys anterior es diferente update
                 // si el anterior es null y hay un id actualizar
@@ -71,12 +74,12 @@ namespace SupervisorMobility.API.Controllers.SOS_Controllers
                 SOSFlowLogbook _logbookToCreate = _mapper.Map<SOSFlowLogbook>(sOSFlowToCreate.FlowLogbooks?.Last());
                 _logbookToCreate.SOSFlowId = _sosFlow.SOSFlowId;
 
-                var resultAddSections = await _ProcessRepository.CreateSOSFlowLogbook(_logbookToCreate);
+                var resultAddSections = await _FlowRepository.CreateSOSFlowLogbook(_logbookToCreate);
 
                 if (resultAddSections > 0)
                 {
                     Debug.WriteLine("SOSFlowLogbook añadidas con exito");
-                    await _ProcessRepository.AddSOSFlowLogbookToSOSFlow(_sosFlow, _logbookToCreate);
+                    await _FlowRepository.AddSOSFlowLogbookToSOSFlow(_sosFlow, _logbookToCreate);
                 }
                 else
                 {
@@ -95,7 +98,7 @@ namespace SupervisorMobility.API.Controllers.SOS_Controllers
         public async Task<ActionResult<SOSFlowDto>> GetSOSFlow(int id, bool includeImages = false, bool includeNotes = false, bool includeLogbooks = false, bool includeSpecialCases = false, bool includeSOS = false, bool includeImagesSOS = false, bool includePeople = false)
         {
 
-            var SOSFlow = await _ProcessRepository.GetSOSFlow(id, includeImages, includeNotes, includeLogbooks, includeSOS, includeImagesSOS, includePeople);
+            var SOSFlow = await _FlowRepository.GetSOSFlow(id, includeImages, includeNotes, includeLogbooks, includeSOS, includeImagesSOS, includePeople);
             if (SOSFlow == null)
             {
                 return NotFound("SOSFlow not found!");
@@ -108,7 +111,7 @@ namespace SupervisorMobility.API.Controllers.SOS_Controllers
         public async Task<ActionResult<IEnumerable<SOSFlowDto>>> GetAllSOSFlow(bool includeImages = false, bool includeNotes = false, bool includeLogbooks = false, bool includeSpecialCases = false, bool includeSOS = false)
         {
 
-            var CheckpointEntities = await _ProcessRepository.GetAllSOSFlow(includeImages, includeNotes, includeLogbooks, includeSOS);
+            var CheckpointEntities = await _FlowRepository.GetAllSOSFlow(includeImages, includeNotes, includeLogbooks, includeSOS);
             if (CheckpointEntities == null)
             {
                 return NotFound("Get All Sos Analisis not found!");
@@ -143,7 +146,7 @@ namespace SupervisorMobility.API.Controllers.SOS_Controllers
                     FlowLogbook.IsActive = true;
                 }
 
-                var resultAddSOSFlowLogbook = await _ProcessRepository.AddRangeSOSFlowLogbook(newSOSFlowLogbook);
+                var resultAddSOSFlowLogbook = await _FlowRepository.AddRangeSOSFlowLogbook(newSOSFlowLogbook);
 
                 if (resultAddSOSFlowLogbook != null)
                 {
@@ -160,7 +163,7 @@ namespace SupervisorMobility.API.Controllers.SOS_Controllers
            
 
 
-            SOSFlow _sosFlow = await _ProcessRepository.GetSOSFlow(sosFlow_Id, true, true, true);
+            SOSFlow _sosFlow = await _FlowRepository.GetSOSFlow(sosFlow_Id, true, true, true);
 
             ////Aqui va el historico de ser necesario en  un futuro 
 
@@ -178,8 +181,8 @@ namespace SupervisorMobility.API.Controllers.SOS_Controllers
 
             foreach (var logbook in sosUpdateEntity.FlowLogbooks)
             {
-                var flowUpdate = await _ProcessRepository.UpdateFlowLogbook(logbook);
-                SOSFlowLogbook flowBkaux = await _ProcessRepository.GetSOSFlowLogbookById(logbook.SOSFlowLogbookId);
+                var flowUpdate = await _FlowRepository.UpdateFlowLogbook(logbook);
+                SOSFlowLogbook flowBkaux = await _FlowRepository.GetSOSFlowLogbookById(logbook.SOSFlowLogbookId);
                 Bkup_FlowLogbook.Add(flowBkaux);
             }
 
@@ -187,9 +190,9 @@ namespace SupervisorMobility.API.Controllers.SOS_Controllers
             //Nulleamos el update para evitar errores
             sosUpdateEntity.FlowLogbooks = null;
 
-            await _ProcessRepository.SOSDataRemoveAllSOSFlowLogbookFromSOSFlow(_sosFlow);
+            await _FlowRepository.SOSDataRemoveAllSOSFlowLogbookFromSOSFlow(_sosFlow);
 
-            var result = await _ProcessRepository.UpdateSOSFlow(sosUpdateEntity, _sosFlow);
+            var result = await _FlowRepository.UpdateSOSFlow(sosUpdateEntity, _sosFlow);
 
             // Volver a añádir bkup
 
@@ -198,7 +201,7 @@ namespace SupervisorMobility.API.Controllers.SOS_Controllers
             {
                 foreach (SOSFlowLogbook logbook in Bkup_FlowLogbook)
                 {
-                    await _ProcessRepository.AddSOSFlowLogbookToSOSFlow(_sosFlow, logbook);
+                    await _FlowRepository.AddSOSFlowLogbookToSOSFlow(_sosFlow, logbook);
                 }
             }
 
@@ -220,7 +223,7 @@ namespace SupervisorMobility.API.Controllers.SOS_Controllers
         [HttpDelete("{SOSFlowId}")]
         public async Task<ActionResult<int>> RemoveSOSHub(int SOSFlowId)
         {
-            var result = await _ProcessRepository.RemoveSOSFlow(SOSFlowId);
+            var result = await _FlowRepository.RemoveSOSFlow(SOSFlowId);
 
             if (result > 0)
                 return Ok();
