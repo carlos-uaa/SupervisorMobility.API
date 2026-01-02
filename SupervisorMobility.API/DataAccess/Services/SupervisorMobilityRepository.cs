@@ -1215,14 +1215,15 @@ namespace SupervisorMobility.API.Services
 
         public async Task<AsyncVoidMethodBuilder> UserAddArea(User Master, Area Slave)
         {
-            if (Master.Areas != null)
+            var userWithAreas = await _context.Users.Include(u => u.Areas).FirstOrDefaultAsync(u => u.UserId == Master.UserId);
+            if (userWithAreas.Areas != null)
             {
-                Master.Areas.Add(Slave);
+                userWithAreas.Areas.Add(Slave);
             }
             else
             {
-                Master.Areas = new List<Area>();
-                Master.Areas.Add(Slave);
+                userWithAreas.Areas = new List<Area>();
+                userWithAreas.Areas.Add(Slave);
             }
             await _context.SaveChangesAsync();
 

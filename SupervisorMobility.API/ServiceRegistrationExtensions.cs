@@ -124,7 +124,14 @@ namespace SupervisorMobility.API
             if (RuntimeInformation.IsOSPlatform(OSPlatform.Windows))
             {
                 // Usa la cadena de conexión de Windows
-                services.AddDbContext<SupervisorMobilityContext>(options => options.UseSqlServer(configuration.GetConnectionString("SupervisorMobilityDBConnectionString"), options => { options.CommandTimeout(300); }), ServiceLifetime.Transient);
+                services.AddDbContext<SupervisorMobilityContext>(options =>
+                {
+                    options.UseSqlServer(configuration.GetConnectionString("SupervisorMobilityDBConnectionString"), sqlOptions =>
+                    {
+                        sqlOptions.CommandTimeout(300);
+                    });
+                    options.EnableSensitiveDataLogging(); // Moved inside the lambda to ensure 'options' is in scope
+                }, ServiceLifetime.Transient);
             }
             else
             {
