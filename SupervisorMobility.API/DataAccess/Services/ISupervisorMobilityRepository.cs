@@ -187,6 +187,7 @@ namespace SupervisorMobility.API.Services
         Task RemoveAllAreasFromUser(User user);
         Task<AsyncVoidMethodBuilder> UserRemoveAllAreas(User Master);
         Task<AsyncVoidMethodBuilder> UserAddArea(User Master, Area Slave);
+        Task<AsyncVoidMethodBuilder> UserAddAreas(User Master, List<Area> Areas);
 
 
         Task UpdateUser(UsersForUpdateDto user, int userId);

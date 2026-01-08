@@ -1225,10 +1225,46 @@ namespace SupervisorMobility.API.Services
                 userWithAreas.Areas = new List<Area>();
                 userWithAreas.Areas.Add(Slave);
             }
-            await _context.SaveChangesAsync();
+            // No hacer SaveChangesAsync aquí, dejamos que el controller lo haga al final
+            // await _context.SaveChangesAsync();
 
             return new AsyncVoidMethodBuilder();
 
+        }
+
+        public async Task<AsyncVoidMethodBuilder> UserAddAreas(User Master, List<Area> Areas)
+        {
+            // Buscar el usuario en el contexto, o usar el que ya está siendo trackeado
+            var userWithAreas = _context.Users.Local.FirstOrDefault(u => u.UserId == Master.UserId);
+            
+            if (userWithAreas == null)
+            {
+                // Si no está en el contexto local, cargarlo desde la BD
+                userWithAreas = await _context.Users.Include(u => u.Areas).FirstOrDefaultAsync(u => u.UserId == Master.UserId);
+            }
+            else
+            {
+                // Si ya está en el contexto, cargar sus áreas explícitamente
+                await _context.Entry(userWithAreas).Collection(u => u.Areas).LoadAsync();
+            }
+            
+            if (userWithAreas.Areas == null)
+            {
+                userWithAreas.Areas = new List<Area>();
+            }
+            
+            foreach (var area in Areas)
+            {
+                // Verificar si el área ya existe en el usuario
+                if (!userWithAreas.Areas.Any(a => a.AreaId == area.AreaId))
+                {
+                    // Buscar el área en el contexto o adjuntarla
+                    var trackedArea = _context.Areas.Local.FirstOrDefault(a => a.AreaId == area.AreaId) ?? area;
+                    userWithAreas.Areas.Add(trackedArea);
+                }
+            }
+            // No hacer SaveChangesAsync aquí, dejamos que el controller lo haga al final
+            return new AsyncVoidMethodBuilder();
         }
 
 
@@ -3267,7 +3303,15 @@ namespace SupervisorMobility.API.Services
         }
         public async Task<IEnumerable<HCI>> GetAllHCIs(int LoginUserId, bool includeNavigation = false, bool includePeople = false, bool includeCommentaries = false, bool includeTransactions = false)
         {
-            User LoginUserEntity = _context.Users.Where(u => u.UserId == LoginUserId).FirstOrDefault();
+            User LoginUserEntity = _context.Users
+                .Include(u => u.Areas)  // Incluir Areas para evitar null reference
+                .Where(u => u.UserId == LoginUserId)
+                .FirstOrDefault();
+
+            if (LoginUserEntity == null)
+            {
+                return new List<HCI>(); // Retornar lista vacía si no se encuentra el usuario
+            }
 
             var query = _context.HCIs.Where(u => u.IsActive == true);
 

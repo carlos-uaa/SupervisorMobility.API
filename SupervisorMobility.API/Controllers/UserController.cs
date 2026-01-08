@@ -328,11 +328,7 @@ namespace SupervisorMobility.API.Controllers
 
             if (haveAreas)
             {
-                foreach (var item in Areas)
-                {
-                    _supervisorMobilityRepository.UserAddArea(UserToReturn, item);
-                }
-
+                await _supervisorMobilityRepository.UserAddAreas(UserToReturn, Areas);
             }
 
             await _supervisorMobilityRepository.SaveChangesAsync();
