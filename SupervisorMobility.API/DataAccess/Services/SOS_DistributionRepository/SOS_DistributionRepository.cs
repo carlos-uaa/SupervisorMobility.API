@@ -600,10 +600,24 @@ namespace SupervisorMobility.API.DataAccess.Services.SOS_DistributionRepository
 
         public async Task<int> RemoveSOSDistribution(int SOS_Distribution_id)
         {
-            var SOS_DistributionEntity = await GetSOSDistribution(SOS_Distribution_id);
-            SOS_DistributionEntity.IsActive = false;
-            _context.SOSDistributions.Update(SOS_DistributionEntity);
-            return await _context.SaveChangesAsync();
+            try
+            {
+                var SOS_DistributionEntity = await _context.SOSDistributions
+                    .Where(d => d.SOSDistributionId == SOS_Distribution_id)
+                    .FirstOrDefaultAsync();
+                
+                if (SOS_DistributionEntity == null || SOS_DistributionEntity.IsActive == false)
+                    return 0;
+                    
+                SOS_DistributionEntity.IsActive = false;
+                _context.SOSDistributions.Update(SOS_DistributionEntity);
+                return await _context.SaveChangesAsync();
+            }
+            catch (Exception ex)
+            {
+                Debug.WriteLine($"An error occurred while removing SOS Distribution: {ex}");
+                return 0;
+            }
         }
 
         public async Task AddIlustrationToSOSDistribution(int SOS_Distribution_id, FileUpload evidence)
