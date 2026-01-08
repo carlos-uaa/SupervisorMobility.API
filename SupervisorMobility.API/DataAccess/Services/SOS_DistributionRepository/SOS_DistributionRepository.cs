@@ -606,7 +606,7 @@ namespace SupervisorMobility.API.DataAccess.Services.SOS_DistributionRepository
                     .Where(d => d.SOSDistributionId == SOS_Distribution_id)
                     .FirstOrDefaultAsync();
                 
-                if (SOS_DistributionEntity == null)
+                if (SOS_DistributionEntity == null || SOS_DistributionEntity.IsActive == false)
                     return 0;
                     
                 SOS_DistributionEntity.IsActive = false;
@@ -615,7 +615,7 @@ namespace SupervisorMobility.API.DataAccess.Services.SOS_DistributionRepository
             }
             catch (Exception ex)
             {
-                Debug.WriteLine($"An error occurred while removing SOS Distribution: {ex.Message}");
+                Debug.WriteLine($"An error occurred while removing SOS Distribution: {ex}");
                 return 0;
             }
         }
