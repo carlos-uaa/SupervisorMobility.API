@@ -608,6 +608,7 @@ namespace SupervisorMobility.API.DataAccess.Services.SOS_DistributionRepository
                 return 0;
                 
             SOS_DistributionEntity.IsActive = false;
+            _context.SOSDistributions.Update(SOS_DistributionEntity);
             return await _context.SaveChangesAsync();
         }
 
