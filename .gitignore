@@ -379,6 +379,5 @@ SupervisorMobility.API/appsettings.json
 SupervisorMobility.API/appsettings.Development.json
 appsettings.Development.json
 appsettings.json
-*.xlsx
 *.csv
 /SupervisorMobility.API/uploads

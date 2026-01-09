@@ -26,7 +26,7 @@ namespace SupervisorMobility.API.DataAccess.Services.SOS_SequenceRepository
         public async Task<int> CreateSOSSequence(SOSSequence SOS_SequenceToCreate)
         {
             _context.SOSSequences.Add(SOS_SequenceToCreate);
-            return _context.SaveChanges();
+            return await _context.SaveChangesAsync();
         }
 
         public async Task<SOSSequence> GetSOSSequence(int SOSSequenceId, bool includeImages = false, bool includeNotes = false, bool includeLogbooks = false, bool includeSpecialCases = false, bool includeSOS = false, bool includeImagesSOS = false)

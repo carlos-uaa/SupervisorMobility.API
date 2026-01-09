@@ -1,9 +1,12 @@
 ﻿using AutoMapper;
+using DocumentFormat.OpenXml.Bibliography;
+using DocumentFormat.OpenXml.Spreadsheet;
 using Microsoft.AspNetCore.Mvc;
 using Quartz.Core;
 using SupervisorMobility.API.DataAccess.Entities;
 using SupervisorMobility.API.DataAccess.Entities.SOS;
 using SupervisorMobility.API.DataAccess.Services;
+using SupervisorMobility.API.DataAccess.Services.SOS_Combination;
 using SupervisorMobility.API.Models.CommentaryDtos;
 using SupervisorMobility.API.Models.FileUploadDto;
 using SupervisorMobility.API.Models.SOS.SOSAnalysisDtos;
@@ -25,12 +28,14 @@ namespace SupervisorMobility.API.Controllers.SOS_Controllers
         private readonly IMapper _mapper;
         private readonly IWebHostEnvironment _env;
         private readonly ISOS_ProcessRepository _ProcessRepository;
-        public CombinationController(IWebHostEnvironment env, IMapper mapper, ISOS_ProcessRepository repository)
+        private readonly ISOS_CombinationRepository _CombinationRepository;
+        public CombinationController(IWebHostEnvironment env, IMapper mapper, ISOS_ProcessRepository repository, ISOS_CombinationRepository combinationRepository)
         {
             _ProcessRepository = repository;
             _mapper = mapper ??
                   throw new ArgumentNullException(nameof(mapper));
             _env = env ?? throw new ArgumentNullException(nameof(env));
+            _CombinationRepository = combinationRepository;
         }
 
         [HttpPost]
@@ -45,19 +50,27 @@ namespace SupervisorMobility.API.Controllers.SOS_Controllers
 
                 sOSCombinationToCreate.SOSHubId = SOSHubCollection_Id;
 
-                sOSCombinationToCreate.SOSCombinationOperationSequence = new List<SOSCombinationOperationSequenceForCreateDto>();
-
-                foreach(Section sec in SOSEntity.Sections)
+                if(sOSCombinationToCreate.SOSCombinationOperationSequence == null || sOSCombinationToCreate.SOSCombinationOperationSequence.Count==0)
                 {
-                    SOSCombinationOperationSequenceForCreateDto CombinationOperationToAdd = new();
-
-                    CombinationOperationToAdd.SectionId = sec.SectionId;
-                    CombinationOperationToAdd.ProcessName = sec.Step;
-                    CombinationOperationToAdd.SequenceId = SOSEntity.Sections.ToList().IndexOf(sec) + 1;
-                    CombinationOperationToAdd.IsActive = true;
-
-                    sOSCombinationToCreate.SOSCombinationOperationSequence?.Add(CombinationOperationToAdd);
+                    sOSCombinationToCreate.SOSCombinationOperationSequence = new List<SOSCombinationOperationSequenceForCreateDto>();
                 }
+
+                    //sOSCombinationToCreate.SOSCombinationOperationSequence = new List<SOSCombinationOperationSequenceForCreateDto>();
+                if (SOSEntity != null && (SOSEntity.Sections!=null && SOSEntity.Sections.Count > 0))
+                {
+                    foreach (Section sec in SOSEntity.Sections)
+                    {
+                        SOSCombinationOperationSequenceForCreateDto CombinationOperationToAdd = new();
+
+                        CombinationOperationToAdd.SectionId = sec.SectionId;
+                        CombinationOperationToAdd.ProcessName = sec.Step;
+                        CombinationOperationToAdd.SequenceId = SOSEntity.Sections.ToList().IndexOf(sec) + 1;
+                        CombinationOperationToAdd.IsActive = true;
+
+                        sOSCombinationToCreate.SOSCombinationOperationSequence?.Add(CombinationOperationToAdd);
+                    }
+                }
+               
 
                 SOSCombination CombinationToCreate = _mapper.Map<SOSCombination>(sOSCombinationToCreate);
 
@@ -66,7 +79,7 @@ namespace SupervisorMobility.API.Controllers.SOS_Controllers
                     CombinationToCreate.ReviewerHSId = null;
                 }
 
-                var createdResult = await _ProcessRepository.CreateSOSCombination(CombinationToCreate);
+                var createdResult = await _CombinationRepository.CreateSOSCombination(CombinationToCreate);
                 if (createdResult != null)
                     return Ok(CombinationToCreate);
                 else
@@ -75,7 +88,7 @@ namespace SupervisorMobility.API.Controllers.SOS_Controllers
             else
             {
                 //only add revision
-                SOSCombination _sosCombination = await _ProcessRepository.GetSOSCombination(sOSCombinationToCreate.SOSCombinationId, true, true, true, true );
+                SOSCombination _sosCombination = await _CombinationRepository.GetSOSCombination(sOSCombinationToCreate.SOSCombinationId, true, true, true, true );
 
                 if (sOSCombinationToCreate.ReviewerHSId <= 0)
                 {
@@ -88,12 +101,12 @@ namespace SupervisorMobility.API.Controllers.SOS_Controllers
                 SOSCombinationLogbook _logbookToCreate = _mapper.Map<SOSCombinationLogbook>(sOSCombinationToCreate.CombinationLogbooks?.Last());
                 _logbookToCreate.SOSCombinationId = _sosCombination.SOSCombinationId;
 
-                var resultAddSections = await _ProcessRepository.CreateSOSCombinationLogbook(_logbookToCreate);
+                var resultAddSections = await _CombinationRepository.CreateSOSCombinationLogbook(_logbookToCreate);
 
                 if (resultAddSections > 0)
                 {
                     Debug.WriteLine("SOSCombinationLogbook añadidas con exito");
-                    await _ProcessRepository.AddSOSCombinationLogbookToSOSCombination(_sosCombination, _logbookToCreate);
+                    await _CombinationRepository.AddSOSCombinationLogbookToSOSCombination(_sosCombination, _logbookToCreate);
                 }
                 else
                 {
@@ -112,7 +125,7 @@ namespace SupervisorMobility.API.Controllers.SOS_Controllers
         public async Task<ActionResult<SOSCombinationDto>> GetSOSCombination(int id, bool includeImages = false, bool includeNotes = false, bool includeLogbooks = false, bool includeSpecialCases = false, bool includeSOS = false, bool includeImagesSOS = false, bool includeProcess = false)
         {
 
-            var SOSCombination = await _ProcessRepository.GetSOSCombination(id, includeImages, includeNotes, includeLogbooks,  includeSOS, includeImagesSOS, includeProcess);
+            var SOSCombination = await _CombinationRepository.GetSOSCombination(id, includeImages, includeNotes, includeLogbooks,  includeSOS, includeImagesSOS, includeProcess);
             if (SOSCombination == null)
             {
                 return NotFound("SOSCombination not found!");
@@ -125,7 +138,7 @@ namespace SupervisorMobility.API.Controllers.SOS_Controllers
         public async Task<ActionResult<IEnumerable<SOSCombinationDto>>> GetAllSOSCombination(bool includeImages = false, bool includeNotes = false, bool includeLogbooks = false, bool includeSpecialCases = false, bool includeSOS = false)
         {
 
-            var CheckpointEntities = await _ProcessRepository.GetAllSOSCombination(includeImages, includeNotes, includeLogbooks, includeSOS);
+            var CheckpointEntities = await _CombinationRepository.GetAllSOSCombination(includeImages, includeNotes, includeLogbooks, includeSOS);
             if (CheckpointEntities == null)
             {
                 return NotFound("Get All Sos Analisis not found!");
@@ -138,188 +151,195 @@ namespace SupervisorMobility.API.Controllers.SOS_Controllers
         [HttpPut("{sosCombination_Id}")]
         public async Task<ActionResult> UpdateSOSCombination(int sosCombination_Id, SOSCombinationForUpdateDto sosUpdateEntity)
         {
-            List<Turn> Bkup_Turn = new List<Turn>();
-            List<SOSCombinationLogbook> Bkup_CombinationLogbook = new List<SOSCombinationLogbook>();
-            List<SOSCombinationOperationSequence> Bkup_OperationSequence = new List<SOSCombinationOperationSequence>();
-
-          // Filtrar nuevos CombinationLogbooks
-            List<SOSCombinationLogbookForUpdateDto> filteredCombinationLogbooksList = sosUpdateEntity.CombinationLogbooks.Where(t => t.SOSCombinationLogbookId <= 0).ToList();
-           // Filtrar nuevos Turnos
-            List<TurnForUpdateDto> filteredTurnList = sosUpdateEntity.Turns.Where(t => t.TurnId <= 0).ToList();
-            //filtrar nuevos SOSCombinationOperationSequence
-            List<SOSCombinationOperationSequenceForUpdateDto> filteredOperationSequence = sosUpdateEntity.SOSCombinationOperationSequence.Where(sq => sq.SOSCombinationOperationSequenceId <= 0).ToList();
-
-            // Remover nuevos SOSCombinationOperationSequenceForUpdateDto de la lista principal para evitar duplicados
-            if (filteredOperationSequence.Any())
+            try
             {
-                sosUpdateEntity.SOSCombinationOperationSequence.RemoveAll(t => t.SOSCombinationOperationSequenceId == null || t.SOSCombinationOperationSequenceId <= 0);
+                List<Turn> Bkup_Turn = new List<Turn>();
+                List<SOSCombinationLogbook> Bkup_CombinationLogbook = new List<SOSCombinationLogbook>();
+                List<SOSCombinationOperationSequence> Bkup_OperationSequence = new List<SOSCombinationOperationSequence>();
 
-                // Mapear nuevas norms/standars
-                List<SOSCombinationOperationSequence> newSOSOperationSequences = _mapper.Map<List<SOSCombinationOperationSequence>>(filteredOperationSequence);
+                // Filtrar nuevos CombinationLogbooks
+                List<SOSCombinationLogbookForUpdateDto> filteredCombinationLogbooksList = sosUpdateEntity.CombinationLogbooks.Where(t => t.SOSCombinationLogbookId <= 0).ToList();
+                // Filtrar nuevos Turnos
+                List<TurnForUpdateDto> filteredTurnList = sosUpdateEntity.Turns.Where(t => t.TurnId <= 0).ToList();
+                //filtrar nuevos SOSCombinationOperationSequence
+                List<SOSCombinationOperationSequenceForUpdateDto> filteredOperationSequence = sosUpdateEntity.SOSCombinationOperationSequence.Where(sq => sq.SOSCombinationOperationSequenceId <= 0).ToList();
 
-                foreach (var OperationSequence in newSOSOperationSequences)
+                // Remover nuevos SOSCombinationOperationSequenceForUpdateDto de la lista principal para evitar duplicados
+                if (filteredOperationSequence.Any())
                 {
-                    OperationSequence.SOSCombinationOperationSequenceId= 0;
-                    OperationSequence.IsActive = true;
+                    sosUpdateEntity.SOSCombinationOperationSequence.RemoveAll(t => t.SOSCombinationOperationSequenceId == null || t.SOSCombinationOperationSequenceId <= 0);
+
+                    // Mapear nuevas norms/standars
+                    List<SOSCombinationOperationSequence> newSOSOperationSequences = _mapper.Map<List<SOSCombinationOperationSequence>>(filteredOperationSequence);
+
+                    foreach (var OperationSequence in newSOSOperationSequences)
+                    {
+                        OperationSequence.SOSCombinationOperationSequenceId = 0;
+                        OperationSequence.IsActive = true;
+                    }
+
+                    var resultAddOperationSequences = await _CombinationRepository.AddRangeSOSCombinationOperationSequences(newSOSOperationSequences);
+
+                    if (resultAddOperationSequences != null)
+                    {
+                        Debug.WriteLine("Operation Sequences añadidos con exitop");
+                        Bkup_OperationSequence.AddRange(resultAddOperationSequences);
+                    }
+                    else
+                    {
+                        Debug.WriteLine("Error OperationSequences añadidos");
+                    }
                 }
 
-                var resultAddOperationSequences = await _ProcessRepository.AddRangeSOSCombinationOperationSequences(newSOSOperationSequences);
 
-                if (resultAddOperationSequences != null)
+                // Remover nuevos CombinationLogbooks de la lista principal para evitar duplicados
+                if (filteredCombinationLogbooksList.Any())
                 {
-                    Debug.WriteLine("Operation Sequences añadidos con exitop");
-                    Bkup_OperationSequence.AddRange(resultAddOperationSequences);
+                    sosUpdateEntity.CombinationLogbooks.RemoveAll(t => t.SOSCombinationLogbookId == null || t.SOSCombinationLogbookId <= 0);
+
+                    // Mapear nuevas norms/standars
+                    List<SOSCombinationLogbook> newSOSCombinationLogbook = _mapper.Map<List<SOSCombinationLogbook>>(filteredCombinationLogbooksList);
+
+                    foreach (var CombinationLogbook in newSOSCombinationLogbook)
+                    {
+                        CombinationLogbook.SOSCombinationLogbookId = 0;
+                        CombinationLogbook.IsActive = true;
+                    }
+
+                    var resultAddSOSCombinationLogbook = await _CombinationRepository.AddRangeSOSCombinationLogbook(newSOSCombinationLogbook);
+
+                    if (resultAddSOSCombinationLogbook != null)
+                    {
+                        Debug.WriteLine("CombinationLogbooks añadidos con exitop");
+                        Bkup_CombinationLogbook.AddRange(resultAddSOSCombinationLogbook);
+                    }
+                    else
+                    {
+                        Debug.WriteLine("Error CombinationLogbooks añadidos");
+                    }
+                }
+
+
+                //Turnos
+                if (filteredTurnList.Any())
+                {
+                    sosUpdateEntity.Turns.RemoveAll(t => t.TurnId == null || t.TurnId <= 0);
+
+                    // Mapear nuevas tiempos
+                    List<Turn> newTurn = _mapper.Map<List<Turn>>(filteredTurnList);
+
+                    foreach (var time in newTurn)
+                    {
+                        time.TurnId = 0;
+                        //time.IsActive = true;
+                    }
+
+                    var resultAddTurn = await _ProcessRepository.AddRangeTurns(newTurn);
+
+                    if (resultAddTurn != null)
+                    {
+                        Debug.WriteLine("Add Turn añadidos con exito");
+                        Bkup_Turn.AddRange(resultAddTurn);
+                    }
+                    else
+                    {
+                        Debug.WriteLine("Error Add Turn añadidos");
+                    }
+                }
+
+
+                SOSCombination _sosCombination = await _CombinationRepository.GetSOSCombination(sosCombination_Id, true, true, true);
+
+                ////Aqui va el historico de ser necesario en  un futuro 
+
+                ////Ejemplo de uso 
+                ////Compare genera un string que menciona las diferencias
+                ////string jsonResult = CompareAndGenerateJson(_mapper.Map<SOSHubForUpdateDto>(entitySOSHub), _SOSHubForUpdate);
+                ////se crea un entity 
+                ////SOSHubHistory newHistory = new SOSHubHistory();
+                ////_mapper.Map(entitySOSHub, newHistory);
+                ////newHistory.VersionChanges = jsonResult;
+                ////se almacena la entity anterior y se le añade el resumen de cambios
+                ////await _ProcessRepository.CreateHistorySOScollection(newHistory);
+
+
+
+                //Crear bkup de datos relacionados
+
+                foreach (var logbook in sosUpdateEntity.CombinationLogbooks)
+                {
+                    var CombinationUpdate = await _CombinationRepository.UpdateCombinationLogbook(logbook);
+                    SOSCombinationLogbook CombinationBkaux = await _CombinationRepository.GetSOSCombinationLogbookById(logbook.SOSCombinationLogbookId);
+                    Bkup_CombinationLogbook.Add(CombinationBkaux);
+                }
+
+                foreach (var turn in sosUpdateEntity.Turns)
+                {
+                    var turnUpdate = await _ProcessRepository.UpdateTurn(turn);
+                    Turn turnBkaux = await _ProcessRepository.GetTurnById(turn.TurnId);
+                    Bkup_Turn.Add(turnBkaux);
+                }
+
+                foreach (var operationSequence in sosUpdateEntity.SOSCombinationOperationSequence)
+                {
+                    var operationSequenceUpdate = await _CombinationRepository.UpdateSOSCombinationOperationSequences(operationSequence);
+                    SOSCombinationOperationSequence operationSequenceBkaux = await _CombinationRepository.GetSOSCombinationOperationSequencesById(operationSequence.SOSCombinationOperationSequenceId);
+                    Bkup_OperationSequence.Add(operationSequenceBkaux);
+                }
+
+
+                //Nulleamos el update para evitar errores
+                sosUpdateEntity.Turns = null;
+                sosUpdateEntity.SOSHub = null;
+                sosUpdateEntity.CombinationLogbooks = null;
+                sosUpdateEntity.SOSCombinationOperationSequence = null;
+
+                await _ProcessRepository.RemoveAllTurnsFromSOSCombination(_sosCombination);
+                await _CombinationRepository.RemoveAllOperationsSequenceFromSOSCombination(_sosCombination);
+                await _CombinationRepository.SOSDataRemoveAllSOSCombinationLogbookFromSOSCombination(_sosCombination);
+
+                var result = await _CombinationRepository.UpdateSOSCombination(sosUpdateEntity, _sosCombination);
+
+                // Volver a añádir bkup
+
+                //Combination Logbook
+                if (Bkup_CombinationLogbook.Any())
+                {
+                    foreach (SOSCombinationLogbook logbook in Bkup_CombinationLogbook)
+                    {
+                        await _CombinationRepository.AddSOSCombinationLogbookToSOSCombination(_sosCombination, logbook);
+                    }
+                }
+
+                //turns
+                if (Bkup_Turn.Any())
+                {
+                    foreach (Turn turn in Bkup_Turn)
+                    {
+                        await _ProcessRepository.AddTurnToSOSCombination(_sosCombination, turn);
+                    }
+                }
+
+                //Operations Sequence
+                if (Bkup_OperationSequence.Any())
+                {
+                    foreach (SOSCombinationOperationSequence operationSequence in Bkup_OperationSequence)
+                    {
+                        await _CombinationRepository.AddOperationSequenceToSOSCombination(_sosCombination, operationSequence);
+                    }
+                }
+
+                if (result != null)
+                {
+                    return Ok(_sosCombination);
                 }
                 else
-                {
-                    Debug.WriteLine("Error OperationSequences añadidos");
-                }
+                    return BadRequest();
             }
-
-
-            // Remover nuevos CombinationLogbooks de la lista principal para evitar duplicados
-            if (filteredCombinationLogbooksList.Any())
+            catch (Exception ex)
             {
-                sosUpdateEntity.CombinationLogbooks.RemoveAll(t => t.SOSCombinationLogbookId == null || t.SOSCombinationLogbookId <= 0);
-
-                // Mapear nuevas norms/standars
-                List<SOSCombinationLogbook> newSOSCombinationLogbook = _mapper.Map<List<SOSCombinationLogbook>>(filteredCombinationLogbooksList);
-
-                foreach (var CombinationLogbook in newSOSCombinationLogbook)
-                {
-                    CombinationLogbook.SOSCombinationLogbookId = 0;
-                    CombinationLogbook.IsActive = true;
-                }
-
-                var resultAddSOSCombinationLogbook = await _ProcessRepository.AddRangeSOSCombinationLogbook(newSOSCombinationLogbook);
-
-                if (resultAddSOSCombinationLogbook != null)
-                {
-                    Debug.WriteLine("CombinationLogbooks añadidos con exitop");
-                    Bkup_CombinationLogbook.AddRange(resultAddSOSCombinationLogbook);
-                }
-                else
-                {
-                    Debug.WriteLine("Error CombinationLogbooks añadidos");
-                }
+                return NotFound($"Error: {ex.Message}, Inner: {ex.InnerException}");
             }
-
-
-            //Turnos
-            if (filteredTurnList.Any())
-            {
-                sosUpdateEntity.Turns.RemoveAll(t => t.TurnId == null || t.TurnId <= 0);
-
-                // Mapear nuevas tiempos
-                List<Turn> newTurn = _mapper.Map<List<Turn>>(filteredTurnList);
-
-                foreach (var time in newTurn)
-                {
-                    time.TurnId = 0;
-                    //time.IsActive = true;
-                }
-
-                var resultAddTurn = await _ProcessRepository.AddRangeTurns(newTurn);
-
-                if (resultAddTurn != null)
-                {
-                    Debug.WriteLine("Add Turn añadidos con exito");
-                    Bkup_Turn.AddRange(resultAddTurn);
-                }
-                else
-                {
-                    Debug.WriteLine("Error Add Turn añadidos");
-                }
-            }
-
-
-            SOSCombination _sosCombination = await _ProcessRepository.GetSOSCombination(sosCombination_Id, true, true, true);
-
-            ////Aqui va el historico de ser necesario en  un futuro 
-
-            ////Ejemplo de uso 
-            ////Compare genera un string que menciona las diferencias
-            ////string jsonResult = CompareAndGenerateJson(_mapper.Map<SOSHubForUpdateDto>(entitySOSHub), _SOSHubForUpdate);
-            ////se crea un entity 
-            ////SOSHubHistory newHistory = new SOSHubHistory();
-            ////_mapper.Map(entitySOSHub, newHistory);
-            ////newHistory.VersionChanges = jsonResult;
-            ////se almacena la entity anterior y se le añade el resumen de cambios
-            ////await _ProcessRepository.CreateHistorySOScollection(newHistory);
-
-
-
-            //Crear bkup de datos relacionados
-      
-            foreach (var logbook in sosUpdateEntity.CombinationLogbooks)
-            {
-                var CombinationUpdate = await _ProcessRepository.UpdateCombinationLogbook(logbook);
-                SOSCombinationLogbook CombinationBkaux = await _ProcessRepository.GetSOSCombinationLogbookById(logbook.SOSCombinationLogbookId);
-                Bkup_CombinationLogbook.Add(CombinationBkaux);
-            }
-
-            foreach (var turn in sosUpdateEntity.Turns)
-            {
-                var turnUpdate = await _ProcessRepository.UpdateTurn(turn);
-                Turn turnBkaux = await _ProcessRepository.GetTurnById(turn.TurnId);
-                Bkup_Turn.Add(turnBkaux);
-            }
-
-            foreach (var operationSequence in sosUpdateEntity.SOSCombinationOperationSequence)
-            {
-                var operationSequenceUpdate = await _ProcessRepository.UpdateSOSCombinationOperationSequences(operationSequence);
-                SOSCombinationOperationSequence operationSequenceBkaux = await _ProcessRepository.GetSOSCombinationOperationSequencesById(operationSequence.SOSCombinationOperationSequenceId);
-                Bkup_OperationSequence.Add(operationSequenceBkaux);
-            }
-
-
-            //Nulleamos el update para evitar errores
-            sosUpdateEntity.Turns = null;
-            sosUpdateEntity.SOSHub = null;
-            sosUpdateEntity.CombinationLogbooks = null;
-            sosUpdateEntity.SOSCombinationOperationSequence = null;
-
-            await _ProcessRepository.RemoveAllTurnsFromSOSCombination(_sosCombination);
-            await _ProcessRepository.RemoveAllOperationsSequenceFromSOSCombination(_sosCombination);
-            await _ProcessRepository.SOSDataRemoveAllSOSCombinationLogbookFromSOSCombination(_sosCombination);
-
-            var result = await _ProcessRepository.UpdateSOSCombination(sosUpdateEntity, _sosCombination);
-
-            // Volver a añádir bkup
-
-            //Combination Logbook
-            if (Bkup_CombinationLogbook.Any())
-            {
-                foreach (SOSCombinationLogbook logbook in Bkup_CombinationLogbook)
-                {
-                    await _ProcessRepository.AddSOSCombinationLogbookToSOSCombination(_sosCombination, logbook);
-                }
-            }
-
-            //turns
-            if (Bkup_Turn.Any())
-            {
-                foreach (Turn turn in Bkup_Turn)
-                {
-                    await _ProcessRepository.AddTurnToSOSCombination(_sosCombination, turn);
-                }
-            }
-
-            //Operations Sequence
-            if (Bkup_OperationSequence.Any())
-            {
-                foreach (SOSCombinationOperationSequence operationSequence in Bkup_OperationSequence)
-                {
-                    await _ProcessRepository.AddOperationSequenceToSOSCombination(_sosCombination, operationSequence);
-                }
-            }
-
-            if (result != null)
-            {
-                return Ok(_sosCombination);
-            }
-            else
-                return BadRequest();
 
         }//end Update 
 
@@ -328,7 +348,7 @@ namespace SupervisorMobility.API.Controllers.SOS_Controllers
         [HttpDelete("{SOSCombinationId}")]
         public async Task<ActionResult<int>> RemoveSOSHub(int SOSCombinationId)
         {
-            var result = await _ProcessRepository.RemoveSOSCombination(SOSCombinationId);
+            var result = await _CombinationRepository.RemoveSOSCombination(SOSCombinationId);
 
             if (result > 0)
                 return Ok();
@@ -350,6 +370,8 @@ namespace SupervisorMobility.API.Controllers.SOS_Controllers
             trustedFileNameForStorage = Path.GetRandomFileName();
 
             var path = Path.Combine(_env.ContentRootPath, "uploads\\SOSCombination\\Ilustrations", trustedFileNameForStorage);
+            //var path = Path.Combine("C:\\", "Users\\zkril\\source\\repos\\SupervisorMobility.API\\upload\\SOSCombination\\Ilustrations", trustedFileNameForStorage);
+          
             // Asegurarse de que el directorio de destino exista
             var directory = Path.GetDirectoryName(path);
             if (!Directory.Exists(directory))
@@ -369,7 +391,7 @@ namespace SupervisorMobility.API.Controllers.SOS_Controllers
 
             var fileToReturn = await _ProcessRepository.CreateFileAsync(uploadResult);
 
-            await _ProcessRepository.AddIlustrationToSOSCombination(Combination_id, fileToReturn);
+            await _CombinationRepository.AddIlustrationToSOSCombination(Combination_id, fileToReturn);
             await _ProcessRepository.SaveChangesAsync();
 
             return Ok(fileToReturn);
@@ -383,7 +405,7 @@ namespace SupervisorMobility.API.Controllers.SOS_Controllers
             if (FileInfo is not null)
             {
                 var path = Path.Combine(_env.ContentRootPath, "uploads\\SOSCombination\\Ilustrations", FileInfo.StorageFileName);
-
+                //var path = Path.Combine("C:\\", "Users\\zkril\\source\\repos\\SupervisorMobility.API\\upload\\SOSCombination\\Ilustrations", FileInfo.StorageFileName);
                 var memory = new MemoryStream();
                 using (var stream = new FileStream(path, FileMode.Open))
                 {
@@ -402,7 +424,7 @@ namespace SupervisorMobility.API.Controllers.SOS_Controllers
         [HttpDelete("Ilustrations/{SOS_SOSCombination_id}/remove/{ImageFile_id}")]
         public async Task<ActionResult<int>> RemoveImage(int SOS_SOSCombination_id, int ImageFile_id)
         {
-            var result = await _ProcessRepository.RemoveIlustrationFromSOSCombination(SOS_SOSCombination_id, ImageFile_id);
+            var result = await _CombinationRepository.RemoveIlustrationFromSOSCombination(SOS_SOSCombination_id, ImageFile_id);
 
             if (result > 0)
                 return Ok();

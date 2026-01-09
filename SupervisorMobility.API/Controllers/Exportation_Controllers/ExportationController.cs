@@ -20,6 +20,17 @@ using SupervisorMobility.API.DataAccess.Services.ExportationServices;
 using SupervisorMobility.API.Interfaces.SOSDistribution.SOSDistributionExcel;
 using System.Drawing;
 using System.Text.RegularExpressions;
+using Aspose.Cells;
+using Aspose.Cells.Drawing;
+using System.Drawing.Drawing2D;
+using SupervisorMobility.API.TestingsDtos;
+using DocumentFormat.OpenXml.Drawing.Charts;
+using SupervisorMobility.API.DataAccess.Services.SOS_AnalysisRepository;
+using static System.Net.Mime.MediaTypeNames;
+using SupervisorMobility.API.DataAccess.Services.SOS_SequenceRepository;
+using SupervisorMobility.API.DataAccess.Services.SOS_Combination;
+using SupervisorMobility.API.DataAccess.Services.SOS_FlowRepository;
+using Microsoft.AspNetCore.Routing.Template;
 
 namespace SupervisorMobility.API.Controllers.Exportation_Controllers
 {
@@ -28,13 +39,17 @@ namespace SupervisorMobility.API.Controllers.Exportation_Controllers
     public class ExportationController : ControllerBase
     {
         private readonly ISOS_ProcessRepository _AnalysisProcessRepository;
+        private readonly ISOS_AnalysisRepository _AnalysisRepository;
+        private readonly ISOS_SequenceRepository _SequenceRepository;
+        private readonly ISOS_CombinationRepository _CombinationRepository;
+        private readonly ISOS_FlowRepository _FlowRepository;
         private readonly IWebHostEnvironment _env;
         private readonly ISOSDistributionExcelService _sosDistributionExcelService;
         private readonly ExportationStylesService stylesService;
         private readonly ExportationImgService imgService;
         private readonly ExportationSheetService sheetService;
 
-        public ExportationController(ISOS_ProcessRepository repository, IWebHostEnvironment env, ISOSDistributionExcelService sosDistributionExcelService)
+        public ExportationController(ISOS_ProcessRepository repository, IWebHostEnvironment env, ISOSDistributionExcelService sosDistributionExcelService, ISOS_AnalysisRepository analysisRepository, ISOS_SequenceRepository sequenceRepository, ISOS_CombinationRepository combinationRepository, ISOS_FlowRepository flowRepository)
         {
             _AnalysisProcessRepository = repository;
             _env = env ?? throw new ArgumentNullException(nameof(env));
@@ -42,6 +57,10 @@ namespace SupervisorMobility.API.Controllers.Exportation_Controllers
             imgService = new ExportationImgService();
             sheetService = new ExportationSheetService();
             _sosDistributionExcelService = sosDistributionExcelService;
+            _AnalysisRepository = analysisRepository;
+            _SequenceRepository = sequenceRepository;
+            _CombinationRepository = combinationRepository;
+            _FlowRepository = flowRepository;
         }
 
         /*
@@ -50,7 +69,7 @@ namespace SupervisorMobility.API.Controllers.Exportation_Controllers
         [HttpGet("Excel/Analyses/{AnalysisId}")]
         public async Task<IActionResult> AnalysesExcelExport(int AnalysisId)
         {
-            var SosAnalysis = await _AnalysisProcessRepository.GetSOSAnalysis(AnalysisId, true, true, true, true, true, true);
+            var SosAnalysis = await _AnalysisRepository.GetSOSAnalysis(AnalysisId, true, true, true, true, true, true);
 
             string templateName = "DataAccess/Templates/Analysis Template.xlsx";
             MemoryStream ms = new MemoryStream();
@@ -526,7 +545,7 @@ namespace SupervisorMobility.API.Controllers.Exportation_Controllers
                         int horizontalOffset = 0;
                         using (FileStream stream = System.IO.File.OpenRead($"{imgPath[0]}{imgPath[1]}"))
                         {
-                            Image imgObj = Image.FromStream(stream);
+                            System.Drawing.Image imgObj = System.Drawing.Image.FromStream(stream);
 
                             int w = imgObj.Width, h = imgObj.Height;
 
@@ -724,7 +743,7 @@ namespace SupervisorMobility.API.Controllers.Exportation_Controllers
         [HttpGet("Excel/Sequence/{SequenceId}")]
         public async Task<IActionResult> SequenceExcelExport(int SequenceId)
         {
-            var SosSequence = await _AnalysisProcessRepository.GetSOSSequence(SequenceId, true, true, true, true, true, true);
+            var SosSequence = await _SequenceRepository.GetSOSSequence(SequenceId, true, true, true, true, true, true);
 
             string templateName = "DataAccess/Templates/Sequence Template.xlsx";
             MemoryStream ms = new MemoryStream();
@@ -1164,7 +1183,7 @@ namespace SupervisorMobility.API.Controllers.Exportation_Controllers
                         int horizontalOffset = 0;
                         using (FileStream stream = System.IO.File.OpenRead($"{imgPath[0]}{imgPath[1]}"))
                         {
-                            Image imgObj = Image.FromStream(stream);
+                            System.Drawing.Image imgObj = System.Drawing.Image.FromStream(stream);
 
                             int w = imgObj.Width, h = imgObj.Height;
 
@@ -1380,17 +1399,100 @@ namespace SupervisorMobility.API.Controllers.Exportation_Controllers
         }
 
         [HttpGet("Excel/Combination/{CombinationId}")]
-        public async Task<IActionResult> CombinationExcelExport(int CombinationId)
+        public async Task<IActionResult> AsposeExampleExcelExport(int CombinationId)
         {
-            return Ok();
+            //Aspose.Cells.License license = new Aspose.Cells.License();
+            //license.SetLicense("AsposeLicense/Aspose.PDF.NET.lic");
+            // Cargar plantilla
+            var templatePath = "DataAccess/Templates/Combination Template.xlsx";
+                if (!System.IO.File.Exists(templatePath))
+               {
+                  return NotFound("Excel template not found.");
+               }
+
+            var workbook = new Aspose.Cells.Workbook(templatePath);
+            var sheet = workbook.Worksheets[0];
+            //metodo que dibuja el diagrama de lineas
+            var sosCombination = await _CombinationRepository.GetSOSCombination(CombinationId, true, true, true, true, true, true);
+            if(sosCombination == null)
+            {
+                return NotFound("Combination not found.");
+            }
+            else
+            {
+                //metodo para llenar el template
+                FillTemplate(workbook, sosCombination);
+
+                //obtener la secuencia de operaciones y de ser asi dibujar el diagrama
+                var operationSecuence = sosCombination.SOSCombinationOperationSequence?.OrderBy(so => so.SequenceId).ToList();
+
+                if (operationSecuence != null && operationSecuence.Count > 0)
+                {
+                    //si el numero de operaciones es mayor que 11 tenemos que enviar solo las primeras 11 ya que el diagrama solo soporta 11 operaciones
+                    if (operationSecuence.Count > 11)
+                    {
+                        operationSecuence = operationSecuence.Take(11).ToList();
+                    }
+                    await FillLineDiagram(workbook, operationSecuence);
+
+                }
+                //else
+                //{
+                //    FillLineDiagram(workbook, null);
+                //}
+
+                var worksheet = workbook.Worksheets[0];
+                //colocar la img
+                //img de diagrama
+                if (sosCombination.Illustrations != null && sosCombination.Illustrations.Count > 0)
+                {
+                    var fileid = sosCombination.Illustrations.First().FileUploadId;
+                    var FileInfo = await _AnalysisProcessRepository.FetchFileAsync(fileid);
+
+                    if (FileInfo is not null)
+                    {
+                        var path = System.IO.Path.Combine(_env.ContentRootPath, "uploads\\SOSCombination\\Ilustrations", FileInfo.StorageFileName);     
+                        if(System.IO.File.Exists(path))
+                        {
+                            byte[] imageBytes = await System.IO.File.ReadAllBytesAsync(path);
+                            var imageStream = new MemoryStream(imageBytes);
+                            // Insertar la imagen en el Excel
+                            int pictureIndex = worksheet.Pictures.Add(16, 8, imageStream);
+                            Aspose.Cells.Drawing.Picture picture = worksheet.Pictures[pictureIndex];
+                            picture.Width = 612;  // en píxeles
+                            picture.Height = 380;
+                        }
+                       
+
+                    }
+                }
+            }
+
+
+            // Guardar en memoria
+            using var stream = new MemoryStream();
+            workbook.Save(stream, Aspose.Cells.SaveFormat.Xlsx);
+            stream.Position = 0;
+            //checar que la hoe tenga un proccess name de lo contrario colocarle el default
+            var processName = string.IsNullOrEmpty(sosCombination.ProcessName) ? "Combination Report" : sosCombination.ProcessName;
+
+            // Sanitize processName for filename safety
+            foreach (var c in System.IO.Path.GetInvalidFileNameChars())
+            {
+            processName = processName.Replace(c, '_');
+            }
+
+            // Retornar como archivo descargable
+            return File(stream.ToArray(), "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet", $"{processName}.xlsx");
         }
+
 
         [HttpPost("Excel/Flow/{FlowId}")]
         public async Task<IActionResult> FlowExcelExport(int FlowId, List<IFormFile> Diagrams)
         {
             try
             {
-                var SosFlow = await _AnalysisProcessRepository.GetSOSFlow(FlowId, includePeople: true, includeLogbooks: true, includeSOS: true);
+                var SosFlow = await _FlowRepository.GetSOSFlow(FlowId, includePeople: true, includeLogbooks: true, includeSOS: true);
 
                 string templateName = "DataAccess/Templates/Flow Template.xlsx";
                 MemoryStream ms = new MemoryStream();
@@ -1551,6 +1653,612 @@ namespace SupervisorMobility.API.Controllers.Exportation_Controllers
             {
                 Console.WriteLine($"Error in flow exportation: {ex.Message}\n Inner Exception: {ex.InnerException}");
                 return StatusCode(500, $"An error occurred while generating the Excel file. \n Error in flow exportation: {ex.Message}\n Inner Exception: {ex.InnerException}");
+            }
+        }
+
+
+        private void FillTemplate(Aspose.Cells.Workbook workbook, SOSCombination sosCombination)
+        {
+            var sheet = workbook.Worksheets[0];
+
+           
+
+            #region information table
+            //Nombre de la operacion
+            sheet.Cells["B8"].Value = sosCombination.OperationName;
+            //grupo/operador/supervisor 
+            if (sosCombination.Turns?.Any() ?? false)
+            {
+                var cellNumber = 8;
+                foreach (var turn in sosCombination.Turns)
+                {
+                    sheet.Cells[$"Z{cellNumber + 1}"].Value = turn.TurnType == null ? "" : turn.TurnType;
+                    sheet.Cells[$"AH{cellNumber + 1}"].Value = turn.Operator?.Name == null ? " " : turn.Operator?.Name;
+                    sheet.Cells[$"BE{cellNumber + 1}"].Value = turn.Supervisor?.Name == null ? " " : turn.Supervisor?.Name;
+                    cellNumber++;
+                }
+            }
+            //elaboro
+            sheet.Cells["B13"].Value = sosCombination.SOSHub?.ApproverOwners?.FirstOrDefault()?.Name == null ? " " : sosCombination.SOSHub?.ApproverOwners?.FirstOrDefault()?.Name;
+            //reviso
+            sheet.Cells["F13"].Value = sosCombination.CombinationLogbooks?.FirstOrDefault()?.Reviewer?.Name == null ? " " : sosCombination.CombinationLogbooks?.FirstOrDefault()?.Reviewer?.Name;
+            //reviso (H y S)
+            sheet.Cells["J13"].Value = sosCombination.ReviewerHS?.Name == null ? " " : sosCombination.ReviewerHS?.Name;
+            //aprobo
+            sheet.Cells["O13"].Value = sosCombination.CombinationLogbooks?.FirstOrDefault()?.Approver?.Name == null ? " " : sosCombination.CombinationLogbooks?.FirstOrDefault()?.Approver.Name;
+            //fecha de emision
+            sheet.Cells["B15"].Value = sosCombination.CreatedAt?.ToString("dd-MMM-yyyy").Replace(".", "");
+            //mes de aplicacion
+            sheet.Cells["H15"].Value = sosCombination.ApplicationMonth == null ? "" : sosCombination.ApplicationMonth;
+            //modelos
+            string Models = "";
+            if (sosCombination.SOSHub?.AppliedModels != null && sosCombination.SOSHub.AppliedModels.Any())
+            {
+                Models = string.Join(", ", sosCombination.SOSHub.AppliedModels.Select(am => am.Description));
+            }
+            sheet.Cells["L15"].Value = Models;
+            //tiempo de aprendizaje
+            sheet.Cells["Z15"].Value = sosCombination.SOSHub?.TrainingTime == null ? " " : $"{sosCombination.SOSHub.TrainingTime} DIAS ";
+            //planta
+            sheet.Cells["AP15"].Value = sosCombination.SOSHub?.Plant?.Description == null ? " " : sosCombination.SOSHub.Plant?.Description;
+            //departamento (gerencia)
+            sheet.Cells["BE15"].Value = sosCombination.SOSHub?.Department?.Description == null ? " " : sosCombination.SOSHub?.Department?.Description;
+
+            
+            //volumen de produccion por turno
+            sheet.Cells["B29"].Value = sosCombination.ProductionVolumePerShift == null ? " " : sosCombination.ProductionVolumePerShift;
+            //tiempo tacto
+            sheet.Cells["I29"].Value = sosCombination.TackTime == null ? " " : sosCombination.TackTime;
+            //numero de control
+            sheet.Cells["L29"].Value = sosCombination.ControlNumber == null ? "" : sosCombination.ControlNumber;
+            //parte fea
+            var operationSecuence = sosCombination.SOSCombinationOperationSequence?.OrderBy(so => so.SequenceId).ToList();
+            if (operationSecuence != null && operationSecuence.Count > 0)
+            {
+                var startRow = 39;
+                foreach (var operation in operationSecuence)
+                {
+                    //secuencia de operacion
+                    sheet.Cells[$"B{startRow}"].Value = operation.SequenceId == null ? " " : operation.SequenceId;
+                    //nombre de la operacion
+                    sheet.Cells[$"C{startRow}"].Value = operation.ProcessName == null ? " " : operation.ProcessName;
+                    //partes por ciclo
+                    sheet.Cells[$"H{startRow}"].Value = operation.PartsPerCycle == null ? " " : operation.PartsPerCycle;
+                    //tiempo de operacion manual
+                    sheet.Cells[$"I{startRow}"].Value = operation.ManualOperationTime == null ? " " : operation.ManualOperationTime;
+                    //tiempo de operacion manual con maquina en automatico
+                    sheet.Cells[$"J{startRow}"].Value = operation.ManualOperationTimeWithMachineInAutomatic == null ? " " : operation.ManualOperationTimeWithMachineInAutomatic;
+                    //tiempo de operacion de maquina en automatico
+                    sheet.Cells[$"K{startRow}"].Value = operation.AutomaticMachineOperationTime == null ? " " : operation.AutomaticMachineOperationTime;
+
+
+
+                    startRow++;
+
+                }
+            }
+
+            //plan de produccion y observaciones
+            sheet.Cells["C54"].Value = sosCombination.ProductionPlanAndObservations == null ? " " : sosCombination.ProductionPlanAndObservations;
+            if (sosCombination.CombinationLogbooks != null && sosCombination.CombinationLogbooks.Count > 0)
+            {
+                var mostRecentLogs = sosCombination.CombinationLogbooks?.OrderByDescending(log => log.SOSCombinationLogbookId)
+                .Take(Math.Min(3, sosCombination.CombinationLogbooks.Count))
+                .OrderBy(log => log.SOSCombinationLogbookId)
+                .ToList();
+                var logRowStart = 58;
+                foreach (var log in mostRecentLogs)
+                {
+                    //aprobo
+                    sheet.Cells[$"AJ{logRowStart}"].Value = log.Approver?.Name == null ? " " : log.Approver?.Name;
+                    //cambio
+                    sheet.Cells[$"AS{logRowStart}"].Value = log.Changes == null ? " " : log.Changes;
+                    //fecha
+                    sheet.Cells[$"BP{logRowStart}"].Value = log.Date == null ? " " : log.Date?.ToString("dd-MMM-yyyy");
+                    //reviso (rev)
+                    sheet.Cells[$"BX{logRowStart}"].Value = log.Reviewer?.Name == null ? " " : log.Reviewer?.Name;
+
+                    logRowStart++;
+                }
+            }
+
+            #endregion
+
+        }
+        private async Task FillLineDiagram(Aspose.Cells.Workbook workbook, List<SOSCombinationOperationSequence>? operations)
+        {
+            var sheet = workbook.Worksheets[0];
+
+            // Copiar el shape "Freeform 4" y dibujar uno nuevo con las mismas propiedades
+            Aspose.Cells.Drawing.Shape lineaOriginal = sheet.Shapes["Freeform 4"];
+            //imagen de linea senoidal 
+            var path = System.IO.Path.Combine("Assets/SenoidalLines", "imagenSenH.png");
+            byte[] imageBytes = await System.IO.File.ReadAllBytesAsync(path);
+            var imageStreamSenH = new MemoryStream(imageBytes);
+
+            var path2 = System.IO.Path.Combine("Assets/SenoidalLines", "imagenSenV.png");
+            byte[] imageBytes2 = await System.IO.File.ReadAllBytesAsync(path2);
+            var imageStreamSenV = new MemoryStream(imageBytes2);
+
+
+
+
+
+            // Si el shape original tiene más propiedades específicas que necesitas copiar, agrégalas aquí.
+
+            // El nuevo shape aparecerá en la hoja de Excel en la posición indicada.
+
+
+            // Obtener celdas dodne se empieza a dibujar
+            var celdaInicio = sheet.Cells["N39"];
+            var celdaFin = sheet.Cells["S39"];
+            int offsetY = sheet.Cells.GetRowHeightPixel(celdaInicio.Row) / 2;
+            int dotLineLimit = 850;
+            //desplazamiento en Y (altur a la que se debe iniciar el dibujo de la linea)
+            offsetY = offsetY - 4;
+            //bandera que indica si se debe aplicar el plus al offsetY para la linea de los pasos.
+            var isOffSetY = false;
+            int filaInicio = celdaInicio.Row;
+            int columnaInicio = celdaInicio.Column;
+            int columnaInicioByRow = celdaInicio.Column;
+            string celdaFinalLinea = "N39";
+            //color de linea
+            var lineColor = System.Drawing.Color.Black;
+
+            if(operations==null || operations.Count == 0)
+            {
+                //info de ejemplo
+                List<OperationsDto> operationsExample = new List<OperationsDto>
+            {
+                new OperationsDto
+                {
+
+                    ManualOperationTime=0.12,
+                    ManualOperationTimeWithMachineInAutomatic=0.1,
+                    AutomaticMachineOperationTime=1.7,
+                    StepsToNextProcess=0.02
+                },
+                 new OperationsDto
+                {
+
+                    ManualOperationTime=0.14,
+                    ManualOperationTimeWithMachineInAutomatic=0.1,
+                    AutomaticMachineOperationTime=0.5,
+                    StepsToNextProcess=0.06
+                },
+                  new OperationsDto
+                {
+
+                    ManualOperationTime=0.1,
+                    ManualOperationTimeWithMachineInAutomatic=0.0,
+                    AutomaticMachineOperationTime=0.3,
+                    StepsToNextProcess=0.02
+                },
+                   new OperationsDto
+                {
+
+                    ManualOperationTime=0.02,
+                    ManualOperationTimeWithMachineInAutomatic=0.0,
+                    AutomaticMachineOperationTime=0.0,
+                    StepsToNextProcess=0.02
+                },
+                    new OperationsDto
+                {
+
+                    ManualOperationTime=0.02,
+                    ManualOperationTimeWithMachineInAutomatic=0.0,
+                    AutomaticMachineOperationTime=0.0,
+                    StepsToNextProcess=0.02
+                },
+                     new OperationsDto
+                {
+
+                    ManualOperationTime=0.1,
+                    ManualOperationTimeWithMachineInAutomatic=0.04,
+                    AutomaticMachineOperationTime=0.5,
+                    StepsToNextProcess=0.06
+                },
+                     new OperationsDto
+                {
+
+                    ManualOperationTime=0.1,
+                    ManualOperationTimeWithMachineInAutomatic=0.0,
+                    AutomaticMachineOperationTime=0.4,
+                    StepsToNextProcess=0.0
+                }
+
+            };
+
+                //proceso de dibujado del grafico ejemplo
+                foreach (var operation in operationsExample)
+                {
+                    //dibujar linea de tiempo de operacion manual
+                    int desplazamientoEnX = (int)(((50 * operation.ManualOperationTime) / 0.1));//calculo del desplazamiento en Y
+                    var line = sheet.Shapes.AddLine(filaInicio, offsetY, columnaInicio, 10, 0, desplazamientoEnX);//row inicio/offsetY/columna inicio de dibujo/desplaamientoX/alto/desplazamientoY
+                    line.Line.DashStyle = MsoLineDashStyle.Solid;
+                    line.Line.Weight = 2;
+                    line.Line.SolidFill.Color = lineColor;
+
+
+                    //saber donde termina la linea para dibujar la que sigue
+                    celdaFinalLinea = Aspose.Cells.CellsHelper.CellIndexToName(line.LowerRightRow, line.LowerRightColumn - 1);
+
+                    //con eso dibujamos la linea puntuada que representa el tiempo de operacion con maquina en automatico
+                    if (operation.AutomaticMachineOperationTime > 0)
+                    {
+                        var totalUnitsByRow = 850;//170 celdas por fila * 10 unidades por celda
+                        string startCell = $"O{sheet.Cells[celdaFinalLinea].Row + 1}";
+                        //distancia de inicio de linea con respecto al total del rango
+                        CellArea area = CellArea.CreateCellArea(startCell, celdaFinalLinea);
+                        int totalCells = (area.EndRow - area.StartRow + 1) * (area.EndColumn - area.StartColumn + 1);
+
+                        //calculamos la distancia total desde la celda de inicio hasta la celda final de la linea
+                        desplazamientoEnX = (int)(((50 * operation.AutomaticMachineOperationTime) / 0.1));
+                        int totalDistanceFromStartCell = totalCells * 10;//10 unidades por celda
+                        int totalDistanceWithDotLine = totalDistanceFromStartCell + desplazamientoEnX;
+                        if (totalDistanceWithDotLine > totalUnitsByRow)
+                        {
+                            int excedente = totalDistanceWithDotLine - totalUnitsByRow;
+
+                            desplazamientoEnX = totalUnitsByRow - totalDistanceFromStartCell;
+                            line = sheet.Shapes.AddLine(sheet.Cells[celdaFinalLinea].Row, offsetY, sheet.Cells[celdaFinalLinea].Column, 10, 0, desplazamientoEnX);
+                            line.Line.DashStyle = MsoLineDashStyle.RoundDot;
+                            line.Line.SolidFill.Color = lineColor;
+                            line.Line.Weight = 2;
+                            //dibujamos el exedente en la misma fila pero al inicio
+                            line = sheet.Shapes.AddLine(sheet.Cells[celdaFinalLinea].Row, offsetY + 10, columnaInicioByRow, 10, 0, excedente);
+
+                        }
+                        else
+                        {
+                            line = sheet.Shapes.AddLine(sheet.Cells[celdaFinalLinea].Row, offsetY, sheet.Cells[celdaFinalLinea].Column, 10, 0, desplazamientoEnX);
+
+                        }
+                        line.Line.DashStyle = MsoLineDashStyle.RoundDot;
+                        line.Line.SolidFill.Color = lineColor;
+                        line.Line.Weight = 2;
+
+
+                    }
+
+
+                    //dibujamos la linea  en vertical para despues dibujar la linea de tiempo manual de la maquina en automatico
+                    //linea de separacion
+                    if (operation.ManualOperationTimeWithMachineInAutomatic > 0)
+                    {
+                        line = sheet.Shapes.AddLine(sheet.Cells[celdaFinalLinea].Row, offsetY, sheet.Cells[celdaFinalLinea].Column, 10, 10, 0);
+                        line.Line.DashStyle = MsoLineDashStyle.Solid;
+                        line.Line.SolidFill.Color = lineColor;
+                        line.Line.Weight = 2;
+
+                        //linea de tiempo manual de la maquina en automatico
+                        desplazamientoEnX = (int)(((50 * operation.ManualOperationTimeWithMachineInAutomatic) / 0.1));
+                        line = sheet.Shapes.AddLine(sheet.Cells[celdaFinalLinea].Row, offsetY + 12, sheet.Cells[celdaFinalLinea].Column, 10, 0, desplazamientoEnX);
+                        line.Line.DashStyle = MsoLineDashStyle.Custom;  
+                        line.Line.SolidFill.Color = lineColor;
+                        line.Line.Weight = 2;
+                        //asignamos a celdaFinalLinea la columna donde termino la linea de tiempo manual con maquina en automatico
+                        celdaFinalLinea = Aspose.Cells.CellsHelper.CellIndexToName(line.LowerRightRow, line.LowerRightColumn - 1);
+                        isOffSetY = true;
+                    }
+
+
+                    //dibujamos la linea de los pasos para la siguiente operacion.
+                    if (operation.StepsToNextProcess > 0)
+                    {
+                        int indiceImagen = 0;
+                        Aspose.Cells.Drawing.Picture imagen = null;
+                        desplazamientoEnX = (int)(((50 * operation.StepsToNextProcess) / 0.1));
+                        Aspose.Cells.Drawing.Shape rectangleForm = null;
+                        if (isOffSetY)
+                        {
+                            //line = sheet.Shapes.AddLine(sheet.Cells[celdaFinalLinea].Row, offsetY + 12, sheet.Cells[celdaFinalLinea].Column, 10, 21, desplazamientoEnX);
+                            rectangleForm = sheet.Shapes.AddShape(lineaOriginal.MsoDrawingType, sheet.Cells[celdaFinalLinea].Row, offsetY + 12, sheet.Cells[celdaFinalLinea].Column, 10, 21, desplazamientoEnX);
+                            int fila = rectangleForm.UpperLeftRow;
+                            int columna = rectangleForm.UpperLeftColumn + 1;
+                            int ancho = rectangleForm.Width;
+                            int alto = rectangleForm.Height;
+
+                            if (ancho < alto)
+                            {
+                                indiceImagen = sheet.Pictures.Add(fila,columna, imageStreamSenV);
+                                imagen = sheet.Pictures[indiceImagen];
+
+                                imagen.Width = ancho;
+                                imagen.Height = alto;
+                                imagen.Top = offsetY + 12;
+
+                                double anguloDiagonal = Math.Atan((double)alto / ancho) * (180 / Math.PI);
+                                imagen.RotationAngle = 360-(90-anguloDiagonal);
+
+                            }
+                            else
+                            {
+                                indiceImagen = sheet.Pictures.Add(fila, columna, imageStreamSenH);
+                                imagen = sheet.Pictures[indiceImagen];
+
+                                // Ajustar tamaño para que coincida con la forma
+
+
+                                imagen.Width = ancho+5;
+                                imagen.Height = alto;
+
+                                //desplazamiento en Y 
+                                imagen.Top = offsetY + 12;
+
+
+                                //calcular la diagonal de la forma para la inclinacion de la img
+                                double anguloDiagonal = Math.Atan((double)alto / ancho) * (180 / Math.PI);
+                                imagen.RotationAngle = anguloDiagonal;
+                            }
+                            
+                          
+
+                            // Opcional: enviar forma al fondo para que la imagen quede encima
+                            rectangleForm.ZOrderPosition = 0;
+                            rectangleForm.Fill.FillType = FillType.None;
+                            rectangleForm.IsHidden = true; // Oculta el shape en la hoja
+                            imagen.ZOrderPosition = 1;
+
+
+
+                        }
+                        else
+                        {
+                            rectangleForm = sheet.Shapes.AddShape(lineaOriginal.MsoDrawingType,sheet.Cells[celdaFinalLinea].Row, offsetY, sheet.Cells[celdaFinalLinea].Column, 10, 35, desplazamientoEnX);
+                            int fila = rectangleForm.UpperLeftRow;
+                            int columna = rectangleForm.UpperLeftColumn + 1;
+                            int ancho = rectangleForm.Width;
+                            int alto = rectangleForm.Height;
+
+
+                            if (ancho < alto)
+                            {
+                                indiceImagen = sheet.Pictures.Add(fila, columna, imageStreamSenV);
+                                imagen = sheet.Pictures[indiceImagen];
+
+                                imagen.Width = ancho;
+                                imagen.Height = alto;
+                                imagen.Top = offsetY;
+
+                                double anguloDiagonal = Math.Atan((double)alto / ancho) * (180 / Math.PI);
+                                imagen.RotationAngle = 360 - (90 - anguloDiagonal);
+
+                            }
+                            else
+                            {
+                                indiceImagen = sheet.Pictures.Add(fila, columna, imageStreamSenH);
+                                imagen = sheet.Pictures[indiceImagen];
+
+                                // Ajustar tamaño para que coincida con la forma
+
+
+                                imagen.Width = ancho+5;
+                                imagen.Height = alto;
+
+                                //desplazamiento en Y 
+                                imagen.Top = offsetY;
+
+
+                                //calcular la diagonal de la forma para la inclinacion de la img
+                                double anguloDiagonal = Math.Atan((double)alto / ancho) * (180 / Math.PI);
+                                imagen.RotationAngle = anguloDiagonal;
+                            }
+                            // Opcional: enviar forma al fondo para que la imagen quede encima
+                            rectangleForm.ZOrderPosition = 0;
+                            rectangleForm.Fill.FillType = FillType.None;
+                            rectangleForm.IsHidden = true; // Oculta el shape en la hoja
+
+
+
+                            imagen.ZOrderPosition = 1;
+                        }
+                        //asignamos a filaInicio la columna donde termino la linea de pasos
+                        celdaFinalLinea = Aspose.Cells.CellsHelper.CellIndexToName(rectangleForm.LowerRightRow, rectangleForm.LowerRightColumn - 1);
+                    }
+
+                    filaInicio = sheet.Cells[celdaFinalLinea].Row;
+                    columnaInicio = sheet.Cells[celdaFinalLinea].Column;
+                    isOffSetY = false;
+                }
+            }
+            else
+            {
+                int desplazamientoEnX = 0;
+                LineShape line = null;
+                foreach (var operation in operations)
+                {
+                    //dibujar linea de tiempo de operacion manual
+                    if(operation.ManualOperationTime!=null && operation.ManualOperationTime > 0)
+                    {
+                        desplazamientoEnX = (int)(((50 * operation.ManualOperationTime) / 0.1));//calculo del desplazamiento en Y
+                        line = sheet.Shapes.AddLine(filaInicio, offsetY, columnaInicio, 10, 0, desplazamientoEnX);//row inicio/offsetY/columna inicio de dibujo/desplaamientoX/alto/desplazamientoY
+                        line.Line.DashStyle = MsoLineDashStyle.Solid;
+                        line.Line.Weight = 2;
+                        line.Line.SolidFill.Color = lineColor;
+                        //saber donde termina la linea para dibujar la que sigue
+                        celdaFinalLinea = Aspose.Cells.CellsHelper.CellIndexToName(line.LowerRightRow, line.LowerRightColumn - 1);
+                    }
+                   
+
+
+                    
+
+                    //con eso dibujamos la linea puntuada que representa el tiempo de operacion con maquina en automatico
+                    if (operation.AutomaticMachineOperationTime!=null && operation.AutomaticMachineOperationTime > 0)
+                    {
+                        var totalUnitsByRow = 850;//puntos maximos por renglon
+                        string startCell = $"O{sheet.Cells[celdaFinalLinea].Row + 1}";
+                        //distancia de inicio de linea con respecto al total del rango
+                        CellArea area = CellArea.CreateCellArea(startCell, celdaFinalLinea);
+                        int totalCells = (area.EndRow - area.StartRow + 1) * (area.EndColumn - area.StartColumn + 1);
+
+                        //calculamos la distancia total desde la celda de inicio hasta la celda final de la linea
+                        desplazamientoEnX = (int)(((50 * operation.AutomaticMachineOperationTime) / 0.1));
+                        int totalDistanceFromStartCell = totalCells * 10;//10 unidades por celda
+                        int totalDistanceWithDotLine = totalDistanceFromStartCell + desplazamientoEnX;
+                        if (totalDistanceWithDotLine > totalUnitsByRow)
+                        {
+                            int excedente = totalDistanceWithDotLine - totalUnitsByRow;
+
+                            desplazamientoEnX = totalUnitsByRow - totalDistanceFromStartCell;
+                            line = sheet.Shapes.AddLine(sheet.Cells[celdaFinalLinea].Row, offsetY, sheet.Cells[celdaFinalLinea].Column, 10, 0, desplazamientoEnX);
+                            line.Line.DashStyle = MsoLineDashStyle.RoundDot;
+                            line.Line.SolidFill.Color = lineColor;
+                            line.Line.Weight = 2;
+                            //dibujamos el exedente en la misma fila pero al inicio
+                            line = sheet.Shapes.AddLine(sheet.Cells[celdaFinalLinea].Row, offsetY + 10, columnaInicioByRow, 10, 0, excedente);
+
+                        }
+                        else
+                        {
+                            line = sheet.Shapes.AddLine(sheet.Cells[celdaFinalLinea].Row, offsetY, sheet.Cells[celdaFinalLinea].Column, 10, 0, desplazamientoEnX);
+
+                        }
+                        line.Line.DashStyle = MsoLineDashStyle.RoundDot;
+                        line.Line.SolidFill.Color = lineColor;
+                        line.Line.Weight = 2;
+
+
+                    }
+
+
+                    //dibujamos la linea  en vertical para despues dibujar la linea de tiempo manual de la maquina en automatico
+                    //linea de separacion
+                    if (operation.ManualOperationTimeWithMachineInAutomatic!=null && operation.ManualOperationTimeWithMachineInAutomatic > 0)
+                    {
+                        line = sheet.Shapes.AddLine(sheet.Cells[celdaFinalLinea].Row, offsetY, sheet.Cells[celdaFinalLinea].Column, 10, 10, 0);
+                        line.Line.DashStyle = MsoLineDashStyle.Solid;
+                        line.Line.SolidFill.Color = lineColor;
+                        line.Line.Weight = 2;
+
+                        //linea de tiempo manual de la maquina en automatico
+                        desplazamientoEnX = (int)(((50 * operation.ManualOperationTimeWithMachineInAutomatic) / 0.1));
+                        line = sheet.Shapes.AddLine(sheet.Cells[celdaFinalLinea].Row, offsetY + 12, sheet.Cells[celdaFinalLinea].Column, 10, 0, desplazamientoEnX);
+                        line.Line.DashStyle = MsoLineDashStyle.Custom;
+                        line.Line.SolidFill.Color = lineColor;
+                        line.Line.Weight = 2;
+                        //asignamos a celdaFinalLinea la columna donde termino la linea de tiempo manual con maquina en automatico
+                        celdaFinalLinea = Aspose.Cells.CellsHelper.CellIndexToName(line.LowerRightRow, line.LowerRightColumn - 1);
+                        isOffSetY = true;
+                    }
+
+
+                    //dibujamos la linea de los pasos para la siguiente operacion.
+                    if (operation.StepsToNextProcess!=null && operation.StepsToNextProcess > 0)
+                    {
+                        int indiceImagen = 0;
+                        Aspose.Cells.Drawing.Picture imagen = null;
+                        desplazamientoEnX = (int)(((50 * operation.StepsToNextProcess) / 0.1));
+                        Aspose.Cells.Drawing.Shape rectangleForm = null;
+                        if (isOffSetY)
+                        {
+                            //line = sheet.Shapes.AddLine(sheet.Cells[celdaFinalLinea].Row, offsetY + 12, sheet.Cells[celdaFinalLinea].Column, 10, 21, desplazamientoEnX);
+                            rectangleForm = sheet.Shapes.AddShape(lineaOriginal.MsoDrawingType, sheet.Cells[celdaFinalLinea].Row, offsetY + 12, sheet.Cells[celdaFinalLinea].Column, 10, 21, desplazamientoEnX);
+                            int fila = rectangleForm.UpperLeftRow;
+                            int columna = rectangleForm.UpperLeftColumn + 1;
+                            int ancho = rectangleForm.Width;
+                            int alto = rectangleForm.Height;
+
+                            if (ancho < alto)
+                            {
+                                indiceImagen = sheet.Pictures.Add(fila, columna, imageStreamSenV);
+                                imagen = sheet.Pictures[indiceImagen];
+
+                                imagen.Width = ancho;
+                                imagen.Height = alto;
+                                imagen.Top = offsetY + 12;
+
+                                double anguloDiagonal = Math.Atan((double)alto / ancho) * (180 / Math.PI);
+                                imagen.RotationAngle = 360 - (90 - anguloDiagonal);
+
+                            }
+                            else
+                            {
+                                indiceImagen = sheet.Pictures.Add(fila, columna, imageStreamSenH);
+                                imagen = sheet.Pictures[indiceImagen];
+
+                                // Ajustar tamaño para que coincida con la forma
+
+
+                                imagen.Width = ancho + 5;
+                                imagen.Height = alto;
+
+                                //desplazamiento en Y 
+                                imagen.Top = offsetY + 12;
+
+
+                                //calcular la diagonal de la forma para la inclinacion de la img
+                                double anguloDiagonal = Math.Atan((double)alto / ancho) * (180 / Math.PI);
+                                imagen.RotationAngle = anguloDiagonal;
+                            }
+
+
+
+                            // Opcional: enviar forma al fondo para que la imagen quede encima
+                            rectangleForm.ZOrderPosition = 0;
+                            rectangleForm.Fill.FillType = FillType.None;
+                            rectangleForm.IsHidden = true; // Oculta el shape en la hoja
+                            imagen.ZOrderPosition = 1;
+
+
+
+                        }
+                        else
+                        {
+                            rectangleForm = sheet.Shapes.AddShape(lineaOriginal.MsoDrawingType, sheet.Cells[celdaFinalLinea].Row, offsetY, sheet.Cells[celdaFinalLinea].Column, 10, 35, desplazamientoEnX);
+                            int fila = rectangleForm.UpperLeftRow;
+                            int columna = rectangleForm.UpperLeftColumn + 1;
+                            int ancho = rectangleForm.Width;
+                            int alto = rectangleForm.Height;
+
+
+                            if (ancho < alto)
+                            {
+                                indiceImagen = sheet.Pictures.Add(fila, columna, imageStreamSenV);
+                                imagen = sheet.Pictures[indiceImagen];
+
+                                imagen.Width = ancho;
+                                imagen.Height = alto;
+                                imagen.Top = offsetY;
+
+                                double anguloDiagonal = Math.Atan((double)alto / ancho) * (180 / Math.PI);
+                                imagen.RotationAngle = 360 - (90 - anguloDiagonal);
+
+                            }
+                            else
+                            {
+                                indiceImagen = sheet.Pictures.Add(fila, columna, imageStreamSenH);
+                                imagen = sheet.Pictures[indiceImagen];
+
+                                // Ajustar tamaño para que coincida con la forma
+
+
+                                imagen.Width = ancho + 5;
+                                imagen.Height = alto;
+
+                                //desplazamiento en Y 
+                                imagen.Top = offsetY;
+
+
+                                //calcular la diagonal de la forma para la inclinacion de la img
+                                double anguloDiagonal = Math.Atan((double)alto / ancho) * (180 / Math.PI);
+                                imagen.RotationAngle = anguloDiagonal;
+                            }
+                            // Opcional: enviar forma al fondo para que la imagen quede encima
+                            rectangleForm.ZOrderPosition = 0;
+                            rectangleForm.Fill.FillType = FillType.None;
+                            rectangleForm.IsHidden = true; // Oculta el shape en la hoja
+                            imagen.ZOrderPosition = 1;
+                        }
+                        //asignamos a filaInicio la columna donde termino la linea de pasos
+                        celdaFinalLinea = Aspose.Cells.CellsHelper.CellIndexToName(rectangleForm.LowerRightRow, rectangleForm.LowerRightColumn - 1);
+                    }
+
+                    filaInicio = sheet.Cells[celdaFinalLinea].Row;
+                    columnaInicio = sheet.Cells[celdaFinalLinea].Column;
+                    isOffSetY = false;
+                }
             }
         }
     }

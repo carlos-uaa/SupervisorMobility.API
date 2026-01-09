@@ -26,7 +26,7 @@ namespace SupervisorMobility.API.DataAccess.Services.SOS_FlowRepository
         public async Task<int> CreateSOSFlow(SOSFlow SOS_FlowToCreate)
         {
             _context.SOSFlows.Add(SOS_FlowToCreate);
-            return _context.SaveChanges();
+            return await _context.SaveChangesAsync();
         }
 
         public async Task<SOSFlow> GetSOSFlow(int SOSFlowId, bool includeImages = false, bool includeNotes = false, bool includeLogbooks = false, bool includeSOS = false, bool includeImagesSOS = false, bool includePeople = false)

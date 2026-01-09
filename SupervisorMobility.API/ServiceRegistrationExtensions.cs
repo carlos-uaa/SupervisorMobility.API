@@ -43,6 +43,13 @@ using SupervisorMobility.API.infrastructure.repositories.STRO.Collections.Skills
 using SupervisorMobility.API.infrastructure.repositories.STRO.Collections.Knowledges;
 using SupervisorMobility.API.Interfaces.SOSDistribution.SOSDistributionExcel;
 using SupervisorMobility.API.Services.SOSDistribution.SOSDistributionExcel;
+using SupervisorMobility.API.DataAccess.Services.SOS_AnalysisRepository;
+using SupervisorMobility.API.DataAccess.Services.SOS_Combination;
+using SupervisorMobility.API.DataAccess.Services.SOS_CombinationRepository;
+using SupervisorMobility.API.DataAccess.Services.SOS_DistributionRepository;
+using SupervisorMobility.API.DataAccess.Services.SOS_FlowRepository;
+using SupervisorMobility.API.DataAccess.Services.SOS_SequenceRepository;
+using SupervisorMobility.API.DataAccess.Services.SOS_SynopticTableRepository;
 
 
 namespace SupervisorMobility.API
@@ -59,6 +66,12 @@ namespace SupervisorMobility.API
             services.AddScoped<IStampingRepository, StampingRepository>();
             // HOE/SOS Analysis_Process
             services.AddScoped<ISOS_ProcessRepository, SOS_ProcessRepository>();
+            services.AddScoped<ISOS_AnalysisRepository, SOS_AnalysisRepository>();
+            services.AddScoped<ISOS_CombinationRepository, SOS_CombinationRepository>();
+            services.AddScoped<ISOS_DistributionRepository, SOS_DistributionRepository>();
+            services.AddScoped<ISOS_FlowRepository, SOS_FlowRepository>();
+            services.AddScoped<ISOS_SequenceRepository, SOS_SequenceRepository>();
+            services.AddScoped<ISOS_SynopticTableRepository, SOS_SynopticTableRepository>();
             services.AddScoped<ISOSDistributionExcelService, SOSDistributionExcelService>();
 
             services.AddScoped<IKnowledgeRepository, KnowledgeRepository>();

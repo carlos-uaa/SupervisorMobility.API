@@ -2,6 +2,10 @@
 using Microsoft.AspNetCore.Mvc;
 using SupervisorMobility.API.DataAccess.Entities.SOS;
 using SupervisorMobility.API.DataAccess.Services;
+using SupervisorMobility.API.DataAccess.Services.SOS_AnalysisRepository;
+using SupervisorMobility.API.DataAccess.Services.SOS_SequenceRepository;
+using SupervisorMobility.API.DataAccess.Services.SOS_SynopticTableRepository;
+using SupervisorMobility.API.Interfaces.SOSDistribution.SOSDistributionExcel;
 using SupervisorMobility.API.Models.SOS.SOSSynopticTableofControlPointsDtos;
 using SupervisorMobility.API.Models.SOS.SOSSynopticTableofControlPointsDtos;
 using SupervisorMobility.API.Models.SOS.SOSSynopticTableofControlPointsDtos;
@@ -16,12 +20,18 @@ namespace SupervisorMobility.API.Controllers.SOS_Controllers
         private readonly IMapper _mapper;
         private readonly IWebHostEnvironment _env;
         private readonly ISOS_ProcessRepository _ProcessRepository;
-        public SynopticTableofControlPointsController(IWebHostEnvironment env, IMapper mapper, ISOS_ProcessRepository repository)
+        private readonly ISOS_SynopticTableRepository _SynopticTableRepository;
+        private readonly ISOS_SequenceRepository _SequenceRepository;
+        private readonly ISOS_AnalysisRepository _AnalisisRepository;
+        public SynopticTableofControlPointsController(IWebHostEnvironment env, IMapper mapper, ISOS_ProcessRepository repository, ISOS_SynopticTableRepository synopticTableRepository, ISOS_SequenceRepository sequenceRepository, ISOS_AnalysisRepository analysisRepository)
         {
             _ProcessRepository = repository;
             _mapper = mapper ??
                   throw new ArgumentNullException(nameof(mapper));
             _env = env ?? throw new ArgumentNullException(nameof(env));
+            _SynopticTableRepository = synopticTableRepository;
+            _SequenceRepository = sequenceRepository;
+            _AnalisisRepository = analysisRepository;
         }
 
         [HttpPost]
@@ -42,18 +52,18 @@ namespace SupervisorMobility.API.Controllers.SOS_Controllers
 
                 foreach (var sequence in sOSSynopticTableofControlPointsToCreate.Sequences)
                 {
-                    SOSSequence sequenceToAdd = await _ProcessRepository.GetSOSSequence(sequence.SOSSequenceId);
+                    SOSSequence sequenceToAdd = await _SequenceRepository.GetSOSSequence(sequence.SOSSequenceId);
                     SynopticTableofControlPointsToCreate.Sequences.ToList().Add(sequenceToAdd);
                 }
 
                 foreach (var analysis in sOSSynopticTableofControlPointsToCreate.Analyses)
                 {
-                    SOSAnalysis analysisToAdd = await _ProcessRepository.GetSOSAnalysis(analysis.SOSAnalysisId);
+                    SOSAnalysis analysisToAdd = await _AnalisisRepository.GetSOSAnalysis(analysis.SOSAnalysisId);
                     SynopticTableofControlPointsToCreate.Analyses.ToList().Add(analysisToAdd);
                 }
 
 
-                var createdResult = await _ProcessRepository.CreateSOSSynopticTableofControlPoints(SynopticTableofControlPointsToCreate);
+                var createdResult = await _SynopticTableRepository.CreateSOSSynopticTableofControlPoints(SynopticTableofControlPointsToCreate);
                 if (createdResult != null)
                     return Ok(SynopticTableofControlPointsToCreate);
                 else
@@ -62,17 +72,17 @@ namespace SupervisorMobility.API.Controllers.SOS_Controllers
             else
             {
                 //only add revision
-                SOSSynopticTableofControlPoints _sosSynopticTableofControlPoints = await _ProcessRepository.GetSOSSynopticTableofControlPoints(sOSSynopticTableofControlPointsToCreate.SOSSynopticTableofControlPointsId, true, true, true);
+                SOSSynopticTableofControlPoints _sosSynopticTableofControlPoints = await _SynopticTableRepository.GetSOSSynopticTableofControlPoints(sOSSynopticTableofControlPointsToCreate.SOSSynopticTableofControlPointsId, true, true, true);
 
                 SOSSynopticPointsLogbook _logbookToCreate = _mapper.Map<SOSSynopticPointsLogbook>(sOSSynopticTableofControlPointsToCreate.SynopticPointsLogbooks?.Last());
                 _logbookToCreate.SOSSynopticTableofControlPointsId = _sosSynopticTableofControlPoints.SOSSynopticTableofControlPointsId;
 
-                var resultAddSections = await _ProcessRepository.CreateSOSSynopticPointsLogbook(_logbookToCreate);
+                var resultAddSections = await _SynopticTableRepository.CreateSOSSynopticPointsLogbook(_logbookToCreate);
 
                 if (resultAddSections > 0)
                 {
                     Debug.WriteLine("SOSSynopticPointsLogbook añadidas con exito");
-                    await _ProcessRepository.AddSOSSynopticPointsLogbookToSOSSynopticTableofControlPoints(_sosSynopticTableofControlPoints, _logbookToCreate);
+                    await _SynopticTableRepository.AddSOSSynopticPointsLogbookToSOSSynopticTableofControlPoints(_sosSynopticTableofControlPoints, _logbookToCreate);
                 }
                 else
                 {
@@ -91,7 +101,7 @@ namespace SupervisorMobility.API.Controllers.SOS_Controllers
         public async Task<ActionResult<SOSSynopticControlPointsDto>> GetSOSSynopticTableofControlPoints(int id, bool includeLogbooks = false, bool includeSOS = false, bool includeCollections = false)
         {
 
-            var SOSSynopticTableofControlPoints = await _ProcessRepository.GetSOSSynopticTableofControlPoints(id, includeLogbooks, includeSOS, includeCollections);
+            var SOSSynopticTableofControlPoints = await _SynopticTableRepository.GetSOSSynopticTableofControlPoints(id, includeLogbooks, includeSOS, includeCollections);
             if (SOSSynopticTableofControlPoints == null)
             {
                 return NotFound("SOSSynopticTableofControlPoints not found!");
@@ -104,7 +114,7 @@ namespace SupervisorMobility.API.Controllers.SOS_Controllers
         public async Task<ActionResult<IEnumerable<SOSSynopticControlPointsDto>>> GetAllSOSSynopticTableofOperatingControlPoints(bool includeLogbooks = false, bool includeSOS = false, bool includeCollections = false)
         {
 
-            var CheckpointEntities = await _ProcessRepository.GetAllSOSSynopticTableofControlPoints(includeLogbooks, includeSOS, includeCollections);
+            var CheckpointEntities = await _SynopticTableRepository.GetAllSOSSynopticTableofControlPoints(includeLogbooks, includeSOS, includeCollections);
             if (CheckpointEntities == null)
             {
                 return NotFound("Get All Sos Analisis not found!");
