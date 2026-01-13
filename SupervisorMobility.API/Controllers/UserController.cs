@@ -17,6 +17,7 @@ using SupervisorMobility.API.Models.FileUploadDto;
 using SupervisorMobility.API.Models.HCIDtos;
 using SupervisorMobility.API.Models.ReturnResults;
 using SupervisorMobility.API.Models.Users;
+using SupervisorMobility.API.Models.NotificationDtos;
 using SupervisorMobility.API.Services;
 
 namespace SupervisorMobility.API.Controllers
@@ -332,6 +333,42 @@ namespace SupervisorMobility.API.Controllers
             }
 
             await _supervisorMobilityRepository.SaveChangesAsync();
+
+            // Crear notificación para el superior si tiene uno asignado
+            if (UserToReturn.SuperiorId.HasValue)
+            {
+                string userTypeName = UserToReturn.UserType switch
+                {
+                    1 => "Administrador",
+                    2 => "Senior Supervisor",
+                    3 => "Supervisor",
+                    4 => "Operador",
+                    5 => "SSV",
+                    _ => "Usuario"
+                };
+
+                NotificationToCreateDto newNotify = new NotificationToCreateDto
+                {
+                    MadeBy = "SM Mobility",
+                    UserId = UserToReturn.SuperiorId.Value,
+                    IsAccepted = true,
+                    IsActive = true,
+                    NotificationType = "Nuevo Usuario Creado",
+                    NotificationText = $"Se ha creado un nuevo usuario asignado a tu equipo:\\n\\n" +
+                                      $"Nombre: {UserToReturn.Name}\\n" +
+                                      $"Tipo: {userTypeName}\\n" +
+                                      $"Fecha: {DateTime.Now:dd/MM/yyyy HH:mm}"
+                };
+
+                try 
+                {
+                    await _assyChartService.CreateNotificationAsync(newNotify);
+                }
+                catch (Exception)
+                {
+                    // Ignorar errores en la notificación para no afectar el flujo principal
+                }
+            }
 
             return Ok(UserToReturn);
 
