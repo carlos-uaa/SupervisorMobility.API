@@ -3275,17 +3275,42 @@ namespace SupervisorMobility.API.Controllers
         [ProducesResponseType(StatusCodes.Status500InternalServerError)]
         [ProducesResponseType(StatusCodes.Status200OK)]
         [HttpPatch("UpdateUsersAreasForSuperior")]
-        public async Task<ActionResult<ServiceResponse<bool>>> UpdateUsersAreasForSuperior(List<UpdateAreasForSuperiorDto> usersList)
+        public async Task<ActionResult<ServiceResponse<UpdateUsersAreasResult>>> UpdateUsersAreasForSuperior(List<UpdateAreasForSuperiorDto> usersList)
         {
             try
             {
                 var response = await _supervisorMobilityRepository.UpdateUserAreasForSuperior(usersList);
+                
+                // Si hay errores parciales pero algunos éxitos, retornar 200 con detalles
+                if (response.Data?.SuccessfullyUpdated > 0)
+                {
+                    return Ok(response);
+                }
+                
+                // Si todos fallaron, retornar error
+                if (response.Data?.Failed == response.Data?.TotalUsers)
+                {
+                    return BadRequest(response);
+                }
+                
                 return Ok(response);
-            }catch(Exception ex)
+            }
+            catch(Exception ex)
             {
-                var response = new ServiceResponse<bool>();
-                response.Success = false;
-                response.Message = ex.Message + ex.InnerException;
+                var response = new ServiceResponse<UpdateUsersAreasResult>
+                {
+                    Success = false,
+                    Message = ex.InnerException != null 
+                        ? $"{ex.Message} - Inner: {ex.InnerException.Message}" 
+                        : ex.Message,
+                    Data = new UpdateUsersAreasResult
+                    {
+                        Success = false,
+                        Message = "Critical server error occurred",
+                        TotalUsers = usersList?.Count ?? 0,
+                        Failed = usersList?.Count ?? 0
+                    }
+                };
                 return StatusCode(StatusCodes.Status500InternalServerError, response);
             }
         }

@@ -1112,70 +1112,170 @@ namespace SupervisorMobility.API.Services
             await _context.SaveChangesAsync();
         }
 
-        public async Task<ServiceResponse<bool>> UpdateUserAreasForSuperior(List<UpdateAreasForSuperiorDto> usersList)
+        public async Task<ServiceResponse<UpdateUsersAreasResult>> UpdateUserAreasForSuperior(List<UpdateAreasForSuperiorDto> usersList)
         {
-            var response = new ServiceResponse<bool>();
+            var response = new ServiceResponse<UpdateUsersAreasResult>();
+            var result = new UpdateUsersAreasResult
+            {
+                TotalUsers = usersList.Count
+            };
+
             try
             {
-                foreach (var userInfo in usersList)
+                // Validación crítica: Verificar que todos los superiores existan primero
+                var superiorIds = usersList.Select(u => u.SuperiorId).Distinct().ToList();
+                foreach (var superiorId in superiorIds)
                 {
-                    var userExist = await UserExistAsync(userInfo.UserId);
-                    if (!userExist)
-                    {
-                        response.Success = false;
-                        response.Message = $"User with Id {userInfo.UserId} does not exist.";
-                        return response;
-                    }
-                    //si el usuario existe buscamos su superior para poder actualizarle la planta y el grupo
-                    var superiorUser = await GetUserAsync(userInfo.SuperiorId, true);
+                    var superiorUser = await GetUserAsync(superiorId, true);
                     if (superiorUser == null)
                     {
                         response.Success = false;
-                        response.Message = $"Superior User with Id {userInfo.SuperiorId} does not exist.";
+                        response.Message = $"Superior User with Id {superiorId} does not exist. Cannot proceed with any updates.";
+                        result.Success = false;
+                        result.Message = response.Message;
+                        response.Data = result;
                         return response;
                     }
+                }
 
-                    var user = await GetUserAsync(userInfo.UserId, true);
-                    if (user?.SuperiorId != userInfo.SuperiorId)
+                // Procesar cada usuario individualmente
+                foreach (var userInfo in usersList)
+                {
+                    try
                     {
-                        //si el superior es diferente removemos el subordinado del superior anterior
-                        var previousSuperior = await GetUserAsync((int)user?.SuperiorId, true);
-                        if (previousSuperior == null)
+                        // Usar transacción para cada usuario
+                        using var transaction = await _context.Database.BeginTransactionAsync();
+                        
+                        try
                         {
-                            response.Success = false;
-                            response.Message = $"Previous Superior User with Id {user?.SuperiorId} does not exist.";
-                            return response;
+                            var userExist = await UserExistAsync(userInfo.UserId);
+                            if (!userExist)
+                            {
+                                result.Failed++;
+                                result.Errors.Add(new UserUpdateError
+                                {
+                                    UserId = userInfo.UserId,
+                                    ErrorType = "UserNotFound",
+                                    ErrorMessage = $"User with Id {userInfo.UserId} does not exist."
+                                });
+                                continue;
+                            }
+
+                            var user = await GetUserAsync(userInfo.UserId, true);
+                            var superiorUser = await GetUserAsync(userInfo.SuperiorId, true);
+
+                            // Cambio de superior
+                            if (user?.SuperiorId != userInfo.SuperiorId)
+                            {
+                                if (user?.SuperiorId != null)
+                                {
+                                    var previousSuperior = await GetUserAsync((int)user.SuperiorId, true);
+                                    if (previousSuperior != null)
+                                    {
+                                        await UserRemoveSubordinated(previousSuperior, user);
+                                    }
+                                }
+                                await UserAddSubordinated(superiorUser, user);
+                            }
+
+                            // Actualizar planta y grupo
+                            user.PlantId = superiorUser.PlantId;
+                            user.GroupId = superiorUser.GroupId;
+                            await _context.SaveChangesAsync();
+
+                            // Validar que todas las áreas existan
+                            var missingAreas = new List<int>();
+                            foreach (var areaId in userInfo.AreaIds)
+                            {
+                                var areaExists = await _context.Areas.AnyAsync(a => a.AreaId == areaId);
+                                if (!areaExists)
+                                {
+                                    missingAreas.Add(areaId);
+                                }
+                            }
+
+                            if (missingAreas.Any())
+                            {
+                                result.Failed++;
+                                result.Errors.Add(new UserUpdateError
+                                {
+                                    UserId = userInfo.UserId,
+                                    ErrorType = "AreasNotFound",
+                                    ErrorMessage = $"User {userInfo.UserId}: Some areas do not exist.",
+                                    MissingAreaIds = missingAreas
+                                });
+                                await transaction.RollbackAsync();
+                                continue;
+                            }
+
+                            // Actualizar las áreas del usuario
+                            await UserRemoveAllAreas(user);
+                            foreach (var areaId in userInfo.AreaIds)
+                            {
+                                var areaEntity = await _context.Areas.FirstOrDefaultAsync(a => a.AreaId == areaId);
+                                if (areaEntity != null)
+                                {
+                                    await UserAddArea(user, areaEntity);
+                                }
+                            }
+
+                            await _context.SaveChangesAsync();
+                            await transaction.CommitAsync();
+                            result.SuccessfullyUpdated++;
                         }
-                        await UserRemoveSubordinated(previousSuperior, user);
-                        //agregamos el subordinado al nuevo superior
-                        await UserAddSubordinated(superiorUser, user);
+                        catch (Exception ex)
+                        {
+                            await transaction.RollbackAsync();
+                            result.Failed++;
+                            result.Errors.Add(new UserUpdateError
+                            {
+                                UserId = userInfo.UserId,
+                                ErrorType = "ProcessingError",
+                                ErrorMessage = $"Error processing user {userInfo.UserId}: {ex.Message}"
+                            });
+                        }
                     }
-                    //actualizamos planta y grupo
-                    user.PlantId = superiorUser.PlantId;
-                    user.GroupId = superiorUser.GroupId;
-                    await _context.SaveChangesAsync();
-
-                    //actualizamos las areas del usuario
-                    await UserRemoveAllAreas(user);
-                    foreach (var areaId in userInfo.AreaIds)
+                    catch (Exception ex)
                     {
-                        var areaEntity = await _context.Areas.FirstOrDefaultAsync(a => a.AreaId == areaId);
-                        if (areaEntity != null)
+                        result.Failed++;
+                        result.Errors.Add(new UserUpdateError
                         {
-                            await UserAddArea(user, areaEntity);
-                        }
+                            UserId = userInfo.UserId,
+                            ErrorType = "TransactionError",
+                            ErrorMessage = $"Failed to create transaction for user {userInfo.UserId}: {ex.Message}"
+                        });
                     }
                 }
-                response.Data = true;
-                response.Message = "Users areas and hierarchy updated successfully.";
-                return response;
 
+                // Generar mensaje de resumen
+                if (result.Failed == 0)
+                {
+                    result.Message = $"All {result.SuccessfullyUpdated} users updated successfully.";
+                    result.Success = true;
+                }
+                else if (result.SuccessfullyUpdated == 0)
+                {
+                    result.Message = $"Failed to update all {result.Failed} users.";
+                    result.Success = false;
+                    response.Success = false;
+                }
+                else
+                {
+                    result.Message = $"Partially completed: {result.SuccessfullyUpdated} updated, {result.Failed} failed.";
+                    result.Success = true; // Éxito parcial
+                }
+
+                response.Data = result;
+                response.Message = result.Message;
+                return response;
             }
             catch (Exception ex)
             {
                 response.Success = false;
-                response.Message = ex.Message;
-
+                response.Message = $"Critical error: {ex.Message}";
+                result.Success = false;
+                result.Message = response.Message;
+                response.Data = result;
                 return response;
             }
         }
