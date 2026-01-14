@@ -848,7 +848,7 @@ namespace SupervisorMobility.API.Services
         #region Users
         public async Task<IEnumerable<User>> GetAllUsersAsync(bool includeCollections = false, bool includeSubordinates = false, bool includeLeadershipRecord = false)
         {
-            var query = _context.Users.Where(u => u.IsActive == true);
+            var query = _context.Users.AsNoTracking().Where(u => u.IsActive == true);
 
             if (includeCollections)
             {
@@ -874,7 +874,7 @@ namespace SupervisorMobility.API.Services
 
         public async Task<IEnumerable<User>> GetAllUserByTypeAsync(int typeUser, bool includeCollections = false, bool includeSubordinates = false, bool includeLeadershipRecord = false)
         {
-            var query = _context.Users.Where(u => u.UserType == typeUser).Where(u => u.IsActive == true);
+            var query = _context.Users.AsNoTracking().Where(u => u.UserType == typeUser).Where(u => u.IsActive == true);
 
             if (includeCollections)
             {
@@ -900,7 +900,7 @@ namespace SupervisorMobility.API.Services
 
         public async Task<IEnumerable<User>> GetAllUserByTypeInPlantAreaAsync(int plantId, int areaId, int typeUser, bool includeCollections = false, bool includeSubordinates = false, bool includeLeadershipRecord = false)
         {
-            var query = _context.Users.Where(u => u.IsActive == true && u.UserType == typeUser && u.PlantId == plantId && u.AreaId == areaId);
+            var query = _context.Users.AsNoTracking().Where(u => u.IsActive == true && u.UserType == typeUser && u.PlantId == plantId && u.AreaId == areaId);
 
             if (includeCollections)
             {
@@ -923,7 +923,7 @@ namespace SupervisorMobility.API.Services
 
         public async Task<IEnumerable<User>> GetAllUserByTypeInPlantAsync(int plantId, int typeUser, bool includeCollections = false, bool includeSubordinates = false, bool includeLeadershipRecord = false)
         {
-            var query = _context.Users.Where(u => u.UserType == typeUser && u.PlantId == plantId && u.IsActive == true);
+            var query = _context.Users.AsNoTracking().Where(u => u.UserType == typeUser && u.PlantId == plantId && u.IsActive == true);
 
             if (includeCollections)
             {
@@ -949,6 +949,7 @@ namespace SupervisorMobility.API.Services
         public async Task<IEnumerable<User>> GetAllSubordinatesAsync(int superiorid)
         {
             return await _context.Users
+                .AsNoTracking()
                 .Include(p => p.Plant)
                 .Include(a => a.Area)
                 .Include(d => d.Distribution)
