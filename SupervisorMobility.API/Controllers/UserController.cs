@@ -322,14 +322,17 @@ namespace SupervisorMobility.API.Controllers
             {
                 foreach (var item in Users)
                 {
-                    _supervisorMobilityRepository.UserAddSubordinated(UserToReturn, item);
+                    await _supervisorMobilityRepository.UserAddSubordinated(UserToReturn, item);
                 }
 
             }
 
             if (haveAreas)
             {
-                await _supervisorMobilityRepository.UserAddAreas(UserToReturn, Areas);
+                foreach (var itemArea in Areas)
+                {
+                    await _supervisorMobilityRepository.UserAddArea(UserToReturn, itemArea);
+                }                
             }
 
             await _supervisorMobilityRepository.SaveChangesAsync();
@@ -3266,6 +3269,25 @@ namespace SupervisorMobility.API.Controllers
                 return NotFound(response);
             }
             return Ok(response);
+        }
+
+
+        [ProducesResponseType(StatusCodes.Status500InternalServerError)]
+        [ProducesResponseType(StatusCodes.Status200OK)]
+        [HttpPatch("UpdateUsersAreasForSuperior")]
+        public async Task<ActionResult<ServiceResponse<bool>>> UpdateUsersAreasForSuperior(List<UpdateAreasForSuperiorDto> usersList)
+        {
+            try
+            {
+                var response = await _supervisorMobilityRepository.UpdateUserAreasForSuperior(usersList);
+                return Ok(response);
+            }catch(Exception ex)
+            {
+                var response = new ServiceResponse<bool>();
+                response.Success = false;
+                response.Message = ex.Message + ex.InnerException;
+                return StatusCode(StatusCodes.Status500InternalServerError, response);
+            }
         }
 
     }

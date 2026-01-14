@@ -191,6 +191,7 @@ namespace SupervisorMobility.API.Services
 
 
         Task UpdateUser(UsersForUpdateDto user, int userId);
+        Task <ServiceResponse<bool>>UpdateUserAreasForSuperior(List<UpdateAreasForSuperiorDto> userList);
 
         Task AddUserAsync(User user);
         Task<ServiceResponse<WFMInfoSP>> GetPersonalInfoForUserByPersonalNumber(int personalNumber);

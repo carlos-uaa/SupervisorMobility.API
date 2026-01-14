@@ -1111,6 +1111,76 @@ namespace SupervisorMobility.API.Services
 
             await _context.SaveChangesAsync();
         }
+
+        public async Task<ServiceResponse<bool>> UpdateUserAreasForSuperior(List<UpdateAreasForSuperiorDto> usersList)
+        {
+            var response = new ServiceResponse<bool>();
+            try
+            {
+                foreach (var userInfo in usersList)
+                {
+                    var userExist = await UserExistAsync(userInfo.UserId);
+                    if (!userExist)
+                    {
+                        response.Success = false;
+                        response.Message = $"User with Id {userInfo.UserId} does not exist.";
+                        return response;
+                    }
+                    //si el usuario existe buscamos su superior para poder actualizarle la planta y el grupo
+                    var superiorUser = await GetUserAsync(userInfo.SuperiorId, true);
+                    if (superiorUser == null)
+                    {
+                        response.Success = false;
+                        response.Message = $"Superior User with Id {userInfo.SuperiorId} does not exist.";
+                        return response;
+                    }
+
+                    var user = await GetUserAsync(userInfo.UserId, true);
+                    if (user?.SuperiorId != userInfo.SuperiorId)
+                    {
+                        //si el superior es diferente removemos el subordinado del superior anterior
+                        var previousSuperior = await GetUserAsync((int)user?.SuperiorId, true);
+                        if (previousSuperior == null)
+                        {
+                            response.Success = false;
+                            response.Message = $"Previous Superior User with Id {user?.SuperiorId} does not exist.";
+                            return response;
+                        }
+                        await UserRemoveSubordinated(previousSuperior, user);
+                        //agregamos el subordinado al nuevo superior
+                        await UserAddSubordinated(superiorUser, user);
+                    }
+                    //actualizamos planta y grupo
+                    user.PlantId = superiorUser.PlantId;
+                    user.GroupId = superiorUser.GroupId;
+                    await _context.SaveChangesAsync();
+
+                    //actualizamos las areas del usuario
+                    await UserRemoveAllAreas(user);
+                    foreach (var areaId in userInfo.AreaIds)
+                    {
+                        var areaEntity = await _context.Areas.FirstOrDefaultAsync(a => a.AreaId == areaId);
+                        if (areaEntity != null)
+                        {
+                            await UserAddArea(user, areaEntity);
+                        }
+                    }
+                }
+                response.Data = true;
+                response.Message = "Users areas and hierarchy updated successfully.";
+                return response;
+
+            }
+            catch (Exception ex)
+            {
+                response.Success = false;
+                response.Message = ex.Message;
+
+                return response;
+            }
+        }
+
+
         public async Task<AsyncVoidMethodBuilder> UserAddSubordinated(User Master, User Slave)
         {
 
