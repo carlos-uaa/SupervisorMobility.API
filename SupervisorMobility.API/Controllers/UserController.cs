@@ -459,7 +459,9 @@ namespace SupervisorMobility.API.Controllers
                     var userInDB = await _assyChartService.FetchUserAsync(Sub.UserId);
                     //para saber si el subordinado no sufrio cambios verificamos que todas las areas y el superior sean iguales
                     var idsAreasUserInDb = userInDB?.Areas?.Select(a => a.AreaId).ToList() ?? new List<int>();
-                    if ((idsAreasUserInDb.Count!=Sub.AreasIds?.Count && !idsAreasUserInDb.Except(Sub.AreasIds).Any()) || userInDB?.SuperiorId != Sub.SuperiorId)
+                    var subAreasIds = Sub.AreasIds ?? new List<int>();
+
+                    if ((idsAreasUserInDb.Count != subAreasIds.Count && !idsAreasUserInDb.Except(subAreasIds).Any()) || userInDB?.SuperiorId != Sub.SuperiorId)
                     {
                         _mapper.Map(Sub, userInDB);
                         UsersInUser.Add(userInDB);
@@ -580,12 +582,12 @@ namespace SupervisorMobility.API.Controllers
                             break;
                     }
 
-                    _supervisorMobilityRepository.UserAddSubordinated(UserToReturn, elementUserInList);
+                    await _supervisorMobilityRepository.UserAddSubordinated(UserToReturn, elementUserInList);
                 }
 
                 foreach (var userRestore in UsersWithoutChanges)
                 {
-                    _supervisorMobilityRepository.UserAddSubordinated(UserToReturn, userRestore);
+                    await _supervisorMobilityRepository.UserAddSubordinated(UserToReturn, userRestore);
                 }
             }
 
@@ -595,8 +597,9 @@ namespace SupervisorMobility.API.Controllers
                 UserToReturn.Areas = null;
                 foreach (var elemntArea in AreasInUser)
                 {
-                    _supervisorMobilityRepository.UserAddArea(UserToReturn, elemntArea);
+                    await _supervisorMobilityRepository.UserAddArea(UserToReturn, elemntArea);
                 }
+                await _supervisorMobilityRepository.SaveChangesAsync();
             }
 
 
