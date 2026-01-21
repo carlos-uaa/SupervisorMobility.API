@@ -245,18 +245,6 @@ namespace SupervisorMobility.API.Controllers
             if (newUser.DepartmentId == 0)
                 newUser.DepartmentId = null;
 
-            if (newUser.AreaId == 0)
-            {
-                newUser.AreaId = null;
-            }
-            //else if (newUser.AreaId != null)
-            //{
-            //    if (!await _supervisorMobilityRepository.AreaExistAsync((int)newUser.AreaId))
-            //    {
-            //        return NotFound("No Area");
-            //    }
-            //}
-
             if (newUser.GroupId == 0)
             {
                 newUser.GroupId = null;
@@ -269,7 +257,7 @@ namespace SupervisorMobility.API.Controllers
                 }
             }
 
-            if (newUser.DistributionId == 0)
+            if (newUser.DistributionId == 0 || newUser.DistributionId == null)
             {
                 newUser.DistributionId = null;
             }
