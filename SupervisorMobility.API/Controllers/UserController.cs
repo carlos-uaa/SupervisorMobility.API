@@ -19,6 +19,7 @@ using SupervisorMobility.API.Models.ReturnResults;
 using SupervisorMobility.API.Models.Users;
 using SupervisorMobility.API.Models.NotificationDtos;
 using SupervisorMobility.API.Services;
+using Microsoft.AspNetCore.SignalR;
 
 namespace SupervisorMobility.API.Controllers
 {
@@ -3275,6 +3276,84 @@ namespace SupervisorMobility.API.Controllers
                 // Si hay errores parciales pero algunos éxitos, retornar 200 con detalles
                 if (response.Data?.SuccessfullyUpdated > 0)
                 {
+                    // Crear notificacion a los usuarios que se actualizaron correctamente
+                    foreach (var userUpdate in usersList)
+                    {
+                        if (response.Data.Errors.Any(u => u.UserId == userUpdate.UserId))
+                            continue;
+
+                        try
+                        {
+                            // Obtener al usuario actualizado 
+                            var userResponse = await GetUser(userUpdate.UserId, true);
+                            var okResult = userResponse.Result as OkObjectResult;
+                            var user = okResult?.Value as UsersWithNavigationAndPeopleDetails;
+
+                            // Notificar al usuario que sus areas cambiaron
+                            NotificationToCreateDto areasChangedNotification = new NotificationToCreateDto
+                            {
+                                MadeBy = "SM Mobility",
+                                UserId = user.UserId,
+                                IsAccepted = true,
+                                IsActive = true,
+                                NotificationType = "Update subordinate",
+                                NotificationText = $"Your superior have new Areas and your Areas managed were updated."
+                            };
+
+                            try
+                            {
+                                await _assyChartService.CreateNotificationAsync(areasChangedNotification);
+                            }
+                            catch (Exception)
+                            {
+                                // Ignorar errores en la notificación para no afectar el flujo principal
+                            }
+
+                            //En los casos necesarios, crear actualizacion para actualizar a los subordinados del subordinado
+                            if (user.UserType == 2 || user.UserType == 3)
+                                if (user.Subordinates != null && user.Subordinates.Count > 0)
+                                    foreach (var sub in user.Subordinates)
+                                    {
+                                        string userTypeName = sub.UserType switch
+                                        {
+                                            1 => "Administrador",
+                                            2 => "Senior Supervisor",
+                                            3 => "Supervisor",
+                                            4 => "Operador",
+                                            5 => "SSV",
+                                            _ => "Usuario"
+                                        };
+
+                                        NotificationToCreateDto newNotify = new NotificationToCreateDto
+                                        {
+                                            MadeBy = "SM Mobility",
+                                            UserId = user.UserId,
+                                            IsAccepted = true,
+                                            IsActive = true,
+                                            NotificationType = "Update subordinate",
+                                            NotificationText = $"Your Areas have changed and this subordinate needs you to update their information so it aligns with yours.\\n\\n" +
+                                                          $"Name: {sub.Name}\\n" +
+                                                          $"Type: {userTypeName}\\n" +
+                                                          $"Date: {DateTime.Now:dd/MM/yyyy HH:mm}"
+                                        };
+
+                                        try
+                                        {
+                                            await _assyChartService.CreateNotificationAsync(newNotify);
+                                        }
+                                        catch (Exception)
+                                        {
+                                            // Ignorar errores en la notificación para no afectar el flujo principal
+                                        }
+                                    }
+                        }
+                        catch (Exception)
+                        {
+                            // Ignorar errores en la query para no afectar el flujo principal
+                        }
+                    }
+
+                    // Retornar la respuesta
                     return Ok(response);
                 }
                 

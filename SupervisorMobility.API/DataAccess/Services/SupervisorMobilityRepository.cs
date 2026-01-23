@@ -1208,8 +1208,25 @@ namespace SupervisorMobility.API.Services
                                 continue;
                             }
 
-                            // Actualizar las áreas del usuario
-                            await UserRemoveAllAreas(user);
+                            // ----------- Actualizar las áreas del usuario ----------- \\
+
+                            // Eliminar las Areas anteriores del usuario
+                            var removeAreasResult = await UserRemoveAllAreas(user);
+
+                            // Validar que se hayan borrado correctamente
+                            if (removeAreasResult < 0)
+                            {
+                                result.Failed++;
+                                result.Errors.Add(new UserUpdateError
+                                {
+                                    UserId = userInfo.UserId,
+                                    ErrorType = "Area Removal Failed",
+                                    ErrorMessage = $"Failed to remove existing areas for user {userInfo.UserId}."
+                                });
+                                await transaction.RollbackAsync();
+                                continue;
+                            }
+
                             foreach (var areaId in userInfo.AreaIds)
                             {
                                 var areaEntity = await _context.Areas.FirstOrDefaultAsync(a => a.AreaId == areaId);
@@ -1371,21 +1388,12 @@ namespace SupervisorMobility.API.Services
             return new AsyncVoidMethodBuilder();
         }
 
-        public async Task<AsyncVoidMethodBuilder> UserRemoveAllAreas(User Master)
+        public async Task<int> UserRemoveAllAreas(User master)
         {
-            Master.Areas?.Clear();
-            // Eliminar todas las entradas relacionadas en la tabla UserAreas para el usuario especificado
-            string sqlQuery = "DELETE FROM UserAreas WHERE UserId = @userId";
-
-            int executeCount = _context.Database.ExecuteSqlRaw(sqlQuery,
-                    new SqlParameter("@userId", Master.UserId));
-
-            Debug.WriteLine($"Este es executeCount: {executeCount}");
-
-            await _context.SaveChangesAsync();
-            return new AsyncVoidMethodBuilder();
-
+            master.Areas?.Clear();
+            return await _context.SaveChangesAsync();
         }
+
 
         public async Task<AsyncVoidMethodBuilder> UserAddArea(User Master, Area Slave)
         {
