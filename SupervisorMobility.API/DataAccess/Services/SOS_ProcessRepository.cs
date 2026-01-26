@@ -165,7 +165,7 @@ namespace SupervisorMobility.API.DataAccess.Services
 
                 if (includeDocuments)
                 {
-                    await _context.Entry(sosHub).Collection(o => o.CommonDirection).LoadAsync();
+                    await _context.Entry(sosHub).Collection(o => o.CommonDirection).Query().Where(d => d.IsActive == true).LoadAsync();
                 }
 
                 if (includeModel)
@@ -193,25 +193,42 @@ namespace SupervisorMobility.API.DataAccess.Services
                 {
                     await _context.Entry(sosHub).Reference(a => a.Hci).Query().Where(d => d.IsActive == true).LoadAsync();
 
-
                     await _context.Entry(sosHub).Collection(a => a.SOSAnalysis).Query().Where(d => d.IsActive == true).LoadAsync();
                     foreach (var analysis in sosHub.SOSAnalysis)
                     {
                         await _context.Entry(analysis).Collection(aa => aa.AnalysisLogbooks).LoadAsync();
+                        foreach (var logbook in analysis.AnalysisLogbooks)
+                        {
+                            await _context.Entry(logbook).Reference(al => al.Approver).LoadAsync();
+                            await _context.Entry(logbook).Reference(al => al.Reviewer).LoadAsync();
+                        }
                     }
 
                     await _context.Entry(sosHub).Collection(c => c.SOSCombination).Query().Where(d => d.IsActive == true).LoadAsync();
                     foreach (var combination in sosHub.SOSCombination)
                     {
                         await _context.Entry(combination).Collection(aa => aa.CombinationLogbooks).LoadAsync();
+                        foreach (var logbook in combination.CombinationLogbooks)
+                        {
+                            await _context.Entry(logbook).Reference(al => al.Approver).LoadAsync();
+                            await _context.Entry(logbook).Reference(al => al.Reviewer).LoadAsync();
+                        }
+                        
                         await _context.Entry(combination).Collection(aa => aa.Turns).LoadAsync();
+                        await _context.Entry(combination).Reference(al => al.ReviewerHS).LoadAsync();
                     }
 
-                    await _context.Entry(sosHub).Collection(d => d.SOSDistribution).Query().Where(d => d.IsActive == true).LoadAsync(); foreach (var distribution in sosHub.SOSDistribution)
+                    await _context.Entry(sosHub).Collection(d => d.SOSDistribution).Query().Where(d => d.IsActive == true).LoadAsync(); 
+                    foreach (var distribution in sosHub.SOSDistribution)
                     {
                         await _context.Entry(distribution).Collection(aa => aa.DistributionLogbooks).LoadAsync();
+                        foreach (var logbook in distribution.DistributionLogbooks)
+                        {
+                            await _context.Entry(logbook).Reference(al => al.Approver).LoadAsync();
+                            await _context.Entry(logbook).Reference(al => al.Reviewer).LoadAsync();
+                        }
+                        
                         await _context.Entry(distribution).Collection(aa => aa.Turns).LoadAsync();
-
                         await _context.Entry(distribution).Collection(aa => aa.Analyses).LoadAsync();
                         await _context.Entry(distribution).Collection(aa => aa.Sequences).LoadAsync();
                     }
@@ -220,12 +237,23 @@ namespace SupervisorMobility.API.DataAccess.Services
                     foreach (var flow in sosHub.SOSFlow)
                     {
                         await _context.Entry(flow).Collection(aa => aa.FlowLogbooks).LoadAsync();
+                        foreach (var logbook in flow.FlowLogbooks)
+                        {
+                            await _context.Entry(logbook).Reference(al => al.Approver).LoadAsync();
+                            await _context.Entry(logbook).Reference(al => al.Reviewer).LoadAsync();
+                        }
+                        await _context.Entry(flow).Reference(al => al.ReviewerHS).LoadAsync();
                     }
 
                     await _context.Entry(sosHub).Collection(s => s.SOSSequence).Query().Where(d => d.IsActive == true).LoadAsync();
                     foreach (var sequence in sosHub.SOSSequence)
                     {
                         await _context.Entry(sequence).Collection(aa => aa.SequenceLogbooks).LoadAsync();
+                        foreach (var logbook in sequence.SequenceLogbooks)
+                        {
+                            await _context.Entry(logbook).Reference(al => al.Approver).LoadAsync();
+                            await _context.Entry(logbook).Reference(al => al.Reviewer).LoadAsync();
+                        }
                     }
 
                     await _context.Entry(sosHub).Collection(d => d.SOSSynopticControlPoints).Query().Where(d => d.IsActive == true).LoadAsync(); foreach (var synoptic in sosHub.SOSSynopticControlPoints)
@@ -242,71 +270,6 @@ namespace SupervisorMobility.API.DataAccess.Services
 
                         await _context.Entry(synoptic).Collection(aa => aa.Analyses).LoadAsync();
                         await _context.Entry(synoptic).Collection(aa => aa.Sequences).LoadAsync();
-                    }
-
-
-                    await _context.Entry(sosHub).Collection(a => a.SOSAnalysis).LoadAsync();
-                    foreach (var analysis in sosHub.SOSAnalysis)
-                    {
-                        // Cargar AnalysisLogbooks y sus relaciones
-                        await _context.Entry(analysis).Collection(aa => aa.AnalysisLogbooks).LoadAsync();
-                        foreach (var logbook in analysis.AnalysisLogbooks)
-                        {
-                            await _context.Entry(logbook).Reference(al => al.Approver).LoadAsync();
-                            await _context.Entry(logbook).Reference(al => al.Reviewer).LoadAsync();
-                        }
-                    }
-
-                    await _context.Entry(sosHub).Collection(c => c.SOSCombination).LoadAsync();
-                    foreach (var combination in sosHub.SOSCombination)
-                    {
-                        // Cargar CombinationLogbooks y sus relaciones
-                        await _context.Entry(combination).Collection(al => al.CombinationLogbooks).LoadAsync();
-                        foreach (var logbook in combination.CombinationLogbooks)
-                        {
-                            await _context.Entry(logbook).Reference(al => al.Approver).LoadAsync();
-                            await _context.Entry(logbook).Reference(al => al.Reviewer).LoadAsync();
-                        }
-
-                        await _context.Entry(combination).Reference(al => al.ReviewerHS).LoadAsync();
-                    }
-
-                    await _context.Entry(sosHub).Collection(d => d.SOSDistribution).LoadAsync();
-                    foreach (var distribution in sosHub.SOSDistribution)
-                    {
-                        // Cargar DistributionLogbooks y sus relaciones
-                        await _context.Entry(distribution).Collection(aa => aa.DistributionLogbooks).LoadAsync();
-                        foreach (var logbook in distribution.DistributionLogbooks)
-                        {
-                            await _context.Entry(logbook).Reference(al => al.Approver).LoadAsync();
-                            await _context.Entry(logbook).Reference(al => al.Reviewer).LoadAsync();
-                        }
-                    }
-
-                    await _context.Entry(sosHub).Collection(f => f.SOSFlow).LoadAsync();
-                    foreach (var flow in sosHub.SOSFlow)
-                    {
-                        // Cargar FlowLogbooks y sus relaciones
-                        await _context.Entry(flow).Collection(aa => aa.FlowLogbooks).LoadAsync();
-                        foreach (var logbook in flow.FlowLogbooks)
-                        {
-                            await _context.Entry(logbook).Reference(al => al.Approver).LoadAsync();
-                            await _context.Entry(logbook).Reference(al => al.Reviewer).LoadAsync();
-                        }
-
-                        await _context.Entry(flow).Reference(al => al.ReviewerHS).LoadAsync();
-                    }
-
-                    await _context.Entry(sosHub).Collection(s => s.SOSSequence).LoadAsync();
-                    foreach (var sequence in sosHub.SOSSequence)
-                    {
-                        // Cargar SequenceLogbooks y sus relaciones
-                        await _context.Entry(sequence).Collection(aa => aa.SequenceLogbooks).LoadAsync();
-                        foreach (var logbook in sequence.SequenceLogbooks)
-                        {
-                            await _context.Entry(logbook).Reference(al => al.Approver).LoadAsync();
-                            await _context.Entry(logbook).Reference(al => al.Reviewer).LoadAsync();
-                        }
                     }
                 }
             }
