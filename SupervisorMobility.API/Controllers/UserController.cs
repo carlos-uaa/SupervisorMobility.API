@@ -262,7 +262,7 @@ namespace SupervisorMobility.API.Controllers
             {
                 newUser.DistributionId = null;
             }
-            else
+            else if (newUser.DistributionId != null)
             {
                 if (!await _supervisorMobilityRepository.DistributionExistsAsync((int)newUser.DistributionId))
                 {
