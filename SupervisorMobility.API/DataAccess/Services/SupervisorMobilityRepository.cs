@@ -900,7 +900,7 @@ namespace SupervisorMobility.API.Services
 
         public async Task<IEnumerable<User>> GetAllUserByTypeInPlantAreaAsync(int plantId, int areaId, int typeUser, bool includeCollections = false, bool includeSubordinates = false, bool includeLeadershipRecord = false)
         {
-            var query = _context.Users.AsNoTracking().Where(u => u.IsActive == true && u.UserType == typeUser && u.PlantId == plantId && u.AreaId == areaId);
+            var query = _context.Users.AsNoTracking().Where(u => u.IsActive == true && u.UserType == typeUser && u.PlantId == plantId && u.Areas.Any(a => a.AreaId == areaId));
 
             if (includeCollections)
             {
@@ -1047,7 +1047,7 @@ namespace SupervisorMobility.API.Services
 
         public async Task<User?> GetUserByPayrollAndMoreAsync(int payroll, int plantid, int areaid, int groupid)
         {
-            return await _context.Users.Where(p => p.Payroll == payroll && p.PlantId == plantid && p.AreaId == areaid && p.GroupId == groupid).FirstOrDefaultAsync();
+            return await _context.Users.Where(p => p.Payroll == payroll && p.PlantId == plantid && p.Areas.Any(a => a.AreaId == areaid) && p.GroupId == groupid).FirstOrDefaultAsync();
         }
 
 
@@ -1070,7 +1070,7 @@ namespace SupervisorMobility.API.Services
 
         public async Task<bool> UserExistAdvanceAsync(string nombre, int nomina, int plantid, int areaid, int grupoid)
         {
-            return await _context.Users.AnyAsync(p => p.Name == nombre && p.Payroll == nomina && p.PlantId == plantid && p.AreaId == areaid && p.GroupId == grupoid);
+            return await _context.Users.AnyAsync(p => p.Name == nombre && p.Payroll == nomina && p.PlantId == plantid && p.Areas.Any(a => a.AreaId == areaid) && p.GroupId == grupoid);
         }
 
         public async Task UpdateUser(UsersForUpdateDto user, int userId)
@@ -1356,11 +1356,17 @@ namespace SupervisorMobility.API.Services
         public async Task<AsyncVoidMethodBuilder> UserUpdateAllSubordinated(User Master)
         {
 
-            var UsersList = await _context.Users.Where(u => u.SuperiorId == Master.UserId)
+            var UsersList = await _context.Users.Include(u => u.Areas).Where(u => u.SuperiorId == Master.UserId)
                  .OrderBy(c => c.UserId).ToListAsync();
 
             if (UsersList?.Count > 0)
             {
+                // Cargar las áreas del Master si no están cargadas
+                if (Master.Areas == null)
+                {
+                    await _context.Entry(Master).Collection(m => m.Areas).LoadAsync();
+                }
+
                 foreach (User sub in UsersList)
                 {
                     switch (sub.UserType)
@@ -1376,8 +1382,25 @@ namespace SupervisorMobility.API.Services
                             break;
                         case 4:
                             sub.PlantId = Master.PlantId;
-                            sub.AreaId = Master.AreaId;
                             sub.GroupId = Master.GroupId;
+                            
+                            // Limpiar áreas actuales del subordinado
+                            sub.Areas?.Clear();
+                            if (sub.Areas == null)
+                            {
+                                sub.Areas = new List<Area>();
+                            }
+                            
+                            // Copiar todas las áreas del Master al subordinado
+                            if (Master.Areas != null && Master.Areas.Any())
+                            {
+                                foreach (var area in Master.Areas)
+                                {
+                                    // Buscar el área en el contexto o adjuntarla
+                                    var trackedArea = _context.Areas.Local.FirstOrDefault(a => a.AreaId == area.AreaId) ?? area;
+                                    sub.Areas.Add(trackedArea);
+                                }
+                            }
                             break;
                     }
                 }
