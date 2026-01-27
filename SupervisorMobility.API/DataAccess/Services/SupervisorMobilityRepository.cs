@@ -31,6 +31,7 @@ using SupervisorMobility.API.Models.ProductiveCalendarDtos;
 using SupervisorMobility.API.Models.SOS.SOSHubDtos.AnalysisDtos;
 using SupervisorMobility.API.Models.SOSReviewDtos;
 using SupervisorMobility.API.Models.Users;
+using System.Collections.Frozen;
 using System.Diagnostics;
 using System.Linq;
 using System.Linq.Expressions;
@@ -900,7 +901,7 @@ namespace SupervisorMobility.API.Services
 
         public async Task<IEnumerable<User>> GetAllUserByTypeInPlantAreaAsync(int plantId, int areaId, int typeUser, bool includeCollections = false, bool includeSubordinates = false, bool includeLeadershipRecord = false)
         {
-            var query = _context.Users.AsNoTracking().Where(u => u.IsActive == true && u.UserType == typeUser && u.PlantId == plantId && u.AreaId == areaId);
+            var query = _context.Users.AsNoTracking().Where(u => u.IsActive == true && u.UserType == typeUser && u.PlantId == plantId && u.Areas.Any(a=>a.AreaId == areaId));
 
             if (includeCollections)
             {
@@ -1047,7 +1048,7 @@ namespace SupervisorMobility.API.Services
 
         public async Task<User?> GetUserByPayrollAndMoreAsync(int payroll, int plantid, int areaid, int groupid)
         {
-            return await _context.Users.Where(p => p.Payroll == payroll && p.PlantId == plantid && p.AreaId == areaid && p.GroupId == groupid).FirstOrDefaultAsync();
+            return await _context.Users.Where(p => p.Payroll == payroll && p.PlantId == plantid && p.Areas.Any(a=>a.AreaId == areaid) && p.GroupId == groupid).FirstOrDefaultAsync();
         }
 
 
@@ -1070,7 +1071,7 @@ namespace SupervisorMobility.API.Services
 
         public async Task<bool> UserExistAdvanceAsync(string nombre, int nomina, int plantid, int areaid, int grupoid)
         {
-            return await _context.Users.AnyAsync(p => p.Name == nombre && p.Payroll == nomina && p.PlantId == plantid && p.AreaId == areaid && p.GroupId == grupoid);
+            return await _context.Users.AnyAsync(p => p.Name == nombre && p.Payroll == nomina && p.PlantId == plantid && p.Areas.Any(a => a.AreaId == areaid) && p.GroupId == grupoid);
         }
 
         public async Task UpdateUser(UsersForUpdateDto user, int userId)
@@ -1376,7 +1377,7 @@ namespace SupervisorMobility.API.Services
                             break;
                         case 4:
                             sub.PlantId = Master.PlantId;
-                            sub.AreaId = Master.AreaId;
+                            sub.Areas.Add( Master.Areas.FirstOrDefault() );
                             sub.GroupId = Master.GroupId;
                             break;
                     }
@@ -1670,7 +1671,7 @@ namespace SupervisorMobility.API.Services
             {
                 query = query.Where(j => j.AreaId == areaId);
                 dtquery = _context.Distributions.Where(p => p.AreaId == areaId && p.IsActive == true);
-                oquery = _context.Users.Where(u => u.IsActive == true && u.UserType == 4 && u.PlantId == plantId && u.AreaId == areaId);
+                oquery = _context.Users.Where(u => u.IsActive == true && u.UserType == 4 && u.PlantId == plantId && u.Areas.Any(a=>a.AreaId == areaId));
             }
 
             if (distributionId != default(int))

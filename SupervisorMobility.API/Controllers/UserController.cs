@@ -389,9 +389,9 @@ namespace SupervisorMobility.API.Controllers
                 }
             }
 
-            if (user.AreaId == 0)
+            if (user.Areas == null || user.Areas.Count <= 0)
             {
-                user.AreaId = null;
+                user.Areas = null;
             }
             //else if (user.AreaId != null)
             //{
@@ -943,7 +943,7 @@ namespace SupervisorMobility.API.Controllers
                     ItemInUserList.Subordinates = null;
                 }
 
-                if (ItemInUserList.Areas != null || ItemInUserList.AreaId!=null)
+                if (ItemInUserList.Areas != null)
                 {
                     haveAreas = true;
                     if (ItemInUserList.Areas != null)
@@ -952,10 +952,6 @@ namespace SupervisorMobility.API.Controllers
                         {
                             AreasInUser.Add(await _supervisorMobilityRepository.GetAreaForPlantAsync((int)ItemInUserList.PlantId, AreainList.AreaId));
                         }
-                    }
-                    if (ItemInUserList.AreaId != null)
-                    {
-                        AreasInUser.Add(await _supervisorMobilityRepository.GetAreaForPlantAsync((int)ItemInUserList.PlantId, (int)ItemInUserList.AreaId));
                     }
 
                     ItemInUserList.Areas = null;
@@ -1541,7 +1537,7 @@ namespace SupervisorMobility.API.Controllers
                     item.Subordinates = null;
                 }
 
-                if (item.Areas != null || item.AreaId != null)
+                if (item.Areas != null)
                 {
                     haveAreas = true;
                     if (item.Areas != null)
@@ -1550,10 +1546,6 @@ namespace SupervisorMobility.API.Controllers
                         {
                             AreasInUser.Add(await _supervisorMobilityRepository.GetAreaForPlantAsync((int)item.PlantId, AreainList.AreaId));
                         }
-                    }
-                    if (item.AreaId != null)
-                    {
-                        AreasInUser.Add(await _supervisorMobilityRepository.GetAreaForPlantAsync((int)item.PlantId, (int)item.AreaId));
                     }
 
                     item.Areas = null;
@@ -2592,13 +2584,13 @@ namespace SupervisorMobility.API.Controllers
                     }
                 }
 
-                if (item.AreaId == 0)
+                if (item.Areas == null || item.Areas.Count <= 0)
                 {
-                    item.AreaId = null;
+                    item.Areas = null;
                 }
-                else if (item.AreaId != null)
+                else
                 {
-                    if (!await _supervisorMobilityRepository.AreaExistAsync((int)item.AreaId))
+                    if (!await _supervisorMobilityRepository.AreaExistAsync((int)item.Areas.FirstOrDefault().AreaId))
                     {
                         return NotFound("No Area");
                     }
