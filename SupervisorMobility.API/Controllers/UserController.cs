@@ -3,16 +3,23 @@ using DocumentFormat.OpenXml;
 using DocumentFormat.OpenXml.Packaging;
 using DocumentFormat.OpenXml.Spreadsheet;
 using Microsoft.AspNetCore.Cors;
+using Microsoft.AspNetCore.Identity;
 using Microsoft.AspNetCore.Mvc;
+using Microsoft.EntityFrameworkCore.ChangeTracking;
+using OfficeOpenXml;
 using SpreadsheetLight;
 using SupervisorMobility.API.Business;
 using SupervisorMobility.API.DataAccess.Entities;
+using SupervisorMobility.API.DataAccess.SPModels;
 using SupervisorMobility.API.Entities;
+using SupervisorMobility.API.Models.AreaDtos;
 using SupervisorMobility.API.Models.FileUploadDto;
 using SupervisorMobility.API.Models.HCIDtos;
 using SupervisorMobility.API.Models.ReturnResults;
 using SupervisorMobility.API.Models.Users;
+using SupervisorMobility.API.Models.NotificationDtos;
 using SupervisorMobility.API.Services;
+using Microsoft.AspNetCore.SignalR;
 
 namespace SupervisorMobility.API.Controllers
 {
@@ -239,18 +246,6 @@ namespace SupervisorMobility.API.Controllers
             if (newUser.DepartmentId == 0)
                 newUser.DepartmentId = null;
 
-            if (newUser.AreaId == 0)
-            {
-                newUser.AreaId = null;
-            }
-            else if (newUser.AreaId != null)
-            {
-                if (!await _supervisorMobilityRepository.AreaExistAsync((int)newUser.AreaId))
-                {
-                    return NotFound("No Area");
-                }
-            }
-
             if (newUser.GroupId == 0)
             {
                 newUser.GroupId = null;
@@ -263,11 +258,11 @@ namespace SupervisorMobility.API.Controllers
                 }
             }
 
-            if (newUser.DistributionId == 0)
+            if (newUser.DistributionId == 0 || newUser.DistributionId == null)
             {
                 newUser.DistributionId = null;
             }
-            else
+            else if (newUser.DistributionId != null)
             {
                 if (!await _supervisorMobilityRepository.DistributionExistsAsync((int)newUser.DistributionId))
                 {
@@ -316,21 +311,56 @@ namespace SupervisorMobility.API.Controllers
             {
                 foreach (var item in Users)
                 {
-                    _supervisorMobilityRepository.UserAddSubordinated(UserToReturn, item);
+                    await _supervisorMobilityRepository.UserAddSubordinated(UserToReturn, item);
                 }
 
             }
 
             if (haveAreas)
             {
-                foreach (var item in Areas)
+                foreach (var itemArea in Areas)
                 {
-                    _supervisorMobilityRepository.UserAddArea(UserToReturn, item);
-                }
-
+                    await _supervisorMobilityRepository.UserAddArea(UserToReturn, itemArea);
+                }                
             }
 
             await _supervisorMobilityRepository.SaveChangesAsync();
+
+            // Crear notificación para el superior si tiene uno asignado
+            if (UserToReturn.SuperiorId.HasValue)
+            {
+                string userTypeName = UserToReturn.UserType switch
+                {
+                    1 => "Administrador",
+                    2 => "Senior Supervisor",
+                    3 => "Supervisor",
+                    4 => "Operador",
+                    5 => "SSV",
+                    _ => "Usuario"
+                };
+
+                NotificationToCreateDto newNotify = new NotificationToCreateDto
+                {
+                    MadeBy = "SM Mobility",
+                    UserId = UserToReturn.SuperiorId.Value,
+                    IsAccepted = true,
+                    IsActive = true,
+                    NotificationType = "Nuevo Usuario Creado",
+                    NotificationText = $"Se ha creado un nuevo usuario asignado a tu equipo:\\n\\n" +
+                                      $"Nombre: {UserToReturn.Name}\\n" +
+                                      $"Tipo: {userTypeName}\\n" +
+                                      $"Fecha: {DateTime.Now:dd/MM/yyyy HH:mm}"
+                };
+
+                try 
+                {
+                    await _assyChartService.CreateNotificationAsync(newNotify);
+                }
+                catch (Exception)
+                {
+                    // Ignorar errores en la notificación para no afectar el flujo principal
+                }
+            }
 
             return Ok(UserToReturn);
 
@@ -363,13 +393,13 @@ namespace SupervisorMobility.API.Controllers
             {
                 user.AreaId = null;
             }
-            else if (user.AreaId != null)
-            {
-                if (!await _supervisorMobilityRepository.AreaExistAsync((int)user.AreaId))
-                {
-                    return NotFound("No Area");
-                }
-            }
+            //else if (user.AreaId != null)
+            //{
+            //    if (!await _supervisorMobilityRepository.AreaExistAsync((int)user.AreaId))
+            //    {
+            //        return NotFound("No Area");
+            //    }
+            //}
 
             if ( user.DepartmentId == null || user.DepartmentId == 0)
             {
@@ -416,8 +446,11 @@ namespace SupervisorMobility.API.Controllers
                 foreach (var Sub in user.Subordinates)
                 {
                     var userInDB = await _assyChartService.FetchUserAsync(Sub.UserId);
+                    //para saber si el subordinado no sufrio cambios verificamos que todas las areas y el superior sean iguales
+                    var idsAreasUserInDb = userInDB?.Areas?.Select(a => a.AreaId).ToList() ?? new List<int>();
+                    var subAreasIds = Sub.AreasIds ?? new List<int>();
 
-                    if (userInDB.AreaId != Sub.AreaId || userInDB.SuperiorId != Sub.SuperiorId)
+                    if ((idsAreasUserInDb.Count != subAreasIds.Count && !idsAreasUserInDb.Except(subAreasIds).Any()) || userInDB?.SuperiorId != Sub.SuperiorId)
                     {
                         _mapper.Map(Sub, userInDB);
                         UsersInUser.Add(userInDB);
@@ -466,8 +499,8 @@ namespace SupervisorMobility.API.Controllers
                         user.PlantId = actualSuperior.PlantId;
                         user.GroupId = actualSuperior.GroupId;
 
-                        if (user.UserType == 4)
-                            user.AreaId = actualSuperior.AreaId;
+                        //if (user.UserType == 4)
+                        //    user.AreaId = actualSuperior.AreaId;
                     }
                 }else if (userToCompare.SuperiorId is null && entityentity.SuperiorId != null)
                 {
@@ -519,7 +552,7 @@ namespace SupervisorMobility.API.Controllers
                             { 
                                 elementAux.GroupId = UserToReturn.GroupId;
                                 elementAux.PlantId = UserToReturn.PlantId;
-                                elementAux.AreaId = UserToReturn.AreaId;
+                               // elementAux.AreaId = UserToReturn.AreaId;
                             }
                             await _assyChartService.UpdateUserAsync(elementAux, elementUserInList.UserId);
 
@@ -538,12 +571,12 @@ namespace SupervisorMobility.API.Controllers
                             break;
                     }
 
-                    _supervisorMobilityRepository.UserAddSubordinated(UserToReturn, elementUserInList);
+                    await _supervisorMobilityRepository.UserAddSubordinated(UserToReturn, elementUserInList);
                 }
 
                 foreach (var userRestore in UsersWithoutChanges)
                 {
-                    _supervisorMobilityRepository.UserAddSubordinated(UserToReturn, userRestore);
+                    await _supervisorMobilityRepository.UserAddSubordinated(UserToReturn, userRestore);
                 }
             }
 
@@ -553,13 +586,157 @@ namespace SupervisorMobility.API.Controllers
                 UserToReturn.Areas = null;
                 foreach (var elemntArea in AreasInUser)
                 {
-                    _supervisorMobilityRepository.UserAddArea(UserToReturn, elemntArea);
+                    await _supervisorMobilityRepository.UserAddArea(UserToReturn, elemntArea);
                 }
+                await _supervisorMobilityRepository.SaveChangesAsync();
             }
 
 
 
             return Ok();
+        }
+
+        [HttpPut("ReasignnToNewSuperiorV2")]
+        public async Task<ActionResult<ServiceResponse<bool>>> ReasingnnToNewSuperior(List<UsersToReasignnDto> usersToReasignns, int reasignType)
+        {
+            var response = new ServiceResponse<bool>();
+            try
+            {
+                foreach (var userToReasing in usersToReasignns)
+                {
+                    User newSuperiorUser= new User();
+                    //obtenemos el nuevo superior
+                    if (userToReasing.SuperiorId.HasValue)
+                    {
+                         newSuperiorUser = await _assyChartService.FetchUserAsync(userToReasing.SuperiorId.Value);
+                        if(newSuperiorUser == null)
+                        {
+                            response.Message = $"Nuevo superior con ID {userToReasing.SuperiorId.Value} no encontrado.";
+                            response.Success = false;
+                            return BadRequest(response);
+                        }
+
+                    }
+                    else
+                    {
+                        // Handle the case where SuperiorId is null, if necessary
+                        response.Message = "SuperiorId is null for one or more users.";
+                        response.Success = false;
+                        return BadRequest(response);
+                    }
+                    //obtenemos el usuario a reasignar
+                    var userEntity = await _supervisorMobilityRepository.GetUserAsync(userToReasing.UserId);
+                    if (userEntity != null)
+                    {
+                        //si el superior actual es diferente al nuevo, removemos la relacion
+                        if (userEntity.SuperiorId != userToReasing.SuperiorId)
+                        {
+                            var currentSuperior = await _supervisorMobilityRepository.GetUserAsync(userEntity.SuperiorId.Value, true);
+                            await _supervisorMobilityRepository.UserRemoveSubordinated(currentSuperior, userEntity);
+                        }
+
+                    }
+                    else
+                    {
+                        response.Message = $"Usuario a reasignar con ID {userToReasing.UserId} no encontrado.";
+                        response.Success = false;
+                        return BadRequest(response);
+                    }
+                        var userToUpdate = _mapper.Map<UsersForUpdateDto>(userToReasing);
+
+                    //ahora dependiendo del tipo de usuario del nuevo superior, actualizamos los datos del usuario a reasignar
+                    switch (newSuperiorUser.UserType) 
+                    { 
+                    
+                    case 2:
+                            //Si el nuevo jefe es un SSV, estoy manejando un SV
+                            userToUpdate.SuperiorId = newSuperiorUser.UserId;
+                            if (reasignType != 2)
+                            {
+                                userToUpdate.GroupId = newSuperiorUser.GroupId;
+                                userToUpdate.PlantId = newSuperiorUser.PlantId;
+                            }
+                            //actualizamos la info de los operadores
+                            if(userEntity.Subordinates?.Count > 0)
+                            {
+                                foreach (var subInuser in userEntity.Subordinates)
+                                {
+                                    //obtenemos el subordinado
+                                    var subEntity = await _supervisorMobilityRepository.GetUserAsync(subInuser.UserId);
+                                    if (subEntity != null)
+                                    {
+                                       
+                                        //obtenemos las areas para el subordinado de la lista SubordinateNewAreasList
+                                        var subordinateAreaInfo = userToReasing.SubordinateNewAreasList?.FirstOrDefault(s => s.UserId == subEntity.UserId);
+                                        if (subordinateAreaInfo!=null && subordinateAreaInfo.AreasId != null)
+                                        {
+                                            //Limpio las areas actuales
+                                            await _supervisorMobilityRepository.UserRemoveAllAreas(subEntity);
+                                            foreach (var areaId in subordinateAreaInfo.AreasId)
+                                            {
+                                                var areaToAdd = await _supervisorMobilityRepository.GetAreaOnlyIdAsync(areaId);
+                                                if (areaToAdd != null)
+                                                    await _supervisorMobilityRepository.UserAddArea(subEntity, areaToAdd);
+                                            }
+                                        }
+                                        
+                                        
+                                    }
+                                   
+                                }
+                            }
+                            break;
+                    case 3:
+                            //Si el nuevo jefe es un SV, estoy manejando un operador
+                            userToUpdate.SuperiorId = newSuperiorUser.UserId;
+                            if (reasignType != 2)
+                            {
+                                userToUpdate.GroupId = newSuperiorUser.GroupId;
+                                userToUpdate.PlantId = newSuperiorUser.PlantId;
+                                //si el usuario a reasignar tiene areas se eliminan para asignar las nuevas
+                                if (userToUpdate.Areas != null)
+                                {
+                                    userToUpdate.Areas.Clear();
+                                }
+                                foreach(var areaId in userToReasing.AreasIds)
+                                {
+                                    var areaToAdd = await _supervisorMobilityRepository.GetAreaOnlyIdAsync(areaId);
+                                    if (areaToAdd != null)
+                                    {
+                                        if (userToUpdate.Areas == null)
+                                        {
+                                            userToUpdate.Areas = new List<AreaWithoutNavigationPropertiesDto>();
+                                        }
+                                        userToUpdate.Areas.Add(new AreaWithoutNavigationPropertiesDto
+                                        {
+                                            AreaId = areaToAdd.AreaId,
+                                            Code = areaToAdd.Code,
+                                            Description = areaToAdd.Description,
+                                            PlantId = areaToAdd.PlantId,
+                                            IsActive = areaToAdd.IsActive
+                                        });
+                                    }
+                                }
+                            }
+                            break;
+
+                    }
+                    await _assyChartService.UpdateUserAsync(userToUpdate, userEntity.UserId);
+                    await _supervisorMobilityRepository.UserAddSubordinated(newSuperiorUser, userEntity);
+
+                }
+
+
+                response.Data = true;
+                response.Message = "Reasignacion completada";
+            }
+            catch (Exception ex)
+            {
+                response.Data = false;
+                response.Success = false;
+                response.Message = ex.Message;
+            }
+            return Ok(response);
         }
 
         [HttpPut("ReassingToNewSuperior")]
@@ -601,7 +778,20 @@ namespace SupervisorMobility.API.Controllers
                             {
                                 var SubSubEntity = await _supervisorMobilityRepository.GetUserAsync(SubInuser.UserId);
                                 var SubSubUpdate = _mapper.Map<UsersForUpdateDto>(elemntUser);
-                                SubSubUpdate.AreaId = elemntUser.AreaId;
+                               
+                                if(elemntUser.AreasIds != null)
+                                {
+                                    //Limpio las areas actuales
+                                    await _supervisorMobilityRepository.UserRemoveAllAreas(SubSubEntity);
+                                    foreach (var areaId in elemntUser.AreasIds)
+                                    {
+                                        var areaToAdd = await _supervisorMobilityRepository.GetAreaOnlyIdAsync(areaId);
+                                        if(areaToAdd != null)
+                                            await _supervisorMobilityRepository.UserAddArea(SubSubEntity, areaToAdd);
+                                    }
+                                }
+                                
+                                //SubSubUpdate.AreaId = elemntUser.AreaId;
 
                                 await _assyChartService.UpdateUserAsync(SubSubUpdate, SubSubEntity.UserId);
                             }
@@ -640,7 +830,7 @@ namespace SupervisorMobility.API.Controllers
 
                 User exsuperior = await _supervisorMobilityRepository.GetUserAsync((int)usertoRemove.SuperiorId, true);
 
-                _supervisorMobilityRepository.UserRemoveSubordinated(exsuperior, usertoRemove);
+               await  _supervisorMobilityRepository.UserRemoveSubordinated(exsuperior, usertoRemove);
             }
 
             return Ok();
@@ -682,7 +872,7 @@ namespace SupervisorMobility.API.Controllers
                 bool haveUsers = false;
 
                 var UserToReturn = new User();
-
+                ItemInUserList.IsActive= true;
                 if (ItemInUserList.PlantId == 0 || ItemInUserList.PlantId == -1)
                 {
                     ItemInUserList.PlantId = null;
@@ -695,17 +885,17 @@ namespace SupervisorMobility.API.Controllers
                     }
                 }
 
-                if (ItemInUserList.AreaId == 0 || ItemInUserList.AreaId == -1)
-                {
-                    ItemInUserList.AreaId = null;
-                }
-                else if (ItemInUserList.AreaId != null)
-                {
-                    if (!await _supervisorMobilityRepository.AreaExistAsync((int)ItemInUserList.AreaId))
-                    {
-                        return NotFound("No Area");
-                    }
-                }
+                //if (ItemInUserList.AreaId == 0 || ItemInUserList.AreaId == -1)
+                //{
+                //    ItemInUserList.AreaId = null;
+                //}
+                //else if (ItemInUserList.AreaId != null)
+                //{
+                //    if (!await _supervisorMobilityRepository.AreaExistAsync((int)ItemInUserList.AreaId))
+                //    {
+                //        return NotFound("No Area");
+                //    }
+                //}
 
                 if (ItemInUserList.GroupId == 0 || ItemInUserList.GroupId == -1)
                 {
@@ -753,13 +943,21 @@ namespace SupervisorMobility.API.Controllers
                     ItemInUserList.Subordinates = null;
                 }
 
-                if (ItemInUserList.Areas != null)
+                if (ItemInUserList.Areas != null || ItemInUserList.AreaId!=null)
                 {
                     haveAreas = true;
-                    foreach (var AreainList in ItemInUserList.Areas)
+                    if (ItemInUserList.Areas != null)
                     {
-                        AreasInUser.Add(await _supervisorMobilityRepository.GetAreaForPlantAsync((int)ItemInUserList.PlantId, AreainList.AreaId));
+                        foreach (var AreainList in ItemInUserList.Areas)
+                        {
+                            AreasInUser.Add(await _supervisorMobilityRepository.GetAreaForPlantAsync((int)ItemInUserList.PlantId, AreainList.AreaId));
+                        }
                     }
+                    if (ItemInUserList.AreaId != null)
+                    {
+                        AreasInUser.Add(await _supervisorMobilityRepository.GetAreaForPlantAsync((int)ItemInUserList.PlantId, (int)ItemInUserList.AreaId));
+                    }
+
                     ItemInUserList.Areas = null;
                 }
 
@@ -806,19 +1004,19 @@ namespace SupervisorMobility.API.Controllers
                                     if (InComingUserToCompare.SuperiorId != null && entityentity.SuperiorId != null)
                                     {
                                         User exsuperior = await _supervisorMobilityRepository.GetUserAsync((int)entityentity.SuperiorId, true);
+                                       
                                         var usertoRemove = _mapper.Map<User>(entityentity);
+                                       await  _supervisorMobilityRepository.UserRemoveSubordinated(exsuperior, usertoRemove);
 
-                                        _supervisorMobilityRepository.UserRemoveSubordinated(exsuperior, usertoRemove);
 
                                         User actualSuperior = await _supervisorMobilityRepository.GetUserAsync((int)ItemInUserList.SuperiorId, true);
-                                        _supervisorMobilityRepository.UserAddSubordinated(actualSuperior, usertoRemove);
-
+                                        await _supervisorMobilityRepository.UserAddSubordinated(actualSuperior, usertoRemove);                                       
                                         ItemInUserList.SuperiorId = actualSuperior.UserId;
                                         ItemInUserList.PlantId = actualSuperior.PlantId;
                                         ItemInUserList.GroupId = actualSuperior.GroupId;
 
-                                        if (ItemInUserList.UserType == 4)
-                                            ItemInUserList.AreaId = actualSuperior.AreaId;
+                                        //if (ItemInUserList.UserType == 4)
+                                        //    ItemInUserList.AreaId = actualSuperior.AreaId;
 
                                         InComingUserToCompare = _mapper.Map<User>(ItemInUserList);
                                     }
@@ -827,6 +1025,7 @@ namespace SupervisorMobility.API.Controllers
                                 userToUpdate.CreatedDate = (DateTime)entityentity.CreatedDate;
                                 await _supervisorMobilityRepository.UpdateUser(userToUpdate, entityentity.UserId);
                                 UserToReturn = _mapper.Map<User>(userToUpdate);
+                                UserToReturn.UserId = entityentity.UserId;
                                 ResultToReturn.UsersUpdated++;
                             }
                             else
@@ -902,18 +1101,18 @@ namespace SupervisorMobility.API.Controllers
                                             //Me aseguro de que eliminar al usuario como subordinado del anterior SUPERIRO y lo reasigno al nuevo superior
                                             User exsuperior = await _supervisorMobilityRepository.GetUserAsync((int)UserInDb.SuperiorId, true);
 
-                                            _supervisorMobilityRepository.UserRemoveSubordinated(exsuperior, UserInDb);
+                                           await _supervisorMobilityRepository.UserRemoveSubordinated(exsuperior, UserInDb);
 
                                             User actualSuperior = await _supervisorMobilityRepository.GetUserAsync((int)ItemInUserList.SuperiorId, true);
 
-                                            InComingUserToCompare.SuperiorId = actualSuperior.UserId;
-                                            InComingUserToCompare.PlantId = actualSuperior.PlantId;
-                                            InComingUserToCompare.GroupId = actualSuperior.GroupId;
+                                            InComingUserToCompare.SuperiorId = actualSuperior?.UserId;
+                                            InComingUserToCompare.PlantId = actualSuperior?.PlantId;
+                                            InComingUserToCompare.GroupId = actualSuperior?.GroupId;
 
-                                            if (ItemInUserList.UserType == 4)
-                                                InComingUserToCompare.AreaId = actualSuperior.AreaId;
+                                            //if (ItemInUserList.UserType == 4)
+                                            //    InComingUserToCompare.AreaId = actualSuperior.AreaId;
 
-                                            _supervisorMobilityRepository.UserAddSubordinated(actualSuperior, UserInDb);
+                                            await _supervisorMobilityRepository.UserAddSubordinated(actualSuperior, UserInDb);
 
                                             var userToUpdate = _mapper.Map<UsersForUpdateDto>(InComingUserToCompare);
                                             userToUpdate.CreatedDate = (DateTime)UserInDb.CreatedDate;
@@ -930,10 +1129,10 @@ namespace SupervisorMobility.API.Controllers
                                             InComingUserToCompare.PlantId = actualSuperior.PlantId;
                                             InComingUserToCompare.GroupId = actualSuperior.GroupId;
 
-                                            if (ItemInUserList.UserType == 4)
-                                                InComingUserToCompare.AreaId = actualSuperior.AreaId;
+                                            //if (ItemInUserList.UserType == 4)
+                                            //    InComingUserToCompare.AreaId = actualSuperior.AreaId;
 
-                                            _supervisorMobilityRepository.UserAddSubordinated(actualSuperior, UserInDb);
+                                           await _supervisorMobilityRepository.UserAddSubordinated(actualSuperior, UserInDb);
 
 
                                             var userToUpdate = _mapper.Map<UsersForUpdateDto>(InComingUserToCompare);
@@ -948,7 +1147,7 @@ namespace SupervisorMobility.API.Controllers
                                             //Elimina el supervisor y ya
                                             User exsuperior = await _supervisorMobilityRepository.GetUserAsync((int)UserInDb.SuperiorId, true);
 
-                                            _supervisorMobilityRepository.UserRemoveSubordinated(exsuperior, UserInDb);
+                                           await _supervisorMobilityRepository.UserRemoveSubordinated(exsuperior, UserInDb);
                                         }
                                     }
                                     else
@@ -960,16 +1159,22 @@ namespace SupervisorMobility.API.Controllers
                                         }
                                         else
                                         {
+                                            
+                                            
                                             User actualSuperior = await _supervisorMobilityRepository.GetUserAsync((int)InComingUserToCompare.SuperiorId, true);
+                                            //saber si las areas del usuario entrante estan contenidas en las areas del superior
+                                            var areasInSuperior = InComingUserToCompare.Areas.All(a => actualSuperior.Areas.All(a2 => a.AreaId == a2.AreaId));
+
+
                                             if (InComingUserToCompare.PlantId != actualSuperior.PlantId ||
-                                                InComingUserToCompare.AreaId != actualSuperior.AreaId ||
+                                                 areasInSuperior||
                                                 InComingUserToCompare.GroupId != actualSuperior.GroupId)
                                             {
                                                 InComingUserToCompare.PlantId = actualSuperior.PlantId;
                                                 InComingUserToCompare.GroupId = actualSuperior.GroupId;
 
-                                                if (InComingUserToCompare.UserType == 4)
-                                                    InComingUserToCompare.AreaId = actualSuperior.AreaId;
+                                                //if (InComingUserToCompare.UserType == 4)
+                                                //    InComingUserToCompare.AreaId = actualSuperior.AreaId;
 
                                                 var userToUpdate = _mapper.Map<UsersForUpdateDto>(InComingUserToCompare);
                                                 userToUpdate.CreatedDate = (DateTime)UserInDb.CreatedDate;
@@ -994,14 +1199,15 @@ namespace SupervisorMobility.API.Controllers
                                     //el usuario es el mismo en la base de datos, pero la comparacion no valida que siga siendo la misma informacion del superior y el usuario
 
                                     User actualSuperior = await _supervisorMobilityRepository.GetUserAsync((int)UserInDb.SuperiorId, true);
-
-                                    if (InComingUserToCompare.PlantId != actualSuperior.PlantId || InComingUserToCompare.AreaId != actualSuperior.AreaId || InComingUserToCompare.GroupId != actualSuperior.GroupId)
+                                    //saber si las areas del usuario entrante estan contenidas en las areas del superior
+                                    var areasInSuperior = InComingUserToCompare.Areas.All(a => actualSuperior.Areas.All(a2 => a.AreaId == a2.AreaId));
+                                    if (InComingUserToCompare.PlantId != actualSuperior.PlantId || areasInSuperior || InComingUserToCompare.GroupId != actualSuperior.GroupId)
                                     {
                                         InComingUserToCompare.PlantId = actualSuperior.PlantId;
                                         InComingUserToCompare.GroupId = actualSuperior.GroupId;
 
-                                        if (InComingUserToCompare.UserType == 4)
-                                            InComingUserToCompare.AreaId = actualSuperior.AreaId;
+                                        //if (InComingUserToCompare.UserType == 4)
+                                        //    InComingUserToCompare.AreaId = actualSuperior.AreaId;
 
                                         var userToUpdate = _mapper.Map<UsersForUpdateDto>(InComingUserToCompare);
                                         userToUpdate.CreatedDate = (DateTime)UserInDb.CreatedDate;
@@ -1048,7 +1254,7 @@ namespace SupervisorMobility.API.Controllers
                                         User exsuperior = await _supervisorMobilityRepository.GetUserAsync((int)UserInDb.SuperiorId, true);
 
                                         // Remover subordinado solo si hay un superior existente
-                                        _supervisorMobilityRepository.UserRemoveSubordinated(exsuperior, UserInDb);
+                                       await _supervisorMobilityRepository.UserRemoveSubordinated(exsuperior, UserInDb);
                                     }
 
                                     User? actualSuperior = null;
@@ -1061,11 +1267,11 @@ namespace SupervisorMobility.API.Controllers
                                         InComingUserToCompare.PlantId = actualSuperior.PlantId;
                                         InComingUserToCompare.GroupId = actualSuperior.GroupId;
 
-                                        if (ItemInUserList.UserType == 4)
-                                            InComingUserToCompare.AreaId = actualSuperior.AreaId;
+                                        //if (ItemInUserList.UserType == 4)
+                                        //    InComingUserToCompare.AreaId = actualSuperior.AreaId;
 
                                         // Agregar subordinado al nuevo superior
-                                        _supervisorMobilityRepository.UserAddSubordinated(actualSuperior, UserInDb);
+                                        await _supervisorMobilityRepository.UserAddSubordinated(actualSuperior, UserInDb);
                                     }
 
                                     // Actualizar al usuario independientemente de si hay un superior o no
@@ -1074,7 +1280,7 @@ namespace SupervisorMobility.API.Controllers
 
                                     await _supervisorMobilityRepository.UpdateUser(userToUpdate, UserInDb.UserId);
                                     UserToReturn = _mapper.Map<User>(userToUpdate);
-
+                                    UserToReturn.UserId = UserInDb.UserId;
                                     ResultToReturn.UsersUpdated++;
 
                                 }
@@ -1086,17 +1292,17 @@ namespace SupervisorMobility.API.Controllers
                                     InComingUserToCompare.PlantId = actualSuperior.PlantId;
                                     InComingUserToCompare.GroupId = actualSuperior.GroupId;
 
-                                    if (ItemInUserList.UserType == 4)
-                                        InComingUserToCompare.AreaId = actualSuperior.AreaId;
+                                    //if (ItemInUserList.UserType == 4)
+                                    //    InComingUserToCompare.AreaId = actualSuperior.AreaId;
 
-                                    _supervisorMobilityRepository.UserAddSubordinated(actualSuperior, UserInDb);
+                                    await _supervisorMobilityRepository.UserAddSubordinated(actualSuperior, UserInDb);
 
 
                                     var userToUpdate = _mapper.Map<UsersForUpdateDto>(InComingUserToCompare);
                                     userToUpdate.CreatedDate = (DateTime)UserInDb.CreatedDate;
                                     await _supervisorMobilityRepository.UpdateUser(userToUpdate, UserInDb.UserId);
                                     UserToReturn = _mapper.Map<User>(userToUpdate);
-
+                                    UserToReturn.UserId = UserInDb.UserId;
                                     ResultToReturn.UsersUpdated++;
                                 }
                                 else if (InComingUserToCompare.SuperiorId == null && UserInDb.SuperiorId != null)
@@ -1104,7 +1310,7 @@ namespace SupervisorMobility.API.Controllers
                                     //Elimina el supervisor y ya
                                     User exsuperior = await _supervisorMobilityRepository.GetUserAsync((int)UserInDb.SuperiorId, true);
 
-                                    _supervisorMobilityRepository.UserRemoveSubordinated(exsuperior, UserInDb);
+                                   await _supervisorMobilityRepository.UserRemoveSubordinated(exsuperior, UserInDb);
                                 }
                             }
                             else
@@ -1117,22 +1323,24 @@ namespace SupervisorMobility.API.Controllers
                                 else
                                 {
                                     User actualSuperior = await _supervisorMobilityRepository.GetUserAsync((int)InComingUserToCompare.SuperiorId, true);
+                                    var areasInSuperior = InComingUserToCompare.Areas.All(a => actualSuperior.Areas.All(a2 => a.AreaId == a2.AreaId));
                                     if (InComingUserToCompare.PlantId != actualSuperior.PlantId ||
-                                        InComingUserToCompare.AreaId != actualSuperior.AreaId ||
+                                        areasInSuperior ||
                                         InComingUserToCompare.GroupId != actualSuperior.GroupId)
                                     {
                                         InComingUserToCompare.PlantId = actualSuperior.PlantId;
                                         InComingUserToCompare.GroupId = actualSuperior.GroupId;
 
-                                        if (InComingUserToCompare.UserType == 4)
-                                            InComingUserToCompare.AreaId = actualSuperior.AreaId;
+                                        //if (InComingUserToCompare.UserType == 4)
+                                        //    InComingUserToCompare.AreaId = actualSuperior.AreaId;
 
                                         var userToUpdate = _mapper.Map<UsersForUpdateDto>(InComingUserToCompare);
                                         userToUpdate.CreatedDate = (DateTime)UserInDb.CreatedDate;
                                         await _supervisorMobilityRepository.UpdateUser(userToUpdate, UserInDb.UserId);
-
+                                       
                                         ResultToReturn.UsersUpdated++;
                                         UserToReturn = _mapper.Map<User>(userToUpdate);
+                                        UserToReturn.UserId = UserInDb.UserId;
                                     }
                                     else
                                     {
@@ -1155,15 +1363,16 @@ namespace SupervisorMobility.API.Controllers
                             else
                             {
                                 User actualSuperior = await _supervisorMobilityRepository.GetUserAsync((int)InComingUserToCompare.SuperiorId, true);
+                                var areasInSuperior = InComingUserToCompare.Areas.All(a => actualSuperior.Areas.All(a2 => a.AreaId == a2.AreaId));
                                 if (InComingUserToCompare.PlantId != actualSuperior.PlantId ||
-                                    InComingUserToCompare.AreaId != actualSuperior.AreaId ||
+                                    areasInSuperior ||
                                     InComingUserToCompare.GroupId != actualSuperior.GroupId)
                                 {
                                     InComingUserToCompare.PlantId = actualSuperior.PlantId;
                                     InComingUserToCompare.GroupId = actualSuperior.GroupId;
 
-                                    if (InComingUserToCompare.UserType == 4)
-                                        InComingUserToCompare.AreaId = actualSuperior.AreaId;
+                                    //if (InComingUserToCompare.UserType == 4)
+                                    //    InComingUserToCompare.AreaId = actualSuperior.AreaId;
 
                                     var userToUpdate = _mapper.Map<UsersForUpdateDto>(InComingUserToCompare);
                                     userToUpdate.CreatedDate = (DateTime)UserInDb.CreatedDate;
@@ -1171,6 +1380,7 @@ namespace SupervisorMobility.API.Controllers
 
                                     ResultToReturn.UsersUpdated++;
                                     UserToReturn = _mapper.Map<User>(userToUpdate);
+                                    UserToReturn.UserId = UserInDb.UserId;
                                 }
                                 else
                                 {
@@ -1190,7 +1400,7 @@ namespace SupervisorMobility.API.Controllers
                 {
                     foreach (var elemntUser in UsersInUser)
                     {
-                        _supervisorMobilityRepository.UserAddSubordinated(UserToReturn, elemntUser);
+                       await _supervisorMobilityRepository.UserAddSubordinated(UserToReturn, elemntUser);
                     }
                 }
 
@@ -1199,7 +1409,7 @@ namespace SupervisorMobility.API.Controllers
                     await _supervisorMobilityRepository.RemoveAllAreasFromUser(UserToReturn);
                     foreach (var elemntArea in AreasInUser)
                     {
-                        _supervisorMobilityRepository.UserAddArea(UserToReturn, elemntArea);
+                      await  _supervisorMobilityRepository.UserAddArea(UserToReturn, elemntArea);
                     }
                 }
 
@@ -1225,7 +1435,7 @@ namespace SupervisorMobility.API.Controllers
         {
 
 
-            User MasterUser = await _supervisorMobilityRepository.GetUserAsync(superiorId, true);
+            //User MasterUser = await _supervisorMobilityRepository.GetUserAsync(superiorId, true);
             UploadUsersResult ResultToReturn = new UploadUsersResult();
             foreach (var item in UsesToCreateInSuperior)
             {
@@ -1233,22 +1443,23 @@ namespace SupervisorMobility.API.Controllers
                 bool HCIStatus = false;
                 int userId = 0;
 
-                if (item.SuperiorId != null)
-                    if (item.SuperiorId != superiorId)
-                    {
-                        User exsuperior = await _supervisorMobilityRepository.GetUserAsync((int)item.SuperiorId, true);
-                        var usertoRemove = _mapper.Map<User>(item);
+                //if (item.SuperiorId != null)
 
-                        _supervisorMobilityRepository.UserRemoveSubordinated(exsuperior, usertoRemove);
+                //    if (item.SuperiorId != superiorId)
+                //    {
+                //        User exsuperior = await _supervisorMobilityRepository.GetUserAsync((int)item.SuperiorId, true);
+                //        var usertoRemove = _mapper.Map<User>(item);
 
-                        item.SuperiorId = superiorId;
-                        item.PlantId = MasterUser.PlantId;
-                        item.GroupId = MasterUser.GroupId;
+                //        await _supervisorMobilityRepository.UserRemoveSubordinated(exsuperior, usertoRemove);
 
-                        if (item.UserType == 4)
-                            item.AreaId = MasterUser.AreaId;
+                //        item.SuperiorId = superiorId;
+                //        item.PlantId = MasterUser.PlantId;
+                //        item.GroupId = MasterUser.GroupId;
 
-                    }
+                //        //if (item.UserType == 4)
+                //        //    item.AreaId = MasterUser.AreaId;
+
+                //    }
 
 
                 List<Area> AreasInUser = new List<Area>();
@@ -1257,6 +1468,7 @@ namespace SupervisorMobility.API.Controllers
                 bool haveUsers = false;
 
                 var UserToReturn = new User();
+                item.IsActive = true;
 
                 if (item.PlantId == 0 || item.PlantId == -1)
                 {
@@ -1270,17 +1482,17 @@ namespace SupervisorMobility.API.Controllers
                     }
                 }
 
-                if (item.AreaId == 0 || item.AreaId == -1)
-                {
-                    item.AreaId = null;
-                }
-                else if (item.AreaId != null)
-                {
-                    if (!await _supervisorMobilityRepository.AreaExistAsync((int)item.AreaId))
-                    {
-                        return NotFound("No Area");
-                    }
-                }
+                //if (item.AreaId == 0 || item.AreaId == -1)
+                //{
+                //    item.AreaId = null;
+                //}
+                //else if (item.AreaId != null)
+                //{
+                //    if (!await _supervisorMobilityRepository.AreaExistAsync((int)item.AreaId))
+                //    {
+                //        return NotFound("No Area");
+                //    }
+                //}
 
                 if (item.GroupId == 0 || item.GroupId == -1)
                 {
@@ -1329,13 +1541,21 @@ namespace SupervisorMobility.API.Controllers
                     item.Subordinates = null;
                 }
 
-                if (item.Areas != null)
+                if (item.Areas != null || item.AreaId != null)
                 {
                     haveAreas = true;
-                    foreach (var AreainList in item.Areas)
+                    if (item.Areas != null)
                     {
-                        AreasInUser.Add(await _supervisorMobilityRepository.GetAreaForPlantAsync((int)item.PlantId, AreainList.AreaId));
+                        foreach (var AreainList in item.Areas)
+                        {
+                            AreasInUser.Add(await _supervisorMobilityRepository.GetAreaForPlantAsync((int)item.PlantId, AreainList.AreaId));
+                        }
                     }
+                    if (item.AreaId != null)
+                    {
+                        AreasInUser.Add(await _supervisorMobilityRepository.GetAreaForPlantAsync((int)item.PlantId, (int)item.AreaId));
+                    }
+
                     item.Areas = null;
                 }
 
@@ -1376,12 +1596,35 @@ namespace SupervisorMobility.API.Controllers
 
                             if (!entityentity.Equals(userToCompare))
                             {
+                                if (userToCompare.SuperiorId != entityentity.SuperiorId)
+                                {
+                                    if (userToCompare.SuperiorId != null && entityentity.SuperiorId != null)
+                                    {
+                                        User exsuperior = await _supervisorMobilityRepository.GetUserAsync((int)entityentity.SuperiorId, true);
+                                        var usertoRemove = _mapper.Map<User>(entityentity);
+
+                                        await _supervisorMobilityRepository.UserRemoveSubordinated(exsuperior, usertoRemove);
+
+                                        User actualSuperior = await _supervisorMobilityRepository.GetUserAsync((int)userToCompare.SuperiorId, true);
+                                        await _supervisorMobilityRepository.UserAddSubordinated(actualSuperior, usertoRemove);
+
+                                        item.SuperiorId = actualSuperior.UserId;
+                                        item.PlantId = actualSuperior.PlantId;
+                                        item.GroupId = actualSuperior.GroupId;
+
+                                        //if (ItemInUserList.UserType == 4)
+                                        //    ItemInUserList.AreaId = actualSuperior.AreaId;
+
+                                        userToCompare = _mapper.Map<User>(item);
+                                    }
+                                }
 
                                 var userToUpdate = _mapper.Map<UsersForUpdateDto>(userToCompare);
                                 userToUpdate.CreatedDate = (DateTime)entityentity.CreatedDate;
 
                                 await _supervisorMobilityRepository.UpdateUser(userToUpdate, entityentity.UserId);
                                 UserToReturn = _mapper.Map<User>(userToUpdate);
+                                UserToReturn.UserId = entityentity.UserId;
                                 ResultToReturn.UsersUpdated++;
                             }
                             else
@@ -1449,6 +1692,28 @@ namespace SupervisorMobility.API.Controllers
 
                                 if (!entityentity.Equals(userToCompare))
                                 {
+                                    if (userToCompare.SuperiorId != entityentity.SuperiorId)
+                                    {
+                                        if (userToCompare.SuperiorId != null && entityentity.SuperiorId != null)
+                                        {
+                                            User exsuperior = await _supervisorMobilityRepository.GetUserAsync((int)entityentity.SuperiorId, true);
+                                            var usertoRemove = _mapper.Map<User>(entityentity);
+
+                                            await _supervisorMobilityRepository.UserRemoveSubordinated(exsuperior, usertoRemove);
+
+                                            User actualSuperior = await _supervisorMobilityRepository.GetUserAsync((int)userToCompare.SuperiorId, true);
+                                            await _supervisorMobilityRepository.UserAddSubordinated(actualSuperior, usertoRemove);
+
+                                            item.SuperiorId = actualSuperior.UserId;
+                                            item.PlantId = actualSuperior.PlantId;
+                                            item.GroupId = actualSuperior.GroupId;
+
+                                            //if (ItemInUserList.UserType == 4)
+                                            //    ItemInUserList.AreaId = actualSuperior.AreaId;
+
+                                            userToCompare = _mapper.Map<User>(item);
+                                        }
+                                    }
 
                                     var userToUpdate = _mapper.Map<UsersForUpdateDto>(userToCompare);
 
@@ -1456,6 +1721,7 @@ namespace SupervisorMobility.API.Controllers
 
                                     await _supervisorMobilityRepository.UpdateUser(userToUpdate, entityentity.UserId);
                                     UserToReturn = _mapper.Map<User>(userToUpdate);
+                                    UserToReturn.UserId = entityentity.UserId;
                                     ResultToReturn.UsersUpdated++;
                                 }
                                 else
@@ -1482,13 +1748,35 @@ namespace SupervisorMobility.API.Controllers
                         var userToCompare = _mapper.Map<User>(item);
                         if (!entityUserwhitId.Equals(userToCompare))
                         {
+                            if (userToCompare.SuperiorId != entityUserwhitId.SuperiorId)
+                            {
+                                if (userToCompare.SuperiorId != null && entityUserwhitId.SuperiorId != null)
+                                {
+                                    User exsuperior = await _supervisorMobilityRepository.GetUserAsync((int)entityUserwhitId.SuperiorId, true);
+                                    var usertoRemove = _mapper.Map<User>(entityUserwhitId);
+
+                                    await _supervisorMobilityRepository.UserRemoveSubordinated(exsuperior, usertoRemove);
+
+                                    User actualSuperior = await _supervisorMobilityRepository.GetUserAsync((int)userToCompare.SuperiorId, true);
+                                    await _supervisorMobilityRepository.UserAddSubordinated(actualSuperior, usertoRemove);
+
+                                    item.SuperiorId = actualSuperior.UserId;
+                                    item.PlantId = actualSuperior.PlantId;
+                                    item.GroupId = actualSuperior.GroupId;
+
+                                    //if (ItemInUserList.UserType == 4)
+                                    //    ItemInUserList.AreaId = actualSuperior.AreaId;
+
+                                    userToCompare = _mapper.Map<User>(item);
+                                }
+                            }
 
                             var userToUpdate = _mapper.Map<UsersForUpdateDto>(userToCompare);
                             userToUpdate.CreatedDate = (DateTime)entityUserwhitId.CreatedDate;
 
                             await _supervisorMobilityRepository.UpdateUser(userToUpdate, entityUserwhitId.UserId);
                             UserToReturn = _mapper.Map<User>(entityUserwhitId);
-
+                            UserToReturn.UserId = entityUserwhitId.UserId;
                             ResultToReturn.UsersUpdated++;
                         }
                         else
@@ -1506,15 +1794,16 @@ namespace SupervisorMobility.API.Controllers
                 {
                     foreach (var elemntUser in UsersInUser)
                     {
-                        _supervisorMobilityRepository.UserAddSubordinated(UserToReturn, elemntUser);
+                        await _supervisorMobilityRepository.UserAddSubordinated(UserToReturn, elemntUser);
                     }
                 }
 
                 if (haveAreas)
                 {
+                    await _supervisorMobilityRepository.RemoveAllAreasFromUser(UserToReturn);
                     foreach (var elemntArea in AreasInUser)
                     {
-                        _supervisorMobilityRepository.UserAddArea(UserToReturn, elemntArea);
+                        await _supervisorMobilityRepository.UserAddArea(UserToReturn, elemntArea);
                     }
                 }
 
@@ -1527,7 +1816,7 @@ namespace SupervisorMobility.API.Controllers
                     var entityhci = await _supervisorMobilityRepository.AddHCI(hciEntity);
                 }
 
-                _supervisorMobilityRepository.UserAddSubordinated(MasterUser, UserToReturn);
+                //await _supervisorMobilityRepository.UserAddSubordinated(MasterUser, UserToReturn);
             }
 
             return Ok(ResultToReturn);
@@ -1627,31 +1916,36 @@ namespace SupervisorMobility.API.Controllers
 
                     List<string> RowsInFile = new List<string>();
 
-                    using (SpreadsheetDocument document = SpreadsheetDocument.Open(file, false))
+                    using (var  document = new ExcelPackage(new FileInfo(file)))
                     {
                         // Obtener la primera hoja de trabajo
-                        WorkbookPart workbookPart = document.WorkbookPart;
-                        Sheet sheet = workbookPart.Workbook.Sheets.Elements<Sheet>().FirstOrDefault();
-                        if (sheet != null)
+                        var ws = document.Workbook.Worksheets[0];
+                        int totalRowWithInfo = ws.Dimension.End.Row;
+                       
+                        for(int row= ws.Dimension.Start.Row; row<=totalRowWithInfo;row++)
                         {
-                            WorksheetPart worksheetPart = (WorksheetPart)workbookPart.GetPartById(sheet.Id);
-                            SheetData sheetData = worksheetPart.Worksheet.Elements<SheetData>().FirstOrDefault();
-
-                            if (sheetData != null)
+                            for(int i = 1; i <= 12; i++)
                             {
-                                foreach (var row in sheetData.Elements<Row>())
+                                if (ws.Cells[row, i].Value != null)
                                 {
-                                   
-                                    foreach (var cell in row.Elements<Cell>().Take(13)) // Leer hasta la columna 13
-                                    {
-                                        string cellValue = GetCellValue(workbookPart, cell);
-                                        RowsInFile.Add(string.IsNullOrEmpty(cellValue) ? "§" : cellValue);
-                                    }
-
-                                    DataInFile.Add(RowsInFile.ToArray());
+                                    // Updated line to ensure null safety by adding a null-coalescing operator to provide a default value.
+                                    RowsInFile.Add(ws.Cells[row, i].Value?.ToString() ?? "§");
+                                }
+                                else
+                                {
+                                    RowsInFile.Add("§");
                                 }
                             }
+                           
+                       
+                           
+                            
+
+                            DataInFile.Add(RowsInFile.ToArray());
+                            RowsInFile.Clear();
                         }
+                            
+                        
                     }
 
                 }
@@ -1747,6 +2041,14 @@ namespace SupervisorMobility.API.Controllers
                                         {
 
                                             break;
+                                        }
+                                        //se asigna el payroll
+                                        try
+                                        {
+                                            ToInsertIntoList.Payroll = row[2] != "§" ? int.Parse(row[2]) : int.Parse(row[403]);
+                                        }
+                                        catch (Exception ex)
+                                        {
                                         }
 
                                         try
@@ -1922,7 +2224,7 @@ namespace SupervisorMobility.API.Controllers
                                     }
                                     break;
                                 case 3:
-                                    try
+                                    try  
                                     {
                                         ToInsertIntoList.UserId = row[0] != "§" ? int.Parse(row[0]) : -1;
 
@@ -1953,8 +2255,16 @@ namespace SupervisorMobility.API.Controllers
                                         {
 
                                         }
-
+                                        //se asigna el payroll
                                         try
+                                        {
+                                            ToInsertIntoList.Payroll = row[2] != "§" ? int.Parse(row[2]) : int.Parse(row[403]);
+                                        }
+                                        catch (Exception ex)
+                                        {
+                                        }
+
+                                            try
                                         {
                                             ToInsertIntoList.SuperiorId = row[6] != "§" ? int.Parse(row[6]) : int.Parse(row[403]);
 
@@ -2045,19 +2355,54 @@ namespace SupervisorMobility.API.Controllers
 
                                         try
                                         {
-                                            ToInsertIntoList.AreaId = row[9] != "§" ? int.Parse(row[9]) : int.Parse(row[403]);
-                                            try
+                                            if (row[9].Contains(','))
                                             {
-                                                ToInsertIntoList.Area = ToInsertIntoList.Superior?.Areas.ToList().Find(a => a.AreaId == ToInsertIntoList.AreaId);
-                                            }
-                                            catch (Exception ex)
-                                            {
+                                                string[]? SplitedAreas = row[9] != "§" ? row[9].Split(',') : null;
 
+                                                if (SplitedAreas != null)
+                                                {
+                                                    if (ToInsertIntoList.Areas != null)
+                                                    {
+                                                        foreach (var item in SplitedAreas)
+                                                        {
+                                                            ToInsertIntoList.Areas.Add(_areas[_plants.ToList().FindIndex(e => e.PlantId == ToInsertIntoList.PlantId)].ToList().Find(a => a.AreaId == int.Parse(item)));
+                                                        }
+                                                    }
+                                                    else
+                                                    {
+                                                        ToInsertIntoList.Areas = new List<Area>();
+                                                        foreach (var item in SplitedAreas)
+                                                        {
+                                                            ToInsertIntoList.Areas.Add(_areas[_plants.ToList().FindIndex(e => e.PlantId == ToInsertIntoList.PlantId)].ToList().Find(a => a.AreaId == int.Parse(item)));
+                                                        }
+                                                    }
+
+                                                }
+                                            }
+                                            else
+                                            {
+                                                if (row[9] != "§")
+                                                {
+                                                    if (ToInsertIntoList.Areas != null)
+                                                    {
+
+                                                        ToInsertIntoList.Areas.Add(_areas[_plants.ToList().FindIndex(e => e.PlantId == ToInsertIntoList.PlantId)].ToList().Find(a => a.AreaId == int.Parse(row[9])));
+
+                                                    }
+                                                    else
+                                                    {
+                                                        ToInsertIntoList.Areas = new List<Area>();
+                                                        ToInsertIntoList.Areas.Add(_areas[_plants.ToList().FindIndex(e => e.PlantId == ToInsertIntoList.PlantId)].ToList().Find(a => a.AreaId == int.Parse(row[9])));
+
+                                                    }
+                                                }
                                             }
                                         }
                                         catch (Exception ex)
                                         {
 
+
+                                            break;
                                         }
                                     }
                                     catch (Exception ex)
@@ -2107,12 +2452,54 @@ namespace SupervisorMobility.API.Controllers
 
                                                 try
                                                 {
-                                                    ToInsertIntoList.AreaId = ToInsertIntoList.Superior?.AreaId;
-                                                    ToInsertIntoList.Area = ToInsertIntoList.Superior?.Area;
+                                                    if (row[9].Contains(','))
+                                                    {
+                                                        string[]? SplitedAreas = row[9] != "§" ? row[9].Split(',') : null;
+
+                                                        if (SplitedAreas != null)
+                                                        {
+                                                            if (ToInsertIntoList.Areas != null)
+                                                            {
+                                                                foreach (var item in SplitedAreas)
+                                                                {
+                                                                    ToInsertIntoList.Areas.Add(_areas[_plants.ToList().FindIndex(e => e.PlantId == ToInsertIntoList.PlantId)].ToList().Find(a => a.AreaId == int.Parse(item)));
+                                                                }
+                                                            }
+                                                            else
+                                                            {
+                                                                ToInsertIntoList.Areas = new List<Area>();
+                                                                foreach (var item in SplitedAreas)
+                                                                {
+                                                                    ToInsertIntoList.Areas.Add(_areas[_plants.ToList().FindIndex(e => e.PlantId == ToInsertIntoList.PlantId)].ToList().Find(a => a.AreaId == int.Parse(item)));
+                                                                }
+                                                            }
+
+                                                        }
+                                                    }
+                                                    else
+                                                    {
+                                                        if (row[9] != "§")
+                                                        {
+                                                            if (ToInsertIntoList.Areas != null)
+                                                            {
+
+                                                                ToInsertIntoList.Areas.Add(_areas[_plants.ToList().FindIndex(e => e.PlantId == ToInsertIntoList.PlantId)].ToList().Find(a => a.AreaId == int.Parse(row[9])));
+
+                                                            }
+                                                            else
+                                                            {
+                                                                ToInsertIntoList.Areas = new List<Area>();
+                                                                ToInsertIntoList.Areas.Add(_areas[_plants.ToList().FindIndex(e => e.PlantId == ToInsertIntoList.PlantId)].ToList().Find(a => a.AreaId == int.Parse(row[9])));
+
+                                                            }
+                                                        }
+                                                    }
                                                 }
                                                 catch (Exception ex)
                                                 {
 
+
+                                                    break;
                                                 }
 
                                                 try
@@ -2192,7 +2579,7 @@ namespace SupervisorMobility.API.Controllers
                 bool haveUsers = false;
 
                 var UserToReturn = new User();
-
+                item.IsActive = true;
                 if (item.PlantId == 0)
                 {
                     item.PlantId = null;
@@ -2307,10 +2694,10 @@ namespace SupervisorMobility.API.Controllers
                         else
                         {
                             var userToCompare = _mapper.Map<User>(item);
-
+                            userToCompare.IsActive = entityentity.IsActive;
                             if (!entityentity.Equals(userToCompare))
                             {
-
+                                
                                 if (userToCompare.SuperiorId != entityentity.SuperiorId)
                                 {
                                     if (userToCompare.SuperiorId != null && entityentity.SuperiorId != null)
@@ -2318,17 +2705,17 @@ namespace SupervisorMobility.API.Controllers
                                         User exsuperior = await _supervisorMobilityRepository.GetUserAsync((int)entityentity.SuperiorId, true);
                                         var usertoRemove = _mapper.Map<User>(entityentity);
 
-                                        _supervisorMobilityRepository.UserRemoveSubordinated(exsuperior, usertoRemove);
+                                        await _supervisorMobilityRepository.UserRemoveSubordinated(exsuperior, usertoRemove);
 
                                         User actualSuperior = await _supervisorMobilityRepository.GetUserAsync((int)item.SuperiorId, true);
-                                        _supervisorMobilityRepository.UserAddSubordinated(actualSuperior, usertoRemove);
+                                        await _supervisorMobilityRepository.UserAddSubordinated(actualSuperior, usertoRemove);
 
                                         item.SuperiorId = actualSuperior.UserId;
                                         item.PlantId = actualSuperior.PlantId;
                                         item.GroupId = actualSuperior.GroupId;
 
-                                        if (item.UserType == 4)
-                                            item.AreaId = actualSuperior.AreaId;
+                                        //if (item.UserType == 4)
+                                        //    item.AreaId = actualSuperior.AreaId;
 
                                         userToCompare = _mapper.Map<User>(item);
                                     }
@@ -2353,7 +2740,7 @@ namespace SupervisorMobility.API.Controllers
                     }
                     else
                     {
-                        var usertoCreate = _mapper.Map<UsersForCreation>(item);
+                        var usertoCreate = _mapper.Map<UsersForCreation>(item);                     
                         var finalUser = await _assyChartService.CreateUserAsync(usertoCreate);
                         if (finalUser != null)
                             ResultToReturn.UsersCreated++;
@@ -2401,7 +2788,7 @@ namespace SupervisorMobility.API.Controllers
                             else
                             {
                                 var userToCompare = _mapper.Map<User>(item);
-
+                               
                                 if (!entityentity.Equals(userToCompare))
                                 {
                                     if (userToCompare.SuperiorId != entityentity.SuperiorId)
@@ -2411,17 +2798,17 @@ namespace SupervisorMobility.API.Controllers
                                             User exsuperior = await _supervisorMobilityRepository.GetUserAsync((int)entityentity.SuperiorId, true);
                                             var usertoRemove = _mapper.Map<User>(entityentity);
 
-                                            _supervisorMobilityRepository.UserRemoveSubordinated(exsuperior, usertoRemove);
+                                            await _supervisorMobilityRepository.UserRemoveSubordinated(exsuperior, usertoRemove);
 
                                             User actualSuperior = await _supervisorMobilityRepository.GetUserAsync((int)item.SuperiorId, true);
-                                            _supervisorMobilityRepository.UserAddSubordinated(actualSuperior, usertoRemove);
+                                            await _supervisorMobilityRepository.UserAddSubordinated(actualSuperior, usertoRemove);
 
                                             item.SuperiorId = actualSuperior.UserId;
                                             item.PlantId = actualSuperior.PlantId;
                                             item.GroupId = actualSuperior.GroupId;
 
-                                            if (item.UserType == 4)
-                                                item.AreaId = actualSuperior.AreaId;
+                                            //if (item.UserType == 4)
+                                            //    item.AreaId = actualSuperior.AreaId;
 
                                             userToCompare = _mapper.Map<User>(item);
                                         }
@@ -2446,6 +2833,7 @@ namespace SupervisorMobility.API.Controllers
                         else
                         {
                             var usertoCreate = _mapper.Map<UsersForCreation>(item);
+                            usertoCreate.IsActive = true;
                             var finalUser = await _assyChartService.CreateUserAsync(usertoCreate);
                             if (finalUser != null)
                                 ResultToReturn.UsersCreated++;
@@ -2456,6 +2844,7 @@ namespace SupervisorMobility.API.Controllers
                     else
                     {
                         var userToCompare = _mapper.Map<User>(item);
+                        
                         if (!entityUserwhitId.Equals(userToCompare))
                         {
                             if (userToCompare.SuperiorId != entityUserwhitId.SuperiorId)
@@ -2465,17 +2854,17 @@ namespace SupervisorMobility.API.Controllers
                                     User exsuperior = await _supervisorMobilityRepository.GetUserAsync((int)entityUserwhitId.SuperiorId, true);
                                     var usertoRemove = _mapper.Map<User>(entityUserwhitId);
 
-                                    _supervisorMobilityRepository.UserRemoveSubordinated(exsuperior, usertoRemove);
+                                    await _supervisorMobilityRepository.UserRemoveSubordinated(exsuperior, usertoRemove);
 
                                     User actualSuperior = await _supervisorMobilityRepository.GetUserAsync((int)item.SuperiorId, true);
-                                    _supervisorMobilityRepository.UserAddSubordinated(actualSuperior, usertoRemove);
+                                    await _supervisorMobilityRepository.UserAddSubordinated(actualSuperior, usertoRemove);
 
                                     item.SuperiorId = actualSuperior.UserId;
                                     item.PlantId = actualSuperior.PlantId;
                                     item.GroupId = actualSuperior.GroupId;
 
-                                    if (item.UserType == 4)
-                                        item.AreaId = actualSuperior.AreaId;
+                                    //if (item.UserType == 4)
+                                    //    item.AreaId = actualSuperior.AreaId;
 
                                     userToCompare = _mapper.Map<User>(item);
                                 }
@@ -2502,7 +2891,7 @@ namespace SupervisorMobility.API.Controllers
                 {
                     foreach (var elemntUser in UsersInUser)
                     {
-                        _supervisorMobilityRepository.UserAddSubordinated(UserToReturn, elemntUser);
+                        await _supervisorMobilityRepository.UserAddSubordinated(UserToReturn, elemntUser);
                     }
                 }
 
@@ -2510,7 +2899,7 @@ namespace SupervisorMobility.API.Controllers
                 {
                     foreach (var elemntArea in AreasInUser)
                     {
-                        _supervisorMobilityRepository.UserAddArea(UserToReturn, elemntArea);
+                        await _supervisorMobilityRepository.UserAddArea(UserToReturn, elemntArea);
                     }
                 }
 
@@ -2859,6 +3248,142 @@ namespace SupervisorMobility.API.Controllers
             return res;
 
         }//end download file function 
+
+        [HttpGet("GetPersonalInfoByPersonalNumber")]
+        [ProducesResponseType(StatusCodes.Status200OK)]
+        [ProducesResponseType(StatusCodes.Status404NotFound)]
+        [ProducesResponseType(StatusCodes.Status500InternalServerError)]
+        public async Task<ActionResult<ServiceResponse<WFMInfoSP>>> GetPersonalInfoByPersonalNumber(int personalNumber)
+        {
+           var response = await _supervisorMobilityRepository.GetPersonalInfoForUserByPersonalNumber(personalNumber);
+            if (response.Data == null)
+            {
+                return NotFound(response);
+            }
+            return Ok(response);
+        }
+
+
+        [ProducesResponseType(StatusCodes.Status500InternalServerError)]
+        [ProducesResponseType(StatusCodes.Status200OK)]
+        [HttpPatch("UpdateUsersAreasForSuperior")]
+        public async Task<ActionResult<ServiceResponse<UpdateUsersAreasResult>>> UpdateUsersAreasForSuperior(List<UpdateAreasForSuperiorDto> usersList)
+        {
+            try
+            {
+                var response = await _supervisorMobilityRepository.UpdateUserAreasForSuperior(usersList);
+                
+                // Si hay errores parciales pero algunos éxitos, retornar 200 con detalles
+                if (response.Data?.SuccessfullyUpdated > 0)
+                {
+                    // Crear notificacion a los usuarios que se actualizaron correctamente
+                    foreach (var userUpdate in usersList)
+                    {
+                        if (response.Data.Errors.Any(u => u.UserId == userUpdate.UserId))
+                            continue;
+
+                        try
+                        {
+                            // Obtener al usuario actualizado 
+                            var userResponse = await GetUser(userUpdate.UserId, true);
+                            var okResult = userResponse.Result as OkObjectResult;
+                            var user = okResult?.Value as UsersWithNavigationAndPeopleDetails;
+
+                            // Notificar al usuario que sus areas cambiaron
+                            NotificationToCreateDto areasChangedNotification = new NotificationToCreateDto
+                            {
+                                MadeBy = "SM Mobility",
+                                UserId = user.UserId,
+                                IsAccepted = true,
+                                IsActive = true,
+                                NotificationType = "Update subordinate",
+                                NotificationText = $"Your superior have new Areas and your Areas managed were updated."
+                            };
+
+                            try
+                            {
+                                await _assyChartService.CreateNotificationAsync(areasChangedNotification);
+                            }
+                            catch (Exception)
+                            {
+                                // Ignorar errores en la notificación para no afectar el flujo principal
+                            }
+
+                            //En los casos necesarios, crear actualizacion para actualizar a los subordinados del subordinado
+                            if (user.UserType == 2 || user.UserType == 3)
+                                if (user.Subordinates != null && user.Subordinates.Count > 0)
+                                    foreach (var sub in user.Subordinates)
+                                    {
+                                        string userTypeName = sub.UserType switch
+                                        {
+                                            1 => "Administrador",
+                                            2 => "Senior Supervisor",
+                                            3 => "Supervisor",
+                                            4 => "Operador",
+                                            5 => "SSV",
+                                            _ => "Usuario"
+                                        };
+
+                                        NotificationToCreateDto newNotify = new NotificationToCreateDto
+                                        {
+                                            MadeBy = "SM Mobility",
+                                            UserId = user.UserId,
+                                            IsAccepted = true,
+                                            IsActive = true,
+                                            NotificationType = "Update subordinate",
+                                            NotificationText = $"Your Areas have changed and this subordinate needs you to update their information so it aligns with yours.\\n\\n" +
+                                                          $"Name: {sub.Name}\\n" +
+                                                          $"Type: {userTypeName}\\n" +
+                                                          $"Date: {DateTime.Now:dd/MM/yyyy HH:mm}"
+                                        };
+
+                                        try
+                                        {
+                                            await _assyChartService.CreateNotificationAsync(newNotify);
+                                        }
+                                        catch (Exception)
+                                        {
+                                            // Ignorar errores en la notificación para no afectar el flujo principal
+                                        }
+                                    }
+                        }
+                        catch (Exception)
+                        {
+                            // Ignorar errores en la query para no afectar el flujo principal
+                        }
+                    }
+
+                    // Retornar la respuesta
+                    return Ok(response);
+                }
+                
+                // Si todos fallaron, retornar error
+                if (response.Data?.Failed == response.Data?.TotalUsers)
+                {
+                    return BadRequest(response);
+                }
+                
+                return Ok(response);
+            }
+            catch(Exception ex)
+            {
+                var response = new ServiceResponse<UpdateUsersAreasResult>
+                {
+                    Success = false,
+                    Message = ex.InnerException != null 
+                        ? $"{ex.Message} - Inner: {ex.InnerException.Message}" 
+                        : ex.Message,
+                    Data = new UpdateUsersAreasResult
+                    {
+                        Success = false,
+                        Message = "Critical server error occurred",
+                        TotalUsers = usersList?.Count ?? 0,
+                        Failed = usersList?.Count ?? 0
+                    }
+                };
+                return StatusCode(StatusCodes.Status500InternalServerError, response);
+            }
+        }
 
     }
 }
