@@ -1239,41 +1239,30 @@ namespace SupervisorMobility.API.DataAccess.Services
                 // Verificar si el master ya está siendo rastreado en el contexto
                 var localMasterEntry = _context.SOSHubs.Local.FirstOrDefault(entry => entry.SOSHubId == master.SOSHubId);
                 if (localMasterEntry != null)
-                {
                     master = localMasterEntry;
-                }
                 else
-                {
                     if (_context.Entry(master).State == EntityState.Detached)
-                    {
                         _context.SOSHubs.Attach(master);
-                    }
-                }
 
                 // Verificar si el slave ya está siendo rastreado en el contexto
                 var localSlaveEntry = _context.Products.Local.FirstOrDefault(entry => entry.ProductId == slave.ProductId);
                 if (localSlaveEntry != null)
-                {
                     slave = localSlaveEntry;
-                }
                 else
-                {
                     if (_context.Entry(slave).State == EntityState.Detached)
-                    {
                         _context.Products.Attach(slave);
-                    }
-                }
 
                 // Validar contra la colección cargada
+                if(master.AppliedModels == null)
+                    master.AppliedModels = new List<Product>();
+
                 if (!master.AppliedModels.Any(p => p.ProductId == slave.ProductId))
                 {
                     master.AppliedModels.Add(slave);
                     await _context.SaveChangesAsync();
                 }
                 else
-                {
                     Debug.WriteLine($"La relación SOSHubId={master.SOSHubId} con ProductId={slave.ProductId} ya existe.");
-                }
             }
             catch (Exception ex)
             {
