@@ -1230,6 +1230,12 @@ namespace SupervisorMobility.API.DataAccess.Services
         {
             try
             {
+                // Cargar explícitamente la colección desde la BD
+                // Esto asegura que AppliedModels refleja lo que realmente está en la tabla intermedia.
+                await _context.Entry(master)
+                             .Collection(m => m.AppliedModels)
+                             .LoadAsync();
+
                 // Verificar si el master ya está siendo rastreado en el contexto
                 var localMasterEntry = _context.SOSHubs.Local.FirstOrDefault(entry => entry.SOSHubId == master.SOSHubId);
                 if (localMasterEntry != null)
@@ -1244,7 +1250,7 @@ namespace SupervisorMobility.API.DataAccess.Services
                     }
                 }
 
-                // Verificar si el AppliedModel slave ya está siendo rastreado en el contexto
+                // Verificar si el slave ya está siendo rastreado en el contexto
                 var localSlaveEntry = _context.Products.Local.FirstOrDefault(entry => entry.ProductId == slave.ProductId);
                 if (localSlaveEntry != null)
                 {
@@ -1258,24 +1264,19 @@ namespace SupervisorMobility.API.DataAccess.Services
                     }
                 }
 
-                // Añadir el producto a la colección de AppliedModels del master
-                if (master.AppliedModels == null)
-                {
-                    master.AppliedModels = new List<Product>();
-                }
-
-                // Verificar si la Prodcut ya está en la colección
-                if (!master.AppliedModels.Any(t => t.ProductId == slave.ProductId))
+                // Validar contra la colección cargada
+                if (!master.AppliedModels.Any(p => p.ProductId == slave.ProductId))
                 {
                     master.AppliedModels.Add(slave);
+                    await _context.SaveChangesAsync();
                 }
-
-                // Guardar los cambios
-                await _context.SaveChangesAsync();
+                else
+                {
+                    Debug.WriteLine($"La relación SOSHubId={master.SOSHubId} con ProductId={slave.ProductId} ya existe.");
+                }
             }
             catch (Exception ex)
             {
-                // Manejar el error apropiadamente, puedes loguearlo o lanzar una excepción personalizada
                 Debug.WriteLine("An error occurred while updating the SOSHub: " + ex.Message);
             }
             return new AsyncVoidMethodBuilder();
