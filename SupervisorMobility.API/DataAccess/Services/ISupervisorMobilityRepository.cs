@@ -14,6 +14,7 @@ using SupervisorMobility.API.Models.ILURegisterDtos;
 using SupervisorMobility.API.Models.JobPaginationDtos;
 using SupervisorMobility.API.Models.ProductiveCalendarDtos;
 using SupervisorMobility.API.Models.MetricsDtos;
+using SupervisorMobility.API.DataAccess.SPModels;
 
 
 namespace SupervisorMobility.API.Services
@@ -184,13 +185,16 @@ namespace SupervisorMobility.API.Services
         Task<AsyncVoidMethodBuilder> UserUpdateAllSubordinated(User Master);
         Task<AsyncVoidMethodBuilder> UserRemoveAllSubordinated(User Master);
         Task RemoveAllAreasFromUser(User user);
-        Task<AsyncVoidMethodBuilder> UserRemoveAllAreas(User Master);
+        Task<int> UserRemoveAllAreas(User Master);
         Task<AsyncVoidMethodBuilder> UserAddArea(User Master, Area Slave);
+        Task<AsyncVoidMethodBuilder> UserAddAreas(User Master, List<Area> Areas);
 
 
         Task UpdateUser(UsersForUpdateDto user, int userId);
+        Task<ServiceResponse<UpdateUsersAreasResult>> UpdateUserAreasForSuperior(List<UpdateAreasForSuperiorDto> userList);
 
         Task AddUserAsync(User user);
+        Task<ServiceResponse<WFMInfoSP>> GetPersonalInfoForUserByPersonalNumber(int personalNumber);
 
         void DeleteUserAsync(User user);
         #endregion

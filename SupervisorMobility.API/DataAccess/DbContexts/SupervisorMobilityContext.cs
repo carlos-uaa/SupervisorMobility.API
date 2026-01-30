@@ -13,6 +13,7 @@ using SupervisorMobility.API.DataAccess.Entities.SOS.History;
 using SupervisorMobility.API.DataAccess.Entities.SOS_Review;
 using SupervisorMobility.API.Entities;
 using System.Globalization;
+using SupervisorMobility.API.DataAccess.SPModels;
 
 namespace SupervisorMobility.API.Context
 {
@@ -148,6 +149,9 @@ namespace SupervisorMobility.API.Context
         public DbSet<InsuranceFeatures> InsuranceFeatures { get; set; }
         public DbSet<OperationMachine> OperationMachine { get; set; }
 
+        //modelos para Store Procedures
+        public DbSet<WFMInfoSP> WFMInfoSPs { get; set; }
+
         #endregion
 
         public SupervisorMobilityContext(DbContextOptions<SupervisorMobilityContext> options)
@@ -157,6 +161,14 @@ namespace SupervisorMobility.API.Context
 
         protected override void OnModelCreating(ModelBuilder modelBuilder)
         {
+
+
+            // configuramos los modelos de los SPs como vistas para que nos haga la migracion
+            modelBuilder.Entity<WFMInfoSP>(f =>
+            {
+                f.HasNoKey();
+                f.ToView("Get_Personal_Info_By_Personal_Number");
+            });
             //Default values
             modelBuilder.Entity<JobCategoryStructure>()
                 .Property(p => p.IsActive)

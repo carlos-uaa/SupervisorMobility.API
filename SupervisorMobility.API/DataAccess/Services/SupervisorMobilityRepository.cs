@@ -16,6 +16,7 @@ using SupervisorMobility.API.DataAccess.Entities.Paths;
 using SupervisorMobility.API.DataAccess.Entities.SOS;
 using SupervisorMobility.API.DataAccess.Entities.SOS_Review;
 using SupervisorMobility.API.DataAccess.Services.OrderingServices;
+using SupervisorMobility.API.DataAccess.SPModels;
 using SupervisorMobility.API.Entities;
 using SupervisorMobility.API.Models.ADUser;
 using SupervisorMobility.API.Models.HCIDtos;
@@ -847,7 +848,7 @@ namespace SupervisorMobility.API.Services
         #region Users
         public async Task<IEnumerable<User>> GetAllUsersAsync(bool includeCollections = false, bool includeSubordinates = false, bool includeLeadershipRecord = false)
         {
-            var query = _context.Users.Where(u => u.IsActive == true);
+            var query = _context.Users.AsNoTracking().Where(u => u.IsActive == true);
 
             if (includeCollections)
             {
@@ -873,7 +874,7 @@ namespace SupervisorMobility.API.Services
 
         public async Task<IEnumerable<User>> GetAllUserByTypeAsync(int typeUser, bool includeCollections = false, bool includeSubordinates = false, bool includeLeadershipRecord = false)
         {
-            var query = _context.Users.Where(u => u.UserType == typeUser).Where(u => u.IsActive == true);
+            var query = _context.Users.AsNoTracking().Where(u => u.UserType == typeUser).Where(u => u.IsActive == true);
 
             if (includeCollections)
             {
@@ -899,7 +900,7 @@ namespace SupervisorMobility.API.Services
 
         public async Task<IEnumerable<User>> GetAllUserByTypeInPlantAreaAsync(int plantId, int areaId, int typeUser, bool includeCollections = false, bool includeSubordinates = false, bool includeLeadershipRecord = false)
         {
-            var query = _context.Users.Where(u => u.IsActive == true && u.UserType == typeUser && u.PlantId == plantId && u.AreaId == areaId);
+            var query = _context.Users.AsNoTracking().Where(u => u.IsActive == true && u.UserType == typeUser && u.PlantId == plantId && u.Areas.Any(a => a.AreaId == areaId));
 
             if (includeCollections)
             {
@@ -922,7 +923,7 @@ namespace SupervisorMobility.API.Services
 
         public async Task<IEnumerable<User>> GetAllUserByTypeInPlantAsync(int plantId, int typeUser, bool includeCollections = false, bool includeSubordinates = false, bool includeLeadershipRecord = false)
         {
-            var query = _context.Users.Where(u => u.UserType == typeUser && u.PlantId == plantId && u.IsActive == true);
+            var query = _context.Users.AsNoTracking().Where(u => u.UserType == typeUser && u.PlantId == plantId && u.IsActive == true);
 
             if (includeCollections)
             {
@@ -948,6 +949,7 @@ namespace SupervisorMobility.API.Services
         public async Task<IEnumerable<User>> GetAllSubordinatesAsync(int superiorid)
         {
             return await _context.Users
+                .AsNoTracking()
                 .Include(p => p.Plant)
                 .Include(a => a.Area)
                 .Include(d => d.Distribution)
@@ -1006,6 +1008,7 @@ namespace SupervisorMobility.API.Services
                 .Include(d => d.Distribution)
                 .Include(g => g.Group)
                 .Include(s => s.Superior)
+                .Include(s => s.Superior.Areas)
                 .Include(ss => ss.Subordinates)
                 .Include(ILU => ILU.ILURegisers)
                 .Include(aa => aa.Areas)
@@ -1020,6 +1023,7 @@ namespace SupervisorMobility.API.Services
                 .Include(d => d.Distribution)
                 .Include(g => g.Group)
                 .Include(s => s.Superior)
+                .Include(s => s.Superior.Areas)
                 .Include(ss => ss.Subordinates)
                 .Include(ILU => ILU.ILURegisers)
                 .Include(aa => aa.Areas)
@@ -1033,6 +1037,7 @@ namespace SupervisorMobility.API.Services
                 .Include(d => d.Distribution)
                 .Include(g => g.Group)
                 .Include(s => s.Superior)
+                .Include(s => s.Superior.Areas)
                 .Include(ss => ss.Subordinates)
                 .Include(aa => aa.Areas)
                 .Include(ILU => ILU.ILURegisers)
@@ -1042,7 +1047,7 @@ namespace SupervisorMobility.API.Services
 
         public async Task<User?> GetUserByPayrollAndMoreAsync(int payroll, int plantid, int areaid, int groupid)
         {
-            return await _context.Users.Where(p => p.Payroll == payroll && p.PlantId == plantid && p.AreaId == areaid && p.GroupId == groupid).FirstOrDefaultAsync();
+            return await _context.Users.Where(p => p.Payroll == payroll && p.PlantId == plantid && p.Areas.Any(a => a.AreaId == areaid) && p.GroupId == groupid).FirstOrDefaultAsync();
         }
 
 
@@ -1065,14 +1070,35 @@ namespace SupervisorMobility.API.Services
 
         public async Task<bool> UserExistAdvanceAsync(string nombre, int nomina, int plantid, int areaid, int grupoid)
         {
-            return await _context.Users.AnyAsync(p => p.Name == nombre && p.Payroll == nomina && p.PlantId == plantid && p.AreaId == areaid && p.GroupId == grupoid);
+            return await _context.Users.AnyAsync(p => p.Name == nombre && p.Payroll == nomina && p.PlantId == plantid && p.Areas.Any(a => a.AreaId == areaid) && p.GroupId == grupoid);
         }
 
         public async Task UpdateUser(UsersForUpdateDto user, int userId)
         {
-            var entityUser = await _context.Users.FirstOrDefaultAsync(u => u.UserId == userId);
-            entityUser.Department = await _context.Departments.FirstOrDefaultAsync(d => d.DepartmentId == user.DepartmentId);
-            entityUser.DepartmentId = entityUser.Department.DepartmentId;
+            var entityUser = new User();
+            try
+            {
+                 entityUser = await _context.Users.FirstOrDefaultAsync(u => u.UserId == userId);
+                if (entityUser == null)
+                {
+                    throw new Exception($"User with ID {userId} not found.");
+                }
+                else
+                {
+                    if (user.DepartmentId != null)
+                    {
+                        entityUser.Department = await _context.Departments.FirstOrDefaultAsync(d => d.DepartmentId == user.DepartmentId);
+                        entityUser.DepartmentId = entityUser.Department?.DepartmentId;
+                    }
+                }
+              
+            }
+            catch (Exception ex)
+            {
+                Debug.WriteLine("Error en UpdateUser: " + ex.Message);
+            }
+            
+                
 
             _mapper.Map(user, entityUser);
 
@@ -1083,8 +1109,195 @@ namespace SupervisorMobility.API.Services
             //}
 
 
-            _context.SaveChanges();
+            await _context.SaveChangesAsync();
         }
+
+        public async Task<ServiceResponse<UpdateUsersAreasResult>> UpdateUserAreasForSuperior(List<UpdateAreasForSuperiorDto> usersList)
+        {
+            var response = new ServiceResponse<UpdateUsersAreasResult>();
+            var result = new UpdateUsersAreasResult
+            {
+                TotalUsers = usersList.Count
+            };
+
+            try
+            {
+                // Validación crítica: Verificar que todos los superiores existan primero
+                var superiorIds = usersList.Select(u => u.SuperiorId).Distinct().ToList();
+                foreach (var superiorId in superiorIds)
+                {
+                    var superiorUser = await GetUserAsync(superiorId, true);
+                    if (superiorUser == null)
+                    {
+                        response.Success = false;
+                        response.Message = $"Superior User with Id {superiorId} does not exist. Cannot proceed with any updates.";
+                        result.Success = false;
+                        result.Message = response.Message;
+                        response.Data = result;
+                        return response;
+                    }
+                }
+
+                // Procesar cada usuario individualmente
+                foreach (var userInfo in usersList)
+                {
+                    try
+                    {
+                        // Usar transacción para cada usuario
+                        using var transaction = await _context.Database.BeginTransactionAsync();
+                        
+                        try
+                        {
+                            var userExist = await UserExistAsync(userInfo.UserId);
+                            if (!userExist)
+                            {
+                                result.Failed++;
+                                result.Errors.Add(new UserUpdateError
+                                {
+                                    UserId = userInfo.UserId,
+                                    ErrorType = "UserNotFound",
+                                    ErrorMessage = $"User with Id {userInfo.UserId} does not exist."
+                                });
+                                continue;
+                            }
+
+                            var user = await GetUserAsync(userInfo.UserId, true);
+                            var superiorUser = await GetUserAsync(userInfo.SuperiorId, true);
+
+                            // Cambio de superior
+                            if (user?.SuperiorId != userInfo.SuperiorId)
+                            {
+                                if (user?.SuperiorId != null)
+                                {
+                                    var previousSuperior = await GetUserAsync((int)user.SuperiorId, true);
+                                    if (previousSuperior != null)
+                                    {
+                                        await UserRemoveSubordinated(previousSuperior, user);
+                                    }
+                                }
+                                await UserAddSubordinated(superiorUser, user);
+                            }
+
+                            // Actualizar planta y grupo
+                            user.PlantId = superiorUser.PlantId;
+                            user.GroupId = superiorUser.GroupId;
+                            await _context.SaveChangesAsync();
+
+                            // Validar que todas las áreas existan
+                            var missingAreas = new List<int>();
+                            foreach (var areaId in userInfo.AreaIds)
+                            {
+                                var areaExists = await _context.Areas.AnyAsync(a => a.AreaId == areaId);
+                                if (!areaExists)
+                                {
+                                    missingAreas.Add(areaId);
+                                }
+                            }
+
+                            if (missingAreas.Any())
+                            {
+                                result.Failed++;
+                                result.Errors.Add(new UserUpdateError
+                                {
+                                    UserId = userInfo.UserId,
+                                    ErrorType = "AreasNotFound",
+                                    ErrorMessage = $"User {userInfo.UserId}: Some areas do not exist.",
+                                    MissingAreaIds = missingAreas
+                                });
+                                await transaction.RollbackAsync();
+                                continue;
+                            }
+
+                            // ----------- Actualizar las áreas del usuario ----------- \\
+
+                            // Eliminar las Areas anteriores del usuario
+                            var removeAreasResult = await UserRemoveAllAreas(user);
+
+                            // Validar que se hayan borrado correctamente
+                            if (removeAreasResult < 0)
+                            {
+                                result.Failed++;
+                                result.Errors.Add(new UserUpdateError
+                                {
+                                    UserId = userInfo.UserId,
+                                    ErrorType = "Area Removal Failed",
+                                    ErrorMessage = $"Failed to remove existing areas for user {userInfo.UserId}."
+                                });
+                                await transaction.RollbackAsync();
+                                continue;
+                            }
+
+                            foreach (var areaId in userInfo.AreaIds)
+                            {
+                                var areaEntity = await _context.Areas.FirstOrDefaultAsync(a => a.AreaId == areaId);
+                                if (areaEntity != null)
+                                {
+                                    await UserAddArea(user, areaEntity);
+                                }
+                            }
+
+                            await _context.SaveChangesAsync();
+                            await transaction.CommitAsync();
+                            result.SuccessfullyUpdated++;
+                        }
+                        catch (Exception ex)
+                        {
+                            await transaction.RollbackAsync();
+                            result.Failed++;
+                            result.Errors.Add(new UserUpdateError
+                            {
+                                UserId = userInfo.UserId,
+                                ErrorType = "ProcessingError",
+                                ErrorMessage = $"Error processing user {userInfo.UserId}: {ex.Message}"
+                            });
+                        }
+                    }
+                    catch (Exception ex)
+                    {
+                        result.Failed++;
+                        result.Errors.Add(new UserUpdateError
+                        {
+                            UserId = userInfo.UserId,
+                            ErrorType = "TransactionError",
+                            ErrorMessage = $"Failed to create transaction for user {userInfo.UserId}: {ex.Message}"
+                        });
+                    }
+                }
+
+                // Generar mensaje de resumen
+                if (result.Failed == 0)
+                {
+                    result.Message = $"All {result.SuccessfullyUpdated} users updated successfully.";
+                    result.Success = true;
+                }
+                else if (result.SuccessfullyUpdated == 0)
+                {
+                    result.Message = $"Failed to update all {result.Failed} users.";
+                    result.Success = false;
+                    response.Success = false;
+                }
+                else
+                {
+                    result.Message = $"Partially completed: {result.SuccessfullyUpdated} updated, {result.Failed} failed.";
+                    result.Success = true; // Éxito parcial
+                }
+
+                response.Data = result;
+                response.Message = result.Message;
+                return response;
+            }
+            catch (Exception ex)
+            {
+                response.Success = false;
+                response.Message = $"Critical error: {ex.Message}";
+                result.Success = false;
+                result.Message = response.Message;
+                response.Data = result;
+                return response;
+            }
+        }
+
+
         public async Task<AsyncVoidMethodBuilder> UserAddSubordinated(User Master, User Slave)
         {
 
@@ -1099,14 +1312,14 @@ namespace SupervisorMobility.API.Services
                 Slave.SuperiorId = Master.UserId;
                 Master.Subordinates.Add(Slave);
             }
-            _context.SaveChanges();
+            await _context.SaveChangesAsync();
             return new AsyncVoidMethodBuilder();
         }
 
         public async Task<AsyncVoidMethodBuilder> UserRemoveSubordinated(User Master, User Slave)
         {
             Master.Subordinates?.Remove(Slave);
-            _context.SaveChanges();
+            await _context.SaveChangesAsync();
             return new AsyncVoidMethodBuilder();
         }
         public async Task<AsyncVoidMethodBuilder> UserRemoveAllSubordinated(User Master)
@@ -1123,7 +1336,7 @@ namespace SupervisorMobility.API.Services
                 }
 
                 Master.Subordinates?.Clear();
-                _context.SaveChanges();
+                await _context.SaveChangesAsync();
             }
 
             return new AsyncVoidMethodBuilder();
@@ -1137,17 +1350,23 @@ namespace SupervisorMobility.API.Services
             {
                 userWithAreas.Areas?.Clear();
 
-                _context.SaveChanges();
+                await _context.SaveChangesAsync();
             }
         }
         public async Task<AsyncVoidMethodBuilder> UserUpdateAllSubordinated(User Master)
         {
 
-            var UsersList = await _context.Users.Where(u => u.SuperiorId == Master.UserId)
+            var UsersList = await _context.Users.Include(u => u.Areas).Where(u => u.SuperiorId == Master.UserId)
                  .OrderBy(c => c.UserId).ToListAsync();
 
             if (UsersList?.Count > 0)
             {
+                // Cargar las áreas del Master si no están cargadas
+                if (Master.Areas == null)
+                {
+                    await _context.Entry(Master).Collection(m => m.Areas).LoadAsync();
+                }
+
                 foreach (User sub in UsersList)
                 {
                     switch (sub.UserType)
@@ -1163,49 +1382,94 @@ namespace SupervisorMobility.API.Services
                             break;
                         case 4:
                             sub.PlantId = Master.PlantId;
-                            sub.AreaId = Master.AreaId;
                             sub.GroupId = Master.GroupId;
+                            
+                            // Limpiar áreas actuales del subordinado
+                            sub.Areas?.Clear();
+                            if (sub.Areas == null)
+                            {
+                                sub.Areas = new List<Area>();
+                            }
+                            
+                            // Copiar todas las áreas del Master al subordinado
+                            if (Master.Areas != null && Master.Areas.Any())
+                            {
+                                foreach (var area in Master.Areas)
+                                {
+                                    // Buscar el área en el contexto o adjuntarla
+                                    var trackedArea = _context.Areas.Local.FirstOrDefault(a => a.AreaId == area.AreaId) ?? area;
+                                    sub.Areas.Add(trackedArea);
+                                }
+                            }
                             break;
                     }
                 }
 
-                _context.SaveChanges();
+                await _context.SaveChangesAsync();
             }
 
             return new AsyncVoidMethodBuilder();
         }
 
-        public async Task<AsyncVoidMethodBuilder> UserRemoveAllAreas(User Master)
+        public async Task<int> UserRemoveAllAreas(User master)
         {
-            Master.Areas?.Clear();
-            // Eliminar todas las entradas relacionadas en la tabla UserAreas para el usuario especificado
-            string sqlQuery = "DELETE FROM UserAreas WHERE UserId = @userId";
-
-            int executeCount = _context.Database.ExecuteSqlRaw(sqlQuery,
-                    new SqlParameter("@userId", Master.UserId));
-
-            Debug.WriteLine($"Este es executeCount: {executeCount}");
-
-            _context.SaveChanges();
-            return new AsyncVoidMethodBuilder();
-
+            master.Areas?.Clear();
+            return await _context.SaveChangesAsync();
         }
+
 
         public async Task<AsyncVoidMethodBuilder> UserAddArea(User Master, Area Slave)
         {
-            if (Master.Areas != null)
+            var userWithAreas = await _context.Users.Include(u => u.Areas).FirstOrDefaultAsync(u => u.UserId == Master.UserId);
+            if (userWithAreas.Areas != null)
             {
-                Master.Areas.Add(Slave);
+                userWithAreas.Areas.Add(Slave);
             }
             else
             {
-                Master.Areas = new List<Area>();
-                Master.Areas.Add(Slave);
+                userWithAreas.Areas = new List<Area>();
+                userWithAreas.Areas.Add(Slave);
             }
-            _context.SaveChanges();
+            // No hacer SaveChangesAsync aquí, dejamos que el controller lo haga al final
+            // await _context.SaveChangesAsync();
 
             return new AsyncVoidMethodBuilder();
 
+        }
+
+        public async Task<AsyncVoidMethodBuilder> UserAddAreas(User Master, List<Area> Areas)
+        {
+            // Buscar el usuario en el contexto, o usar el que ya está siendo trackeado
+            var userWithAreas = _context.Users.Local.FirstOrDefault(u => u.UserId == Master.UserId);
+            
+            if (userWithAreas == null)
+            {
+                // Si no está en el contexto local, cargarlo desde la BD
+                userWithAreas = await _context.Users.Include(u => u.Areas).FirstOrDefaultAsync(u => u.UserId == Master.UserId);
+            }
+            else
+            {
+                // Si ya está en el contexto, cargar sus áreas explícitamente
+                await _context.Entry(userWithAreas).Collection(u => u.Areas).LoadAsync();
+            }
+            
+            if (userWithAreas.Areas == null)
+            {
+                userWithAreas.Areas = new List<Area>();
+            }
+            
+            foreach (var area in Areas)
+            {
+                // Verificar si el área ya existe en el usuario
+                if (!userWithAreas.Areas.Any(a => a.AreaId == area.AreaId))
+                {
+                    // Buscar el área en el contexto o adjuntarla
+                    var trackedArea = _context.Areas.Local.FirstOrDefault(a => a.AreaId == area.AreaId) ?? area;
+                    userWithAreas.Areas.Add(trackedArea);
+                }
+            }
+            // No hacer SaveChangesAsync aquí, dejamos que el controller lo haga al final
+            return new AsyncVoidMethodBuilder();
         }
 
 
@@ -1219,7 +1483,39 @@ namespace SupervisorMobility.API.Services
         {
             //_context.Users.Remove(user);
             user.IsActive = false;
-            _context.SaveChanges();
+           _context.SaveChangesAsync();
+        }
+
+        //metodo para obtener la informacion personal del usario en WFM
+        public async Task<ServiceResponse<WFMInfoSP>>GetPersonalInfoForUserByPersonalNumber(int personalNumber)
+        {
+            var response = new ServiceResponse<WFMInfoSP>();
+            try
+            {
+                var personalInfo = await _context.WFMInfoSPs
+                .FromSqlRaw("dbo.Get_Personal_Info_By_Personal_Number {0}", personalNumber)
+                .AsNoTracking()
+                .ToListAsync();
+
+                if(personalInfo !=null && personalInfo.Count>0)
+                {
+                    response.Data = personalInfo[0];
+                    response.Success = true;
+                    response.Message = "Informacion personal obtenida correctamente.";
+                }
+                else
+                {
+                    response.Success = false;
+                    response.Message = "No se encontro informacion personal para el numero proporcionado.";
+                }
+            }
+            catch(Exception ex)
+            {
+                response.Success = false;
+                response.Message = $"Error al obtener la informacion personal: {ex.Message + ex.InnerException.Message}";
+            }
+            
+            return response;
         }
         #endregion
         #region RouteAssychart
@@ -3212,7 +3508,15 @@ namespace SupervisorMobility.API.Services
         }
         public async Task<IEnumerable<HCI>> GetAllHCIs(int LoginUserId, bool includeNavigation = false, bool includePeople = false, bool includeCommentaries = false, bool includeTransactions = false)
         {
-            User LoginUserEntity = _context.Users.Where(u => u.UserId == LoginUserId).FirstOrDefault();
+            User LoginUserEntity = _context.Users
+                .Include(u => u.Areas)  // Incluir Areas para evitar null reference
+                .Where(u => u.UserId == LoginUserId)
+                .FirstOrDefault();
+
+            if (LoginUserEntity == null)
+            {
+                return new List<HCI>(); // Retornar lista vacía si no se encuentra el usuario
+            }
 
             var query = _context.HCIs.Where(u => u.IsActive == true);
 

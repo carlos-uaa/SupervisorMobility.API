@@ -41,9 +41,15 @@ namespace SupervisorMobility.API.Controllers.IS_Controllers
 
             var entityhci = await _supervisorMobilityRepository.AddHCI(hciEntity);
 
-            SOSHub sOSHub = await _sosProcessRepository.GetSOSHub((int)hciForCreate.SOSHubId);
-
-            await _sosProcessRepository.AddHCISOSCollection(sOSHub, hciEntity);
+            // Solo agregar a SOSHub si SOSHubId tiene valor
+            if (hciForCreate.SOSHubId.HasValue && hciForCreate.SOSHubId.Value > 0)
+            {
+                SOSHub sOSHub = await _sosProcessRepository.GetSOSHub(hciForCreate.SOSHubId.Value);
+                if (sOSHub != null)
+                {
+                    await _sosProcessRepository.AddHCISOSCollection(sOSHub, hciEntity);
+                }
+            }
 
             if (entityhci != null)
                 return Ok(_mapper.Map<HCIDto>(hciEntity));

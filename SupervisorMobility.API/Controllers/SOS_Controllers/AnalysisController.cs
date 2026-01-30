@@ -328,12 +328,19 @@ namespace SupervisorMobility.API.Controllers.SOS_Controllers
         [HttpDelete("{SOSAnalysisId}")]
         public async Task<ActionResult<int>> RemoveSOSHub(int SOSAnalysisId)
         {
-            var result = await _AnalysusRepository.RemoveSOSAnalysis(SOSAnalysisId);
+            try
+            {
+                var result = await _AnalysusRepository.RemoveSOSAnalysis(SOSAnalysisId);
 
-            if (result > 0)
-                return Ok();
-            else
-                return BadRequest("something wrong");
+                if (result > 0)
+                    return Ok();
+                else
+                    return BadRequest("something wrong");
+            }
+            catch (Exception ex)
+            {
+                return BadRequest(ex.Message);
+            }
         }
 
 
