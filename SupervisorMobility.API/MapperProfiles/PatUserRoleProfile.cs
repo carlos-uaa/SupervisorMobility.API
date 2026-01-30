@@ -9,6 +9,7 @@ namespace SupervisorMobility.API.MapperProfiles
             CreateMap<DataAccess.Entities.PatUserRole, Models.PATDtos.PatUserRoleDtos.PatUserRoleDto>().ReverseMap();
             CreateMap<DataAccess.Entities.PatUserRole, Models.PATDtos.PatUserRoleDtos.PatUserRoleForCreateDto>().ReverseMap();
             CreateMap<DataAccess.Entities.PatUserRole, Models.PATDtos.PatUserRoleDtos.PatUserRoleForUpdateDto>().ReverseMap();
+            CreateMap<Models.PATDtos.PatUserRoleDtos.PatUserRoleForCreateDto, Models.PATDtos.PatUserRoleDtos.PatUserRoleForUpdateDto>().ReverseMap();
         }
     }
 
