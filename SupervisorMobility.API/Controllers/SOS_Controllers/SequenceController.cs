@@ -122,6 +122,16 @@ namespace SupervisorMobility.API.Controllers.SOS_Controllers
             return Ok(_mapper.Map<IEnumerable<SOSSequenceDto>>(CheckpointEntities));
         }
 
+        [HttpGet("byArea")]
+        public async Task<ActionResult<IEnumerable<SOSSequenceDto>>> GetAllSOSSequenceByArea(int Area_Id, bool includeImages = false, bool includeNotes = false, bool includeLogbooks = false, bool includeSpecialCases = false, bool includeSOS = false)
+        {
+            var CheckpointEntities = await _SequenceRepository.GetAllSOSSequenceByArea(Area_Id, includeImages, includeNotes, includeLogbooks, includeSpecialCases, includeSOS);
+            if (CheckpointEntities == null)
+                return NotFound("Get All Sos Analisis not found!");
+
+            return Ok(_mapper.Map<IEnumerable<SOSSequenceDto>>(CheckpointEntities));
+        }
+
         //Update
         [HttpPut("{sosSequence_Id}")]
         public async Task<ActionResult> UpdateSOSSequence(int sosSequence_Id, SOSSequenceForUpdateDto sosUpdateEntity)
