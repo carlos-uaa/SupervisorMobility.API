@@ -191,6 +191,8 @@ namespace SupervisorMobility.API.DataAccess.Services
 
                 if (includeCollections)
                 {
+                    Console.WriteLine($"[API GetSOSHub] Loading collections for HubId: {HubId}");
+                    
                     await _context.Entry(sosHub).Reference(a => a.Hci).Query().Where(d => d.IsActive == true).LoadAsync();
 
                     await _context.Entry(sosHub).Collection(a => a.SOSAnalysis).Query().Where(d => d.IsActive == true).LoadAsync();
@@ -219,6 +221,16 @@ namespace SupervisorMobility.API.DataAccess.Services
                     }
 
                     await _context.Entry(sosHub).Collection(d => d.SOSDistribution).Query().Where(d => d.IsActive == true).LoadAsync(); 
+                    
+                    Console.WriteLine($"[API GetSOSHub] Loaded {sosHub.SOSDistribution?.Count ?? 0} distributions");
+                    if (sosHub.SOSDistribution != null && sosHub.SOSDistribution.Count > 0)
+                    {
+                        foreach (var dist in sosHub.SOSDistribution)
+                        {
+                            Console.WriteLine($"[API GetSOSHub] Distribution {dist.SOSDistributionId}, SOSHubId: {dist.SOSHubId}, IsActive: {dist.IsActive}");
+                        }
+                    }
+                    
                     foreach (var distribution in sosHub.SOSDistribution)
                     {
                         await _context.Entry(distribution).Collection(aa => aa.DistributionLogbooks).LoadAsync();
@@ -256,12 +268,21 @@ namespace SupervisorMobility.API.DataAccess.Services
                         }
                     }
 
-                    await _context.Entry(sosHub).Collection(d => d.SOSSynopticControlPoints).Query().Where(d => d.IsActive == true).LoadAsync(); foreach (var synoptic in sosHub.SOSSynopticControlPoints)
+                    await _context.Entry(sosHub).Collection(d => d.SOSSynopticControlPoints).Query().Where(d => d.IsActive == true).LoadAsync(); 
+                    
+                    Console.WriteLine($"[API GetSOSHub] Loaded {sosHub.SOSSynopticControlPoints?.Count ?? 0} CSPC items");
+                    
+                    foreach (var synoptic in sosHub.SOSSynopticControlPoints)
                     {
+                        Console.WriteLine($"[API GetSOSHub] CSPC ID={synoptic.SOSSynopticTableofControlPointsId}, ProcessName='{synoptic.ProcessName}'");
+                        
                         await _context.Entry(synoptic).Collection(aa => aa.SynopticPointsLogbooks).LoadAsync();
-
+                        
                         await _context.Entry(synoptic).Collection(aa => aa.Analyses).LoadAsync();
+                        Console.WriteLine($"[API GetSOSHub] CSPC {synoptic.SOSSynopticTableofControlPointsId} loaded {synoptic.Analyses?.Count() ?? 0} analyses");
+                        
                         await _context.Entry(synoptic).Collection(aa => aa.Sequences).LoadAsync();
+                        Console.WriteLine($"[API GetSOSHub] CSPC {synoptic.SOSSynopticTableofControlPointsId} loaded {synoptic.Sequences?.Count() ?? 0} sequences");
                     }
 
                     await _context.Entry(sosHub).Collection(d => d.SOSSynopticOperatingRequirements).Query().Where(d => d.IsActive == true).LoadAsync(); foreach (var synoptic in sosHub.SOSSynopticOperatingRequirements)
