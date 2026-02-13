@@ -500,6 +500,10 @@ namespace SupervisorMobility.API.DataAccess.Services.SOS_SynopticTableRepository
         #region SOSSynopticTableofControlPoints
         public async Task<int> CreateSOSSynopticTableofControlPoints(SOSSynopticTableofControlPoints SOS_SynopticTableofControlPointsToCreate)
         {
+            Console.WriteLine($"[CreateSOSSynopticTableofControlPoints] Creating CSPC with ProcessName='{SOS_SynopticTableofControlPointsToCreate.ProcessName}', SOSHubId={SOS_SynopticTableofControlPointsToCreate.SOSHubId}");
+            Console.WriteLine($"[CreateSOSSynopticTableofControlPoints] Analyses count: {SOS_SynopticTableofControlPointsToCreate.Analyses?.Count() ?? 0}");
+            Console.WriteLine($"[CreateSOSSynopticTableofControlPoints] Sequences count: {SOS_SynopticTableofControlPointsToCreate.Sequences?.Count() ?? 0}");
+            
             var analysesCopy = SOS_SynopticTableofControlPointsToCreate.Analyses.ToList();
 
             for (int j = 0; j < analysesCopy.Count; j++)
@@ -545,7 +549,29 @@ namespace SupervisorMobility.API.DataAccess.Services.SOS_SynopticTableRepository
             }
 
             _context.SOSSynopticTableofControlPoints.Add(SOS_SynopticTableofControlPointsToCreate);
-            return _context.SaveChanges();
+            
+            // CRITICAL FIX: Establecer la relación many-to-many con el Hub
+            // Cargar el Hub y agregarlo a la colección para que EF Core cree la entrada en la tabla intermedia
+            var hub = await _context.SOSHubs.FindAsync(SOS_SynopticTableofControlPointsToCreate.SOSHubId);
+            if (hub != null)
+            {
+                // Cargar la colección de CSPC del Hub si no está cargada
+                await _context.Entry(hub).Collection(h => h.SOSSynopticControlPoints).LoadAsync();
+                
+                // Agregar el CSPC a la colección del Hub (esto crea la relación many-to-many)
+                hub.SOSSynopticControlPoints.Add(SOS_SynopticTableofControlPointsToCreate);
+                
+                Console.WriteLine($"[CreateSOSSynopticTableofControlPoints] Added CSPC to Hub collection. Hub now has {hub.SOSSynopticControlPoints.Count} CSPC items");
+            }
+            else
+            {
+                Console.WriteLine($"[CreateSOSSynopticTableofControlPoints] ERROR: Hub {SOS_SynopticTableofControlPointsToCreate.SOSHubId} not found!");
+            }
+            
+            var savedCount = _context.SaveChanges();
+            Console.WriteLine($"[CreateSOSSynopticTableofControlPoints] SaveChanges returned: {savedCount}");
+            
+            return savedCount;
         }
 
         public async Task<SOSSynopticTableofControlPoints> GetSOSSynopticTableofControlPoints(int SOSSynopticTableofControlPointsId, bool includeLogbooks = false, bool includeSOS = false, bool includeCollections = false)
@@ -592,14 +618,14 @@ namespace SupervisorMobility.API.DataAccess.Services.SOS_SynopticTableRepository
 
 
                     sosSynopticControlPoints.Sequences = await _context.SOSSequences
-                        .Where(s => s.SOSSynopticOperatingRequirements.Any(d => d.SOSSynopticTableofOperatingRequirementsId == SOSSynopticTableofControlPointsId))
+                        .Where(s => s.SOSSynopticControlPoints.Any(d => d.SOSSynopticTableofControlPointsId == SOSSynopticTableofControlPointsId))
                         .Include(sh => sh.SOSHub)
                         .ThenInclude(shs => shs.Sections)
                         .ThenInclude(shsa => shsa.Analyses)
                         .ToListAsync();
 
                     sosSynopticControlPoints.Analyses = await _context.SOSAnalyses
-                        .Where(s => s.SOSSynopticOperatingRequirements.Any(d => d.SOSSynopticTableofOperatingRequirementsId == SOSSynopticTableofControlPointsId))
+                        .Where(s => s.SOSSynopticControlPoints.Any(d => d.SOSSynopticTableofControlPointsId == SOSSynopticTableofControlPointsId))
                         .Include(sh => sh.SOSHub)
                         .ThenInclude(shs => shs.Sections)
                         .ThenInclude(shsa => shsa.Analyses)

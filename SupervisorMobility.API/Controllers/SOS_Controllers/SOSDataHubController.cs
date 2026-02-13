@@ -555,6 +555,7 @@ namespace SupervisorMobility.API.Controllers.SOS_Controllers
             if (entitySOSHub.AreaId == 0) entitySOSHub.AreaId = null;
             if (entitySOSHub.DepartmentId == 0) entitySOSHub.DepartmentId = null;
             if (entitySOSHub.DistributionId == 0) entitySOSHub.DistributionId = null;
+            if (_SOSHubForUpdate.DistributionId == 0) _SOSHubForUpdate.DistributionId = null;
             if (entitySOSHub.PlantId == 0) entitySOSHub.PlantId = null;
             if (entitySOSHub.StationId == 0) entitySOSHub.StationId = null;
             //se envia la distribucion id en null para que no genere conflicto al crear la sos hub

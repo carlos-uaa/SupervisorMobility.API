@@ -191,6 +191,8 @@ namespace SupervisorMobility.API.DataAccess.Services
 
                 if (includeCollections)
                 {
+                    Console.WriteLine($"[API GetSOSHub] Loading collections for HubId: {HubId}");
+                    
                     await _context.Entry(sosHub).Reference(a => a.Hci).Query().Where(d => d.IsActive == true).LoadAsync();
 
                     await _context.Entry(sosHub).Collection(a => a.SOSAnalysis).Query().Where(d => d.IsActive == true).LoadAsync();
@@ -219,6 +221,16 @@ namespace SupervisorMobility.API.DataAccess.Services
                     }
 
                     await _context.Entry(sosHub).Collection(d => d.SOSDistribution).Query().Where(d => d.IsActive == true).LoadAsync(); 
+                    
+                    Console.WriteLine($"[API GetSOSHub] Loaded {sosHub.SOSDistribution?.Count ?? 0} distributions");
+                    if (sosHub.SOSDistribution != null && sosHub.SOSDistribution.Count > 0)
+                    {
+                        foreach (var dist in sosHub.SOSDistribution)
+                        {
+                            Console.WriteLine($"[API GetSOSHub] Distribution {dist.SOSDistributionId}, SOSHubId: {dist.SOSHubId}, IsActive: {dist.IsActive}");
+                        }
+                    }
+                    
                     foreach (var distribution in sosHub.SOSDistribution)
                     {
                         await _context.Entry(distribution).Collection(aa => aa.DistributionLogbooks).LoadAsync();
@@ -256,12 +268,21 @@ namespace SupervisorMobility.API.DataAccess.Services
                         }
                     }
 
-                    await _context.Entry(sosHub).Collection(d => d.SOSSynopticControlPoints).Query().Where(d => d.IsActive == true).LoadAsync(); foreach (var synoptic in sosHub.SOSSynopticControlPoints)
+                    await _context.Entry(sosHub).Collection(d => d.SOSSynopticControlPoints).Query().Where(d => d.IsActive == true).LoadAsync(); 
+                    
+                    Console.WriteLine($"[API GetSOSHub] Loaded {sosHub.SOSSynopticControlPoints?.Count ?? 0} CSPC items");
+                    
+                    foreach (var synoptic in sosHub.SOSSynopticControlPoints)
                     {
+                        Console.WriteLine($"[API GetSOSHub] CSPC ID={synoptic.SOSSynopticTableofControlPointsId}, ProcessName='{synoptic.ProcessName}'");
+                        
                         await _context.Entry(synoptic).Collection(aa => aa.SynopticPointsLogbooks).LoadAsync();
-
+                        
                         await _context.Entry(synoptic).Collection(aa => aa.Analyses).LoadAsync();
+                        Console.WriteLine($"[API GetSOSHub] CSPC {synoptic.SOSSynopticTableofControlPointsId} loaded {synoptic.Analyses?.Count() ?? 0} analyses");
+                        
                         await _context.Entry(synoptic).Collection(aa => aa.Sequences).LoadAsync();
+                        Console.WriteLine($"[API GetSOSHub] CSPC {synoptic.SOSSynopticTableofControlPointsId} loaded {synoptic.Sequences?.Count() ?? 0} sequences");
                     }
 
                     await _context.Entry(sosHub).Collection(d => d.SOSSynopticOperatingRequirements).Query().Where(d => d.IsActive == true).LoadAsync(); foreach (var synoptic in sosHub.SOSSynopticOperatingRequirements)
@@ -1230,52 +1251,42 @@ namespace SupervisorMobility.API.DataAccess.Services
         {
             try
             {
+                // Cargar explícitamente la colección desde la BD
+                // Esto asegura que AppliedModels refleja lo que realmente está en la tabla intermedia.
+                await _context.Entry(master)
+                             .Collection(m => m.AppliedModels)
+                             .LoadAsync();
+
                 // Verificar si el master ya está siendo rastreado en el contexto
                 var localMasterEntry = _context.SOSHubs.Local.FirstOrDefault(entry => entry.SOSHubId == master.SOSHubId);
                 if (localMasterEntry != null)
-                {
                     master = localMasterEntry;
-                }
                 else
-                {
                     if (_context.Entry(master).State == EntityState.Detached)
-                    {
                         _context.SOSHubs.Attach(master);
-                    }
-                }
 
-                // Verificar si el AppliedModel slave ya está siendo rastreado en el contexto
+                // Verificar si el slave ya está siendo rastreado en el contexto
                 var localSlaveEntry = _context.Products.Local.FirstOrDefault(entry => entry.ProductId == slave.ProductId);
                 if (localSlaveEntry != null)
-                {
                     slave = localSlaveEntry;
-                }
                 else
-                {
                     if (_context.Entry(slave).State == EntityState.Detached)
-                    {
                         _context.Products.Attach(slave);
-                    }
-                }
 
-                // Añadir el producto a la colección de AppliedModels del master
-                if (master.AppliedModels == null)
-                {
+                // Validar contra la colección cargada
+                if(master.AppliedModels == null)
                     master.AppliedModels = new List<Product>();
-                }
 
-                // Verificar si la Prodcut ya está en la colección
-                if (!master.AppliedModels.Any(t => t.ProductId == slave.ProductId))
+                if (!master.AppliedModels.Any(p => p.ProductId == slave.ProductId))
                 {
                     master.AppliedModels.Add(slave);
+                    await _context.SaveChangesAsync();
                 }
-
-                // Guardar los cambios
-                await _context.SaveChangesAsync();
+                else
+                    Debug.WriteLine($"La relación SOSHubId={master.SOSHubId} con ProductId={slave.ProductId} ya existe.");
             }
             catch (Exception ex)
             {
-                // Manejar el error apropiadamente, puedes loguearlo o lanzar una excepción personalizada
                 Debug.WriteLine("An error occurred while updating the SOSHub: " + ex.Message);
             }
             return new AsyncVoidMethodBuilder();

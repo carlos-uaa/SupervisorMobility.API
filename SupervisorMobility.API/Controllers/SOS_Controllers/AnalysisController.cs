@@ -130,6 +130,17 @@ namespace SupervisorMobility.API.Controllers.SOS_Controllers
             return Ok(_mapper.Map<IEnumerable<SOSAnalysisDto>>(CheckpointEntities));
         }
 
+        // Emndpoint para obtener todos los análisis por área
+        [HttpGet("byArea")]
+        public async Task<ActionResult<IEnumerable<SOSAnalysisDto>>> GetAllSOSAnalysisbyArea(int Area_Id, bool includeImages = false, bool includeNotes = false, bool includeLogbooks = false, bool includeSpecialCases = false, bool includeSOS = false)
+        {
+            var CheckpointEntities = await _AnalysusRepository.GetAllSOSAnalysisByArea(Area_Id, includeImages, includeNotes, includeLogbooks, includeSpecialCases, includeSOS);
+            if (CheckpointEntities == null)
+                return NotFound("Get All Sos Analisis not found!");
+
+            return Ok(_mapper.Map<IEnumerable<SOSAnalysisDto>>(CheckpointEntities));
+        }
+
         //Update
 
         [HttpPut("{sosAnalysis_Id}")]

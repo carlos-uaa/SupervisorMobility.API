@@ -89,6 +89,8 @@ namespace SupervisorMobility.API.Models.SOS.SOSHubDtos
         public ICollection<SOSDistribution>? SOSDistribution { get; set; } = new List<SOSDistribution>();
         public ICollection<SOSFlow>? SOSFlow { get; set; } = new List<SOSFlow>();
         public ICollection<SOSSequence>? SOSSequence { get; set; } = new List<SOSSequence>();
+        public ICollection<SOSSynopticTableofControlPoints>? SOSSynopticControlPoints { get; set; } = new List<SOSSynopticTableofControlPoints>();
+        public ICollection<SOSSynopticTableofOperatingRequirements>? SOSSynopticOperatingRequirements { get; set; } = new List<SOSSynopticTableofOperatingRequirements>();
         public ICollection<SOSHubHistory>? History { get; set; } = new List<SOSHubHistory>();
         public ICollection<PATDto>? PATs { get; set; } = new List<PATDto>();
         public int? HciId => Hci?.HCIId;

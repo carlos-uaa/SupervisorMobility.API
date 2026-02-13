@@ -53,13 +53,13 @@ namespace SupervisorMobility.API.Controllers.SOS_Controllers
                 foreach (var sequence in sOSSynopticTableofControlPointsToCreate.Sequences)
                 {
                     SOSSequence sequenceToAdd = await _SequenceRepository.GetSOSSequence(sequence.SOSSequenceId);
-                    SynopticTableofControlPointsToCreate.Sequences.ToList().Add(sequenceToAdd);
+                    SynopticTableofControlPointsToCreate.Sequences.Add(sequenceToAdd);
                 }
 
                 foreach (var analysis in sOSSynopticTableofControlPointsToCreate.Analyses)
                 {
                     SOSAnalysis analysisToAdd = await _AnalisisRepository.GetSOSAnalysis(analysis.SOSAnalysisId);
-                    SynopticTableofControlPointsToCreate.Analyses.ToList().Add(analysisToAdd);
+                    SynopticTableofControlPointsToCreate.Analyses.Add(analysisToAdd);
                 }
 
 

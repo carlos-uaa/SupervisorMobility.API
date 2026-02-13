@@ -99,6 +99,12 @@ namespace SupervisorMobility.API.Controllers.SOS_Controllers
                 sOSDistributionToCreate.IsActive = true;
 
                 sOSDistributionToCreate.SOSHubId = SOSHubCollection_Id;
+                
+                Console.WriteLine($"[API] Creating distribution for SOSHubId: {SOSHubCollection_Id}");
+                Console.WriteLine($"[API] Distribution.IsActive: {sOSDistributionToCreate.IsActive}");
+                Console.WriteLine($"[API] Analyses count: {sOSDistributionToCreate.Analyses?.Count ?? 0}");
+                Console.WriteLine($"[API] Sequences count: {sOSDistributionToCreate.Sequences?.Count ?? 0}");
+                
                 // NOTE: Replace with logic to add SOS hubs from selected analyses and sequences
 
                 // NOTE: Ensure additional time details are initialized if missing
@@ -118,9 +124,17 @@ namespace SupervisorMobility.API.Controllers.SOS_Controllers
 
                 // NOTE: Map DTO to entity before creation
                 SOSDistribution DistributionToCreate = _mapper.Map<SOSDistribution>(sOSDistributionToCreate);
+                
+                Console.WriteLine($"[API] Mapped entity SOSHubId: {DistributionToCreate.SOSHubId}");
+                Console.WriteLine($"[API] Mapped entity Analyses count: {DistributionToCreate.Analyses?.Count ?? 0}");
 
                 // NOTE: Create new distribution in repository
                 var createdResult = await _DistributionRepository.CreateSOSDistribution(DistributionToCreate);
+                
+                Console.WriteLine($"[API] CreateSOSDistribution returned: {createdResult}");
+                Console.WriteLine($"[API] DistributionToCreate.SOSDistributionId after save: {DistributionToCreate.SOSDistributionId}");
+                Console.WriteLine($"[API] DistributionToCreate.SOSHubId after save: {DistributionToCreate.SOSHubId}");
+                
                 if (createdResult != null)
                     return Ok(DistributionToCreate);
                 else

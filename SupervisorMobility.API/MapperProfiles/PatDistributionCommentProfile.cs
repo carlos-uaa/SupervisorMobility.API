@@ -9,6 +9,7 @@ namespace SupervisorMobility.API.MapperProfiles
             CreateMap<DataAccess.Entities.PatDistributionComment, Models.PATDtos.PatDistributionCommentDtos.PatDistributionCommentDto>().ReverseMap();
             CreateMap<DataAccess.Entities.PatDistributionComment, Models.PATDtos.PatDistributionCommentDtos.PatDistributionCommentForCreateDto>().ReverseMap();
             CreateMap<DataAccess.Entities.PatDistributionComment, Models.PATDtos.PatDistributionCommentDtos.PatDistributionCommentForUpdateDto>().ReverseMap();
+            CreateMap<Models.PATDtos.PatDistributionCommentDtos.PatDistributionCommentForCreateDto, Models.PATDtos.PatDistributionCommentDtos.PatDistributionCommentForUpdateDto>().ReverseMap();
         }
     }
 
