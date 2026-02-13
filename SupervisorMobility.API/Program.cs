@@ -34,33 +34,13 @@ builder.Services.AddCors(policy =>
 
 
 var env = builder.Environment;
-// Verifica si el sistema operativo es Linux
-bool isLinux = RuntimeInformation.IsOSPlatform(OSPlatform.Linux);
 
-if (env.IsDevelopment())
-{
-    // Usa una ruta completa si es Linux
-    if (isLinux)
-    {
-        builder.Configuration.AddJsonFile("/home/Vanitas/Documents/GrupoSinco/Supervisor Mobility/SupervisorMobility.API/SupervisorMobility.API/appsettings.Development.json", optional: false, reloadOnChange: false);
-    }
-    else
-    {
-        builder.Configuration.AddJsonFile("appsettings.Development.json", optional: false, reloadOnChange: false);
-    }
-}
-else
-{
-    // Usa una ruta completa si es Linux
-    if (isLinux)
-    {
-        builder.Configuration.AddJsonFile("/home/Vanitas/Documents/GrupoSinco/Supervisor Mobility/SupervisorMobility.API/SupervisorMobility.API/appsettings.json", optional: false, reloadOnChange: true);
-    }
-    else
-    {
-        builder.Configuration.AddJsonFile("appsettings.json", optional: false, reloadOnChange: true);
-    }
-}
+builder.Configuration
+    .SetBasePath(Directory.GetCurrentDirectory())
+    .AddJsonFile("appsettings.json", optional: false, reloadOnChange: true)
+    .AddJsonFile($"appsettings.{env.EnvironmentName}.json", optional: true, reloadOnChange: true)
+    .AddEnvironmentVariables();
+
 
 builder.Host.UseSerilog();
 
