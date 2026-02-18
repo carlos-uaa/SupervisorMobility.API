@@ -27,8 +27,17 @@ namespace SupervisorMobility.API.DataAccess.Services.SOS_SynopticTableRepository
         #region SOSSynopticTableofOperatingRequirements
         public async Task<int> CreateSOSSynopticTableofOperatingRequirements(SOSSynopticTableofOperatingRequirements SOS_SynopticTableofOperatingRequirementsToCreate)
         {
-
             _context.SOSSynopticTableofOperatingRequirements.Add(SOS_SynopticTableofOperatingRequirementsToCreate);
+            
+            // NOTE: Mark related SOSHubs as Unchanged - they already exist in DB
+            if (SOS_SynopticTableofOperatingRequirementsToCreate.SOSHubs != null)
+            {
+                foreach (var sosHub in SOS_SynopticTableofOperatingRequirementsToCreate.SOSHubs)
+                {
+                    _context.Entry(sosHub).State = EntityState.Unchanged;
+                }
+            }
+            
             return _context.SaveChanges();
         }
         public async Task<SOSSynopticTableofOperatingRequirements> GetSOSSynopticTableofOperatingRequirements(int SOSSynopticTableofOperatingRequirementsId, bool includeLogbooks = false, bool includeSOS = false, bool includeCollections = false)

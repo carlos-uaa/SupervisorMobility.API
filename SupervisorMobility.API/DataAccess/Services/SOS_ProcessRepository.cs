@@ -285,10 +285,31 @@ namespace SupervisorMobility.API.DataAccess.Services
                         Console.WriteLine($"[API GetSOSHub] CSPC {synoptic.SOSSynopticTableofControlPointsId} loaded {synoptic.Sequences?.Count() ?? 0} sequences");
                     }
 
-                    await _context.Entry(sosHub).Collection(d => d.SOSSynopticOperatingRequirements).Query().Where(d => d.IsActive == true).LoadAsync(); foreach (var synoptic in sosHub.SOSSynopticOperatingRequirements)
+                    // CSRO: First try loading via direct FK (SOSHubId), then also via many-to-many join table
+                    // The CSRO entity has both SOSHubId (direct FK to owner hub) and SOSHubs (many-to-many for selected hubs)
+                    var csrosByFK = await _context.SOSSynopticTableofOperatingRequirements
+                        .Where(s => s.SOSHubId == sosHub.SOSHubId && s.IsActive == true)
+                        .ToListAsync();
+                    
+                    // Also load via many-to-many navigation (in case some were linked that way)
+                    await _context.Entry(sosHub).Collection(d => d.SOSSynopticOperatingRequirements).Query().Where(d => d.IsActive == true).LoadAsync();
+                    
+                    // Merge: add any FK-based CSROs that aren't already in the many-to-many collection
+                    foreach (var csroByFK in csrosByFK)
                     {
+                        if (!sosHub.SOSSynopticOperatingRequirements.Any(x => x.SOSSynopticTableofOperatingRequirementsId == csroByFK.SOSSynopticTableofOperatingRequirementsId))
+                        {
+                            sosHub.SOSSynopticOperatingRequirements.Add(csroByFK);
+                        }
+                    }
+                    
+                    Console.WriteLine($"[API GetSOSHub] Loaded {sosHub.SOSSynopticOperatingRequirements?.Count ?? 0} CSRO items (FK={csrosByFK.Count}, M2M={sosHub.SOSSynopticOperatingRequirements?.Count ?? 0})");
+                    foreach (var synoptic in sosHub.SOSSynopticOperatingRequirements)
+                    {
+                        Console.WriteLine($"[API GetSOSHub] CSRO ID={synoptic.SOSSynopticTableofOperatingRequirementsId}, ProcessName='{synoptic.ProcessName}', SOSHubId={synoptic.SOSHubId}");
                         await _context.Entry(synoptic).Collection(aa => aa.SynopticRequirementsLogbooks).LoadAsync();
-
+                        await _context.Entry(synoptic).Collection(aa => aa.SOSHubs).LoadAsync();
+                        Console.WriteLine($"[API GetSOSHub] CSRO {synoptic.SOSSynopticTableofOperatingRequirementsId} loaded {synoptic.SOSHubs?.Count() ?? 0} SOSHubs");
                         await _context.Entry(synoptic).Collection(aa => aa.Analyses).LoadAsync();
                         await _context.Entry(synoptic).Collection(aa => aa.Sequences).LoadAsync();
                     }
