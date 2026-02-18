@@ -84,50 +84,74 @@ namespace SupervisorMobility.API.Controllers.SOS_Controllers
                 // NOTE: Map DTO to entity
                 SOSSynopticTableofOperatingRequirements SynopticTableofOperatingRequirementsToCreate = _mapper.Map<SOSSynopticTableofOperatingRequirements>(sOSSynopticTableofOperatingRequirementsToCreate);
 
-                SynopticTableofOperatingRequirementsToCreate.SOSHubs = new List<SOSHub>();
                 SynopticTableofOperatingRequirementsToCreate.SOSSynopticRequirementsOperationSequence = new List<SOSSynopticRequirementsOperationSequence>();
 
-                // NOTE: Populate SOSHubs and operation sequences
-                foreach (var SOSHub in sOSSynopticTableofOperatingRequirementsToCreate.SOSHubs!)
+                // NOTE: Process SOSHubs if provided
+                if (sOSSynopticTableofOperatingRequirementsToCreate.SOSHubs != null && sOSSynopticTableofOperatingRequirementsToCreate.SOSHubs.Any())
                 {
-                    SOSHub SOSHubDb = await _ProcessRepository.GetSOSHub(SOSHub.SOSHubId);
-                    SynopticTableofOperatingRequirementsToCreate.SOSHubs.Add(SOSHubDb);
+                    // NOTE: Get all hub IDs and fetch existing hubs from database
+                    var sosHubIds = sOSSynopticTableofOperatingRequirementsToCreate.SOSHubs.Select(h => h.SOSHubId).ToList();
+                    var existingSosHubs = new List<SOSHub>();
 
-                    SOSDistribution distribution = SOSHub?.SOSDistribution?.FirstOrDefault()!;
-                    SOSDistribution SOSdistributionComplete = await _DistributionRepository.GetSOSDistribution(distribution.SOSDistributionId);
-
-
-                    foreach (var sequenceDistribution in SOSdistributionComplete.SOSDistributionOperationSequence!)
+                    foreach (var hubId in sosHubIds)
                     {
-                        SynopticTableofOperatingRequirementsToCreate.SOSSynopticRequirementsOperationSequence.Add(
-                                new SOSSynopticRequirementsOperationSequence
-                                {
-                                    Sequence = sequenceDistribution.SequenceId,
-                                    SectionId = sequenceDistribution.SectionId,
-                                    SosHubId = SOSHub?.SOSHubId,
-                                    OperationPersonText = sequenceDistribution?.Section?.Step,
-                                    OperationMachineText = "",
-                                    IsOperationPersonRequired = true,
-                                    IsOperationMachineRequired = false,
-                                }
-                            );
-
-                        var Analysis = sequenceDistribution?.Section?.Analyses?? new List<Analysis>();
-
-                        foreach(var Aly in Analysis)
+                        var sosHub = await _ProcessRepository.GetSOSHub(hubId);
+                        if (sosHub != null)
                         {
-                            Aly.CriticalPoints?.ForEach(item =>
-                            {
-                                SynopticTableofOperatingRequirementsToCreate?.InsuranceFeatures?.Add(
-                                    new InsuranceFeatures
-                                    {
-                                        Insurance = item,
-                                        SectionId = sequenceDistribution?.SectionId ?? 0,
-                                    }
-                                );
-                            });
+                            existingSosHubs.Add(sosHub);
                         }
+                    }
 
+                    // NOTE: Assign existing SOSHubs (EF Core knows about these from DB)
+                    if (existingSosHubs.Any())
+                    {
+                        SynopticTableofOperatingRequirementsToCreate.SOSHubs = existingSosHubs;
+
+                        // NOTE: Process operation sequences
+                        foreach (var sosHub in existingSosHubs)
+                        {
+                            SOSDistribution distribution = sosHub?.SOSDistribution?.FirstOrDefault();
+                        
+                            if (distribution != null)
+                            {
+                                SOSDistribution SOSdistributionComplete = await _DistributionRepository.GetSOSDistribution(distribution.SOSDistributionId);
+
+                                if (SOSdistributionComplete?.SOSDistributionOperationSequence != null)
+                                {
+                                    foreach (var sequenceDistribution in SOSdistributionComplete.SOSDistributionOperationSequence)
+                                    {
+                                        SynopticTableofOperatingRequirementsToCreate.SOSSynopticRequirementsOperationSequence.Add(
+                                            new SOSSynopticRequirementsOperationSequence
+                                            {
+                                                Sequence = sequenceDistribution.SequenceId,
+                                                SectionId = sequenceDistribution.SectionId,
+                                                SosHubId = sosHub.SOSHubId,
+                                                OperationPersonText = sequenceDistribution?.Section?.Step,
+                                                OperationMachineText = "",
+                                                IsOperationPersonRequired = true,
+                                                IsOperationMachineRequired = false,
+                                            }
+                                        );
+
+                                        var Analysis = sequenceDistribution?.Section?.Analyses ?? new List<Analysis>();
+
+                                        foreach (var Aly in Analysis)
+                                        {
+                                            Aly.CriticalPoints?.ForEach(item =>
+                                            {
+                                                SynopticTableofOperatingRequirementsToCreate?.InsuranceFeatures?.Add(
+                                                    new InsuranceFeatures
+                                                    {
+                                                        Insurance = item,
+                                                        SectionId = sequenceDistribution?.SectionId ?? 0,
+                                                    }
+                                                );
+                                            });
+                                        }
+                                    }
+                                }
+                            }
+                        }
                     }
                 }
 
