@@ -71,6 +71,8 @@ namespace SupervisorMobility.API.Context
         public DbSet<Kaizen> Kaizens { get; set; }
         public DbSet<KaizenTransaction> KaizenTransactions { get; set; }
         public DbSet<Holiday> Holidays { get; set; }
+        public DbSet<UserCourse> UserCourses { get; set; }
+
 
         #endregion
 
@@ -204,7 +206,7 @@ namespace SupervisorMobility.API.Context
             modelBuilder.Entity<JobObservation>()
                .HasMany(s => s.Operations)
                .WithMany(u => u.JobObservations)
-               .UsingEntity(join => join.ToTable("JobOperations")); // Nombre de la tabla intermedia
+               .UsingEntity(join => join.ToTable("JobOperations"));
 
 
             modelBuilder.Entity<Plant>()
@@ -1564,6 +1566,11 @@ namespace SupervisorMobility.API.Context
                 );
 
 
+            modelBuilder.Entity<UserCourse>(entity =>
+            {
+                entity.HasNoKey();
+                entity.ToView("dbo.sp_GetUserCourses");
+            });
 
             //modelBuilder.Entity<ChecklistAnswer>()
             //    .HasData(
