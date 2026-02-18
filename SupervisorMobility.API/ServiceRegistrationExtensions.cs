@@ -50,6 +50,7 @@ using SupervisorMobility.API.DataAccess.Services.SOS_DistributionRepository;
 using SupervisorMobility.API.DataAccess.Services.SOS_FlowRepository;
 using SupervisorMobility.API.DataAccess.Services.SOS_SequenceRepository;
 using SupervisorMobility.API.DataAccess.Services.SOS_SynopticTableRepository;
+using SupervisorMobility.API.DataAccess.Services.UserCoursesServices;
 
 
 namespace SupervisorMobility.API
@@ -73,6 +74,9 @@ namespace SupervisorMobility.API
             services.AddScoped<ISOS_SequenceRepository, SOS_SequenceRepository>();
             services.AddScoped<ISOS_SynopticTableRepository, SOS_SynopticTableRepository>();
             services.AddScoped<ISOSDistributionExcelService, SOSDistributionExcelService>();
+
+            services.AddScoped<IUserCoursesServices, UserCoursesServices>();
+            services.AddScoped<IUserCoursesRepository, UserCoursesRepository>();
 
             services.AddScoped<IKnowledgeRepository, KnowledgeRepository>();
             services.AddScoped<ISkillRepository, SkillRepository>();
