@@ -215,8 +215,13 @@ namespace SupervisorMobility.API.DataAccess.Services
                             await _context.Entry(logbook).Reference(al => al.Approver).LoadAsync();
                             await _context.Entry(logbook).Reference(al => al.Reviewer).LoadAsync();
                         }
-                        
+
                         await _context.Entry(combination).Collection(aa => aa.Turns).LoadAsync();
+                        foreach (var turn in combination.Turns)
+                        {
+                            await _context.Entry(turn).Reference(t => t.Supervisor).LoadAsync();
+                            await _context.Entry(turn).Reference(t => t.Operator).LoadAsync();
+                        }
                         await _context.Entry(combination).Reference(al => al.ReviewerHS).LoadAsync();
                     }
 
@@ -241,6 +246,12 @@ namespace SupervisorMobility.API.DataAccess.Services
                         }
                         
                         await _context.Entry(distribution).Collection(aa => aa.Turns).LoadAsync();
+                        foreach (var turn in distribution.Turns)
+                        {
+                            await _context.Entry(turn).Reference(t => t.Supervisor).LoadAsync();
+                            await _context.Entry(turn).Reference(t => t.Operator).LoadAsync();
+                        }
+
                         await _context.Entry(distribution).Collection(aa => aa.Analyses).LoadAsync();
                         await _context.Entry(distribution).Collection(aa => aa.Sequences).LoadAsync();
                     }
