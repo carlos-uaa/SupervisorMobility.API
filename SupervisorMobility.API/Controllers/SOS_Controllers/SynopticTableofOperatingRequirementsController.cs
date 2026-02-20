@@ -251,16 +251,16 @@ namespace SupervisorMobility.API.Controllers.SOS_Controllers
             }
         }//end Update 
 
-        //[HttpDelete("{SOSSynopticTableofOperatingRequirementsId}")]
-        //public async Task<ActionResult<int>> RemoveSOSHub(int SOSSynopticTableofOperatingRequirementsId)
-        //{
-        //    var result = await _ProcessRepository.RemoveSOSSynopticTableofOperatingRequirements(SOSSynopticTableofOperatingRequirementsId);
+        [HttpDelete("{SOSSynopticTableofOperatingRequirementsId}")]
+        public async Task<ActionResult<int>> RemoveSOSSynopticTableofOperatingRequirements(int SOSSynopticTableofOperatingRequirementsId)
+        {
+            var result = await _SynopticTableRepository.RemoveSOSSynopticTableofOperatingRequirements(SOSSynopticTableofOperatingRequirementsId);
 
-        //    if (result > 0)
-        //        return Ok();
-        //    else
-        //        return BadRequest("something wrong");
-        //}
+            if (result > 0)
+                return Ok();
+            else
+                return BadRequest("something wrong");
+        }
 
 
         ////ilustrations

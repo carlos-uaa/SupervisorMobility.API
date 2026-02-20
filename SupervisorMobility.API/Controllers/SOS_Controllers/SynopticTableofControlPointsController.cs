@@ -123,5 +123,16 @@ namespace SupervisorMobility.API.Controllers.SOS_Controllers
             return Ok(_mapper.Map<IEnumerable<SOSSynopticControlPointsDto>>(CheckpointEntities));
 
         }
+
+        [HttpDelete("{SOSSynopticTableofControlPointsId}")]
+        public async Task<ActionResult<int>> RemoveSOSSynopticTableofControlPoints(int SOSSynopticTableofControlPointsId)
+        {
+            var result = await _SynopticTableRepository.RemoveSOSSynopticTableofControlPoints(SOSSynopticTableofControlPointsId);
+
+            if (result > 0)
+                return Ok();
+            else
+                return BadRequest("something wrong");
+        }
     }
 }

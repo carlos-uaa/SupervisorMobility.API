@@ -59,6 +59,7 @@ namespace SupervisorMobility.API.DataAccess.Services.SOS_SynopticTableRepository
         Task<int> CreateSOSSynopticTableofControlPoints(SOSSynopticTableofControlPoints SOS_SynopticTableofControlPointsToCreate);
         Task<SOSSynopticTableofControlPoints> GetSOSSynopticTableofControlPoints(int SOSSynopticTableofControlPointsId, bool includeLogbooks = false, bool includeSOS = false, bool includeCollections = false);
         Task<IEnumerable<SOSSynopticTableofControlPoints>> GetAllSOSSynopticTableofControlPoints(bool includeLogbooks = false, bool includeSOS = false, bool includeCollections = false);
+        Task<int> RemoveSOSSynopticTableofControlPoints(int SOS_SynopticTableofControlPoints_id);
         #endregion
 
         #region Add To Sos SynopticTableofControlPoints
