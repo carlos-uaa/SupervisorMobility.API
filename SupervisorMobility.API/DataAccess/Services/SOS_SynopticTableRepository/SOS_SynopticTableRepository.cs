@@ -400,7 +400,12 @@ namespace SupervisorMobility.API.DataAccess.Services.SOS_SynopticTableRepository
         }
         public async Task<int> RemoveSOSSynopticTableofOperatingRequirements(int SOS_SynopticTableofOperatingRequirements_id)
         {
-            throw new NotImplementedException();
+            var entity = await _context.SOSSynopticTableofOperatingRequirements
+                .FirstOrDefaultAsync(e => e.SOSSynopticTableofOperatingRequirementsId == SOS_SynopticTableofOperatingRequirements_id);
+            if (entity == null) return 0;
+            entity.IsActive = false;
+            _context.SOSSynopticTableofOperatingRequirements.Update(entity);
+            return await _context.SaveChangesAsync();
         }
         public async Task AddIlustrationToSOSSynopticTableofOperatingRequirements(int SOS_SynopticTableofOperatingRequirements_id, FileUpload evidence)
         {
@@ -679,6 +684,16 @@ namespace SupervisorMobility.API.DataAccess.Services.SOS_SynopticTableRepository
         }
 
         #endregion
+
+        public async Task<int> RemoveSOSSynopticTableofControlPoints(int SOS_SynopticTableofControlPoints_id)
+        {
+            var entity = await _context.SOSSynopticTableofControlPoints
+                .FirstOrDefaultAsync(e => e.SOSSynopticTableofControlPointsId == SOS_SynopticTableofControlPoints_id);
+            if (entity == null) return 0;
+            entity.IsActive = false;
+            _context.SOSSynopticTableofControlPoints.Update(entity);
+            return await _context.SaveChangesAsync();
+        }
 
         #region Add To Sos SynopticTableofControlPoints
         public async Task<AsyncVoidMethodBuilder> AddSOSSynopticPointsLogbookToSOSSynopticTableofControlPoints(SOSSynopticTableofControlPoints Master, SOSSynopticPointsLogbook Slave)
