@@ -1,6 +1,7 @@
 ﻿using SupervisorMobility.API.DataAccess.Entities.SOS.STRO.Dtos;
 using SupervisorMobility.API.DataAccess.Entities.SOS;
 using SupervisorMobility.API.DataAccess.Entities;
+using SupervisorMobility.API.Models.SOS.SOSSynopticTableofControlPointsDtos;
 using SupervisorMobility.API.Models.SOS.SOSSynopticTableofOperatingRequirementsLogbookDtos;
 using SupervisorMobility.API.Models.SOS.SOSSynopticTableofOperatingRequirementsOperationSequenceDtos;
 using System.Runtime.CompilerServices;
@@ -59,6 +60,7 @@ namespace SupervisorMobility.API.DataAccess.Services.SOS_SynopticTableRepository
         Task<int> CreateSOSSynopticTableofControlPoints(SOSSynopticTableofControlPoints SOS_SynopticTableofControlPointsToCreate);
         Task<SOSSynopticTableofControlPoints> GetSOSSynopticTableofControlPoints(int SOSSynopticTableofControlPointsId, bool includeLogbooks = false, bool includeSOS = false, bool includeCollections = false);
         Task<IEnumerable<SOSSynopticTableofControlPoints>> GetAllSOSSynopticTableofControlPoints(bool includeLogbooks = false, bool includeSOS = false, bool includeCollections = false);
+        Task<SOSSynopticTableofControlPoints> UpdateSOSSynopticTableofControlPoints(int sosSynopticTableofControlPoints_Id, SOSSynopticTableofControlPointsForUpdateDto sosUpdateEntity);
         Task<int> RemoveSOSSynopticTableofControlPoints(int SOS_SynopticTableofControlPoints_id);
         #endregion
 
