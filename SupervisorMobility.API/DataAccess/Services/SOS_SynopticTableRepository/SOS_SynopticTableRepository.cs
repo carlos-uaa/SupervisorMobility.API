@@ -3,6 +3,7 @@ using SupervisorMobility.API.DataAccess.Entities.SOS.STRO.Dtos;
 using SupervisorMobility.API.DataAccess.Entities.SOS.STRO;
 using SupervisorMobility.API.DataAccess.Entities.SOS;
 using SupervisorMobility.API.DataAccess.Entities;
+using SupervisorMobility.API.Models.SOS.SOSSynopticTableofControlPointsDtos;
 using SupervisorMobility.API.Models.SOS.SOSSynopticTableofOperatingRequirementsLogbookDtos;
 using SupervisorMobility.API.Models.SOS.SOSSynopticTableofOperatingRequirementsOperationSequenceDtos;
 using System.Runtime.CompilerServices;
@@ -681,6 +682,26 @@ namespace SupervisorMobility.API.DataAccess.Services.SOS_SynopticTableRepository
 
 
             return sosSynopticControlPoints;
+        }
+
+        public async Task<SOSSynopticTableofControlPoints> UpdateSOSSynopticTableofControlPoints(int sosSynopticTableofControlPoints_Id, SOSSynopticTableofControlPointsForUpdateDto STCPUpdate)
+        {
+            var entity = await _context.SOSSynopticTableofControlPoints
+                .FirstOrDefaultAsync(e => e.SOSSynopticTableofControlPointsId == sosSynopticTableofControlPoints_Id);
+
+            if (entity == null) throw new Exception("SOSSynopticTableofControlPoints not found");
+
+            entity.ProcessName = STCPUpdate.ProcessName ?? entity.ProcessName;
+            entity.InternalControlNumber = STCPUpdate.InternalControlNumber ?? entity.InternalControlNumber;
+            entity.CreatorId = STCPUpdate.CreatorId ?? entity.CreatorId;
+            entity.ReviewerId = STCPUpdate.ReviewerId ?? entity.ReviewerId;
+            entity.ApproverId = STCPUpdate.ApproverId ?? entity.ApproverId;
+            entity.SOSHubId = STCPUpdate.SOSHubId ?? entity.SOSHubId;
+
+            _context.SOSSynopticTableofControlPoints.Update(entity);
+            await _context.SaveChangesAsync();
+
+            return entity;
         }
 
         #endregion

@@ -7,8 +7,6 @@ using SupervisorMobility.API.DataAccess.Services.SOS_SequenceRepository;
 using SupervisorMobility.API.DataAccess.Services.SOS_SynopticTableRepository;
 using SupervisorMobility.API.Interfaces.SOSDistribution.SOSDistributionExcel;
 using SupervisorMobility.API.Models.SOS.SOSSynopticTableofControlPointsDtos;
-using SupervisorMobility.API.Models.SOS.SOSSynopticTableofControlPointsDtos;
-using SupervisorMobility.API.Models.SOS.SOSSynopticTableofControlPointsDtos;
 using System.Diagnostics;
 
 namespace SupervisorMobility.API.Controllers.SOS_Controllers
@@ -122,6 +120,20 @@ namespace SupervisorMobility.API.Controllers.SOS_Controllers
 
             return Ok(_mapper.Map<IEnumerable<SOSSynopticControlPointsDto>>(CheckpointEntities));
 
+        }
+
+        [HttpPut("{id}")]
+        public async Task<ActionResult<SOSSynopticControlPointsDto>> UpdateSOSSynopticTableofControlPoints(int id, SOSSynopticTableofControlPointsForUpdateDto sosUpdateEntity)
+        {
+            try
+            {
+                var updated = await _SynopticTableRepository.UpdateSOSSynopticTableofControlPoints(id, sosUpdateEntity);
+                return Ok(_mapper.Map<SOSSynopticControlPointsDto>(updated));
+            }
+            catch (Exception error)
+            {
+                return BadRequest(error.Message);
+            }
         }
 
         [HttpDelete("{SOSSynopticTableofControlPointsId}")]
