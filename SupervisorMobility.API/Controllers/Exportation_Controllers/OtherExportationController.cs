@@ -16,9 +16,6 @@ using Newtonsoft.Json;
 using DocumentFormat.OpenXml.Drawing.Charts;
 using System.Globalization;
 using DocumentFormat.OpenXml.Wordprocessing;
-using SupervisorMobility.API.DataAccess.Services.UserCoursesServices;
-using SupervisorMobility.API.DataAccess.Entities.SOS.STRO;
-using System.Security.Principal;
 
 namespace SupervisorMobility.API.Controllers.Exportation_Controllers
 {
@@ -29,12 +26,11 @@ namespace SupervisorMobility.API.Controllers.Exportation_Controllers
         private readonly ISupervisorMobilityRepository _SMProcessRepository;
         private readonly ISOS_ProcessRepository _SOSProcessRepository;
         private readonly IWebHostEnvironment _env;
-        private readonly IUserCoursesServices _userCoursesService;
         private readonly ExportationStylesService stylesService;
         private readonly ExportationImgService imgService;
         private readonly ExportationSheetService sheetService;
 
-        public OtherExportationController(ISupervisorMobilityRepository repository, IWebHostEnvironment env, ISOS_ProcessRepository SOSrepository, IUserCoursesServices userCoursesService)
+        public OtherExportationController(ISupervisorMobilityRepository repository, IWebHostEnvironment env, ISOS_ProcessRepository SOSrepository)
         {
             _SMProcessRepository = repository;
             _SOSProcessRepository = SOSrepository;
@@ -42,7 +38,6 @@ namespace SupervisorMobility.API.Controllers.Exportation_Controllers
             stylesService = new ExportationStylesService();
             imgService = new ExportationImgService();
             sheetService = new ExportationSheetService();
-            _userCoursesService = userCoursesService;
         }
 
         [HttpGet("Excel/PATYearly/{PATId}")]
@@ -692,8 +687,6 @@ namespace SupervisorMobility.API.Controllers.Exportation_Controllers
         public async Task<IActionResult> HCIExcelExport(int HCIId)
         {
             var _HCI = await _SMProcessRepository.GetHCI(HCIId, true, true, includeTransactions: true);
-            if (_HCI == null)
-                return NotFound("No se encontró el HCI especificado.");
 
             string templateName = "DataAccess/Templates/HCI Template.xlsx";
             const string sheetNames = "HCI ";
@@ -706,18 +699,15 @@ namespace SupervisorMobility.API.Controllers.Exportation_Controllers
                 package.Workbook.CalcMode = ExcelCalcMode.Automatic;
                 var sheet = package.Workbook.Worksheets["HCI"];
 
-                sheet.Cells["B3"].Value = _HCI.User?.Name ?? "";
-                sheet.Cells["E3"].Value = _HCI.User?.Payroll;
-                sheet.Cells["J3"].Value = _HCI.User?.BirthDate.HasValue == true
-                    ? _HCI.User.BirthDate.Value.ToString("dd/MM/yyyy", CultureInfo.InvariantCulture)
-                    : "";
-                sheet.Cells["B4"].Value = _HCI.User?.Management ?? "";
-                sheet.Cells["F4"].Value = _HCI.User?.Department?.Description ?? "";
-                sheet.Cells["J4"].Value = _HCI.User?.Process ?? "";
-                sheet.Cells["M4"].Value = _HCI.User?.IncomesDate.HasValue == true
-                    ? _HCI.User.IncomesDate.Value.ToString("dd/MM/yyyy", CultureInfo.InvariantCulture)
-                    : "";
+                //#region information table
 
+                sheet.Cells["B3"].Value = _HCI.User?.Name;
+                sheet.Cells["E3"].Value = _HCI.User?.Payroll;
+                sheet.Cells["J3"].Value = _HCI.User?.BirthDate.ToString();
+                sheet.Cells["B4"].Value = _HCI.User?.Management;
+                sheet.Cells["F4"].Value = _HCI.User?.Department?.Description;
+                sheet.Cells["J4"].Value = _HCI.User?.Process;
+                sheet.Cells["M4"].Value = _HCI.User?.IncomesDate.ToString();
 
                 //var imageFile = new FileInfo("path_to_your_image.jpg");
                 //var picture = sheet.Drawings.AddPicture("MyImage", imageFile);
@@ -729,147 +719,93 @@ namespace SupervisorMobility.API.Controllers.Exportation_Controllers
 
                 //picture.SetSize((int)cellWidth, (int)cellHeight);
 
-                #region Overflow registers managment
-                ExcelWorksheet annexSheet = null;
-                int annexCurrentRow = 1;
-
-                void AddToAnnex(string sectionTitle, IEnumerable<string[]> rows)
-                {
-                    if (annexSheet == null) annexSheet = package.Workbook.Worksheets.Add("Anexos");
-
-                    var titleRange = annexSheet.Cells[annexCurrentRow, 1];
-                    titleRange.Value = $"DETALLE DE: {sectionTitle}";
-                    titleRange.Style.Font.Bold = true;
-                    annexCurrentRow++;
-
-                    foreach (var row in rows)
-                    {
-                        for (int i = 0; i < row.Length; i++)
-                        {
-                            annexSheet.Cells[annexCurrentRow, i + 1].Value = row[i];
-                        }
-                        annexCurrentRow++;
-                    }
-                    annexCurrentRow += 2;
-                }
-                #endregion
-
                 if (_HCI.Transactions != null)
                 {
-                    string? payrol = null;
-                    if (_HCI.User?.Payroll > 0)
-                        payrol = _HCI.User?.Payroll.ToString();
+                    int pageIndex = 1;
+                    int LastRow = 18;
+                    int currentRow = 9;
 
-                    if(!string.IsNullOrEmpty(payrol))
+                    #region Manuals Training
+
+                    var ManualTraining = _HCI.Transactions.Where(t => t.Type == 1).ToList();
+                    foreach (var item in ManualTraining)
                     {
-                        var courses = new List<UserCourse>();
-                        try
-                        {
-                            var coursesResponse = await _userCoursesService.GetUserCoursesAsync(payrol);
-                            if (coursesResponse != null && coursesResponse.Success && coursesResponse.Data != null)
-                                courses = coursesResponse.Data.ToList();
-                        }
-                        catch
-                        {
-                            courses = new List<UserCourse>();
-                        }
+                        sheet.Cells[$"A{currentRow}"].Value = (item.DateStart?.ToString("dd/MM/yyyy", CultureInfo.InvariantCulture) ?? "") + " - " + (item.DateEnd?.ToString("dd/MM/yyyy", CultureInfo.InvariantCulture) ?? "");
+                        sheet.Cells[$"B{currentRow}"].Value = item.Description;
 
-                        #region Courses about Manuals
-                        int lastRowManuals = 18;
-                        int startRowManuals = 9;
-                        int maxItems = lastRowManuals - startRowManuals + 1;
-
-                        List<UserCourse> manualCourses = courses;
-
-                        if (manualCourses.Count > maxItems)
+                        currentRow++;
+                        if (currentRow > LastRow && item != ManualTraining.Last())
                         {
-                            for (int i = 0; i < maxItems - 1; i++)
+                            sheet = package.Workbook.Worksheets[$"{sheetNames}{pageIndex + 1}"];
+
+                            if (sheet == null)
                             {
-                                sheet.Cells[$"A{startRowManuals + i}"].Value = courses[i].Date.ToString("dd/MM/yyyy");
-                                sheet.Cells[$"B{startRowManuals + i}"].Value = courses[i].Course;
+                                sheetService.AddOtherSheet(package, 2, pageIndex.ToString());
+                                sheet = package.Workbook.Worksheets[$"{sheetNames}{pageIndex + 1}"];
                             }
-                            var cellAviso = sheet.Cells[$"A{lastRowManuals}"];
-                            cellAviso.Value = "--- Ver detalle en Anexos ---";
-                            cellAviso.Style.Font.Italic = true;
 
-                            AddToAnnex("CAPACITACIÓN RECIBIDA SOBRE LOS MANUALES DEL DEPTO", courses.Select(c => new[] { c.Date.ToString("dd/MM/yyyy"), c.Course }));
+                            pageIndex++;
+                            currentRow = 9;
                         }
-                        else
-                        {
-                            int r = startRowManuals;
-                            foreach (var item in courses)
-                            {
-                                sheet.Cells[$"A{r}"].Value = item.Date.ToString("dd/MM/yyyy");
-                                sheet.Cells[$"B{r}"].Value = item.Course;
-                                r++;
-                            }
-                        }
-                        #endregion
-
-                        sheet = package.Workbook.Worksheets.First();
-
-                        #region Courses about company
-                        int lastRowCompanyCourses = 38;
-                        int startRowCompanyCourses = 21;
-                        int maxCompanyCourses = lastRowCompanyCourses - startRowCompanyCourses + 1;
-
-                        List<UserCourse> companyCourses = courses;
-
-                        if (companyCourses.Count > maxCompanyCourses)
-                        {
-                            for (int i = 0; i < maxItems - 1; i++)
-                            {
-                                sheet.Cells[$"A{startRowManuals + i}"].Value = courses[i].Date.ToString("dd/MM/yyyy");
-                                sheet.Cells[$"B{startRowManuals + i}"].Value = courses[i].Course;
-                            }
-                            var cellAviso = sheet.Cells[$"A{lastRowManuals}"];
-                            cellAviso.Value = "--- Ver detalle en Anexos ---";
-                            cellAviso.Style.Font.Italic = true;
-
-                            AddToAnnex("CAPACITACIÓN DENTRO Y FUERA DE LA EMPRESA", courses.Select(c => new[] { c.Date.ToString("dd/MM/yyyy"), c.Course }));
-                        }
-                        else
-                        {
-                            int r = startRowManuals;
-                            foreach (var item in courses)
-                            {
-                                sheet.Cells[$"A{r}"].Value = item.Date.ToString("dd/MM/yyyy");
-                                sheet.Cells[$"B{r}"].Value = item.Course;
-                                r++;
-                            }
-                        }
-                        #endregion
                     }
+                    #endregion
 
                     sheet = package.Workbook.Worksheets.First();
+                    pageIndex = 1;
 
-                    #region Degrees, License & Diplomas
-                    int LastRowDLD = 52;
-                    int startRowDLD = 41;
-                    int maxDLDItems = LastRowDLD - startRowDLD + 1;
+                    #region Company Training
+                    LastRow = 38;
+                    currentRow = 21;
+
+                    var CompanyTraining = _HCI.Transactions.Where(t => t.Type == 2).ToList();
+                    foreach (var item in CompanyTraining)
+                    {
+                        sheet.Cells[$"A{currentRow}"].Value = (item.DateStart?.ToString("dd/MM/yyyy", CultureInfo.InvariantCulture) ?? "") + " - " + (item.DateEnd?.ToString("dd/MM/yyyy", CultureInfo.InvariantCulture) ?? "");
+                        sheet.Cells[$"B{currentRow}"].Value = item.Description;
+
+                        currentRow++;
+                        if (currentRow > LastRow && item != CompanyTraining.Last())
+                        {
+                            sheet = package.Workbook.Worksheets[$"{sheetNames}{pageIndex + 1}"];
+
+                            if (sheet == null)
+                            {
+                                sheetService.AddOtherSheet(package, 2, pageIndex.ToString());
+                                sheet = package.Workbook.Worksheets[$"{sheetNames}{pageIndex + 1}"];
+                            }
+
+                            pageIndex++;
+                            currentRow = 21;
+                        }
+                    }
+                    #endregion
+
+                    sheet = package.Workbook.Worksheets.First();
+                    pageIndex = 1;
+
+                    #region Knowledge
+                    LastRow = 52;
+                    currentRow = 41;
 
                     var Knowledge = _HCI.Transactions.Where(t => t.Type == 3).ToList();
-                    if (Knowledge.Count > maxDLDItems)
+                    foreach (var item in Knowledge)
                     {
-                        for (int i = 0; i < maxDLDItems - 1; i++)
-                        {
-                            sheet.Cells[$"A{startRowDLD + i}"].Value = Knowledge[i].DateStart.HasValue ? Knowledge[i].DateStart.Value.ToString("dd/MM/yyyy") : "";
-                            sheet.Cells[$"B{startRowDLD + i}"].Value = Knowledge[i].Description;
-                        }
-                        var cellAviso = sheet.Cells[$"A{LastRowDLD}"];
-                        cellAviso.Value = "--- Ver detalle en Anexos ---";
-                        cellAviso.Style.Font.Italic = true;
+                        sheet.Cells[$"A{currentRow}"].Value = item.DateEnd?.ToString("dd/MM/yyyy", CultureInfo.InvariantCulture) ?? "";
+                        sheet.Cells[$"B{currentRow}"].Value = item.Description;
 
-                        AddToAnnex("TITULOS, LICENCIAS Y DIPLOMAS", Knowledge.Select(c => new[] { c.DateStart.Value.ToString("dd/MM/yyyy"), c.Description }));
-                    }
-                    else
-                    {
-                        int r = startRowDLD;
-                        foreach (var item in Knowledge)
+                        currentRow++;
+                        if (currentRow > LastRow && item != Knowledge.Last())
                         {
-                            sheet.Cells[$"A{r}"].Value = item.DateStart.HasValue ? item.DateStart.Value.ToString("dd/MM/yyyy") : "";
-                            sheet.Cells[$"B{r}"].Value = item.Description;
-                            r++;
+                            sheet = package.Workbook.Worksheets[$"{sheetNames}{pageIndex + 1}"];
+
+                            if (sheet == null)
+                            {
+                                sheetService.AddOtherSheet(package, 2, pageIndex.ToString());
+                                sheet = package.Workbook.Worksheets[$"{sheetNames}{pageIndex + 1}"];
+                            }
+
+                            pageIndex++;
+                            currentRow = 41;
                         }
                     }
                     #endregion
@@ -879,43 +815,33 @@ namespace SupervisorMobility.API.Controllers.Exportation_Controllers
 
                 if (_HCI.CareerPaths != null)
                 {
-                    #region Profesional Trajectory
-                    int lastRowCP = 18;
-                    int startRowCP = 9;
-                    int maxCPItems = lastRowCP - startRowCP + 1;
+                    int pageIndex = 1;
+                    int LastRow = 18;
+                    int currentRow = 9;
 
-                    if (_HCI.CareerPaths.Count() > maxCPItems)
+                    #region Career
+
+                    foreach (var item in _HCI.CareerPaths)
                     {
-                        var items = _HCI.CareerPaths.ToList();
-                        for(int i = 0; i < maxCPItems - 1; i++)
+                        sheet.Cells[$"D{currentRow}"].Value = item.CareerPathNo;
+                        sheet.Cells[$"E{currentRow}"].Value = item.ChangeDate?.ToString("dd/MM/yyyy", CultureInfo.InvariantCulture) ?? "";
+                        sheet.Cells[$"F{currentRow}"].Value = item.Department;
+                        sheet.Cells[$"G{currentRow}"].Value = item.Process;
+                        sheet.Cells[$"J{currentRow}"].Value = item.OperationDescription;
+
+                        currentRow++;
+                        if (currentRow > LastRow && item != _HCI.CareerPaths.Last())
                         {
-                            sheet.Cells[$"D{startRowCP + i}"].Value = items[i].CareerPathNo;
-                            sheet.Cells[$"E{startRowCP + i}"].Value = items[i].ChangeDate?.ToString("dd/MM/yyyy", CultureInfo.InvariantCulture) ?? "";
-                            sheet.Cells[$"F{startRowCP + i}"].Value = items[i].Department;
-                            sheet.Cells[$"G{startRowCP + i}"].Value = items[i].Process;
-                            sheet.Cells[$"J{startRowCP + i}"].Value = items[i].OperationDescription;
-                        }
-                        
-                        sheet.Cells[$"D{lastRowCP}"].Value = "--- Ver detalle en Anexos ---";
-                        AddToAnnex("TRAYECTORIA PROFESIONAL DENTRO DE LA EMPRESA", _HCI.CareerPaths.Select(cp => new[] {
-                            cp.CareerPathNo.ToString(),
-                            cp.ChangeDate?.ToString("dd/MM/yyyy") ?? "",
-                            cp.Department,
-                            cp.Process,
-                            cp.OperationDescription
-                        }));
-                    }
-                    else
-                    {
-                        int r = startRowCP;
-                        foreach (var item in _HCI.CareerPaths)
-                        {
-                            sheet.Cells[$"D{r}"].Value = item.CareerPathNo;
-                            sheet.Cells[$"E{r}"].Value = item.ChangeDate?.ToString("dd/MM/yyyy") ?? "";
-                            sheet.Cells[$"F{r}"].Value = item.Department;
-                            sheet.Cells[$"G{r}"].Value = item.Process;
-                            sheet.Cells[$"J{r}"].Value = item.OperationDescription;
-                            r++;
+                            sheet = package.Workbook.Worksheets[$"{sheetNames}{pageIndex + 1}"];
+
+                            if (sheet == null)
+                            {
+                                sheetService.AddOtherSheet(package, 2, pageIndex.ToString());
+                                sheet = package.Workbook.Worksheets[$"{sheetNames}{pageIndex + 1}"];
+                            }
+
+                            pageIndex++;
+                            currentRow = 9;
                         }
                     }
                     #endregion
@@ -925,103 +851,74 @@ namespace SupervisorMobility.API.Controllers.Exportation_Controllers
 
                 if (_HCI.ILUs != null)
                 {
-                    #region Experience (ILUs)
-                    int startRowExp = 21;
-                    int lastRowExp = 52;
-                    int maxExpRows = lastRowExp - startRowExp + 1;
+                    int pageIndex = 1;
+                    int LastRow = 52;
+                    int currentRow = 21;
 
-                    var experienceList = _HCI.ILUs
-                        .Where(e => e.isActive)
+                    #region Experience
+
+                    foreach (var item in _HCI.ILUs.Where(e => e.isActive)
                         .GroupBy(e => new { e.DistributionId, ILUCategory = GetILUCategory(e.ILULevel?.ILULevelCode) })
                         .Select(g => g.OrderByDescending(e => e.AcquisitionDate).First())
-                        .ToList();
-
-                    if (experienceList.Count > maxExpRows)
+                        .ToList())
                     {
-                        for (int i = 0; i < maxExpRows - 1; i++)
+                        sheet.Cells[$"D{currentRow}"].Value = (item.AcquisitionDate?.ToString("dd/MM/yyyy", CultureInfo.InvariantCulture) ?? "") + " - " + (item.EndDate?.ToString("dd/MM/yyyy", CultureInfo.InvariantCulture) ?? "");
+                        sheet.Cells[$"F{currentRow}"].Value = item.Distribution?.Description;
+                        string iluLevlelCode = item.ILULevel?.ILULevelCode switch
                         {
-                            var item = experienceList[i];
-                            FillILURow(sheet, startRowExp + i, item);
-                        }
+                            "ITrainee" or "I" or "ILeader" or "LTrainee" or "LTraineeLeader" => "I",
+                            "L" or "LLeader" or "UTrainee" or "ULeaderTrainee" => "L",
+                            "U" or "ULeader" => "U",
+                            _ => ""
+                        };
+                        sheet.Cells[$"L{currentRow}"].Value = iluLevlelCode.ToUpperInvariant();
 
-                        var avisoCell = sheet.Cells[$"D{lastRowExp}:L{lastRowExp}"];
-                        avisoCell.Merge = true;
-                        avisoCell.Value = "--- Ver detalle de Experiencia en Anexos ---";
-                        avisoCell.Style.Font.Italic = true;
-
-                        AddToAnnex("EXPERIENCIA (ILUs)", experienceList.Select(e => new[] {
-                            (e.AcquisitionDate?.ToString("dd/MM/yyyy") ?? "") + " - " + (e.EndDate?.ToString("dd/MM/yyyy") ?? ""),
-                            e.Distribution?.Description ?? "",
-                            MapILUCode(e.ILULevel?.ILULevelCode)
-                        }));
-                    }
-                    else
-                    {
-                        int r = startRowExp;
-                        foreach (var item in experienceList)
+                        currentRow++;
+                        if (currentRow > LastRow && item != _HCI.ILUs.Last())
                         {
-                            FillILURow(sheet, r, item);
-                            r++;
+                            sheet = package.Workbook.Worksheets[$"{sheetNames}{pageIndex + 1}"];
+
+                            if (sheet == null)
+                            {
+                                sheetService.AddOtherSheet(package, 2, pageIndex.ToString());
+                                sheet = package.Workbook.Worksheets[$"{sheetNames}{pageIndex + 1}"];
+                            }
+
+                            pageIndex++;
+                            currentRow = 21;
                         }
                     }
                     #endregion
-                }
-
-                void FillILURow(ExcelWorksheet sheet, int row, ILURegister item)
-                {
-                    sheet.Cells[$"D{row}"].Value = (item.AcquisitionDate?.ToString("dd/MM/yyyy") ?? "") + " - " + (item.EndDate?.ToString("dd/MM/yyyy") ?? "");
-                    sheet.Cells[$"F{row}"].Value = item.Distribution?.Description;
-                    sheet.Cells[$"L{row}"].Value = MapILUCode(item.ILULevel?.ILULevelCode);
-                }
-
-                string MapILUCode(string code)
-                {
-                    return code switch
-                    {
-                        "ITrainee" or "I" or "ILeader" or "LTrainee" or "LTraineeLeader" => "I",
-                        "L" or "LLeader" or "UTrainee" or "ULeaderTrainee" => "L",
-                        "U" or "ULeader" => "U",
-                        _ => ""
-                    };
                 }
 
                 sheet = package.Workbook.Worksheets.First();
 
                 if (_HCI.Categories != null)
                 {
+                    int pageIndex = 1;
+                    int LastRow = 17;
+                    int currentRow = 10;
+
                     #region Categories
-                    int startRowCat = 10;
-                    int lastRowCat = 17;
-                    int maxCatRows = lastRowCat - startRowCat + 1;
-                    var categoriesList = _HCI.Categories.ToList();
 
-                    if (categoriesList.Count > maxCatRows)
+                    foreach (var item in _HCI.Categories)
                     {
-                        for (int i = 0; i < maxCatRows - 1; i++)
-                        {
-                            var item = categoriesList[i];
-                            sheet.Cells[$"N{startRowCat + i}"].Value = item.ChosenCategory?.Description ?? "";
-                            sheet.Cells[$"P{startRowCat + i}"].Value = item.Date?.ToString("dd/MM/yyyy") ?? "";
-                        }
+                        sheet.Cells[$"N{currentRow}"].Value = item.ChosenCategory?.Description ?? "";
+                        sheet.Cells[$"P{currentRow}"].Value = item.Date?.ToString("dd/MM/yyyy", CultureInfo.InvariantCulture) ?? "";
 
-                        var avisoCell = sheet.Cells[$"N{lastRowCat}"];
-                        avisoCell.Value = "--- Ver detalle en Anexos ---";
-                        avisoCell.Style.Font.Italic = true;
-                        sheet.Cells[$"P{lastRowCat}"].Value = "";
-
-                        AddToAnnex("CATEGORÍAS", categoriesList.Select(c => new[] {
-                            c.ChosenCategory?.Description ?? "",
-                            c.Date?.ToString("dd/MM/yyyy") ?? ""
-                        }));
-                    }
-                    else
-                    {
-                        int r = startRowCat;
-                        foreach (var item in categoriesList)
+                        currentRow++;
+                        if (currentRow > LastRow && item != _HCI.Categories.Last())
                         {
-                            sheet.Cells[$"N{r}"].Value = item.ChosenCategory?.Description ?? "";
-                            sheet.Cells[$"P{r}"].Value = item.Date?.ToString("dd/MM/yyyy") ?? "";
-                            r++;
+                            sheet = package.Workbook.Worksheets[$"{sheetNames}{pageIndex + 1}"];
+
+                            if (sheet == null)
+                            {
+                                sheetService.AddOtherSheet(package, 2, pageIndex.ToString());
+                                sheet = package.Workbook.Worksheets[$"{sheetNames}{pageIndex + 1}"];
+                            }
+
+                            pageIndex++;
+                            currentRow = 10;
                         }
                     }
                     #endregion
@@ -1031,37 +928,35 @@ namespace SupervisorMobility.API.Controllers.Exportation_Controllers
 
                 if (_HCI.Commentaries != null)
                 {
+                    int pageIndex = 1;
+                    int LastRow = 52;
+                    int currentRow = 20;
+
                     #region Special Notes
-                    int startRowComm = 20;
-                    int lastRowComm = 52;
-                    int maxCommRows = lastRowComm - startRowComm + 1;
-                    var commentaryList = _HCI.Commentaries.ToList();
 
-                    if (commentaryList.Count > maxCommRows)
+                    foreach (var item in _HCI.Commentaries)
                     {
-                        for (int i = 0; i < maxCommRows - 1; i++)
-                        {
-                            sheet.Cells[$"N{startRowComm + i}"].Value = commentaryList[i].Comment;
-                        }
+                        sheet.Cells[$"N{currentRow}"].Value = item.Comment;
 
-                        var avisoCell = sheet.Cells[$"N{lastRowComm}"];
-                        avisoCell.Value = "--- Ver notas adicionales completas en Anexos ---";
-                        avisoCell.Style.Font.Italic = true;
-                        avisoCell.Style.Font.Color.SetColor(System.Drawing.Color.Gray);
-
-                        AddToAnnex("NOTAS ESPECIALES", commentaryList.Select(c => new[] { c.Comment }));
-                    }
-                    else
-                    {
-                        int r = startRowComm;
-                        foreach (var item in commentaryList)
+                        currentRow++;
+                        if (currentRow > LastRow && item != _HCI.Commentaries.Last())
                         {
-                            sheet.Cells[$"N{r}"].Value = item.Comment;
-                            r++;
+                            sheet = package.Workbook.Worksheets[$"{sheetNames}{pageIndex + 1}"];
+
+                            if (sheet == null)
+                            {
+                                sheetService.AddOtherSheet(package, 2, pageIndex.ToString());
+                                sheet = package.Workbook.Worksheets[$"{sheetNames}{pageIndex + 1}"];
+                            }
+
+                            pageIndex++;
+                            currentRow = 20;
                         }
                     }
                     #endregion
                 }
+
+                //sheetService.SetPrintingOptions(package.Workbook);
 
                 package.SaveAs(ms);
             }
@@ -1084,4 +979,5 @@ namespace SupervisorMobility.API.Controllers.Exportation_Controllers
             };
         }
     }
+
 }
