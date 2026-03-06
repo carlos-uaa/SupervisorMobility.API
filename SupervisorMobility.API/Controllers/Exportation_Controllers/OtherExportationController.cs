@@ -733,13 +733,28 @@ namespace SupervisorMobility.API.Controllers.Exportation_Controllers
                 ExcelWorksheet annexSheet = null;
                 int annexCurrentRow = 1;
 
-                void AddToAnnex(string sectionTitle, IEnumerable<string[]> rows)
+                void AddToAnnex(string sectionTitle, string[] headers, IEnumerable<string[]> rows)
                 {
                     if (annexSheet == null) annexSheet = package.Workbook.Worksheets.Add("Anexos");
 
-                    var titleRange = annexSheet.Cells[annexCurrentRow, 1];
-                    titleRange.Value = $"DETALLE DE: {sectionTitle}";
+                    int startRow = annexCurrentRow;
+                    int colCount = headers.Length;
+
+                    var titleRange = annexSheet.Cells[annexCurrentRow, 1, annexCurrentRow, colCount];
+                    titleRange.Merge = true;
+                    titleRange.Value = $"DETALLE DE: {sectionTitle.ToUpper()}";
                     titleRange.Style.Font.Bold = true;
+                    titleRange.Style.HorizontalAlignment = OfficeOpenXml.Style.ExcelHorizontalAlignment.Center;
+                    annexCurrentRow++;
+
+                    for (int i = 0; i < colCount; i++)
+                    {
+                        var cell = annexSheet.Cells[annexCurrentRow, i + 1];
+                        cell.Value = headers[i];
+                        cell.Style.Font.Bold = true;
+                        cell.Style.Fill.PatternType = OfficeOpenXml.Style.ExcelFillStyle.Solid;
+                        cell.Style.Fill.BackgroundColor.SetColor(System.Drawing.Color.LightGray);
+                    }
                     annexCurrentRow++;
 
                     foreach (var row in rows)
@@ -750,6 +765,16 @@ namespace SupervisorMobility.API.Controllers.Exportation_Controllers
                         }
                         annexCurrentRow++;
                     }
+
+                    var fullTableRange = annexSheet.Cells[startRow, 1, annexCurrentRow - 1, colCount];
+
+                    fullTableRange.Style.Border.Top.Style = OfficeOpenXml.Style.ExcelBorderStyle.Thin;
+                    fullTableRange.Style.Border.Bottom.Style = OfficeOpenXml.Style.ExcelBorderStyle.Thin;
+                    fullTableRange.Style.Border.Left.Style = OfficeOpenXml.Style.ExcelBorderStyle.Thin;
+                    fullTableRange.Style.Border.Right.Style = OfficeOpenXml.Style.ExcelBorderStyle.Thin;
+
+                    fullTableRange.AutoFitColumns();
+
                     annexCurrentRow += 2;
                 }
                 #endregion
@@ -792,7 +817,8 @@ namespace SupervisorMobility.API.Controllers.Exportation_Controllers
                             cellAviso.Value = "--- Ver detalle en Anexos ---";
                             cellAviso.Style.Font.Italic = true;
 
-                            AddToAnnex("CAPACITACIÓN RECIBIDA SOBRE LOS MANUALES DEL DEPTO", courses.Select(c => new[] { c.Date.ToString("dd/MM/yyyy"), c.Course }));
+                            string[] headersAnexo = { "FECHA", "DESCRIPCIÓN DEL CURSO / CAPACITACIÓN" };
+                            AddToAnnex("CAPACITACIÓN RECIBIDA SOBRE LOS MANUALES DEL DEPTO", headersAnexo, courses.Select(c => new[] { c.Date.ToString("dd/MM/yyyy"), c.Course }));
                         }
                         else
                         {
@@ -826,7 +852,8 @@ namespace SupervisorMobility.API.Controllers.Exportation_Controllers
                             cellAviso.Value = "--- Ver detalle en Anexos ---";
                             cellAviso.Style.Font.Italic = true;
 
-                            AddToAnnex("CAPACITACIÓN DENTRO Y FUERA DE LA EMPRESA", courses.Select(c => new[] { c.Date.ToString("dd/MM/yyyy"), c.Course }));
+                            string[] headersAnexo = { "FECHA", "DESCRIPCIÓN DEL CURSO / CAPACITACIÓN" };
+                            AddToAnnex("CAPACITACIÓN DENTRO Y FUERA DE LA EMPRESA", headersAnexo, courses.Select(c => new[] { c.Date.ToString("dd/MM/yyyy"), c.Course }));
                         }
                         else
                         {
@@ -860,7 +887,8 @@ namespace SupervisorMobility.API.Controllers.Exportation_Controllers
                         cellAviso.Value = "--- Ver detalle en Anexos ---";
                         cellAviso.Style.Font.Italic = true;
 
-                        AddToAnnex("TITULOS, LICENCIAS Y DIPLOMAS", Knowledge.Select(c => new[] { c.DateStart.Value.ToString("dd/MM/yyyy"), c.Description }));
+                        string[] headersAnexo = { "FECHA DE OBTENCIÓN", "NOMBRE" };
+                        AddToAnnex("TITULOS, LICENCIAS Y DIPLOMAS", headersAnexo, Knowledge.Select(c => new[] { c.DateStart.Value.ToString("dd/MM/yyyy"), c.Description }));
                     }
                     else
                     {
@@ -897,7 +925,9 @@ namespace SupervisorMobility.API.Controllers.Exportation_Controllers
                         }
 
                         sheet.Cells[$"D{lastRowCP}"].Value = "--- Ver detalle en Anexos ---";
-                        AddToAnnex("TRAYECTORIA PROFESIONAL DENTRO DE LA EMPRESA", _HCI.CareerPaths.Select(cp => new[] {
+
+                        string[] headersAnexo = { "N°", "FECHA DE CAMBIO", "DEPTO", "NOMBRE DEL PROCESO", "DESCRIPCIÓN DE LA OPERACIÓN" };
+                        AddToAnnex("TRAYECTORIA PROFESIONAL DENTRO DE LA EMPRESA", headersAnexo, _HCI.CareerPaths.Select(cp => new[] {
                             cp.CareerPathNo.ToString(),
                             cp.ChangeDate?.ToString("dd/MM/yyyy") ?? "",
                             cp.Department,
@@ -949,7 +979,8 @@ namespace SupervisorMobility.API.Controllers.Exportation_Controllers
                         avisoCell.Value = "--- Ver detalle de Experiencia en Anexos ---";
                         avisoCell.Style.Font.Italic = true;
 
-                        AddToAnnex("EXPERIENCIA (ILUs)", experienceList.Select(e => new[] {
+                        string[] headersAnexo = { "PERIODO", "DESCRIPCIÓN DE LA OPERACIÓN", "NIVEL" };
+                        AddToAnnex("EXPERIENCIA (ILUs)", headersAnexo, experienceList.Select(e => new[] {
                             (e.AcquisitionDate?.ToString("dd/MM/yyyy") ?? "") + " - " + (e.EndDate?.ToString("dd/MM/yyyy") ?? ""),
                             e.Distribution?.Description ?? "",
                             MapILUCode(e.ILULevel?.ILULevelCode)
@@ -1009,7 +1040,8 @@ namespace SupervisorMobility.API.Controllers.Exportation_Controllers
                         avisoCell.Style.Font.Italic = true;
                         sheet.Cells[$"P{lastRowCat}"].Value = "";
 
-                        AddToAnnex("CATEGORÍAS", categoriesList.Select(c => new[] {
+                        string[] headersAnexo = { "CATEGORÍA O NIVEL", "FECHA" };
+                        AddToAnnex("CATEGORÍAS", headersAnexo, categoriesList.Select(c => new[] {
                             c.ChosenCategory?.Description ?? "",
                             c.Date?.ToString("dd/MM/yyyy") ?? ""
                         }));
@@ -1049,7 +1081,8 @@ namespace SupervisorMobility.API.Controllers.Exportation_Controllers
                         avisoCell.Style.Font.Italic = true;
                         avisoCell.Style.Font.Color.SetColor(System.Drawing.Color.Gray);
 
-                        AddToAnnex("NOTAS ESPECIALES", commentaryList.Select(c => new[] { c.Comment }));
+                        string[] headersAnexo = { "NOTAS ESPECIALES" };
+                        AddToAnnex("NOTAS ESPECIALES", headersAnexo, commentaryList.Select(c => new[] { c.Comment }));
                     }
                     else
                     {
