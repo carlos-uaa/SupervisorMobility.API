@@ -72,8 +72,7 @@ namespace SupervisorMobility.API.Context
         public DbSet<KaizenTransaction> KaizenTransactions { get; set; }
         public DbSet<Holiday> Holidays { get; set; }
         public DbSet<UserCourse> UserCourses { get; set; }
-
-
+        public DbSet<LocalUserCourses> LocalUserCourses { get; set; }
         #endregion
 
         #region IS

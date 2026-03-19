@@ -1,16 +1,5 @@
-using DocumentFormat.OpenXml.Office2016.Drawing.ChartDrawing;
-using Microsoft.EntityFrameworkCore;
-using Microsoft.OpenApi.Models;
 using Serilog;
 using SupervisorMobility.API;
-using SupervisorMobility.API.Business;
-using SupervisorMobility.API.Context;
-using SupervisorMobility.API.DataAccess.Entities;
-using SupervisorMobility.API.DataAccess.Services;
-using SupervisorMobility.API.Models.NotificationDtos;
-using SupervisorMobility.API.Services;
-using System.Diagnostics;
-using System.Runtime.InteropServices;
 
 Log.Logger = new LoggerConfiguration()
     .MinimumLevel.Debug()

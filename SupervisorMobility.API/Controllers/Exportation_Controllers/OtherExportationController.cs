@@ -128,6 +128,8 @@ namespace SupervisorMobility.API.Controllers.Exportation_Controllers
 
             using var templateStream = System.IO.File.OpenRead(templateName);
 
+            ExcelPackage.License.SetNonCommercialPersonal("Supervisor Mobility");
+
             using (var package = new ExcelPackage(templateStream))
             {
                 package.Workbook.CalcMode = ExcelCalcMode.Automatic;
@@ -462,6 +464,8 @@ namespace SupervisorMobility.API.Controllers.Exportation_Controllers
 
             using var templateStream = System.IO.File.OpenRead(templateName);
 
+            ExcelPackage.License.SetNonCommercialPersonal("Supervisor Mobility");
+
             using (var package = new ExcelPackage(templateStream))
             {
                 package.Workbook.CalcMode = ExcelCalcMode.Automatic;
@@ -701,6 +705,8 @@ namespace SupervisorMobility.API.Controllers.Exportation_Controllers
 
             using var templateStream = System.IO.File.OpenRead(templateName);
 
+            ExcelPackage.License.SetNonCommercialPersonal("Supervisor Mobility");
+
             using (var package = new ExcelPackage(templateStream))
             {
                 package.Workbook.CalcMode = ExcelCalcMode.Automatic;
@@ -799,70 +805,79 @@ namespace SupervisorMobility.API.Controllers.Exportation_Controllers
                             courses = new List<UserCourse>();
                         }
 
-                        #region Courses about Manuals
-                        int lastRowManuals = 18;
-                        int startRowManuals = 9;
-                        int maxItems = lastRowManuals - startRowManuals + 1;
+                        string[] headersAnexo = { "FECHA", "DESCRIPCIÓN DEL CURSO / CAPACITACIÓN" };
 
-                        List<UserCourse> manualCourses = courses;
+                        #region 1. Cursos de Empresa (Sección Inferior: 21 a 38)
+                        int startRowCo = 21;
+                        int lastRowCo = 38;
+                        int maxCo = lastRowCo - startRowCo + 1; // 18 filas
+                        int currentCoRow = startRowCo;
+                        List<LocalUserCourses> companyCourses = _HCI.Courses.ToList();
 
-                        if (manualCourses.Count > maxItems)
+                        if (companyCourses.Count > maxCo)
                         {
-                            for (int i = 0; i < maxItems - 1; i++)
+                            // Si no caben, llenamos hasta la 37 y dejamos la 38 para el aviso
+                            for (int i = 0; i < maxCo - 1; i++)
                             {
-                                sheet.Cells[$"A{startRowManuals + i}"].Value = courses[i].Date.ToString("dd/MM/yyyy");
-                                sheet.Cells[$"B{startRowManuals + i}"].Value = courses[i].Course;
+                                sheet.Cells[$"A{startRowCo + i}"].Value = companyCourses[i].Date.ToString("dd/MM/yyyy");
+                                sheet.Cells[$"B{startRowCo + i}"].Value = companyCourses[i].Reticulate;
                             }
-                            var cellAviso = sheet.Cells[$"A{lastRowManuals}"];
-                            cellAviso.Value = "--- Ver detalle en Anexos ---";
-                            cellAviso.Style.Font.Italic = true;
+                            sheet.Cells[$"B{lastRowCo}"].Value = "--- Ver detalle en Anexos ---";
+                            currentCoRow = lastRowCo + 1; // Ya no hay espacio
 
-                            string[] headersAnexo = { "FECHA", "DESCRIPCIÓN DEL CURSO / CAPACITACIÓN" };
-                            AddToAnnex("CAPACITACIÓN RECIBIDA SOBRE LOS MANUALES DEL DEPTO", headersAnexo, courses.Select(c => new[] { c.Date.ToString("dd/MM/yyyy"), c.Course }));
+                            AddToAnnex("CAPACITACIÓN EMPRESA", headersAnexo, companyCourses.Select(c => new[] { c.Date.ToString("dd/MM/yyyy"), c.Reticulate }));
                         }
                         else
                         {
-                            int r = startRowManuals;
-                            foreach (var item in courses)
+                            // Si caben, los ponemos y guardamos en qué fila nos quedamos
+                            foreach (var item in companyCourses)
                             {
-                                sheet.Cells[$"A{r}"].Value = item.Date.ToString("dd/MM/yyyy");
-                                sheet.Cells[$"B{r}"].Value = item.Course;
-                                r++;
+                                sheet.Cells[$"A{currentCoRow}"].Value = item.Date.ToString("dd/MM/yyyy");
+                                sheet.Cells[$"B{currentCoRow}"].Value = item.Reticulate;
+                                currentCoRow++;
                             }
                         }
                         #endregion
 
-                        sheet = package.Workbook.Worksheets.First();
+                        #region 2. Cursos de Manuales (Sección Superior: 9 a 18)
+                        int startRowMan = 9;
+                        int lastRowMan = 18;
+                        int maxMan = lastRowMan - startRowMan + 1;
+                        List<UserCourse> manualCourses = courses;
 
-                        #region Courses about company
-                        int lastRowCompanyCourses = 38;
-                        int startRowCompanyCourses = 21;
-                        int maxCompanyCourses = lastRowCompanyCourses - startRowCompanyCourses + 1;
+                        var manualsQueCaben = manualCourses.Take(maxMan).ToList();
+                        var manualsSobrantes = manualCourses.Skip(maxMan).ToList();
 
-                        List<UserCourse> companyCourses = courses;
-
-                        if (companyCourses.Count > maxCompanyCourses)
+                        for (int i = 0; i < manualsQueCaben.Count; i++)
                         {
-                            for (int i = 0; i < maxItems - 1; i++)
-                            {
-                                sheet.Cells[$"A{startRowManuals + i}"].Value = courses[i].Date.ToString("dd/MM/yyyy");
-                                sheet.Cells[$"B{startRowManuals + i}"].Value = courses[i].Course;
-                            }
-                            var cellAviso = sheet.Cells[$"A{lastRowManuals}"];
-                            cellAviso.Value = "--- Ver detalle en Anexos ---";
-                            cellAviso.Style.Font.Italic = true;
-
-                            string[] headersAnexo = { "FECHA", "DESCRIPCIÓN DEL CURSO / CAPACITACIÓN" };
-                            AddToAnnex("CAPACITACIÓN DENTRO Y FUERA DE LA EMPRESA", headersAnexo, courses.Select(c => new[] { c.Date.ToString("dd/MM/yyyy"), c.Course }));
+                            sheet.Cells[$"A{startRowMan + i}"].Value = manualsQueCaben[i].Date.ToString("dd/MM/yyyy");
+                            sheet.Cells[$"B{startRowMan + i}"].Value = manualsQueCaben[i].Course;
                         }
-                        else
+
+                        if (manualsSobrantes.Any())
                         {
-                            int r = startRowManuals;
-                            foreach (var item in courses)
+                            int espacioLibreEnCo = lastRowCo - currentCoRow + 1;
+
+                            if (espacioLibreEnCo > 0)
                             {
-                                sheet.Cells[$"A{r}"].Value = item.Date.ToString("dd/MM/yyyy");
-                                sheet.Cells[$"B{r}"].Value = item.Course;
-                                r++;
+                                var paraElHueco = manualsSobrantes.Take(espacioLibreEnCo).ToList();
+                                for (int i = 0; i < paraElHueco.Count; i++)
+                                {
+                                    sheet.Cells[$"A{currentCoRow + i}"].Value = paraElHueco[i].Date.ToString("dd/MM/yyyy");
+                                    sheet.Cells[$"B{currentCoRow + i}"].Value = paraElHueco[i].Course + " (Manuales)";
+                                }
+
+                                var definitivosAlAnexo = manualsSobrantes.Skip(espacioLibreEnCo).ToList();
+                                if (definitivosAlAnexo.Any())
+                                {
+                                    sheet.Cells[$"B{lastRowCo}"].Value = "--- Ver resto en Anexos ---";
+                                    AddToAnnex("MANUALES (EXCESO)", headersAnexo, definitivosAlAnexo.Select(c => new[] { c.Date.ToString("dd/MM/yyyy"), c.Course }));
+                                }
+                            }
+                            else
+                            {
+                                sheet.Cells[$"B{lastRowMan}"].Value = "--- Ver detalle en Anexos ---";
+                                AddToAnnex("MANUALES DEPTO", headersAnexo, manualsSobrantes.Select(c => new[] { c.Date.ToString("dd/MM/yyyy"), c.Course }));
                             }
                         }
                         #endregion

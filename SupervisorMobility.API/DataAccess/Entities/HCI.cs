@@ -19,6 +19,7 @@ namespace SupervisorMobility.API.DataAccess.Entities
         public ICollection<HCICategory>? Categories { get; set; }
         public ICollection<UserCareerPath>? CareerPaths { get; set; }
         public ICollection<Commentary>? Commentaries { get; set; }
+        public ICollection<LocalUserCourses>? Courses { get; set; }
         public bool? IsActive { get; set; }
 
         public ICollection<ILURegister>? ILUs

@@ -272,10 +272,10 @@ namespace SupervisorMobility.API.DataAccess.Services.ExportationServices
             {
                 worksheet.PrinterSettings.PaperSize = ePaperSize.Tabloid;
                 worksheet.PrinterSettings.Orientation = eOrientation.Landscape;
-                worksheet.PrinterSettings.TopMargin = 0.5m;
-                worksheet.PrinterSettings.BottomMargin = 0.5m;
-                worksheet.PrinterSettings.LeftMargin = 0.5m;
-                worksheet.PrinterSettings.RightMargin = 0.5m;
+                worksheet.PrinterSettings.TopMargin = (double)0.5m;
+                worksheet.PrinterSettings.BottomMargin = (double)0.5m;
+                worksheet.PrinterSettings.LeftMargin = (double)0.5m;
+                worksheet.PrinterSettings.RightMargin = (double)0.5m;
                 worksheet.PrinterSettings.FitToPage = true;
                 worksheet.PrinterSettings.FitToWidth = 1;
                 worksheet.PrinterSettings.FitToHeight = 1;
