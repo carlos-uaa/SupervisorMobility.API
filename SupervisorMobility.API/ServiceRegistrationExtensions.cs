@@ -51,6 +51,8 @@ using SupervisorMobility.API.DataAccess.Services.SOS_FlowRepository;
 using SupervisorMobility.API.DataAccess.Services.SOS_SequenceRepository;
 using SupervisorMobility.API.DataAccess.Services.SOS_SynopticTableRepository;
 using SupervisorMobility.API.DataAccess.Services.UserCoursesServices;
+using SupervisorMobility.API.DataAccess.Services.LocalUserCourses.Service;
+using SupervisorMobility.API.DataAccess.Services.LocalUserCourses.Repository;
 
 
 namespace SupervisorMobility.API
@@ -96,6 +98,8 @@ namespace SupervisorMobility.API
             services.AddScoped<IOrderingService, OrderingService>();
             services.AddScoped<ISTOperatingRequirementsService, STOperatingRequirementsService>();
             services.AddScoped<ISTROSyncDistributionService, STROSyncDistributionService>();
+            services.AddScoped<ILocalUserCoursesService, LocalUserCoursesService>();
+            services.AddScoped<ILocalUserCoursesRepository, LocalUserCoursesRepository>();
 
 
 

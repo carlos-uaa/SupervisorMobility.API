@@ -3460,9 +3460,7 @@ namespace SupervisorMobility.API.Services
             var query = _context.HCIs.Where(k => k.IsActive == true && k.HCIId == HCIId);
 
             if (includeNavigation)
-            {
-                query = query.Include(p => p.CareerPaths).Include(p => p.Categories).Include(p => p.Commentaries).Include(p => p.Transactions);
-            }
+                query = query.Include(p => p.CareerPaths).Include(p => p.Categories).Include(p => p.Commentaries).Include(p => p.Transactions).Include(p => p.Courses);
 
             if (includePeople)
             {
@@ -3501,7 +3499,6 @@ namespace SupervisorMobility.API.Services
             return await _context.HCIs.Where(k => k.IsActive == true && k.UserId == userId).FirstOrDefaultAsync();
 
         }
-
         public async Task<bool> SearchExistHciForUserId(int userId)
         {
             return await _context.HCIs.AnyAsync(k => k.IsActive == true && k.UserId == userId);
@@ -3589,7 +3586,9 @@ namespace SupervisorMobility.API.Services
         }
         public async Task<int> AddHCI(HCI HCIForAdd)
         {
-            //HCIForAdd.User = _context.Users.FirstOrDefault(p=>p.UserId == HCIForAdd.UserId);
+            if (HCIForAdd.Courses == null)
+                HCIForAdd.Courses = new List<LocalUserCourses>();
+
             _context.HCIs.Add(HCIForAdd);
             return _context.SaveChanges();
         }
@@ -3616,25 +3615,20 @@ namespace SupervisorMobility.API.Services
 
             return await _context.SaveChangesAsync();
         }
-
         public async Task<int> RemoveHCI(HCI HCIForAdd)
         {
             HCIForAdd.IsActive = false;
             return _context.SaveChanges();
         }
-
-
         public async Task<IEnumerable<User>> GetUsersWithoutHci()
         {
             var usuariosSinHCI = _context.Users.Where(u => !_context.HCIs.Any(hci => hci.UserId == u.UserId));
             return await usuariosSinHCI.ToListAsync();
         }
-
         public async Task<IEnumerable<HCICategory>> GetHCICategories()
         {
             return _context.HCICategories.OrderBy(p => p.ChosenCategoryDepartmentId).ToList();
         }
-
         private void UpdateILURegisters(ICollection<ILURegister> existingILURegisters, ICollection<ILURegisterForUpdateDto> updatedILURegisters)
         {
             foreach (var updatedILURegister in updatedILURegisters)
@@ -3658,7 +3652,6 @@ namespace SupervisorMobility.API.Services
                 existingILURegisters.Remove(iluToRemove);
             }
         }
-
         #endregion
 
         //#region HCI ILU

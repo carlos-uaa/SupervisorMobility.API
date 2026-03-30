@@ -76,6 +76,8 @@ namespace SupervisorMobility.API.Controllers.Exportation_Controllers
 
             using var templateStream = System.IO.File.OpenRead(templateName);
 
+            ExcelPackage.License.SetNonCommercialPersonal("Supervisor Mobility");
+
             using (var package = new ExcelPackage(templateStream))
             {
                 package.Workbook.CalcMode = ExcelCalcMode.Automatic;
@@ -749,6 +751,8 @@ namespace SupervisorMobility.API.Controllers.Exportation_Controllers
             MemoryStream ms = new MemoryStream();
 
             using var templateStream = System.IO.File.OpenRead(templateName);
+
+            ExcelPackage.License.SetNonCommercialPersonal("Supervisor Mobility");
 
             using (var package = new ExcelPackage(templateStream))
             {
@@ -1498,6 +1502,8 @@ namespace SupervisorMobility.API.Controllers.Exportation_Controllers
                 MemoryStream ms = new MemoryStream();
 
                 using var templateStream = System.IO.File.OpenRead(templateName);
+
+                ExcelPackage.License.SetNonCommercialPersonal("Supervisor Mobility");
 
                 using (var package = new ExcelPackage(templateStream))
                 {
