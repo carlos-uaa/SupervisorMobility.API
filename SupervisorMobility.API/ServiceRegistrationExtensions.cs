@@ -53,6 +53,7 @@ using SupervisorMobility.API.DataAccess.Services.SOS_SynopticTableRepository;
 using SupervisorMobility.API.DataAccess.Services.UserCoursesServices;
 using SupervisorMobility.API.DataAccess.Services.LocalUserCourses.Service;
 using SupervisorMobility.API.DataAccess.Services.LocalUserCourses.Repository;
+using SupervisorMobility.API.DataAccess.Services.HRIServices;
 
 
 namespace SupervisorMobility.API
@@ -101,6 +102,9 @@ namespace SupervisorMobility.API
             services.AddScoped<ILocalUserCoursesService, LocalUserCoursesService>();
             services.AddScoped<ILocalUserCoursesRepository, LocalUserCoursesRepository>();
 
+
+            //HRI Services
+            services.AddScoped<IHRIServices, HRIServices>();
 
 
             services.Configure<IISServerOptions>(options =>

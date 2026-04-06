@@ -14,6 +14,8 @@ using SupervisorMobility.API.DataAccess.Entities.SOS_Review;
 using SupervisorMobility.API.Entities;
 using System.Globalization;
 using SupervisorMobility.API.DataAccess.SPModels;
+using SupervisorMobility.API.DataAccess.Entities.HRI;
+using SupervisorMobility.API.DataAccess.Entities.HRI_s_Entities;
 
 namespace SupervisorMobility.API.Context
 {
@@ -153,6 +155,16 @@ namespace SupervisorMobility.API.Context
         //modelos para Store Procedures
         public DbSet<WFMInfoSP> WFMInfoSPs { get; set; }
 
+        #endregion
+
+        #region
+        public DbSet<HRI>  HRIs { get; set; }
+        public DbSet<HRICycles> HRICycles { get; set; }
+        public DbSet<HRIRevisionItems> HRIRevisionItems { get; set; }
+        public DbSet<HRImages> HRImages { get; set; }
+        public DbSet<RevisionCycles> RevisionCycles { get; set; }
+        public DbSet<WeeklyRevisions> WeeklyRevisions { get; set; }
+        public DbSet<DailyRevisions> DailyRevisions { get; set; }
         #endregion
 
         public SupervisorMobilityContext(DbContextOptions<SupervisorMobilityContext> options)

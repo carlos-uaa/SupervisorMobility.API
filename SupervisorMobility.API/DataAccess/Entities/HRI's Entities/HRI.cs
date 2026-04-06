@@ -1,0 +1,23 @@
+﻿using SupervisorMobility.API.DataAccess.Entities.HRI_s_Entities;
+using System.ComponentModel.DataAnnotations;
+
+namespace SupervisorMobility.API.DataAccess.Entities.HRI
+{
+    public class HRI
+    {
+        [Key]
+        public int HriId { get; set; }
+        public string NameOfLine { get; set; }
+        public string NameOfItem { get; set; }
+        public string ControlNumber { get; set; }
+        public string Dock { get; set; }
+        public string Department { get; set; }
+        public List<HRImages> Images { get; set; }
+        public List<HRIRevisionItems> ItemsRevised { get; set; }
+        public List<WeeklyRevisions> WeeklyRevisions { get; set; }
+        public List<HRICycles> Cycles { get; set; }
+        public List<RevisionCycles> Revisions { get; set; }
+        public bool IsActive { get; set; }
+        public DateTime CreationDate { get; set; }
+    }
+}
