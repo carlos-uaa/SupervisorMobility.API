@@ -54,6 +54,7 @@ using SupervisorMobility.API.DataAccess.Services.UserCoursesServices;
 using SupervisorMobility.API.DataAccess.Services.LocalUserCourses.Service;
 using SupervisorMobility.API.DataAccess.Services.LocalUserCourses.Repository;
 using SupervisorMobility.API.DataAccess.Services.HRIServices;
+using SupervisorMobility.API.DataAccess.Services.HRIRepository;
 
 
 namespace SupervisorMobility.API
@@ -105,7 +106,14 @@ namespace SupervisorMobility.API
 
             //HRI Services
             services.AddScoped<IHRIServices, HRIServices>();
+            services.AddScoped<IHRIItemsService, HRIItemsService>();
+            services.AddScoped<IHRIDocksService, HRIDocksService>();
+            services.AddScoped<IHRILinesService, HRILinesService>();
 
+            //HRI Repositories
+            services.AddScoped<IHRIItemsRepository, HRIItemsRepository>();
+            services.AddScoped<IHRIDocksRepository, HRIDocksRepository>();
+            services.AddScoped<IHRILinesRepository, HRILinesRepository>();
 
             services.Configure<IISServerOptions>(options =>
             {

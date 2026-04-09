@@ -159,6 +159,9 @@ namespace SupervisorMobility.API.Context
 
         #region
         public DbSet<HRI>  HRIs { get; set; }
+        public DbSet<HRILines> HRILines { get; set; }
+        public DbSet<HRIDock> HRIDocks { get; set; }
+        public DbSet<HRIItem> HRIItems { get; set; }
         public DbSet<HRICycles> HRICycles { get; set; }
         public DbSet<HRIRevisionItems> HRIRevisionItems { get; set; }
         public DbSet<HRImages> HRImages { get; set; }

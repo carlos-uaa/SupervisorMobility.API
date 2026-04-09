@@ -7,10 +7,10 @@ namespace SupervisorMobility.API.DataAccess.Entities.HRI
     {
         [Key]
         public int HriId { get; set; }
-        public string NameOfLine { get; set; }
-        public string NameOfItem { get; set; }
+        public HRILines Line { get; set; }
+        public HRIItem NameOfItem { get; set; }
         public string ControlNumber { get; set; }
-        public string Dock { get; set; }
+        public HRIDock Dock { get; set; }
         public string Department { get; set; }
         public List<HRImages> Images { get; set; }
         public List<HRIRevisionItems> ItemsRevised { get; set; }
