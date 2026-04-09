@@ -14,6 +14,7 @@ using SupervisorMobility.API.DataAccess.Entities.SOS_Review;
 using SupervisorMobility.API.Entities;
 using System.Globalization;
 using SupervisorMobility.API.DataAccess.SPModels;
+using SupervisorMobility.API.Models.Email;
 
 namespace SupervisorMobility.API.Context
 {
@@ -73,6 +74,8 @@ namespace SupervisorMobility.API.Context
         public DbSet<Holiday> Holidays { get; set; }
         public DbSet<UserCourse> UserCourses { get; set; }
         public DbSet<LocalUserCourses> LocalUserCourses { get; set; }
+        public DbSet<EmailQueue> EmailQueues { get; set; }
+        public DbSet<EmailDeliveryResult> EmailDeliveryResults { get; set; }
         #endregion
 
         #region IS
@@ -993,6 +996,9 @@ namespace SupervisorMobility.API.Context
               );
 
 
+            var seedUsersCreatedDate = new DateTime(2026, 1, 1, 8, 0, 0, DateTimeKind.Utc);
+            var seedNotificationsEntryDate = new DateTime(2026, 1, 1, 9, 0, 0, DateTimeKind.Utc);
+
             modelBuilder.Entity<User>().HasData(
                 new User
                 {
@@ -1000,6 +1006,7 @@ namespace SupervisorMobility.API.Context
                     ObjectId = "marco.aguayo@compasdcpcs.local",
                     Name = "Marco Aguayo",
                     Email = "maguayo@gruposinco.com.mx",
+                    CreatedDate = seedUsersCreatedDate,
                     IsActive = true,
                     UserType = 1
                 },
@@ -1009,6 +1016,7 @@ namespace SupervisorMobility.API.Context
                     ObjectId = "maguayosinco@compasdcpcs.local",
                     Name = "M. Aguayo Sinco",
                     Email = "maguayo@gruposinco.com.mx",
+                    CreatedDate = seedUsersCreatedDate,
                     IsActive = true,
                     UserType = 1,
                 },
@@ -1018,6 +1026,7 @@ namespace SupervisorMobility.API.Context
                     ObjectId = "pmunozsinco@compasdcpcs.local",
                     Name = "Pedro",
                     Email = "pmunoz@gruposinco.com.mx",
+                    CreatedDate = seedUsersCreatedDate,
                     IsActive = true,
                     UserType = 1
                 }
@@ -1031,6 +1040,7 @@ namespace SupervisorMobility.API.Context
                     GroupId = 1,
                     Name = "SeniorSupervisor",
                     Payroll = 4,
+                    CreatedDate = seedUsersCreatedDate,
                     IsActive = true,
                     UserType = 2,
                 }, new User
@@ -1043,6 +1053,7 @@ namespace SupervisorMobility.API.Context
                     GroupId = 1,
                     Name = "Supervisor",
                     Payroll = 5,
+                    CreatedDate = seedUsersCreatedDate,
                     IsActive = true,
                     UserType = 3,
                     SuperiorId = 3,
@@ -1056,6 +1067,7 @@ namespace SupervisorMobility.API.Context
                     GroupId = 1,
                     Name = "Operador 1",
                     Payroll = 6,
+                    CreatedDate = seedUsersCreatedDate,
                     IsActive = true,
                     UserType = 4,
                     SuperiorId = 4,
@@ -1069,6 +1081,7 @@ namespace SupervisorMobility.API.Context
                     GroupId = 1,
                     Name = "Operador 2",
                     Payroll = 7,
+                    CreatedDate = seedUsersCreatedDate,
                     IsActive = true,
                     UserType = 4,
                     SuperiorId = 4,
@@ -1082,6 +1095,7 @@ namespace SupervisorMobility.API.Context
                     GroupId = 1,
                     Name = "Operador 3",
                     Payroll = 8,
+                    CreatedDate = seedUsersCreatedDate,
                     IsActive = true,
                     UserType = 4,
                     SuperiorId = 4,
@@ -1106,7 +1120,7 @@ namespace SupervisorMobility.API.Context
                     new Notification()
                     {
                         NotificationID = 2,
-                        EntryDate = DateTime.Now,
+                        EntryDate = seedNotificationsEntryDate,
                         IsAccepted = true,
                         IsActive = true,
                         MadeBy = "Marco Aguayo",
@@ -1117,7 +1131,7 @@ namespace SupervisorMobility.API.Context
                     new Notification()
                     {
                         NotificationID = 3,
-                        EntryDate = DateTime.Now,
+                        EntryDate = seedNotificationsEntryDate,
                         IsAccepted = false,
                         IsActive = true,
                         MadeBy = "Marco Aguayo",
@@ -1128,7 +1142,7 @@ namespace SupervisorMobility.API.Context
                     new Notification()
                     {
                         NotificationID = 4,
-                        EntryDate = DateTime.Now,
+                        EntryDate = seedNotificationsEntryDate,
                         IsAccepted = true,
                         IsActive = false,
                         MadeBy = "Marco Aguayo",
@@ -1139,7 +1153,7 @@ namespace SupervisorMobility.API.Context
                     new Notification()
                     {
                         NotificationID = 5,
-                        EntryDate = DateTime.Now,
+                        EntryDate = seedNotificationsEntryDate,
                         IsAccepted = false,
                         IsActive = false,
                         MadeBy = "Marco Aguayo",
@@ -1150,7 +1164,7 @@ namespace SupervisorMobility.API.Context
                     new Notification()
                     {
                         NotificationID = 6,
-                        EntryDate = DateTime.Now,
+                        EntryDate = seedNotificationsEntryDate,
                         IsAccepted = true,
                         IsActive = true,
                         MadeBy = "Marco Aguayo",
@@ -1161,7 +1175,7 @@ namespace SupervisorMobility.API.Context
                     new Notification()
                     {
                         NotificationID = 7,
-                        EntryDate = DateTime.Now,
+                        EntryDate = seedNotificationsEntryDate,
                         IsAccepted = false,
                         IsActive = true,
                         MadeBy = "Marco Aguayo",
@@ -1172,7 +1186,7 @@ namespace SupervisorMobility.API.Context
                     new Notification()
                     {
                         NotificationID = 8,
-                        EntryDate = DateTime.Now,
+                        EntryDate = seedNotificationsEntryDate,
                         IsAccepted = true,
                         IsActive = false,
                         MadeBy = "Marco Aguayo",
@@ -1183,7 +1197,7 @@ namespace SupervisorMobility.API.Context
                     new Notification()
                     {
                         NotificationID = 9,
-                        EntryDate = DateTime.Now,
+                        EntryDate = seedNotificationsEntryDate,
                         IsAccepted = false,
                         IsActive = false,
                         MadeBy = "Marco Aguayo",
