@@ -3,12 +3,14 @@ using DocumentFormat.OpenXml.Bibliography;
 using DocumentFormat.OpenXml.Spreadsheet;
 using Microsoft.AspNetCore.Mvc;
 using Quartz.Core;
+using SupervisorMobility.API.Business;
 using SupervisorMobility.API.DataAccess.Entities;
 using SupervisorMobility.API.DataAccess.Entities.SOS;
 using SupervisorMobility.API.DataAccess.Services;
 using SupervisorMobility.API.DataAccess.Services.SOS_Combination;
 using SupervisorMobility.API.Models.CommentaryDtos;
 using SupervisorMobility.API.Models.FileUploadDto;
+using SupervisorMobility.API.Models.NotificationDtos;
 using SupervisorMobility.API.Models.SOS.SOSAnalysisDtos;
 using SupervisorMobility.API.Models.SOS.SOSCombinationDtos;
 using SupervisorMobility.API.Models.SOS.SOSCombinationLogbookDtos;
@@ -29,13 +31,16 @@ namespace SupervisorMobility.API.Controllers.SOS_Controllers
         private readonly IWebHostEnvironment _env;
         private readonly ISOS_ProcessRepository _ProcessRepository;
         private readonly ISOS_CombinationRepository _CombinationRepository;
-        public CombinationController(IWebHostEnvironment env, IMapper mapper, ISOS_ProcessRepository repository, ISOS_CombinationRepository combinationRepository)
+        private readonly INotificationService _notificationService;
+
+        public CombinationController(IWebHostEnvironment env, IMapper mapper, ISOS_ProcessRepository repository, ISOS_CombinationRepository combinationRepository, INotificationService notificationService)
         {
             _ProcessRepository = repository;
             _mapper = mapper ??
                   throw new ArgumentNullException(nameof(mapper));
             _env = env ?? throw new ArgumentNullException(nameof(env));
             _CombinationRepository = combinationRepository;
+            _notificationService = notificationService ?? throw new ArgumentNullException(nameof(notificationService));
         }
 
         [HttpPost]
@@ -80,8 +85,22 @@ namespace SupervisorMobility.API.Controllers.SOS_Controllers
                 }
 
                 var createdResult = await _CombinationRepository.CreateSOSCombination(CombinationToCreate);
-                if (createdResult != null)
+                if (createdResult > 0)
+                {
+                    int notifyUserId = CombinationToCreate.ReviewerHSId ?? SOSEntity?.CreatorId ?? 1;
+                    await _notificationService.CreateNotificationAsync(new NotificationToCreateDto
+                    {
+                        MadeBy = "SM Mobility",
+                        NotificationType = "SOS Combination Created",
+                        NotificationText = $"SOS Combination (ID: {CombinationToCreate.SOSCombinationId}) has been generated for SOS Hub (ID: {SOSHubCollection_Id}).",
+                        UserId = notifyUserId,
+                        IsActive = true,
+                        IsAccepted = true,
+                        EntryDate = DateTime.Now
+                    });
+
                     return Ok(CombinationToCreate);
+                }
                 else
                     return BadRequest();
             }
@@ -115,6 +134,19 @@ namespace SupervisorMobility.API.Controllers.SOS_Controllers
                 }
 
 
+
+                SOSHub relatedSOSHub = await _ProcessRepository.GetSOSHub(_sosCombination.SOSHubId, includeInformation: true);
+                int notifyUserId = relatedSOSHub?.CreatorId ?? _sosCombination.ReviewerHSId ?? 1;
+                await _notificationService.CreateNotificationAsync(new NotificationToCreateDto
+                {
+                    MadeBy = "SM Mobility",
+                    NotificationType = "SOS Combination Review Completed",
+                    NotificationText = $"SOS Combination (ID: {_sosCombination.SOSCombinationId}) review has been completed.",
+                    UserId = notifyUserId,
+                    IsActive = true,
+                    IsAccepted = true,
+                    EntryDate = DateTime.Now
+                });
 
                 return Ok(_sosCombination);
             }

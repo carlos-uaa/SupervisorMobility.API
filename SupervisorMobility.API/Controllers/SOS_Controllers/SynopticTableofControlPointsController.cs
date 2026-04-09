@@ -1,11 +1,13 @@
 ﻿using AutoMapper;
 using Microsoft.AspNetCore.Mvc;
+using SupervisorMobility.API.Business;
 using SupervisorMobility.API.DataAccess.Entities.SOS;
 using SupervisorMobility.API.DataAccess.Services;
 using SupervisorMobility.API.DataAccess.Services.SOS_AnalysisRepository;
 using SupervisorMobility.API.DataAccess.Services.SOS_SequenceRepository;
 using SupervisorMobility.API.DataAccess.Services.SOS_SynopticTableRepository;
 using SupervisorMobility.API.Interfaces.SOSDistribution.SOSDistributionExcel;
+using SupervisorMobility.API.Models.NotificationDtos;
 using SupervisorMobility.API.Models.SOS.SOSSynopticTableofControlPointsDtos;
 using System.Diagnostics;
 
@@ -21,7 +23,9 @@ namespace SupervisorMobility.API.Controllers.SOS_Controllers
         private readonly ISOS_SynopticTableRepository _SynopticTableRepository;
         private readonly ISOS_SequenceRepository _SequenceRepository;
         private readonly ISOS_AnalysisRepository _AnalisisRepository;
-        public SynopticTableofControlPointsController(IWebHostEnvironment env, IMapper mapper, ISOS_ProcessRepository repository, ISOS_SynopticTableRepository synopticTableRepository, ISOS_SequenceRepository sequenceRepository, ISOS_AnalysisRepository analysisRepository)
+        private readonly INotificationService _notificationService;
+
+        public SynopticTableofControlPointsController(IWebHostEnvironment env, IMapper mapper, ISOS_ProcessRepository repository, ISOS_SynopticTableRepository synopticTableRepository, ISOS_SequenceRepository sequenceRepository, ISOS_AnalysisRepository analysisRepository, INotificationService notificationService)
         {
             _ProcessRepository = repository;
             _mapper = mapper ??
@@ -30,11 +34,13 @@ namespace SupervisorMobility.API.Controllers.SOS_Controllers
             _SynopticTableRepository = synopticTableRepository;
             _SequenceRepository = sequenceRepository;
             _AnalisisRepository = analysisRepository;
+            _notificationService = notificationService ?? throw new ArgumentNullException(nameof(notificationService));
         }
 
         [HttpPost]
         public async Task<ActionResult<SOSSynopticControlPointsDto>> GenerateSynopticTableofControlPoints(SOSSynopticTableofControlPointsForCreateDto sOSSynopticTableofControlPointsToCreate, int SOSHubCollection_Id)
         {
+            SOSHub sosHubEntity = await _ProcessRepository.GetSOSHub(SOSHubCollection_Id, includeInformation: true);
 
             if (sOSSynopticTableofControlPointsToCreate.SOSSynopticTableofControlPointsId == 0)
             {
@@ -62,8 +68,22 @@ namespace SupervisorMobility.API.Controllers.SOS_Controllers
 
 
                 var createdResult = await _SynopticTableRepository.CreateSOSSynopticTableofControlPoints(SynopticTableofControlPointsToCreate);
-                if (createdResult != null)
+                if (createdResult > 0)
+                {
+                    int notifyUserId = sosHubEntity?.CreatorId ?? 1;
+                    await _notificationService.CreateNotificationAsync(new NotificationToCreateDto
+                    {
+                        MadeBy = "SM Mobility",
+                        NotificationType = "SOS STCP Created",
+                        NotificationText = $"Synoptic Table of Control Points (ID: {SynopticTableofControlPointsToCreate.SOSSynopticTableofControlPointsId}) has been generated for SOS Hub (ID: {SOSHubCollection_Id}).",
+                        UserId = notifyUserId,
+                        IsActive = true,
+                        IsAccepted = true,
+                        EntryDate = DateTime.Now
+                    });
+
                     return Ok(SynopticTableofControlPointsToCreate);
+                }
                 else
                     return BadRequest();
             }
@@ -87,6 +107,19 @@ namespace SupervisorMobility.API.Controllers.SOS_Controllers
                     Debug.WriteLine("Error Sections añadidos");
                     return BadRequest();
                 }
+
+
+                int reviewNotifyUserId = sosHubEntity?.CreatorId ?? 1;
+                await _notificationService.CreateNotificationAsync(new NotificationToCreateDto
+                {
+                    MadeBy = "SM Mobility",
+                    NotificationType = "SOS STCP Review Completed",
+                    NotificationText = $"Synoptic Table of Control Points (ID: {_sosSynopticTableofControlPoints.SOSSynopticTableofControlPointsId}) review has been completed.",
+                    UserId = reviewNotifyUserId,
+                    IsActive = true,
+                    IsAccepted = true,
+                    EntryDate = DateTime.Now
+                });
 
 
 
