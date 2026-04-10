@@ -17,6 +17,7 @@ using SupervisorMobility.API.DataAccess.SPModels;
 using SupervisorMobility.API.DataAccess.Entities.HRI;
 using SupervisorMobility.API.DataAccess.Entities.HRI_s_Entities;
 using SupervisorMobility.API.Models.Email;
+using SupervisorMobility.API.DataAccess.Entities.HRI_s_Entities.HRIRevisionsItem_Entities;
 
 namespace SupervisorMobility.API.Context
 {
@@ -171,6 +172,9 @@ namespace SupervisorMobility.API.Context
         public DbSet<RevisionCycles> RevisionCycles { get; set; }
         public DbSet<WeeklyRevisions> WeeklyRevisions { get; set; }
         public DbSet<DailyRevisions> DailyRevisions { get; set; }
+        public DbSet<RevisionMethod> RevisionMethods { get; set; }  
+        public DbSet<Veredict> Veredicts { get; set; }
+        public DbSet<Frecuency> Frecuencies { get; set; }
         #endregion
 
         public SupervisorMobilityContext(DbContextOptions<SupervisorMobilityContext> options)

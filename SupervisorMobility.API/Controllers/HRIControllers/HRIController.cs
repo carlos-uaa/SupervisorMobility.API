@@ -2,7 +2,7 @@
 using SupervisorMobility.API.DataAccess.Services.HRIServices;
 using SupervisorMobility.API.Models.HRIDtos;
 
-namespace SupervisorMobility.API.Controllers
+namespace SupervisorMobility.API.Controllers.HRIControllers
 {
     [ApiController]
     [Route("api/[controller]")]    

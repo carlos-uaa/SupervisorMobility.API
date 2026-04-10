@@ -80,6 +80,10 @@
 		<Folder Include="uploads\users\" />
 	</ItemGroup>
 
+	<ItemGroup>
+	  <None Include="Models\HRICyclesDtos\CreateHRICyclesDto.cs" />
+	</ItemGroup>
+
 	<Target Name="PublishFrontend" AfterTargets="ComputeFilesToPublish">
 		<ItemGroup>
 			<DistFiles Include="Documents\**" />

@@ -1,4 +1,5 @@
-﻿using System.ComponentModel.DataAnnotations;
+﻿using SupervisorMobility.API.DataAccess.Entities.HRI_s_Entities.HRIRevisionsItem_Entities;
+using System.ComponentModel.DataAnnotations;
 
 namespace SupervisorMobility.API.DataAccess.Entities.HRI
 {
@@ -10,8 +11,11 @@ namespace SupervisorMobility.API.DataAccess.Entities.HRI
         public HRI HRI { get; set; }
         public int ItemNumber { get; set; }
         public string  RevisionPoint { get; set; }
-        public string RevisionMethod { get; set; } //por confirmar
-        public string Veredict { get; set; }
-        public string  Frecuency { get; set; }//por confirmar
+        public int? RevisionMethodId { get; set; } //por confirmar
+        public RevisionMethod? RevisionMethod { get; set; }
+        public int? VeredictId { get; set; }
+        public Veredict? Veredict { get; set; }
+        public int? FrecuencyId { get; set; }//por confirmar
+        public Frecuency? Frecuency { get; set; }
     }
 }

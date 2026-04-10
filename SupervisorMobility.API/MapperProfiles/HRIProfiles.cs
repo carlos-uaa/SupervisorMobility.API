@@ -1,5 +1,6 @@
 ﻿using AutoMapper;
 using SupervisorMobility.API.DataAccess.Entities.HRI;
+using SupervisorMobility.API.Models.HRICyclesDtos;
 using SupervisorMobility.API.Models.HRIDtos;
 
 namespace SupervisorMobility.API.MapperProfiles
@@ -10,6 +11,11 @@ namespace SupervisorMobility.API.MapperProfiles
         {
                CreateMap<HRI,GetHRIDto>().ReverseMap();
                 CreateMap<CreateHRIDto,HRI>().ReverseMap();
+
+            #region HRICycles
+                CreateMap<HRICycles, GetHRICyclesDto>().ReverseMap();
+                CreateMap<CreateHRICycles, HRICycles>().ReverseMap();
+            #endregion
         }
     }
 }
