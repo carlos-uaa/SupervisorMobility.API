@@ -7,6 +7,7 @@ using SupervisorMobility.API.DataAccess.Entities;
 using SupervisorMobility.API.DataAccess.Entities.SOS;
 using SupervisorMobility.API.DataAccess.Services;
 using SupervisorMobility.API.Models.ILURegisterDtos;
+using SupervisorMobility.API.Models.NotificationDtos;
 using SupervisorMobility.API.Models.PATDtos;
 using SupervisorMobility.API.Models.PlantDtos;
 using SupervisorMobility.API.Models.SOS.SOSDistributionDtos;
@@ -26,9 +27,10 @@ namespace SupervisorMobility.API.Controllers
         readonly IAssyChartService _assyChartService;
         private readonly ISupervisorMobilityRepository _supervisorMobilityRepository;
         private readonly ISOS_ProcessRepository _ProcessRepository;
+        private readonly INotificationService _notificationService;
 
         public PATController(ISupervisorMobilityRepository supervisorMobilityRepository, IAssyChartService assyChartService,
-            IMapper mapper, ISOS_ProcessRepository repository)
+            IMapper mapper, ISOS_ProcessRepository repository, INotificationService notificationService)
         {
             _ProcessRepository = repository;
             _assyChartService = assyChartService;
@@ -36,6 +38,8 @@ namespace SupervisorMobility.API.Controllers
                 throw new ArgumentNullException(nameof(supervisorMobilityRepository));
             _mapper = mapper ??
                 throw new ArgumentNullException(nameof(mapper));
+            _notificationService = notificationService ??
+                throw new ArgumentNullException(nameof(notificationService));
         }
 
         [HttpPost]
@@ -130,7 +134,7 @@ namespace SupervisorMobility.API.Controllers
                 var createdResult = await _supervisorMobilityRepository.AddPat(PatToCreate);
 
 
-                if (createdResult != null)
+                if (createdResult > 0)
                 {
                     List<User> all_Users = new();
 
@@ -161,6 +165,18 @@ namespace SupervisorMobility.API.Controllers
 
                     if (update)
                     {
+                        int notifyUserId = PatToCreate.Supervisors.FirstOrDefault()?.UserId ?? 1;
+                        await _notificationService.CreateNotificationAsync(new NotificationToCreateDto
+                        {
+                            MadeBy = "SM Mobility",
+                            NotificationType = "PAT Created",
+                            NotificationText = $"PAT (ID: {PatToCreate.PATid}) has been generated for SOS Hub (ID: {SOSHubCollection_Id}).",
+                            UserId = notifyUserId,
+                            IsActive = true,
+                            IsAccepted = true,
+                            EntryDate = DateTime.Now
+                        });
+
                         return Ok(PatToCreate);
                     }
                     else
@@ -183,7 +199,25 @@ namespace SupervisorMobility.API.Controllers
 
                 PATForUpdateDto pat = _mapper.Map<PATForUpdateDto>(patToGenerate);
 
-                await _supervisorMobilityRepository.UpdatePAT(pat, patEntity);
+                int updateResult = await _supervisorMobilityRepository.UpdatePAT(pat, patEntity);
+
+                if (updateResult > 0)
+                {
+                    int notifyUserId = patEntity.Supervisors?.FirstOrDefault()?.UserId
+                        ?? patToGenerate.Supervisors?.FirstOrDefault()?.UserId
+                        ?? 1;
+
+                    await _notificationService.CreateNotificationAsync(new NotificationToCreateDto
+                    {
+                        MadeBy = "SM Mobility",
+                        NotificationType = "PAT Updated",
+                        NotificationText = $"PAT (ID: {patEntity.PATid}) has been updated.",
+                        UserId = notifyUserId,
+                        IsActive = true,
+                        IsAccepted = true,
+                        EntryDate = DateTime.Now
+                    });
+                }
 
 
 

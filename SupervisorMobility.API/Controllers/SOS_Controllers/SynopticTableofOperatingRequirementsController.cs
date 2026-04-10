@@ -4,6 +4,7 @@ using System.Diagnostics;
 // - External imports
 using Microsoft.AspNetCore.Mvc;
 using AutoMapper;
+using SupervisorMobility.API.Business;
 
 // - Context imports
 using SupervisorMobility.API.DataAccess.Services;
@@ -21,6 +22,7 @@ using SupervisorMobility.API.Models.SOS.SOSSynopticTableofOperatingRequirementsL
 using SupervisorMobility.API.Models.SOS.SOSSynopticTableofOperatingRequirementsDtos;
 using SupervisorMobility.API.Models.SOS.SOSHubDtos.SectionDtos;
 using SupervisorMobility.API.Models.CommentaryDtos;
+using SupervisorMobility.API.Models.NotificationDtos;
 using SupervisorMobility.API.Models.SOS.SOSHubDtos;
 using SupervisorMobility.API.Models.FileUploadDto;
 using SupervisorMobility.API.DataAccess.Entities.SOS.STRO;
@@ -41,6 +43,7 @@ namespace SupervisorMobility.API.Controllers.SOS_Controllers
         private readonly ISOS_DistributionRepository _DistributionRepository;
         private readonly ISOS_SynopticTableRepository _SynopticTableRepository;
         private readonly ISTOperatingRequirementsService _STOperatingRequirementsService;
+        private readonly INotificationService _notificationService;
 
         /// <summary>
         /// Initializes a new instance of the <see cref="SynopticTableofOperatingRequirementsController"/> class.
@@ -50,7 +53,7 @@ namespace SupervisorMobility.API.Controllers.SOS_Controllers
         /// <param name="repository">Repository used to access SOS process data.</param>
         /// <param name="STOperatingRequirementsService">Service used to manage Synoptic Table of Operating Requirements (STRO) operations.</param>
         /// <exception cref="ArgumentNullException">Thrown if <paramref name="mapper"/> or <paramref name="env"/> is null.</exception>
-        public SynopticTableofOperatingRequirementsController(IWebHostEnvironment env, IMapper mapper, ISOS_ProcessRepository repository, ISTOperatingRequirementsService STOperatingRequirementsService, ISOS_DistributionRepository distributionRepository, ISOS_SynopticTableRepository synopticTableRepository)
+        public SynopticTableofOperatingRequirementsController(IWebHostEnvironment env, IMapper mapper, ISOS_ProcessRepository repository, ISTOperatingRequirementsService STOperatingRequirementsService, ISOS_DistributionRepository distributionRepository, ISOS_SynopticTableRepository synopticTableRepository, INotificationService notificationService)
         {
             _ProcessRepository = repository;
             _STOperatingRequirementsService = STOperatingRequirementsService;
@@ -58,6 +61,7 @@ namespace SupervisorMobility.API.Controllers.SOS_Controllers
             _env = env ?? throw new ArgumentNullException(nameof(env));
             _DistributionRepository = distributionRepository;
             _SynopticTableRepository = synopticTableRepository;
+            _notificationService = notificationService ?? throw new ArgumentNullException(nameof(notificationService));
         }
 
         /// <summary>
@@ -73,6 +77,8 @@ namespace SupervisorMobility.API.Controllers.SOS_Controllers
         [HttpPost]
         public async Task<ActionResult<SOSSynopticRequirementsDto>> GenerateSynopticTableofOperatingRequirements(SOSSynopticTableofOperatingRequirementsForCreateDto sOSSynopticTableofOperatingRequirementsToCreate, int SOSHubCollection_Id)
         {
+            SOSHub sosHubEntity = await _ProcessRepository.GetSOSHub(SOSHubCollection_Id, includeInformation: true);
+
             // ============ CREATE NEW SYNOPTIC TABLE ============= \\
             if (sOSSynopticTableofOperatingRequirementsToCreate.SOSSynopticTableofOperatingRequirementsId == 0)
             {
@@ -157,8 +163,22 @@ namespace SupervisorMobility.API.Controllers.SOS_Controllers
 
                 // NOTE: Create synoptic table in repository
                 var createdResult = await _SynopticTableRepository.CreateSOSSynopticTableofOperatingRequirements(SynopticTableofOperatingRequirementsToCreate);
-                if (createdResult != null)
+                if (createdResult > 0)
+                {
+                    int notifyUserId = sosHubEntity?.CreatorId ?? 1;
+                    await _notificationService.CreateNotificationAsync(new NotificationToCreateDto
+                    {
+                        MadeBy = "SM Mobility",
+                        NotificationType = "SOS STOR Created",
+                        NotificationText = $"Synoptic Table of Operating Requirements (ID: {SynopticTableofOperatingRequirementsToCreate.SOSSynopticTableofOperatingRequirementsId}) has been generated for SOS Hub (ID: {SOSHubCollection_Id}).",
+                        UserId = notifyUserId,
+                        IsActive = true,
+                        IsAccepted = true,
+                        EntryDate = DateTime.Now
+                    });
+
                     return Ok(SynopticTableofOperatingRequirementsToCreate);
+                }
                 else
                     return BadRequest();
             }
@@ -183,6 +203,19 @@ namespace SupervisorMobility.API.Controllers.SOS_Controllers
                 {
                     return BadRequest();
                 }
+
+
+                int reviewNotifyUserId = sosHubEntity?.CreatorId ?? 1;
+                await _notificationService.CreateNotificationAsync(new NotificationToCreateDto
+                {
+                    MadeBy = "SM Mobility",
+                    NotificationType = "SOS STOR Review Completed",
+                    NotificationText = $"Synoptic Table of Operating Requirements (ID: {_sosSynopticTableofOperatingRequirements.SOSSynopticTableofOperatingRequirementsId}) review has been completed.",
+                    UserId = reviewNotifyUserId,
+                    IsActive = true,
+                    IsAccepted = true,
+                    EntryDate = DateTime.Now
+                });
 
 
 

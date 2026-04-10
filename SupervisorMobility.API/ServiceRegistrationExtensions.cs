@@ -27,6 +27,7 @@ using SupervisorMobility.API.DataAccess.Services;
 // - Business / Service imports
 using SupervisorMobility.API.Business;
 using SupervisorMobility.API.Services;
+using SupervisorMobility.API.Services.BackgroundServices;
 using SupervisorMobility.API.Services.SOS;
 
 // - Interface imports
@@ -94,6 +95,7 @@ namespace SupervisorMobility.API
 
             //Another
             services.AddScoped<IJobObservationService, JobObservationService>();
+            services.AddScoped<INotificationService, NotificationService>();
             services.AddScoped<IAssyChartService, AssyChartService>();
             services.AddScoped<IEmailService, EmailService>();
             services.AddScoped<ITreeService, TreeService>();
@@ -103,6 +105,10 @@ namespace SupervisorMobility.API
             services.AddScoped<ILocalUserCoursesService, LocalUserCoursesService>();
             services.AddScoped<ILocalUserCoursesRepository, LocalUserCoursesRepository>();
 
+
+            // Register EmailQueueBackgroundService as singleton and hosted service
+            services.AddSingleton<EmailQueueBackgroundService>();
+            services.AddHostedService(provider => provider.GetRequiredService<EmailQueueBackgroundService>());
 
             //HRI Services
             services.AddScoped<IHRIServices, HRIServices>();

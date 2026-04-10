@@ -5,6 +5,7 @@ using KellermanSoftware.CompareNetObjects;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 using Newtonsoft.Json;
+using SupervisorMobility.API.Business;
 using SupervisorMobility.API.DataAccess.Entities;
 using SupervisorMobility.API.DataAccess.Entities.SOS;
 using SupervisorMobility.API.DataAccess.Services;
@@ -30,13 +31,15 @@ namespace SupervisorMobility.API.Controllers.SOS_Controllers
         private readonly IMapper _mapper;
         //private readonly SupervisorMobilityContext _context;
         private readonly IWebHostEnvironment _env;
+        private readonly INotificationService _notificationService;
 
-        public SOSDataHubController(ISOS_ProcessRepository repository, IWebHostEnvironment env, IMapper mapper)
+        public SOSDataHubController(ISOS_ProcessRepository repository, IWebHostEnvironment env, IMapper mapper, INotificationService notificationService)
         {
             _AnalysisProcessRepository = repository;
             _mapper = mapper ??
                   throw new ArgumentNullException(nameof(mapper));
             _env = env ?? throw new ArgumentNullException(nameof(env));
+            _notificationService = notificationService ?? throw new ArgumentNullException(nameof(notificationService));
         }
 
         [HttpPost]
@@ -136,6 +139,17 @@ namespace SupervisorMobility.API.Controllers.SOS_Controllers
 
             if (createdResult != null)
             {
+                _notificationService.CreateNotificationAsync(new Models.NotificationDtos.NotificationToCreateDto
+                {
+                    MadeBy = "SM Mobility",
+                    NotificationType = "New SOS Hub Created",
+                    NotificationText = $"A new SOS Hub with ID {createdResult.SOSHubId} has been created.",
+                    // UserId = SOSEntity.CreatorId ?? 0, // Assuming the creator should receive the notification
+                    UserId = 1, // Assuming the creator should receive the notification
+                    IsActive = true,
+                    IsAccepted = true,
+                    EntryDate = DateTime.Now
+                });
                 return Ok(_mapper.Map<SOSHubDto>(createdResult));
             }
             else
