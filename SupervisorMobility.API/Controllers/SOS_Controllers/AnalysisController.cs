@@ -17,6 +17,8 @@ using SupervisorMobility.API.Models.SOS.SOSHubDtos;
 using SupervisorMobility.API.Models.SOS.SOSTimeDtos;
 using SupervisorMobility.API.Models.SOS.ToolDtos;
 using SupervisorMobility.API.Models.SOSReviewDtos;
+using SupervisorMobility.API.Models.NotificationDtos;
+using SupervisorMobility.API.Business;
 using System.Diagnostics;
 
 namespace SupervisorMobility.API.Controllers.SOS_Controllers
@@ -29,13 +31,21 @@ namespace SupervisorMobility.API.Controllers.SOS_Controllers
         private readonly ISOS_AnalysisRepository _AnalysusRepository;
         private readonly IMapper _mapper;
         private readonly IWebHostEnvironment _env;
-        public AnalysisController(IWebHostEnvironment env, IMapper mapper, ISOS_ProcessRepository repository, ISOS_AnalysisRepository analysisRepository)
+        private readonly INotificationService _notificationService;
+        public AnalysisController(
+            IWebHostEnvironment env, 
+            IMapper mapper, 
+            ISOS_ProcessRepository repository, 
+            ISOS_AnalysisRepository analysisRepository,
+            INotificationService notificationService
+        )
         {
             _ProcessRepository = repository;
             _mapper = mapper ??
                   throw new ArgumentNullException(nameof(mapper));
             _env = env ?? throw new ArgumentNullException(nameof(env));
             _AnalysusRepository = analysisRepository;
+            _notificationService = notificationService;
         }
 
         [HttpPost]
@@ -58,8 +68,23 @@ namespace SupervisorMobility.API.Controllers.SOS_Controllers
                 SOSAnalysis AnalysisToCreate = _mapper.Map<SOSAnalysis>(sOSAnalysisToCreate);
 
                 var createdResult = await _AnalysusRepository.CreateSOSAnalysis(AnalysisToCreate);
-                if (createdResult != null)
+                if (createdResult > 0)
+                {
+                    // Create a notification for the new analysis creation
+                    NotificationToCreateDto notificationDto = new NotificationToCreateDto
+                    {
+                        MadeBy = "SM Mobility",
+                        NotificationType = "New SOS Hub Created",
+                        NotificationText = $"A new SOS Analysis (ID: {AnalysisToCreate.SOSAnalysisId}) has been created for SOS Hub (ID: {SOSEntity.SOSHubId}).",
+                        // UserId = SOSEntity.CreatedBy ?? 0, // Assuming the creator should receive the notification
+                        UserId = 1, // Assuming the creator should receive the notification
+                        IsActive = true,
+                        IsAccepted = true,
+                        EntryDate = DateTime.Now
+                    };
+                    _notificationService.CreateNotificationAsync(notificationDto);
                     return Ok(AnalysisToCreate);
+                }
                 else
                     return BadRequest();
             }
@@ -84,8 +109,19 @@ namespace SupervisorMobility.API.Controllers.SOS_Controllers
                     return BadRequest();
                 }
 
-
-
+                // Create notification for new revision
+                NotificationToCreateDto notificationDto = new NotificationToCreateDto
+                {
+                    MadeBy = "SM Mobility",
+                    NotificationType = "SOS Analysis Updated",
+                    NotificationText = $"SOS Analysis (ID: {_sosAnalysis.SOSAnalysisId}) has been updated with a new revision.",
+                    // UserId = _sosAnalysis.CreatedBy ?? 0, // Assuming the creator should receive the notification
+                    UserId = 1, // Assuming the creator should receive the notification
+                    IsActive = true,
+                    IsAccepted = true,
+                    EntryDate = DateTime.Now
+                };
+                _notificationService.CreateNotificationAsync(notificationDto);
                 return Ok(_sosAnalysis);
             }
 
