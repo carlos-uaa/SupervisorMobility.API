@@ -15,7 +15,7 @@ namespace SupervisorMobility.API.DataAccess.Entities.HRI
         public RevisionMethod? RevisionMethod { get; set; }
         public int? VeredictId { get; set; }
         public Veredict? Veredict { get; set; }
-        public int? FrecuencyId { get; set; }//por confirmar
-        public Frecuency? Frecuency { get; set; }
+        public int? FrequencyId { get; set; }//por confirmar
+        public Frequency? Frequency { get; set; }
     }
 }

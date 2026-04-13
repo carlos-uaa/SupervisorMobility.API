@@ -3,7 +3,7 @@ using System.ComponentModel.DataAnnotations;
 
 namespace SupervisorMobility.API.DataAccess.Entities.HRI_s_Entities.HRIRevisionsItem_Entities
 {
-    public class Frecuency
+    public class Frequency
     {
         [Key]
         public int Id { get; set; }

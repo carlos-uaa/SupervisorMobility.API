@@ -174,7 +174,7 @@ namespace SupervisorMobility.API.Context
         public DbSet<DailyRevisions> DailyRevisions { get; set; }
         public DbSet<RevisionMethod> RevisionMethods { get; set; }  
         public DbSet<Veredict> Veredicts { get; set; }
-        public DbSet<Frecuency> Frecuencies { get; set; }
+        public DbSet<Frequency> Frequencies { get; set; }
         #endregion
 
         public SupervisorMobilityContext(DbContextOptions<SupervisorMobilityContext> options)
