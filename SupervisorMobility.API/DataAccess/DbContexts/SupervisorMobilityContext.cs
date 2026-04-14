@@ -161,7 +161,7 @@ namespace SupervisorMobility.API.Context
 
         #endregion
 
-        #region
+        #region HRIs
         public DbSet<HRI>  HRIs { get; set; }
         public DbSet<HRILines> HRILines { get; set; }
         public DbSet<HRIDock> HRIDocks { get; set; }

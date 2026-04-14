@@ -69,7 +69,7 @@ namespace SupervisorMobility.API.DataAccess.Services.HRIRepository
             var response = new ServiceResponse<GetHRICyclesDto>();
             try
             {
-                var hriCycle = await _context.HRICycles.Include(h => h.DailyRevisions).FirstOrDefaultAsync(h => h.CycleId == id);
+                var hriCycle = await _context.HRICycles.Include(h => h.DailyRevisions).Include(h => h.Responsible).FirstOrDefaultAsync(h => h.CycleId == id);
                 if (hriCycle == null)
                 {
                     response.Success = false;

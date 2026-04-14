@@ -2,6 +2,7 @@
 using SupervisorMobility.API.Context;
 using SupervisorMobility.API.Models.HRIRevisionCycles;
 using Microsoft.EntityFrameworkCore;
+using SupervisorMobility.API.DataAccess.Entities.HRI;
 
 namespace SupervisorMobility.API.DataAccess.Services.HRIRepository
 {
@@ -14,39 +15,179 @@ namespace SupervisorMobility.API.DataAccess.Services.HRIRepository
             _context = context;
             _mapper = mapper;
         }
-        public Task<ServiceResponse<List<GetRevisionCyclesDto>>> GetAllRevisionCycles()
+        public async Task<ServiceResponse<List<GetRevisionCyclesDto>>> GetAllRevisionCycles()
         {
-            throw new NotImplementedException();
+            var response = new ServiceResponse<List<GetRevisionCyclesDto>>();
+            try
+            {
+                var revisionCycles = await _context.RevisionCycles.Include(rc => rc.DailyRevisions).ToListAsync();
+                if(revisionCycles == null || revisionCycles.Count == 0) 
+                {
+                    response.Success = false;
+                    response.Message = "No revision cycles found.";
+                    return response;
+                }
+                response.Data = revisionCycles.Select(rc => _mapper.Map<GetRevisionCyclesDto>(rc)).ToList();
+                response.Success = true;
+                response.Message = "Revision cycles retrieved successfully.";
+            }
+            catch (Exception ex)
+            {
+                response.Success = false;
+                response.Message = $"An error occurred while retrieving revision cycles: {ex.Message}";
+            }
+            return response;
         }
 
-        public Task<ServiceResponse<List<GetRevisionCyclesDto>>> GetAllRevisionCyclesByRevisionItemId(int itemId)
+        public async Task<ServiceResponse<List<GetRevisionCyclesDto>>> GetAllRevisionCyclesByRevisionItemId(int itemId)
         {
-            throw new NotImplementedException();
+            var response = new ServiceResponse<List<GetRevisionCyclesDto>>();
+            try
+            {
+                var revisionCycles = await _context.RevisionCycles.Include(rc=>rc.DailyRevisions).Where(rc => rc.HRIRevisionItemsId == itemId).ToListAsync();
+                if(revisionCycles == null || revisionCycles.Count == 0) 
+                {
+                    response.Success = false;
+                    response.Message = "No revision cycles found for the specified item.";
+                    return response;
+                }
+                response.Data = revisionCycles.Select(rc => _mapper.Map<GetRevisionCyclesDto>(rc)).ToList();
+                response.Success = true;
+                response.Message = "Revision cycles retrieved successfully.";
+            }
+            catch (Exception ex)
+            {
+                response.Success = false;
+                response.Message = $"An error occurred while retrieving revision cycles: {ex.Message}";
+            }
+            return response;
         }
 
-        public Task<ServiceResponse<GetRevisionCyclesDto>> GetRevisionCycleById(int id)
+        public async Task<ServiceResponse<GetRevisionCyclesDto>> GetRevisionCycleById(int id)
         {
-            throw new NotImplementedException();
+            var response = new ServiceResponse<GetRevisionCyclesDto>();
+            try
+            {
+                var revisionCycle = await _context.RevisionCycles.Include(rc => rc.DailyRevisions).FirstOrDefaultAsync(rc => rc.RevisionCycleId == id);
+                if(revisionCycle == null) 
+                {
+                    response.Success = false;
+                    response.Message = "Revision cycle not found.";
+                    return response;
+                }
+                response.Data = _mapper.Map<GetRevisionCyclesDto>(revisionCycle);
+                response.Success = true;
+                response.Message = "Revision cycle retrieved successfully.";
+
+            }
+            catch (Exception ex)
+            {
+                response.Success = false;
+                response.Message = $"An error occurred while retrieving the revision cycle: {ex.Message}";
+            }
+            return response;
         }
 
-        public Task<ServiceResponse<GetRevisionCyclesDto>> CreateRevisionCycle(int itemId, CreateRevisionCyclesDto createRevisionCyclesDto)
+        public async Task<ServiceResponse<GetRevisionCyclesDto>> CreateRevisionCycle(int itemId, CreateRevisionCyclesDto createRevisionCyclesDto)
         {
-            throw new NotImplementedException();
+            var response = new ServiceResponse<GetRevisionCyclesDto>();
+            try
+            {
+                var revisionCycle = _mapper.Map<RevisionCycles>(createRevisionCyclesDto);
+                revisionCycle.HRIRevisionItemsId = itemId;
+                await _context.RevisionCycles.AddAsync(revisionCycle);
+                await _context.SaveChangesAsync();
+                response.Data = _mapper.Map<GetRevisionCyclesDto>(revisionCycle);
+                response.Success = true;
+                response.Message = "Revision cycle created successfully.";
+
+            }
+            catch (Exception ex)
+            {
+                response.Success = false;
+                response.Message = $"An error occurred while creating the revision cycle: {ex.Message}";
+            }
+            return response;
         }
 
-        public Task<ServiceResponse<bool>> CreateRevisionCyclesByRevisionItemId(int itemId, List<CreateRevisionCyclesDto> listOfRevisionsCycles)
+        public async  Task<ServiceResponse<bool>> CreateRevisionCyclesByRevisionItemId(int itemId, List<CreateRevisionCyclesDto> listOfRevisionsCycles)
         {
-            throw new NotImplementedException();
+            var response = new ServiceResponse<bool>();
+            try
+            {
+                foreach (var createRevisionCyclesDto in listOfRevisionsCycles)
+                {
+                    var revisionCycle = _mapper.Map<RevisionCycles>(createRevisionCyclesDto);
+                    revisionCycle.HRIRevisionItemsId = itemId;
+                    await _context.RevisionCycles.AddAsync(revisionCycle);
+                }
+                await _context.SaveChangesAsync();
+                response.Data = true;
+                response.Success = true;
+                response.Message = "Revision cycles created successfully.";
+            }
+            catch (Exception ex)
+            {
+                response.Success = false;
+                response.Message = $"An error occurred while creating the revision cycles: {ex.Message}";
+            }
+            return response;
         }
 
-        public Task<ServiceResponse<GetRevisionCyclesDto>> UpdateRevisionCycle(int id, UpdateRevisionCycleDto updateRevisionCycleDto)
+        public async  Task<ServiceResponse<GetRevisionCyclesDto>> UpdateRevisionCycle(int id, UpdateRevisionCycleDto updateRevisionCycleDto)
         {
-            throw new NotImplementedException();
+            var response = new ServiceResponse<GetRevisionCyclesDto>();
+            try
+            {
+                var revisionCycle = await _context.RevisionCycles.FirstOrDefaultAsync(rc => rc.RevisionCycleId == id);
+                if(revisionCycle == null) 
+                {
+                    response.Success = false;
+                    response.Message = "Revision cycle not found.";
+                    return response;
+                }
+                _mapper.Map(updateRevisionCycleDto, revisionCycle);
+                _context.RevisionCycles.Update(revisionCycle);
+                await _context.SaveChangesAsync();
+                response.Data = _mapper.Map<GetRevisionCyclesDto>(revisionCycle);
+                response.Success = true;
+                response.Message = "Revision cycle updated successfully.";
+
+            }
+            catch (Exception ex)
+            {
+                response.Success = false;
+                response.Message = $"An error occurred while updating the revision cycle: {ex.Message}";
+            }
+            return response;
         }
 
-        public Task<ServiceResponse<bool>> DeleteRevisionCycle(int id)
+        public async  Task<ServiceResponse<bool>> DeleteRevisionCycle(int id)
         {
-            throw new NotImplementedException();
+            var response = new ServiceResponse<bool>();
+            try
+            {
+                var revisionCycle = await _context.RevisionCycles.FirstOrDefaultAsync(rc => rc.RevisionCycleId == id);
+                if(revisionCycle == null) 
+                {
+                    response.Success = false;
+                    response.Message = "Revision cycle not found.";
+                    return response;
+                }
+                _context.RevisionCycles.Remove(revisionCycle);
+                await _context.SaveChangesAsync();
+                response.Data = true;
+                response.Success = true;
+                response.Message = "Revision cycle deleted successfully.";
+            }
+            catch (Exception ex)
+            {
+                response.Success = false;
+                response.Message = $"An error occurred while deleting the revision cycle: {ex.Message}";
+            }
+            return response;
         }
+
+
     }
 }

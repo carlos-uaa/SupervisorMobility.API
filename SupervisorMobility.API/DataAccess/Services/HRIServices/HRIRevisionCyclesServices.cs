@@ -10,39 +10,39 @@ namespace SupervisorMobility.API.DataAccess.Services.HRIServices
         {
             _repository = repository;
         }   
-        public Task<ServiceResponse<List<GetRevisionCyclesDto>>> GetAllRevisionCycles()
+        public async  Task<ServiceResponse<List<GetRevisionCyclesDto>>> GetAllRevisionCycles()
         {
-                return _repository.GetAllRevisionCycles();
+                return await _repository.GetAllRevisionCycles();
         }
 
-        public Task<ServiceResponse<List<GetRevisionCyclesDto>>> GetAllRevisionCyclesByRevisionItemId(int itemId)
+        public async Task<ServiceResponse<List<GetRevisionCyclesDto>>> GetAllRevisionCyclesByRevisionItemId(int itemId)
         {
-            return _repository.GetAllRevisionCyclesByRevisionItemId(itemId);
+            return await _repository.GetAllRevisionCyclesByRevisionItemId(itemId);
         }
 
-        public Task<ServiceResponse<GetRevisionCyclesDto>> GetRevisionCycleById(int id)
+        public async  Task<ServiceResponse<GetRevisionCyclesDto>> GetRevisionCycleById(int id)
         {
-            return _repository.GetRevisionCycleById(id);
+            return await _repository.GetRevisionCycleById(id);
         }
 
-        public Task<ServiceResponse<GetRevisionCyclesDto>> CreateRevisionCycle(int itemId, CreateRevisionCyclesDto createRevisionCyclesDto)
+        public async Task<ServiceResponse<GetRevisionCyclesDto>> CreateRevisionCycle(int itemId, CreateRevisionCyclesDto createRevisionCyclesDto)
         {
-            return _repository.CreateRevisionCycle(itemId, createRevisionCyclesDto);
+            return await _repository.CreateRevisionCycle(itemId, createRevisionCyclesDto);
         }
 
-        public Task<ServiceResponse<bool>> CreateRevisionCyclesByRevisionItemId(int itemId, List<CreateRevisionCyclesDto> listOfRevisionsCycles)
+        public async Task<ServiceResponse<bool>> CreateRevisionCyclesByRevisionItemId(int itemId, List<CreateRevisionCyclesDto> listOfRevisionsCycles)
         {
-            return _repository.CreateRevisionCyclesByRevisionItemId(itemId, listOfRevisionsCycles);
+            return await _repository.CreateRevisionCyclesByRevisionItemId(itemId, listOfRevisionsCycles);
         }
 
-        public Task<ServiceResponse<GetRevisionCyclesDto>> UpdateRevisionCycle(int id, UpdateRevisionCycleDto updateRevisionCycleDto)
+        public async Task<ServiceResponse<GetRevisionCyclesDto>> UpdateRevisionCycle(int id, UpdateRevisionCycleDto updateRevisionCycleDto)
         {
-            return _repository.UpdateRevisionCycle(id, updateRevisionCycleDto);
+            return await _repository.UpdateRevisionCycle(id, updateRevisionCycleDto);
         }
 
-        public Task<ServiceResponse<bool>> DeleteRevisionCycle(int id)
+        public async Task<ServiceResponse<bool>> DeleteRevisionCycle(int id)
         {
-            return _repository.DeleteRevisionCycle(id);
+            return await _repository.DeleteRevisionCycle(id);
         }
     }
 }

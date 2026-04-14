@@ -1,7 +1,7 @@
 ﻿using SupervisorMobility.API.DataAccess.Entities.HRI_s_Entities.HRIRevisionsItem_Entities;
 using System.ComponentModel.DataAnnotations;
 
-namespace SupervisorMobility.API.DataAccess.Entities.HRI
+namespace SupervisorMobility.API.DataAccess.Entities.HRI_s_Entities
 {
     public class HRIRevisionItems
     {

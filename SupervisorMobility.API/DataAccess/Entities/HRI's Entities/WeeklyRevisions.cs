@@ -1,6 +1,6 @@
 ﻿using System.ComponentModel.DataAnnotations;
 
-namespace SupervisorMobility.API.DataAccess.Entities.HRI
+namespace SupervisorMobility.API.DataAccess.Entities.HRI_s_Entities
 {
     public class WeeklyRevisions
     {
@@ -8,7 +8,8 @@ namespace SupervisorMobility.API.DataAccess.Entities.HRI
         public int RevisionId  { get; set; }
         public int HriId { get; set; }
         public HRI HRI { get; set; }
-        public User SeniorSupervisor { get; set; }
+        public int? UserId { get; set; }
+        public User? SeniorSupervisor { get; set; }
         public int Month { get; set; }
         public int Week { get; set; }
     }

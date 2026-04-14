@@ -1,4 +1,5 @@
 ﻿using DocumentFormat.OpenXml.Drawing.Charts;
+using SupervisorMobility.API.DataAccess.Entities.HRI_s_Entities;
 using SupervisorMobility.API.DataAccess.Entities.ILU;
 using SupervisorMobility.API.DataAccess.Entities.SOS;
 using SupervisorMobility.API.DataAccess.Entities.SOS.History;
@@ -92,6 +93,10 @@ namespace SupervisorMobility.API.DataAccess.Entities
         public ICollection<SOSHubHistory>? SOSHubHistoriesApproverOwners { get; set; }
 
         public ICollection<SOSHubHistory>? SOSHubHistoriesReviewerEditors { get; set; }
+        public List<HRI>? HRI { get; set; }
+        public List<HRICycles>? HRICycles { get; set; }
+        public List<DailyRevisions>? DailyRevisions { get; set; }
+        public List<WeeklyRevisions>? WeeklyRevisions { get; set; }
 
         public override bool Equals(object obj)
         {
