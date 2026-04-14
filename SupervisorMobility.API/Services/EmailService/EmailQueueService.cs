@@ -1,35 +1,171 @@
 using SupervisorMobility.API.Models;
 using SupervisorMobility.API.Models.Email;
 using Microsoft.EntityFrameworkCore;
+using SupervisorMobility.API.Entities;
 
 namespace SupervisorMobility.API.Services.EmailService
 {
     public interface IEmailQueueService
     {
-        // Task<ServiceResponse<EmailQueue>> CreateEmailQueueAsync(Notification notification, Users madeby);
+        Task<EmailQueue> AddEmailQueueEntryAsync(Notification notification, string type);
+        Task<ServiceResponse<List<EmailQueue>>> GetPendingEmailQueuesAsync();
+        Task<ServiceResponse<bool>> IncrementAttempt(int id);
+        
+        Task<ServiceResponse<EmailQueue>> AcceptEmailQueueAsync(int id);
+
         // Task<ServiceResponse<EmailQueue>> CreateEmailQueueAsync(EmailQueue emailQueue);
-        // Task<ServiceResponse<List<EmailQueue>>> GetPendingEmailQueuesAsync();
         // Task<ServiceResponse<EmailQueue>> GetEmailQueueByIdAsync(int id);
         // Task<ServiceResponse<List<EmailQueue>>> GetAllEmailQueuesAsync();
         // Task<ServiceResponse<List<EmailQueue>>> GetEmailQueuesByUserAsync(int userId);
         // Task<ServiceResponse<List<EmailQueue>>> GetEmailQueuesByPIRAsync(int pirId);
         // Task<ServiceResponse<EmailQueue>> UpdateEmailQueueAsync(int id, EmailQueue emailQueue);
         // Task<ServiceResponse<bool>> DeleteEmailQueueAsync(int id);
-        // Task<ServiceResponse<EmailQueue>> AcceptEmailQueueAsync(int id);
+        
         // Task<ServiceResponse<EmailQueue>> RejectEmailQueueAsync(int id);
-        // Task<ServiceResponse<bool>> IncrementAttempt(int id);
+        
     }
 
     public class EmailQueueService : IEmailQueueService
     {
-        // private readonly DatabaseContext _context;
+        private readonly ISupervisorMobilityRepository _repository;
 
         public EmailQueueService(
-            // DatabaseContext context
-            )
+            ISupervisorMobilityRepository repository
+        )
         {
-            // _context = context;
+            _repository = repository;
         }
+
+
+        public async Task<EmailQueue> AddEmailQueueEntryAsync(Notification notification, string type)
+        {
+            // Logic to add the notification to the email queue
+            EmailQueue emailQueueEntry = new EmailQueue
+            {
+                MadeByID = notification.UserId,
+                NotificationType = notification.NotificationType ?? type,
+                StaffID = notification.UserId, // Assuming the staff is the same as the user for this example
+                EntryDate = DateTime.Now,
+                IsSend = false,
+                Attempts = 0
+            };
+
+            return await _repository.AddEmailQueueEntryAsync(emailQueueEntry);
+        }
+
+        public async Task<ServiceResponse<List<EmailQueue>>> GetPendingEmailQueuesAsync()
+        {
+            try
+            {
+                var emailQueue = await _repository.GetPendingEmailQueuesAsync();
+
+                return new ServiceResponse<List<EmailQueue>>
+                {
+                    Success = true,
+                    Data = emailQueue
+                };
+            }
+            catch (Exception ex)
+            {
+                return new ServiceResponse<List<EmailQueue>>
+                {
+                    Success = false,
+                    Message = $"Error retrieving pending email queues: {ex.Message}"
+                };
+            }
+        }
+
+
+        public async Task<ServiceResponse<bool>> IncrementAttempt(int id)
+        {
+            var response = new ServiceResponse<bool>();
+            try
+            {
+                var emailQueue = await _repository.GetEmailQueueByIdAsync(id);
+                if (emailQueue == null)
+                {
+                    response.Success = false;
+                    response.Message = $"Email queue with ID {id} not found";
+                    response.Data = false;
+                    return response;
+                }
+
+
+                if (emailQueue.Attempts < 5)
+                {
+                    emailQueue.Attempts = emailQueue.Attempts + 1;
+                    await _repository.UpdateEmailQueueAsync(emailQueue);
+                }
+                else
+                {
+                    await AcceptEmailQueueAsync(id);
+                }
+
+                response.Success = true;
+                response.Message = "Attempt incremented successfully";
+                response.Data = true;
+                return response;
+            }
+            catch (Exception ex)
+            {
+                response.Success = false;
+                response.Message = $"Error incrementing attempt: {ex.Message}";
+                response.Data = false;
+                return response;
+            }
+        }
+        
+        public async Task<ServiceResponse<EmailQueue>> AcceptEmailQueueAsync(int id)
+        {
+            try
+            {
+                var emailQueue = await _repository.GetEmailQueueByIdAsync(id);
+
+                if (emailQueue == null)
+                {
+                    return new ServiceResponse<EmailQueue>
+                    {
+                        Success = false,
+                        Message = $"Email queue with ID {id} not found"
+                    };
+                }
+
+                emailQueue.IsSend = true;
+                emailQueue.SendDate = DateTime.Now;
+                await _repository.UpdateEmailQueueAsync(emailQueue);
+
+                return new ServiceResponse<EmailQueue>
+                {
+                    Success = true,
+                    Data = await _repository.GetEmailQueueByIdAsync(id),
+                    Message = "Email queue accepted successfully"
+                };
+            }
+            catch (Exception ex)
+            {
+                return new ServiceResponse<EmailQueue>
+                {
+                    Success = false,
+                    Message = $"Error accepting email queue: {ex.Message}"
+                };
+            }
+        }
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
 
         // public async Task<ServiceResponse<EmailQueue>> CreateEmailQueueAsync(Notification notification, Users madeby)
         // {
@@ -113,69 +249,8 @@ namespace SupervisorMobility.API.Services.EmailService
         //         };
         //     }
         // }
-        // public async Task<ServiceResponse<List<EmailQueue>>> GetPendingEmailQueuesAsync()
-        // {
-        //     try
-        //     {
-        //         var emailQueues = await _context.EmailQueues
-        //             .Include(e => e.MadeBy)
-        //             .Include(e => e.TargetRelation)
-        //             .Include(e => e.Staff)
-        //             .Where(e => !e.IsSend)
-        //             .OrderBy(e => e.EntryDate)
-        //             .Take(1)
-        //             .ToListAsync();
 
-        //         return new ServiceResponse<List<EmailQueue>>
-        //         {
-        //             Success = true,
-        //             Data = emailQueues
-        //         };
-        //     }
-        //     catch (Exception ex)
-        //     {
-        //         return new ServiceResponse<List<EmailQueue>>
-        //         {
-        //             Success = false,
-        //             Message = $"Error retrieving pending email queues: {ex.Message}"
-        //         };
-        //     }
-        // }
-        // public async Task<ServiceResponse<EmailQueue>> AcceptEmailQueueAsync(int id)
-        // {
-        //     try
-        //     {
-        //         var emailQueue = await _context.EmailQueues.FindAsync(id);
-
-        //         if (emailQueue == null)
-        //         {
-        //             return new ServiceResponse<EmailQueue>
-        //             {
-        //                 Success = false,
-        //                 Message = $"Email queue with ID {id} not found"
-        //             };
-        //         }
-
-        //         emailQueue.IsSend = true;
-        //         emailQueue.SendDate = DateTime.Now;
-        //         await _context.SaveChangesAsync();
-
-        //         return new ServiceResponse<EmailQueue>
-        //         {
-        //             Success = true,
-        //             Data = await GetEmailQueueWithRelationsAsync(id),
-        //             Message = "Email queue accepted successfully"
-        //         };
-        //     }
-        //     catch (Exception ex)
-        //     {
-        //         return new ServiceResponse<EmailQueue>
-        //         {
-        //             Success = false,
-        //             Message = $"Error accepting email queue: {ex.Message}"
-        //         };
-        //     }
-        // }
+        
         // public async Task<ServiceResponse<EmailQueue>> RejectEmailQueueAsync(int id)
         // {
         //     try
@@ -210,17 +285,6 @@ namespace SupervisorMobility.API.Services.EmailService
         //         };
         //     }
         // }
-
-
-
-
-
-
-
-
-
-
-
 
         // public async Task<ServiceResponse<EmailQueue>> GetEmailQueueByIdAsync(int id)
         // {
@@ -461,43 +525,6 @@ namespace SupervisorMobility.API.Services.EmailService
         //         .FirstOrDefaultAsync(e => e.EmailQueueID == id);
         // }
 
-        // public async Task<ServiceResponse<bool>> IncrementAttempt(int id)
-        // {
-        //     var response = new ServiceResponse<bool>();
-        //     try
-        //     {
-        //         var emailQueue = await _context.EmailQueues.FirstOrDefaultAsync(eq => eq.EmailQueueID == id);
-        //         if (emailQueue == null)
-        //         {
-        //             response.Success = false;
-        //             response.Message = $"Email queue with ID {id} not found";
-        //             response.Data = false;
-        //             return response;
-        //         }
 
-              
-        //         if (emailQueue.Attempts < 5)
-        //         {
-        //             emailQueue.Attempts = emailQueue.Attempts  + 1;
-        //             await _context.SaveChangesAsync();
-        //         }
-        //         else 
-        //         { 
-        //             await AcceptEmailQueueAsync(id);
-        //         }
-
-        //         response.Success = true;
-        //         response.Message = "Attempt incremented successfully";
-        //         response.Data = true;
-        //         return response;
-        //     }
-        //     catch (Exception ex)
-        //     {
-        //         response.Success = false;
-        //         response.Message = $"Error incrementing attempt: {ex.Message}";
-        //         response.Data = false;
-        //         return response;
-        //     }
-        // }
     }
 }

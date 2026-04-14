@@ -1,3 +1,4 @@
+using SupervisorMobility.API.DataAccess.Services;
 using SupervisorMobility.API.Services.EmailService;
 
 namespace SupervisorMobility.API.Services.BackgroundServices
@@ -54,7 +55,7 @@ namespace SupervisorMobility.API.Services.BackgroundServices
 
                     Interlocked.Exchange(ref _isProcessing, 1);
 
-                    // await ProcessPendingEmails(stoppingToken);
+                    await ProcessPendingEmails(stoppingToken);
 
                     Interlocked.Exchange(ref _isProcessing, 0);
 
@@ -80,52 +81,52 @@ namespace SupervisorMobility.API.Services.BackgroundServices
             _logger.LogInformation("Email Queue Background Service detenido");
         }
 
-        // private async Task ProcessPendingEmails(CancellationToken stoppingToken)
-        // {
-        //     using (var scope = _serviceProvider.CreateScope())
-        //     {
-        //         var emailQueueService = scope.ServiceProvider.GetRequiredService<IEmailQueueService>();
+        private async Task ProcessPendingEmails(CancellationToken stoppingToken)
+        {
+            using (var scope = _serviceProvider.CreateScope())
+            {
+                var emailQueueService = scope.ServiceProvider.GetRequiredService<IEmailQueueService>();
 
-        //         while (!stoppingToken.IsCancellationRequested)
-        //         {
-        //             var pendingQueuesResponse = await emailQueueService.GetPendingEmailQueuesAsync();
+                while (!stoppingToken.IsCancellationRequested)
+                {
+                    var pendingQueuesResponse = await emailQueueService.GetPendingEmailQueuesAsync();
 
-        //             if (pendingQueuesResponse.Success && pendingQueuesResponse.Data != null && pendingQueuesResponse.Data.Count > 0)
-        //             {
-        //                 _logger.LogInformation($"Procesando {pendingQueuesResponse.Data.Count} email(s) pendiente(s)");
+                    if (pendingQueuesResponse.Success && pendingQueuesResponse.Data != null && pendingQueuesResponse.Data.Count > 0)
+                    {
+                        _logger.LogInformation($"Procesando {pendingQueuesResponse.Data.Count} email(s) pendiente(s)");
 
-        //                 foreach (var emailQueue in pendingQueuesResponse.Data)
-        //                 {
-        //                     try
-        //                     {
-        //                         var emailService = scope.ServiceProvider.GetRequiredService<IEmailService>();
-        //                         var wasSent =  await emailService.SendEmailAsync(emailQueue);
-        //                         if(wasSent == false)
-        //                         {
-        //                             await emailQueueService.IncrementAttempt(emailQueue.EmailQueueID);
-        //                         }
-        //                         else
-        //                         {
-        //                             await emailQueueService.AcceptEmailQueueAsync(emailQueue.EmailQueueID);
-        //                         }
-        //                             _logger.LogInformation($"Email procesado: EmailQueue ID: {emailQueue.EmailQueueID}");
+                        foreach (var emailQueue in pendingQueuesResponse.Data)
+                        {
+                            try
+                            {
+                                var emailService = scope.ServiceProvider.GetRequiredService<IEmailServices>();
+                                var wasSent =  await emailService.SendEmailAsync(emailQueue);
+                                if(wasSent == false)
+                                {
+                                    await emailQueueService.IncrementAttempt(emailQueue.EmailQueueID);
+                                }
+                                else
+                                {
+                                    await emailQueueService.AcceptEmailQueueAsync(emailQueue.EmailQueueID);
+                                }
+                                    _logger.LogInformation($"Email procesado: EmailQueue ID: {emailQueue.EmailQueueID}");
                                 
-        //                     }
-        //                     catch (Exception ex)
-        //                     {
-        //                         _logger.LogError(ex, $"Error procesando EmailQueue ID: {emailQueue.EmailQueueID}");
-        //                     }
-        //                 }
+                            }
+                            catch (Exception ex)
+                            {
+                                _logger.LogError(ex, $"Error procesando EmailQueue ID: {emailQueue.EmailQueueID}");
+                            }
+                        }
 
-        //                 await Task.Delay(TimeSpan.FromSeconds(2), stoppingToken);
-        //             }
-        //             else
-        //             {
-        //                 _logger.LogInformation("No hay más emails pendientes. Servicio en espera.");
-        //                 break;
-        //             }
-        //         }
-        //     }
-        // }
+                        await Task.Delay(TimeSpan.FromSeconds(2), stoppingToken);
+                    }
+                    else
+                    {
+                        _logger.LogInformation("No hay más emails pendientes. Servicio en espera.");
+                        break;
+                    }
+                }
+            }
+        }
     }
 }
