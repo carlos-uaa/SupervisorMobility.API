@@ -46,7 +46,7 @@ namespace SupervisorMobility.API.Controllers.HRIControllers
              [ProducesResponseType(StatusCodes.Status201Created)]
              [ProducesResponseType(StatusCodes.Status400BadRequest)]
              [ProducesResponseType(StatusCodes.Status500InternalServerError)]
-             public async Task<ActionResult<ServiceResponse<GetHRICyclesDto>>> CreateHRICycle(CreateHRICycles createHRICycle)
+             public async Task<ActionResult<ServiceResponse<GetHRICyclesDto>>> CreateHRICycle(CreateHRICyclesDto createHRICycle)
              {
                  var response = await _HRICyclesService.CreateHRICycle(createHRICycle);
                  if (response.Data == null)

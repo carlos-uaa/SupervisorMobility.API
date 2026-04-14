@@ -116,6 +116,10 @@ namespace SupervisorMobility.API
             services.AddScoped<IHRIDocksService, HRIDocksService>();
             services.AddScoped<IHRILinesService, HRILinesService>();
             services.AddScoped<IHRICyclesService, HRICyclesServices>();
+            services.AddScoped<IHRIRevisionItemService, HRIRevisionItemService>();
+            services.AddScoped<IHRIRevisionItemRepository, HRIRevisionItemRepository>();
+            services.AddScoped<IHRIRevisionCyclesService, HRIRevisionCyclesServices>();
+            services.AddScoped<IHRIRevisionCyclesRepository, HRIRevisionCyclesRepository>();    
 
             //HRI Repositories
             services.AddScoped<IHRIItemsRepository, HRIItemsRepository>();

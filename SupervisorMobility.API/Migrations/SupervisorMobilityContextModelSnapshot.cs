@@ -34,7 +34,7 @@ namespace SupervisorMobility.API.Migrations
 
                     b.HasIndex("AnalysisBkupsSOSHubHistoryId");
 
-                    b.ToTable("AnalysisBkupHistorySOSHubHistory");
+                    b.ToTable("AnalysisBkupHistorySOSHubHistory", (string)null);
                 });
 
             modelBuilder.Entity("AnalysisBkupSOSHub", b =>
@@ -49,7 +49,7 @@ namespace SupervisorMobility.API.Migrations
 
                     b.HasIndex("AnalysisBkupsSOSHubId");
 
-                    b.ToTable("AnalysisBkupSOSHub");
+                    b.ToTable("AnalysisBkupSOSHub", (string)null);
                 });
 
             modelBuilder.Entity("ChecklistQuestionPillar", b =>
@@ -64,7 +64,7 @@ namespace SupervisorMobility.API.Migrations
 
                     b.HasIndex("PillarsPillarId");
 
-                    b.ToTable("ChecklistQuestionPillar");
+                    b.ToTable("ChecklistQuestionPillar", (string)null);
                 });
 
             modelBuilder.Entity("DistributionProduct", b =>
@@ -79,7 +79,7 @@ namespace SupervisorMobility.API.Migrations
 
                     b.HasIndex("ProductsProductId");
 
-                    b.ToTable("DistributionProduct");
+                    b.ToTable("DistributionProduct", (string)null);
                 });
 
             modelBuilder.Entity("EquipmentSOSHub", b =>
@@ -94,7 +94,7 @@ namespace SupervisorMobility.API.Migrations
 
                     b.HasIndex("SafetyEquipmentSOSHubId");
 
-                    b.ToTable("EquipmentSOSHub");
+                    b.ToTable("EquipmentSOSHub", (string)null);
                 });
 
             modelBuilder.Entity("EquipmentSOSHubHistory", b =>
@@ -109,7 +109,7 @@ namespace SupervisorMobility.API.Migrations
 
                     b.HasIndex("SafetyEquipmentHistorySOSHubHistoryId");
 
-                    b.ToTable("EquipmentSOSHubHistory");
+                    b.ToTable("EquipmentSOSHubHistory", (string)null);
                 });
 
             modelBuilder.Entity("JobObservationOperation", b =>
@@ -139,7 +139,7 @@ namespace SupervisorMobility.API.Migrations
 
                     b.HasIndex("OperationsOperationId");
 
-                    b.ToTable("JobObservationVersionOperation");
+                    b.ToTable("JobObservationVersionOperation", (string)null);
                 });
 
             modelBuilder.Entity("PatSupervisor", b =>
@@ -154,7 +154,7 @@ namespace SupervisorMobility.API.Migrations
 
                     b.HasIndex("SupervisorId");
 
-                    b.ToTable("PatSupervisor");
+                    b.ToTable("PatSupervisor", (string)null);
                 });
 
             modelBuilder.Entity("ProductSOSHub", b =>
@@ -184,7 +184,7 @@ namespace SupervisorMobility.API.Migrations
 
                     b.HasIndex("DistributionsSOSDistributionId");
 
-                    b.ToTable("SOSAnalysisSOSDistribution");
+                    b.ToTable("SOSAnalysisSOSDistribution", (string)null);
                 });
 
             modelBuilder.Entity("SOSAnalysisSOSSynopticTableofControlPoints", b =>
@@ -199,7 +199,7 @@ namespace SupervisorMobility.API.Migrations
 
                     b.HasIndex("SOSSynopticControlPointsSOSSynopticTableofControlPointsId");
 
-                    b.ToTable("SOSAnalysisSOSSynopticTableofControlPoints");
+                    b.ToTable("SOSAnalysisSOSSynopticTableofControlPoints", (string)null);
                 });
 
             modelBuilder.Entity("SOSAnalysisSOSSynopticTableofOperatingRequirements", b =>
@@ -214,7 +214,7 @@ namespace SupervisorMobility.API.Migrations
 
                     b.HasIndex("SOSSynopticOperatingRequirementsSOSSynopticTableofOperatingRequirementsId");
 
-                    b.ToTable("SOSAnalysisSOSSynopticTableofOperatingRequirements");
+                    b.ToTable("SOSAnalysisSOSSynopticTableofOperatingRequirements", (string)null);
                 });
 
             modelBuilder.Entity("SOSDistributionSOSHub", b =>
@@ -229,7 +229,7 @@ namespace SupervisorMobility.API.Migrations
 
                     b.HasIndex("SOSHubsSOSHubId");
 
-                    b.ToTable("SOSDistributionSOSHub");
+                    b.ToTable("SOSDistributionSOSHub", (string)null);
                 });
 
             modelBuilder.Entity("SOSDistributionSOSSequence", b =>
@@ -244,7 +244,7 @@ namespace SupervisorMobility.API.Migrations
 
                     b.HasIndex("SequencesSOSSequenceId");
 
-                    b.ToTable("SOSDistributionSOSSequence");
+                    b.ToTable("SOSDistributionSOSSequence", (string)null);
                 });
 
             modelBuilder.Entity("SOSHubCommons", b =>
@@ -259,7 +259,7 @@ namespace SupervisorMobility.API.Migrations
 
                     b.HasIndex("SOSHubId");
 
-                    b.ToTable("SOSHubCommons");
+                    b.ToTable("SOSHubCommons", (string)null);
                 });
 
             modelBuilder.Entity("SOSHubHistoryTool", b =>
@@ -274,7 +274,7 @@ namespace SupervisorMobility.API.Migrations
 
                     b.HasIndex("ToolsUsedToolId");
 
-                    b.ToTable("SOSHubHistoryTool");
+                    b.ToTable("SOSHubHistoryTool", (string)null);
                 });
 
             modelBuilder.Entity("SOSHubHistoryUser", b =>
@@ -319,7 +319,7 @@ namespace SupervisorMobility.API.Migrations
 
                     b.HasIndex("SOSSynopticControlPointsSOSSynopticTableofControlPointsId");
 
-                    b.ToTable("SOSHubSOSSynopticTableofControlPoints");
+                    b.ToTable("SOSHubSOSSynopticTableofControlPoints", (string)null);
                 });
 
             modelBuilder.Entity("SOSHubSOSSynopticTableofOperatingRequirements", b =>
@@ -334,7 +334,7 @@ namespace SupervisorMobility.API.Migrations
 
                     b.HasIndex("SOSSynopticOperatingRequirementsSOSSynopticTableofOperatingRequirementsId");
 
-                    b.ToTable("SOSHubSOSSynopticTableofOperatingRequirements");
+                    b.ToTable("SOSHubSOSSynopticTableofOperatingRequirements", (string)null);
                 });
 
             modelBuilder.Entity("SOSHubSection", b =>
@@ -349,7 +349,7 @@ namespace SupervisorMobility.API.Migrations
 
                     b.HasIndex("SectionsSectionId");
 
-                    b.ToTable("SOSHubSection");
+                    b.ToTable("SOSHubSection", (string)null);
                 });
 
             modelBuilder.Entity("SOSHubUser", b =>
@@ -394,7 +394,7 @@ namespace SupervisorMobility.API.Migrations
 
                     b.HasIndex("SupervisorsUserId");
 
-                    b.ToTable("SOSReviewProgramUser");
+                    b.ToTable("SOSReviewProgramUser", (string)null);
                 });
 
             modelBuilder.Entity("SOSSequenceSOSSynopticTableofControlPoints", b =>
@@ -409,7 +409,7 @@ namespace SupervisorMobility.API.Migrations
 
                     b.HasIndex("SequencesSOSSequenceId");
 
-                    b.ToTable("SOSSequenceSOSSynopticTableofControlPoints");
+                    b.ToTable("SOSSequenceSOSSynopticTableofControlPoints", (string)null);
                 });
 
             modelBuilder.Entity("SOSSequenceSOSSynopticTableofOperatingRequirements", b =>
@@ -424,7 +424,7 @@ namespace SupervisorMobility.API.Migrations
 
                     b.HasIndex("SequencesSOSSequenceId");
 
-                    b.ToTable("SOSSequenceSOSSynopticTableofOperatingRequirements");
+                    b.ToTable("SOSSequenceSOSSynopticTableofOperatingRequirements", (string)null);
                 });
 
             modelBuilder.Entity("SupervisorMobility.API.DataAccess.Entities.Area", b =>
@@ -457,7 +457,7 @@ namespace SupervisorMobility.API.Migrations
 
                     b.HasIndex("PlantId");
 
-                    b.ToTable("Areas");
+                    b.ToTable("Areas", (string)null);
 
                     b.HasData(
                         new
@@ -525,7 +525,7 @@ namespace SupervisorMobility.API.Migrations
 
                     b.HasIndex("UserId");
 
-                    b.ToTable("Attendances");
+                    b.ToTable("Attendances", (string)null);
                 });
 
             modelBuilder.Entity("SupervisorMobility.API.DataAccess.Entities.Commentary", b =>
@@ -576,7 +576,7 @@ namespace SupervisorMobility.API.Migrations
 
                     b.HasIndex("SOSSequenceId");
 
-                    b.ToTable("Commentaries");
+                    b.ToTable("Commentaries", (string)null);
                 });
 
             modelBuilder.Entity("SupervisorMobility.API.DataAccess.Entities.Distribution", b =>
@@ -612,7 +612,7 @@ namespace SupervisorMobility.API.Migrations
 
                     b.HasIndex("AreaId");
 
-                    b.ToTable("Distributions");
+                    b.ToTable("Distributions", (string)null);
                 });
 
             modelBuilder.Entity("SupervisorMobility.API.DataAccess.Entities.FileUpload", b =>
@@ -717,7 +717,7 @@ namespace SupervisorMobility.API.Migrations
 
                     b.HasIndex("SOSSequenceId");
 
-                    b.ToTable("Files");
+                    b.ToTable("Files", (string)null);
                 });
 
             modelBuilder.Entity("SupervisorMobility.API.DataAccess.Entities.Guides", b =>
@@ -752,7 +752,7 @@ namespace SupervisorMobility.API.Migrations
 
                     b.HasIndex("FileUploadId");
 
-                    b.ToTable("Guides");
+                    b.ToTable("Guides", (string)null);
                 });
 
             modelBuilder.Entity("SupervisorMobility.API.DataAccess.Entities.HCI", b =>
@@ -780,7 +780,7 @@ namespace SupervisorMobility.API.Migrations
                         .IsUnique()
                         .HasFilter("[SOSHubId] IS NOT NULL");
 
-                    b.ToTable("HCIs");
+                    b.ToTable("HCIs", (string)null);
                 });
 
             modelBuilder.Entity("SupervisorMobility.API.DataAccess.Entities.HCICategory", b =>
@@ -811,7 +811,7 @@ namespace SupervisorMobility.API.Migrations
 
                     b.HasIndex("HCIId");
 
-                    b.ToTable("HCICategories");
+                    b.ToTable("HCICategories", (string)null);
                 });
 
             modelBuilder.Entity("SupervisorMobility.API.DataAccess.Entities.HCITransaction", b =>
@@ -846,7 +846,7 @@ namespace SupervisorMobility.API.Migrations
 
                     b.HasIndex("HCIId");
 
-                    b.ToTable("HCITransactions");
+                    b.ToTable("HCITransactions", (string)null);
                 });
 
             modelBuilder.Entity("SupervisorMobility.API.DataAccess.Entities.HeadCount", b =>
@@ -922,7 +922,7 @@ namespace SupervisorMobility.API.Migrations
 
                     b.HasKey("HeadCountId");
 
-                    b.ToTable("headCounts");
+                    b.ToTable("headCounts", (string)null);
                 });
 
             modelBuilder.Entity("SupervisorMobility.API.DataAccess.Entities.Holiday", b =>
@@ -948,7 +948,7 @@ namespace SupervisorMobility.API.Migrations
 
                     b.HasKey("HolidayId");
 
-                    b.ToTable("Holidays");
+                    b.ToTable("Holidays", (string)null);
                 });
 
             modelBuilder.Entity("SupervisorMobility.API.DataAccess.Entities.ILU.ILURegister", b =>
@@ -995,7 +995,7 @@ namespace SupervisorMobility.API.Migrations
 
                     b.HasIndex("OperatorId");
 
-                    b.ToTable("ILURegisters");
+                    b.ToTable("ILURegisters", (string)null);
                 });
 
             modelBuilder.Entity("SupervisorMobility.API.DataAccess.Entities.IS.Appearance", b =>
@@ -1040,7 +1040,7 @@ namespace SupervisorMobility.API.Migrations
 
                     b.HasIndex("ReviewerId");
 
-                    b.ToTable("AppearanceInspections");
+                    b.ToTable("AppearanceInspections", (string)null);
                 });
 
             modelBuilder.Entity("SupervisorMobility.API.DataAccess.Entities.IS.Checkpoint", b =>
@@ -1072,7 +1072,7 @@ namespace SupervisorMobility.API.Migrations
 
                     b.HasIndex("TemplateId");
 
-                    b.ToTable("Checkpoints");
+                    b.ToTable("Checkpoints", (string)null);
                 });
 
             modelBuilder.Entity("SupervisorMobility.API.DataAccess.Entities.IS.CheckpointAnswerColumn", b =>
@@ -1111,7 +1111,7 @@ namespace SupervisorMobility.API.Migrations
 
                     b.HasIndex("LogbookTemplateId");
 
-                    b.ToTable("CheckpointAnswerColumns");
+                    b.ToTable("CheckpointAnswerColumns", (string)null);
                 });
 
             modelBuilder.Entity("SupervisorMobility.API.DataAccess.Entities.IS.CheckpointNorm", b =>
@@ -1139,7 +1139,7 @@ namespace SupervisorMobility.API.Migrations
 
                     b.HasIndex("CheckpointId");
 
-                    b.ToTable("CheckpointsNorm");
+                    b.ToTable("CheckpointsNorm", (string)null);
                 });
 
             modelBuilder.Entity("SupervisorMobility.API.DataAccess.Entities.IS.CheckpointNormAnswer", b =>
@@ -1174,7 +1174,7 @@ namespace SupervisorMobility.API.Migrations
 
                     b.HasIndex("LogbookTemplateId");
 
-                    b.ToTable("CheckpointsNormAnswer");
+                    b.ToTable("CheckpointsNormAnswer", (string)null);
                 });
 
             modelBuilder.Entity("SupervisorMobility.API.DataAccess.Entities.IS.DataPanel", b =>
@@ -1202,7 +1202,7 @@ namespace SupervisorMobility.API.Migrations
 
                     b.HasIndex("AppearanceId");
 
-                    b.ToTable("DataPanels");
+                    b.ToTable("DataPanels", (string)null);
 
                     b.HasData(
                         new
@@ -1269,7 +1269,7 @@ namespace SupervisorMobility.API.Migrations
 
                     b.HasIndex("LogbookId");
 
-                    b.ToTable("DataPanelDefectAnswer");
+                    b.ToTable("DataPanelDefectAnswer", (string)null);
                 });
 
             modelBuilder.Entity("SupervisorMobility.API.DataAccess.Entities.IS.DataPanelSpecification", b =>
@@ -1297,7 +1297,7 @@ namespace SupervisorMobility.API.Migrations
 
                     b.HasIndex("DataPanelId");
 
-                    b.ToTable("DataPanelSpecifications");
+                    b.ToTable("DataPanelSpecifications", (string)null);
                 });
 
             modelBuilder.Entity("SupervisorMobility.API.DataAccess.Entities.IS.LogbookAppearance", b =>
@@ -1338,7 +1338,7 @@ namespace SupervisorMobility.API.Migrations
 
                     b.HasIndex("InspectorId");
 
-                    b.ToTable("LogbookAppearance");
+                    b.ToTable("LogbookAppearance", (string)null);
                 });
 
             modelBuilder.Entity("SupervisorMobility.API.DataAccess.Entities.IS.LogbookTemplate", b =>
@@ -1372,7 +1372,7 @@ namespace SupervisorMobility.API.Migrations
 
                     b.HasIndex("TemplateId");
 
-                    b.ToTable("LogbooksTemplate");
+                    b.ToTable("LogbooksTemplate", (string)null);
                 });
 
             modelBuilder.Entity("SupervisorMobility.API.DataAccess.Entities.IS.Part", b =>
@@ -1399,7 +1399,7 @@ namespace SupervisorMobility.API.Migrations
 
                     b.HasIndex("ModelId");
 
-                    b.ToTable("Parts");
+                    b.ToTable("Parts", (string)null);
                 });
 
             modelBuilder.Entity("SupervisorMobility.API.DataAccess.Entities.IS.ProblemDefect", b =>
@@ -1427,7 +1427,7 @@ namespace SupervisorMobility.API.Migrations
 
                     b.HasIndex("AppearanceId");
 
-                    b.ToTable("ProblemDefects");
+                    b.ToTable("ProblemDefects", (string)null);
                 });
 
             modelBuilder.Entity("SupervisorMobility.API.DataAccess.Entities.IS.ProblemDefectAnswer", b =>
@@ -1457,7 +1457,7 @@ namespace SupervisorMobility.API.Migrations
 
                     b.HasIndex("ProblemId");
 
-                    b.ToTable("ProblemDefectAnswer");
+                    b.ToTable("ProblemDefectAnswer", (string)null);
                 });
 
             modelBuilder.Entity("SupervisorMobility.API.DataAccess.Entities.IS.Template", b =>
@@ -1487,7 +1487,7 @@ namespace SupervisorMobility.API.Migrations
 
                     b.HasIndex("PartId");
 
-                    b.ToTable("TemplateInspections");
+                    b.ToTable("TemplateInspections", (string)null);
                 });
 
             modelBuilder.Entity("SupervisorMobility.API.DataAccess.Entities.Kaizen", b =>
@@ -1585,7 +1585,7 @@ namespace SupervisorMobility.API.Migrations
 
                     b.HasIndex("SupervisorId");
 
-                    b.ToTable("Kaizens");
+                    b.ToTable("Kaizens", (string)null);
                 });
 
             modelBuilder.Entity("SupervisorMobility.API.DataAccess.Entities.KaizenTransaction", b =>
@@ -1618,7 +1618,7 @@ namespace SupervisorMobility.API.Migrations
 
                     b.HasIndex("KaizenId");
 
-                    b.ToTable("KaizenTransactions");
+                    b.ToTable("KaizenTransactions", (string)null);
                 });
 
             modelBuilder.Entity("SupervisorMobility.API.DataAccess.Entities.LUP.ILULevel", b =>
@@ -1642,7 +1642,7 @@ namespace SupervisorMobility.API.Migrations
 
                     b.HasKey("ILULevelId");
 
-                    b.ToTable("ILULevels");
+                    b.ToTable("ILULevels", (string)null);
 
                     b.HasData(
                         new
@@ -1753,7 +1753,7 @@ namespace SupervisorMobility.API.Migrations
 
                     b.HasIndex("HCIId");
 
-                    b.ToTable("LocalUserCourses");
+                    b.ToTable("LocalUserCourses", (string)null);
                 });
 
             modelBuilder.Entity("SupervisorMobility.API.DataAccess.Entities.Logger.LogEvent", b =>
@@ -1770,7 +1770,7 @@ namespace SupervisorMobility.API.Migrations
 
                     b.HasKey("LogEventId");
 
-                    b.ToTable("LogEvents");
+                    b.ToTable("LogEvents", (string)null);
                 });
 
             modelBuilder.Entity("SupervisorMobility.API.DataAccess.Entities.Logger.LogSpecificEvent", b =>
@@ -1792,7 +1792,7 @@ namespace SupervisorMobility.API.Migrations
 
                     b.HasIndex("LogEventId");
 
-                    b.ToTable("LogSepecificEvents");
+                    b.ToTable("LogSepecificEvents", (string)null);
                 });
 
             modelBuilder.Entity("SupervisorMobility.API.DataAccess.Entities.Logger.Logger", b =>
@@ -1835,7 +1835,7 @@ namespace SupervisorMobility.API.Migrations
 
                     b.HasIndex("UserId");
 
-                    b.ToTable("DataLoggs");
+                    b.ToTable("DataLoggs", (string)null);
                 });
 
             modelBuilder.Entity("SupervisorMobility.API.DataAccess.Entities.PAT", b =>
@@ -1895,7 +1895,7 @@ namespace SupervisorMobility.API.Migrations
 
                     b.HasIndex("SOSHubId");
 
-                    b.ToTable("PATs");
+                    b.ToTable("PATs", (string)null);
                 });
 
             modelBuilder.Entity("SupervisorMobility.API.DataAccess.Entities.PatDistributionComment", b =>
@@ -1923,7 +1923,7 @@ namespace SupervisorMobility.API.Migrations
 
                     b.HasIndex("PATId");
 
-                    b.ToTable("PatDistributionComments");
+                    b.ToTable("PatDistributionComments", (string)null);
                 });
 
             modelBuilder.Entity("SupervisorMobility.API.DataAccess.Entities.PatSubordinate", b =>
@@ -1948,7 +1948,7 @@ namespace SupervisorMobility.API.Migrations
 
                     b.HasIndex("PatId");
 
-                    b.ToTable("PatSubordinates");
+                    b.ToTable("PatSubordinates", (string)null);
                 });
 
             modelBuilder.Entity("SupervisorMobility.API.DataAccess.Entities.PatUserRole", b =>
@@ -1978,7 +1978,7 @@ namespace SupervisorMobility.API.Migrations
 
                     b.HasIndex("PATId");
 
-                    b.ToTable("PatUserRoles");
+                    b.ToTable("PatUserRoles", (string)null);
                 });
 
             modelBuilder.Entity("SupervisorMobility.API.DataAccess.Entities.Paths.SOSCodePath", b =>
@@ -2036,7 +2036,7 @@ namespace SupervisorMobility.API.Migrations
 
                     b.HasIndex("ProductId");
 
-                    b.ToTable("CodePaths");
+                    b.ToTable("CodePaths", (string)null);
                 });
 
             modelBuilder.Entity("SupervisorMobility.API.DataAccess.Entities.Product", b =>
@@ -2064,7 +2064,7 @@ namespace SupervisorMobility.API.Migrations
 
                     b.HasKey("ProductId");
 
-                    b.ToTable("Products");
+                    b.ToTable("Products", (string)null);
 
                     b.HasData(
                         new
@@ -2123,7 +2123,7 @@ namespace SupervisorMobility.API.Migrations
 
                     b.HasIndex("SectionId");
 
-                    b.ToTable("Analyses");
+                    b.ToTable("Analyses", (string)null);
                 });
 
             modelBuilder.Entity("SupervisorMobility.API.DataAccess.Entities.SOS.AnalysisBkup", b =>
@@ -2149,7 +2149,7 @@ namespace SupervisorMobility.API.Migrations
 
                     b.HasKey("AnalysisBkupId");
 
-                    b.ToTable("AnalysisBkups");
+                    b.ToTable("AnalysisBkups", (string)null);
                 });
 
             modelBuilder.Entity("SupervisorMobility.API.DataAccess.Entities.SOS.AnalysisBkupHistory", b =>
@@ -2174,7 +2174,7 @@ namespace SupervisorMobility.API.Migrations
 
                     b.HasKey("AnalysisBkupHistoryId");
 
-                    b.ToTable("AnalysisBkupsHistory");
+                    b.ToTable("AnalysisBkupsHistory", (string)null);
                 });
 
             modelBuilder.Entity("SupervisorMobility.API.DataAccess.Entities.SOS.AnalysisHistory", b =>
@@ -2209,7 +2209,7 @@ namespace SupervisorMobility.API.Migrations
 
                     b.HasIndex("SectionHistoryId");
 
-                    b.ToTable("AnalysesHistory");
+                    b.ToTable("AnalysesHistory", (string)null);
                 });
 
             modelBuilder.Entity("SupervisorMobility.API.DataAccess.Entities.SOS.CommentaryHistory", b =>
@@ -2238,7 +2238,7 @@ namespace SupervisorMobility.API.Migrations
 
                     b.HasIndex("SOSHubHistoryId");
 
-                    b.ToTable("CommentaryHistorys");
+                    b.ToTable("CommentaryHistorys", (string)null);
                 });
 
             modelBuilder.Entity("SupervisorMobility.API.DataAccess.Entities.SOS.CommonDirection", b =>
@@ -2273,7 +2273,7 @@ namespace SupervisorMobility.API.Migrations
 
                     b.HasIndex("SOSHubHistoryId");
 
-                    b.ToTable("CommonDirections");
+                    b.ToTable("CommonDirections", (string)null);
                 });
 
             modelBuilder.Entity("SupervisorMobility.API.DataAccess.Entities.SOS.Equipment", b =>
@@ -2299,7 +2299,7 @@ namespace SupervisorMobility.API.Migrations
 
                     b.HasKey("EquipmentId");
 
-                    b.ToTable("Equipments");
+                    b.ToTable("Equipments", (string)null);
                 });
 
             modelBuilder.Entity("SupervisorMobility.API.DataAccess.Entities.SOS.History.SOSHubHistory", b =>
@@ -2396,7 +2396,7 @@ namespace SupervisorMobility.API.Migrations
 
                     b.HasIndex("StationId");
 
-                    b.ToTable("SOSHubsHistory");
+                    b.ToTable("SOSHubsHistory", (string)null);
                 });
 
             modelBuilder.Entity("SupervisorMobility.API.DataAccess.Entities.SOS.Material", b =>
@@ -2428,7 +2428,7 @@ namespace SupervisorMobility.API.Migrations
 
                     b.HasIndex("SOSHubHistoryId");
 
-                    b.ToTable("Materials");
+                    b.ToTable("Materials", (string)null);
                 });
 
             modelBuilder.Entity("SupervisorMobility.API.DataAccess.Entities.SOS.MaterialUsed", b =>
@@ -2459,7 +2459,7 @@ namespace SupervisorMobility.API.Migrations
 
                     b.HasIndex("SOSHubId");
 
-                    b.ToTable("MaterialsUsed");
+                    b.ToTable("MaterialsUsed", (string)null);
                 });
 
             modelBuilder.Entity("SupervisorMobility.API.DataAccess.Entities.SOS.SOSAnalysis", b =>
@@ -2494,7 +2494,7 @@ namespace SupervisorMobility.API.Migrations
 
                     b.HasIndex("SOSHubId");
 
-                    b.ToTable("SOSAnalyses");
+                    b.ToTable("SOSAnalyses", (string)null);
                 });
 
             modelBuilder.Entity("SupervisorMobility.API.DataAccess.Entities.SOS.SOSAnalysisLogbook", b =>
@@ -2547,7 +2547,7 @@ namespace SupervisorMobility.API.Migrations
 
                     b.HasIndex("SOSAnalysisId");
 
-                    b.ToTable("SOSAnalysisLogbooks");
+                    b.ToTable("SOSAnalysisLogbooks", (string)null);
                 });
 
             modelBuilder.Entity("SupervisorMobility.API.DataAccess.Entities.SOS.SOSCombination", b =>
@@ -2607,7 +2607,7 @@ namespace SupervisorMobility.API.Migrations
 
                     b.HasIndex("SOSHubId");
 
-                    b.ToTable("SOSCombinations");
+                    b.ToTable("SOSCombinations", (string)null);
                 });
 
             modelBuilder.Entity("SupervisorMobility.API.DataAccess.Entities.SOS.SOSCombinationLogbook", b =>
@@ -2660,7 +2660,7 @@ namespace SupervisorMobility.API.Migrations
 
                     b.HasIndex("SOSCombinationId");
 
-                    b.ToTable("SOSCombinationLogbooks");
+                    b.ToTable("SOSCombinationLogbooks", (string)null);
                 });
 
             modelBuilder.Entity("SupervisorMobility.API.DataAccess.Entities.SOS.SOSCombinationOperationSequence", b =>
@@ -2705,7 +2705,7 @@ namespace SupervisorMobility.API.Migrations
 
                     b.HasIndex("SOSCombinationId");
 
-                    b.ToTable("SOSCombinationOperationSequences");
+                    b.ToTable("SOSCombinationOperationSequences", (string)null);
                 });
 
             modelBuilder.Entity("SupervisorMobility.API.DataAccess.Entities.SOS.SOSDistribution", b =>
@@ -2761,7 +2761,7 @@ namespace SupervisorMobility.API.Migrations
 
                     b.HasIndex("SOSDistributionAdditionalTimeId");
 
-                    b.ToTable("SOSDistributions");
+                    b.ToTable("SOSDistributions", (string)null);
                 });
 
             modelBuilder.Entity("SupervisorMobility.API.DataAccess.Entities.SOS.SOSDistributionAdditionalTime", b =>
@@ -2797,7 +2797,7 @@ namespace SupervisorMobility.API.Migrations
 
                     b.HasKey("SOSDistributionAdditionalTimeId");
 
-                    b.ToTable("SOSDistributionAdditionalTimes");
+                    b.ToTable("SOSDistributionAdditionalTimes", (string)null);
                 });
 
             modelBuilder.Entity("SupervisorMobility.API.DataAccess.Entities.SOS.SOSDistributionLogbook", b =>
@@ -2850,7 +2850,7 @@ namespace SupervisorMobility.API.Migrations
 
                     b.HasIndex("SOSDistributionId");
 
-                    b.ToTable("SOSDistributionLogbooks");
+                    b.ToTable("SOSDistributionLogbooks", (string)null);
                 });
 
             modelBuilder.Entity("SupervisorMobility.API.DataAccess.Entities.SOS.SOSDistributionOperationSequence", b =>
@@ -2885,7 +2885,7 @@ namespace SupervisorMobility.API.Migrations
 
                     b.HasIndex("SectionId");
 
-                    b.ToTable("SOSDistributionOperationSequence");
+                    b.ToTable("SOSDistributionOperationSequence", (string)null);
                 });
 
             modelBuilder.Entity("SupervisorMobility.API.DataAccess.Entities.SOS.SOSFlow", b =>
@@ -2942,7 +2942,7 @@ namespace SupervisorMobility.API.Migrations
 
                     b.HasIndex("SOSHubId");
 
-                    b.ToTable("SOSFlows");
+                    b.ToTable("SOSFlows", (string)null);
                 });
 
             modelBuilder.Entity("SupervisorMobility.API.DataAccess.Entities.SOS.SOSFlowLogbook", b =>
@@ -2997,7 +2997,7 @@ namespace SupervisorMobility.API.Migrations
 
                     b.HasIndex("SOSFlowId");
 
-                    b.ToTable("SOSFlowLogbooks");
+                    b.ToTable("SOSFlowLogbooks", (string)null);
                 });
 
             modelBuilder.Entity("SupervisorMobility.API.DataAccess.Entities.SOS.SOSHub", b =>
@@ -3080,7 +3080,7 @@ namespace SupervisorMobility.API.Migrations
 
                     b.HasIndex("ToolId");
 
-                    b.ToTable("SOSHubs");
+                    b.ToTable("SOSHubs", (string)null);
                 });
 
             modelBuilder.Entity("SupervisorMobility.API.DataAccess.Entities.SOS.SOSSTROKnowledgeHub", b =>
@@ -3108,7 +3108,7 @@ namespace SupervisorMobility.API.Migrations
 
                     b.HasIndex("SOSSynopticTableofOperatingRequirementsId");
 
-                    b.ToTable("SOSSTROKnowledgeHub");
+                    b.ToTable("SOSSTROKnowledgeHub", (string)null);
                 });
 
             modelBuilder.Entity("SupervisorMobility.API.DataAccess.Entities.SOS.SOSSTROSkillHub", b =>
@@ -3136,7 +3136,7 @@ namespace SupervisorMobility.API.Migrations
 
                     b.HasIndex("SkillId");
 
-                    b.ToTable("SOSSTROSkillHub");
+                    b.ToTable("SOSSTROSkillHub", (string)null);
                 });
 
             modelBuilder.Entity("SupervisorMobility.API.DataAccess.Entities.SOS.SOSSequence", b =>
@@ -3171,7 +3171,7 @@ namespace SupervisorMobility.API.Migrations
 
                     b.HasIndex("SOSHubId");
 
-                    b.ToTable("SOSSequences");
+                    b.ToTable("SOSSequences", (string)null);
                 });
 
             modelBuilder.Entity("SupervisorMobility.API.DataAccess.Entities.SOS.SOSSequenceLogbook", b =>
@@ -3224,7 +3224,7 @@ namespace SupervisorMobility.API.Migrations
 
                     b.HasIndex("SOSSequenceId");
 
-                    b.ToTable("SOSSequenceLogbooks");
+                    b.ToTable("SOSSequenceLogbooks", (string)null);
                 });
 
             modelBuilder.Entity("SupervisorMobility.API.DataAccess.Entities.SOS.SOSSynopticPointsLogbook", b =>
@@ -3267,7 +3267,7 @@ namespace SupervisorMobility.API.Migrations
 
                     b.HasIndex("SOSSynopticTableofControlPointsId");
 
-                    b.ToTable("SOSSynopticPointsLogbooks");
+                    b.ToTable("SOSSynopticPointsLogbooks", (string)null);
                 });
 
             modelBuilder.Entity("SupervisorMobility.API.DataAccess.Entities.SOS.SOSSynopticPointsOperationSequence", b =>
@@ -3299,7 +3299,7 @@ namespace SupervisorMobility.API.Migrations
 
                     b.HasIndex("SectionId");
 
-                    b.ToTable("SOSSynopticPointsOperationSequences");
+                    b.ToTable("SOSSynopticPointsOperationSequences", (string)null);
                 });
 
             modelBuilder.Entity("SupervisorMobility.API.DataAccess.Entities.SOS.SOSSynopticRequirementsLogbook", b =>
@@ -3352,7 +3352,7 @@ namespace SupervisorMobility.API.Migrations
 
                     b.HasIndex("SOSSynopticRequirementsId");
 
-                    b.ToTable("SOSSynopticRequirementsLogbooks");
+                    b.ToTable("SOSSynopticRequirementsLogbooks", (string)null);
                 });
 
             modelBuilder.Entity("SupervisorMobility.API.DataAccess.Entities.SOS.SOSSynopticRequirementsOperationSequence", b =>
@@ -3399,7 +3399,7 @@ namespace SupervisorMobility.API.Migrations
 
                     b.HasIndex("SectionId");
 
-                    b.ToTable("SOSSynopticRequirementsOperationSequences");
+                    b.ToTable("SOSSynopticRequirementsOperationSequences", (string)null);
                 });
 
             modelBuilder.Entity("SupervisorMobility.API.DataAccess.Entities.SOS.SOSSynopticTableRequirementOperationDifficulty", b =>
@@ -3425,7 +3425,7 @@ namespace SupervisorMobility.API.Migrations
 
                     b.HasIndex("SOSSynopticTableofOperatingRequirementsId");
 
-                    b.ToTable("SOSSynopticTableRequirementOperationDifficulty");
+                    b.ToTable("SOSSynopticTableRequirementOperationDifficulty", (string)null);
                 });
 
             modelBuilder.Entity("SupervisorMobility.API.DataAccess.Entities.SOS.SOSSynopticTableofControlPoints", b =>
@@ -3470,7 +3470,7 @@ namespace SupervisorMobility.API.Migrations
 
                     b.HasIndex("ReviewerId");
 
-                    b.ToTable("SOSSynopticTableofControlPoints");
+                    b.ToTable("SOSSynopticTableofControlPoints", (string)null);
                 });
 
             modelBuilder.Entity("SupervisorMobility.API.DataAccess.Entities.SOS.SOSSynopticTableofOperatingRequirements", b =>
@@ -3515,7 +3515,7 @@ namespace SupervisorMobility.API.Migrations
 
                     b.HasIndex("ReviewerId");
 
-                    b.ToTable("SOSSynopticTableofOperatingRequirements");
+                    b.ToTable("SOSSynopticTableofOperatingRequirements", (string)null);
                 });
 
             modelBuilder.Entity("SupervisorMobility.API.DataAccess.Entities.SOS.SOSTime", b =>
@@ -3550,7 +3550,7 @@ namespace SupervisorMobility.API.Migrations
 
                     b.HasIndex("SOSSequenceId");
 
-                    b.ToTable("SOSTimes");
+                    b.ToTable("SOSTimes", (string)null);
                 });
 
             modelBuilder.Entity("SupervisorMobility.API.DataAccess.Entities.SOS.STRO.EstablishedConditions", b =>
@@ -3575,7 +3575,7 @@ namespace SupervisorMobility.API.Migrations
 
                     b.HasIndex("SOSSynopticTableofOperatingRequirementsId");
 
-                    b.ToTable("EstablishedConditions");
+                    b.ToTable("EstablishedConditions", (string)null);
                 });
 
             modelBuilder.Entity("SupervisorMobility.API.DataAccess.Entities.SOS.STRO.InsuranceFeatures", b =>
@@ -3600,7 +3600,7 @@ namespace SupervisorMobility.API.Migrations
 
                     b.HasIndex("SOSSynopticTableofOperatingRequirementsId");
 
-                    b.ToTable("InsuranceFeatures");
+                    b.ToTable("InsuranceFeatures", (string)null);
                 });
 
             modelBuilder.Entity("SupervisorMobility.API.DataAccess.Entities.SOS.STRO.Knowledge", b =>
@@ -3620,7 +3620,7 @@ namespace SupervisorMobility.API.Migrations
 
                     b.HasKey("Id");
 
-                    b.ToTable("Knowledge");
+                    b.ToTable("Knowledge", (string)null);
                 });
 
             modelBuilder.Entity("SupervisorMobility.API.DataAccess.Entities.SOS.STRO.OperationMachine", b =>
@@ -3645,7 +3645,7 @@ namespace SupervisorMobility.API.Migrations
 
                     b.HasIndex("SOSSynopticTableofOperatingRequirementsId");
 
-                    b.ToTable("OperationMachine");
+                    b.ToTable("OperationMachine", (string)null);
                 });
 
             modelBuilder.Entity("SupervisorMobility.API.DataAccess.Entities.SOS.STRO.Skill", b =>
@@ -3665,7 +3665,7 @@ namespace SupervisorMobility.API.Migrations
 
                     b.HasKey("Id");
 
-                    b.ToTable("Skill");
+                    b.ToTable("Skill", (string)null);
                 });
 
             modelBuilder.Entity("SupervisorMobility.API.DataAccess.Entities.SOS.Section", b =>
@@ -3690,7 +3690,7 @@ namespace SupervisorMobility.API.Migrations
 
                     b.HasKey("SectionId");
 
-                    b.ToTable("Sections");
+                    b.ToTable("Sections", (string)null);
                 });
 
             modelBuilder.Entity("SupervisorMobility.API.DataAccess.Entities.SOS.SectionHistory", b =>
@@ -3724,7 +3724,7 @@ namespace SupervisorMobility.API.Migrations
 
                     b.HasIndex("SOSHubHistoryId");
 
-                    b.ToTable("SectionsHistory");
+                    b.ToTable("SectionsHistory", (string)null);
                 });
 
             modelBuilder.Entity("SupervisorMobility.API.DataAccess.Entities.SOS.Tool", b =>
@@ -3750,7 +3750,7 @@ namespace SupervisorMobility.API.Migrations
 
                     b.HasKey("ToolId");
 
-                    b.ToTable("Tools");
+                    b.ToTable("Tools", (string)null);
                 });
 
             modelBuilder.Entity("SupervisorMobility.API.DataAccess.Entities.SOS.ToolUsed", b =>
@@ -3779,7 +3779,7 @@ namespace SupervisorMobility.API.Migrations
 
                     b.HasIndex("ToolId");
 
-                    b.ToTable("ToolsUsed");
+                    b.ToTable("ToolsUsed", (string)null);
                 });
 
             modelBuilder.Entity("SupervisorMobility.API.DataAccess.Entities.SOS.Turn", b =>
@@ -3815,7 +3815,7 @@ namespace SupervisorMobility.API.Migrations
 
                     b.HasIndex("SupervisorId");
 
-                    b.ToTable("Turns");
+                    b.ToTable("Turns", (string)null);
                 });
 
             modelBuilder.Entity("SupervisorMobility.API.DataAccess.Entities.SOS_Review.SOSRegUserOperation", b =>
@@ -3843,7 +3843,7 @@ namespace SupervisorMobility.API.Migrations
 
                     b.HasIndex("SupervisorId");
 
-                    b.ToTable("SOSRegsUserOperation");
+                    b.ToTable("SOSRegsUserOperation", (string)null);
                 });
 
             modelBuilder.Entity("SupervisorMobility.API.DataAccess.Entities.SOS_Review.SOSRegisterJobObservation", b =>
@@ -3889,7 +3889,7 @@ namespace SupervisorMobility.API.Migrations
 
                     b.HasIndex("SOSReviewProgramid");
 
-                    b.ToTable("SOSRegisters");
+                    b.ToTable("SOSRegisters", (string)null);
                 });
 
             modelBuilder.Entity("SupervisorMobility.API.DataAccess.Entities.SOS_Review.SOSReviewDistSuggestion", b =>
@@ -3917,7 +3917,7 @@ namespace SupervisorMobility.API.Migrations
 
                     b.HasIndex("SOSReviewProgramid");
 
-                    b.ToTable("SOSSuggestionsDistribution");
+                    b.ToTable("SOSSuggestionsDistribution", (string)null);
                 });
 
             modelBuilder.Entity("SupervisorMobility.API.DataAccess.Entities.SOS_Review.SOSReviewProgram", b =>
@@ -3963,7 +3963,7 @@ namespace SupervisorMobility.API.Migrations
 
                     b.HasIndex("PlantId");
 
-                    b.ToTable("SOSReviews");
+                    b.ToTable("SOSReviews", (string)null);
                 });
 
             modelBuilder.Entity("SupervisorMobility.API.DataAccess.Entities.SupportDocumentType", b =>
@@ -3991,7 +3991,7 @@ namespace SupervisorMobility.API.Migrations
 
                     b.HasKey("SupportDocumentTypeId");
 
-                    b.ToTable("SupportDocumentTypes");
+                    b.ToTable("SupportDocumentTypes", (string)null);
 
                     b.HasData(
                         new
@@ -4104,7 +4104,7 @@ namespace SupervisorMobility.API.Migrations
 
                     b.HasIndex("SuperiorId");
 
-                    b.ToTable("Users");
+                    b.ToTable("Users", (string)null);
 
                     b.HasData(
                         new
@@ -4255,7 +4255,7 @@ namespace SupervisorMobility.API.Migrations
 
                     b.HasIndex("HCIId");
 
-                    b.ToTable("UserCareerPaths");
+                    b.ToTable("UserCareerPaths", (string)null);
                 });
 
             modelBuilder.Entity("SupervisorMobility.API.DataAccess.Entities.UserCourse", b =>
@@ -4312,7 +4312,7 @@ namespace SupervisorMobility.API.Migrations
 
                     b.HasKey("UserNotFoundId");
 
-                    b.ToTable("UsersNotFound");
+                    b.ToTable("UsersNotFound", (string)null);
                 });
 
             modelBuilder.Entity("SupervisorMobility.API.DataAccess.SPModels.WFMInfoSP", b =>
@@ -4444,7 +4444,7 @@ namespace SupervisorMobility.API.Migrations
 
                     b.HasIndex("PlantId");
 
-                    b.ToTable("AssyCharts");
+                    b.ToTable("AssyCharts", (string)null);
                 });
 
             modelBuilder.Entity("SupervisorMobility.API.Entities.ChecklistAnswer", b =>
@@ -4493,7 +4493,7 @@ namespace SupervisorMobility.API.Migrations
 
                     b.HasIndex("JobObservationVersionId");
 
-                    b.ToTable("ChecklistAnswers");
+                    b.ToTable("ChecklistAnswers", (string)null);
                 });
 
             modelBuilder.Entity("SupervisorMobility.API.Entities.ChecklistQuestion", b =>
@@ -4544,7 +4544,7 @@ namespace SupervisorMobility.API.Migrations
 
                     b.HasIndex("TypeId");
 
-                    b.ToTable("ChecklistQuestions", t =>
+                    b.ToTable("ChecklistQuestions", null, t =>
                         {
                             t.HasCheckConstraint("ck_cq_seq", "[CategorySequence] > 0");
                         });
@@ -4875,7 +4875,7 @@ namespace SupervisorMobility.API.Migrations
 
                     b.HasKey("DepartmentId");
 
-                    b.ToTable("Departments");
+                    b.ToTable("Departments", (string)null);
 
                     b.HasData(
                         new
@@ -4982,7 +4982,7 @@ namespace SupervisorMobility.API.Migrations
 
                     b.HasKey("GlosaryWordId");
 
-                    b.ToTable("Glosary");
+                    b.ToTable("Glosary", (string)null);
 
                     b.HasData(
                         new
@@ -5108,7 +5108,7 @@ namespace SupervisorMobility.API.Migrations
 
                     b.HasKey("GroupId");
 
-                    b.ToTable("Groups");
+                    b.ToTable("Groups", (string)null);
 
                     b.HasData(
                         new
@@ -5158,7 +5158,7 @@ namespace SupervisorMobility.API.Migrations
 
                     b.HasKey("JobCategoryStructureId");
 
-                    b.ToTable("JobCategoryStructures", t =>
+                    b.ToTable("JobCategoryStructures", null, t =>
                         {
                             t.HasCheckConstraint("ck_cc_seq", "[Sequence] > 0");
                         });
@@ -5381,7 +5381,7 @@ namespace SupervisorMobility.API.Migrations
 
                     b.HasIndex("SupervisorId");
 
-                    b.ToTable("JobObservations");
+                    b.ToTable("JobObservations", (string)null);
                 });
 
             modelBuilder.Entity("SupervisorMobility.API.Entities.JobObservationVersion", b =>
@@ -5536,7 +5536,7 @@ namespace SupervisorMobility.API.Migrations
 
                     b.HasIndex("SupervisorId");
 
-                    b.ToTable("JobObservationHistory");
+                    b.ToTable("JobObservationHistory", (string)null);
                 });
 
             modelBuilder.Entity("SupervisorMobility.API.Entities.Lup", b =>
@@ -5610,7 +5610,7 @@ namespace SupervisorMobility.API.Migrations
 
                     b.HasIndex("JobObservationVersionId");
 
-                    b.ToTable("Lup");
+                    b.ToTable("Lup", (string)null);
                 });
 
             modelBuilder.Entity("SupervisorMobility.API.Entities.Notification", b =>
@@ -5650,7 +5650,7 @@ namespace SupervisorMobility.API.Migrations
 
                     b.HasIndex("UserId");
 
-                    b.ToTable("Notifications");
+                    b.ToTable("Notifications", (string)null);
 
                     b.HasData(
                         new
@@ -5811,7 +5811,7 @@ namespace SupervisorMobility.API.Migrations
 
                     b.HasIndex("DistributionId");
 
-                    b.ToTable("Operations");
+                    b.ToTable("Operations", (string)null);
                 });
 
             modelBuilder.Entity("SupervisorMobility.API.Entities.Pillar", b =>
@@ -5839,7 +5839,7 @@ namespace SupervisorMobility.API.Migrations
 
                     b.HasKey("PillarId");
 
-                    b.ToTable("Pillars");
+                    b.ToTable("Pillars", (string)null);
 
                     b.HasData(
                         new
@@ -5904,7 +5904,7 @@ namespace SupervisorMobility.API.Migrations
 
                     b.HasKey("PlantId");
 
-                    b.ToTable("Plants");
+                    b.ToTable("Plants", (string)null);
 
                     b.HasData(
                         new
@@ -5948,7 +5948,7 @@ namespace SupervisorMobility.API.Migrations
 
                     b.HasKey("QuestionTypeId");
 
-                    b.ToTable("QuestionTypes");
+                    b.ToTable("QuestionTypes", (string)null);
 
                     b.HasData(
                         new
@@ -6026,7 +6026,7 @@ namespace SupervisorMobility.API.Migrations
 
                     b.HasKey("StationId");
 
-                    b.ToTable("Stations");
+                    b.ToTable("Stations", (string)null);
                 });
 
             modelBuilder.Entity("SupervisorMobility.API.Models.Email.EmailDeliveryResult", b =>
@@ -6115,7 +6115,7 @@ namespace SupervisorMobility.API.Migrations
 
                     b.HasIndex("SentByUserID");
 
-                    b.ToTable("EmailDeliveryResults");
+                    b.ToTable("EmailDeliveryResults", (string)null);
                 });
 
             modelBuilder.Entity("SupervisorMobility.API.Models.Email.EmailQueue", b =>
@@ -6154,7 +6154,7 @@ namespace SupervisorMobility.API.Migrations
 
                     b.HasIndex("StaffID");
 
-                    b.ToTable("EmailQueues");
+                    b.ToTable("EmailQueues", (string)null);
                 });
 
             modelBuilder.Entity("UserArea", b =>
