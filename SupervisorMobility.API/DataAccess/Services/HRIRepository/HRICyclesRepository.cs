@@ -1,7 +1,7 @@
 ﻿using AutoMapper;
 using Microsoft.EntityFrameworkCore;
 using SupervisorMobility.API.Context;
-using SupervisorMobility.API.DataAccess.Entities.HRI;
+using SupervisorMobility.API.DataAccess.Entities.HRI_s_Entities;
 using SupervisorMobility.API.Models.HRICyclesDtos;
 
 namespace SupervisorMobility.API.DataAccess.Services.HRIRepository

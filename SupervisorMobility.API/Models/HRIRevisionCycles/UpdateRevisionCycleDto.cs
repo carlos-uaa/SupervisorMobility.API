@@ -1,4 +1,4 @@
-﻿using SupervisorMobility.API.DataAccess.Entities.HRI;
+﻿
 
 namespace SupervisorMobility.API.Models.HRIRevisionCycles
 {

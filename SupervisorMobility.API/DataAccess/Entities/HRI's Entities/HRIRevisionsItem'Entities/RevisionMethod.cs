@@ -1,4 +1,4 @@
-﻿using SupervisorMobility.API.DataAccess.Entities.HRI;
+﻿
 using System.ComponentModel.DataAnnotations;
 
 namespace SupervisorMobility.API.DataAccess.Entities.HRI_s_Entities.HRIRevisionsItem_Entities

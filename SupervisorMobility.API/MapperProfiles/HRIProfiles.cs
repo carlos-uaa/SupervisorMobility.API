@@ -1,5 +1,5 @@
 ﻿using AutoMapper;
-using SupervisorMobility.API.DataAccess.Entities.HRI;
+using SupervisorMobility.API.DataAccess.Entities.HRI_s_Entities;
 using SupervisorMobility.API.DataAccess.Entities.HRI_s_Entities.HRIRevisionsItem_Entities;
 using SupervisorMobility.API.Models.HRICyclesDtos;
 using SupervisorMobility.API.Models.HRIDtos;

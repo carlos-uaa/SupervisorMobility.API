@@ -2,7 +2,8 @@
 using SupervisorMobility.API.Context;
 using SupervisorMobility.API.Models.HRIRevisionCycles;
 using Microsoft.EntityFrameworkCore;
-using SupervisorMobility.API.DataAccess.Entities.HRI;
+using SupervisorMobility.API.DataAccess.Entities.HRI_s_Entities;
+
 
 namespace SupervisorMobility.API.DataAccess.Services.HRIRepository
 {

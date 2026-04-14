@@ -1,4 +1,6 @@
-﻿using SupervisorMobility.API.DataAccess.Entities.HRI;
+﻿
+
+using SupervisorMobility.API.DataAccess.Entities.HRI_s_Entities;
 
 namespace SupervisorMobility.API.Models.HRICyclesDtos
 {
