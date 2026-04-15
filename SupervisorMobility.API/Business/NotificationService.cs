@@ -2,17 +2,28 @@ using AutoMapper;
 using SupervisorMobility.API.Entities;
 using SupervisorMobility.API.Models.NotificationDtos;
 using SupervisorMobility.API.Services;
+using SupervisorMobility.API.Services.EmailService;
+using SupervisorMobility.API.Services.WhatsAppService;
 
 namespace SupervisorMobility.API.Business
 {
     public class NotificationService : INotificationService
     {
         private readonly ISupervisorMobilityRepository _repository;
+        private readonly IEmailQueueService _emailQueueService;
+        private readonly IWhatsAppService _whatsAppService;
         private readonly IMapper _mapper;
 
-        public NotificationService(ISupervisorMobilityRepository repository, IMapper mapper)
+        public NotificationService(
+            ISupervisorMobilityRepository repository,
+            IEmailQueueService emailQueueService,
+            IWhatsAppService whatsAppService,
+            IMapper mapper
+        )
         {
             _repository = repository;
+            _emailQueueService = emailQueueService;
+            _whatsAppService = whatsAppService;
             _mapper = mapper;
         }
 
@@ -28,6 +39,27 @@ namespace SupervisorMobility.API.Business
 
             _repository.AddNotificationAsync(notifyToAdd);
             await _repository.SaveChangesAsync();
+
+            if(specialOptions != null)
+            {
+                if(specialOptions.Email.HasValue && specialOptions.Email.Value)
+                {
+                    var emailQueueEntry = await _emailQueueService.AddEmailQueueEntryAsync(notifyToAdd, specialOptions.type);
+                }
+
+                if(specialOptions.WhatsApp.HasValue && specialOptions.WhatsApp.Value)
+                {                    
+                    var recipientPhoneNumber = "524492339120"; // This should be dynamically determined based on the notification data
+                    var whatsAppSended = await _whatsAppService.SendWhatsAppTemplateAsync(recipientPhoneNumber, specialOptions.type);
+                }
+
+                if(specialOptions.MicrosoftTeams.HasValue && specialOptions.MicrosoftTeams.Value)
+                {
+                    // Logic to add the notification to the Microsoft Teams queue
+                    // This is a placeholder for the actual implementation
+                    // You would need to create a MicrosoftTeamsQueue entity and repository method similar to EmailQueue
+                }
+            }
 
             return notifyToAdd;
         }

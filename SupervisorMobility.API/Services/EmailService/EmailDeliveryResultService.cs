@@ -1,12 +1,12 @@
 using AutoMapper;
 using Microsoft.EntityFrameworkCore;
-using SupervisorMobility.API.Models;
+using SupervisorMobility.API.Models.Email;
 
 namespace SupervisorMobility.API.Services.EmailService
 {
     public interface IEmailDeliveryResultService
     {
-        // Task<EmailDeliveryResultDto> SaveEmailResultAsync(CreateEmailDeliveryResultDto createDto);
+        Task<EmailDeliveryResultDto> SaveEmailResultAsync(CreateEmailDeliveryResultDto createDto);
         // Task<EmailDeliveryResultDto> UpdateEmailResultAsync(int id, UpdateEmailDeliveryResultDto updateDto);
         // Task<EmailDeliveryResultDto?> GetEmailResultByIdAsync(int id);
         // Task<IEnumerable<EmailDeliveryResultDto>> GetEmailResultsByUserAsync(int userId);
@@ -20,33 +20,37 @@ namespace SupervisorMobility.API.Services.EmailService
 
     public class EmailDeliveryResultService : IEmailDeliveryResultService
     {
-        // private readonly DatabaseContext _context;
+        
+        private readonly ISupervisorMobilityRepository _repository;
         private readonly IMapper _mapper;
 
         public EmailDeliveryResultService(
-            // DatabaseContext context, 
+            ISupervisorMobilityRepository repository,   
             IMapper mapper)
         {
-            // _context = context;
+            _repository = repository;
             _mapper = mapper;
         }
 
-    //     public async Task<EmailDeliveryResultDto> SaveEmailResultAsync(CreateEmailDeliveryResultDto createDto)
-    //     {
-    //         var emailResult = _mapper.Map<EmailDeliveryResult>(createDto);
-    //         emailResult.SentDateTime = DateTime.Now;
+        public async Task<EmailDeliveryResultDto> SaveEmailResultAsync(CreateEmailDeliveryResultDto createDto)
+        {
+            var emailResult = _mapper.Map<EmailDeliveryResult>(createDto);
+            emailResult.SentDateTime = DateTime.Now;
 
-    //         if (emailResult.IsDelivered && emailResult.DeliveryDateTime == null)
-    //         {
-    //             emailResult.DeliveryDateTime = DateTime.Now;
-    //         }
+            if (emailResult.IsDelivered && emailResult.DeliveryDateTime == null)
+            {
+                emailResult.DeliveryDateTime = DateTime.Now;
+            }
 
-    //         _context.EmailDeliveryResults.Add(emailResult);
-    //         await _context.SaveChangesAsync();
-
-    //         return await GetEmailResultByIdAsync(emailResult.EmailDeliveryResultID) 
-    //             ?? throw new InvalidOperationException("Failed to retrieve saved email result");
-    //     }
+            var resultEmail = await _repository.AddEmailDeliveryResultAsync(emailResult);
+            if(resultEmail == null)
+            {
+                throw new InvalidOperationException("Failed to save email delivery result");
+            }
+            
+            return await GetEmailResultByIdAsync(resultEmail.EmailDeliveryResultID) 
+                ?? throw new InvalidOperationException("Failed to retrieve saved email result");
+        }
 
     //     public async Task<EmailDeliveryResultDto> UpdateEmailResultAsync(int id, UpdateEmailDeliveryResultDto updateDto)
     //     {
@@ -76,14 +80,11 @@ namespace SupervisorMobility.API.Services.EmailService
     //             ?? throw new InvalidOperationException("Failed to retrieve updated email result");
     //     }
 
-    //     public async Task<EmailDeliveryResultDto?> GetEmailResultByIdAsync(int id)
-    //     {
-    //         var emailResult = await _context.EmailDeliveryResults
-    //             .Include(e => e.SentByUser)
-    //             .FirstOrDefaultAsync(e => e.EmailDeliveryResultID == id);
-
-    //         return emailResult == null ? null : _mapper.Map<EmailDeliveryResultDto>(emailResult);
-    //     }
+        public async Task<EmailDeliveryResultDto?> GetEmailResultByIdAsync(int id)
+        {
+            var emailResult = _repository.GetEmailDeliveryResultByIdAsync(id).Result;
+            return emailResult == null ? null : _mapper.Map<EmailDeliveryResultDto>(emailResult);
+        }
 
     //     public async Task<IEnumerable<EmailDeliveryResultDto>> GetEmailResultsByUserAsync(int userId)
     //     {

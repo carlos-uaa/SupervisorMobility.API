@@ -29,6 +29,8 @@ using SupervisorMobility.API.Business;
 using SupervisorMobility.API.Services;
 using SupervisorMobility.API.Services.BackgroundServices;
 using SupervisorMobility.API.Services.SOS;
+using SupervisorMobility.API.Services.WhatsAppService;
+using SupervisorMobility.API.Services.MicrosoftTeamsService;
 
 // - Interface imports
 using SupervisorMobility.API.Interfaces.SOS;
@@ -40,10 +42,6 @@ using SupervisorMobility.API.Services.SOSDistribution.SOSDistributionExcel;
 using SupervisorMobility.API.infrastructure.repositories.STRO.Collections.Skills;
 using SupervisorMobility.API.infrastructure.repositories.STRO;
 using SupervisorMobility.API.Models.NotificationDtos;
-using SupervisorMobility.API.infrastructure.repositories.STRO.Collections.Skills;
-using SupervisorMobility.API.infrastructure.repositories.STRO.Collections.Knowledges;
-using SupervisorMobility.API.Interfaces.SOSDistribution.SOSDistributionExcel;
-using SupervisorMobility.API.Services.SOSDistribution.SOSDistributionExcel;
 using SupervisorMobility.API.DataAccess.Services.SOS_AnalysisRepository;
 using SupervisorMobility.API.DataAccess.Services.SOS_Combination;
 using SupervisorMobility.API.DataAccess.Services.SOS_CombinationRepository;
@@ -54,6 +52,7 @@ using SupervisorMobility.API.DataAccess.Services.SOS_SynopticTableRepository;
 using SupervisorMobility.API.DataAccess.Services.UserCoursesServices;
 using SupervisorMobility.API.DataAccess.Services.LocalUserCourses.Service;
 using SupervisorMobility.API.DataAccess.Services.LocalUserCourses.Repository;
+using SupervisorMobility.API.Services.EmailService;
 
 
 namespace SupervisorMobility.API
@@ -93,9 +92,14 @@ namespace SupervisorMobility.API
 
             //Another
             services.AddScoped<IJobObservationService, JobObservationService>();
+            services.AddScoped<IEmailDeliveryResultService, EmailDeliveryResultService>();
+            services.AddScoped<IEmailQueueService, EmailQueueService>();
             services.AddScoped<INotificationService, NotificationService>();
             services.AddScoped<IAssyChartService, AssyChartService>();
             services.AddScoped<IEmailService, EmailService>();
+            services.AddScoped<IEmailServices, EmailServices>();
+            services.AddScoped<IWhatsAppService, WhatsAppService>();
+            services.AddScoped<IMicrosoftTeamsService, MicrosoftTeamsService>();
             services.AddScoped<ITreeService, TreeService>();
             services.AddScoped<IOrderingService, OrderingService>();
             services.AddScoped<ISTOperatingRequirementsService, STOperatingRequirementsService>();
@@ -170,9 +174,42 @@ namespace SupervisorMobility.API
 
             var emailConfig = configuration
                 .GetSection("EmailConfiguration")
-                .Get<EmailConfiguration>();
+                .Get<EmailConfiguration>() ?? new EmailConfiguration();
+
+            var whatsappConfig = configuration
+                .GetSection("WhatsAppConfiguration")
+                .Get<WhatsAppConfiguration>() ?? new WhatsAppConfiguration
+                {
+                    UserAccessToken = string.Empty,
+                    Version = "v25.0",
+                    PhoneNumberId = string.Empty
+                };
+                
+            var microsoftTeamsConfig = configuration
+                .GetSection("MicrosoftTeamsConfiguration")
+                .Get<MicrosoftTeamsConfiguration>() ?? new MicrosoftTeamsConfiguration
+                {
+                    ClientId = string.Empty,
+                    Username = string.Empty,
+                    Password = string.Empty,
+                    TenantId = string.Empty,
+                    ClientSecret = string.Empty,
+                    TeamId = string.Empty,
+                    ChannelId = string.Empty
+                };
+
+                var appSettingsConfig = configuration
+                .GetSection("AppSettings")
+                .Get<AppSettingsConfiguration>() ?? new AppSettingsConfiguration
+                {
+                    production = false
+                };
 
             services.AddSingleton(emailConfig);
+            services.AddSingleton(whatsappConfig);
+            services.AddSingleton(microsoftTeamsConfig);
+            services.AddSingleton(appSettingsConfig);
+            services.AddHttpClient();
 
             //Odmitir Referencias ciruclares
             services.AddControllers()

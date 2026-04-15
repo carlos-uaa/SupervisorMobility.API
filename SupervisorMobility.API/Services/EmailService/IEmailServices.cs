@@ -6,8 +6,11 @@ using MimeKit;
 
 namespace SupervisorMobility.API.Services.EmailService
 {
-    public interface IEmailService
+    public interface IEmailServices
     {
+        public Task<bool> SendEmailAsync(EmailQueue queued);
+
+
         // public MimeMessage CreateEmailMessage(string email, string message);
 
         /// <summary>
@@ -35,6 +38,6 @@ namespace SupervisorMobility.API.Services.EmailService
         /// </summary>
         // public Task<bool> SendSingleEmailAsync(SmtpClient client, string toEmail, string subject, string body, string? referenceEntity = null, int? referenceEntityId = null, int? sentByUserId = null);
         // public Task<string> CreateMessageToBodyNoti(NotificacionWMessageDto notification);
-        // public Task<bool> SendEmailAsync(EmailQueue queued);
+        
     }
 }

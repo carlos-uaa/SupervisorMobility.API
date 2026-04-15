@@ -35,6 +35,8 @@ using System.Diagnostics;
 using System.Linq;
 using System.Linq.Expressions;
 using System.Runtime.CompilerServices;
+using SupervisorMobility.API.Models.Email;
+using SupervisorMobility.API.Entities;
 
 namespace SupervisorMobility.API.Services
 {
@@ -2642,6 +2644,60 @@ namespace SupervisorMobility.API.Services
             //_context.Notifications.Remove(notify);
         }
         #endregion
+
+        #region EmailQueue
+        public async Task<EmailQueue> AddEmailQueueEntryAsync(EmailQueue emailQueue)
+        {
+            await _context.EmailQueues.AddAsync(emailQueue);
+            await _context.SaveChangesAsync();
+            return emailQueue;
+        }
+
+        public async Task<List<EmailQueue>> GetPendingEmailQueuesAsync()
+        {
+            return await _context.EmailQueues
+                .Include(e => e.MadeBy)
+                // .Include(e => e.TargetRelation)
+                .Include(e => e.Staff)
+                .Where(e => !e.IsSend)
+                .OrderBy(c => c.EntryDate)
+                .Take(1)
+                .ToListAsync();
+        }
+        #endregion
+
+
+        #region EmailDeliveryResult
+        public async Task<EmailDeliveryResult> AddEmailDeliveryResultAsync(EmailDeliveryResult emailDeliveryResult)
+        {
+            _context.EmailDeliveryResults.Add(emailDeliveryResult);
+            await _context.SaveChangesAsync();
+            return emailDeliveryResult;
+        }
+        public async Task<EmailDeliveryResult?> GetEmailDeliveryResultByIdAsync(int id)
+        {
+            return await _context.EmailDeliveryResults
+                .Include(e => e.SentByUser)
+                .FirstOrDefaultAsync(e => e.EmailDeliveryResultID == id);
+        }
+
+        public async Task<EmailQueue?> GetEmailQueueByIdAsync(int id)
+        {
+            return await _context.EmailQueues
+                .Include(e => e.MadeBy)
+                // .Include(e => e.TargetRelation)
+                .Include(e => e.Staff)
+                .FirstOrDefaultAsync(e => e.EmailQueueID == id);
+        }
+
+        public async Task UpdateEmailQueueAsync(EmailQueue emailQueue)
+        {
+            _context.EmailQueues.Update(emailQueue);
+            await _context.SaveChangesAsync();
+        }
+        #endregion
+
+
         #region Attendance
         public async Task<Attendance> GetAttendanceById(int AttendanceId)
         {
