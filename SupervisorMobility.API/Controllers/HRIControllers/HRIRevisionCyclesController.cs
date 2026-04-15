@@ -1,5 +1,6 @@
 ﻿using Microsoft.AspNetCore.Mvc;
 using SupervisorMobility.API.DataAccess.Services.HRIServices;
+using SupervisorMobility.API.Models.HRIDailyRevisionDtos;
 using SupervisorMobility.API.Models.HRIRevisionCycles;
 
 namespace SupervisorMobility.API.Controllers.HRIControllers
@@ -57,6 +58,15 @@ namespace SupervisorMobility.API.Controllers.HRIControllers
         public async Task<ServiceResponse<bool>> CreateRevisionCyclesByRevisionItemId(int itemId, List<CreateRevisionCyclesDto> listOfRevisionsCycles)
         {
             return await _service.CreateRevisionCyclesByRevisionItemId(itemId, listOfRevisionsCycles);
+        }
+
+        [HttpPost("CreateNewDailyRevisionsForRevisionCycle")]
+        [ProducesResponseType(StatusCodes.Status201Created)]
+        [ProducesResponseType(StatusCodes.Status400BadRequest)]
+        [ProducesResponseType(StatusCodes.Status500InternalServerError)]
+        public async Task<ServiceResponse<bool>> CreateNewDailyRevision(CreateDailyRevisionDto createDaily)
+        {
+            return await _service.CreateNewDailyRevision(createDaily);
         }
 
         [HttpPut("UpdateRevisionCycle/{id}")]

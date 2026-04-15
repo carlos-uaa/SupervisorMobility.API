@@ -1,8 +1,9 @@
 ﻿using AutoMapper;
-using SupervisorMobility.API.Context;
-using SupervisorMobility.API.Models.HRIRevisionCycles;
 using Microsoft.EntityFrameworkCore;
+using SupervisorMobility.API.Context;
 using SupervisorMobility.API.DataAccess.Entities.HRI_s_Entities;
+using SupervisorMobility.API.Models.HRIDailyRevisionDtos;
+using SupervisorMobility.API.Models.HRIRevisionCycles;
 
 
 namespace SupervisorMobility.API.DataAccess.Services.HRIRepository
@@ -21,7 +22,7 @@ namespace SupervisorMobility.API.DataAccess.Services.HRIRepository
             var response = new ServiceResponse<List<GetRevisionCyclesDto>>();
             try
             {
-                var revisionCycles = await _context.RevisionCycles.Include(rc => rc.DailyRevisions).ToListAsync();
+                var revisionCycles = await _context.RevisionCycles.Include(rc => rc.DailyRevisions!).ThenInclude(dr => dr.Responsible).ToListAsync();
                 if(revisionCycles == null || revisionCycles.Count == 0) 
                 {
                     response.Success = false;
@@ -45,7 +46,7 @@ namespace SupervisorMobility.API.DataAccess.Services.HRIRepository
             var response = new ServiceResponse<List<GetRevisionCyclesDto>>();
             try
             {
-                var revisionCycles = await _context.RevisionCycles.Include(rc=>rc.DailyRevisions).Where(rc => rc.HRIRevisionItemsId == itemId).ToListAsync();
+                var revisionCycles = await _context.RevisionCycles.Include(rc => rc.DailyRevisions!).ThenInclude(dr => dr.Responsible).Where(rc => rc.HRIRevisionItemsId == itemId).ToListAsync();
                 if(revisionCycles == null || revisionCycles.Count == 0) 
                 {
                     response.Success = false;
@@ -69,7 +70,7 @@ namespace SupervisorMobility.API.DataAccess.Services.HRIRepository
             var response = new ServiceResponse<GetRevisionCyclesDto>();
             try
             {
-                var revisionCycle = await _context.RevisionCycles.Include(rc => rc.DailyRevisions).FirstOrDefaultAsync(rc => rc.RevisionCycleId == id);
+                var revisionCycle = await _context.RevisionCycles.Include(rc => rc.DailyRevisions!).ThenInclude(dr => dr.Responsible).FirstOrDefaultAsync(rc => rc.RevisionCycleId == id);
                 if(revisionCycle == null) 
                 {
                     response.Success = false;
@@ -133,6 +134,34 @@ namespace SupervisorMobility.API.DataAccess.Services.HRIRepository
                 response.Message = $"An error occurred while creating the revision cycles: {ex.Message}";
             }
             return response;
+        }
+        public async Task<ServiceResponse<bool>> CreateNewDailyRevision(CreateDailyRevisionDto createDaily)
+        {
+            var response = new ServiceResponse<bool>();
+            try
+            {
+                var newDaily = new DailyRevisions
+                {
+                    RevisionCycleId = createDaily.EntityRelationId,
+                    Day = createDaily.Day,
+                    Month = createDaily.Month,
+                    UserId = createDaily.UserId,
+                    UserType = createDaily.UserType,
+                    Status = createDaily.Status
+                };
+                await _context.DailyRevisions.AddAsync(newDaily);
+                await _context.SaveChangesAsync();
+                response.Data = true;
+                response.Success = true;
+                response.Message = "Daily revision created successfully.";
+            }
+            catch (Exception ex)
+            {
+                response.Success = false;
+                response.Message = ex.Message;
+            }
+            return response;
+
         }
 
         public async  Task<ServiceResponse<GetRevisionCyclesDto>> UpdateRevisionCycle(int id, UpdateRevisionCycleDto updateRevisionCycleDto)

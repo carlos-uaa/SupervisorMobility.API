@@ -56,6 +56,20 @@ namespace SupervisorMobility.API.Controllers.HRIControllers
             return Ok(response);
         }
 
+        [HttpPost("CreateHRIREvisionItemsByHRIId/{hriId}")]
+        [ProducesResponseType(StatusCodes.Status201Created)]
+        [ProducesResponseType(StatusCodes.Status400BadRequest)]
+        [ProducesResponseType(StatusCodes.Status500InternalServerError)]
+        public async Task<ActionResult<ServiceResponse<bool>>> CreateHRIREvisionItemsByHRIId(int hriId, List<CreateHRIRevisionItemDto> createHRIRevisionItemDtos)
+        {
+            var response = await _hriRevisionItemService.CreateHRIREvisionItemsByHRIId(hriId, createHRIRevisionItemDtos);
+            if (response.Data == false)
+            {
+                return BadRequest(response);
+            }
+            return Ok(response);
+        }
+
         [HttpPut("UpdateHRIRevisionItem/{id}")]
         [ProducesResponseType(StatusCodes.Status200OK)]
         [ProducesResponseType(StatusCodes.Status400BadRequest)]

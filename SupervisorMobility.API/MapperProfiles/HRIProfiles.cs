@@ -2,7 +2,9 @@
 using SupervisorMobility.API.DataAccess.Entities.HRI_s_Entities;
 using SupervisorMobility.API.DataAccess.Entities.HRI_s_Entities.HRIRevisionsItem_Entities;
 using SupervisorMobility.API.Models.HRICyclesDtos;
+using SupervisorMobility.API.Models.HRIDailyRevisionDtos;
 using SupervisorMobility.API.Models.HRIDtos;
+using SupervisorMobility.API.Models.HRIHourmeterRevisionDto;
 using SupervisorMobility.API.Models.HRIRevisionCycles;
 using SupervisorMobility.API.Models.HRIRevisionItemsDtos;
 
@@ -42,6 +44,14 @@ namespace SupervisorMobility.API.MapperProfiles
             CreateMap<RevisionCycles, GetRevisionCyclesDto>().ReverseMap();
             CreateMap<CreateRevisionCyclesDto, RevisionCycles>().ReverseMap();
             CreateMap<UpdateRevisionCycleDto, RevisionCycles>().ReverseMap();
+            #endregion
+
+            #region dailyRevisions
+            CreateMap<CreateDailyRevisionDto,DailyRevisions>().ReverseMap();
+            #endregion
+            #region HourmeterRevision
+            CreateMap<HourmeterRevision, GetHourmeterRevisionDto>().ReverseMap();
+            CreateMap<CreateHourMeterRevisionDto, HourmeterRevision>().ReverseMap();
             #endregion
         }
     }

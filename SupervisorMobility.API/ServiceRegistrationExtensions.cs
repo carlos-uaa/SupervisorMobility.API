@@ -120,13 +120,15 @@ namespace SupervisorMobility.API
             services.AddScoped<IHRIRevisionItemService, HRIRevisionItemService>();
             services.AddScoped<IHRIRevisionItemRepository, HRIRevisionItemRepository>();
             services.AddScoped<IHRIRevisionCyclesService, HRIRevisionCyclesServices>();
-            services.AddScoped<IHRIRevisionCyclesRepository, HRIRevisionCyclesRepository>();    
+            services.AddScoped<IHRIRevisionCyclesRepository, HRIRevisionCyclesRepository>(); 
+            services.AddScoped<IHRIHourmeterRevisionService, HRIHourmeterRevisionService>();
 
             //HRI Repositories
             services.AddScoped<IHRIItemsRepository, HRIItemsRepository>();
             services.AddScoped<IHRIDocksRepository, HRIDocksRepository>();
             services.AddScoped<IHRILinesRepository, HRILinesRepository>();
-            services.AddScoped<IHRICyclesRepository, HRICyclesRepository>();    
+            services.AddScoped<IHRICyclesRepository, HRICyclesRepository>();   
+            services.AddScoped<IHRIHourmeterRevisionRepository, HRIHourmeterRevisionRepository>();
 
             services.Configure<IISServerOptions>(options =>
             {

@@ -1,4 +1,5 @@
 ﻿using SupervisorMobility.API.DataAccess.Services.HRIRepository;
+using SupervisorMobility.API.Models.HRIDailyRevisionDtos;
 using SupervisorMobility.API.Models.HRIRevisionCycles;
 
 namespace SupervisorMobility.API.DataAccess.Services.HRIServices
@@ -43,6 +44,11 @@ namespace SupervisorMobility.API.DataAccess.Services.HRIServices
         public async Task<ServiceResponse<bool>> DeleteRevisionCycle(int id)
         {
             return await _repository.DeleteRevisionCycle(id);
+        }
+
+        public async Task<ServiceResponse<bool>> CreateNewDailyRevision(CreateDailyRevisionDto createDaily)
+        {
+            return await _repository.CreateNewDailyRevision(createDaily);
         }
     }
 }

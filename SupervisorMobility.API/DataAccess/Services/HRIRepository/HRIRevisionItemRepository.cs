@@ -26,6 +26,7 @@ namespace SupervisorMobility.API.DataAccess.Services.HRIRepository
                                                                    .Include(ri => ri.RevisionMethod)
                                                                    .Include(ri => ri.Veredict)
                                                                    .Include(ri => ri.Frequency)
+                                                                   .Include(ri => ri.RevisionCycles!).ThenInclude(rc => rc.DailyRevisions)
                                                                    .ToListAsync();
                 if(revisionItems.Count == 0)
                 {
@@ -54,6 +55,7 @@ namespace SupervisorMobility.API.DataAccess.Services.HRIRepository
                                                                    .Include(ri => ri.RevisionMethod)
                                                                    .Include(ri => ri.Veredict)
                                                                    .Include(ri => ri.Frequency)
+                                                                   .Include(ri=>ri.RevisionCycles!).ThenInclude(rc=>rc.DailyRevisions)
                                                                    .FirstOrDefaultAsync(ri => ri.ItemId == id);
                 if (revisionItem == null)
                 {
@@ -88,6 +90,37 @@ namespace SupervisorMobility.API.DataAccess.Services.HRIRepository
                 response.Success = true;
                 response.Message = "HRI Revision Item created successfully.";
 
+            }
+            catch (Exception ex)
+            {
+                response.Success = false;
+                response.Message = ex.Message;
+            }
+            return response;
+        }
+
+        public async Task<ServiceResponse<bool>>CreateHRIREvisionItemsByHRIId(int hriId, List<CreateHRIRevisionItemDto> createHRIRevisionItemDtos)
+        {
+            var response = new ServiceResponse<bool>();
+            try
+            {
+                var hri = await _context.HRIs.FindAsync(hriId);
+                if (hri == null)
+                {
+                    response.Success = false;
+                    response.Message = "HRI not found.";
+                    return response;
+                }
+                var revisionItems = createHRIRevisionItemDtos.Select(dto => _mapper.Map<HRIRevisionItems>(dto)).ToList();
+                foreach (var item in revisionItems)
+                {
+                    item.HriId = hriId; // Asignamos el HRIId a cada item
+                }
+                await _context.HRIRevisionItems.AddRangeAsync(revisionItems);
+                await _context.SaveChangesAsync();
+                response.Data = true;
+                response.Success = true;
+                response.Message = "HRI Revision Items created successfully.";
             }
             catch (Exception ex)
             {

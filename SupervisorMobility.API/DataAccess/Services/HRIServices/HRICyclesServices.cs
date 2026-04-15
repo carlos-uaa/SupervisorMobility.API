@@ -3,6 +3,7 @@ using SupervisorMobility.API.Context;
 using SupervisorMobility.API.Models.HRICyclesDtos;
 using Microsoft.EntityFrameworkCore;
 using SupervisorMobility.API.DataAccess.Services.HRIRepository;
+using SupervisorMobility.API.Models.HRIDailyRevisionDtos;
 
 namespace SupervisorMobility.API.DataAccess.Services.HRIServices
 {
@@ -17,6 +18,16 @@ namespace SupervisorMobility.API.DataAccess.Services.HRIServices
         public async Task<ServiceResponse<GetHRICyclesDto>> CreateHRICycle(CreateHRICyclesDto createHRICycle)
         {
             return await _hriCyclesRepository.CreateHRICycle(createHRICycle);
+        }
+
+        public async Task<ServiceResponse<bool>> CreateHRICyclesByHRIId(int hriId, List<CreateHRICyclesDto> createHRICycles)
+        {
+            return await _hriCyclesRepository.CreateHRICyclesByHRIId(hriId, createHRICycles);
+        }
+
+        public async Task<ServiceResponse<bool>> CreateNewDailyRevision(CreateDailyRevisionDto createDaily)
+        {
+            return await _hriCyclesRepository.CreateNewDailyRevision(createDaily);
         }
 
         public async Task<ServiceResponse<bool>> DeleteHRICycle(int id)

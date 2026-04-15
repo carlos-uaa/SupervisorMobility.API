@@ -1,4 +1,5 @@
-﻿using SupervisorMobility.API.Models.HRIRevisionCycles;
+﻿using SupervisorMobility.API.Models.HRIDailyRevisionDtos;
+using SupervisorMobility.API.Models.HRIRevisionCycles;
 
 namespace SupervisorMobility.API.DataAccess.Services.HRIServices
 {
@@ -9,6 +10,7 @@ namespace SupervisorMobility.API.DataAccess.Services.HRIServices
         Task<ServiceResponse<GetRevisionCyclesDto>> GetRevisionCycleById(int id);
         Task<ServiceResponse<GetRevisionCyclesDto>> CreateRevisionCycle(int itemId, CreateRevisionCyclesDto createRevisionCyclesDto);
         Task<ServiceResponse<bool>> CreateRevisionCyclesByRevisionItemId(int itemId,List<CreateRevisionCyclesDto> listOfRevisionsCycles);
+        Task<ServiceResponse<bool>> CreateNewDailyRevision(CreateDailyRevisionDto createDaily);
         Task<ServiceResponse<GetRevisionCyclesDto>> UpdateRevisionCycle(int id, UpdateRevisionCycleDto updateRevisionCycleDto);
         Task<ServiceResponse<bool>> DeleteRevisionCycle(int id);
     }

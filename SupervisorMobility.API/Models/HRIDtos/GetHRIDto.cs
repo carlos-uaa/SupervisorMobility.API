@@ -1,4 +1,5 @@
 ﻿
+using SupervisorMobility.API.DataAccess.Entities;
 using SupervisorMobility.API.DataAccess.Entities.HRI_s_Entities;
 
 namespace SupervisorMobility.API.Models.HRIDtos
@@ -20,6 +21,8 @@ namespace SupervisorMobility.API.Models.HRIDtos
         public List<HRICycles>? HriCycles { get; set; }
         public bool IsActive { get; set; }
         public DateTime CreationDate { get; set; }
-        public DailyRevisions? HourmeterRevision { get; set; }
+        public HourmeterRevision? HourmeterRevision { get; set; }
+        public int? UserId { get; set; }
+        public User? Supervisor { get; set; }
     }
 }

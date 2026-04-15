@@ -3,6 +3,7 @@ using Microsoft.EntityFrameworkCore;
 using SupervisorMobility.API.Context;
 using SupervisorMobility.API.DataAccess.Entities.HRI_s_Entities;
 using SupervisorMobility.API.Models.HRICyclesDtos;
+using SupervisorMobility.API.Models.HRIDailyRevisionDtos;
 
 namespace SupervisorMobility.API.DataAccess.Services.HRIRepository
 {
@@ -36,6 +37,60 @@ namespace SupervisorMobility.API.DataAccess.Services.HRIRepository
             }
             return response;
         }
+
+        public async Task<ServiceResponse<bool>> CreateHRICyclesByHRIId(int hriId, List<CreateHRICyclesDto> createHRICycles)
+        {
+            var response = new ServiceResponse<bool>();
+            try
+            {
+                var newHRICycles = createHRICycles.Select(c => _mapper.Map<HRICycles>(c)).ToList();
+                foreach (var hriCycle in newHRICycles)
+                {
+                    hriCycle.HriId = hriId;
+                    await _context.HRICycles.AddAsync(hriCycle);
+                }
+                await _context.SaveChangesAsync();
+                response.Data = true;
+                response.Success = true;
+                response.Message = "HRICycles created successfully.";
+            }
+            catch (Exception ex)
+            {
+                response.Success = false;
+                response.Message = ex.Message;
+            }
+            return response;
+        }
+
+        public async Task<ServiceResponse<bool>> CreateNewDailyRevision(CreateDailyRevisionDto createDaily)         
+        {
+            var response = new ServiceResponse<bool>();
+            try
+            {
+                var newDaily = new DailyRevisions
+                {
+                    CycleId = createDaily.EntityRelationId,
+                    Day = createDaily.Day,
+                    Month = createDaily.Month,
+                    UserId = createDaily.UserId,
+                    UserType = createDaily.UserType,
+                    Status = createDaily.Status
+                };
+                await _context.DailyRevisions.AddAsync(newDaily);
+                await _context.SaveChangesAsync();
+                response.Data = true;
+                response.Success = true;
+                response.Message = "Daily revision created successfully.";
+            }
+            catch(Exception ex)
+            {
+                response.Success = false;
+                response.Message = ex.Message;
+            }
+            return response;
+
+        }
+
 
         public async Task<ServiceResponse<bool>> DeleteHRICycle(int id)
         {
