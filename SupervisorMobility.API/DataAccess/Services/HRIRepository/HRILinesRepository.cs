@@ -66,7 +66,7 @@ namespace SupervisorMobility.API.DataAccess.Services.HRIRepository
         {
             try
             {
-                _context.HRILines.Add(Line);
+                await _context.HRILines.AddAsync(Line);
                 await _context.SaveChangesAsync();
 
                 return new ServiceResponse<HRILines>

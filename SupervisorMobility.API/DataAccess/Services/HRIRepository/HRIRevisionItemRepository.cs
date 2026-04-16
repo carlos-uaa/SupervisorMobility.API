@@ -219,7 +219,7 @@ namespace SupervisorMobility.API.DataAccess.Services.HRIRepository
             var response = new ServiceResponse<GetFrequencyDto>();
             try
             {
-                var frequency = await _context.Frequencies.FindAsync(id);
+                var frequency = await _context.Frequencies.Where(f => f.Id == id && f.IsActive==true).FirstOrDefaultAsync();
                 if (frequency == null)
                 {
                     response.Success = false;
@@ -348,7 +348,7 @@ namespace SupervisorMobility.API.DataAccess.Services.HRIRepository
             var response = new ServiceResponse<GetVeredictDto>();
             try
             {
-                var veredict = await _context.Veredicts.FindAsync(id);
+                var veredict = await _context.Veredicts.Where(v => v.Id == id && v.IsActive == true).FirstOrDefaultAsync();
                 if (veredict == null)
                 {
                     response.Success = false;
@@ -478,7 +478,7 @@ namespace SupervisorMobility.API.DataAccess.Services.HRIRepository
             var response = new ServiceResponse<GetRevisionMethodDto>();
             try
             {
-                var revisionMethod = await _context.RevisionMethods.FindAsync(id);
+                var revisionMethod = await _context.RevisionMethods.Where(rm => rm.Id == id && rm.IsActive == true).FirstOrDefaultAsync();
                 if (revisionMethod == null)
                 {
                     response.Success = false;

@@ -17,7 +17,7 @@ namespace SupervisorMobility.API.DataAccess.Services.HRIRepository
         {
             try
             {
-                var docks = _context.HRIDocks.Where(h => h.IsActive).ToList();
+                var docks = await _context.HRIDocks.Where(h => h.IsActive).ToListAsync();
                 string message = docks.Count > 0 ? "HRIDocks retrieved successfully." : "No active HRIDocks found.";
                 return new ServiceResponse<List<HRIDock>>
                 {
@@ -65,7 +65,7 @@ namespace SupervisorMobility.API.DataAccess.Services.HRIRepository
         {
             try
             {
-                _context.HRIDocks.Add(Dock);
+                 await _context.HRIDocks.AddAsync(Dock);
                 await _context.SaveChangesAsync();
 
                 return new ServiceResponse<HRIDock>

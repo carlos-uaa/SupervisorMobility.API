@@ -65,7 +65,7 @@ namespace SupervisorMobility.API.DataAccess.Services.HRIRepository
         {
             try
             {
-                _context.HRIItems.Add(Item);
+                await _context.HRIItems.AddAsync(Item);
                 await _context.SaveChangesAsync();
 
                 return new ServiceResponse<HRIItem>

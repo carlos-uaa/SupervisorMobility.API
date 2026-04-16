@@ -1,8 +1,6 @@
 ﻿using Microsoft.AspNetCore.Mvc;
 using SupervisorMobility.API.DataAccess.Entities.HRI_s_Entities;
 using SupervisorMobility.API.DataAccess.Services.HRIServices;
-using RouteAttribute = Microsoft.AspNetCore.Mvc.RouteAttribute;
-
 namespace SupervisorMobility.API.Controllers.HRIControllers
 {
     [ApiController]
