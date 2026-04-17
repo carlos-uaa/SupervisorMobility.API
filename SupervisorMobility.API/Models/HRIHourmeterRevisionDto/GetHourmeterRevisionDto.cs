@@ -1,4 +1,5 @@
 ﻿using SupervisorMobility.API.DataAccess.Entities.HRI_s_Entities;
+using SupervisorMobility.API.Models.HRIDailyRevisionDtos;
 
 namespace SupervisorMobility.API.Models.HRIHourmeterRevisionDto
 {
@@ -6,6 +7,6 @@ namespace SupervisorMobility.API.Models.HRIHourmeterRevisionDto
     {
         public int Id { get; set; }
         public int? HriId { get; set; }
-        public List<DailyRevisions>? DailyRevisions { get; set; }
+        public List<GetDailyRevisionDto>? DailyRevisions { get; set; }
     }
 }

@@ -48,6 +48,8 @@ namespace SupervisorMobility.API.MapperProfiles
 
             #region dailyRevisions
             CreateMap<CreateDailyRevisionDto,DailyRevisions>().ReverseMap();
+            CreateMap<DailyRevisions, GetDailyRevisionDto>().ReverseMap();
+           
             #endregion
             #region HourmeterRevision
             CreateMap<HourmeterRevision, GetHourmeterRevisionDto>().ReverseMap();

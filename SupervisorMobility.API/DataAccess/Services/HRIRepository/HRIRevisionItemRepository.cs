@@ -94,7 +94,7 @@ namespace SupervisorMobility.API.DataAccess.Services.HRIRepository
             catch (Exception ex)
             {
                 response.Success = false;
-                response.Message = ex.Message;
+                response.Message = ex.Message + ex.InnerException.Message;
             }
             return response;
         }
