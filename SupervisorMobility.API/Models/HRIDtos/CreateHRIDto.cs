@@ -2,6 +2,7 @@
 using SupervisorMobility.API.Models.HRICyclesDtos;
 using SupervisorMobility.API.Models.HRIHourmeterRevisionDto;
 using SupervisorMobility.API.Models.HRIRevisionItemsDtos;
+using SupervisorMobility.API.Models.HRIDtos.HRImagesDto;
 
 namespace SupervisorMobility.API.Models.HRIDtos
 {
@@ -15,7 +16,7 @@ namespace SupervisorMobility.API.Models.HRIDtos
         public int? HRIDockId { get; set; }
         public HRIDock? Dock { get; set; }
         public string? Department { get; set; }
-        public List<HRImages>? Images { get; set; }
+        public List<CreateHRImageDto>? Images { get; set; }
         public List<CreateHRIRevisionItemDto>? ItemsRevised { get; set; }
         public List<WeeklyRevisions>? WeeklyRevisions { get; set; }
         public List<CreateHRICyclesDto>? HriCycles { get; set; }
