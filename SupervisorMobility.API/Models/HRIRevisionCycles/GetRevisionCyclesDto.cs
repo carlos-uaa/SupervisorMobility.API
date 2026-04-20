@@ -9,6 +9,7 @@ namespace SupervisorMobility.API.Models.HRIRevisionCycles
     {
         public int RevisionCycleId { get; set; }
         public int Cycle { get; set; }
+        public bool? IsActive { get; set; }
         public int? HRIRevisionItemsId { get; set; }
         public List<GetDailyRevisionDto>? DailyRevisions { get; set; }
     }

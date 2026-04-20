@@ -2,6 +2,7 @@
 using Microsoft.EntityFrameworkCore;
 using SupervisorMobility.API.Context;
 using SupervisorMobility.API.DataAccess.Entities.HRI_s_Entities;
+using SupervisorMobility.API.Models.HRIDailyRevisionDtos;
 using SupervisorMobility.API.Models.HRIHourmeterRevisionDto;
 
 namespace SupervisorMobility.API.DataAccess.Services.HRIRepository
@@ -22,9 +23,11 @@ namespace SupervisorMobility.API.DataAccess.Services.HRIRepository
             try
             {
                 var hourmeterRevisions = await _context.HourmeterRevisions
-                    .Include(hr => hr.DailyRevisions)
+                    .Include(hr => hr.DailyRevisions!).ThenInclude(dr=>dr.Responsible).Where(hr => hr.IsActive == true)
                     .ToListAsync();
                 serviceResponse.Data = hourmeterRevisions.Select(hr => _mapper.Map<GetHourmeterRevisionDto>(hr)).ToList();
+                serviceResponse.Message = "Hourmeter revisions retrieved successfully.";
+                serviceResponse.Success = true;
             }
             catch (Exception ex)
             {
@@ -39,9 +42,11 @@ namespace SupervisorMobility.API.DataAccess.Services.HRIRepository
             var serviceResponse = new ServiceResponse<GetHourmeterRevisionDto>();
             try
             {
-                var hourmeterRevision = await _context.HourmeterRevisions.Include(hr => hr.DailyRevisions)
+                var hourmeterRevision = await _context.HourmeterRevisions.Include(hr => hr.DailyRevisions!).ThenInclude(dr=>dr.Responsible).Where(hr => hr.IsActive == true)
                     .FirstOrDefaultAsync(hr => hr.HriId == Hrid);
                 serviceResponse.Data = _mapper.Map<GetHourmeterRevisionDto>(hourmeterRevision);
+                serviceResponse.Message = hourmeterRevision != null ? "Hourmeter revision found." : "Hourmeter revision not found.";
+                serviceResponse.Success = true;
             }
             catch (Exception ex)
             {
@@ -57,9 +62,12 @@ namespace SupervisorMobility.API.DataAccess.Services.HRIRepository
             try
             {
                 var hourmeterRevision = await _context.HourmeterRevisions
-                    .Include(hr => hr.DailyRevisions)
+                    .Include(hr => hr.DailyRevisions!)
+                    .ThenInclude(dr=>dr.Responsible)
                     .FirstOrDefaultAsync(hr => hr.Id == id);
                 serviceResponse.Data = _mapper.Map<GetHourmeterRevisionDto>(hourmeterRevision);
+                serviceResponse.Message = hourmeterRevision != null ? "Hourmeter revision found." : "Hourmeter revision not found.";
+                serviceResponse.Success = true;
             }
             catch (Exception ex)
             {
@@ -87,20 +95,64 @@ namespace SupervisorMobility.API.DataAccess.Services.HRIRepository
             return serviceResponse;
         }
 
-        public async Task<ServiceResponse<List<GetHourmeterRevisionDto>>> DeleteHourmeterRevision(int id)
+        public async Task<ServiceResponse<bool>> CreateNewDailyRevision(CreateDailyRevisionDto createDaily)
         {
-            var serviceResponse = new ServiceResponse<List<GetHourmeterRevisionDto>>();
+            var response = new ServiceResponse<bool>();
+            try
+            {
+                var newDaily = new DailyRevisions
+                {
+                    HourmeterRevisionId = createDaily.EntityRelationId,
+                    Day = createDaily.Day,
+                    Month = createDaily.Month,
+                    UserId = createDaily.UserId,
+                    UserType = createDaily.UserType,
+                    Status = createDaily.Status,
+                    IsActive = true
+                };
+                await _context.DailyRevisions.AddAsync(newDaily);
+                await _context.SaveChangesAsync();
+                response.Data = true;
+                response.Success = true;
+                response.Message = "Daily revision created successfully.";
+            }
+            catch (Exception ex)
+            {
+                response.Success = false;
+                response.Message = ex.Message;
+            }
+            return response;
+
+        }
+
+        public async Task<ServiceResponse<bool>> DeleteHourmeterRevision(int id)
+        {
+            var serviceResponse = new ServiceResponse<bool>();
             try
             {
                 var hourmeterRevision = await _context.HourmeterRevisions
                     .FirstOrDefaultAsync(hr => hr.Id == id);
-                if (hourmeterRevision != null)
+                if (hourmeterRevision == null)
                 {
-                    _context.HourmeterRevisions.Remove(hourmeterRevision);
-                    await _context.SaveChangesAsync();
+                    serviceResponse.Success = false;
+                    serviceResponse.Message = "Hourmeter revision not found.";
+                    return serviceResponse;
                 }
-                var remainingRevisions = await _context.HourmeterRevisions.ToListAsync();
-                serviceResponse.Data = _mapper.Map<List<GetHourmeterRevisionDto>>(remainingRevisions);
+
+                //soft delete related daily revisions
+                var dailyRevisions = await _context.DailyRevisions
+                    .Where(dr => dr.HourmeterRevisionId == id && dr.IsActive == true)
+                    .ToListAsync();
+                foreach (var daily in dailyRevisions)
+                {
+                    daily.IsActive = false; // Soft delete
+                }
+                // Soft delete by setting IsActive to false
+                hourmeterRevision.IsActive = false;
+                await _context.SaveChangesAsync();
+                serviceResponse.Data = true;
+                serviceResponse.Success = true;
+                serviceResponse.Message = "Hourmeter revision deleted successfully.";
             }
             catch (Exception ex)
             {

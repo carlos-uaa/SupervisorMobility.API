@@ -12,6 +12,7 @@ namespace SupervisorMobility.API.Models.HRIRevisionItemsDtos
         public int? RevisionMethodId { get; set; } 
         public int? VeredictId { get; set; }
         public int? FrequencyId { get; set; }
-       
+        public bool? IsActive { get; set; } = true;
+
     }
 }

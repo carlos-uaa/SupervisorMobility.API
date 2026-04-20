@@ -22,7 +22,7 @@ namespace SupervisorMobility.API.DataAccess.Services.HRIRepository
             var response = new ServiceResponse<List<GetRevisionCyclesDto>>();
             try
             {
-                var revisionCycles = await _context.RevisionCycles.Include(rc => rc.DailyRevisions!).ThenInclude(dr => dr.Responsible).ToListAsync();
+                var revisionCycles = await _context.RevisionCycles.Include(rc => rc.DailyRevisions!).ThenInclude(dr => dr.Responsible).Where(rc => rc.IsActive == true).ToListAsync();
                 if(revisionCycles == null || revisionCycles.Count == 0) 
                 {
                     response.Success = false;
@@ -46,7 +46,7 @@ namespace SupervisorMobility.API.DataAccess.Services.HRIRepository
             var response = new ServiceResponse<List<GetRevisionCyclesDto>>();
             try
             {
-                var revisionCycles = await _context.RevisionCycles.Include(rc => rc.DailyRevisions!).ThenInclude(dr => dr.Responsible).Where(rc => rc.HRIRevisionItemsId == itemId).ToListAsync();
+                var revisionCycles = await _context.RevisionCycles.Include(rc => rc.DailyRevisions!).ThenInclude(dr => dr.Responsible).Where(rc => rc.HRIRevisionItemsId == itemId && rc.IsActive == true).ToListAsync();
                 if(revisionCycles == null || revisionCycles.Count == 0) 
                 {
                     response.Success = false;
@@ -147,7 +147,8 @@ namespace SupervisorMobility.API.DataAccess.Services.HRIRepository
                     Month = createDaily.Month,
                     UserId = createDaily.UserId,
                     UserType = createDaily.UserType,
-                    Status = createDaily.Status
+                    Status = createDaily.Status,
+                    IsActive = true
                 };
                 await _context.DailyRevisions.AddAsync(newDaily);
                 await _context.SaveChangesAsync();
@@ -204,7 +205,15 @@ namespace SupervisorMobility.API.DataAccess.Services.HRIRepository
                     response.Message = "Revision cycle not found.";
                     return response;
                 }
-                _context.RevisionCycles.Remove(revisionCycle);
+
+                //soft delete related daily revisions
+                var relatedDailyRevisions = await _context.DailyRevisions.Where(dr => dr.RevisionCycleId == id).ToListAsync();
+                foreach (var dailyRevision in relatedDailyRevisions)
+                {
+                    dailyRevision.IsActive = false;
+                }
+                // Soft delete by setting IsActive to false
+                revisionCycle.IsActive = false;
                 await _context.SaveChangesAsync();
                 response.Data = true;
                 response.Success = true;

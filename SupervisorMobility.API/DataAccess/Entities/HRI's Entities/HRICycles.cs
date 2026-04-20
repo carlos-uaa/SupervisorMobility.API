@@ -12,6 +12,7 @@ namespace SupervisorMobility.API.DataAccess.Entities.HRI_s_Entities
         public int? UserId { get; set; }
         public User? Responsible { get; set; }
         public string? UserType { get; set; }
+        public bool? IsActive { get; set; }
         public List<DailyRevisions>? DailyRevisions { get; set; }
     }
 }

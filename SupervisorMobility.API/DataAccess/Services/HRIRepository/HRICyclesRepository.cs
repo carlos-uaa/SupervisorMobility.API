@@ -74,7 +74,9 @@ namespace SupervisorMobility.API.DataAccess.Services.HRIRepository
                     Month = createDaily.Month,
                     UserId = createDaily.UserId,
                     UserType = createDaily.UserType,
-                    Status = createDaily.Status
+                    Status = createDaily.Status,
+                    IsActive = true
+
                 };
                 await _context.DailyRevisions.AddAsync(newDaily);
                 await _context.SaveChangesAsync();
@@ -104,8 +106,13 @@ namespace SupervisorMobility.API.DataAccess.Services.HRIRepository
                     response.Message = "HRICycle not found.";
                     return response;
                 }
-
-                _context.HRICycles.Remove(hriCycle);
+                // Remove associated daily revisions first
+                var dailyRevisions = _context.DailyRevisions.Where(d => d.CycleId == id);
+                foreach (var daily in dailyRevisions)
+                {
+                    daily.IsActive = false; // Soft delete
+                }
+                hriCycle.IsActive = false; // Soft delete
                 await _context.SaveChangesAsync();
                 response.Data = true;
                 response.Success = true;
@@ -114,7 +121,7 @@ namespace SupervisorMobility.API.DataAccess.Services.HRIRepository
             catch (Exception ex)
             {
                 response.Success = false;
-                response.Message = ex.Message;
+                response.Message = ex.Message + (ex.InnerException != null ? " Inner Exception: " + ex.InnerException.Message : "");
             }
             return response;
         }
@@ -124,7 +131,7 @@ namespace SupervisorMobility.API.DataAccess.Services.HRIRepository
             var response = new ServiceResponse<GetHRICyclesDto>();
             try
             {
-                var hriCycle = await _context.HRICycles.Include(h => h.DailyRevisions).Include(h => h.Responsible).FirstOrDefaultAsync(h => h.CycleId == id);
+                var hriCycle = await _context.HRICycles.Include(h => h.DailyRevisions).Include(h => h.Responsible).FirstOrDefaultAsync(h => h.CycleId == id && h.IsActive == true);
                 if (hriCycle == null)
                 {
                     response.Success = false;
@@ -150,7 +157,7 @@ namespace SupervisorMobility.API.DataAccess.Services.HRIRepository
             var response = new ServiceResponse<List<GetHRICyclesDto>>();
             try
             {
-                var hriCycles = await _context.HRICycles.Include(h => h.DailyRevisions).ToListAsync();
+                var hriCycles = await _context.HRICycles.Include(h=>h.Responsible).Include(h => h.DailyRevisions).Where(h => h.IsActive == true).ToListAsync();
                 response.Data = hriCycles.Select(h => _mapper.Map<GetHRICyclesDto>(h)).ToList();
                 response.Success = true;
                 response.Message = "HRICycles retrieved successfully.";

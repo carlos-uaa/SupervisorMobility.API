@@ -17,6 +17,7 @@ namespace SupervisorMobility.API.DataAccess.Entities.HRI_s_Entities
         public Veredict? Veredict { get; set; }
         public int? FrequencyId { get; set; }
         public Frequency? Frequency { get; set; }
+        public bool? IsActive { get; set; }
         public List<RevisionCycles>? RevisionCycles { get; set; }
     }
 }

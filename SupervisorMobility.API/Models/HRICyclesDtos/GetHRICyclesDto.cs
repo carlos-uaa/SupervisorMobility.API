@@ -10,8 +10,8 @@ namespace SupervisorMobility.API.Models.HRICyclesDtos
     {
         public int CycleId { get; set; }
         public int HriId { get; set; }
-        public HRI HRI { get; set; }
         public int Cycle { get; set; }
+        public bool? IsActive { get; set; }
         public int UserId { get; set; }
         public GetUserForHRIDailyRevsionDto? Responsible { get; set; }
         public string? UserType { get; set; }

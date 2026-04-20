@@ -18,5 +18,6 @@ namespace SupervisorMobility.API.Models.HRIRevisionItemsDtos
         public int? FrequencyId { get; set; }
         public GetFrequencyDto? Frequency { get; set; }
         public List<GetRevisionCyclesDto>? RevisionCycles { get; set; }
+        public bool? IsActive { get; set; }
     }
 }

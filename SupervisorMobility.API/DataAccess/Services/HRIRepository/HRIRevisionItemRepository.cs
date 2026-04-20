@@ -10,10 +10,12 @@ namespace SupervisorMobility.API.DataAccess.Services.HRIRepository
     public class HRIRevisionItemRepository : IHRIRevisionItemRepository
     {
         private readonly SupervisorMobilityContext _context;
+        private readonly IHRIRevisionCyclesRepository _hriRevisionCyclesRepository;
         private readonly IMapper _mapper;
-        public HRIRevisionItemRepository(SupervisorMobilityContext supervisorMobilityContext, IMapper mapper)
+        public HRIRevisionItemRepository(SupervisorMobilityContext supervisorMobilityContext, IHRIRevisionCyclesRepository hriRevisionCyclesRepository, IMapper mapper)
         {
             _context = supervisorMobilityContext;
+            _hriRevisionCyclesRepository = hriRevisionCyclesRepository;
             _mapper = mapper;
         }
         #region HRIRevisionItem
@@ -173,8 +175,19 @@ namespace SupervisorMobility.API.DataAccess.Services.HRIRepository
                 }
                 else
                 {
-                    _context.HRIRevisionItems.Remove(revisionItem);
+                    // soft delete
+                    revisionItem.IsActive = false;
                     await _context.SaveChangesAsync();
+
+                    // Eliminar los ciclos de revisión asociados
+                    var revisionCycles = await _hriRevisionCyclesRepository.GetAllRevisionCyclesByRevisionItemId(revisionItem.ItemId);
+                    if (revisionCycles.Data != null)
+                    {
+                        foreach (var cycle in revisionCycles.Data)
+                        {
+                            await _hriRevisionCyclesRepository.DeleteRevisionCycle(cycle.RevisionCycleId);
+                        }
+                    }
                     response.Data = true;
                     response.Success = true;
                     response.Message = "HRI Revision Item deleted successfully.";

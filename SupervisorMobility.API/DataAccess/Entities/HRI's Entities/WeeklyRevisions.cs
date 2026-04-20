@@ -12,5 +12,6 @@ namespace SupervisorMobility.API.DataAccess.Entities.HRI_s_Entities
         public User? SeniorSupervisor { get; set; }
         public int Month { get; set; }
         public int Week { get; set; }
+        public bool? IsActive { get; set; }
     }
 }

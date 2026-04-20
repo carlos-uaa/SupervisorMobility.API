@@ -3,5 +3,6 @@
     public class CreateRevisionCyclesDto
     {       
         public int Cycle { get; set; }
+        public bool? IsActive { get; set; } = true;
     }
 }

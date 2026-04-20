@@ -1,4 +1,5 @@
-﻿using SupervisorMobility.API.Models.HRIHourmeterRevisionDto;
+﻿using SupervisorMobility.API.Models.HRIDailyRevisionDtos;
+using SupervisorMobility.API.Models.HRIHourmeterRevisionDto;
 
 namespace SupervisorMobility.API.DataAccess.Services.HRIServices
 {
@@ -8,6 +9,7 @@ namespace SupervisorMobility.API.DataAccess.Services.HRIServices
         Task<ServiceResponse<GetHourmeterRevisionDto>>  GetHourmeterRevisionByHRIId(int Hrid);
         Task<ServiceResponse<GetHourmeterRevisionDto>>  GetHourmeterRevisionById(int id);
         Task<ServiceResponse<GetHourmeterRevisionDto>> AddHourmeterRevision(CreateHourMeterRevisionDto newHourmeterRevision);        
-        Task<ServiceResponse<List<GetHourmeterRevisionDto>>> DeleteHourmeterRevision(int id);
+        Task<ServiceResponse<bool>> DeleteHourmeterRevision(int id);
+        Task<ServiceResponse<bool>> CreateNewDailyRevision(CreateDailyRevisionDto createDaily);
     }
 }

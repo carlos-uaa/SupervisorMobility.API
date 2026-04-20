@@ -1,32 +1,43 @@
-﻿using SupervisorMobility.API.Models.HRIHourmeterRevisionDto;
+﻿using SupervisorMobility.API.DataAccess.Services.HRIRepository;
+using SupervisorMobility.API.Models.HRIDailyRevisionDtos;
+using SupervisorMobility.API.Models.HRIHourmeterRevisionDto;
 
 namespace SupervisorMobility.API.DataAccess.Services.HRIServices
 {
     public class HRIHourmeterRevisionService : IHRIHourmeterRevisionService
     {
-        public Task<ServiceResponse<List<GetHourmeterRevisionDto>>> GetAllHourmeterRevisions()
+        private readonly IHRIHourmeterRevisionRepository _hourmeterRevisionRepository;
+        public HRIHourmeterRevisionService(IHRIHourmeterRevisionRepository hourmeterRevisionRepository)
         {
-            throw new NotImplementedException();
+            _hourmeterRevisionRepository = hourmeterRevisionRepository;
+        }   
+        public async  Task<ServiceResponse<List<GetHourmeterRevisionDto>>> GetAllHourmeterRevisions()
+        {
+           return await _hourmeterRevisionRepository.GetAllHourmeterRevisions();
         }
 
-        public Task<ServiceResponse<GetHourmeterRevisionDto>> GetHourmeterRevisionByHRIId(int Hrid)
+        public async Task<ServiceResponse<GetHourmeterRevisionDto>> GetHourmeterRevisionByHRIId(int Hrid)
         {
-            throw new NotImplementedException();
+            return await _hourmeterRevisionRepository.GetHourmeterRevisionByHRIId(Hrid);
         }
 
-        public Task<ServiceResponse<GetHourmeterRevisionDto>> GetHourmeterRevisionById(int id)
+        public async  Task<ServiceResponse<GetHourmeterRevisionDto>> GetHourmeterRevisionById(int id)
         {
-            throw new NotImplementedException();
+            return await _hourmeterRevisionRepository.GetHourmeterRevisionById(id);
         }
 
-        public Task<ServiceResponse<GetHourmeterRevisionDto>> AddHourmeterRevision(CreateHourMeterRevisionDto newHourmeterRevision)
+        public async Task<ServiceResponse<GetHourmeterRevisionDto>> AddHourmeterRevision(CreateHourMeterRevisionDto newHourmeterRevision)
         {
-            throw new NotImplementedException();
+            return await _hourmeterRevisionRepository.AddHourmeterRevision(newHourmeterRevision);
         }
 
-        public Task<ServiceResponse<List<GetHourmeterRevisionDto>>> DeleteHourmeterRevision(int id)
+        public async Task<ServiceResponse<bool>> DeleteHourmeterRevision(int id)
         {
-            throw new NotImplementedException();
+            return await _hourmeterRevisionRepository.DeleteHourmeterRevision(id);
+        }
+        public async Task<ServiceResponse<bool>> CreateNewDailyRevision(CreateDailyRevisionDto createDaily)
+        {
+            return await _hourmeterRevisionRepository.CreateNewDailyRevision(createDaily);
         }
     }
 }

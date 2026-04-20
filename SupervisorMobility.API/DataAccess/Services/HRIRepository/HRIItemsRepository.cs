@@ -17,7 +17,7 @@ namespace SupervisorMobility.API.DataAccess.Services.HRIRepository
         {
             try
             {
-                var items = _context.HRIItems.Where(h => h.IsActive).ToList();
+                var items = await _context.HRIItems.Where(h => h.IsActive).ToListAsync();
                 string message = items.Count > 0 ? "HRIItems retrieved successfully." : "No active HRIItems found.";
                 return new ServiceResponse<List<HRIItem>>
                 {

@@ -33,7 +33,7 @@
 		<PackageReference Include="EPPlus" Version="8.0.4" /> <!--Actualizar a version 8.4.0-->
 		<PackageReference Include="FuzzySharp" Version="2.0.2" />
 		<PackageReference Include="FuzzyString" Version="1.0.0" />
-		<PackageReference Include="MailKit" Version="4.15.1" />
+		<PackageReference Include="MailKit" Version="4.16.0" />
 		<PackageReference Include="Microsoft.AspNetCore.Mvc.NewtonsoftJson" Version="10.0.3" /> <!--Actualizar a version 10.0.3-->
 		<PackageReference Include="Microsoft.Data.SqlClient" Version="6.1.4" />
 		<PackageReference Include="Microsoft.EntityFrameworkCore" Version="10.0.3" />
@@ -44,7 +44,6 @@
 		</PackageReference>
 		<PackageReference Include="Microsoft.Graph.Core" Version="3.2.1" />
 		<PackageReference Include="Microsoft.Identity.Client" Version="4.80.0" />
-		<PackageReference Include="MimeKit" Version="4.15.1" />
 		<PackageReference Include="ObjectCloner" Version="2.2.2" />
 		<PackageReference Include="Quartz" Version="3.16.1" />
 		<PackageReference Include="Quartz.Extensions.Hosting" Version="3.16.0" />

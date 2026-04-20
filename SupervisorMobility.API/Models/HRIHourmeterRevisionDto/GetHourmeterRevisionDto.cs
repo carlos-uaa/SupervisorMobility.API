@@ -8,5 +8,6 @@ namespace SupervisorMobility.API.Models.HRIHourmeterRevisionDto
         public int Id { get; set; }
         public int? HriId { get; set; }
         public List<GetDailyRevisionDto>? DailyRevisions { get; set; }
+        public bool? IsActive { get; set; }
     }
 }
