@@ -8,10 +8,12 @@ namespace SupervisorMobility.API.DataAccess.Services.HRIServices
     public class HRImagesService : IHRImagesService
     {
         private readonly IHRImagesRepository _hrImagesRepository;
+        private readonly IWebHostEnvironment _env;
 
-        public HRImagesService(IHRImagesRepository hrImagesRepository)
+        public HRImagesService(IHRImagesRepository hrImagesRepository, IWebHostEnvironment env)
         {
             _hrImagesRepository = hrImagesRepository;
+            _env = env;
         }
 
         public async Task<ServiceResponse<List<HRImages>>> GetImagesByHRIIdAsync(int hriId)
@@ -60,6 +62,38 @@ namespace SupervisorMobility.API.DataAccess.Services.HRIServices
                         Message = "All images must have ImageType."
                     };
                 }
+
+                // Move from temp folder to definiv folder
+                images.ForEach(img =>
+                {
+                    var tempFilePath = Path.Combine(_env.ContentRootPath, img.ImageUrl);
+                    if (File.Exists(tempFilePath))
+                    {
+                        var fileName = Path.GetFileName(tempFilePath);
+                        var destinationDirectory = Path.Combine(_env.ContentRootPath, "uploads", "HRIImages");
+                        if (!Directory.Exists(destinationDirectory))
+                        {
+                            Directory.CreateDirectory(destinationDirectory);
+                        }
+
+                        destinationDirectory = Path.Combine(destinationDirectory, img.HriId.ToString());
+                        if(!Directory.Exists(destinationDirectory))
+                        {
+                            Directory.CreateDirectory(destinationDirectory);
+                        }
+
+                        var destinationFilePath = Path.Combine(destinationDirectory, fileName);
+                        File.Move(tempFilePath, destinationFilePath);
+
+                        // Update the ImageUrl to the new location
+                        img.ImageUrl = Path.Combine("uploads", "HRIImages", img.HriId.ToString(), fileName).Replace("\\", "/");
+                    }
+                    else
+                    {
+                        throw new Exception($"The temporary file {tempFilePath} does not exist.");
+                    }
+                });
+
 
                 return await _hrImagesRepository.CreateHRImagesAsync(images);
             }
@@ -177,7 +211,7 @@ namespace SupervisorMobility.API.DataAccess.Services.HRIServices
                     extension = ".tmp";
                 }
 
-                var tempDirectory = Path.Combine(Path.GetTempPath(), "SupervisorMobility", "HRIImages");
+                var tempDirectory = Path.Combine(_env.ContentRootPath, "uploads\\temp", "HRIImages");
                 if (!Directory.Exists(tempDirectory))
                 {
                     Directory.CreateDirectory(tempDirectory);
@@ -189,9 +223,10 @@ namespace SupervisorMobility.API.DataAccess.Services.HRIServices
                 await using var stream = new FileStream(tempFilePath, FileMode.Create);
                 await image.CopyToAsync(stream);
 
+                var relativePath = Path.Combine("uploads", "temp", "HRIImages", fileName).Replace("\\", "/");
                 return new ServiceResponse<string>
                 {
-                    Data = tempFilePath,
+                    Data = relativePath,
                     Message = "Image saved successfully in temp folder."
                 };
             }
