@@ -56,8 +56,9 @@ namespace SupervisorMobility.API.DataAccess.Services.HRIRepository
                     {
                         serviceResponse.Success = false;
                         serviceResponse.Message = $"Error creating HRI Revision Items: {res.Message}";
+                        return serviceResponse;
                     }
-                    return serviceResponse;
+                    
                 }
                 //agregamos las revisiones semanales relacionadas al hri
                 if(newHRI.WeeklyRevisions != null && newHRI.WeeklyRevisions.Count > 0)
@@ -78,8 +79,9 @@ namespace SupervisorMobility.API.DataAccess.Services.HRIRepository
                     {
                         serviceResponse.Success = false;
                         serviceResponse.Message = $"Error creating HRI Cycles: {res.Message}";
+                        return serviceResponse;
                     }
-                    return serviceResponse;
+                    
                 }
 
                 //agregamos la revision del hourmeter relacionada al hri
@@ -90,8 +92,9 @@ namespace SupervisorMobility.API.DataAccess.Services.HRIRepository
                     {
                         serviceResponse.Success = false;
                         serviceResponse.Message = $"Error creating HRI Hourmeter Revision: {res.Message}";
+                        return serviceResponse;
                     }
-                    return serviceResponse;
+                    
 
                 }
 
