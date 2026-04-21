@@ -3,6 +3,7 @@ using Microsoft.EntityFrameworkCore;
 using SupervisorMobility.API.Context;
 using SupervisorMobility.API.DataAccess.Entities.HRI_s_Entities;
 using SupervisorMobility.API.Models.HRIDtos;
+using SupervisorMobility.API.Models.HRIHourmeterRevisionDto;
 
 namespace SupervisorMobility.API.DataAccess.Services.HRIRepository
 {
@@ -87,7 +88,12 @@ namespace SupervisorMobility.API.DataAccess.Services.HRIRepository
                 //agregamos la revision del hourmeter relacionada al hri
                 if(newHRI.HourmeterRevision != null)
                 {
-                    var res = await _hriHourmeterRepository.AddHourmeterRevision(newHRI.HourmeterRevision);
+                    var hourmeterRevision = new CreateHourMeterRevisionDto
+                    {
+                        HriId = hri.HriId,
+                        IsActive = true
+                    };
+                    var res = await _hriHourmeterRepository.AddHourmeterRevision(hourmeterRevision);
                     if (res.Success == false)
                     {
                         serviceResponse.Success = false;
