@@ -1,4 +1,5 @@
 ﻿using SupervisorMobility.API.DataAccess.Entities.HRI_s_Entities;
+using SupervisorMobility.API.Entities;
 using System.ComponentModel.DataAnnotations;
 
 namespace SupervisorMobility.API.DataAccess.Entities.HRI_s_Entities
@@ -22,7 +23,13 @@ namespace SupervisorMobility.API.DataAccess.Entities.HRI_s_Entities
         public bool IsActive { get; set; }
         public DateTime CreationDate { get; set; }
         public HourmeterRevision? HourmeterRevision { get; set; }
-        public int? UserId { get; set; }
-         public User? Supervisor { get; set; }
+        public int? SupervisorUserId { get; set; }
+        public User? Supervisor { get; set; }
+         public int? SSVUserId { get; set; }
+        public User? SSV { get; set; }
+        public  int? PlantId { get; set; }
+        public Plant? Plant { get; set; }
+        public int? AreaId { get; set; }
+        public Area? Area { get; set; }
     }
 }

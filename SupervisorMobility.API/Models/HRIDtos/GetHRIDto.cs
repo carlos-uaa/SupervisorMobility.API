@@ -1,9 +1,11 @@
 ﻿
 using SupervisorMobility.API.DataAccess.Entities;
 using SupervisorMobility.API.DataAccess.Entities.HRI_s_Entities;
+using SupervisorMobility.API.Models.AreaDtos;
 using SupervisorMobility.API.Models.HRICyclesDtos;
 using SupervisorMobility.API.Models.HRIHourmeterRevisionDto;
 using SupervisorMobility.API.Models.HRIRevisionItemsDtos;
+using SupervisorMobility.API.Models.PlantDtos;
 using SupervisorMobility.API.Models.Users;
 
 namespace SupervisorMobility.API.Models.HRIDtos
@@ -26,7 +28,14 @@ namespace SupervisorMobility.API.Models.HRIDtos
         public bool IsActive { get; set; }
         public DateTime CreationDate { get; set; }
         public GetHourmeterRevisionDto? HourmeterRevision { get; set; }
-        public int? UserId { get; set; }
+        public int? SupervisorUserId { get; set; }
         public GetUserForHRIDailyRevsionDto? Supervisor { get; set; }
+        public int? SSVUserId { get; set; }
+        public GetUserForHRIDailyRevsionDto? SSV { get; set; }
+
+        public int? PlantId { get; set; }
+        public GetPlantForHRIDto? Plant { get; set; }
+        public int? AreaId { get; set; }
+        public GetAreaForHRIDto? Area { get; set; }
     }
 }

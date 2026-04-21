@@ -33,7 +33,7 @@ namespace SupervisorMobility.API.DataAccess.Services.HRIRepository
             catch (Exception ex)
             {
                 response.Success = false;
-                response.Message = ex.Message;
+                response.Message = ex.Message + ex.InnerException.Message;
             }
             return response;
         }
@@ -72,9 +72,9 @@ namespace SupervisorMobility.API.DataAccess.Services.HRIRepository
                     CycleId = createDaily.EntityRelationId,
                     Day = createDaily.Day,
                     Month = createDaily.Month,
+                    Status = createDaily.Status,
                     UserId = createDaily.UserId,
                     UserType = createDaily.UserType,
-                    Status = createDaily.Status,
                     IsActive = true
 
                 };
@@ -131,7 +131,7 @@ namespace SupervisorMobility.API.DataAccess.Services.HRIRepository
             var response = new ServiceResponse<GetHRICyclesDto>();
             try
             {
-                var hriCycle = await _context.HRICycles.Include(h => h.DailyRevisions).Include(h => h.Responsible).FirstOrDefaultAsync(h => h.CycleId == id && h.IsActive == true);
+                var hriCycle = await _context.HRICycles.Include(h=>h.Supervisor).Include(h=>h.Operator).Include(h => h.DailyRevisions).FirstOrDefaultAsync(h => h.CycleId == id && h.IsActive == true);
                 if (hriCycle == null)
                 {
                     response.Success = false;
@@ -157,7 +157,7 @@ namespace SupervisorMobility.API.DataAccess.Services.HRIRepository
             var response = new ServiceResponse<List<GetHRICyclesDto>>();
             try
             {
-                var hriCycles = await _context.HRICycles.Include(h=>h.Responsible).Include(h => h.DailyRevisions).Where(h => h.IsActive == true).ToListAsync();
+                var hriCycles = await _context.HRICycles.Include(h=>h.Supervisor).Include(h=>h.Operator).Include(h => h.DailyRevisions).Where(h => h.IsActive == true).ToListAsync();
                 response.Data = hriCycles.Select(h => _mapper.Map<GetHRICyclesDto>(h)).ToList();
                 response.Success = true;
                 response.Message = "HRICycles retrieved successfully.";

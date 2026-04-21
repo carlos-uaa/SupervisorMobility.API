@@ -35,7 +35,10 @@ namespace SupervisorMobility.API.DataAccess.Services.HRIRepository
                     ControlNumber = newHRI.ControlNumber,
                     HRIDockId = newHRI.HRIDockId,
                     Department = newHRI.Department,
-                    UserId = newHRI.SupervisorId,
+                    SupervisorUserId = newHRI.SupervisorUserId,
+                    SSVUserId = newHRI.SSVUserId,
+                    PlantId = newHRI.PlantId,
+                    AreaId = newHRI.AreaId,
                     IsActive = true,
                     CreationDate = DateTime.UtcNow
                 };
@@ -154,6 +157,9 @@ namespace SupervisorMobility.API.DataAccess.Services.HRIRepository
                     .Include(h => h.HriCycles)
                     .Include(h => h.HourmeterRevision)
                     .Include(h => h.Supervisor)
+                    .Include(h => h.SSV)
+                    .Include(h => h.Plant)
+                    .Include(h => h.Area)
                     .ToListAsync();
                 response.Data = hris.Select(h => _mapper.Map<GetHRIDto>(h)).ToList();
                 response.Success = true;
@@ -181,6 +187,9 @@ namespace SupervisorMobility.API.DataAccess.Services.HRIRepository
                     .Include(h => h.HriCycles)
                     .Include(h => h.HourmeterRevision)
                     .Include(h => h.Supervisor)
+                    .Include(h => h.SSV)
+                    .Include(h => h.Plant)
+                    .Include(h => h.Area)
                     .FirstOrDefaultAsync(h => h.HriId == id);
                 if (hri == null)
                 {

@@ -93,8 +93,6 @@ namespace SupervisorMobility.API.DataAccess.Entities
         public ICollection<SOSHubHistory>? SOSHubHistoriesApproverOwners { get; set; }
 
         public ICollection<SOSHubHistory>? SOSHubHistoriesReviewerEditors { get; set; }
-        public List<HRI>? HRI { get; set; }
-        public List<HRICycles>? HRICycles { get; set; }
         public List<DailyRevisions>? DailyRevisions { get; set; }
         public List<WeeklyRevisions>? WeeklyRevisions { get; set; }
 

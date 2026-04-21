@@ -3,6 +3,7 @@ using System;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Infrastructure;
 using Microsoft.EntityFrameworkCore.Metadata;
+using Microsoft.EntityFrameworkCore.Migrations;
 using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 using SupervisorMobility.API.Context;
 
@@ -11,9 +12,11 @@ using SupervisorMobility.API.Context;
 namespace SupervisorMobility.API.Migrations
 {
     [DbContext(typeof(SupervisorMobilityContext))]
-    partial class SupervisorMobilityContextModelSnapshot : ModelSnapshot
+    [Migration("20260421182225_AddUsersToHRICycles")]
+    partial class AddUsersToHRICycles
     {
-        protected override void BuildModel(ModelBuilder modelBuilder)
+        /// <inheritdoc />
+        protected override void BuildTargetModel(ModelBuilder modelBuilder)
         {
 #pragma warning disable 612, 618
             modelBuilder
@@ -905,9 +908,6 @@ namespace SupervisorMobility.API.Migrations
 
                     SqlServerPropertyBuilderExtensions.UseIdentityColumn(b.Property<int>("HriId"));
 
-                    b.Property<int?>("AreaId")
-                        .HasColumnType("int");
-
                     b.Property<string>("ControlNumber")
                         .HasColumnType("nvarchar(max)");
 
@@ -929,18 +929,10 @@ namespace SupervisorMobility.API.Migrations
                     b.Property<bool>("IsActive")
                         .HasColumnType("bit");
 
-                    b.Property<int?>("PlantId")
-                        .HasColumnType("int");
-
-                    b.Property<int?>("SSVUserId")
-                        .HasColumnType("int");
-
-                    b.Property<int?>("SupervisorUserId")
+                    b.Property<int?>("UserId")
                         .HasColumnType("int");
 
                     b.HasKey("HriId");
-
-                    b.HasIndex("AreaId");
 
                     b.HasIndex("HRIDockId");
 
@@ -948,11 +940,7 @@ namespace SupervisorMobility.API.Migrations
 
                     b.HasIndex("HRILinesId");
 
-                    b.HasIndex("PlantId");
-
-                    b.HasIndex("SSVUserId");
-
-                    b.HasIndex("SupervisorUserId");
+                    b.HasIndex("UserId");
 
                     b.ToTable("HRIs");
                 });
@@ -979,6 +967,9 @@ namespace SupervisorMobility.API.Migrations
 
                     b.Property<int?>("SupervisorUserId")
                         .HasColumnType("int");
+
+                    b.Property<string>("UserType")
+                        .HasColumnType("nvarchar(max)");
 
                     b.HasKey("CycleId");
 
@@ -7213,10 +7204,6 @@ namespace SupervisorMobility.API.Migrations
 
             modelBuilder.Entity("SupervisorMobility.API.DataAccess.Entities.HRI_s_Entities.HRI", b =>
                 {
-                    b.HasOne("SupervisorMobility.API.DataAccess.Entities.Area", "Area")
-                        .WithMany("HRIs")
-                        .HasForeignKey("AreaId");
-
                     b.HasOne("SupervisorMobility.API.DataAccess.Entities.HRI_s_Entities.HRIDock", "Dock")
                         .WithMany("HRIs")
                         .HasForeignKey("HRIDockId");
@@ -7229,29 +7216,15 @@ namespace SupervisorMobility.API.Migrations
                         .WithMany("HRIs")
                         .HasForeignKey("HRILinesId");
 
-                    b.HasOne("SupervisorMobility.API.Entities.Plant", "Plant")
-                        .WithMany("HRIs")
-                        .HasForeignKey("PlantId");
-
-                    b.HasOne("SupervisorMobility.API.DataAccess.Entities.User", "SSV")
-                        .WithMany()
-                        .HasForeignKey("SSVUserId");
-
                     b.HasOne("SupervisorMobility.API.DataAccess.Entities.User", "Supervisor")
-                        .WithMany()
-                        .HasForeignKey("SupervisorUserId");
-
-                    b.Navigation("Area");
+                        .WithMany("HRI")
+                        .HasForeignKey("UserId");
 
                     b.Navigation("Dock");
 
                     b.Navigation("Line");
 
                     b.Navigation("NameOfItem");
-
-                    b.Navigation("Plant");
-
-                    b.Navigation("SSV");
 
                     b.Navigation("Supervisor");
                 });
@@ -8816,8 +8789,6 @@ namespace SupervisorMobility.API.Migrations
             modelBuilder.Entity("SupervisorMobility.API.DataAccess.Entities.Area", b =>
                 {
                     b.Navigation("Distributions");
-
-                    b.Navigation("HRIs");
                 });
 
             modelBuilder.Entity("SupervisorMobility.API.DataAccess.Entities.Distribution", b =>
@@ -9128,6 +9099,8 @@ namespace SupervisorMobility.API.Migrations
                 {
                     b.Navigation("DailyRevisions");
 
+                    b.Navigation("HRI");
+
                     b.Navigation("ILURegisers");
 
                     b.Navigation("Subordinates");
@@ -9169,11 +9142,6 @@ namespace SupervisorMobility.API.Migrations
             modelBuilder.Entity("SupervisorMobility.API.Entities.Lup", b =>
                 {
                     b.Navigation("Evidences");
-                });
-
-            modelBuilder.Entity("SupervisorMobility.API.Entities.Plant", b =>
-                {
-                    b.Navigation("HRIs");
                 });
 #pragma warning restore 612, 618
         }
