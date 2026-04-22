@@ -7,6 +7,7 @@ using SupervisorMobility.API.Models.HRIDtos;
 using SupervisorMobility.API.Models.HRIHourmeterRevisionDto;
 using SupervisorMobility.API.Models.HRIRevisionCycles;
 using SupervisorMobility.API.Models.HRIRevisionItemsDtos;
+using SupervisorMobility.API.Models.HRIWeeklyRevisions;
 
 namespace SupervisorMobility.API.MapperProfiles
 {
@@ -49,7 +50,11 @@ namespace SupervisorMobility.API.MapperProfiles
             #region dailyRevisions
             CreateMap<CreateDailyRevisionDto,DailyRevisions>().ReverseMap();
             CreateMap<DailyRevisions, GetDailyRevisionDto>().ReverseMap();
-           
+
+            #endregion
+            #region WeeklyRevisions
+            CreateMap<WeeklyRevisions, GetWeeklyRevisionDto>().ReverseMap();
+            CreateMap<CreateWeeklyRevisionDto, WeeklyRevisions>().ReverseMap();
             #endregion
             #region HourmeterRevision
             CreateMap<HourmeterRevision, GetHourmeterRevisionDto>().ReverseMap();

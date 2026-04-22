@@ -4,6 +4,7 @@ using SupervisorMobility.API.Context;
 using SupervisorMobility.API.DataAccess.Entities.HRI_s_Entities;
 using SupervisorMobility.API.Models.HRIDtos;
 using SupervisorMobility.API.Models.HRIHourmeterRevisionDto;
+using SupervisorMobility.API.Models.HRIWeeklyRevisions;
 
 namespace SupervisorMobility.API.DataAccess.Services.HRIRepository
 {
@@ -64,12 +65,13 @@ namespace SupervisorMobility.API.DataAccess.Services.HRIRepository
                 //agregamos las revisiones semanales relacionadas al hri
                 if(newHRI.WeeklyRevisions != null && newHRI.WeeklyRevisions.Count > 0)
                 {
-                    foreach(var weeklyRevision in newHRI.WeeklyRevisions)
+                    var res = await CreateNewWeeeklyRevisions(newHRI.WeeklyRevisions);
+                    if (res.Success == false)
                     {
-                        weeklyRevision.HriId = hri.HriId;
-                        await _context.WeeklyRevisions.AddAsync(weeklyRevision);
+                        serviceResponse.Success = false;
+                        serviceResponse.Message = $"Error creating HRI Weekly Revisions: {res.Message}";
+                        return serviceResponse;
                     }
-                    await _context.SaveChangesAsync();
                 }
 
                 //agregamos los ciclos relacionados al hri
@@ -120,6 +122,29 @@ namespace SupervisorMobility.API.DataAccess.Services.HRIRepository
             return serviceResponse;
         }
 
+        public async Task<ServiceResponse<bool>>CreateNewWeeeklyRevisions(List<CreateWeeklyRevisionDto> weeklyRevisions)
+        {
+            var response = new ServiceResponse<bool>();
+            try
+            {
+                foreach(var weeklyRevision in weeklyRevisions)
+                {
+                   var newWeeklys = weeklyRevisions.Select(s=>_mapper.Map<WeeklyRevisions>(s)).ToList();
+                    await _context.WeeklyRevisions.AddRangeAsync(newWeeklys);
+                }
+                await _context.SaveChangesAsync();
+                response.Success = true;
+                response.Message = "Weekly revisions created successfully.";
+                response.Data = true;
+            }
+            catch (Exception ex)
+            {
+                response.Success = false;
+                response.Message = $"Error creating weekly revisions: {ex.Message}";
+                response.Data = false;
+            }
+            return response;
+        }
         public async Task<ServiceResponse<bool>> DeleteHRI(int id)
         {
             var response = new ServiceResponse<bool>();
