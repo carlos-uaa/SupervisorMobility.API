@@ -211,6 +211,10 @@ namespace SupervisorMobility.API.DataAccess.Services.HRIRepository
                     .Include(h => h.HriCycles!)
                         .ThenInclude(c => c.DailyRevisions!)
                             .ThenInclude(dr => dr.Responsible)
+                    .Include(h => h.HriCycles!)
+                        .ThenInclude(c => c.Operator)
+                    .Include(h => h.HriCycles!)
+                        .ThenInclude(c => c.Supervisor)
                     .Include(h => h.HourmeterRevision)
                         .ThenInclude(hr => hr.DailyRevisions!)
                             .ThenInclude(dr => dr.Responsible)
@@ -254,6 +258,10 @@ namespace SupervisorMobility.API.DataAccess.Services.HRIRepository
                     .Include(h => h.HriCycles!)
                         .ThenInclude(c => c.DailyRevisions!)
                             .ThenInclude(dr => dr.Responsible)
+                    .Include(h=>h.HriCycles!)
+                        .ThenInclude(c=>c.Operator)
+                    .Include(h => h.HriCycles!)
+                        .ThenInclude(c => c.Supervisor)
                     .Include(h => h.HourmeterRevision)
                         .ThenInclude(hr => hr.DailyRevisions!)
                             .ThenInclude(dr => dr.Responsible)
@@ -278,6 +286,46 @@ namespace SupervisorMobility.API.DataAccess.Services.HRIRepository
                 response.Message = $"Error retrieving HRI: {ex.Message}";
             }
             return response;
+        }
+
+        public async Task<ServiceResponse<List<GetHRIToTableDto>>> GetAllHRITable()
+        {
+            var response = new ServiceResponse<List<GetHRIToTableDto>>();
+            var hriTableList = new List<GetHRIToTableDto>();
+            try
+            {
+                var hris = await _context.HRIs.Include(h => h.Line)
+                    .Include(h => h.NameOfItem)
+                    .Include(h => h.Images)
+                    .ToListAsync();
+
+                foreach (var hri in hris)
+                {
+                    var hriTableDto = new GetHRIToTableDto
+                    {
+                        HriId = hri.HriId,
+                        Line = hri.Line,
+                        NameOfItem = hri.NameOfItem,
+                        ControlNumber = hri.ControlNumber,
+                        Department = hri.Department,
+                        ImagesCount = hri.Images != null ? hri.Images.Count : 0,
+                        IsActive = hri.IsActive,
+                        CreationDate = hri.CreationDate
+                    };
+                    hriTableList.Add(hriTableDto);
+                }
+                response.Data = hriTableList;
+                response.Success = true;
+                response.Message = "HRIs for table retrieved successfully.";
+
+            }
+            catch (Exception ex)
+            {
+                response.Success = false;
+                response.Message = $"Error retrieving HRIs for table: {ex.Message}";
+            }
+            return response;
+                
         }
 
     }

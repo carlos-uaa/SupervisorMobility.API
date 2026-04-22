@@ -36,5 +36,10 @@ namespace SupervisorMobility.API.DataAccess.Services.HRIServices
         {
             return await _hriRepository.CreateNewWeeeklyRevisions(weeklyRevisions);
         }
+
+        public async Task<ServiceResponse<List<GetHRIToTableDto>>> GetAllHRITable()
+        {
+            return await _hriRepository.GetAllHRITable();
+        }
     }
 }

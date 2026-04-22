@@ -43,6 +43,20 @@ namespace SupervisorMobility.API.Controllers.HRIControllers
             return Ok(response);
         }
 
+        [HttpGet("GetHRISoftInfoList")]
+        [ProducesResponseType(StatusCodes.Status200OK)]
+        [ProducesResponseType(StatusCodes.Status404NotFound)]
+        [ProducesResponseType(StatusCodes.Status500InternalServerError)]
+        public async Task<ActionResult<ServiceResponse<List<GetHRIToTableDto>>>> GetHRISoftInfoList()
+        {
+            var response = await _HRIServices.GetAllHRITable();
+            if (response.Data == null)
+            {
+                return NotFound(response);
+            }
+            return Ok(response);
+        }
+
         [HttpPost("CreateHRI")]
         [ProducesResponseType(StatusCodes.Status201Created)]
         [ProducesResponseType(StatusCodes.Status400BadRequest)]
