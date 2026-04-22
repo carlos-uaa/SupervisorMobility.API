@@ -41,7 +41,7 @@ namespace SupervisorMobility.API.Controllers.HRIControllers
         }
 
         [HttpPost("SaveImageInTempFolderAsync")]
-        public async Task<ServiceResponse<string>> SaveImageInTempFolderAsync([FromForm] IFormFile image)
+        public async Task<ServiceResponse<string>> SaveImageInTempFolderAsync(IFormFile image)
         {
             return await _hrImagesService.SaveImageInTempFolderAsync(image);
         }
