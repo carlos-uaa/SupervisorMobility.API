@@ -36,9 +36,9 @@ namespace SupervisorMobility.API.DataAccess.Services.HRIServices
         {
             return await _hriRevisionItemRepository.DeleteHRIRevisionItem(id);
         }
-        public async Task<ServiceResponse<bool>> CreateHRIREvisionItemsByHRIId(int hriId, List<CreateHRIRevisionItemDto> createHRIRevisionItemDtos)
+        public async Task<ServiceResponse<bool>> CreateHRIREvisionItemsByHRIId(int hriId, List<CreateHRIRevisionItemDto> createHRIRevisionItemDtos, int numOfCycles)
         {
-            return await _hriRevisionItemRepository.CreateHRIREvisionItemsByHRIId(hriId, createHRIRevisionItemDtos);
+            return await _hriRevisionItemRepository.CreateHRIREvisionItemsByHRIId(hriId, createHRIRevisionItemDtos, numOfCycles);
         }
         #endregion
         #region frequency

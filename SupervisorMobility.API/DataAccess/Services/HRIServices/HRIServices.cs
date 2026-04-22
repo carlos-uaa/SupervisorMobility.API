@@ -1,6 +1,7 @@
 ﻿
 using SupervisorMobility.API.Models.HRIDtos;
 using SupervisorMobility.API.DataAccess.Services.HRIRepository;
+using SupervisorMobility.API.Models.HRIWeeklyRevisions;
 
 namespace SupervisorMobility.API.DataAccess.Services.HRIServices
 {
@@ -30,6 +31,10 @@ namespace SupervisorMobility.API.DataAccess.Services.HRIServices
         public async Task<ServiceResponse<bool>> DeleteHRI(int id)
         {
             return await _hriRepository.DeleteHRI(id);
+        }
+        public async Task<ServiceResponse<bool>> CreateNewWeeeklyRevisions(List<CreateWeeklyRevisionDto> weeklyRevisions)
+        {
+            return await _hriRepository.CreateNewWeeeklyRevisions(weeklyRevisions);
         }
     }
 }

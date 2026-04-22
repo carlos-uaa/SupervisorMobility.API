@@ -60,9 +60,9 @@ namespace SupervisorMobility.API.Controllers.HRIControllers
         [ProducesResponseType(StatusCodes.Status201Created)]
         [ProducesResponseType(StatusCodes.Status400BadRequest)]
         [ProducesResponseType(StatusCodes.Status500InternalServerError)]
-        public async Task<ActionResult<ServiceResponse<bool>>> CreateHRIREvisionItemsByHRIId(int hriId, List<CreateHRIRevisionItemDto> createHRIRevisionItemDtos)
+        public async Task<ActionResult<ServiceResponse<bool>>> CreateHRIREvisionItemsByHRIId(int hriId, List<CreateHRIRevisionItemDto> createHRIRevisionItemDtos, int numOfCycles)
         {
-            var response = await _hriRevisionItemService.CreateHRIREvisionItemsByHRIId(hriId, createHRIRevisionItemDtos);
+            var response = await _hriRevisionItemService.CreateHRIREvisionItemsByHRIId(hriId, createHRIRevisionItemDtos, numOfCycles);
             if (response.Data == false)
             {
                 return BadRequest(response);

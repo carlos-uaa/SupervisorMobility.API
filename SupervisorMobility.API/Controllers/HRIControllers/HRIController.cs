@@ -1,6 +1,7 @@
 ﻿using Microsoft.AspNetCore.Mvc;
 using SupervisorMobility.API.DataAccess.Services.HRIServices;
 using SupervisorMobility.API.Models.HRIDtos;
+using SupervisorMobility.API.Models.HRIWeeklyRevisions;
 
 namespace SupervisorMobility.API.Controllers.HRIControllers
 {
@@ -50,6 +51,20 @@ namespace SupervisorMobility.API.Controllers.HRIControllers
         {
             var response = await _HRIServices.CreateHRI(newHRI);
             if (response.Data == null)
+            {
+                return BadRequest(response);
+            }
+            return Ok(response);
+        }
+
+        [HttpPost("CreateNewWeeklyRevision")]
+        [ProducesResponseType(StatusCodes.Status201Created)]
+        [ProducesResponseType(StatusCodes.Status400BadRequest)]
+        [ProducesResponseType(StatusCodes.Status500InternalServerError)]
+        public async Task<ActionResult<ServiceResponse<bool>>> CreateNewWeeklyRevision(List<CreateWeeklyRevisionDto> weeklyRevisions)
+        {
+            var response = await _HRIServices.CreateNewWeeeklyRevisions(weeklyRevisions);
+            if (response.Data == false)
             {
                 return BadRequest(response);
             }

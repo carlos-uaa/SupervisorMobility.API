@@ -4,6 +4,7 @@ using SupervisorMobility.API.Models.HRIRevisionItemsDtos;
 using Microsoft.EntityFrameworkCore;
 using SupervisorMobility.API.DataAccess.Entities.HRI_s_Entities.HRIRevisionsItem_Entities;
 using SupervisorMobility.API.DataAccess.Entities.HRI_s_Entities;
+using SupervisorMobility.API.Models.HRIRevisionCycles;
 
 namespace SupervisorMobility.API.DataAccess.Services.HRIRepository
 {
@@ -101,7 +102,7 @@ namespace SupervisorMobility.API.DataAccess.Services.HRIRepository
             return response;
         }
 
-        public async Task<ServiceResponse<bool>>CreateHRIREvisionItemsByHRIId(int hriId, List<CreateHRIRevisionItemDto> createHRIRevisionItemDtos)
+        public async Task<ServiceResponse<bool>>CreateHRIREvisionItemsByHRIId(int hriId, List<CreateHRIRevisionItemDto> createHRIRevisionItemDtos, int numOfCycles)
         {
             var response = new ServiceResponse<bool>();
             try
@@ -116,10 +117,30 @@ namespace SupervisorMobility.API.DataAccess.Services.HRIRepository
                 var revisionItems = createHRIRevisionItemDtos.Select(dto => _mapper.Map<HRIRevisionItems>(dto)).ToList();
                 foreach (var item in revisionItems)
                 {
+                    
                     item.HriId = hriId; // Asignamos el HRIId a cada item
+                    await _context.HRIRevisionItems.AddAsync(item);
+                    await _context.SaveChangesAsync();
+                    // Crear los ciclos de revisión para cada item
+                    if(numOfCycles > 0)
+                    {
+                        var listOfCycles = new List<CreateRevisionCyclesDto>();
+                        for (int i = 1; i <= numOfCycles; i++)
+                        {
+
+                            var revisionCycle = new CreateRevisionCyclesDto
+                            {
+                                Cycle = i,
+                                IsActive = true
+                            };
+                            listOfCycles.Add(revisionCycle);
+                        }
+                        await _hriRevisionCyclesRepository.CreateRevisionCyclesByRevisionItemId(item.ItemId, listOfCycles);
+                    }
+                    
+                    
                 }
-                await _context.HRIRevisionItems.AddRangeAsync(revisionItems);
-                await _context.SaveChangesAsync();
+
                 response.Data = true;
                 response.Success = true;
                 response.Message = "HRI Revision Items created successfully.";
