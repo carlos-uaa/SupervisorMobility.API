@@ -68,6 +68,7 @@
 		<Folder Include="uploads\attendance\" />
 		<Folder Include="uploads\evidence\" />
 		<Folder Include="uploads\guides\" />
+		<Folder Include="uploads\HRIImages\" />
 		<Folder Include="uploads\headcount\" />
 		<Folder Include="uploads\massive\" />
 		<Folder Include="uploads\SOSData\Videos\" />
