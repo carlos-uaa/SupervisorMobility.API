@@ -17,7 +17,7 @@ namespace SupervisorMobility.API.DataAccess.Services.HRIServices
         {
             _hrImagesRepository = hrImagesRepository;
             _env = env;
-            _uploadsRoot = Path.GetFullPath(Path.Combine(env.ContentRootPath, "uploads"));
+            _uploadsRoot = Path.GetFullPath(env.ContentRootPath);
         }
 
         public async Task<ServiceResponse<List<HRImages>>> GetImagesByHRIIdAsync(int hriId)
