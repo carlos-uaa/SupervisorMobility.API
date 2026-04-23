@@ -2,6 +2,7 @@ using SupervisorMobility.API.DataAccess.Entities.HRI_s_Entities;
 using SupervisorMobility.API.DataAccess.Services.HRIRepository;
 using SupervisorMobility.API.Models.HRIDtos.HRImagesDto;
 using Microsoft.AspNetCore.Http;
+using Microsoft.AspNetCore.StaticFiles;
 
 namespace SupervisorMobility.API.DataAccess.Services.HRIServices
 {
@@ -9,11 +10,14 @@ namespace SupervisorMobility.API.DataAccess.Services.HRIServices
     {
         private readonly IHRImagesRepository _hrImagesRepository;
         private readonly IWebHostEnvironment _env;
+        private readonly string _uploadsRoot;
+        private readonly FileExtensionContentTypeProvider _contentTypeProvider = new();
 
         public HRImagesService(IHRImagesRepository hrImagesRepository, IWebHostEnvironment env)
         {
             _hrImagesRepository = hrImagesRepository;
             _env = env;
+            _uploadsRoot = Path.GetFullPath(Path.Combine(env.ContentRootPath, "uploads"));
         }
 
         public async Task<ServiceResponse<List<HRImages>>> GetImagesByHRIIdAsync(int hriId)
@@ -239,5 +243,108 @@ namespace SupervisorMobility.API.DataAccess.Services.HRIServices
                 };
             }
         }
+
+        public ServiceResponse<HRImageContentDto> GetImageContent(string path)
+        {
+            try
+            {
+                if (string.IsNullOrWhiteSpace(path))
+                {
+                    return new ServiceResponse<HRImageContentDto>
+                    {
+                        Success = false,
+                        Message = "Image path is required."
+                    };
+                }
+
+                var filePath = ResolvePathWithinUploads(path);
+                if (filePath is null)
+                {
+                    return new ServiceResponse<HRImageContentDto>
+                    {
+                        Success = false,
+                        Message = "Image path is invalid."
+                    };
+                }
+
+                if (!File.Exists(filePath))
+                {
+                    return new ServiceResponse<HRImageContentDto>
+                    {
+                        Success = false,
+                        Message = "Image file does not exist."
+                    };
+                }
+
+                if (!IsSupportedImage(filePath))
+                {
+                    return new ServiceResponse<HRImageContentDto>
+                    {
+                        Success = false,
+                        Message = "Only image files are allowed."
+                    };
+                }
+
+                if (!_contentTypeProvider.TryGetContentType(filePath, out var contentType))
+                {
+                    contentType = "application/octet-stream";
+                }
+
+                return new ServiceResponse<HRImageContentDto>
+                {
+                    Data = new HRImageContentDto
+                    {
+                        FilePath = filePath,
+                        ContentType = contentType
+                    }
+                };
+            }
+            catch (Exception ex)
+            {
+                return new ServiceResponse<HRImageContentDto>
+                {
+                    Success = false,
+                    Message = $"Error resolving image content: {ex.Message}"
+                };
+            }
+        }
+
+        private string? ResolvePathWithinUploads(string relativePath)
+        {
+            if (string.IsNullOrWhiteSpace(relativePath))
+            {
+                return null;
+            }
+
+            var normalized = relativePath
+                .Replace('/', Path.DirectorySeparatorChar)
+                .TrimStart(Path.DirectorySeparatorChar);
+
+            var combinedPath = Path.GetFullPath(Path.Combine(_uploadsRoot, normalized));
+            if (!combinedPath.StartsWith(_uploadsRoot, StringComparison.OrdinalIgnoreCase))
+            {
+                return null;
+            }
+
+            return combinedPath;
+        }
+
+        private static readonly HashSet<string> AllowedImageExtensions = new(StringComparer.OrdinalIgnoreCase)
+        {
+            ".png",
+            ".jpg",
+            ".jpeg",
+            ".webp",
+            ".gif",
+            ".bmp",
+            ".svg"
+        };
+
+        private static bool IsSupportedImage(string path)
+        {
+            var extension = Path.GetExtension(path);
+            return AllowedImageExtensions.Contains(extension);
+        }
+
     }
 }

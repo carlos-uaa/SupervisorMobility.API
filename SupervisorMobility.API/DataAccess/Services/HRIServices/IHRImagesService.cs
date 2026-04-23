@@ -11,5 +11,6 @@ namespace SupervisorMobility.API.DataAccess.Services.HRIServices
         Task<ServiceResponse<List<HRImages>>> UpdateHRImageAsync(List<UpdateHRImageDto> image);
         Task<ServiceResponse<bool>> DeleteHRImageAsync(int imageId);
         Task<ServiceResponse<string>> SaveImageInTempFolderAsync(IFormFile image);
+        ServiceResponse<HRImageContentDto> GetImageContent(string path);
     }
 }

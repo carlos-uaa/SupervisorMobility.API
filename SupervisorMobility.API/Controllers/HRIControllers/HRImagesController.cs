@@ -45,5 +45,22 @@ namespace SupervisorMobility.API.Controllers.HRIControllers
         {
             return await _hrImagesService.SaveImageInTempFolderAsync(image);
         }
+        
+        [HttpGet("content")]
+        public IActionResult GetImage([FromQuery] string path)
+        {
+            var imageResponse = _hrImagesService.GetImageContent(path);
+            if (!imageResponse.Success || imageResponse.Data is null)
+            {
+                if (string.Equals(imageResponse.Message, "Image file does not exist.", StringComparison.OrdinalIgnoreCase))
+                {
+                    return NotFound();
+                }
+
+                return BadRequest(imageResponse.Message);
+            }
+
+            return PhysicalFile(imageResponse.Data.FilePath, imageResponse.Data.ContentType, enableRangeProcessing: true);
+        }
     }
 }
