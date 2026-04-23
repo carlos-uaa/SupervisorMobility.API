@@ -53,7 +53,7 @@ namespace SupervisorMobility.API.DataAccess.Services.HRIRepository
                 await _context.SaveChangesAsync();
 
                 //agregamos las imagenes relacionadas al hri
-                if(newHRI.Images != null && newHRI.Images.Count > 0)
+                if (newHRI.Images != null && newHRI.Images.Count > 0)
                 {
                     newHRI.Images.ForEach(img => img.HriId = hri.HriId);
                     await _hrimagesService.CreateHRImagesAsync(newHRI.Images);
@@ -64,17 +64,17 @@ namespace SupervisorMobility.API.DataAccess.Services.HRIRepository
                 var numOfCycles = newHRI.HriCycles != null ? newHRI.HriCycles.Count : 0;
                 if (newHRI.ItemsRevised != null && newHRI.ItemsRevised.Count > 0)
                 {
-                   var res = await _hriRevisionItemRepository.CreateHRIREvisionItemsByHRIId(hri.HriId, newHRI.ItemsRevised, numOfCycles);
+                    var res = await _hriRevisionItemRepository.CreateHRIREvisionItemsByHRIId(hri.HriId, newHRI.ItemsRevised, numOfCycles);
                     if (res.Success == false)
                     {
                         serviceResponse.Success = false;
                         serviceResponse.Message = $"Error creating HRI Revision Items: {res.Message}";
                         return serviceResponse;
                     }
-                    
+
                 }
                 //agregamos las revisiones semanales relacionadas al hri
-                if(newHRI.WeeklyRevisions != null && newHRI.WeeklyRevisions.Count > 0)
+                if (newHRI.WeeklyRevisions != null && newHRI.WeeklyRevisions.Count > 0)
                 {
                     var res = await CreateNewWeeeklyRevisions(newHRI.WeeklyRevisions);
                     if (res.Success == false)
@@ -86,7 +86,7 @@ namespace SupervisorMobility.API.DataAccess.Services.HRIRepository
                 }
 
                 //agregamos los ciclos relacionados al hri
-                if(newHRI.HriCycles != null && newHRI.HriCycles.Count > 0)
+                if (newHRI.HriCycles != null && newHRI.HriCycles.Count > 0)
                 {
                     var res = await _hriCyclesRepository.CreateHRICyclesByHRIId(hri.HriId, newHRI.HriCycles);
                     if (res.Success == false)
@@ -95,11 +95,11 @@ namespace SupervisorMobility.API.DataAccess.Services.HRIRepository
                         serviceResponse.Message = $"Error creating HRI Cycles: {res.Message}";
                         return serviceResponse;
                     }
-                    
+
                 }
 
                 //agregamos la revision del hourmeter relacionada al hri
-                if(newHRI.HourmeterRevision != null)
+                if (newHRI.HourmeterRevision != null)
                 {
                     var hourmeterRevision = new CreateHourMeterRevisionDto
                     {
@@ -113,7 +113,7 @@ namespace SupervisorMobility.API.DataAccess.Services.HRIRepository
                         serviceResponse.Message = $"Error creating HRI Hourmeter Revision: {res.Message}";
                         return serviceResponse;
                     }
-                    
+
 
                 }
 
@@ -133,14 +133,14 @@ namespace SupervisorMobility.API.DataAccess.Services.HRIRepository
             return serviceResponse;
         }
 
-        public async Task<ServiceResponse<bool>>CreateNewWeeeklyRevisions(List<CreateWeeklyRevisionDto> weeklyRevisions)
+        public async Task<ServiceResponse<bool>> CreateNewWeeeklyRevisions(List<CreateWeeklyRevisionDto> weeklyRevisions)
         {
             var response = new ServiceResponse<bool>();
             try
             {
-                foreach(var weeklyRevision in weeklyRevisions)
+                foreach (var weeklyRevision in weeklyRevisions)
                 {
-                   var newWeeklys = weeklyRevisions.Select(s=>_mapper.Map<WeeklyRevisions>(s)).ToList();
+                    var newWeeklys = weeklyRevisions.Select(s => _mapper.Map<WeeklyRevisions>(s)).ToList();
                     await _context.WeeklyRevisions.AddRangeAsync(newWeeklys);
                 }
                 await _context.SaveChangesAsync();
@@ -199,21 +199,21 @@ namespace SupervisorMobility.API.DataAccess.Services.HRIRepository
                     .Include(h => h.Images)
                     .Include(h => h.ItemsRevised!)
                         .ThenInclude(ir => ir.Frequency)
-                    .Include(h => h.ItemsRevised!)
+                    .Include(h => h.ItemsRevised!.Where(ir => ir.IsActive == true))
                         .ThenInclude(ir => ir.Veredict)
-                    .Include(h => h.ItemsRevised!)
+                    .Include(h => h.ItemsRevised!.Where(ir => ir.IsActive == true))
                         .ThenInclude(ir => ir.RevisionMethod)
-                    .Include(h => h.ItemsRevised!)
-                        .ThenInclude(ir => ir.RevisionCycles!)
+                    .Include(h => h.ItemsRevised!.Where(ir => ir.IsActive == true))
+                        .ThenInclude(ir => ir.RevisionCycles!.Where(rc => rc.IsActive == true))
                             .ThenInclude(rc => rc.DailyRevisions!)
                                 .ThenInclude(dr => dr.Responsible)
-                    .Include(h => h.WeeklyRevisions)
-                    .Include(h => h.HriCycles!)
+                    .Include(h => h.WeeklyRevisions!.Where(wr => wr.IsActive == true))
+                    .Include(h => h.HriCycles!.Where(hc => hc.IsActive == true))
                         .ThenInclude(c => c.DailyRevisions!)
                             .ThenInclude(dr => dr.Responsible)
-                    .Include(h => h.HriCycles!)
+                    .Include(h => h.HriCycles!.Where(hc => hc.IsActive == true))
                         .ThenInclude(c => c.Operator)
-                    .Include(h => h.HriCycles!)
+                    .Include(h => h.HriCycles!.Where(hc => hc.IsActive == true))
                         .ThenInclude(c => c.Supervisor)
                     .Include(h => h.HourmeterRevision)
                         .ThenInclude(hr => hr.DailyRevisions!)
@@ -245,22 +245,22 @@ namespace SupervisorMobility.API.DataAccess.Services.HRIRepository
                     .Include(h => h.Dock)
                     .Include(h => h.Images)
                     .Include(h => h.ItemsRevised!)
-                        .ThenInclude(ir=>ir.Frequency)
-                    .Include(h => h.ItemsRevised!)
-                        .ThenInclude(ir=>ir.Veredict)
-                    .Include(h => h.ItemsRevised!)
-                        .ThenInclude(ir=>ir.RevisionMethod)
-                    .Include(h => h.ItemsRevised!)
-                        .ThenInclude(ir => ir.RevisionCycles!)
+                        .ThenInclude(ir => ir.Frequency)
+                    .Include(h => h.ItemsRevised!.Where(ir => ir.IsActive == true))
+                        .ThenInclude(ir => ir.Veredict)
+                    .Include(h => h.ItemsRevised!.Where(ir => ir.IsActive == true))
+                        .ThenInclude(ir => ir.RevisionMethod)
+                    .Include(h => h.ItemsRevised!.Where(ir => ir.IsActive == true))
+                        .ThenInclude(ir => ir.RevisionCycles!.Where(rc => rc.IsActive == true))
                             .ThenInclude(rc => rc.DailyRevisions!)
                                 .ThenInclude(dr => dr.Responsible)
-                    .Include(h => h.WeeklyRevisions)
-                    .Include(h => h.HriCycles!)
+                    .Include(h => h.WeeklyRevisions!.Where(wr => wr.IsActive == true))
+                    .Include(h => h.HriCycles!.Where(hc => hc.IsActive == true))
                         .ThenInclude(c => c.DailyRevisions!)
                             .ThenInclude(dr => dr.Responsible)
-                    .Include(h=>h.HriCycles!)
-                        .ThenInclude(c=>c.Operator)
-                    .Include(h => h.HriCycles!)
+                    .Include(h => h.HriCycles!.Where(hc => hc.IsActive == true))
+                        .ThenInclude(c => c.Operator)
+                    .Include(h => h.HriCycles!.Where(hc => hc.IsActive == true))
                         .ThenInclude(c => c.Supervisor)
                     .Include(h => h.HourmeterRevision)
                         .ThenInclude(hr => hr.DailyRevisions!)
@@ -276,6 +276,8 @@ namespace SupervisorMobility.API.DataAccess.Services.HRIRepository
                     response.Message = "HRI not found.";
                     return response;
                 }
+                //filtramoos los ciclos para traer solo los activos, asi como los items revisados y las revisiones diarias relacionadas a esos ciclos e items
+
                 response.Data = _mapper.Map<GetHRIDto>(hri);
                 response.Success = true;
                 response.Message = "HRI retrieved successfully.";
@@ -297,6 +299,7 @@ namespace SupervisorMobility.API.DataAccess.Services.HRIRepository
                 var hris = await _context.HRIs.Include(h => h.Line)
                     .Include(h => h.NameOfItem)
                     .Include(h => h.Images)
+                    .Where(h => h.IsActive)
                     .ToListAsync();
 
                 foreach (var hri in hris)
@@ -325,8 +328,43 @@ namespace SupervisorMobility.API.DataAccess.Services.HRIRepository
                 response.Message = $"Error retrieving HRIs for table: {ex.Message}";
             }
             return response;
-                
+
         }
 
+        public async Task<ServiceResponse<bool>> UpdateHRI(int id, UpdateHRIDto updatedHRI)
+        {
+            var response = new ServiceResponse<bool>();
+            try
+            {
+                var hri = await _context.HRIs.FirstOrDefaultAsync(h => h.HriId == id);
+                if (hri == null)
+                {
+                    response.Success = false;
+                    response.Message = "HRI not found.";
+                    response.Data = false;
+                    return response;
+                }
+                hri.HRILinesId = updatedHRI.HRILinesId;
+                hri.HRIItemId = updatedHRI.HRIItemId;
+                hri.ControlNumber = updatedHRI.ControlNumber;
+                hri.HRIDockId = updatedHRI.HRIDockId;
+                hri.Department = updatedHRI.Department;
+                hri.SupervisorUserId = updatedHRI.SupervisorUserId;
+                hri.SSVUserId = updatedHRI.SSVUserId;
+                
+                await _context.SaveChangesAsync();
+                response.Success = true;
+                response.Message = "HRI updated successfully.";
+                response.Data = true;
+
+            }
+            catch (Exception ex)
+            {
+                response.Success = false;
+                response.Message = $"Error updating HRI: {ex.Message + (ex.InnerException != null ? " - " + ex.InnerException.Message : "")}";
+                response.Data = false;
+            }
+            return response;
+        }
     }
 }
