@@ -140,8 +140,8 @@ namespace SupervisorMobility.API.DataAccess.Services.HRIRepository
             {
                 foreach (var weeklyRevision in weeklyRevisions)
                 {
-                    var newWeeklys = weeklyRevisions.Select(s => _mapper.Map<WeeklyRevisions>(s)).ToList();
-                    await _context.WeeklyRevisions.AddRangeAsync(newWeeklys);
+                    var newWeeklys = _mapper.Map<WeeklyRevisions>(weeklyRevision);
+                    await _context.WeeklyRevisions.AddAsync(newWeeklys);
                 }
                 await _context.SaveChangesAsync();
                 response.Success = true;
