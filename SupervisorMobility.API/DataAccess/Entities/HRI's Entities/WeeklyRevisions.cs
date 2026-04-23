@@ -13,5 +13,6 @@ namespace SupervisorMobility.API.DataAccess.Entities.HRI_s_Entities
         public int Month { get; set; }
         public int Week { get; set; }
         public bool? IsActive { get; set; }
+        public string? Status { get; set; }
     }
 }
