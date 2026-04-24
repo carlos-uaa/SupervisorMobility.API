@@ -8,6 +8,7 @@ namespace SupervisorMobility.API.DataAccess.Services.HRIRepository
         Task<ServiceResponse<List<GetHRIDto>>> GetAllHRI();
         Task<ServiceResponse<GetHRIDto>> GetHRIById(int id);
         Task<ServiceResponse<GetHRIDto>> CreateHRI(CreateHRIDto newHRI);
+        Task<ServiceResponse<bool>> UpdateHRI(int id, UpdateHRIDto updatedHRI);
         Task<ServiceResponse<bool>> CreateNewWeeeklyRevisions(List<CreateWeeklyRevisionDto> weeklyRevisions);
         Task<ServiceResponse<bool>> DeleteHRI(int id);
         Task<ServiceResponse<List<GetHRIToTableDto>>> GetAllHRITable();

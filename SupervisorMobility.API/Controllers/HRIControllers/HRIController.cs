@@ -84,6 +84,21 @@ namespace SupervisorMobility.API.Controllers.HRIControllers
             }
             return Ok(response);
         }
+
+        [HttpPut("UpdateHRI/{id}")]
+        [ProducesResponseType(StatusCodes.Status200OK)]
+        [ProducesResponseType(StatusCodes.Status400BadRequest)]
+        [ProducesResponseType(StatusCodes.Status500InternalServerError)]
+        public async Task<ActionResult<ServiceResponse<bool>>> UpdateHRI(int id, UpdateHRIDto updatedHRI)
+        {
+            var response = await _HRIServices.UpdateHRI(id, updatedHRI);
+            if (!response.Data)
+            {
+                return BadRequest(response);
+            }
+            return Ok(response);
+        }
+
         [HttpDelete("DeleteHRI/{id}")]
         [ProducesResponseType(StatusCodes.Status200OK)]
         [ProducesResponseType(StatusCodes.Status404NotFound)]
