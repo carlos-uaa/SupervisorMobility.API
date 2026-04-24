@@ -1,4 +1,6 @@
 ﻿using SupervisorMobility.API.DataAccess.Entities.HRI_s_Entities;
+using SupervisorMobility.API.Models.HRICyclesDtos;
+using SupervisorMobility.API.Models.HRIRevisionItemsDtos;
 
 namespace SupervisorMobility.API.Models.HRIDtos
 {
@@ -11,5 +13,7 @@ namespace SupervisorMobility.API.Models.HRIDtos
         public string? Department { get; set; }
         public int? SupervisorUserId { get; set; }
         public int? SSVUserId { get; set; }
+        public List<UpdateRevisionItemDto>? RevisionItems { get; set; }
+        public List<UpdateFullHRICyclesDto>? HRICycles { get; set; }
     }
 }

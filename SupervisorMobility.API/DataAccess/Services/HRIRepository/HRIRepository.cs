@@ -7,6 +7,8 @@ using SupervisorMobility.API.Models.HRIDtos;
 using SupervisorMobility.API.Models.HRIHourmeterRevisionDto;
 using SupervisorMobility.API.Models.HRIWeeklyRevisions;
 using SupervisorMobility.API.Models.HRIDtos.HRImagesDto;
+using SupervisorMobility.API.Models.HRIRevisionItemsDtos;
+using SupervisorMobility.API.Models.HRICyclesDtos;
 
 
 namespace SupervisorMobility.API.DataAccess.Services.HRIRepository
@@ -353,6 +355,110 @@ namespace SupervisorMobility.API.DataAccess.Services.HRIRepository
                 hri.SSVUserId = updatedHRI.SSVUserId;
                 
                 await _context.SaveChangesAsync();
+
+                //actualizamos los ciclos relacionados al hri
+                if (updatedHRI.HRICycles != null && updatedHRI.HRICycles.Count > 0)
+                {
+                    foreach (var cycle in updatedHRI.HRICycles)
+                    {
+                        //si el ciclo tiene un id, significa que ya existe en la base de datos y solo se actualiza, si no tiene id, se crea uno nuevo, si el ciclo tiene el campo Deleted en true, se elimina de la base de datos
+                        if (cycle.Deleted == true)
+                        {
+                            var res = await _hriCyclesRepository.DeleteHRICycle(cycle.CycleId);
+                            if (res.Success == false)
+                            {
+                                response.Success = false;
+                                response.Message = $"Error deleting HRI Cycle with id {cycle.CycleId}: {res.Message}";
+                                response.Data = false;
+                                return response;
+                            }
+                            continue;
+                        }
+                        //si el id es diferente de 0 y el campo deleted es null o false actualizamos el ciclo
+                        else if (cycle.CycleId != 0 && (cycle.Deleted == null || cycle.Deleted == false))
+                        {
+                            var cycleToUpdate = _mapper.Map<UpdateHRICycleDto>(cycle);
+                            var res = await _hriCyclesRepository.UpdateHRICycle(cycle.CycleId, cycleToUpdate);
+                            if (res.Success == false)
+                            {
+                                response.Success = false;
+                                response.Message = $"Error updating HRI Cycle with id {cycle.CycleId}: {res.Message}";
+                                response.Data = false;
+                                return response;
+                            }
+                            continue;
+                        }
+                        //si el id es 0 creamos un nuevo ciclo relacionado al hri
+                        else if (cycle.CycleId == 0)
+                        {
+                            var cycleToCreate = _mapper.Map<CreateHRICyclesDto>(cycle);
+                            cycleToCreate.HriId = hri.HriId;
+                            var res = await _hriCyclesRepository.CreateHRICycle(cycleToCreate);
+                            if (res.Success == false)
+                            {
+                                response.Success = false;
+                                response.Message = $"Error creating HRI Cycle: {res.Message}";
+                                response.Data = false;
+                                return response;
+                            }
+                            continue;
+                        }
+                    }
+                }
+
+                //actualizamos los items revisados relacionados al hri
+                if(updatedHRI.RevisionItems != null && updatedHRI.RevisionItems.Count>0)
+                {
+                    foreach(var item in updatedHRI.RevisionItems)
+                    {
+                        //si el item tiene un id, significa que ya existe en la base de datos y solo se actualiza, si no tiene id, se crea uno nuevo, si el item tiene el campo Deleted en true, se elimina de la base de datos
+                        if (item.Deleted == true)
+                        {
+                            var res = await _hriRevisionItemRepository.DeleteHRIRevisionItem(item.ItemId);
+                            if (res.Success == false)
+                            {
+                                response.Success = false;
+                                response.Message = $"Error deleting HRI Revision Item with id {item.ItemId}: {res.Message}";
+                                response.Data = false;
+                                return response;
+                            }
+                            continue;
+
+                        }
+                        //si el id es diferente de 0 y el campo deleted es null o false actualizamos el item
+                        else if (item.ItemId != 0 && (item.Deleted == null || item.Deleted == false))
+                        {
+                            var itemToUpdate = _mapper.Map<UpdateHRIRevisionItemDto>(item);
+                            var res = await _hriRevisionItemRepository.UpdateHRIRevisionItem(item.ItemId, itemToUpdate);
+                            if (res.Success == false)
+                            {
+                                response.Success = false;
+                                response.Message = $"Error updating HRI Revision Item with id {item.ItemId}: {res.Message}";
+                                response.Data = false;
+                                return response;
+                            }
+                            continue;
+                        }
+                        //si el id es 0 creamos un nuevo item relacionado al hri
+                        else if (item.ItemId == 0)
+                        {
+                            var itemToCreate = _mapper.Map<CreateHRIRevisionItemDto>(item);
+                            itemToCreate.HriId = hri.HriId;
+                            var res = await _hriRevisionItemRepository.CreateHRIRevisionItem(itemToCreate);
+                            if (res.Success == false)
+                            {
+                                response.Success = false;
+                                response.Message = $"Error creating HRI Revision Item: {res.Message}";
+                                response.Data = false;
+                                return response;
+                            }
+                            continue;
+                        }
+
+
+                    }
+                }
+
                 response.Success = true;
                 response.Message = "HRI updated successfully.";
                 response.Data = true;

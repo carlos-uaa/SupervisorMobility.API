@@ -89,6 +89,23 @@ namespace SupervisorMobility.API.DataAccess.Services.HRIRepository
                 var revisionItem = _mapper.Map<HRIRevisionItems>(createHRIRevisionItemDto);
                 await _context.HRIRevisionItems.AddAsync(revisionItem);
                 await _context.SaveChangesAsync();
+
+                // Crear los ciclos de revisión para el item creado
+                var cyclesCount = await _context.HRICycles.Where(rc => rc.HriId == revisionItem.HriId && rc.IsActive==true).CountAsync();
+                if(cyclesCount > 0)
+                {
+                    var listOfCycles = new List<CreateRevisionCyclesDto>();
+                    for (int i = 1; i <= cyclesCount; i++)
+                    {
+                        var revisionCycle = new CreateRevisionCyclesDto
+                        {
+                            Cycle = i,
+                            IsActive = true
+                        };
+                        listOfCycles.Add(revisionCycle);
+                    }
+                    await _hriRevisionCyclesRepository.CreateRevisionCyclesByRevisionItemId(revisionItem.ItemId, listOfCycles);
+                }
                 response.Data = _mapper.Map<GetHRIRevisionItemDto>(revisionItem);
                 response.Success = true;
                 response.Message = "HRI Revision Item created successfully.";

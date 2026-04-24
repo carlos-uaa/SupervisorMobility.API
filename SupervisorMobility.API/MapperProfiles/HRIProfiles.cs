@@ -22,6 +22,9 @@ namespace SupervisorMobility.API.MapperProfiles
                 CreateMap<HRICycles, GetHRICyclesDto>().ReverseMap();
                 CreateMap<CreateHRICyclesDto, HRICycles>().ReverseMap();
                 CreateMap<UpdateHRICycleDto, HRICycles>().ReverseMap();
+                CreateMap<UpdateFullHRICyclesDto, HRICycles>().ReverseMap();
+                CreateMap<UpdateFullHRICyclesDto, UpdateHRICycleDto>().ReverseMap();
+                CreateMap<UpdateFullHRICyclesDto, CreateHRICyclesDto>().ReverseMap();  
             #endregion
 
             #region HRIRevisionItems
@@ -37,6 +40,9 @@ namespace SupervisorMobility.API.MapperProfiles
             CreateMap<RevisionMethod, GetRevisionMethodDto>().ReverseMap();
             CreateMap<CreateRevisionMethodDto, RevisionMethod>().ReverseMap();
             CreateMap<UpdateRevisionMethodDto, RevisionMethod>().ReverseMap();
+            CreateMap<UpdateRevisionItemDto, HRIRevisionItems>().ReverseMap();
+            CreateMap<UpdateRevisionItemDto, UpdateHRIRevisionItemDto>().ReverseMap();
+            CreateMap<UpdateRevisionItemDto, CreateHRIRevisionItemDto>().ReverseMap();
 
 
             #endregion
