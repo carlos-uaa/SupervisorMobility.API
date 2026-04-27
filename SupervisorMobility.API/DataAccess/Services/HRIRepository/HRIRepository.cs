@@ -404,6 +404,7 @@ namespace SupervisorMobility.API.DataAccess.Services.HRIRepository
                         {
                             var cycleToCreate = _mapper.Map<CreateHRICyclesDto>(cycle);
                             cycleToCreate.HriId = hri.HriId;
+                            cycleToCreate.IsActive = true;
                             var res = await _hriCyclesRepository.CreateHRICycle(cycleToCreate);
                             if (res.Success == false)
                             {
@@ -463,6 +464,7 @@ namespace SupervisorMobility.API.DataAccess.Services.HRIRepository
                         {
                             var itemToCreate = _mapper.Map<CreateHRIRevisionItemDto>(item);
                             itemToCreate.HriId = hri.HriId;
+                            itemToCreate.IsActive = true;
                             var res = await _hriRevisionItemRepository.CreateHRIRevisionItem(itemToCreate);
                             if (res.Success == false)
                             {
