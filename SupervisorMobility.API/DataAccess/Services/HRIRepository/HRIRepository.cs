@@ -1,4 +1,4 @@
-﻿using AutoMapper;
+﻿ using AutoMapper;
 using Microsoft.EntityFrameworkCore;
 using SupervisorMobility.API.Context;
 using SupervisorMobility.API.DataAccess.Entities.HRI_s_Entities;
@@ -9,6 +9,7 @@ using SupervisorMobility.API.Models.HRIWeeklyRevisions;
 using SupervisorMobility.API.Models.HRIDtos.HRImagesDto;
 using SupervisorMobility.API.Models.HRIRevisionItemsDtos;
 using SupervisorMobility.API.Models.HRICyclesDtos;
+using SupervisorMobility.API.Models.HRIRevisionCycles;
 
 
 namespace SupervisorMobility.API.DataAccess.Services.HRIRepository
@@ -19,9 +20,10 @@ namespace SupervisorMobility.API.DataAccess.Services.HRIRepository
         private IHRIRevisionItemRepository _hriRevisionItemRepository;
         private IHRICyclesRepository _hriCyclesRepository;
         private IHRIHourmeterRevisionRepository _hriHourmeterRepository;
+        private IHRIRevisionCyclesRepository _hriRevisionCyclesRepository;
         private IHRImagesService _hrimagesService;
         private readonly IMapper _mapper;
-        public HRIRepository(SupervisorMobilityContext context, IMapper mapper, IHRIRevisionItemRepository hriRevisionItemRepository, IHRICyclesRepository hriCyclesRepository, IHRIHourmeterRevisionRepository hriHourmeterRepository, IHRImagesService hrimagesService)
+        public HRIRepository(SupervisorMobilityContext context, IMapper mapper, IHRIRevisionItemRepository hriRevisionItemRepository, IHRICyclesRepository hriCyclesRepository, IHRIHourmeterRevisionRepository hriHourmeterRepository, IHRIRevisionCyclesRepository hriRevisionCyclesRepository, IHRImagesService hrimagesService)
         {
             _context = context;
             _mapper = mapper;
@@ -29,6 +31,7 @@ namespace SupervisorMobility.API.DataAccess.Services.HRIRepository
             _hriCyclesRepository = hriCyclesRepository;
             _hriHourmeterRepository = hriHourmeterRepository;
             _hrimagesService = hrimagesService;
+            _hriRevisionCyclesRepository = hriRevisionCyclesRepository;
         }
         public async Task<ServiceResponse<GetHRIDto>> CreateHRI(CreateHRIDto newHRI)
         {
@@ -195,7 +198,7 @@ namespace SupervisorMobility.API.DataAccess.Services.HRIRepository
             var response = new ServiceResponse<List<GetHRIDto>>();
             try
             {
-                var hris = await _context.HRIs.Include(h => h.Line)
+                var hris = await _context.HRIs.AsNoTracking().Include(h => h.Line)
                     .Include(h => h.NameOfItem)
                     .Include(h => h.Dock)
                     .Include(h => h.Images)
@@ -242,7 +245,7 @@ namespace SupervisorMobility.API.DataAccess.Services.HRIRepository
             var response = new ServiceResponse<GetHRIDto>();
             try
             {
-                var hri = await _context.HRIs.Include(h => h.Line)
+                var hri = await _context.HRIs.AsNoTracking().Include(h => h.Line)
                     .Include(h => h.NameOfItem)
                     .Include(h => h.Dock)
                     .Include(h => h.Images)
@@ -298,7 +301,7 @@ namespace SupervisorMobility.API.DataAccess.Services.HRIRepository
             var hriTableList = new List<GetHRIToTableDto>();
             try
             {
-                var hris = await _context.HRIs.Include(h => h.Line)
+                var hris = await _context.HRIs.AsNoTracking().Include(h => h.Line)
                     .Include(h => h.NameOfItem)
                     .Include(h => h.Images)
                     .Where(h => h.IsActive)
@@ -372,6 +375,14 @@ namespace SupervisorMobility.API.DataAccess.Services.HRIRepository
                                 response.Data = false;
                                 return response;
                             }
+                            var res2 = await _hriRevisionCyclesRepository.DeleteRevisionCycleByHriId(hri.HriId, cycle.Cycle);
+                            if (res2.Success == false)
+                            {
+                                response.Success = false;
+                                response.Message = $"Error deleting HRI Revision Cycle with id {cycle.CycleId}: {res2.Message}";
+                                response.Data = false;
+                                return response;
+                            }
                             continue;
                         }
                         //si el id es diferente de 0 y el campo deleted es null o false actualizamos el ciclo
@@ -401,6 +412,14 @@ namespace SupervisorMobility.API.DataAccess.Services.HRIRepository
                                 response.Data = false;
                                 return response;
                             }
+                            var res2 = await _hriRevisionCyclesRepository.AddNewRevisionCycleToRevisionsItems(hri.HriId, new CreateRevisionCyclesDto { Cycle = cycle.Cycle , IsActive=true});
+                            if (res2.Success == false)
+                            {
+                                response.Success = false;
+                                response.Message = $"Error adding new revision cycle to related revision items: {res2.Message}";
+                                response.Data = false;
+                                return response;
+                            }
                             continue;
                         }
                     }
@@ -411,7 +430,7 @@ namespace SupervisorMobility.API.DataAccess.Services.HRIRepository
                 {
                     foreach(var item in updatedHRI.RevisionItems)
                     {
-                        //si el item tiene un id, significa que ya existe en la base de datos y solo se actualiza, si no tiene id, se crea uno nuevo, si el item tiene el campo Deleted en true, se elimina de la base de datos
+                        // si el item tiene el campo Deleted en true, se elimina de la base de datos
                         if (item.Deleted == true)
                         {
                             var res = await _hriRevisionItemRepository.DeleteHRIRevisionItem(item.ItemId);

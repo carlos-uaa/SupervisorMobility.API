@@ -13,5 +13,7 @@ namespace SupervisorMobility.API.DataAccess.Services.HRIRepository
         Task<ServiceResponse<bool>> CreateNewDailyRevision(CreateDailyRevisionDto createDaily);
         Task<ServiceResponse<GetRevisionCyclesDto>> UpdateRevisionCycle(int id, UpdateRevisionCycleDto updateRevisionCycleDto);
         Task<ServiceResponse<bool>> DeleteRevisionCycle(int id);
+        Task<ServiceResponse<bool>> DeleteRevisionCycleByHriId(int hriId, int cycle);
+        Task<ServiceResponse<bool>> AddNewRevisionCycleToRevisionsItems(int hriId, CreateRevisionCyclesDto newRevisionCycle);
     }
 }

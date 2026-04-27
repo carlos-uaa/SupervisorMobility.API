@@ -227,6 +227,71 @@ namespace SupervisorMobility.API.DataAccess.Services.HRIRepository
             return response;
         }
 
+        public async Task<ServiceResponse<bool>>DeleteRevisionCycleByHriId(int hriId,int cycle)
+        {
+            var response = new ServiceResponse<bool>();
+            try
+            {
+                var revisionItems = await _context.HRIRevisionItems.AsNoTracking().Where(ri => ri.HriId == hriId).Select(ri => ri.ItemId).ToListAsync();
+                foreach (var itemId in revisionItems)
+                {
+                    var revisionCycle = await _context.RevisionCycles.FirstOrDefaultAsync(rc => rc.HRIRevisionItemsId == itemId && rc.Cycle == cycle);
+                    if (revisionCycle != null)
+                    {
+                        //soft delete related daily revisions
+                        var relatedDailyRevisions = await _context.DailyRevisions.Where(dr => dr.RevisionCycleId == revisionCycle.RevisionCycleId).ToListAsync();
+                        if(relatedDailyRevisions.Any())
+                        {
+                            foreach (var dailyRevision in relatedDailyRevisions)
+                            {
+                                dailyRevision.IsActive = false;
+                            }
+                        }
+                       
+                        // Soft delete by setting IsActive to false
+                        revisionCycle.IsActive = false;
+                    }
+                }
+                await _context.SaveChangesAsync();
+                response.Success = true;
+                response.Message = "Revision cycle(s) deleted successfully.";
+                return response;
+
+
+            }
+            catch (Exception ex)
+            {
+                response.Success = false;
+                response.Message = $"An error occurred while deleting the revision cycle: {ex.Message}";
+            }
+            return response;
+        } 
+
+        public async Task<ServiceResponse<bool>> AddNewRevisionCycleToRevisionsItems(int hriId, CreateRevisionCyclesDto newRevisionCycle)
+        {
+            var response = new ServiceResponse<bool>();
+            try
+            {
+                var revisionItems = await _context.HRIRevisionItems.AsNoTracking().Where(ri => ri.HriId == hriId).Select(ri => ri.ItemId).ToListAsync();
+                foreach (var itemId in revisionItems)
+                {
+                    var revisionCycle = _mapper.Map<RevisionCycles>(newRevisionCycle);
+                    revisionCycle.HRIRevisionItemsId = itemId;
+                    await _context.RevisionCycles.AddAsync(revisionCycle);
+                }
+                await _context.SaveChangesAsync();
+                response.Success = true;
+                response.Message = "New revision cycle added to all related revision items successfully.";
+                return response;
+            }
+            catch (Exception ex)
+            {
+                response.Success = false;
+                response.Message = $"An error occurred while adding the new revision cycle: {ex.Message}";
+            }
+            return response;
+        }
+
 
     }
 }
