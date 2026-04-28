@@ -14,7 +14,9 @@ using SupervisorMobility.API.DataAccess.Entities.SOS_Review;
 using SupervisorMobility.API.Entities;
 using System.Globalization;
 using SupervisorMobility.API.DataAccess.SPModels;
+using SupervisorMobility.API.DataAccess.Entities.HRI_s_Entities;
 using SupervisorMobility.API.Models.Email;
+using SupervisorMobility.API.DataAccess.Entities.HRI_s_Entities.HRIRevisionsItem_Entities;
 
 namespace SupervisorMobility.API.Context
 {
@@ -156,6 +158,24 @@ namespace SupervisorMobility.API.Context
         //modelos para Store Procedures
         public DbSet<WFMInfoSP> WFMInfoSPs { get; set; }
 
+        #endregion
+
+        #region HRIs
+        public DbSet<HRI>  HRIs { get; set; }
+        public DbSet<HRILines> HRILines { get; set; }
+        public DbSet<HRIDock> HRIDocks { get; set; }
+        public DbSet<HRIItem> HRIItems { get; set; }
+        public DbSet<HRICycles> HRICycles { get; set; }
+        public DbSet<HRIRevisionItems> HRIRevisionItems { get; set; }
+        public DbSet<HRImages> HRImages { get; set; }
+        public DbSet<RevisionCycles> RevisionCycles { get; set; }
+        public DbSet<WeeklyRevisions> WeeklyRevisions { get; set; }
+        public DbSet<DailyRevisions> DailyRevisions { get; set; }
+        public DbSet<RevisionMethod> RevisionMethods { get; set; }  
+        public DbSet<Veredict> Veredicts { get; set; }
+        public DbSet<Frequency> Frequencies { get; set; }
+        public DbSet<HourmeterRevision> HourmeterRevisions { get; set; }
+       
         #endregion
 
         public SupervisorMobilityContext(DbContextOptions<SupervisorMobilityContext> options)

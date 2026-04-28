@@ -849,6 +849,443 @@ namespace SupervisorMobility.API.Migrations
                     b.ToTable("HCITransactions");
                 });
 
+            modelBuilder.Entity("SupervisorMobility.API.DataAccess.Entities.HRI_s_Entities.DailyRevisions", b =>
+                {
+                    b.Property<int>("RevisionId")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("int");
+
+                    SqlServerPropertyBuilderExtensions.UseIdentityColumn(b.Property<int>("RevisionId"));
+
+                    b.Property<int?>("CycleId")
+                        .HasColumnType("int");
+
+                    b.Property<int>("Day")
+                        .HasColumnType("int");
+
+                    b.Property<int?>("HourmeterRevisionId")
+                        .HasColumnType("int");
+
+                    b.Property<bool?>("IsActive")
+                        .HasColumnType("bit");
+
+                    b.Property<int>("Month")
+                        .HasColumnType("int");
+
+                    b.Property<int?>("RevisionCycleId")
+                        .HasColumnType("int");
+
+                    b.Property<string>("Status")
+                        .HasColumnType("nvarchar(max)");
+
+                    b.Property<int?>("UserId")
+                        .HasColumnType("int");
+
+                    b.Property<string>("UserType")
+                        .HasColumnType("nvarchar(max)");
+
+                    b.HasKey("RevisionId");
+
+                    b.HasIndex("CycleId");
+
+                    b.HasIndex("HourmeterRevisionId");
+
+                    b.HasIndex("RevisionCycleId");
+
+                    b.HasIndex("UserId");
+
+                    b.ToTable("DailyRevisions");
+                });
+
+            modelBuilder.Entity("SupervisorMobility.API.DataAccess.Entities.HRI_s_Entities.HRI", b =>
+                {
+                    b.Property<int>("HriId")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("int");
+
+                    SqlServerPropertyBuilderExtensions.UseIdentityColumn(b.Property<int>("HriId"));
+
+                    b.Property<int?>("AreaId")
+                        .HasColumnType("int");
+
+                    b.Property<string>("ControlNumber")
+                        .HasColumnType("nvarchar(max)");
+
+                    b.Property<DateTime>("CreationDate")
+                        .HasColumnType("datetime2");
+
+                    b.Property<string>("Department")
+                        .HasColumnType("nvarchar(max)");
+
+                    b.Property<int?>("HRIDockId")
+                        .HasColumnType("int");
+
+                    b.Property<int?>("HRIItemId")
+                        .HasColumnType("int");
+
+                    b.Property<int?>("HRILinesId")
+                        .HasColumnType("int");
+
+                    b.Property<bool>("IsActive")
+                        .HasColumnType("bit");
+
+                    b.Property<int?>("PlantId")
+                        .HasColumnType("int");
+
+                    b.Property<int?>("SSVUserId")
+                        .HasColumnType("int");
+
+                    b.Property<int?>("SupervisorUserId")
+                        .HasColumnType("int");
+
+                    b.HasKey("HriId");
+
+                    b.HasIndex("AreaId");
+
+                    b.HasIndex("HRIDockId");
+
+                    b.HasIndex("HRIItemId");
+
+                    b.HasIndex("HRILinesId");
+
+                    b.HasIndex("PlantId");
+
+                    b.HasIndex("SSVUserId");
+
+                    b.HasIndex("SupervisorUserId");
+
+                    b.ToTable("HRIs");
+                });
+
+            modelBuilder.Entity("SupervisorMobility.API.DataAccess.Entities.HRI_s_Entities.HRICycles", b =>
+                {
+                    b.Property<int>("CycleId")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("int");
+
+                    SqlServerPropertyBuilderExtensions.UseIdentityColumn(b.Property<int>("CycleId"));
+
+                    b.Property<int>("Cycle")
+                        .HasColumnType("int");
+
+                    b.Property<int>("HriId")
+                        .HasColumnType("int");
+
+                    b.Property<bool?>("IsActive")
+                        .HasColumnType("bit");
+
+                    b.Property<int?>("OperatorUserId")
+                        .HasColumnType("int");
+
+                    b.Property<int?>("SupervisorUserId")
+                        .HasColumnType("int");
+
+                    b.HasKey("CycleId");
+
+                    b.HasIndex("HriId");
+
+                    b.HasIndex("OperatorUserId");
+
+                    b.HasIndex("SupervisorUserId");
+
+                    b.ToTable("HRICycles");
+                });
+
+            modelBuilder.Entity("SupervisorMobility.API.DataAccess.Entities.HRI_s_Entities.HRIDock", b =>
+                {
+                    b.Property<int>("Id")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("int");
+
+                    SqlServerPropertyBuilderExtensions.UseIdentityColumn(b.Property<int>("Id"));
+
+                    b.Property<string>("Code")
+                        .IsRequired()
+                        .HasColumnType("nvarchar(max)");
+
+                    b.Property<string>("DockName")
+                        .IsRequired()
+                        .HasColumnType("nvarchar(max)");
+
+                    b.Property<bool>("IsActive")
+                        .HasColumnType("bit");
+
+                    b.HasKey("Id");
+
+                    b.ToTable("HRIDocks");
+                });
+
+            modelBuilder.Entity("SupervisorMobility.API.DataAccess.Entities.HRI_s_Entities.HRIItem", b =>
+                {
+                    b.Property<int>("Id")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("int");
+
+                    SqlServerPropertyBuilderExtensions.UseIdentityColumn(b.Property<int>("Id"));
+
+                    b.Property<string>("ControlNumber")
+                        .IsRequired()
+                        .HasColumnType("nvarchar(max)");
+
+                    b.Property<bool>("IsActive")
+                        .HasColumnType("bit");
+
+                    b.Property<string>("Name")
+                        .IsRequired()
+                        .HasColumnType("nvarchar(max)");
+
+                    b.HasKey("Id");
+
+                    b.ToTable("HRIItems");
+                });
+
+            modelBuilder.Entity("SupervisorMobility.API.DataAccess.Entities.HRI_s_Entities.HRILines", b =>
+                {
+                    b.Property<int>("Id")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("int");
+
+                    SqlServerPropertyBuilderExtensions.UseIdentityColumn(b.Property<int>("Id"));
+
+                    b.Property<string>("Code")
+                        .IsRequired()
+                        .HasColumnType("nvarchar(max)");
+
+                    b.Property<bool>("IsActive")
+                        .HasColumnType("bit");
+
+                    b.Property<string>("LineName")
+                        .IsRequired()
+                        .HasColumnType("nvarchar(max)");
+
+                    b.HasKey("Id");
+
+                    b.ToTable("HRILines");
+                });
+
+            modelBuilder.Entity("SupervisorMobility.API.DataAccess.Entities.HRI_s_Entities.HRIRevisionItems", b =>
+                {
+                    b.Property<int>("ItemId")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("int");
+
+                    SqlServerPropertyBuilderExtensions.UseIdentityColumn(b.Property<int>("ItemId"));
+
+                    b.Property<int?>("FrequencyId")
+                        .HasColumnType("int");
+
+                    b.Property<int>("HriId")
+                        .HasColumnType("int");
+
+                    b.Property<bool?>("IsActive")
+                        .HasColumnType("bit");
+
+                    b.Property<int>("ItemNumber")
+                        .HasColumnType("int");
+
+                    b.Property<int?>("RevisionMethodId")
+                        .HasColumnType("int");
+
+                    b.Property<string>("RevisionPoint")
+                        .IsRequired()
+                        .HasColumnType("nvarchar(max)");
+
+                    b.Property<int?>("VeredictId")
+                        .HasColumnType("int");
+
+                    b.HasKey("ItemId");
+
+                    b.HasIndex("FrequencyId");
+
+                    b.HasIndex("HriId");
+
+                    b.HasIndex("RevisionMethodId");
+
+                    b.HasIndex("VeredictId");
+
+                    b.ToTable("HRIRevisionItems");
+                });
+
+            modelBuilder.Entity("SupervisorMobility.API.DataAccess.Entities.HRI_s_Entities.HRIRevisionsItem_Entities.Frequency", b =>
+                {
+                    b.Property<int>("Id")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("int");
+
+                    SqlServerPropertyBuilderExtensions.UseIdentityColumn(b.Property<int>("Id"));
+
+                    b.Property<string>("Code")
+                        .IsRequired()
+                        .HasColumnType("nvarchar(max)");
+
+                    b.Property<string>("Description")
+                        .IsRequired()
+                        .HasColumnType("nvarchar(max)");
+
+                    b.Property<bool>("IsActive")
+                        .HasColumnType("bit");
+
+                    b.HasKey("Id");
+
+                    b.ToTable("Frequencies");
+                });
+
+            modelBuilder.Entity("SupervisorMobility.API.DataAccess.Entities.HRI_s_Entities.HRIRevisionsItem_Entities.RevisionMethod", b =>
+                {
+                    b.Property<int>("Id")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("int");
+
+                    SqlServerPropertyBuilderExtensions.UseIdentityColumn(b.Property<int>("Id"));
+
+                    b.Property<string>("Code")
+                        .IsRequired()
+                        .HasColumnType("nvarchar(max)");
+
+                    b.Property<string>("Description")
+                        .IsRequired()
+                        .HasColumnType("nvarchar(max)");
+
+                    b.Property<bool>("IsActive")
+                        .HasColumnType("bit");
+
+                    b.HasKey("Id");
+
+                    b.ToTable("RevisionMethods");
+                });
+
+            modelBuilder.Entity("SupervisorMobility.API.DataAccess.Entities.HRI_s_Entities.HRIRevisionsItem_Entities.Veredict", b =>
+                {
+                    b.Property<int>("Id")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("int");
+
+                    SqlServerPropertyBuilderExtensions.UseIdentityColumn(b.Property<int>("Id"));
+
+                    b.Property<string>("Code")
+                        .IsRequired()
+                        .HasColumnType("nvarchar(max)");
+
+                    b.Property<string>("Description")
+                        .IsRequired()
+                        .HasColumnType("nvarchar(max)");
+
+                    b.Property<bool>("IsActive")
+                        .HasColumnType("bit");
+
+                    b.HasKey("Id");
+
+                    b.ToTable("Veredicts");
+                });
+
+            modelBuilder.Entity("SupervisorMobility.API.DataAccess.Entities.HRI_s_Entities.HRImages", b =>
+                {
+                    b.Property<int>("ImageId")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("int");
+
+                    SqlServerPropertyBuilderExtensions.UseIdentityColumn(b.Property<int>("ImageId"));
+
+                    b.Property<int?>("HriId")
+                        .HasColumnType("int");
+
+                    b.Property<string>("ImageType")
+                        .IsRequired()
+                        .HasColumnType("nvarchar(max)");
+
+                    b.Property<string>("ImageUrl")
+                        .IsRequired()
+                        .HasColumnType("nvarchar(max)");
+
+                    b.HasKey("ImageId");
+
+                    b.HasIndex("HriId");
+
+                    b.ToTable("HRImages");
+                });
+
+            modelBuilder.Entity("SupervisorMobility.API.DataAccess.Entities.HRI_s_Entities.HourmeterRevision", b =>
+                {
+                    b.Property<int>("Id")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("int");
+
+                    SqlServerPropertyBuilderExtensions.UseIdentityColumn(b.Property<int>("Id"));
+
+                    b.Property<int?>("HriId")
+                        .HasColumnType("int");
+
+                    b.Property<bool?>("IsActive")
+                        .HasColumnType("bit");
+
+                    b.HasKey("Id");
+
+                    b.HasIndex("HriId")
+                        .IsUnique()
+                        .HasFilter("[HriId] IS NOT NULL");
+
+                    b.ToTable("HourmeterRevisions");
+                });
+
+            modelBuilder.Entity("SupervisorMobility.API.DataAccess.Entities.HRI_s_Entities.RevisionCycles", b =>
+                {
+                    b.Property<int>("RevisionCycleId")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("int");
+
+                    SqlServerPropertyBuilderExtensions.UseIdentityColumn(b.Property<int>("RevisionCycleId"));
+
+                    b.Property<int>("Cycle")
+                        .HasColumnType("int");
+
+                    b.Property<int?>("HRIRevisionItemsId")
+                        .HasColumnType("int");
+
+                    b.Property<bool?>("IsActive")
+                        .HasColumnType("bit");
+
+                    b.HasKey("RevisionCycleId");
+
+                    b.HasIndex("HRIRevisionItemsId");
+
+                    b.ToTable("RevisionCycles");
+                });
+
+            modelBuilder.Entity("SupervisorMobility.API.DataAccess.Entities.HRI_s_Entities.WeeklyRevisions", b =>
+                {
+                    b.Property<int>("RevisionId")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("int");
+
+                    SqlServerPropertyBuilderExtensions.UseIdentityColumn(b.Property<int>("RevisionId"));
+
+                    b.Property<int>("HriId")
+                        .HasColumnType("int");
+
+                    b.Property<bool?>("IsActive")
+                        .HasColumnType("bit");
+
+                    b.Property<int>("Month")
+                        .HasColumnType("int");
+
+                    b.Property<string>("Status")
+                        .HasColumnType("nvarchar(max)");
+
+                    b.Property<int?>("UserId")
+                        .HasColumnType("int");
+
+                    b.Property<int>("Week")
+                        .HasColumnType("int");
+
+                    b.HasKey("RevisionId");
+
+                    b.HasIndex("HriId");
+
+                    b.HasIndex("UserId");
+
+                    b.ToTable("WeeklyRevisions");
+                });
+
             modelBuilder.Entity("SupervisorMobility.API.DataAccess.Entities.HeadCount", b =>
                 {
                     b.Property<int>("HeadCountId")
@@ -6750,6 +7187,174 @@ namespace SupervisorMobility.API.Migrations
                         .HasForeignKey("HCIId");
                 });
 
+            modelBuilder.Entity("SupervisorMobility.API.DataAccess.Entities.HRI_s_Entities.DailyRevisions", b =>
+                {
+                    b.HasOne("SupervisorMobility.API.DataAccess.Entities.HRI_s_Entities.HRICycles", "cycle")
+                        .WithMany("DailyRevisions")
+                        .HasForeignKey("CycleId");
+
+                    b.HasOne("SupervisorMobility.API.DataAccess.Entities.HRI_s_Entities.HourmeterRevision", "HourmeterRevision")
+                        .WithMany("DailyRevisions")
+                        .HasForeignKey("HourmeterRevisionId");
+
+                    b.HasOne("SupervisorMobility.API.DataAccess.Entities.HRI_s_Entities.RevisionCycles", "RevisionCycle")
+                        .WithMany("DailyRevisions")
+                        .HasForeignKey("RevisionCycleId");
+
+                    b.HasOne("SupervisorMobility.API.DataAccess.Entities.User", "Responsible")
+                        .WithMany("DailyRevisions")
+                        .HasForeignKey("UserId");
+
+                    b.Navigation("HourmeterRevision");
+
+                    b.Navigation("Responsible");
+
+                    b.Navigation("RevisionCycle");
+
+                    b.Navigation("cycle");
+                });
+
+            modelBuilder.Entity("SupervisorMobility.API.DataAccess.Entities.HRI_s_Entities.HRI", b =>
+                {
+                    b.HasOne("SupervisorMobility.API.DataAccess.Entities.Area", "Area")
+                        .WithMany("HRIs")
+                        .HasForeignKey("AreaId");
+
+                    b.HasOne("SupervisorMobility.API.DataAccess.Entities.HRI_s_Entities.HRIDock", "Dock")
+                        .WithMany("HRIs")
+                        .HasForeignKey("HRIDockId");
+
+                    b.HasOne("SupervisorMobility.API.DataAccess.Entities.HRI_s_Entities.HRIItem", "NameOfItem")
+                        .WithMany("HRIs")
+                        .HasForeignKey("HRIItemId");
+
+                    b.HasOne("SupervisorMobility.API.DataAccess.Entities.HRI_s_Entities.HRILines", "Line")
+                        .WithMany("HRIs")
+                        .HasForeignKey("HRILinesId");
+
+                    b.HasOne("SupervisorMobility.API.Entities.Plant", "Plant")
+                        .WithMany("HRIs")
+                        .HasForeignKey("PlantId");
+
+                    b.HasOne("SupervisorMobility.API.DataAccess.Entities.User", "SSV")
+                        .WithMany()
+                        .HasForeignKey("SSVUserId");
+
+                    b.HasOne("SupervisorMobility.API.DataAccess.Entities.User", "Supervisor")
+                        .WithMany()
+                        .HasForeignKey("SupervisorUserId");
+
+                    b.Navigation("Area");
+
+                    b.Navigation("Dock");
+
+                    b.Navigation("Line");
+
+                    b.Navigation("NameOfItem");
+
+                    b.Navigation("Plant");
+
+                    b.Navigation("SSV");
+
+                    b.Navigation("Supervisor");
+                });
+
+            modelBuilder.Entity("SupervisorMobility.API.DataAccess.Entities.HRI_s_Entities.HRICycles", b =>
+                {
+                    b.HasOne("SupervisorMobility.API.DataAccess.Entities.HRI_s_Entities.HRI", "HRI")
+                        .WithMany("HriCycles")
+                        .HasForeignKey("HriId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
+
+                    b.HasOne("SupervisorMobility.API.DataAccess.Entities.User", "Operator")
+                        .WithMany()
+                        .HasForeignKey("OperatorUserId");
+
+                    b.HasOne("SupervisorMobility.API.DataAccess.Entities.User", "Supervisor")
+                        .WithMany()
+                        .HasForeignKey("SupervisorUserId");
+
+                    b.Navigation("HRI");
+
+                    b.Navigation("Operator");
+
+                    b.Navigation("Supervisor");
+                });
+
+            modelBuilder.Entity("SupervisorMobility.API.DataAccess.Entities.HRI_s_Entities.HRIRevisionItems", b =>
+                {
+                    b.HasOne("SupervisorMobility.API.DataAccess.Entities.HRI_s_Entities.HRIRevisionsItem_Entities.Frequency", "Frequency")
+                        .WithMany("HRIRevisionItems")
+                        .HasForeignKey("FrequencyId");
+
+                    b.HasOne("SupervisorMobility.API.DataAccess.Entities.HRI_s_Entities.HRI", "HRI")
+                        .WithMany("ItemsRevised")
+                        .HasForeignKey("HriId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
+
+                    b.HasOne("SupervisorMobility.API.DataAccess.Entities.HRI_s_Entities.HRIRevisionsItem_Entities.RevisionMethod", "RevisionMethod")
+                        .WithMany("HRIRevisionItems")
+                        .HasForeignKey("RevisionMethodId");
+
+                    b.HasOne("SupervisorMobility.API.DataAccess.Entities.HRI_s_Entities.HRIRevisionsItem_Entities.Veredict", "Veredict")
+                        .WithMany("HRIRevisionItems")
+                        .HasForeignKey("VeredictId");
+
+                    b.Navigation("Frequency");
+
+                    b.Navigation("HRI");
+
+                    b.Navigation("RevisionMethod");
+
+                    b.Navigation("Veredict");
+                });
+
+            modelBuilder.Entity("SupervisorMobility.API.DataAccess.Entities.HRI_s_Entities.HRImages", b =>
+                {
+                    b.HasOne("SupervisorMobility.API.DataAccess.Entities.HRI_s_Entities.HRI", "HRI")
+                        .WithMany("Images")
+                        .HasForeignKey("HriId");
+
+                    b.Navigation("HRI");
+                });
+
+            modelBuilder.Entity("SupervisorMobility.API.DataAccess.Entities.HRI_s_Entities.HourmeterRevision", b =>
+                {
+                    b.HasOne("SupervisorMobility.API.DataAccess.Entities.HRI_s_Entities.HRI", "HRI")
+                        .WithOne("HourmeterRevision")
+                        .HasForeignKey("SupervisorMobility.API.DataAccess.Entities.HRI_s_Entities.HourmeterRevision", "HriId");
+
+                    b.Navigation("HRI");
+                });
+
+            modelBuilder.Entity("SupervisorMobility.API.DataAccess.Entities.HRI_s_Entities.RevisionCycles", b =>
+                {
+                    b.HasOne("SupervisorMobility.API.DataAccess.Entities.HRI_s_Entities.HRIRevisionItems", "HRIRevisionItems")
+                        .WithMany("RevisionCycles")
+                        .HasForeignKey("HRIRevisionItemsId");
+
+                    b.Navigation("HRIRevisionItems");
+                });
+
+            modelBuilder.Entity("SupervisorMobility.API.DataAccess.Entities.HRI_s_Entities.WeeklyRevisions", b =>
+                {
+                    b.HasOne("SupervisorMobility.API.DataAccess.Entities.HRI_s_Entities.HRI", "HRI")
+                        .WithMany("WeeklyRevisions")
+                        .HasForeignKey("HriId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
+
+                    b.HasOne("SupervisorMobility.API.DataAccess.Entities.User", "SeniorSupervisor")
+                        .WithMany("WeeklyRevisions")
+                        .HasForeignKey("UserId");
+
+                    b.Navigation("HRI");
+
+                    b.Navigation("SeniorSupervisor");
+                });
+
             modelBuilder.Entity("SupervisorMobility.API.DataAccess.Entities.ILU.ILURegister", b =>
                 {
                     b.HasOne("SupervisorMobility.API.DataAccess.Entities.Distribution", "Distribution")
@@ -8214,6 +8819,8 @@ namespace SupervisorMobility.API.Migrations
             modelBuilder.Entity("SupervisorMobility.API.DataAccess.Entities.Area", b =>
                 {
                     b.Navigation("Distributions");
+
+                    b.Navigation("HRIs");
                 });
 
             modelBuilder.Entity("SupervisorMobility.API.DataAccess.Entities.Distribution", b =>
@@ -8236,6 +8843,69 @@ namespace SupervisorMobility.API.Migrations
                     b.Navigation("Transactions");
 
                     b.Navigation("User");
+                });
+
+            modelBuilder.Entity("SupervisorMobility.API.DataAccess.Entities.HRI_s_Entities.HRI", b =>
+                {
+                    b.Navigation("HourmeterRevision");
+
+                    b.Navigation("HriCycles");
+
+                    b.Navigation("Images");
+
+                    b.Navigation("ItemsRevised");
+
+                    b.Navigation("WeeklyRevisions");
+                });
+
+            modelBuilder.Entity("SupervisorMobility.API.DataAccess.Entities.HRI_s_Entities.HRICycles", b =>
+                {
+                    b.Navigation("DailyRevisions");
+                });
+
+            modelBuilder.Entity("SupervisorMobility.API.DataAccess.Entities.HRI_s_Entities.HRIDock", b =>
+                {
+                    b.Navigation("HRIs");
+                });
+
+            modelBuilder.Entity("SupervisorMobility.API.DataAccess.Entities.HRI_s_Entities.HRIItem", b =>
+                {
+                    b.Navigation("HRIs");
+                });
+
+            modelBuilder.Entity("SupervisorMobility.API.DataAccess.Entities.HRI_s_Entities.HRILines", b =>
+                {
+                    b.Navigation("HRIs");
+                });
+
+            modelBuilder.Entity("SupervisorMobility.API.DataAccess.Entities.HRI_s_Entities.HRIRevisionItems", b =>
+                {
+                    b.Navigation("RevisionCycles");
+                });
+
+            modelBuilder.Entity("SupervisorMobility.API.DataAccess.Entities.HRI_s_Entities.HRIRevisionsItem_Entities.Frequency", b =>
+                {
+                    b.Navigation("HRIRevisionItems");
+                });
+
+            modelBuilder.Entity("SupervisorMobility.API.DataAccess.Entities.HRI_s_Entities.HRIRevisionsItem_Entities.RevisionMethod", b =>
+                {
+                    b.Navigation("HRIRevisionItems");
+                });
+
+            modelBuilder.Entity("SupervisorMobility.API.DataAccess.Entities.HRI_s_Entities.HRIRevisionsItem_Entities.Veredict", b =>
+                {
+                    b.Navigation("HRIRevisionItems");
+                });
+
+            modelBuilder.Entity("SupervisorMobility.API.DataAccess.Entities.HRI_s_Entities.HourmeterRevision", b =>
+                {
+                    b.Navigation("DailyRevisions");
+                });
+
+            modelBuilder.Entity("SupervisorMobility.API.DataAccess.Entities.HRI_s_Entities.RevisionCycles", b =>
+                {
+                    b.Navigation("DailyRevisions");
                 });
 
             modelBuilder.Entity("SupervisorMobility.API.DataAccess.Entities.IS.Appearance", b =>
@@ -8459,9 +9129,13 @@ namespace SupervisorMobility.API.Migrations
 
             modelBuilder.Entity("SupervisorMobility.API.DataAccess.Entities.User", b =>
                 {
+                    b.Navigation("DailyRevisions");
+
                     b.Navigation("ILURegisers");
 
                     b.Navigation("Subordinates");
+
+                    b.Navigation("WeeklyRevisions");
                 });
 
             modelBuilder.Entity("SupervisorMobility.API.Entities.AssyChart", b =>
@@ -8498,6 +9172,11 @@ namespace SupervisorMobility.API.Migrations
             modelBuilder.Entity("SupervisorMobility.API.Entities.Lup", b =>
                 {
                     b.Navigation("Evidences");
+                });
+
+            modelBuilder.Entity("SupervisorMobility.API.Entities.Plant", b =>
+                {
+                    b.Navigation("HRIs");
                 });
 #pragma warning restore 612, 618
         }

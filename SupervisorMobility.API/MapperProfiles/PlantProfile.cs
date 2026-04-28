@@ -10,6 +10,7 @@ namespace SupervisorMobility.API.Profiles
             CreateMap<Entities.Plant, Models.PlantDtos.PlantWithJustAreasDto>().ReverseMap();
             CreateMap<Entities.Plant, Models.PlantDtos.PlantForCreationDto>().ReverseMap();
             CreateMap<Entities.Plant, Models.PlantDtos.PlantForUpdateDto>().ReverseMap();
+            CreateMap<Entities.Plant, Models.PlantDtos.GetPlantForHRIDto>().ReverseMap();
         }
     }
 }

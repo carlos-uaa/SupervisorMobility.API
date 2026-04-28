@@ -9,7 +9,7 @@
 		<Nullable>enable</Nullable>
 		<ImplicitUsings>enable</ImplicitUsings>
 		<Version>1.1.0</Version>
-		<NoWarn>NU1701</NoWarn>
+		<NoWarn>NU1701;NU1903</NoWarn>
 	</PropertyGroup>
 
 	<PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Release|AnyCPU'">
@@ -23,7 +23,7 @@
 
 	<ItemGroup>
 		<PackageReference Include="Aspose.Cells" Version="25.10.0" />
-		<PackageReference Include="AutoMapper.Extensions.Microsoft.DependencyInjection" Version="12.0.0" />
+		<PackageReference Include="AutoMapper" Version="14.0.0" />
 		<PackageReference Include="ClosedXML" Version="0.105.0" />
 		<PackageReference Include="CompareNETObjects" Version="4.83.0" />
 		<PackageReference Include="CoreHtmlToImage" Version="1.0.6" />
@@ -33,7 +33,7 @@
 		<PackageReference Include="EPPlus" Version="8.0.4" /> <!--Actualizar a version 8.4.0-->
 		<PackageReference Include="FuzzySharp" Version="2.0.2" />
 		<PackageReference Include="FuzzyString" Version="1.0.0" />
-		<PackageReference Include="MailKit" Version="4.15.1" />
+		<PackageReference Include="MailKit" Version="4.16.0" />
 		<PackageReference Include="Microsoft.AspNetCore.Mvc.NewtonsoftJson" Version="10.0.3" /> <!--Actualizar a version 10.0.3-->
 		<PackageReference Include="Microsoft.Data.SqlClient" Version="6.1.4" />
 		<PackageReference Include="Microsoft.EntityFrameworkCore" Version="10.0.3" />
@@ -45,7 +45,6 @@
 		<PackageReference Include="Microsoft.Graph" Version="5.103.0" />
 		<PackageReference Include="Microsoft.Graph.Core" Version="3.2.5" />
 		<PackageReference Include="Microsoft.Identity.Client" Version="4.80.0" />
-		<PackageReference Include="MimeKit" Version="4.15.1" />
 		<PackageReference Include="ObjectCloner" Version="2.2.2" />
 		<PackageReference Include="Quartz" Version="3.16.1" />
 		<PackageReference Include="Quartz.Extensions.Hosting" Version="3.16.0" />
@@ -70,6 +69,7 @@
 		<Folder Include="uploads\attendance\" />
 		<Folder Include="uploads\evidence\" />
 		<Folder Include="uploads\guides\" />
+		<Folder Include="uploads\HRIImages\" />
 		<Folder Include="uploads\headcount\" />
 		<Folder Include="uploads\massive\" />
 		<Folder Include="uploads\SOSData\Videos\" />
@@ -79,6 +79,10 @@
 		<Folder Include="uploads\previousEvidence\" />
 		<Folder Include="uploads\operatorSignature\" />
 		<Folder Include="uploads\users\" />
+	</ItemGroup>
+
+	<ItemGroup>
+	  <None Include="Models\HRICyclesDtos\CreateHRICyclesDto.cs" />
 	</ItemGroup>
 
 	<Target Name="PublishFrontend" AfterTargets="ComputeFilesToPublish">
