@@ -3,6 +3,7 @@ using Microsoft.EntityFrameworkCore;
 using SupervisorMobility.API.Context;
 using SupervisorMobility.API.DataAccess.Entities.HRI_s_Entities;
 using SupervisorMobility.API.Models.HRIDailyRevisionDtos;
+using SupervisorMobility.API.Models.HRIDtos;
 using SupervisorMobility.API.Models.HRIRevisionCycles;
 
 
@@ -152,6 +153,18 @@ namespace SupervisorMobility.API.DataAccess.Services.HRIRepository
                 };
                 await _context.DailyRevisions.AddAsync(newDaily);
                 await _context.SaveChangesAsync();
+
+                //creamos un nuevo registro en la tabla de historial de acciones para esta revisión diaria
+                var revisionItem = await _context.RevisionCycles.AsNoTracking().Include(rc => rc.HRIRevisionItems).FirstOrDefaultAsync(rc => rc.RevisionCycleId == createDaily.EntityRelationId);
+                var historyItem = new HRIHistoryItemDto
+                {
+                    Action = $"Created daily revision for Item {revisionItem!.HRIRevisionItems!.RevisionPoint}  On Revision Cycle: {revisionItem.Cycle}, Day: {createDaily.Day}, Month: {createDaily.Month}, Status: {createDaily.Status}",
+                    ActionDate = DateTime.Now,
+                    ResponsibleUserId = createDaily.UserId,
+                    HRIid = (int)revisionItem!.HRIRevisionItems!.HriId
+                };
+                await SendHistoryAction(historyItem);
+
                 response.Data = true;
                 response.Success = true;
                 response.Message = "Daily revision created successfully.";
@@ -288,6 +301,29 @@ namespace SupervisorMobility.API.DataAccess.Services.HRIRepository
             {
                 response.Success = false;
                 response.Message = $"An error occurred while adding the new revision cycle: {ex.Message}";
+            }
+            return response;
+        }
+
+        public async Task<ServiceResponse<bool>> SendHistoryAction(HRIHistoryItemDto HRIHistoryItemDto)
+        {
+            var response = new ServiceResponse<bool>();
+            try
+            {
+                var historyItem = _mapper.Map<HRIHistoryActions>(HRIHistoryItemDto);
+                await _context.HRIHistoryActions.AddAsync(historyItem);
+                await _context.SaveChangesAsync();
+                response.Success = true;
+                response.Message = "History action sent successfully.";
+                response.Data = true;
+            }
+            catch (Exception ex)
+            {
+                // Log the exception (you can use a logging framework like Serilog, NLog, etc.)
+                Console.WriteLine($"Error sending history action: {ex.Message}");
+                response.Success = false;
+                response.Message = $"Error sending history action: {ex.Message + (ex.InnerException != null ? " - " + ex.InnerException.Message : "")}";
+                response.Data = false;
             }
             return response;
         }

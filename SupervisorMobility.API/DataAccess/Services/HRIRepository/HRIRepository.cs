@@ -121,6 +121,15 @@ namespace SupervisorMobility.API.DataAccess.Services.HRIRepository
 
 
                 }
+                //agregamos una accion al historial del hri indicando que se creo el hri
+                var newHistoryItem = new HRIHistoryItemDto
+                {
+                    HRIid = hri.HriId,
+                    Action = "HRI Created",
+                    ActionDate = DateTime.UtcNow,
+                    ResponsibleUserId = newHRI.SupervisorUserId ?? newHRI.SSVUserId
+                };
+                await SendHistoryAction(newHistoryItem);
 
                 serviceResponse.Data = _mapper.Map<GetHRIDto>(hri);
                 serviceResponse.Success = true;
@@ -149,6 +158,17 @@ namespace SupervisorMobility.API.DataAccess.Services.HRIRepository
                     await _context.WeeklyRevisions.AddAsync(newWeeklys);
                 }
                 await _context.SaveChangesAsync();
+
+                //agregamos una accion al historial del hri indicando que se crearon las revisiones semanales
+                var historyItem = new HRIHistoryItemDto
+                    {
+                        HRIid = weeklyRevisions.First().HriId,
+                        Action = "Weekly Revisions Created",
+                        ActionDate = DateTime.UtcNow,
+                        ResponsibleUserId = weeklyRevisions.First().UserId
+                    };
+                    await SendHistoryAction(historyItem);
+
                 response.Success = true;
                 response.Message = "Weekly revisions created successfully.";
                 response.Data = true;
@@ -356,7 +376,7 @@ namespace SupervisorMobility.API.DataAccess.Services.HRIRepository
                 hri.Department = updatedHRI.Department;
                 hri.SupervisorUserId = updatedHRI.SupervisorUserId;
                 hri.SSVUserId = updatedHRI.SSVUserId;
-                
+
                 await _context.SaveChangesAsync();
 
                 //actualizamos los ciclos relacionados al hri
@@ -365,7 +385,7 @@ namespace SupervisorMobility.API.DataAccess.Services.HRIRepository
                     foreach (var cycle in updatedHRI.HRICycles)
                     {
                         //si el ciclo tiene un id, significa que ya existe en la base de datos y solo se actualiza, si no tiene id, se crea uno nuevo, si el ciclo tiene el campo Deleted en true, se elimina de la base de datos
-                        if (cycle.Deleted == true)
+                        if (cycle.Deleted == true && cycle.CycleId!=0)
                         {
                             var res = await _hriCyclesRepository.DeleteHRICycle(cycle.CycleId);
                             if (res.Success == false)
@@ -383,6 +403,17 @@ namespace SupervisorMobility.API.DataAccess.Services.HRIRepository
                                 response.Data = false;
                                 return response;
                             }
+
+                            //agregamos una accion al historial del hri indicando que se elimino el ciclo
+                            var historyItem = new HRIHistoryItemDto
+                            {
+                                HRIid = hri.HriId,
+                                Action = $"HRI Cycle {cycle.Cycle} deleted",
+                                ActionDate = DateTime.Now,
+                                ResponsibleUserId = updatedHRI.SupervisorUserId ?? updatedHRI.SSVUserId
+                            };
+                            await SendHistoryAction(historyItem);
+
                             continue;
                         }
                         //si el id es diferente de 0 y el campo deleted es null o false actualizamos el ciclo
@@ -397,10 +428,18 @@ namespace SupervisorMobility.API.DataAccess.Services.HRIRepository
                                 response.Data = false;
                                 return response;
                             }
+                            //agregamos una accion al historial del hri indicando que se actualizo el ciclo
+                            var historyItem = new HRIHistoryItemDto
+                            {
+                                HRIid = hri.HriId,
+                                Action = $"HRI Cycle {cycle.Cycle} updated",
+                                ActionDate = DateTime.Now,
+                                ResponsibleUserId = updatedHRI.SupervisorUserId ?? updatedHRI.SSVUserId
+                            };
                             continue;
                         }
                         //si el id es 0 creamos un nuevo ciclo relacionado al hri
-                        else if (cycle.CycleId == 0)
+                        else if (cycle.CycleId == 0 && cycle.Deleted!=true)
                         {
                             var cycleToCreate = _mapper.Map<CreateHRICyclesDto>(cycle);
                             cycleToCreate.HriId = hri.HriId;
@@ -413,7 +452,7 @@ namespace SupervisorMobility.API.DataAccess.Services.HRIRepository
                                 response.Data = false;
                                 return response;
                             }
-                            var res2 = await _hriRevisionCyclesRepository.AddNewRevisionCycleToRevisionsItems(hri.HriId, new CreateRevisionCyclesDto { Cycle = cycle.Cycle , IsActive=true});
+                            var res2 = await _hriRevisionCyclesRepository.AddNewRevisionCycleToRevisionsItems(hri.HriId, new CreateRevisionCyclesDto { Cycle = cycle.Cycle, IsActive = true });
                             if (res2.Success == false)
                             {
                                 response.Success = false;
@@ -421,15 +460,16 @@ namespace SupervisorMobility.API.DataAccess.Services.HRIRepository
                                 response.Data = false;
                                 return response;
                             }
+                            
                             continue;
                         }
                     }
                 }
 
                 //actualizamos los items revisados relacionados al hri
-                if(updatedHRI.RevisionItems != null && updatedHRI.RevisionItems.Count>0)
+                if (updatedHRI.RevisionItems != null && updatedHRI.RevisionItems.Count > 0)
                 {
-                    foreach(var item in updatedHRI.RevisionItems)
+                    foreach (var item in updatedHRI.RevisionItems)
                     {
                         // si el item tiene el campo Deleted en true, se elimina de la base de datos
                         if (item.Deleted == true)
@@ -442,6 +482,15 @@ namespace SupervisorMobility.API.DataAccess.Services.HRIRepository
                                 response.Data = false;
                                 return response;
                             }
+                            //agregamos una accion al historial del hri indicando que se elimino el item revisado
+                            var historyItem = new HRIHistoryItemDto
+                            {
+                                HRIid = hri.HriId,
+                                Action = $"HRI Revision Item {item.RevisionPoint} deleted",
+                                ActionDate = DateTime.Now,
+                                ResponsibleUserId = updatedHRI.SupervisorUserId ?? updatedHRI.SSVUserId
+                            };
+                            await SendHistoryAction(historyItem);
                             continue;
 
                         }
@@ -457,6 +506,15 @@ namespace SupervisorMobility.API.DataAccess.Services.HRIRepository
                                 response.Data = false;
                                 return response;
                             }
+                            //agregamos una accion al historial del hri indicando que se actualizo el item revisado
+                            var historyItem = new HRIHistoryItemDto
+                            {
+                                HRIid = hri.HriId,
+                                Action = $"HRI Revision Item {item.RevisionPoint} updated",
+                                ActionDate = DateTime.Now,
+                                ResponsibleUserId = updatedHRI.SupervisorUserId ?? updatedHRI.SSVUserId
+                            };
+                             await SendHistoryAction(historyItem);
                             continue;
                         }
                         //si el id es 0 creamos un nuevo item relacionado al hri
@@ -473,6 +531,7 @@ namespace SupervisorMobility.API.DataAccess.Services.HRIRepository
                                 response.Data = false;
                                 return response;
                             }
+                            
                             continue;
                         }
 
@@ -490,6 +549,51 @@ namespace SupervisorMobility.API.DataAccess.Services.HRIRepository
                 response.Success = false;
                 response.Message = $"Error updating HRI: {ex.Message + (ex.InnerException != null ? " - " + ex.InnerException.Message : "")}";
                 response.Data = false;
+            }
+            return response;
+        }
+
+        public async Task<ServiceResponse<bool>> SendHistoryAction(HRIHistoryItemDto HRIHistoryItemDto)
+        {
+            var response = new ServiceResponse<bool>();
+            try
+            {
+                var historyItem = _mapper.Map<HRIHistoryActions>(HRIHistoryItemDto);
+                await _context.HRIHistoryActions.AddAsync(historyItem);
+                await _context.SaveChangesAsync();
+                response.Success = true;
+                response.Message = "History action sent successfully.";
+                response.Data = true;
+            }
+            catch (Exception ex)
+            {
+                // Log the exception (you can use a logging framework like Serilog, NLog, etc.)
+                Console.WriteLine($"Error sending history action: {ex.Message}");
+                response.Success = false;
+                response.Message = $"Error sending history action: {ex.Message + (ex.InnerException != null ? " - " + ex.InnerException.Message : "")}";
+                response.Data = false;
+            }
+            return response;
+        }
+
+        public async Task<ServiceResponse<List<GetHRIHistoryActionDto>>> GetHRIHistory(int hriId)
+        {
+            var response = new ServiceResponse<List<GetHRIHistoryActionDto>>();
+            try
+            {
+                var historyActions = await _context.HRIHistoryActions.AsNoTracking()
+                    .Where(ha => ha.HRIid == hriId)
+                    .Include(ha => ha.Responsible)
+                    .OrderByDescending(ha => ha.ActionDate) 
+                    .ToListAsync();
+                response.Data = historyActions.Select(ha => _mapper.Map<GetHRIHistoryActionDto>(ha)).ToList();
+                response.Success = true;
+                response.Message = "HRI history retrieved successfully.";
+            }
+            catch (Exception ex)
+            {
+                response.Success = false;
+                response.Message = $"Error retrieving HRI history: {ex.Message + (ex.InnerException != null ? " - " + ex.InnerException.Message : "")}";
             }
             return response;
         }

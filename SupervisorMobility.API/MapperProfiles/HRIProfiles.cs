@@ -15,11 +15,13 @@ namespace SupervisorMobility.API.MapperProfiles
     {
         public HRIProfiles()
         {
-               CreateMap<HRI,GetHRIDto>().ReverseMap();
-                CreateMap<CreateHRIDto,HRI>().ReverseMap();
+            CreateMap<HRI,GetHRIDto>().ReverseMap();
+            CreateMap<CreateHRIDto,HRI>().ReverseMap();
+            CreateMap<HRIHistoryItemDto, HRIHistoryActions>().ReverseMap();
+            CreateMap<HRIHistoryActions, GetHRIHistoryActionDto>().ReverseMap();
 
             #region HRICycles
-                CreateMap<HRICycles, GetHRICyclesDto>().ReverseMap();
+            CreateMap<HRICycles, GetHRICyclesDto>().ReverseMap();
                 CreateMap<CreateHRICyclesDto, HRICycles>().ReverseMap();
                 CreateMap<UpdateHRICycleDto, HRICycles>().ReverseMap();
                 CreateMap<UpdateFullHRICyclesDto, HRICycles>().ReverseMap();
