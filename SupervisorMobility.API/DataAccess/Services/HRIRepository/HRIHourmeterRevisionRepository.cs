@@ -117,7 +117,7 @@ namespace SupervisorMobility.API.DataAccess.Services.HRIRepository
                 //creamos un nuevo registro en HRIHistoryActions para el historial de acciones
                 var historyItem = new HRIHistoryItemDto
                 {
-                    Action = $"Created daily revision for Hourmeter: {createDaily.EntityRelationId}, Day: {createDaily.Day}, Month: {createDaily.Month}, Status: {createDaily.Status}",
+                    Action = $"Created daily revision for Hourmeter, Day: {createDaily.Day}, Month: {createDaily.Month}, Status: {createDaily.Status}",
                     ActionDate = DateTime.Now,
                     ResponsibleUserId = createDaily.UserId,
                     HRIid = (int)await _context.HourmeterRevisions.Where(h => h.Id == createDaily.EntityRelationId).Select(h => h.HriId).FirstOrDefaultAsync()

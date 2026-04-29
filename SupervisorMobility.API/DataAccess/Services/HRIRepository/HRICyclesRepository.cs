@@ -1,6 +1,7 @@
 ﻿using AutoMapper;
 using Microsoft.EntityFrameworkCore;
 using SupervisorMobility.API.Context;
+using SupervisorMobility.API.DataAccess.Entities;
 using SupervisorMobility.API.DataAccess.Entities.HRI_s_Entities;
 using SupervisorMobility.API.Models.HRICyclesDtos;
 using SupervisorMobility.API.Models.HRIDailyRevisionDtos;
@@ -26,6 +27,16 @@ namespace SupervisorMobility.API.DataAccess.Services.HRIRepository
                 var newHRICycle = _mapper.Map<HRICycles>(createHRICycle);
                 await _context.HRICycles.AddAsync(newHRICycle);
                 await _context.SaveChangesAsync();
+
+                //agregamos una accion al historial del hri indicando que se creo un nuevo ciclo
+                var historyItem = new HRIHistoryItemDto
+                {
+                    HRIid = newHRICycle.HriId,
+                    Action = $"HRI Cycle {newHRICycle.Cycle} created",
+                    ActionDate = DateTime.UtcNow,
+                    ResponsibleUserId =  await _context.HRICycles.Include(hc=>hc.HRI).Where(hc=>hc.CycleId == newHRICycle.CycleId).Select(hc=>hc.HRI.SupervisorUserId).FirstOrDefaultAsync()
+                };
+                await SendHistoryAction(historyItem);
                 response.Data = _mapper.Map<GetHRICyclesDto>(newHRICycle);
                 response.Success = true;
                 response.Message = "HRICycle created successfully.";
@@ -83,10 +94,11 @@ namespace SupervisorMobility.API.DataAccess.Services.HRIRepository
                 await _context.SaveChangesAsync();
 
                 //creamos un nuevo registro en la tabla de historial de acciones para esta revisión diaria
+                var cycleNumber = await _context.HRICycles.Where(c => c.CycleId == createDaily.EntityRelationId).Select(c => c.Cycle).FirstOrDefaultAsync();
                 var historyItem = new HRIHistoryItemDto
                 {
-                    Action = $"Created daily revision for CycleId: {createDaily.EntityRelationId}, Day: {createDaily.Day}, Month: {createDaily.Month}, Status: {createDaily.Status}",
-                    ActionDate = DateTime.UtcNow,
+                    Action = $"Created daily revision for Cycle: {cycleNumber}, Day: {createDaily.Day}, Month: {createDaily.Month}, Status: {createDaily.Status}",
+                    ActionDate = DateTime.Now,
                     ResponsibleUserId = createDaily.UserId,
                     HRIid = await _context.HRICycles.Where(h => h.CycleId == createDaily.EntityRelationId).Select(h => h.HriId).FirstOrDefaultAsync()
 

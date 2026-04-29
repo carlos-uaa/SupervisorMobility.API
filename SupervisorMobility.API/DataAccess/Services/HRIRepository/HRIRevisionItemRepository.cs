@@ -1,10 +1,12 @@
 ﻿using AutoMapper;
-using SupervisorMobility.API.Context;
-using SupervisorMobility.API.Models.HRIRevisionItemsDtos;
 using Microsoft.EntityFrameworkCore;
-using SupervisorMobility.API.DataAccess.Entities.HRI_s_Entities.HRIRevisionsItem_Entities;
+using SupervisorMobility.API.Context;
+using SupervisorMobility.API.DataAccess.Entities;
 using SupervisorMobility.API.DataAccess.Entities.HRI_s_Entities;
+using SupervisorMobility.API.DataAccess.Entities.HRI_s_Entities.HRIRevisionsItem_Entities;
+using SupervisorMobility.API.Models.HRIDtos;
 using SupervisorMobility.API.Models.HRIRevisionCycles;
+using SupervisorMobility.API.Models.HRIRevisionItemsDtos;
 
 namespace SupervisorMobility.API.DataAccess.Services.HRIRepository
 {
@@ -106,6 +108,17 @@ namespace SupervisorMobility.API.DataAccess.Services.HRIRepository
                     }
                     await _hriRevisionCyclesRepository.CreateRevisionCyclesByRevisionItemId(revisionItem.ItemId, listOfCycles);
                 }
+                //agregamos una accion al historial del hri indicando que se creo un nuevo item revisado
+                var historyItem = new HRIHistoryItemDto
+                {
+                    HRIid = revisionItem.HriId,
+                    Action = $"HRI Revision Item {revisionItem.RevisionPoint} created",
+                    ActionDate = DateTime.Now,
+                    ResponsibleUserId = await _context.HRIRevisionItems.Where(ri => ri.ItemId == revisionItem.ItemId)
+                                                        .Select(ri => ri.HRI.SupervisorUserId ?? ri.HRI.SSVUserId)
+                                                        .FirstOrDefaultAsync()
+                };
+                await SendHistoryAction(historyItem);
                 response.Data = _mapper.Map<GetHRIRevisionItemDto>(revisionItem);
                 response.Success = true;
                 response.Message = "HRI Revision Item created successfully.";
@@ -235,6 +248,29 @@ namespace SupervisorMobility.API.DataAccess.Services.HRIRepository
             {
                 response.Success = false;
                 response.Message = ex.Message;
+            }
+            return response;
+        }
+
+        public async Task<ServiceResponse<bool>> SendHistoryAction(HRIHistoryItemDto HRIHistoryItemDto)
+        {
+            var response = new ServiceResponse<bool>();
+            try
+            {
+                var historyItem = _mapper.Map<HRIHistoryActions>(HRIHistoryItemDto);
+                await _context.HRIHistoryActions.AddAsync(historyItem);
+                await _context.SaveChangesAsync();
+                response.Success = true;
+                response.Message = "History action sent successfully.";
+                response.Data = true;
+            }
+            catch (Exception ex)
+            {
+                // Log the exception (you can use a logging framework like Serilog, NLog, etc.)
+                Console.WriteLine($"Error sending history action: {ex.Message}");
+                response.Success = false;
+                response.Message = $"Error sending history action: {ex.Message + (ex.InnerException != null ? " - " + ex.InnerException.Message : "")}";
+                response.Data = false;
             }
             return response;
         }
