@@ -31,5 +31,7 @@ namespace SupervisorMobility.API.DataAccess.Entities.HRI_s_Entities
         public Plant? Plant { get; set; }
         public int? AreaId { get; set; }
         public Area? Area { get; set; }
+
+        public List<HRIHistoryActions>? HistoryActions { get; set; } = new List<HRIHistoryActions>();
     }
 }

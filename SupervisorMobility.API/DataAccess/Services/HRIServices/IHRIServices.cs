@@ -12,6 +12,8 @@ namespace SupervisorMobility.API.DataAccess.Services.HRIServices
         Task<ServiceResponse<bool>> UpdateHRI(int id, UpdateHRIDto updatedHRI);
         Task<ServiceResponse<List<GetHRIToTableDto>>> GetAllHRITable();
         Task<ServiceResponse<bool>>DeleteHRI(int id);
-        
+        Task<ServiceResponse<List<GetHRIHistoryActionDto>>> GetHRIHistory(int hriId);
+
+
     }
 }
