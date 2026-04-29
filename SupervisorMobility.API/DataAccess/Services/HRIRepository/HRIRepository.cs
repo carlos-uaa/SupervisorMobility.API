@@ -10,6 +10,8 @@ using SupervisorMobility.API.Models.HRIDtos.HRImagesDto;
 using SupervisorMobility.API.Models.HRIRevisionItemsDtos;
 using SupervisorMobility.API.Models.HRICyclesDtos;
 using SupervisorMobility.API.Models.HRIRevisionCycles;
+using SupervisorMobility.API.Models.NotificationDtos;
+using SupervisorMobility.API.Business;
 
 
 namespace SupervisorMobility.API.DataAccess.Services.HRIRepository
@@ -23,7 +25,16 @@ namespace SupervisorMobility.API.DataAccess.Services.HRIRepository
         private IHRIRevisionCyclesRepository _hriRevisionCyclesRepository;
         private IHRImagesService _hrimagesService;
         private readonly IMapper _mapper;
-        public HRIRepository(SupervisorMobilityContext context, IMapper mapper, IHRIRevisionItemRepository hriRevisionItemRepository, IHRICyclesRepository hriCyclesRepository, IHRIHourmeterRevisionRepository hriHourmeterRepository, IHRIRevisionCyclesRepository hriRevisionCyclesRepository, IHRImagesService hrimagesService)
+
+        private readonly INotificationService _notificationService;
+        public HRIRepository(
+            SupervisorMobilityContext context, IMapper mapper, IHRIRevisionItemRepository hriRevisionItemRepository,
+            IHRICyclesRepository hriCyclesRepository,
+            IHRIHourmeterRevisionRepository hriHourmeterRepository,
+            IHRIRevisionCyclesRepository hriRevisionCyclesRepository,
+            IHRImagesService hrimagesService,
+            INotificationService notificationService
+        )
         {
             _context = context;
             _mapper = mapper;
@@ -32,6 +43,7 @@ namespace SupervisorMobility.API.DataAccess.Services.HRIRepository
             _hriHourmeterRepository = hriHourmeterRepository;
             _hrimagesService = hrimagesService;
             _hriRevisionCyclesRepository = hriRevisionCyclesRepository;
+            _notificationService = notificationService;
         }
         public async Task<ServiceResponse<GetHRIDto>> CreateHRI(CreateHRIDto newHRI)
         {
@@ -122,11 +134,30 @@ namespace SupervisorMobility.API.DataAccess.Services.HRIRepository
 
                 }
 
+
+                // Create notification fot the supervisor
+                var dto = new NotificationToCreateDto
+                {
+                    MadeBy = "System",
+                    NotificationType = "Created HRI",
+                    NotificationText = "A new HRI has been created with control number: " + hri.ControlNumber,
+                    UserId = hri.SupervisorUserId ?? 1,
+                    IsAccepted = true,
+                    IsActive = true,
+                    EntryDate = DateTime.Now
+                };
+                SpecialOptionsNotification options = new SpecialOptionsNotification
+                {
+                    Email = false,
+                    WhatsApp = false,
+                    MicrosoftTeams = false,
+                    type = "Created HRI"
+                };
+                var created = await _notificationService.CreateNotificationAsync(dto, options);
+
                 serviceResponse.Data = _mapper.Map<GetHRIDto>(hri);
                 serviceResponse.Success = true;
                 serviceResponse.Message = "HRI created successfully.";
-
-
             }
             catch (Exception ex)
             {
@@ -177,6 +208,30 @@ namespace SupervisorMobility.API.DataAccess.Services.HRIRepository
                 }
                 hri.IsActive = false;
                 await _context.SaveChangesAsync();
+
+
+
+                // Create notification fot the supervisor
+                var dto = new NotificationToCreateDto
+                {
+                    MadeBy = "System",
+                    NotificationType = "Deleted HRI",
+                    NotificationText = "An HRI has been deleted with control number: " + hri.ControlNumber,
+                    UserId = hri.SupervisorUserId ?? 1,
+                    IsAccepted = true,
+                    IsActive = true,
+                    EntryDate = DateTime.Now
+                };
+                SpecialOptionsNotification options = new SpecialOptionsNotification
+                {
+                    Email = false,
+                    WhatsApp = false,
+                    MicrosoftTeams = false,
+                    type = "Deleted HRI"
+                };
+                var created = await _notificationService.CreateNotificationAsync(dto, options);
+
+
                 response.Success = true;
                 response.Message = "HRI deleted successfully.";
                 response.Data = true;
@@ -427,9 +482,9 @@ namespace SupervisorMobility.API.DataAccess.Services.HRIRepository
                 }
 
                 //actualizamos los items revisados relacionados al hri
-                if(updatedHRI.RevisionItems != null && updatedHRI.RevisionItems.Count>0)
+                if (updatedHRI.RevisionItems != null && updatedHRI.RevisionItems.Count > 0)
                 {
-                    foreach(var item in updatedHRI.RevisionItems)
+                    foreach (var item in updatedHRI.RevisionItems)
                     {
                         // si el item tiene el campo Deleted en true, se elimina de la base de datos
                         if (item.Deleted == true)
@@ -480,6 +535,27 @@ namespace SupervisorMobility.API.DataAccess.Services.HRIRepository
                     }
                 }
 
+                
+                // Create notification fot the supervisor
+                var dto = new NotificationToCreateDto
+                {
+                    MadeBy = "System",
+                    NotificationType = "Update HRI",
+                    NotificationText = "An HRI has been updated with control number: " + hri.ControlNumber,
+                    UserId = hri.SupervisorUserId ?? 1,
+                    IsAccepted = true,
+                    IsActive = true,
+                    EntryDate = DateTime.Now
+                };
+                SpecialOptionsNotification options = new SpecialOptionsNotification
+                {
+                    Email = false,
+                    WhatsApp = false,
+                    MicrosoftTeams = false,
+                    type = "Update HRI"
+                };
+                var created = await _notificationService.CreateNotificationAsync(dto, options);
+                
                 response.Success = true;
                 response.Message = "HRI updated successfully.";
                 response.Data = true;

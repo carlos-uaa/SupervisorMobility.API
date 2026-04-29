@@ -1,9 +1,11 @@
 ﻿using AutoMapper;
 using Microsoft.EntityFrameworkCore;
+using SupervisorMobility.API.Business;
 using SupervisorMobility.API.Context;
 using SupervisorMobility.API.DataAccess.Entities.HRI_s_Entities;
 using SupervisorMobility.API.Models.HRIDailyRevisionDtos;
 using SupervisorMobility.API.Models.HRIRevisionCycles;
+using SupervisorMobility.API.Models.NotificationDtos;
 
 
 namespace SupervisorMobility.API.DataAccess.Services.HRIRepository
@@ -12,10 +14,13 @@ namespace SupervisorMobility.API.DataAccess.Services.HRIRepository
     {
         private readonly SupervisorMobilityContext _context;
         private readonly IMapper _mapper;
-        public HRIRevisionCyclesRepository(SupervisorMobilityContext context, IMapper mapper)
+        private readonly INotificationService _notificationService;
+
+        public HRIRevisionCyclesRepository(SupervisorMobilityContext context, IMapper mapper, INotificationService notificationService)
         {
             _context = context;
             _mapper = mapper;
+            _notificationService = notificationService;
         }
         public async Task<ServiceResponse<List<GetRevisionCyclesDto>>> GetAllRevisionCycles()
         {
@@ -152,6 +157,30 @@ namespace SupervisorMobility.API.DataAccess.Services.HRIRepository
                 };
                 await _context.DailyRevisions.AddAsync(newDaily);
                 await _context.SaveChangesAsync();
+
+                // Create notification if needed
+                if (createDaily.Notification == true)
+                {
+                    var dto = new NotificationToCreateDto
+                    {
+                        MadeBy = "System",
+                        NotificationType = createDaily.Title ?? "Revision with NG",
+                        NotificationText = createDaily.Message ?? "A new daily revision has been created.",
+                        UserId = createDaily.To ?? 1,
+                        IsAccepted = true,
+                        IsActive = true,
+                        EntryDate = DateTime.Now
+                    };
+                    SpecialOptionsNotification options = new SpecialOptionsNotification
+                    {
+                        Email = false,
+                        WhatsApp = false,
+                        MicrosoftTeams = false,
+                        type = "Created HRI"
+                    };
+                    var created = await _notificationService.CreateNotificationAsync(dto, options);
+                }
+
                 response.Data = true;
                 response.Success = true;
                 response.Message = "Daily revision created successfully.";
