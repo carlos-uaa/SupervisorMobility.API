@@ -34,7 +34,8 @@ namespace SupervisorMobility.API.DataAccess.Services.HRIRepository
                     HRIid = newHRICycle.HriId,
                     Action = $"HRI Cycle {newHRICycle.Cycle} created",
                     ActionDate = DateTime.UtcNow,
-                    ResponsibleUserId =  await _context.HRICycles.Include(hc=>hc.HRI).Where(hc=>hc.CycleId == newHRICycle.CycleId).Select(hc=>hc.HRI.SupervisorUserId).FirstOrDefaultAsync()
+                    ResponsibleUserId =  await _context.HRICycles.Include(hc=>hc.HRI).Where(hc=>hc.CycleId == newHRICycle.CycleId).Select(hc=>hc.HRI.SupervisorUserId).FirstOrDefaultAsync(),
+                    ActionType = "UPDATE"
                 };
                 await SendHistoryAction(historyItem);
                 response.Data = _mapper.Map<GetHRICyclesDto>(newHRICycle);
@@ -97,10 +98,11 @@ namespace SupervisorMobility.API.DataAccess.Services.HRIRepository
                 var cycleNumber = await _context.HRICycles.Where(c => c.CycleId == createDaily.EntityRelationId).Select(c => c.Cycle).FirstOrDefaultAsync();
                 var historyItem = new HRIHistoryItemDto
                 {
-                    Action = $"Created daily revision for Cycle: {cycleNumber}, Day: {createDaily.Day}, Month: {createDaily.Month}, Status: {createDaily.Status}",
+                    Action = $"Created daily revision for Shift: {cycleNumber}, Day: {createDaily.Day}, Month: {createDaily.Month}, Status: {createDaily.Status}",
                     ActionDate = DateTime.Now,
                     ResponsibleUserId = createDaily.UserId,
-                    HRIid = await _context.HRICycles.Where(h => h.CycleId == createDaily.EntityRelationId).Select(h => h.HriId).FirstOrDefaultAsync()
+                    HRIid = await _context.HRICycles.Where(h => h.CycleId == createDaily.EntityRelationId).Select(h => h.HriId).FirstOrDefaultAsync(),
+                    ActionType="UPDATE"
 
                 };
                 await SendHistoryAction(historyItem);
