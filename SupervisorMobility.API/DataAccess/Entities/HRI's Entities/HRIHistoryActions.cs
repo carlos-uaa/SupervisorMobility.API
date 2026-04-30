@@ -10,6 +10,7 @@ namespace SupervisorMobility.API.DataAccess.Entities.HRI_s_Entities
         public int? ResponsibleUserId { get; set; }
         public User? Responsible { get; set; }
         public string? Action { get; set; }
+        public string? ActionType { get; set; }
         public DateTime? ActionDate { get; set; }
     }
 }

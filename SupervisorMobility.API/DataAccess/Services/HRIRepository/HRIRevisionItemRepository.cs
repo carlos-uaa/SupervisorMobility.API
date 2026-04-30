@@ -116,7 +116,8 @@ namespace SupervisorMobility.API.DataAccess.Services.HRIRepository
                     ActionDate = DateTime.Now,
                     ResponsibleUserId = await _context.HRIRevisionItems.Where(ri => ri.ItemId == revisionItem.ItemId)
                                                         .Select(ri => ri.HRI.SupervisorUserId ?? ri.HRI.SSVUserId)
-                                                        .FirstOrDefaultAsync()
+                                                        .FirstOrDefaultAsync(),
+                    ActionType = "UPDATE"
                 };
                 await SendHistoryAction(historyItem);
                 response.Data = _mapper.Map<GetHRIRevisionItemDto>(revisionItem);
@@ -271,6 +272,68 @@ namespace SupervisorMobility.API.DataAccess.Services.HRIRepository
                 response.Success = false;
                 response.Message = $"Error sending history action: {ex.Message + (ex.InnerException != null ? " - " + ex.InnerException.Message : "")}";
                 response.Data = false;
+            }
+            return response;
+        }
+
+        public async Task<ServiceResponse<bool>> ValidateItemForUpdate(int itemId, UpdateHRIRevisionItemDto itemToUpdate)
+        {
+            var response = new ServiceResponse<bool>();
+            try
+            {
+                var item = await _context.HRIRevisionItems.AsNoTracking().FirstOrDefaultAsync(i => i.ItemId == itemId);
+                //validamos si tiene algun campo diferente al que ya tiene en la base de datos, si no tiene ninguno, no se actualiza y se le notifica al usuario
+                if(item != null)
+                {
+                    // Si el item existe, comparamos los campos
+                    if(item.ItemNumber != itemToUpdate.ItemNumber)
+                    {
+                        // Si hay diferencias, se puede proceder con la actualización
+                        response.Data = true;
+                        response.Success = true;
+                        response.Message = "Item can be updated.";
+                        return response;
+                    }
+                    if(item.RevisionPoint != itemToUpdate.RevisionPoint)
+                    {
+                        response.Data = true;
+                        response.Success = true;
+                        response.Message = "Item can be updated.";
+                        return response;
+                    }
+                    if(item.RevisionMethodId != itemToUpdate.RevisionMethodId)
+                    {
+                        response.Data = true;
+                        response.Success = true;
+                        response.Message = "Item can be updated.";
+                        return response;
+                    }
+                    if(item.VeredictId != itemToUpdate.VeredictId)
+                    {
+                        response.Data = true;
+                        response.Success = true;
+                        response.Message = "Item can be updated.";
+                        return response;
+                    }
+                    if(item.FrequencyId != itemToUpdate.FrequencyId)
+                    {
+                        response.Data = true;
+                        response.Success = true;
+                        response.Message = "Item can be updated.";
+                        return response;
+                    }
+                    
+                }
+                response.Data = false;
+                response.Success = false;
+                response.Message = "No changes detected. Item cannot be updated.";
+            }
+            catch (Exception ex)
+            {
+                response.Success = false;
+                response.Message = ex.Message;
+                response.Data = false;
+
             }
             return response;
         }

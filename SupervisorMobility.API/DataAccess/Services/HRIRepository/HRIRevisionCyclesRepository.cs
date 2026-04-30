@@ -163,10 +163,11 @@ namespace SupervisorMobility.API.DataAccess.Services.HRIRepository
                 var revisionItem = await _context.RevisionCycles.AsNoTracking().Include(rc => rc.HRIRevisionItems).FirstOrDefaultAsync(rc => rc.RevisionCycleId == createDaily.EntityRelationId);
                 var historyItem = new HRIHistoryItemDto
                 {
-                    Action = $"Created daily revision for Item {revisionItem!.HRIRevisionItems!.RevisionPoint}  On Revision Cycle: {revisionItem.Cycle}, Day: {createDaily.Day}, Month: {createDaily.Month}, Status: {createDaily.Status}",
+                    Action = $"Created daily revision for Item {revisionItem!.HRIRevisionItems!.RevisionPoint}  On Revision Shift: {revisionItem.Cycle}, Day: {createDaily.Day}, Month: {createDaily.Month}, Status: {createDaily.Status}",
                     ActionDate = DateTime.Now,
                     ResponsibleUserId = createDaily.UserId,
-                    HRIid = (int)revisionItem!.HRIRevisionItems!.HriId
+                    HRIid = (int)revisionItem!.HRIRevisionItems!.HriId,
+                    ActionType = "UPDATE"
                 };
                 await SendHistoryAction(historyItem);
 

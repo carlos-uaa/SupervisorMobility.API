@@ -120,7 +120,8 @@ namespace SupervisorMobility.API.DataAccess.Services.HRIRepository
                     Action = $"Created daily revision for Hourmeter, Day: {createDaily.Day}, Month: {createDaily.Month}, Status: {createDaily.Status}",
                     ActionDate = DateTime.Now,
                     ResponsibleUserId = createDaily.UserId,
-                    HRIid = (int)await _context.HourmeterRevisions.Where(h => h.Id == createDaily.EntityRelationId).Select(h => h.HriId).FirstOrDefaultAsync()
+                    HRIid = (int)await _context.HourmeterRevisions.Where(h => h.Id == createDaily.EntityRelationId).Select(h => h.HriId).FirstOrDefaultAsync(),
+                    ActionType = "UPDATE"
                 };
                 await SendHistoryAction(historyItem);
 

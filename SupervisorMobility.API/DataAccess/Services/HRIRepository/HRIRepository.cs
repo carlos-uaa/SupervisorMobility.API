@@ -139,7 +139,8 @@ namespace SupervisorMobility.API.DataAccess.Services.HRIRepository
                     HRIid = hri.HriId,
                     Action = "HRI Created",
                     ActionDate = DateTime.UtcNow,
-                    ResponsibleUserId = newHRI.SupervisorUserId ?? newHRI.SSVUserId
+                    ResponsibleUserId = newHRI.SupervisorUserId ?? newHRI.SSVUserId,
+                    ActionType = "CREATE"
                 };
                 await SendHistoryAction(newHistoryItem);
 
@@ -196,7 +197,8 @@ namespace SupervisorMobility.API.DataAccess.Services.HRIRepository
                         HRIid = weeklyRevisions.First().HriId,
                         Action = "Weekly Revisions Created",
                         ActionDate = DateTime.UtcNow,
-                        ResponsibleUserId = weeklyRevisions.First().UserId
+                        ResponsibleUserId = weeklyRevisions.First().UserId,
+                        ActionType = "UPDATE"
                     };
                     await SendHistoryAction(historyItem);
 
@@ -465,7 +467,8 @@ namespace SupervisorMobility.API.DataAccess.Services.HRIRepository
                                 HRIid = hri.HriId,
                                 Action = $"HRI Cycle {cycle.Cycle} deleted",
                                 ActionDate = DateTime.Now,
-                                ResponsibleUserId = updatedHRI.SupervisorUserId ?? updatedHRI.SSVUserId
+                                ResponsibleUserId = updatedHRI.SupervisorUserId ?? updatedHRI.SSVUserId,
+                                ActionType = "DELETE"
                             };
                             await SendHistoryAction(historyItem);
 
@@ -489,7 +492,8 @@ namespace SupervisorMobility.API.DataAccess.Services.HRIRepository
                                 HRIid = hri.HriId,
                                 Action = $"HRI Cycle {cycle.Cycle} updated",
                                 ActionDate = DateTime.Now,
-                                ResponsibleUserId = updatedHRI.SupervisorUserId ?? updatedHRI.SSVUserId
+                                ResponsibleUserId = updatedHRI.SupervisorUserId ?? updatedHRI.SSVUserId,
+                                ActionType = "UPDATE"
                             };
                             continue;
                         }
@@ -543,7 +547,8 @@ namespace SupervisorMobility.API.DataAccess.Services.HRIRepository
                                 HRIid = hri.HriId,
                                 Action = $"HRI Revision Item {item.RevisionPoint} deleted",
                                 ActionDate = DateTime.Now,
-                                ResponsibleUserId = updatedHRI.SupervisorUserId ?? updatedHRI.SSVUserId
+                                ResponsibleUserId = updatedHRI.SupervisorUserId ?? updatedHRI.SSVUserId,
+                                ActionType = "DELETE"
                             };
                             await SendHistoryAction(historyItem);
                             continue;
@@ -553,24 +558,33 @@ namespace SupervisorMobility.API.DataAccess.Services.HRIRepository
                         else if (item.ItemId != 0 && (item.Deleted == null || item.Deleted == false))
                         {
                             var itemToUpdate = _mapper.Map<UpdateHRIRevisionItemDto>(item);
-                            var res = await _hriRevisionItemRepository.UpdateHRIRevisionItem(item.ItemId, itemToUpdate);
-                            if (res.Success == false)
+                            var validationRes = await _hriRevisionItemRepository.ValidateItemForUpdate(item.ItemId, itemToUpdate);
+                            if (validationRes.Success == true)
                             {
-                                response.Success = false;
-                                response.Message = $"Error updating HRI Revision Item with id {item.ItemId}: {res.Message}";
-                                response.Data = false;
-                                return response;
+                                var res = await _hriRevisionItemRepository.UpdateHRIRevisionItem(item.ItemId, itemToUpdate);
+                                if (res.Success == false)
+                                {
+                                    response.Success = false;
+                                    response.Message = $"Error updating HRI Revision Item with id {item.ItemId}: {res.Message}";
+                                    response.Data = false;
+                                    return response;
+                                }
+                                //agregamos una accion al historial del hri indicando que se actualizo el item revisado
+                                var historyItem = new HRIHistoryItemDto
+                                {
+                                    HRIid = hri.HriId,
+                                    Action = $"HRI Revision Item {item.RevisionPoint} updated",
+                                    ActionDate = DateTime.Now,
+                                    ResponsibleUserId = updatedHRI.SupervisorUserId ?? updatedHRI.SSVUserId,
+                                    ActionType = "UPDATE"
+                                };
+                                await SendHistoryAction(historyItem);
+                                continue;
                             }
-                            //agregamos una accion al historial del hri indicando que se actualizo el item revisado
-                            var historyItem = new HRIHistoryItemDto
+                            else
                             {
-                                HRIid = hri.HriId,
-                                Action = $"HRI Revision Item {item.RevisionPoint} updated",
-                                ActionDate = DateTime.Now,
-                                ResponsibleUserId = updatedHRI.SupervisorUserId ?? updatedHRI.SSVUserId
-                            };
-                             await SendHistoryAction(historyItem);
-                            continue;
+                                continue;
+                            }                           
                         }
                         //si el id es 0 creamos un nuevo item relacionado al hri
                         else if (item.ItemId == 0)
