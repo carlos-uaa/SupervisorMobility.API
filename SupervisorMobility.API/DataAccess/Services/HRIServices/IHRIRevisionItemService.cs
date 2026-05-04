@@ -10,6 +10,7 @@ namespace SupervisorMobility.API.DataAccess.Services.HRIServices
         Task<ServiceResponse<bool>> CreateHRIREvisionItemsByHRIId(int hriId, List<CreateHRIRevisionItemDto> createHRIRevisionItemDtos, int numOfCycles  );
         Task<ServiceResponse<GetHRIRevisionItemDto>> UpdateHRIRevisionItem(int id, UpdateHRIRevisionItemDto updateHRIRevisionItemDto);
         Task<ServiceResponse<bool>>  DeleteHRIRevisionItem(int id);
+        Task<ServiceResponse<List<GetHRIRevisionItemDto>>> GetAllHRIRevisionItemsByHRIId(int hriId)
 
         Task<ServiceResponse<List<GetFrequencyDto>>> GetAllFrequencies();
         Task<ServiceResponse<GetFrequencyDto>> GetFrequencyById(int id);
