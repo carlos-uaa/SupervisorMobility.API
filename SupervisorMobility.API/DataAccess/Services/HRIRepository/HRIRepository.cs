@@ -202,6 +202,30 @@ namespace SupervisorMobility.API.DataAccess.Services.HRIRepository
                     };
                     await SendHistoryAction(historyItem);
 
+                // Create notification if needed
+                var weekly = weeklyRevisions.First();
+                if (weekly.Notification == true)
+                {
+                    var dto = new NotificationToCreateDto
+                    {
+                        MadeBy = "System",
+                        NotificationType = weekly.Title ?? "Weekly Revision with NG",
+                        NotificationText = weekly.Message ?? "A new weekly revision has been created.",
+                        UserId = weekly.To ?? 1,
+                        IsAccepted = true,
+                        IsActive = true,
+                        EntryDate = DateTime.Now
+                    };
+                    SpecialOptionsNotification options = new SpecialOptionsNotification
+                    {
+                        Email = false,
+                        WhatsApp = weekly.IsUrgent ? true : false,
+                        MicrosoftTeams = false,
+                        type = "RevisionWithNG"
+                    };
+                    var created = await _notificationService.CreateNotificationAsync(dto, options);
+                }
+
                 response.Success = true;
                 response.Message = "Weekly revisions created successfully.";
                 response.Data = true;

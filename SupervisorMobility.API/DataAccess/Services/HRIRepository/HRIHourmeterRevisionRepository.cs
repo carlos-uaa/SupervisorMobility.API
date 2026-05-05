@@ -1,10 +1,12 @@
 ﻿using AutoMapper;
 using Microsoft.EntityFrameworkCore;
+using SupervisorMobility.API.Business;
 using SupervisorMobility.API.Context;
 using SupervisorMobility.API.DataAccess.Entities.HRI_s_Entities;
 using SupervisorMobility.API.Models.HRIDailyRevisionDtos;
 using SupervisorMobility.API.Models.HRIDtos;
 using SupervisorMobility.API.Models.HRIHourmeterRevisionDto;
+using SupervisorMobility.API.Models.NotificationDtos;
 
 namespace SupervisorMobility.API.DataAccess.Services.HRIRepository
 {
@@ -12,10 +14,16 @@ namespace SupervisorMobility.API.DataAccess.Services.HRIRepository
     {
         private readonly SupervisorMobilityContext _context;
         private readonly IMapper _mapper;
-        public HRIHourmeterRevisionRepository(SupervisorMobilityContext context, IMapper mapper)
+        private readonly INotificationService _notificationService;
+        public HRIHourmeterRevisionRepository(
+            SupervisorMobilityContext context,
+            IMapper mapper,
+            INotificationService notificationService
+        )
         {
             _context = context;
             _mapper = mapper;
+            _notificationService = notificationService;
         }
 
         public async Task<ServiceResponse<List<GetHourmeterRevisionDto>>> GetAllHourmeterRevisions()
@@ -124,6 +132,30 @@ namespace SupervisorMobility.API.DataAccess.Services.HRIRepository
                     ActionType = "UPDATE"
                 };
                 await SendHistoryAction(historyItem);
+
+
+                // Create notification if needed
+                if (createDaily.Notification == true)
+                {
+                    var dto = new NotificationToCreateDto
+                    {
+                        MadeBy = "System",
+                        NotificationType = createDaily.Title ?? "Revision of Hourmeter with NG",
+                        NotificationText = createDaily.Message ?? "A new daily revision has been created.",
+                        UserId = createDaily.To ?? 1,
+                        IsAccepted = true,
+                        IsActive = true,
+                        EntryDate = DateTime.Now
+                    };
+                    SpecialOptionsNotification options = new SpecialOptionsNotification
+                    {
+                        Email = false,
+                        WhatsApp = createDaily.IsUrgent ? true : false,
+                        MicrosoftTeams = false,
+                        type = "RevisionWithNG"
+                    };
+                    var created = await _notificationService.CreateNotificationAsync(dto, options);
+                }
 
 
                 response.Data = true;
