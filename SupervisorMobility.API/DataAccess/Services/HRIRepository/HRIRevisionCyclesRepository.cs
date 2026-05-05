@@ -188,9 +188,9 @@ namespace SupervisorMobility.API.DataAccess.Services.HRIRepository
                     SpecialOptionsNotification options = new SpecialOptionsNotification
                     {
                         Email = false,
-                        WhatsApp = false,
+                        WhatsApp = createDaily.IsUrgent ? true : false,
                         MicrosoftTeams = false,
-                        type = "Created HRI"
+                        type = "RevisionWithNG"
                     };
                     var created = await _notificationService.CreateNotificationAsync(dto, options);
                 }
