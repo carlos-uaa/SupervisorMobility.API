@@ -9,6 +9,7 @@ namespace SupervisorMobility.API.Models.HRIDtos
         public HRIItem? NameOfItem { get; set; }
         public string? ControlNumber { get; set; }
         public string? Department { get; set; }
+        public int? RevisedItemsCount { get; set; }
         public int ImagesCount { get; set; }
         public bool IsActive { get; set; }
         public DateTime CreationDate { get; set; }

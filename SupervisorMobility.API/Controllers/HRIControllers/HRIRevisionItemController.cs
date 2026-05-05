@@ -42,6 +42,20 @@ namespace SupervisorMobility.API.Controllers.HRIControllers
              return Ok(response);
         }
 
+        [HttpGet("GetHRIRevisionItemsByHRIId/{hriId}")]
+        [ProducesResponseType(StatusCodes.Status200OK)]
+        [ProducesResponseType(StatusCodes.Status404NotFound)]
+        [ProducesResponseType(StatusCodes.Status500InternalServerError)]
+        public async Task<ActionResult<ServiceResponse<List<GetHRIRevisionItemDto>>>> GetHRIRevisionItemsByHRIId(int hriId)
+        {
+            var response = await _hriRevisionItemService.GetAllHRIRevisionItemsByHRIId(hriId);
+            if (response.Data == null)
+            {
+                return NotFound(response);
+            }
+            return Ok(response);
+        }
+
         [HttpPost("CreateHRIRevisionItem")]
         [ProducesResponseType(StatusCodes.Status201Created)]
         [ProducesResponseType(StatusCodes.Status400BadRequest)]

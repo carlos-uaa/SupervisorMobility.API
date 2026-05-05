@@ -253,6 +253,34 @@ namespace SupervisorMobility.API.DataAccess.Services.HRIRepository
             return response;
         }
 
+        public async Task<ServiceResponse<List<GetHRIRevisionItemDto>>> GetAllHRIRevisionItemsByHRIId(int hriId)
+        {
+            var response = new ServiceResponse<List<GetHRIRevisionItemDto>>();
+            try
+            {
+                var revisionItems = await _context.HRIRevisionItems.Where(ri => ri.HriId == hriId && ri.IsActive==true)
+                                                                   .Include(ri => ri.RevisionMethod)
+                                                                   .Include(ri => ri.Veredict)
+                                                                   .Include(ri => ri.Frequency)                                                      
+                                                                   .ToListAsync();
+                if (revisionItems.Count == 0)
+                {
+                    response.Success = false;
+                    response.Message = "No HRI Revision Items found for the specified HRI.";
+                    return response;
+                }
+                response.Data = revisionItems.Select(ri => _mapper.Map<GetHRIRevisionItemDto>(ri)).ToList();
+                response.Success = true;
+                response.Message = "HRI Revision Items retrieved successfully for the specified HRI.";
+            }
+            catch (Exception ex)
+            {
+                response.Success = false;
+                response.Message = ex.Message;
+            }
+            return response;
+        }
+
         public async Task<ServiceResponse<bool>> SendHistoryAction(HRIHistoryItemDto HRIHistoryItemDto)
         {
             var response = new ServiceResponse<bool>();
