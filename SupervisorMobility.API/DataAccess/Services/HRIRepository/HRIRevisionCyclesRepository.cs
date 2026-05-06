@@ -161,12 +161,13 @@ namespace SupervisorMobility.API.DataAccess.Services.HRIRepository
 
                 //creamos un nuevo registro en la tabla de historial de acciones para esta revisión diaria
                 var revisionItem = await _context.RevisionCycles.AsNoTracking().Include(rc => rc.HRIRevisionItems).FirstOrDefaultAsync(rc => rc.RevisionCycleId == createDaily.EntityRelationId);
+                var HRIId = (int)revisionItem!.HRIRevisionItems!.HriId;
                 var historyItem = new HRIHistoryItemDto
                 {
                     Action = $"Created daily revision for Item {revisionItem!.HRIRevisionItems!.RevisionPoint}  On Revision Shift: {revisionItem.Cycle}, Day: {createDaily.Day}, Month: {createDaily.Month}, Status: {createDaily.Status}",
                     ActionDate = DateTime.Now,
                     ResponsibleUserId = createDaily.UserId,
-                    HRIid = (int)revisionItem!.HRIRevisionItems!.HriId,
+                    HRIid = HRIId,
                     ActionType = "UPDATE"
                 };
                 await SendHistoryAction(historyItem);
@@ -183,11 +184,12 @@ namespace SupervisorMobility.API.DataAccess.Services.HRIRepository
                         UserId = createDaily.To ?? 1,
                         IsAccepted = true,
                         IsActive = true,
-                        EntryDate = DateTime.Now
+                        EntryDate = DateTime.Now,
+                        TargetRelation = HRIId
                     };
                     SpecialOptionsNotification options = new SpecialOptionsNotification
                     {
-                        Email = false,
+                        Email = createDaily.IsUrgent ? true : false,
                         WhatsApp = createDaily.IsUrgent ? true : false,
                         MicrosoftTeams = false,
                         type = "RevisionWithNG"

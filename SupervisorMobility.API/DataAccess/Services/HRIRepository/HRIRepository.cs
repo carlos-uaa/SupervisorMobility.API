@@ -192,9 +192,10 @@ namespace SupervisorMobility.API.DataAccess.Services.HRIRepository
                 await _context.SaveChangesAsync();
 
                 //agregamos una accion al historial del hri indicando que se crearon las revisiones semanales
+                var HRIId = weeklyRevisions.First().HriId;
                 var historyItem = new HRIHistoryItemDto
                     {
-                        HRIid = weeklyRevisions.First().HriId,
+                        HRIid = HRIId,
                         Action = "Weekly Revisions Created",
                         ActionDate = DateTime.UtcNow,
                         ResponsibleUserId = weeklyRevisions.First().UserId,
@@ -214,11 +215,12 @@ namespace SupervisorMobility.API.DataAccess.Services.HRIRepository
                         UserId = weekly.To ?? 1,
                         IsAccepted = true,
                         IsActive = true,
-                        EntryDate = DateTime.Now
+                        EntryDate = DateTime.Now,
+                        TargetRelation = HRIId
                     };
                     SpecialOptionsNotification options = new SpecialOptionsNotification
                     {
-                        Email = false,
+                        Email = weekly.IsUrgent ? true : false,
                         WhatsApp = weekly.IsUrgent ? true : false,
                         MicrosoftTeams = false,
                         type = "RevisionWithNG"
