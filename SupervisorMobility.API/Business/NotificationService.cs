@@ -2,6 +2,7 @@ using AutoMapper;
 using SupervisorMobility.API.Entities;
 using SupervisorMobility.API.Models.NotificationDtos;
 using SupervisorMobility.API.Services;
+using SupervisorMobility.API.Services.BackgroundServices;
 using SupervisorMobility.API.Services.EmailService;
 using SupervisorMobility.API.Services.WhatsAppService;
 
@@ -13,18 +14,21 @@ namespace SupervisorMobility.API.Business
         private readonly IEmailQueueService _emailQueueService;
         private readonly IWhatsAppService _whatsAppService;
         private readonly IMapper _mapper;
+        private readonly EmailQueueBackgroundService _backgroundService;
 
         public NotificationService(
             ISupervisorMobilityRepository repository,
             IEmailQueueService emailQueueService,
             IWhatsAppService whatsAppService,
-            IMapper mapper
+            IMapper mapper,
+            EmailQueueBackgroundService backgroundService
         )
         {
             _repository = repository;
             _emailQueueService = emailQueueService;
             _whatsAppService = whatsAppService;
             _mapper = mapper;
+            _backgroundService = backgroundService;
         }
 
         /// <summary>
@@ -44,12 +48,15 @@ namespace SupervisorMobility.API.Business
             {
                 if(specialOptions.Email.HasValue && specialOptions.Email.Value)
                 {
-                    var emailQueueEntry = await _emailQueueService.AddEmailQueueEntryAsync(notifyToAdd, specialOptions.type);
+                    var emailQueueEntry = await _emailQueueService.AddEmailQueueEntryAsync(notifyToAdd, specialOptions.type, notify.TargetRelation);
+
+                    // Disparar el procesamiento
+                    _backgroundService.TriggerProcessing();
                 }
 
                 if(specialOptions.WhatsApp.HasValue && specialOptions.WhatsApp.Value)
                 {                    
-                    var recipientPhoneNumber = "524492339120"; // This should be dynamically determined based on the notification data
+                    var recipientPhoneNumber = "524659557845"; // This should be dynamically determined based on the notification data
                     var whatsAppSended = await _whatsAppService.SendWhatsAppTemplateAsync(recipientPhoneNumber, specialOptions.type);
                 }
 
