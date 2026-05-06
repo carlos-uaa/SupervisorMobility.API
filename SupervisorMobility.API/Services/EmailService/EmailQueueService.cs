@@ -7,7 +7,7 @@ namespace SupervisorMobility.API.Services.EmailService
 {
     public interface IEmailQueueService
     {
-        Task<EmailQueue> AddEmailQueueEntryAsync(Notification notification, string type);
+        Task<EmailQueue> AddEmailQueueEntryAsync(Notification notification, string type, int? targetRelationId = null);
         Task<ServiceResponse<List<EmailQueue>>> GetPendingEmailQueuesAsync();
         Task<ServiceResponse<bool>> IncrementAttempt(int id);
         
@@ -37,7 +37,7 @@ namespace SupervisorMobility.API.Services.EmailService
         }
 
 
-        public async Task<EmailQueue> AddEmailQueueEntryAsync(Notification notification, string type)
+        public async Task<EmailQueue> AddEmailQueueEntryAsync(Notification notification, string type, int? targetRelationId = null)
         {
             // Logic to add the notification to the email queue
             EmailQueue emailQueueEntry = new EmailQueue
@@ -47,7 +47,9 @@ namespace SupervisorMobility.API.Services.EmailService
                 StaffID = notification.UserId, // Assuming the staff is the same as the user for this example
                 EntryDate = DateTime.Now,
                 IsSend = false,
-                Attempts = 0
+                Attempts = 0,
+                TargetRelationID = targetRelationId ?? 0,
+                TargetRelationAux = getTargetAux(type, notification)
             };
 
             return await _repository.AddEmailQueueEntryAsync(emailQueueEntry);
@@ -114,7 +116,7 @@ namespace SupervisorMobility.API.Services.EmailService
                 return response;
             }
         }
-        
+
         public async Task<ServiceResponse<EmailQueue>> AcceptEmailQueueAsync(int id)
         {
             try
@@ -148,6 +150,17 @@ namespace SupervisorMobility.API.Services.EmailService
                     Success = false,
                     Message = $"Error accepting email queue: {ex.Message}"
                 };
+            }
+        }
+
+        private string? getTargetAux(string type, Notification notification)
+        {
+            switch(type)
+            {
+                case "RevisionWithNG":
+                    return notification.NotificationText;
+                default:
+                    return null;
             }
         }
 
