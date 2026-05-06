@@ -3,6 +3,7 @@ using System;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Infrastructure;
 using Microsoft.EntityFrameworkCore.Metadata;
+using Microsoft.EntityFrameworkCore.Migrations;
 using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 using SupervisorMobility.API.Context;
 
@@ -11,9 +12,11 @@ using SupervisorMobility.API.Context;
 namespace SupervisorMobility.API.Migrations
 {
     [DbContext(typeof(SupervisorMobilityContext))]
-    partial class SupervisorMobilityContextModelSnapshot : ModelSnapshot
+    [Migration("20260506154403_AddTargetRelationIDColumnAtEmailQueue")]
+    partial class AddTargetRelationIDColumnAtEmailQueue
     {
-        protected override void BuildModel(ModelBuilder modelBuilder)
+        /// <inheritdoc />
+        protected override void BuildTargetModel(ModelBuilder modelBuilder)
         {
 #pragma warning disable 612, 618
             modelBuilder
@@ -6616,9 +6619,6 @@ namespace SupervisorMobility.API.Migrations
 
                     b.Property<int?>("StaffID")
                         .HasColumnType("int");
-
-                    b.Property<string>("TargetRelationAux")
-                        .HasColumnType("nvarchar(max)");
 
                     b.Property<int?>("TargetRelationID")
                         .HasColumnType("int");
