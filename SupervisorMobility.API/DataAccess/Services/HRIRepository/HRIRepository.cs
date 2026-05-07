@@ -1,17 +1,19 @@
 ﻿ using AutoMapper;
 using Microsoft.EntityFrameworkCore;
+using OfficeOpenXml;
+using SupervisorMobility.API.Business;
 using SupervisorMobility.API.Context;
 using SupervisorMobility.API.DataAccess.Entities.HRI_s_Entities;
 using SupervisorMobility.API.DataAccess.Services.HRIServices;
-using SupervisorMobility.API.Models.HRIDtos;
-using SupervisorMobility.API.Models.HRIHourmeterRevisionDto;
-using SupervisorMobility.API.Models.HRIWeeklyRevisions;
-using SupervisorMobility.API.Models.HRIDtos.HRImagesDto;
-using SupervisorMobility.API.Models.HRIRevisionItemsDtos;
 using SupervisorMobility.API.Models.HRICyclesDtos;
+using SupervisorMobility.API.Models.HRIDtos;
+using SupervisorMobility.API.Models.HRIDtos.HRImagesDto;
+using SupervisorMobility.API.Models.HRIExcelDtos;
+using SupervisorMobility.API.Models.HRIHourmeterRevisionDto;
 using SupervisorMobility.API.Models.HRIRevisionCycles;
+using SupervisorMobility.API.Models.HRIRevisionItemsDtos;
+using SupervisorMobility.API.Models.HRIWeeklyRevisions;
 using SupervisorMobility.API.Models.NotificationDtos;
-using SupervisorMobility.API.Business;
 
 
 namespace SupervisorMobility.API.DataAccess.Services.HRIRepository
@@ -714,6 +716,385 @@ namespace SupervisorMobility.API.DataAccess.Services.HRIRepository
                 response.Message = $"Error retrieving HRI history: {ex.Message + (ex.InnerException != null ? " - " + ex.InnerException.Message : "")}";
             }
             return response;
+        }
+        public byte[] CreateExcelHriFile(int hriId)
+        {
+            ExcelPackage.License.SetNonCommercialPersonal("SupervisorMobility");
+            using var package = new ExcelPackage();
+            var ws = package.Workbook.Worksheets.Add("HRI");
+            int diasMes = DateTime.DaysInMonth(DateTime.Now.Year, DateTime.Now.Month);
+            //establecemos el ancho de todas las columnas
+            ws.Column(1).Width = 5.29; //A 
+            ws.Column(2).Width = 29.29; //B 
+            ws.Column(3).Width = 24.29; //C
+            ws.Column(4).Width = 24.29; //D
+            ws.Column(5).Width = 20; //E
+            ws.Column(6).Width = 5.27; //F
+            ws.Column(7).Width = 7.29; //G
+
+            //primero le damos el ancho de las columnas de los dias
+            for (int i = 1; i <= diasMes; i++)
+            {
+                ws.Column(7 + i).Width = 3.29; //colocamos el ancho de las columnas de los dias
+            }
+
+            CreateRevisionItemSection(ws);
+
+
+
+
+            return package.GetAsByteArray();
+        }
+        private void CreateRevisionItemSection(ExcelWorksheet ws)
+        {
+
+            var varMes = DateTime.Now.ToString("MMMM").ToUpper();
+            var varAnio = DateTime.Now.Year;
+            var weeksOfMonth = GetMonthWeeks(DateTime.Now.Month, varAnio);
+            //calcular el dia en que empezo este mes
+            var fecha = new DateTime(DateTime.Now.Year, DateTime.Now.Month, 1);
+            var diaInicio = fecha.DayOfWeek;   // Friday, Monday, etc.
+
+            var totalLineas = 1;
+            var totalItemsRevision = 5;
+            var totalTurnos = 3;
+
+            var bodyFontSize = 10;
+            var headerFontSize = 11;
+
+            #region titulos de tabla
+            //colocamos el nombre de cada columna
+            //item
+            var item = ws.Cells["A27:A28"];
+            item.Merge = true;
+            item.Value = "ITEM";
+            item.Style.HorizontalAlignment = OfficeOpenXml.Style.ExcelHorizontalAlignment.Center;
+            item.Style.VerticalAlignment = OfficeOpenXml.Style.ExcelVerticalAlignment.Center;
+            item.Style.Font.Bold = true;
+            item.Style.Font.Size = headerFontSize;
+
+            //puntos de revision
+            var puntosRevision = ws.Cells["B27:B28"];
+            puntosRevision.Merge = true;
+            puntosRevision.Value = "PUNTOS DE REVISION";
+            puntosRevision.Style.HorizontalAlignment = OfficeOpenXml.Style.ExcelHorizontalAlignment.Center;
+            puntosRevision.Style.VerticalAlignment = OfficeOpenXml.Style.ExcelVerticalAlignment.Center;
+            puntosRevision.Style.Font.Bold = true;
+            puntosRevision.Style.Font.Size = headerFontSize;
+
+            //metodo de revision
+            var metodoRevision = ws.Cells["C27:C28"];
+            metodoRevision.Merge = true;
+            metodoRevision.Value = "METODO DE REVISION";
+            metodoRevision.Style.HorizontalAlignment = OfficeOpenXml.Style.ExcelHorizontalAlignment.Center;
+            metodoRevision.Style.VerticalAlignment = OfficeOpenXml.Style.ExcelVerticalAlignment.Center;
+            metodoRevision.Style.Font.Bold = true;
+            metodoRevision.Style.Font.Size = headerFontSize;
+
+            //criterio
+            var criterio = ws.Cells["D27:D28"];
+            criterio.Merge = true;
+            criterio.Value = "CRITERIO";
+            criterio.Style.HorizontalAlignment = OfficeOpenXml.Style.ExcelHorizontalAlignment.Center;
+            criterio.Style.VerticalAlignment = OfficeOpenXml.Style.ExcelVerticalAlignment.Center;
+            criterio.Style.Font.Bold = true;
+            criterio.Style.Font.Size = headerFontSize;
+
+            //frecuencia
+            var frecuencia = ws.Cells["E27:E28"];
+            frecuencia.Merge = true;
+            frecuencia.Value = "FRECUENCIA";
+            frecuencia.Style.HorizontalAlignment = OfficeOpenXml.Style.ExcelHorizontalAlignment.Center;
+            frecuencia.Style.VerticalAlignment = OfficeOpenXml.Style.ExcelVerticalAlignment.Center;
+            frecuencia.Style.Font.Bold = true;
+            frecuencia.Style.Font.Size = headerFontSize;
+
+            // mes
+            var mes = ws.Cells["F27"];
+            mes.Value = "Mes";
+            mes.Style.HorizontalAlignment = OfficeOpenXml.Style.ExcelHorizontalAlignment.Center;
+            mes.Style.VerticalAlignment = OfficeOpenXml.Style.ExcelVerticalAlignment.Center;
+            mes.Style.Font.Bold = true;
+            mes.Style.Font.Size = headerFontSize;
+
+            //dia 
+            var dia = ws.Cells["F28"];
+            dia.Merge = true;
+            dia.Value = "Dia";
+            dia.Style.HorizontalAlignment = OfficeOpenXml.Style.ExcelHorizontalAlignment.Center;
+            dia.Style.VerticalAlignment = OfficeOpenXml.Style.ExcelVerticalAlignment.Center;
+            dia.Style.Font.Bold = true;
+            dia.Style.Font.Size = headerFontSize;
+
+            //turno
+            var turno = ws.Cells["G27:G28"];
+            turno.Merge = true;
+            turno.Value = "TURNO";
+            turno.Style.HorizontalAlignment = OfficeOpenXml.Style.ExcelHorizontalAlignment.Center;
+            turno.Style.VerticalAlignment = OfficeOpenXml.Style.ExcelVerticalAlignment.Center;
+            turno.Style.Font.Bold = true;
+            turno.Style.Font.Size = headerFontSize;
+
+            //colocamos el encabezado del mes y las celdas de los dias
+            int diasMes = DateTime.DaysInMonth(DateTime.Now.Year, DateTime.Now.Month);
+            var encabezadoMes = ws.Cells[27, 8, 27, 8 + (diasMes - 1)];
+            encabezadoMes.Merge = true;
+            encabezadoMes.Value = $"REGISTRO DE REALIZACION DE REVISION DE MES :{varMes} ANIO {varAnio}";
+            encabezadoMes.Style.HorizontalAlignment = OfficeOpenXml.Style.ExcelHorizontalAlignment.Center;
+            encabezadoMes.Style.VerticalAlignment = OfficeOpenXml.Style.ExcelVerticalAlignment.Center;
+            encabezadoMes.Style.Font.Bold = true;
+            encabezadoMes.Style.Font.Size = headerFontSize;
+
+            for (int i = 1; i <= diasMes; i++)
+            {
+                var diaCell = ws.Cells[28, 7 + i];
+                diaCell.Value = i;
+                diaCell.Style.HorizontalAlignment = OfficeOpenXml.Style.ExcelHorizontalAlignment.Center;
+                diaCell.Style.VerticalAlignment = OfficeOpenXml.Style.ExcelVerticalAlignment.Center;
+                diaCell.Style.Font.Bold = true;
+                diaCell.Style.Font.Size = headerFontSize;
+            }
+
+            #endregion
+
+            //colocamos los items de revision y los turnos
+            var filaInicioItems = 29;
+
+            for (int i = 1; i <= totalItemsRevision; i++)
+            {
+                //numero del item
+                var itemCell = ws.Cells[$"A{filaInicioItems}:A{filaInicioItems + totalTurnos - 1}"];
+                itemCell.Merge = true;
+                itemCell.Value = $"{i}";
+                itemCell.Style.HorizontalAlignment = OfficeOpenXml.Style.ExcelHorizontalAlignment.Center;
+                itemCell.Style.VerticalAlignment = OfficeOpenXml.Style.ExcelVerticalAlignment.Center;
+                itemCell.Style.Font.Size = bodyFontSize;
+                //punto de revision
+                var itemRevision = ws.Cells[$"B{filaInicioItems}:B{filaInicioItems + totalTurnos - 1}"];
+                itemRevision.Merge = true;
+                itemRevision.Value = "";
+                itemRevision.Style.HorizontalAlignment = OfficeOpenXml.Style.ExcelHorizontalAlignment.Center;
+                itemRevision.Style.VerticalAlignment = OfficeOpenXml.Style.ExcelVerticalAlignment.Center;
+                itemRevision.Style.Font.Size = bodyFontSize;
+                //metodo de revision
+                var itemMetodoRevision = ws.Cells[$"C{filaInicioItems}:C{filaInicioItems + totalTurnos - 1}"];
+                itemMetodoRevision.Merge = true;
+                itemMetodoRevision.Value = "";
+                itemMetodoRevision.Style.HorizontalAlignment = OfficeOpenXml.Style.ExcelHorizontalAlignment.Center;
+                itemMetodoRevision.Style.VerticalAlignment = OfficeOpenXml.Style.ExcelVerticalAlignment.Center;
+                itemMetodoRevision.Style.Font.Size = bodyFontSize;
+                //criterio
+                var itemCriterio = ws.Cells[$"D{filaInicioItems}:D{filaInicioItems + totalTurnos - 1}"];
+                itemCriterio.Merge = true;
+                itemCriterio.Value = "";
+                itemCriterio.Style.HorizontalAlignment = OfficeOpenXml.Style.ExcelHorizontalAlignment.Center;
+                itemCriterio.Style.VerticalAlignment = OfficeOpenXml.Style.ExcelVerticalAlignment.Center;
+                itemCriterio.Style.Font.Size = bodyFontSize;
+                //frecuencia
+                var itemFrecuencia = ws.Cells[$"E{filaInicioItems}:F{filaInicioItems + totalTurnos - 1}"];
+                itemFrecuencia.Merge = true;
+                itemFrecuencia.Value = "";
+                itemFrecuencia.Style.HorizontalAlignment = OfficeOpenXml.Style.ExcelHorizontalAlignment.Center;
+                itemFrecuencia.Style.VerticalAlignment = OfficeOpenXml.Style.ExcelVerticalAlignment.Center;
+                itemFrecuencia.Style.Font.Size = bodyFontSize;
+                for (int j = 1; j <= totalTurnos; j++)
+                {
+                    var itemCiclo = ws.Cells[$"G{filaInicioItems}"];
+                    itemCiclo.Value = j.ToString();
+                    itemCiclo.Style.HorizontalAlignment = OfficeOpenXml.Style.ExcelHorizontalAlignment.Center;
+                    itemCiclo.Style.VerticalAlignment = OfficeOpenXml.Style.ExcelVerticalAlignment.Center;
+                    itemCiclo.Style.Font.Size = bodyFontSize;
+                    filaInicioItems++;
+                }
+
+
+            }
+            totalLineas += totalItemsRevision * totalTurnos;
+
+            //colocamos la simbologia de las revisiones
+            var simbologia = ws.Cells[$"B{filaInicioItems + 2}"];
+            simbologia.Value = "SIMBOLOGIA";
+            var simbologiaOk = ws.Cells[$"B{filaInicioItems + 3}"];
+            simbologiaOk.Value = " O = OK";
+            var simbologiaNG = ws.Cells[$"B{filaInicioItems + 4}"];
+            simbologiaNG.Value = " X = NG";
+            var simbologiaNA = ws.Cells[$"B{filaInicioItems + 5}"];
+            simbologiaNA.Value = " N/A = NO APLICA";
+            var simbologiaMsm = ws.Cells[$"B{filaInicioItems + 6}"];
+            simbologiaMsm.Value = "COLOCAR VALOR NUMERICO";
+            var simbologiaMsm2 = ws.Cells[$"B{filaInicioItems + 7}"];
+            simbologiaMsm2.Value = "DONDE APLIQUE";
+
+            var stiloSimbologia = ws.Cells[$"B{filaInicioItems + 2}:B{filaInicioItems + 7}"];
+            stiloSimbologia.Style.HorizontalAlignment = OfficeOpenXml.Style.ExcelHorizontalAlignment.Center;
+            stiloSimbologia.Style.VerticalAlignment = OfficeOpenXml.Style.ExcelVerticalAlignment.Center;
+            stiloSimbologia.Style.Font.Size = bodyFontSize;
+            stiloSimbologia.Style.Font.Bold = true;
+
+            //colocamos la segunda tabla 
+            var filaInicioTab2Border = filaInicioItems;
+            var filaInicioTab2 = filaInicioItems; //fila donde termina la tabla de items de revision
+            var totalLineasTab2 = 3; //horometro + 2 lineas de dias
+
+            //horometro
+            var horometro = ws.Cells[$"D{filaInicioTab2}:F{filaInicioTab2 + 2}"];
+            horometro.Merge = true;
+            horometro.Value = "HOROMETRO 1 ER T";
+            horometro.Style.HorizontalAlignment = OfficeOpenXml.Style.ExcelHorizontalAlignment.Center;
+            horometro.Style.VerticalAlignment = OfficeOpenXml.Style.ExcelVerticalAlignment.Center;
+            horometro.Style.Font.Size = headerFontSize;
+            horometro.Style.Font.Bold = true;
+
+            var turnoVacioHorometro = ws.Cells[$"G{filaInicioTab2}:G{filaInicioTab2 + 2}"];
+            turnoVacioHorometro.Merge = true;
+
+            for (int i = 1; i <= diasMes; i++)
+            {
+                var horometroDia = ws.Cells[filaInicioTab2, 7 + i, filaInicioTab2 + 2, 7 + i];
+                horometroDia.Merge = true;
+
+                //aqui colocaremos el valor del horometro de cada dia, por ahora lo dejamos vacio
+
+            }
+            filaInicioTab2 += totalLineasTab2;
+            var filaInicioTab2Aux = filaInicioTab2;
+            var revisionesDiarias = 4;
+            for (int i = 1; i <= totalTurnos; i++)
+            {
+                var revisorOp = ws.Cells[$"D{filaInicioTab2Aux}:F{filaInicioTab2Aux}"];
+                revisorOp.Merge = true;
+                revisorOp.Value = $"REVISO OP {i}ER T";
+                revisorOp.Style.HorizontalAlignment = OfficeOpenXml.Style.ExcelHorizontalAlignment.Center;
+                revisorOp.Style.VerticalAlignment = OfficeOpenXml.Style.ExcelVerticalAlignment.Center;
+                revisorOp.Style.Font.Size = headerFontSize;
+                revisorOp.Style.Font.Bold = true;
+                for (int j = 1; j <= revisionesDiarias; j++)
+                {
+                    var valorRev = ws.Cells[filaInicioTab2Aux, 7 + j]; //aqui colocaremos el resultado de cada revision diaria, por ahora lo dejamos vacio
+                    valorRev.Value = "O";
+                    valorRev.Style.HorizontalAlignment = OfficeOpenXml.Style.ExcelHorizontalAlignment.Center;
+                    valorRev.Style.VerticalAlignment = OfficeOpenXml.Style.ExcelVerticalAlignment.Center;
+                    valorRev.Style.Font.Size = bodyFontSize;
+                }
+                var revisionSv = ws.Cells[$"D{filaInicioTab2Aux + totalTurnos}:F{filaInicioTab2Aux + totalTurnos}"];
+                revisionSv.Merge = true;
+                revisionSv.Value = $"REVISO SV {i}ER T";
+                revisionSv.Style.HorizontalAlignment = OfficeOpenXml.Style.ExcelHorizontalAlignment.Center;
+                revisionSv.Style.VerticalAlignment = OfficeOpenXml.Style.ExcelVerticalAlignment.Center;
+                revisionSv.Style.Font.Size = headerFontSize;
+                revisionSv.Style.Font.Bold = true;
+                for (int j2 = 1; j2 <= revisionesDiarias; j2++)
+                {
+                    var valorRev = ws.Cells[filaInicioTab2Aux + totalTurnos, 7 + j2]; //aqui colocaremos el resultado de cada revision diaria, por ahora lo dejamos vacio
+                    valorRev.Value = "X";
+                    valorRev.Style.HorizontalAlignment = OfficeOpenXml.Style.ExcelHorizontalAlignment.Center;
+                    valorRev.Style.VerticalAlignment = OfficeOpenXml.Style.ExcelVerticalAlignment.Center;
+                    valorRev.Style.Font.Size = bodyFontSize;
+                }
+                filaInicioTab2Aux++;
+                filaInicioTab2 += 2;
+                totalLineasTab2 += 2;
+            }
+
+            //Revision semanal
+
+
+
+            // dibujar el borde de la tabla de items de revision
+            var borderRange = ws.Cells[27, 1, 27 + totalLineas, 8 + (diasMes - 1)];//linea inicio,columna inicio,linea final,columna final
+            borderRange.Style.Border.Top.Style = OfficeOpenXml.Style.ExcelBorderStyle.Thin;
+            borderRange.Style.Border.Bottom.Style = OfficeOpenXml.Style.ExcelBorderStyle.Thin;
+            borderRange.Style.Border.Left.Style = OfficeOpenXml.Style.ExcelBorderStyle.Thin;
+            borderRange.Style.Border.Right.Style = OfficeOpenXml.Style.ExcelBorderStyle.Thin;
+
+            borderRange.Style.Border.Top.Color.SetColor(System.Drawing.Color.Black);
+            borderRange.Style.Border.Bottom.Color.SetColor(System.Drawing.Color.Black);
+            borderRange.Style.Border.Left.Color.SetColor(System.Drawing.Color.Black);
+            borderRange.Style.Border.Right.Color.SetColor(System.Drawing.Color.Black);
+
+            // dibujar el borde de la tabla de horometro
+            var borderRangeTab2 = ws.Cells[filaInicioTab2Border, 4, filaInicioTab2Border + (totalLineasTab2 - 1), 8 + (diasMes - 1)];
+            borderRangeTab2.Style.Border.Top.Style = OfficeOpenXml.Style.ExcelBorderStyle.Thin;
+            borderRangeTab2.Style.Border.Bottom.Style = OfficeOpenXml.Style.ExcelBorderStyle.Thin;
+            borderRangeTab2.Style.Border.Left.Style = OfficeOpenXml.Style.ExcelBorderStyle.Thin;
+            borderRangeTab2.Style.Border.Right.Style = OfficeOpenXml.Style.ExcelBorderStyle.Thin;
+
+            borderRangeTab2.Style.Border.Top.Color.SetColor(System.Drawing.Color.Black);
+            borderRangeTab2.Style.Border.Bottom.Color.SetColor(System.Drawing.Color.Black);
+            borderRangeTab2.Style.Border.Left.Color.SetColor(System.Drawing.Color.Black);
+            borderRangeTab2.Style.Border.Right.Color.SetColor(System.Drawing.Color.Black);
+
+
+
+
+
+
+
+
+
+        }
+        private List<WeeksOfMonthDto> GetMonthWeeks(int mes, int anio)
+        {
+            //definir los dias que tendra cada semana en nuestro caso la semana empieza en viernes y termina en jueves
+            var weeksOfMonth = new List<WeeksOfMonthDto>();
+            int diasMes = DateTime.DaysInMonth(anio, mes);
+            var diasRestantes = diasMes;
+            var diaInicioSemana = (int)new DateTime(anio, mes, 1).DayOfWeek;
+            switch (diaInicioSemana)
+            {
+                case 0: //domingo
+                    weeksOfMonth.Add(new WeeksOfMonthDto { WeekNumber = 1, TotalDays = 5 });
+                    diasRestantes -= 5;
+                    break;
+                case 1: //lunes
+                    weeksOfMonth.Add(new WeeksOfMonthDto { WeekNumber = 1, TotalDays = 4 });
+                    diasRestantes -= 4;
+                    break;
+                case 2: //martes
+                    weeksOfMonth.Add(new WeeksOfMonthDto { WeekNumber = 1, TotalDays = 3 });
+                    diasRestantes -= 3;
+                    break;
+                case 3: //miercoles
+                    weeksOfMonth.Add(new WeeksOfMonthDto { WeekNumber = 1, TotalDays = 2 });
+                    diasRestantes -= 2;
+                    break;
+                case 4: //jueves
+                    weeksOfMonth.Add(new WeeksOfMonthDto { WeekNumber = 1, TotalDays = 1 });
+                    diasRestantes -= 1;
+                    break;
+                case 5: //viernes
+                    weeksOfMonth.Add(new WeeksOfMonthDto { WeekNumber = 1, TotalDays = 7 });
+                    diasRestantes -= 7;
+                    break;
+                case 6: //sabado
+                    weeksOfMonth.Add(new WeeksOfMonthDto { WeekNumber = 1, TotalDays = 6 });
+                    diasRestantes -= 6;
+                    break;
+            }
+            if (diasRestantes % 7 != 0)
+
+            {
+                var total = 1;
+                var semanasCompletas = (int)(diasRestantes / 7);
+                total += semanasCompletas + 1;
+                for (int i = 0; i < semanasCompletas; i++)
+                {
+                    weeksOfMonth.Add(new WeeksOfMonthDto { WeekNumber = i + 2, TotalDays = 7 });
+
+                }
+                weeksOfMonth.Add(new WeeksOfMonthDto { WeekNumber = total, TotalDays = diasRestantes % 7 });
+            }
+            else
+            {
+
+                var semanasCompletas = (int)(diasRestantes / 7);
+                for (int i = 0; i < semanasCompletas; i++)
+                {
+                    weeksOfMonth.Add(new WeeksOfMonthDto { WeekNumber = i + 2, TotalDays = 7 });
+
+                }
+            }
+            return weeksOfMonth;
         }
     }
 }

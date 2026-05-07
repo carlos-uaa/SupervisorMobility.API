@@ -50,5 +50,10 @@ namespace SupervisorMobility.API.DataAccess.Services.HRIServices
         {
             return await _hriRepository.GetHRIHistory(hriId); 
         }
+
+        public byte[] CreateExcelHriFile(int hriId)
+        {
+            return _hriRepository.CreateExcelHriFile(hriId);
+        }
     }
 }

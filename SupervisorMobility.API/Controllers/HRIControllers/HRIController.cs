@@ -71,6 +71,20 @@ namespace SupervisorMobility.API.Controllers.HRIControllers
             return Ok(response);
         }
 
+        [HttpGet("GetExcelHriFile/{hriId}")]
+        [ProducesResponseType(StatusCodes.Status200OK)]
+        [ProducesResponseType(StatusCodes.Status404NotFound)]
+        [ProducesResponseType(StatusCodes.Status500InternalServerError)]
+        public ActionResult GetExcelHriFile(int hriId)
+        {
+            var file = _HRIServices.CreateExcelHriFile(hriId);
+            if (file == null)
+            {
+                return NotFound();
+            }
+            return File(file, "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet", $"HRI_{hriId}.xlsx");
+        }
+
         [HttpPost("CreateHRI")]
         [ProducesResponseType(StatusCodes.Status201Created)]
         [ProducesResponseType(StatusCodes.Status400BadRequest)]
