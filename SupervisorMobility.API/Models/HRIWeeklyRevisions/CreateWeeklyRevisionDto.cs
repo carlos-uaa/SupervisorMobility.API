@@ -9,6 +9,7 @@ namespace SupervisorMobility.API.Models.HRIWeeklyRevisions
         public int? UserId { get; set; }
         public int Month { get; set; }
         public int Week { get; set; }
+        public int Year { get; set; }
         public string? Status { get; set; }
         public bool? IsActive { get; set; } = true;
         public bool? Notification { get; set; }

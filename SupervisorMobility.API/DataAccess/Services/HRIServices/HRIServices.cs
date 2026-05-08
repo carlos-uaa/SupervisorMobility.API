@@ -55,5 +55,10 @@ namespace SupervisorMobility.API.DataAccess.Services.HRIServices
         {
             return _hriRepository.CreateExcelHriFile(hriId, month, year);
         }
+
+        public async Task<ServiceResponse<GetHRIDto>> GetDailyByMonthAndYear(int hriId, int month, int year)
+        {
+            return await _hriRepository.GetDailyByMonthAndYear(hriId, month, year);
+        }
     }
 }
