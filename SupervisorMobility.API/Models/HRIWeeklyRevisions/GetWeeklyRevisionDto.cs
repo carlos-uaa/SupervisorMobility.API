@@ -12,6 +12,7 @@ namespace SupervisorMobility.API.Models.HRIWeeklyRevisions
         public int? UserId { get; set; }
         public GetUserForHRIDailyRevsionDto? SeniorSupervisor { get; set; }
         public int Month { get; set; }
+        public int Year { get; set; }
         public int Week { get; set; }
         public bool? IsActive { get; set; }
         public string? Status { get; set; }

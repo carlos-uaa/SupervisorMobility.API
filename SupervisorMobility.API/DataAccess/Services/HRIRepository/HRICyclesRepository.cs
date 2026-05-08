@@ -89,6 +89,8 @@ namespace SupervisorMobility.API.DataAccess.Services.HRIRepository
                     CycleId = createDaily.EntityRelationId,
                     Day = createDaily.Day,
                     Month = createDaily.Month,
+                    Year = createDaily.Year,
+                    RevisionDate = new DateTime(createDaily.Year, createDaily.Month, createDaily.Day),  
                     Status = createDaily.Status,
                     UserId = createDaily.UserId,
                     UserType = createDaily.UserType,

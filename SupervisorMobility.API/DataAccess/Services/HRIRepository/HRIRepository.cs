@@ -1,4 +1,5 @@
 ﻿ using AutoMapper;
+using DocumentFormat.OpenXml.Office2010.Excel;
 using Microsoft.EntityFrameworkCore;
 using OfficeOpenXml;
 using SupervisorMobility.API.Business;
@@ -362,18 +363,18 @@ namespace SupervisorMobility.API.DataAccess.Services.HRIRepository
                         .ThenInclude(ir => ir.RevisionMethod)
                     .Include(h => h.ItemsRevised!.Where(ir => ir.IsActive == true))
                         .ThenInclude(ir => ir.RevisionCycles!.Where(rc => rc.IsActive == true))
-                            .ThenInclude(rc => rc.DailyRevisions!)
+                            .ThenInclude(rc => rc.DailyRevisions!.Where(dr=>dr.Month == DateTime.Now.Month && dr.Year == DateTime.Now.Year))
                                 .ThenInclude(dr => dr.Responsible)
-                    .Include(h => h.WeeklyRevisions!.Where(wr => wr.IsActive == true))
+                    .Include(h => h.WeeklyRevisions!.Where(wr => wr.IsActive == true && wr.Month == DateTime.Now.Month && wr.Year == DateTime.Now.Year))
                     .Include(h => h.HriCycles!.Where(hc => hc.IsActive == true))
-                        .ThenInclude(c => c.DailyRevisions!)
+                        .ThenInclude(c => c.DailyRevisions!.Where(dr=>dr.Month == DateTime.Now.Month && dr.Year == DateTime.Now.Year))
                             .ThenInclude(dr => dr.Responsible)
                     .Include(h => h.HriCycles!.Where(hc => hc.IsActive == true))
                         .ThenInclude(c => c.Operator)
                     .Include(h => h.HriCycles!.Where(hc => hc.IsActive == true))
                         .ThenInclude(c => c.Supervisor)
                     .Include(h => h.HourmeterRevision)
-                        .ThenInclude(hr => hr.DailyRevisions!)
+                        .ThenInclude(hr => hr.DailyRevisions!.Where(dr=>dr.Month == DateTime.Now.Month && dr.Year == DateTime.Now.Year))
                             .ThenInclude(dr => dr.Responsible)
                     .Include(h => h.Supervisor)
                     .Include(h => h.SSV)
@@ -398,6 +399,92 @@ namespace SupervisorMobility.API.DataAccess.Services.HRIRepository
                 response.Message = $"Error retrieving HRI: {ex.Message}";
             }
             return response;
+        }
+
+        public async Task<ServiceResponse<GetHRIDto>> GetDailyByMonthAndYear(int hriId, int month, int year)
+        {
+            var response = new ServiceResponse<GetHRIDto>();
+            try
+            {
+                var hri = await _context.HRIs.AsNoTracking().Include(h => h.Line)
+                   .Include(h => h.ItemsRevised!)
+                       .ThenInclude(ir => ir.Frequency)
+                   .Include(h => h.ItemsRevised!.Where(ir => ir.IsActive == true))
+                       .ThenInclude(ir => ir.Veredict)
+                   .Include(h => h.ItemsRevised!.Where(ir => ir.IsActive == true))
+                       .ThenInclude(ir => ir.RevisionMethod)
+                   .Include(h => h.ItemsRevised!.Where(ir => ir.IsActive == true))
+                       .ThenInclude(ir => ir.RevisionCycles!.Where(rc => rc.IsActive == true))
+                           .ThenInclude(rc => rc.DailyRevisions!.Where(dr => dr.Month == month && dr.Year == year))
+                               .ThenInclude(dr => dr.Responsible)
+                   .Include(h => h.WeeklyRevisions!.Where(wr => wr.IsActive == true && wr.Month == month && wr.Year == year))
+                   .Include(h => h.HriCycles!.Where(hc => hc.IsActive == true))
+                       .ThenInclude(c => c.DailyRevisions!.Where(dr => dr.Month == month && dr.Year == year))
+                           .ThenInclude(dr => dr.Responsible)
+                   .Include(h => h.HriCycles!.Where(hc => hc.IsActive == true))
+                       .ThenInclude(c => c.Operator)
+                   .Include(h => h.HriCycles!.Where(hc => hc.IsActive == true))
+                       .ThenInclude(c => c.Supervisor)
+                   .Include(h => h.HourmeterRevision)
+                       .ThenInclude(hr => hr.DailyRevisions!.Where(dr => dr.Month == month && dr.Year == year))
+                           .ThenInclude(dr => dr.Responsible)
+                   .FirstOrDefaultAsync(h => h.HriId == hriId);
+
+                if (hri == null)
+                {
+                    response.Success = false;
+                    response.Message = "HRI not found.";
+                    return response;
+                }
+                //filtramoos los ciclos para traer solo los activos, asi como los items revisados y las revisiones diarias relacionadas a esos ciclos e items
+
+                response.Data = _mapper.Map<GetHRIDto>(hri);
+                response.Success = true;
+                response.Message = "HRI retrieved successfully.";
+
+            }
+            catch (Exception ex)
+            {
+                response.Success = false;
+                response.Message = $"Error retrieving daily revisions: {ex.Message}";
+            }
+            return response;
+        }
+
+        public async Task<GetHRIDto>GetHRIByMonthAndYearFilter(int hriId,int month,int year)
+        {
+            var hri = await _context.HRIs.AsNoTracking().Include(h => h.Line)
+                 .Include(h => h.NameOfItem)
+                 .Include(h => h.Dock)
+                 .Include(h => h.Images)
+                 .Include(h => h.ItemsRevised!)
+                     .ThenInclude(ir => ir.Frequency)
+                 .Include(h => h.ItemsRevised!.Where(ir => ir.IsActive == true))
+                     .ThenInclude(ir => ir.Veredict)
+                 .Include(h => h.ItemsRevised!.Where(ir => ir.IsActive == true))
+                     .ThenInclude(ir => ir.RevisionMethod)
+                 .Include(h => h.ItemsRevised!.Where(ir => ir.IsActive == true))
+                     .ThenInclude(ir => ir.RevisionCycles!.Where(rc => rc.IsActive == true))
+                         .ThenInclude(rc => rc.DailyRevisions!.Where(dr => dr.Month == month && dr.Year == year))
+                             .ThenInclude(dr => dr.Responsible)
+                 .Include(h => h.WeeklyRevisions!.Where(wr => wr.IsActive == true && wr.Month == month && wr.Year == year))
+                 .Include(h => h.HriCycles!.Where(hc => hc.IsActive == true))
+                     .ThenInclude(c => c.DailyRevisions!.Where(dr => dr.Month == month && dr.Year == year))
+                         .ThenInclude(dr => dr.Responsible)
+                 .Include(h => h.HriCycles!.Where(hc => hc.IsActive == true))
+                     .ThenInclude(c => c.Operator)
+                 .Include(h => h.HriCycles!.Where(hc => hc.IsActive == true))
+                     .ThenInclude(c => c.Supervisor)
+                 .Include(h => h.HourmeterRevision)
+                     .ThenInclude(hr => hr.DailyRevisions!.Where(dr => dr.Month == month && dr.Year == year))
+                         .ThenInclude(dr => dr.Responsible)
+                 .Include(h => h.Supervisor)
+                 .Include(h => h.SSV)
+                 .Include(h => h.Plant)
+                 .Include(h => h.Area)
+                 .FirstOrDefaultAsync(h => h.HriId == hriId);
+
+                  return _mapper.Map<GetHRIDto>(hri);
         }
 
         public async Task<ServiceResponse<List<GetHRIToTableDto>>> GetAllHRITable()
@@ -717,35 +804,51 @@ namespace SupervisorMobility.API.DataAccess.Services.HRIRepository
             }
             return response;
         }
-        public byte[] CreateExcelHriFile(int hriId)
+        public async Task<ServiceResponse<byte[]>> CreateExcelHriFile(int hriId, int month, int year)
         {
-            ExcelPackage.License.SetNonCommercialPersonal("SupervisorMobility");
-            using var package = new ExcelPackage();
-            var ws = package.Workbook.Worksheets.Add("HRI");
-            int diasMes = DateTime.DaysInMonth(DateTime.Now.Year, DateTime.Now.Month);
-            //establecemos el ancho de todas las columnas
-            ws.Column(1).Width = 5.29; //A 
-            ws.Column(2).Width = 29.29; //B 
-            ws.Column(3).Width = 24.29; //C
-            ws.Column(4).Width = 24.29; //D
-            ws.Column(5).Width = 20; //E
-            ws.Column(6).Width = 5.27; //F
-            ws.Column(7).Width = 7.29; //G
-
-            //primero le damos el ancho de las columnas de los dias
-            for (int i = 1; i <= diasMes; i++)
+            var serviceResponse = new ServiceResponse<byte[]>();
+            try
             {
-                ws.Column(7 + i).Width = 3.29; //colocamos el ancho de las columnas de los dias
+                //obtenemos el hri con su informacion completa
+                var hriResponse = await GetHRIByMonthAndYearFilter(hriId,month,year);
+
+                ExcelPackage.License.SetNonCommercialPersonal("SupervisorMobility");
+                using var package = new ExcelPackage();
+                var ws = package.Workbook.Worksheets.Add("HRI");
+                int diasMes = DateTime.DaysInMonth(year, month);
+                //establecemos el ancho de todas las columnas
+                ws.Column(1).Width = 5.29; //A 
+                ws.Column(2).Width = 29.29; //B 
+                ws.Column(3).Width = 24.29; //C
+                ws.Column(4).Width = 24.29; //D
+                ws.Column(5).Width = 20; //E
+                ws.Column(6).Width = 5.27; //F
+                ws.Column(7).Width = 7.29; //G
+
+                //primero le damos el ancho de las columnas de los dias
+                for (int i = 1; i <= diasMes; i++)
+                {
+                    ws.Column(7 + i).Width = 3.29; //colocamos el ancho de las columnas de los dias
+                }
+
+                CreateRevisionItemSection(ws, hriResponse);
+
+                serviceResponse.Data = package.GetAsByteArray();
+                serviceResponse.Success = true;
+                serviceResponse.Message = "Excel file created successfully.";
+
             }
-
-            CreateRevisionItemSection(ws);
-
-
-
-
-            return package.GetAsByteArray();
+            catch (Exception ex)
+            {
+                serviceResponse.Success = false;
+                serviceResponse.Message = $"Error creating Excel file: {ex.Message + (ex.InnerException != null ? " - " + ex.InnerException.Message : "")}";
+                
+            }
+           
+            return serviceResponse;
         }
-        private void CreateRevisionItemSection(ExcelWorksheet ws)
+
+        private void CreateRevisionItemSection(ExcelWorksheet ws, GetHRIDto hriData)
         {
 
             var varMes = DateTime.Now.ToString("MMMM").ToUpper();

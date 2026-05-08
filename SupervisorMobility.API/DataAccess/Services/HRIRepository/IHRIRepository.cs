@@ -13,6 +13,6 @@ namespace SupervisorMobility.API.DataAccess.Services.HRIRepository
         Task<ServiceResponse<bool>> DeleteHRI(int id);
         Task<ServiceResponse<List<GetHRIToTableDto>>> GetAllHRITable();
         Task<ServiceResponse<List<GetHRIHistoryActionDto>>> GetHRIHistory(int hriId);
-        byte[] CreateExcelHriFile(int hriId);
+        Task<ServiceResponse<byte[]>> CreateExcelHriFile(int hriId, int month, int year);
     }
 }
