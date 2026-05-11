@@ -831,8 +831,10 @@ namespace SupervisorMobility.API.DataAccess.Services.HRIRepository
                     ws.Column(7 + i).Width = 3.29; //colocamos el ancho de las columnas de los dias
                 }
 
+                
+                CreateRevisionItemSection(ws, hriResponse, month, year);
                 CreateHeaderSection(ws, hriResponse, diasMes);
-                CreateRevisionItemSection(ws, hriResponse);
+                
 
                 serviceResponse.Data = package.GetAsByteArray();
                 serviceResponse.Success = true;
@@ -1041,19 +1043,19 @@ namespace SupervisorMobility.API.DataAccess.Services.HRIRepository
             }
         }
 
-        private void CreateRevisionItemSection(ExcelWorksheet ws, GetHRIDto hriData)
+        private void CreateRevisionItemSection(ExcelWorksheet ws, GetHRIDto hriData, int month, int year)
         {
 
-            var varMes = DateTime.Now.ToString("MMMM").ToUpper();
-            var varAnio = DateTime.Now.Year;
-            var weeksOfMonth = GetMonthWeeks(DateTime.Now.Month, varAnio);
+            var varMes = new DateTime(year, month, 1).ToString("MMMM").ToUpper();
+            var varAnio = year;
+            var weeksOfMonth = GetMonthWeeks(month, varAnio);
             //calcular el dia en que empezo este mes
-            var fecha = new DateTime(DateTime.Now.Year, DateTime.Now.Month, 1);
+            var fecha = new DateTime(varAnio, month, 1);
             var diaInicio = fecha.DayOfWeek;   // Friday, Monday, etc.
 
             var totalLineas = 1;
-            var totalItemsRevision = 5;
-            var totalTurnos = 3;
+            var totalItemsRevision = hriData.ItemsRevised!.Count;
+            var totalTurnos = hriData.HriCycles!.Count;
 
             var bodyFontSize = 10;
             var headerFontSize = 11;
@@ -1161,35 +1163,35 @@ namespace SupervisorMobility.API.DataAccess.Services.HRIRepository
                 //numero del item
                 var itemCell = ws.Cells[$"A{filaInicioItems}:A{filaInicioItems + totalTurnos - 1}"];
                 itemCell.Merge = true;
-                itemCell.Value = $"{i}";
+                itemCell.Value = $"{hriData.ItemsRevised![i - 1].ItemNumber}";
                 itemCell.Style.HorizontalAlignment = OfficeOpenXml.Style.ExcelHorizontalAlignment.Center;
                 itemCell.Style.VerticalAlignment = OfficeOpenXml.Style.ExcelVerticalAlignment.Center;
                 itemCell.Style.Font.Size = bodyFontSize;
                 //punto de revision
                 var itemRevision = ws.Cells[$"B{filaInicioItems}:B{filaInicioItems + totalTurnos - 1}"];
                 itemRevision.Merge = true;
-                itemRevision.Value = "";
+                itemRevision.Value = $"{hriData.ItemsRevised![i - 1].RevisionPoint}";
                 itemRevision.Style.HorizontalAlignment = OfficeOpenXml.Style.ExcelHorizontalAlignment.Center;
                 itemRevision.Style.VerticalAlignment = OfficeOpenXml.Style.ExcelVerticalAlignment.Center;
                 itemRevision.Style.Font.Size = bodyFontSize;
                 //metodo de revision
                 var itemMetodoRevision = ws.Cells[$"C{filaInicioItems}:C{filaInicioItems + totalTurnos - 1}"];
                 itemMetodoRevision.Merge = true;
-                itemMetodoRevision.Value = "";
+                itemMetodoRevision.Value = $"{hriData.ItemsRevised![i - 1].RevisionMethod!.Description}";
                 itemMetodoRevision.Style.HorizontalAlignment = OfficeOpenXml.Style.ExcelHorizontalAlignment.Center;
                 itemMetodoRevision.Style.VerticalAlignment = OfficeOpenXml.Style.ExcelVerticalAlignment.Center;
                 itemMetodoRevision.Style.Font.Size = bodyFontSize;
                 //criterio
                 var itemCriterio = ws.Cells[$"D{filaInicioItems}:D{filaInicioItems + totalTurnos - 1}"];
                 itemCriterio.Merge = true;
-                itemCriterio.Value = "";
+                itemCriterio.Value = $"{hriData.ItemsRevised![i - 1].Veredict!.Description}";
                 itemCriterio.Style.HorizontalAlignment = OfficeOpenXml.Style.ExcelHorizontalAlignment.Center;
                 itemCriterio.Style.VerticalAlignment = OfficeOpenXml.Style.ExcelVerticalAlignment.Center;
                 itemCriterio.Style.Font.Size = bodyFontSize;
                 //frecuencia
                 var itemFrecuencia = ws.Cells[$"E{filaInicioItems}:F{filaInicioItems + totalTurnos - 1}"];
                 itemFrecuencia.Merge = true;
-                itemFrecuencia.Value = "";
+                itemFrecuencia.Value = $"{hriData.ItemsRevised![i - 1].Frequency!.Description}";
                 itemFrecuencia.Style.HorizontalAlignment = OfficeOpenXml.Style.ExcelHorizontalAlignment.Center;
                 itemFrecuencia.Style.VerticalAlignment = OfficeOpenXml.Style.ExcelVerticalAlignment.Center;
                 itemFrecuencia.Style.Font.Size = bodyFontSize;
@@ -1200,6 +1202,24 @@ namespace SupervisorMobility.API.DataAccess.Services.HRIRepository
                     itemCiclo.Style.HorizontalAlignment = OfficeOpenXml.Style.ExcelHorizontalAlignment.Center;
                     itemCiclo.Style.VerticalAlignment = OfficeOpenXml.Style.ExcelVerticalAlignment.Center;
                     itemCiclo.Style.Font.Size = bodyFontSize;
+
+                    //si el item en el ciclo actual tiene revisiones diarias, colocamos el simbolo en la columna
+                    //correspondiente al dia de la revision
+                    if (hriData.ItemsRevised![i - 1].RevisionCycles![j-1].DailyRevisions!=null && hriData.ItemsRevised![i - 1].RevisionCycles![j-1].DailyRevisions!.Count > 0)
+                    {
+                        var dailyRevisions = hriData.ItemsRevised![i - 1].RevisionCycles![j-1].DailyRevisions!;
+                        foreach (var dailyRevision in dailyRevisions)
+                        {
+                            var diaRevision = dailyRevision.Day;
+                            var valorCelda = GetSimbolRevision(dailyRevision.Status!=null ? dailyRevision.Status : ""); //por ahora colocamos O, luego se debe colocar el valor correspondiente a cada revision diaria
+                            var cell = ws.Cells[filaInicioItems, 7 + diaRevision];
+                            cell.Value = valorCelda;
+                            cell.Style.HorizontalAlignment = OfficeOpenXml.Style.ExcelHorizontalAlignment.Center;
+                            cell.Style.VerticalAlignment = OfficeOpenXml.Style.ExcelVerticalAlignment.Center;
+                            cell.Style.Font.Size = bodyFontSize;
+                        }
+                    }
+
                     filaInicioItems++;
                 }
 
@@ -1243,15 +1263,39 @@ namespace SupervisorMobility.API.DataAccess.Services.HRIRepository
 
             var turnoVacioHorometro = ws.Cells[$"G{filaInicioTab2}:G{filaInicioTab2 + 2}"];
             turnoVacioHorometro.Merge = true;
-
-            for (int i = 1; i <= diasMes; i++)
+            var hourmeter = hriData.HourmeterRevision;
+            if(hourmeter != null && (hourmeter.DailyRevisions!=null && hourmeter.DailyRevisions.Count > 0))
             {
-                var horometroDia = ws.Cells[filaInicioTab2, 7 + i, filaInicioTab2 + 2, 7 + i];
-                horometroDia.Merge = true;
+                for (int i = 1; i <= diasMes; i++)
+                {
+                    var dailyHourmeter = hourmeter.DailyRevisions!.FirstOrDefault(dr => dr.Day == i);
+                    var horometroDia = ws.Cells[filaInicioTab2, 7 + i, filaInicioTab2 + 2, 7 + i];
+                    horometroDia.Merge = true;
 
-                //aqui colocaremos el valor del horometro de cada dia, por ahora lo dejamos vacio
+                    //aqui colocaremos el valor del horometro de cada dia, por ahora lo dejamos vacio
+                    if(dailyHourmeter != null)
+                    {
+                        horometroDia.Value = GetSimbolRevision(dailyHourmeter.Status!=null ? dailyHourmeter.Status : "");
+                        horometroDia.Style.HorizontalAlignment = OfficeOpenXml.Style.ExcelHorizontalAlignment.Center;
+                        horometroDia.Style.VerticalAlignment = OfficeOpenXml.Style.ExcelVerticalAlignment.Center;
+                        horometroDia.Style.Font.Size = bodyFontSize;
+                    }
 
+                }
             }
+            else
+            {
+                for (int i = 1; i <= diasMes; i++)
+                {
+                    var horometroDia = ws.Cells[filaInicioTab2, 7 + i, filaInicioTab2 + 2, 7 + i];
+                    horometroDia.Merge = true;
+                }
+            }
+
+
+
+
+            
             filaInicioTab2 += totalLineasTab2;
             var filaInicioTab2Aux = filaInicioTab2;
             var revisionesDiarias = 4;
@@ -1294,6 +1338,41 @@ namespace SupervisorMobility.API.DataAccess.Services.HRIRepository
 
             //Revision semanal
 
+            var revisionSemanal = ws.Cells[$"D{filaInicioTab2}:F{filaInicioTab2 + 1}"];
+            revisionSemanal.Merge = true;
+            revisionSemanal.Value = "REVISION SEMANAL SSV";
+            revisionSemanal.Style.HorizontalAlignment = OfficeOpenXml.Style.ExcelHorizontalAlignment.Center;
+            revisionSemanal.Style.VerticalAlignment = OfficeOpenXml.Style.ExcelVerticalAlignment.Center;
+            revisionSemanal.Style.Font.Size = headerFontSize;
+            revisionSemanal.Style.Font.Bold = true;
+            var auxColumnStart = 7;
+            for (int i = 1; i <= weeksOfMonth.Count; i++)
+            {
+
+                if (i == 1)
+                {
+                    var valorRevSemanal = ws.Cells[filaInicioTab2, auxColumnStart, filaInicioTab2 + 1, auxColumnStart + weeksOfMonth[i - 1].TotalDays]; //aqui colocaremos el resultado de la revision semanal del SSV, por ahora lo dejamos vacio
+                    valorRevSemanal.Merge = true;
+                    valorRevSemanal.Value = "O";
+                    valorRevSemanal.Style.HorizontalAlignment = OfficeOpenXml.Style.ExcelHorizontalAlignment.Center;
+                    valorRevSemanal.Style.VerticalAlignment = OfficeOpenXml.Style.ExcelVerticalAlignment.Center;
+                    valorRevSemanal.Style.Font.Size = bodyFontSize;
+                    auxColumnStart += weeksOfMonth[i - 1].TotalDays;
+
+                }
+                else
+                {
+                    var valorRevSemanal = ws.Cells[filaInicioTab2, auxColumnStart + 1, filaInicioTab2 + 1, auxColumnStart + weeksOfMonth[i - 1].TotalDays]; //aqui colocaremos el resultado de la revision semanal del SSV, por ahora lo dejamos vacio
+                    valorRevSemanal.Merge = true;
+                    valorRevSemanal.Value = "X";
+                    valorRevSemanal.Style.HorizontalAlignment = OfficeOpenXml.Style.ExcelHorizontalAlignment.Center;
+                    valorRevSemanal.Style.VerticalAlignment = OfficeOpenXml.Style.ExcelVerticalAlignment.Center;
+                    valorRevSemanal.Style.Font.Size = bodyFontSize;
+                    auxColumnStart += weeksOfMonth[i - 1].TotalDays;
+                }
+            }
+            filaInicioTab2 += 1;
+            totalLineasTab2 += 2;
 
 
             // dibujar el borde de la tabla de items de revision
@@ -1392,7 +1471,20 @@ namespace SupervisorMobility.API.DataAccess.Services.HRIRepository
             }
             return weeksOfMonth;
         }
-
+        private string GetSimbolRevision(string valor)
+        {
+            switch (valor)
+            {
+                case "Ok":
+                    return "O";
+                case "NG":
+                    return "X";
+                case "N/A":
+                    return "N/A";
+                default:
+                    return "";
+            }
+        }
 
         private void setAllBorders(ExcelRange range)
         {
