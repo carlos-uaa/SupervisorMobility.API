@@ -810,7 +810,7 @@ namespace SupervisorMobility.API.DataAccess.Services.HRIRepository
             try
             {
                 //obtenemos el hri con su informacion completa
-                var hriResponse = await GetHRIByMonthAndYearFilter(hriId,month,year);
+                var hriResponse = await GetHRIByMonthAndYearFilter(hriId, month, year);
 
                 ExcelPackage.License.SetNonCommercialPersonal("SupervisorMobility");
                 using var package = new ExcelPackage();
@@ -831,6 +831,7 @@ namespace SupervisorMobility.API.DataAccess.Services.HRIRepository
                     ws.Column(7 + i).Width = 3.29; //colocamos el ancho de las columnas de los dias
                 }
 
+                CreateHeaderSection(ws, hriResponse);
                 CreateRevisionItemSection(ws, hriResponse);
 
                 serviceResponse.Data = package.GetAsByteArray();
@@ -842,10 +843,210 @@ namespace SupervisorMobility.API.DataAccess.Services.HRIRepository
             {
                 serviceResponse.Success = false;
                 serviceResponse.Message = $"Error creating Excel file: {ex.Message + (ex.InnerException != null ? " - " + ex.InnerException.Message : "")}";
-                
+
             }
-           
+
             return serviceResponse;
+        }
+
+        private void CreateHeaderSection(ExcelWorksheet ws, GetHRIDto hriData)
+        {
+            ws.Cells["A1:B3"].Merge = true;
+
+            // Ejemplo: insertar imagen desde archivo local
+            var iconPath = Path.Combine(Directory.GetCurrentDirectory(), "uploads", "icon", "logo.png");
+            if (File.Exists(iconPath))
+            {
+                var picture = ws.Drawings.AddPicture("LogoEmpresa", new FileInfo(iconPath));
+
+                // Posición: fila 1, columna 1 (base 0 internamente)
+                picture.SetPosition(0, 0, 0, 0);
+
+                // Tamaño en pixeles
+                picture.SetSize(240, 70);
+            }
+
+
+            ws.Cells["C3:E4"].Merge = true;
+            ws.Cells["C3:E4"].Value = "PROCEDIMIENTO DE REVISION INICIAL Y HOJA DE REGISTRO";
+            ws.Cells["C3:E4"].Style.HorizontalAlignment = OfficeOpenXml.Style.ExcelHorizontalAlignment.Center;
+            ws.Cells["C3:E4"].Style.VerticalAlignment = OfficeOpenXml.Style.ExcelVerticalAlignment.Center;
+            ws.Cells["C3:E4"].Style.Font.UnderLineType = OfficeOpenXml.Style.ExcelUnderLineType.Single;
+            ws.Cells["C3:E4"].Style.Font.UnderLine = true;
+            ws.Cells["C3:E4"].Style.Font.Bold = true;
+            ws.Cells["C3:E4"].Style.Font.Size = 14;
+
+
+            ws.Cells["F1:H2"].Merge = true;
+            ws.Cells["F1:H2"].Value = "Nombre del equipo";
+            ws.Cells["F1:H2"].Style.Font.Size = 10;
+            ws.Cells["F1:H2"].Style.HorizontalAlignment = OfficeOpenXml.Style.ExcelHorizontalAlignment.Center;
+            ws.Cells["F1:H2"].Style.VerticalAlignment = OfficeOpenXml.Style.ExcelVerticalAlignment.Center;
+            setAllBorders(ws.Cells["F1:H2"]);
+
+            ws.Cells["I1:M2"].Merge = true;
+            ws.Cells["I1:M2"].Value = hriData.NameOfItem != null ? hriData.NameOfItem.Name : "N/A";
+            ws.Cells["I1:M2"].Style.Font.Size = 10;
+            ws.Cells["I1:M2"].Style.Font.Bold = true;
+            ws.Cells["I1:M2"].Style.HorizontalAlignment = OfficeOpenXml.Style.ExcelHorizontalAlignment.Center;
+            ws.Cells["I1:M2"].Style.VerticalAlignment = OfficeOpenXml.Style.ExcelVerticalAlignment.Center;
+            setAllBorders(ws.Cells["I1:M2"]);
+
+            ws.Cells["N1:Q2"].Merge = true;
+            ws.Cells["N1:Q2"].Value = "Numero";
+            ws.Cells["N1:Q2"].Style.Font.Size = 10;
+            ws.Cells["N1:Q2"].Style.HorizontalAlignment = OfficeOpenXml.Style.ExcelHorizontalAlignment.Center;
+            ws.Cells["N1:Q2"].Style.VerticalAlignment = OfficeOpenXml.Style.ExcelVerticalAlignment.Center;
+            setAllBorders(ws.Cells["N1:Q2"]);
+
+            ws.Cells["R1:AB2"].Merge = true;
+            ws.Cells["R1:AB2"].Value = hriData.ControlNumber != null ? hriData.ControlNumber : "N/A";
+            ws.Cells["R1:AB2"].Style.Font.Size = 24;
+            ws.Cells["R1:AB2"].Style.Font.Bold = true;
+            ws.Cells["R1:AB2"].Style.HorizontalAlignment = OfficeOpenXml.Style.ExcelHorizontalAlignment.Center;
+            ws.Cells["R1:AB2"].Style.VerticalAlignment = OfficeOpenXml.Style.ExcelVerticalAlignment.Center;
+            setAllBorders(ws.Cells["R1:AB2"]);
+
+
+            ws.Cells["AD1:AK1"].Merge = true;
+            ws.Cells["AD1:AK1"].Value = "Departamento que realiza";
+            ws.Cells["AD1:AK1"].Style.Font.Size = 11;
+            ws.Cells["AD1:AK1"].Style.HorizontalAlignment = OfficeOpenXml.Style.ExcelHorizontalAlignment.Center;
+            ws.Cells["AD1:AK1"].Style.VerticalAlignment = OfficeOpenXml.Style.ExcelVerticalAlignment.Center;
+            setAllBorders(ws.Cells["AD1:AK1"]);
+
+            ws.Cells["AD2:AK2"].Merge = true;
+            ws.Cells["AD2:AK2"].Value = hriData.Department != null ? hriData.Department : "N/A";
+            ws.Cells["AD2:AK2"].Style.Font.Size = 11;
+            ws.Cells["AD2:AK2"].Style.HorizontalAlignment = OfficeOpenXml.Style.ExcelHorizontalAlignment.Center;
+            ws.Cells["AD2:AK2"].Style.VerticalAlignment = OfficeOpenXml.Style.ExcelVerticalAlignment.Center;
+            setAllBorders(ws.Cells["AD2:AK2"]);
+
+            ws.Cells["AD3:AK3"].Merge = true;
+            ws.Cells["AD3:AK3"].Value = "Supervisor";
+            ws.Cells["AD3:AK3"].Style.Font.Size = 11;
+            ws.Cells["AD3:AK3"].Style.HorizontalAlignment = OfficeOpenXml.Style.ExcelHorizontalAlignment.Center;
+            ws.Cells["AD3:AK3"].Style.VerticalAlignment = OfficeOpenXml.Style.ExcelVerticalAlignment.Center;
+            setAllBorders(ws.Cells["AD3:AK3"]);
+
+            ws.Cells["AD4:AK5"].Merge = true;
+            ws.Cells["AD4:AK5"].Value = hriData.SSV != null ? hriData.SSV.Name : "N/A";
+            ws.Cells["AD4:AK5"].Style.Font.Size = 11;
+            ws.Cells["AD4:AK5"].Style.HorizontalAlignment = OfficeOpenXml.Style.ExcelHorizontalAlignment.Center;
+            ws.Cells["AD4:AK5"].Style.VerticalAlignment = OfficeOpenXml.Style.ExcelVerticalAlignment.Center;
+            setAllBorders(ws.Cells["AD4:AK5"]);
+
+
+            ws.Cells["F3:G3"].Merge = true;
+            ws.Cells["F3:G3"].Value = "Nombre de linea";
+            ws.Cells["F3:G3"].Style.Font.Size = 10;
+            ws.Cells["F3:G3"].Style.HorizontalAlignment = OfficeOpenXml.Style.ExcelHorizontalAlignment.Center;
+            ws.Cells["F3:G3"].Style.VerticalAlignment = OfficeOpenXml.Style.ExcelVerticalAlignment.Center;
+            setAllBorders(ws.Cells["F3:G3"]);
+
+            ws.Cells["H3:Q3"].Merge = true;
+            ws.Cells["H3:Q3"].Value = hriData.Line != null ? hriData.Line.LineName : "N/A";
+            ws.Cells["H3:Q3"].Style.Font.Size = 16;
+            ws.Cells["H3:Q3"].Style.Font.Bold = true;
+            ws.Cells["H3:Q3"].Style.HorizontalAlignment = OfficeOpenXml.Style.ExcelHorizontalAlignment.Center;
+            ws.Cells["H3:Q3"].Style.VerticalAlignment = OfficeOpenXml.Style.ExcelVerticalAlignment.Center;
+            setAllBorders(ws.Cells["H3:Q3"]);
+
+            ws.Cells["R3:W3"].Merge = true;
+            ws.Cells["R3:W3"].Value = "Dock asignado";
+            ws.Cells["R3:W3"].Style.Font.Size = 12;
+            ws.Cells["R3:W3"].Style.HorizontalAlignment = OfficeOpenXml.Style.ExcelHorizontalAlignment.Center;
+            ws.Cells["R3:W3"].Style.VerticalAlignment = OfficeOpenXml.Style.ExcelVerticalAlignment.Center;
+            setAllBorders(ws.Cells["R3:W3"]);
+
+            ws.Cells["X3:AB3"].Merge = true;
+            ws.Cells["X3:AB3"].Value = hriData.Dock != null ? hriData.Dock.DockName : "N/A";
+            ws.Cells["X3:AB3"].Style.Font.Size = 18;
+            ws.Cells["X3:AB3"].Style.Font.Bold = true;
+            ws.Cells["X3:AB3"].Style.HorizontalAlignment = OfficeOpenXml.Style.ExcelHorizontalAlignment.Center;
+            ws.Cells["X3:AB3"].Style.VerticalAlignment = OfficeOpenXml.Style.ExcelVerticalAlignment.Center;
+            setAllBorders(ws.Cells["X3:AB3"]);
+
+
+            // Unimos las celadas para las imagenes
+            ws.Cells["A9:AK24"].Merge = true;
+            ws.Cells["A9:AK24"].Value = "";
+            setOutBorders(ws.Cells["A9:AK26"]);
+
+            // calculamos el ancho de A9 a AK9
+            double anchoTotal = 0;
+            for (int i = 1; i <= 37; i++)  // A=1, B=2, ..., AK=37
+            {
+                anchoTotal += ws.Column(i).Width;
+            }
+            double pixeles = anchoTotal * 7;  // Aproximado
+
+
+            // Ejemplo: insertar imagen desde archivo local
+            var imageAmount = hriData.Images != null ? hriData.Images.Count : 0; // default 9
+            var rowStart = 13; // Fila 9
+            var colStart = 1;
+            var colEnd = 37;
+            var maxWidth = 200;
+            var maxHeight = 158;
+            var gap = 10;
+
+            PositionarImagenesEnRango(ws, rowStart, colStart, colEnd, imageAmount, maxWidth, maxHeight, gap, hriData.Images);
+        }
+        
+        private void PositionarImagenesEnRango(ExcelWorksheet ws, int rowStart, 
+            int colStart, int colEnd, int imageAmount, int maxWidth, int maxHeight, int gap, List<HRImages> images)
+        {
+            // Calcular ancho total disponible en píxeles
+            double anchoTotal = 0;
+            for (int i = colStart; i <= colEnd; i++)
+            {
+                anchoTotal += ws.Column(i).Width;
+            }
+            double pixelesTotal = anchoTotal * 7;
+
+            // Ancho por imagen (reducido por los gaps entre imágenes)
+            double tamanoPorImagen = (pixelesTotal - (gap * (imageAmount - 1))) / imageAmount;
+            if (tamanoPorImagen > maxWidth) tamanoPorImagen = maxWidth;
+
+            
+            // Posicionar cada imagen
+            for (int i = 0; i < imageAmount; i++)
+            {
+                var imgsrc = images != null && images.Count > i ? images[i].ImageUrl : null;
+                if (string.IsNullOrEmpty(imgsrc)) continue;
+                var imagePath = Path.Combine(Directory.GetCurrentDirectory(), imgsrc);
+                if (!File.Exists(imagePath))
+                {
+                    imagePath = Path.Combine(Directory.GetCurrentDirectory(), "uploads", "icon", "logo.png");   
+                }
+
+                // Posición X acumulada en píxeles
+                double posicionXTotal = i * (tamanoPorImagen + gap);
+                
+                // Convertir píxeles totales a columna + offsetX
+                double pixelesAcumulados = 0;
+                int columnaActual = colStart;
+                
+                for (int col = colStart; col <= colEnd; col++)
+                {
+                    double anchoColumna = ws.Column(col).Width * 7;
+                    
+                    if (pixelesAcumulados + anchoColumna > posicionXTotal)
+                    {
+                        columnaActual = col;
+                        break;
+                    }
+                    
+                    pixelesAcumulados += anchoColumna;
+                }
+                
+                double offsetX = posicionXTotal - pixelesAcumulados;
+                
+                var picture = ws.Drawings.AddPicture($"Imagen{i}", new FileInfo(imagePath));
+                picture.SetPosition(rowStart - 1, 0, columnaActual - 1, (int)offsetX);
+                picture.SetSize((int)tamanoPorImagen, (tamanoPorImagen > maxHeight) ? maxHeight : (int)tamanoPorImagen);
+            }
         }
 
         private void CreateRevisionItemSection(ExcelWorksheet ws, GetHRIDto hriData)
@@ -1198,6 +1399,34 @@ namespace SupervisorMobility.API.DataAccess.Services.HRIRepository
                 }
             }
             return weeksOfMonth;
+        }
+
+
+        private void setAllBorders(ExcelRange range)
+        {
+            range.Style.Border.Top.Style = OfficeOpenXml.Style.ExcelBorderStyle.Thin;
+            range.Style.Border.Bottom.Style = OfficeOpenXml.Style.ExcelBorderStyle.Thin;
+            range.Style.Border.Left.Style = OfficeOpenXml.Style.ExcelBorderStyle.Thin;
+            range.Style.Border.Right.Style = OfficeOpenXml.Style.ExcelBorderStyle.Thin;
+        }
+
+        private void setOutBorders(ExcelRange range)
+        {
+            var startRow = range.EntireRow.StartRow;
+            var endRow = range.EntireRow.EndRow;
+            var startCol = range.EntireColumn.StartColumn;
+            var endCol = range.EntireColumn.EndColumn;
+
+            for(int col = startCol; col <= endCol; col++)
+            {
+                range.Worksheet.Cells[startRow, col].Style.Border.Top.Style = OfficeOpenXml.Style.ExcelBorderStyle.Thin;
+                range.Worksheet.Cells[endRow, col].Style.Border.Bottom.Style = OfficeOpenXml.Style.ExcelBorderStyle.Thin;
+            }
+            for (int row = startRow; row <= endRow; row++)
+            {
+                range.Worksheet.Cells[row, startCol].Style.Border.Left.Style = OfficeOpenXml.Style.ExcelBorderStyle.Thin;
+                range.Worksheet.Cells[row, endCol].Style.Border.Right.Style = OfficeOpenXml.Style.ExcelBorderStyle.Thin;
+            }
         }
     }
 }
