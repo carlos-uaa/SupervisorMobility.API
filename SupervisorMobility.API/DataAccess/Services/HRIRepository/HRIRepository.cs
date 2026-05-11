@@ -831,7 +831,7 @@ namespace SupervisorMobility.API.DataAccess.Services.HRIRepository
                     ws.Column(7 + i).Width = 3.29; //colocamos el ancho de las columnas de los dias
                 }
 
-                CreateHeaderSection(ws, hriResponse);
+                CreateHeaderSection(ws, hriResponse, diasMes);
                 CreateRevisionItemSection(ws, hriResponse);
 
                 serviceResponse.Data = package.GetAsByteArray();
@@ -849,7 +849,7 @@ namespace SupervisorMobility.API.DataAccess.Services.HRIRepository
             return serviceResponse;
         }
 
-        private void CreateHeaderSection(ExcelWorksheet ws, GetHRIDto hriData)
+        private void CreateHeaderSection(ExcelWorksheet ws, GetHRIDto hriData, int diasMes)
         {
             ws.Cells["A1:B3"].Merge = true;
 
@@ -969,24 +969,16 @@ namespace SupervisorMobility.API.DataAccess.Services.HRIRepository
 
 
             // Unimos las celadas para las imagenes
-            ws.Cells["A9:AK24"].Merge = true;
-            ws.Cells["A9:AK24"].Value = "";
-            setOutBorders(ws.Cells["A9:AK26"]);
-
-            // calculamos el ancho de A9 a AK9
-            double anchoTotal = 0;
-            for (int i = 1; i <= 37; i++)  // A=1, B=2, ..., AK=37
-            {
-                anchoTotal += ws.Column(i).Width;
-            }
-            double pixeles = anchoTotal * 7;  // Aproximado
-
+            var lastCol = ConvertirNumeroALetraColumna(diasMes + 7); // Columna AK
+            ws.Cells[$"A9:{lastCol}24"].Merge = true;
+            ws.Cells[$"A9:{lastCol}24"].Value = "";
+            setOutBorders(ws.Cells[$"A9:{lastCol}26"]);
 
             // Ejemplo: insertar imagen desde archivo local
             var imageAmount = hriData.Images != null ? hriData.Images.Count : 0; // default 9
             var rowStart = 13; // Fila 9
             var colStart = 1;
-            var colEnd = 37;
+            var colEnd = diasMes + 7; // Columna AK
             var maxWidth = 200;
             var maxHeight = 158;
             var gap = 10;
@@ -1417,7 +1409,7 @@ namespace SupervisorMobility.API.DataAccess.Services.HRIRepository
             var startCol = range.EntireColumn.StartColumn;
             var endCol = range.EntireColumn.EndColumn;
 
-            for(int col = startCol; col <= endCol; col++)
+            for (int col = startCol; col <= endCol; col++)
             {
                 range.Worksheet.Cells[startRow, col].Style.Border.Top.Style = OfficeOpenXml.Style.ExcelBorderStyle.Thin;
                 range.Worksheet.Cells[endRow, col].Style.Border.Bottom.Style = OfficeOpenXml.Style.ExcelBorderStyle.Thin;
@@ -1427,6 +1419,32 @@ namespace SupervisorMobility.API.DataAccess.Services.HRIRepository
                 range.Worksheet.Cells[row, startCol].Style.Border.Left.Style = OfficeOpenXml.Style.ExcelBorderStyle.Thin;
                 range.Worksheet.Cells[row, endCol].Style.Border.Right.Style = OfficeOpenXml.Style.ExcelBorderStyle.Thin;
             }
+        }
+        
+        private string ConvertirNumeroALetraColumna(int numero)
+        {
+            string columna = "";
+
+            while (numero > 0)
+            {
+                numero--;
+                columna = (char)('A' + numero % 26) + columna;
+                numero /= 26;
+            }
+
+            return columna;
+        }
+
+        private int ConvertirLetraColumnaANumero(string columna)
+        {
+            int numero = 0;
+            
+            foreach (char c in columna.ToUpper())
+            {
+                numero = numero * 26 + (c - 'A' + 1);
+            }
+            
+            return numero;
         }
     }
 }
