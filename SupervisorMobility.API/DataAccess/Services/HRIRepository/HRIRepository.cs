@@ -15,6 +15,7 @@ using SupervisorMobility.API.Models.HRIRevisionCycles;
 using SupervisorMobility.API.Models.HRIRevisionItemsDtos;
 using SupervisorMobility.API.Models.HRIWeeklyRevisions;
 using SupervisorMobility.API.Models.NotificationDtos;
+using System.Drawing;
 
 
 namespace SupervisorMobility.API.DataAccess.Services.HRIRepository
@@ -1056,6 +1057,7 @@ namespace SupervisorMobility.API.DataAccess.Services.HRIRepository
             var varMes = new DateTime(year, month, 1).ToString("MMMM").ToUpper();
             var varAnio = year;
             var weeksOfMonth = GetMonthWeeks(month, varAnio);
+            var satAndSunDays = GetSaturdaysAndSundays(month, varAnio);
             //calcular el dia en que empezo este mes
             var fecha = new DateTime(varAnio, month, 1);
             var diaInicio = fecha.DayOfWeek;   // Friday, Monday, etc.
@@ -1210,9 +1212,19 @@ namespace SupervisorMobility.API.DataAccess.Services.HRIRepository
                     itemCiclo.Style.VerticalAlignment = OfficeOpenXml.Style.ExcelVerticalAlignment.Center;
                     itemCiclo.Style.Font.Size = bodyFontSize;
 
-                    //si el item en el ciclo actual tiene revisiones diarias, colocamos el simbolo en la columna
-                    //correspondiente al dia de la revision
-                    if (hriData.ItemsRevised![i - 1].RevisionCycles![j-1].DailyRevisions!=null && hriData.ItemsRevised![i - 1].RevisionCycles![j-1].DailyRevisions!.Count > 0)
+                    //pintamos las celdas de gris si el dia es sabado o domingo
+                       foreach (var SatOrSun in satAndSunDays)
+                        {
+                            var cell = ws.Cells[filaInicioItems, 7 + SatOrSun];
+                            cell.Style.Fill.PatternType = OfficeOpenXml.Style.ExcelFillStyle.Solid;
+                            cell.Style.Fill.BackgroundColor.SetColor(ColorTranslator.FromHtml("#787575"));
+                        }
+
+
+
+                        //si el item en el ciclo actual tiene revisiones diarias, colocamos el simbolo en la columna
+                        //correspondiente al dia de la revision
+                        if (hriData.ItemsRevised![i - 1].RevisionCycles![j-1].DailyRevisions!=null && hriData.ItemsRevised![i - 1].RevisionCycles![j-1].DailyRevisions!.Count > 0)
                     {
                         var dailyRevisions = hriData.ItemsRevised![i - 1].RevisionCycles![j-1].DailyRevisions!;
                         foreach (var dailyRevision in dailyRevisions)
@@ -1276,11 +1288,19 @@ namespace SupervisorMobility.API.DataAccess.Services.HRIRepository
                 for (int i = 1; i <= diasMes; i++)
                 {
                     var dailyHourmeter = hourmeter.DailyRevisions!.FirstOrDefault(dr => dr.Day == i);
+
+
                     var horometroDia = ws.Cells[filaInicioTab2, 7 + i, filaInicioTab2 + 2, 7 + i];
                     horometroDia.Merge = true;
+                    if(satAndSunDays.Contains(i))
+                    {
+                        horometroDia.Style.Fill.PatternType = OfficeOpenXml.Style.ExcelFillStyle.Solid;
+                        horometroDia.Style.Fill.BackgroundColor.SetColor(ColorTranslator.FromHtml("#787575"));
+                    }
 
-                    //aqui colocaremos el valor del horometro de cada dia, por ahora lo dejamos vacio
-                    if(dailyHourmeter != null)
+
+                    //si existe una revision diaria para el dia actual colocamos el simbolo correspondiente en la celda
+                    if (dailyHourmeter != null)
                     {
                         horometroDia.Value = GetSimbolRevision(dailyHourmeter.Status!=null ? dailyHourmeter.Status : "");
                         horometroDia.Style.HorizontalAlignment = OfficeOpenXml.Style.ExcelHorizontalAlignment.Center;
@@ -1296,6 +1316,11 @@ namespace SupervisorMobility.API.DataAccess.Services.HRIRepository
                 {
                     var horometroDia = ws.Cells[filaInicioTab2, 7 + i, filaInicioTab2 + 2, 7 + i];
                     horometroDia.Merge = true;
+                    if (satAndSunDays.Contains(i))
+                    {
+                        horometroDia.Style.Fill.PatternType = OfficeOpenXml.Style.ExcelFillStyle.Solid;
+                        horometroDia.Style.Fill.BackgroundColor.SetColor(ColorTranslator.FromHtml("#787575"));
+                    }
                 }
             }
 
@@ -1305,9 +1330,12 @@ namespace SupervisorMobility.API.DataAccess.Services.HRIRepository
             
             filaInicioTab2 += totalLineasTab2;
             var filaInicioTab2Aux = filaInicioTab2;
-            var revisionesDiarias = 4;
+            
+            
             for (int i = 1; i <= totalTurnos; i++)
             {
+                var dailyRevisions = hriData.HriCycles[i - 1].DailyRevisions;
+
                 var revisorOp = ws.Cells[$"D{filaInicioTab2Aux}:F{filaInicioTab2Aux}"];
                 revisorOp.Merge = true;
                 revisorOp.Value = $"REVISO OP {i}ER T";
@@ -1315,14 +1343,7 @@ namespace SupervisorMobility.API.DataAccess.Services.HRIRepository
                 revisorOp.Style.VerticalAlignment = OfficeOpenXml.Style.ExcelVerticalAlignment.Center;
                 revisorOp.Style.Font.Size = headerFontSize;
                 revisorOp.Style.Font.Bold = true;
-                for (int j = 1; j <= revisionesDiarias; j++)
-                {
-                    var valorRev = ws.Cells[filaInicioTab2Aux, 7 + j]; //aqui colocaremos el resultado de cada revision diaria, por ahora lo dejamos vacio
-                    valorRev.Value = "O";
-                    valorRev.Style.HorizontalAlignment = OfficeOpenXml.Style.ExcelHorizontalAlignment.Center;
-                    valorRev.Style.VerticalAlignment = OfficeOpenXml.Style.ExcelVerticalAlignment.Center;
-                    valorRev.Style.Font.Size = bodyFontSize;
-                }
+                
                 var revisionSv = ws.Cells[$"D{filaInicioTab2Aux + totalTurnos}:F{filaInicioTab2Aux + totalTurnos}"];
                 revisionSv.Merge = true;
                 revisionSv.Value = $"REVISO SV {i}ER T";
@@ -1330,14 +1351,54 @@ namespace SupervisorMobility.API.DataAccess.Services.HRIRepository
                 revisionSv.Style.VerticalAlignment = OfficeOpenXml.Style.ExcelVerticalAlignment.Center;
                 revisionSv.Style.Font.Size = headerFontSize;
                 revisionSv.Style.Font.Bold = true;
-                for (int j2 = 1; j2 <= revisionesDiarias; j2++)
+
+                //pintamos las celdas de gris si el dia es sabado o domingo
+                foreach (var SatOrSun in satAndSunDays)
                 {
-                    var valorRev = ws.Cells[filaInicioTab2Aux + totalTurnos, 7 + j2]; //aqui colocaremos el resultado de cada revision diaria, por ahora lo dejamos vacio
-                    valorRev.Value = "X";
-                    valorRev.Style.HorizontalAlignment = OfficeOpenXml.Style.ExcelHorizontalAlignment.Center;
-                    valorRev.Style.VerticalAlignment = OfficeOpenXml.Style.ExcelVerticalAlignment.Center;
-                    valorRev.Style.Font.Size = bodyFontSize;
+                    var cellOp = ws.Cells[filaInicioTab2Aux, 7 + SatOrSun];
+                    cellOp.Style.Fill.PatternType = OfficeOpenXml.Style.ExcelFillStyle.Solid;
+                    cellOp.Style.Fill.BackgroundColor.SetColor(ColorTranslator.FromHtml("#787575"));
+
+                    var cellSv = ws.Cells[filaInicioTab2Aux + totalTurnos, 7 + SatOrSun];
+                    cellSv.Style.Fill.PatternType = OfficeOpenXml.Style.ExcelFillStyle.Solid;
+                    cellSv.Style.Fill.BackgroundColor.SetColor(ColorTranslator.FromHtml("#787575"));
                 }
+
+                if (dailyRevisions != null && dailyRevisions.Count > 0)
+                {   //optenemos el id del operador y el sv del ciclo con ello filtramos las revisiones diarias
+                    var operatorId = hriData.HriCycles[i - 1].Operator != null ? hriData.HriCycles[i - 1].OperatorUserId : 0;
+                    var svId = hriData.HriCycles[i - 1].Supervisor != null ? hriData.HriCycles[i - 1].SupervisorUserId : 0;
+                    if(operatorId!=0 && dailyRevisions.Any(dr=>dr.UserId == operatorId))
+                    {
+                        //colocamos el simbolo de cada revision diaria del operador en la columna del dia
+                        var dailyRevisionOp = dailyRevisions.Where(dr => dr.UserId == operatorId).ToList();
+                        for (int j = 0; j < dailyRevisionOp.Count; j++)
+                        {
+                            var valorRev = ws.Cells[filaInicioTab2Aux, 7 + dailyRevisionOp[j].Day]; //aqui colocaremos el resultado de cada revision diaria, por ahora lo dejamos vacio
+                            valorRev.Value = GetSimbolRevision(dailyRevisionOp[j].Status!=null ? dailyRevisionOp[j].Status : "");
+                            valorRev.Style.HorizontalAlignment = OfficeOpenXml.Style.ExcelHorizontalAlignment.Center;
+                            valorRev.Style.VerticalAlignment = OfficeOpenXml.Style.ExcelVerticalAlignment.Center;
+                            valorRev.Style.Font.Size = bodyFontSize;
+                        }
+                    }
+                    
+                    if(svId!=0 && dailyRevisions.Any(dr => dr.UserId == svId))
+                    {
+                        //colocamos el simbolo de cada revision diaria del sv en la columna del dia
+                        var dailyRevisionSv = dailyRevisions.Where(dr => dr.UserId == svId).ToList();
+                        for (int j2 = 0; j2 < dailyRevisionSv.Count; j2++)
+                        {
+                            var valorRev = ws.Cells[filaInicioTab2Aux + totalTurnos, 7 + dailyRevisionSv[j2].Day]; //aqui colocaremos el resultado de cada revision diaria, por ahora lo dejamos vacio
+                            valorRev.Value = GetSimbolRevision(dailyRevisionSv[j2].Status!=null ? dailyRevisionSv[j2].Status : "");
+                            valorRev.Style.HorizontalAlignment = OfficeOpenXml.Style.ExcelHorizontalAlignment.Center;
+                            valorRev.Style.VerticalAlignment = OfficeOpenXml.Style.ExcelVerticalAlignment.Center;
+                            valorRev.Style.Font.Size = bodyFontSize;
+                        }
+                    }
+                    
+                }
+
+                
                 filaInicioTab2Aux++;
                 filaInicioTab2 += 2;
                 totalLineasTab2 += 2;
@@ -1360,7 +1421,15 @@ namespace SupervisorMobility.API.DataAccess.Services.HRIRepository
                 {
                     var valorRevSemanal = ws.Cells[filaInicioTab2, auxColumnStart, filaInicioTab2 + 1, auxColumnStart + weeksOfMonth[i - 1].TotalDays]; //aqui colocaremos el resultado de la revision semanal del SSV, por ahora lo dejamos vacio
                     valorRevSemanal.Merge = true;
-                    valorRevSemanal.Value = "O";
+                    //si existe una revision semanal para la semana actual colocamos el simbolo correspondiente en la celda
+                    if (hriData.WeeklyRevisions != null && (hriData.WeeklyRevisions.Count > 0 && hriData.WeeklyRevisions.Any(wr=>wr.Week==i)))
+                    {
+                        valorRevSemanal.Value = GetSimbolRevision(hriData.WeeklyRevisions.First(wr=>wr.Week==i).Status!=null ? hriData.WeeklyRevisions.First(wr=>wr.Week==i).Status! : "");
+                    }
+                    else
+                    {
+                        valorRevSemanal.Value = "";
+                    }
                     valorRevSemanal.Style.HorizontalAlignment = OfficeOpenXml.Style.ExcelHorizontalAlignment.Center;
                     valorRevSemanal.Style.VerticalAlignment = OfficeOpenXml.Style.ExcelVerticalAlignment.Center;
                     valorRevSemanal.Style.Font.Size = bodyFontSize;
@@ -1371,7 +1440,15 @@ namespace SupervisorMobility.API.DataAccess.Services.HRIRepository
                 {
                     var valorRevSemanal = ws.Cells[filaInicioTab2, auxColumnStart + 1, filaInicioTab2 + 1, auxColumnStart + weeksOfMonth[i - 1].TotalDays]; //aqui colocaremos el resultado de la revision semanal del SSV, por ahora lo dejamos vacio
                     valorRevSemanal.Merge = true;
-                    valorRevSemanal.Value = "X";
+                    //si existe una revision semanal para la semana actual colocamos el simbolo correspondiente en la celda
+                    if (hriData.WeeklyRevisions != null && (hriData.WeeklyRevisions.Count > 0 && hriData.WeeklyRevisions.Any(wr => wr.Week == i)))
+                    {
+                        valorRevSemanal.Value = GetSimbolRevision(hriData.WeeklyRevisions.First(wr => wr.Week == i).Status != null ? hriData.WeeklyRevisions.First(wr => wr.Week == i).Status! : "");
+                    }
+                    else
+                    {
+                        valorRevSemanal.Value = "";
+                    }
                     valorRevSemanal.Style.HorizontalAlignment = OfficeOpenXml.Style.ExcelHorizontalAlignment.Center;
                     valorRevSemanal.Style.VerticalAlignment = OfficeOpenXml.Style.ExcelVerticalAlignment.Center;
                     valorRevSemanal.Style.Font.Size = bodyFontSize;
@@ -1406,16 +1483,10 @@ namespace SupervisorMobility.API.DataAccess.Services.HRIRepository
             borderRangeTab2.Style.Border.Left.Color.SetColor(System.Drawing.Color.Black);
             borderRangeTab2.Style.Border.Right.Color.SetColor(System.Drawing.Color.Black);
 
-
-
-
-
-
-
-
-
         }
+
         private List<WeeksOfMonthDto> GetMonthWeeks(int mes, int anio)
+
         {
             //definir los dias que tendra cada semana en nuestro caso la semana empieza en viernes y termina en jueves
             var weeksOfMonth = new List<WeeksOfMonthDto>();
@@ -1425,32 +1496,32 @@ namespace SupervisorMobility.API.DataAccess.Services.HRIRepository
             switch (diaInicioSemana)
             {
                 case 0: //domingo
-                    weeksOfMonth.Add(new WeeksOfMonthDto { WeekNumber = 1, TotalDays = 5 });
-                    diasRestantes -= 5;
-                    break;
-                case 1: //lunes
-                    weeksOfMonth.Add(new WeeksOfMonthDto { WeekNumber = 1, TotalDays = 4 });
-                    diasRestantes -= 4;
-                    break;
-                case 2: //martes
-                    weeksOfMonth.Add(new WeeksOfMonthDto { WeekNumber = 1, TotalDays = 3 });
-                    diasRestantes -= 3;
-                    break;
-                case 3: //miercoles
-                    weeksOfMonth.Add(new WeeksOfMonthDto { WeekNumber = 1, TotalDays = 2 });
-                    diasRestantes -= 2;
-                    break;
-                case 4: //jueves
                     weeksOfMonth.Add(new WeeksOfMonthDto { WeekNumber = 1, TotalDays = 1 });
                     diasRestantes -= 1;
                     break;
-                case 5: //viernes
+                case 1: //lunes
                     weeksOfMonth.Add(new WeeksOfMonthDto { WeekNumber = 1, TotalDays = 7 });
                     diasRestantes -= 7;
                     break;
-                case 6: //sabado
+                case 2: //martes
                     weeksOfMonth.Add(new WeeksOfMonthDto { WeekNumber = 1, TotalDays = 6 });
                     diasRestantes -= 6;
+                    break;
+                case 3: //miercoles
+                    weeksOfMonth.Add(new WeeksOfMonthDto { WeekNumber = 1, TotalDays = 5 });
+                    diasRestantes -= 5;
+                    break;
+                case 4: //jueves
+                    weeksOfMonth.Add(new WeeksOfMonthDto { WeekNumber = 1, TotalDays = 4 });
+                    diasRestantes -= 4;
+                    break;
+                case 5: //viernes
+                    weeksOfMonth.Add(new WeeksOfMonthDto { WeekNumber = 1, TotalDays = 3 });
+                    diasRestantes -= 3;
+                    break;
+                case 6: //sabado
+                    weeksOfMonth.Add(new WeeksOfMonthDto { WeekNumber = 1, TotalDays = 2 });
+                    diasRestantes -= 2;
                     break;
             }
             if (diasRestantes % 7 != 0)
@@ -1478,6 +1549,20 @@ namespace SupervisorMobility.API.DataAccess.Services.HRIRepository
             }
             return weeksOfMonth;
         }
+        private List<int> GetSaturdaysAndSundays(int mes, int anio)
+        {
+            var diasMes = DateTime.DaysInMonth(anio, mes);
+            var dias = new List<int>();
+            for (int i = 1; i <= diasMes; i++)
+            {
+                var diaSemana = new DateTime(anio, mes, i).DayOfWeek;
+                if (diaSemana == DayOfWeek.Sunday || diaSemana == DayOfWeek.Saturday)
+                {
+                    dias.Add(i);
+                }
+            }
+            return dias;
+        }
         private string GetSimbolRevision(string valor)
         {
             switch (valor)
@@ -1486,7 +1571,7 @@ namespace SupervisorMobility.API.DataAccess.Services.HRIRepository
                     return "O";
                 case "NG":
                     return "X";
-                case "N/A":
+                case "NA":
                     return "N/A";
                 default:
                     return "";
