@@ -147,6 +147,57 @@ namespace SupervisorMobility.API.DataAccess.Services.HRIServices
                         Message = $"Validation error: {ex.Message}"
                     };
                 }
+
+
+                // Move new images from temp folder to definitive folder
+                images.ForEach(img =>
+                {
+                    if (img.ImageId != 0)
+                    {
+                        return;
+                    }
+
+                    var tempFilePath = Path.Combine(_env.ContentRootPath, img.ImageUrl);
+                    if (File.Exists(tempFilePath))
+                    {
+                        var fileName = Path.GetFileName(tempFilePath);
+                        var destinationDirectory = Path.Combine(_env.ContentRootPath, "uploads", "HRIImages");
+                        if (!Directory.Exists(destinationDirectory))
+                        {
+                            Directory.CreateDirectory(destinationDirectory);
+                        }
+
+                        destinationDirectory = Path.Combine(destinationDirectory, img.HriId.ToString());
+                        if (!Directory.Exists(destinationDirectory))
+                        {
+                            Directory.CreateDirectory(destinationDirectory);
+                        }
+
+                        var destinationFilePath = Path.Combine(destinationDirectory, fileName);
+                        File.Move(tempFilePath, destinationFilePath);
+
+                        // Update the ImageUrl to the new location
+                        img.ImageUrl = Path.Combine("uploads", "HRIImages", img.HriId.ToString(), fileName).Replace("\\", "/");
+                    }
+                    else
+                    {
+                        throw new Exception($"The temporary file {tempFilePath} does not exist.");
+                    }
+                });
+                
+                // Remove deleted images
+                images.Where(img => img.delete == true).ToList().ForEach(async (img) =>
+                {
+                    var existing = await _hrImagesRepository.GetHRImageByImageIdAsync(img.ImageId ?? 0);
+                    if (existing != null && existing.Data != null && existing.Success)
+                    {
+                        var filePath = Path.Combine(_env.ContentRootPath, existing.Data.ImageUrl);
+                        if (File.Exists(filePath))
+                        {
+                            File.Delete(filePath);
+                        }
+                    }
+                });
                 
 
                 return await _hrImagesRepository.UpdateHRImageAsync(images);

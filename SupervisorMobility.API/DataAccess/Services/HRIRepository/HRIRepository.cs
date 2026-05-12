@@ -701,7 +701,7 @@ namespace SupervisorMobility.API.DataAccess.Services.HRIRepository
                             else
                             {
                                 continue;
-                            }                           
+                            }
                         }
                         //si el id es 0 creamos un nuevo item relacionado al hri
                         else if (item.ItemId == 0)
@@ -717,7 +717,7 @@ namespace SupervisorMobility.API.DataAccess.Services.HRIRepository
                                 response.Data = false;
                                 return response;
                             }
-                            
+
                             continue;
                         }
 
@@ -725,7 +725,14 @@ namespace SupervisorMobility.API.DataAccess.Services.HRIRepository
                     }
                 }
 
+                // actualizamos las imagenes TODO
+                if (updatedHRI.Images != null && updatedHRI.Images.Count > 0)
+                {
+                    updatedHRI.Images.ForEach(img => img.HriId = hri.HriId);
+                    await _hrimagesService.UpdateHRImageAsync(updatedHRI.Images);
+                }
                 
+
                 // Create notification fot the supervisor
                 var dto = new NotificationToCreateDto
                 {

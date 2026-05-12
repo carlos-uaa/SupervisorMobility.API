@@ -44,7 +44,7 @@ namespace SupervisorMobility.API.DataAccess.Services.HRIServices
 
         public Task<ServiceResponse<bool>> UpdateHRI(int id, UpdateHRIDto updatedHRI)
         {
-                        return _hriRepository.UpdateHRI(id, updatedHRI);    
+            return _hriRepository.UpdateHRI(id, updatedHRI);    
         }
         public async Task<ServiceResponse<List<GetHRIHistoryActionDto>>> GetHRIHistory(int hriId)
         {
