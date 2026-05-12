@@ -57,6 +57,20 @@ namespace SupervisorMobility.API.Controllers.HRIControllers
             return Ok(response);
         }
 
+        [HttpGet("GetDailyByMonthAndYear/{hriId}/{month}/{year}")]
+        [ProducesResponseType(StatusCodes.Status200OK)]
+        [ProducesResponseType(StatusCodes.Status404NotFound)]
+        [ProducesResponseType(StatusCodes.Status500InternalServerError)]
+        public async Task<ActionResult<ServiceResponse<GetHRIDto>>> GetDailyByMonthAndYear(int hriId, int month, int year)
+        {
+            var response = await _HRIServices.GetDailyByMonthAndYear(hriId, month, year);
+            if (response.Data == null)
+            {
+                return NotFound(response);
+            }
+            return Ok(response);
+        }
+
         [HttpGet("GetHRIHistory/{hriId}")]
         [ProducesResponseType(StatusCodes.Status200OK)]
         [ProducesResponseType(StatusCodes.Status404NotFound)]
@@ -69,6 +83,20 @@ namespace SupervisorMobility.API.Controllers.HRIControllers
                 return NotFound(response);
             }
             return Ok(response);
+        }
+
+        [HttpGet("GetExcelHriFile/{hriId}/{month}/{year}")]
+        [ProducesResponseType(StatusCodes.Status200OK)]
+        [ProducesResponseType(StatusCodes.Status404NotFound)]
+        [ProducesResponseType(StatusCodes.Status500InternalServerError)]
+        public async Task<ActionResult> GetExcelHriFile(int hriId, int month, int year)
+        {
+            var response = await _HRIServices.CreateExcelHriFile(hriId, month, year);
+            if (response.Success == false)
+            {
+                return NotFound();
+            }
+            return File(response.Data, "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet", $"HRI_{hriId}.xlsx");
         }
 
         [HttpPost("CreateHRI")]

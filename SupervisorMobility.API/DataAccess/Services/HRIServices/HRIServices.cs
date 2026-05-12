@@ -44,11 +44,21 @@ namespace SupervisorMobility.API.DataAccess.Services.HRIServices
 
         public Task<ServiceResponse<bool>> UpdateHRI(int id, UpdateHRIDto updatedHRI)
         {
-                        return _hriRepository.UpdateHRI(id, updatedHRI);    
+            return _hriRepository.UpdateHRI(id, updatedHRI);    
         }
         public async Task<ServiceResponse<List<GetHRIHistoryActionDto>>> GetHRIHistory(int hriId)
         {
             return await _hriRepository.GetHRIHistory(hriId); 
+        }
+
+        public Task<ServiceResponse<byte[]>> CreateExcelHriFile(int hriId, int month, int year)
+        {
+            return _hriRepository.CreateExcelHriFile(hriId, month, year);
+        }
+
+        public async Task<ServiceResponse<GetHRIDto>> GetDailyByMonthAndYear(int hriId, int month, int year)
+        {
+            return await _hriRepository.GetDailyByMonthAndYear(hriId, month, year);
         }
     }
 }

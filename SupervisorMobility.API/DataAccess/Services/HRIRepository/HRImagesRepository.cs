@@ -99,9 +99,23 @@ namespace SupervisorMobility.API.DataAccess.Services.HRIRepository
         {
             try
             {
-                // Delete existing images for the HRI
-                var existingImages = await _context.HRImages.Where(i => i.HriId == image.First().HriId).ToListAsync();
-                _context.HRImages.RemoveRange(existingImages);
+                // Delete image marked for deletion
+                var imagesToDelete = image.Where(i => i.delete && i.ImageId.HasValue).ToList();
+                if (imagesToDelete.Count > 0)
+                {
+                    var imageIdsToDelete = imagesToDelete.Select(i => i.ImageId.Value).ToList();
+                    var existingImagesToDelete = await _context.HRImages.Where(i => imageIdsToDelete.Contains(i.ImageId)).ToListAsync();
+                    _context.HRImages.RemoveRange(existingImagesToDelete);
+                    await _context.SaveChangesAsync();
+                }
+                // var existingImages = await _context.HRImages.Where(i => i.HriId == image.First().HriId).ToListAsync();
+                // _context.HRImages.RemoveRange(existingImages);
+
+                // Remove from image array the images marked for deletion
+                image = image.Where(i => !i.delete).ToList();
+
+                // Remove from image array the image that exist in DB 
+                image = image.Where(i => i.ImageId == 0).ToList();
 
                 // Add updated images
                 var hrImages = image.Select(i => new HRImages
