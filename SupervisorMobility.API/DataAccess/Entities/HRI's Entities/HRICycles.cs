@@ -14,6 +14,7 @@ namespace SupervisorMobility.API.DataAccess.Entities.HRI_s_Entities
         public int?  OperatorUserId { get; set; }
         public User? Operator { get; set; }
         public bool? IsActive { get; set; }
+        public DateTime? CreationDate { get; set; }
         public List<DailyRevisions>? DailyRevisions { get; set; }
     }
 }

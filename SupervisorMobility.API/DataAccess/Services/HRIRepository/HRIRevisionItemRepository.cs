@@ -89,6 +89,7 @@ namespace SupervisorMobility.API.DataAccess.Services.HRIRepository
             try
             {
                 var revisionItem = _mapper.Map<HRIRevisionItems>(createHRIRevisionItemDto);
+                revisionItem.CreationDate = DateTime.Now;
                 await _context.HRIRevisionItems.AddAsync(revisionItem);
                 await _context.SaveChangesAsync();
 
