@@ -3,13 +3,14 @@ using Microsoft.EntityFrameworkCore;
 using SupervisorMobility.API.Context;
 using SupervisorMobility.API.DataAccess.Entities.HRI_s_Entities;
 using SupervisorMobility.API.DataAccess.Services.HRIServices;
-using SupervisorMobility.API.Models.HRIDtos;
-using SupervisorMobility.API.Models.HRIHourmeterRevisionDto;
-using SupervisorMobility.API.Models.HRIWeeklyRevisions;
-using SupervisorMobility.API.Models.HRIDtos.HRImagesDto;
-using SupervisorMobility.API.Models.HRIRevisionItemsDtos;
 using SupervisorMobility.API.Models.HRICyclesDtos;
+using SupervisorMobility.API.Models.HRIDtos;
+using SupervisorMobility.API.Models.HRIDtos.HRImagesDto;
+using SupervisorMobility.API.Models.HRIDtos.HRIMetrics;
+using SupervisorMobility.API.Models.HRIHourmeterRevisionDto;
 using SupervisorMobility.API.Models.HRIRevisionCycles;
+using SupervisorMobility.API.Models.HRIRevisionItemsDtos;
+using SupervisorMobility.API.Models.HRIWeeklyRevisions;
 
 
 namespace SupervisorMobility.API.DataAccess.Services.HRIRepository
@@ -162,14 +163,14 @@ namespace SupervisorMobility.API.DataAccess.Services.HRIRepository
 
                 //agregamos una accion al historial del hri indicando que se crearon las revisiones semanales
                 var historyItem = new HRIHistoryItemDto
-                    {
-                        HRIid = weeklyRevisions.First().HriId,
-                        Action = "Weekly Revisions Created",
-                        ActionDate = DateTime.UtcNow,
-                        ResponsibleUserId = weeklyRevisions.First().UserId,
-                        ActionType = "UPDATE"
-                    };
-                    await SendHistoryAction(historyItem);
+                {
+                    HRIid = weeklyRevisions.First().HriId,
+                    Action = "Weekly Revisions Created",
+                    ActionDate = DateTime.UtcNow,
+                    ResponsibleUserId = weeklyRevisions.First().UserId,
+                    ActionType = "UPDATE"
+                };
+                await SendHistoryAction(historyItem);
 
                 response.Success = true;
                 response.Message = "Weekly revisions created successfully.";
@@ -325,7 +326,7 @@ namespace SupervisorMobility.API.DataAccess.Services.HRIRepository
             {
                 var hris = await _context.HRIs.AsNoTracking().Include(h => h.Line)
                     .Include(h => h.NameOfItem)
-                    .Include(h=>h.ItemsRevised!.Where(ir => ir.IsActive == true))
+                    .Include(h => h.ItemsRevised!.Where(ir => ir.IsActive == true))
                     .Include(h => h.Images)
                     .Where(h => h.IsActive)
                     .ToListAsync();
@@ -389,7 +390,7 @@ namespace SupervisorMobility.API.DataAccess.Services.HRIRepository
                     foreach (var cycle in updatedHRI.HRICycles)
                     {
                         //si el ciclo tiene un id, significa que ya existe en la base de datos y solo se actualiza, si no tiene id, se crea uno nuevo, si el ciclo tiene el campo Deleted en true, se elimina de la base de datos
-                        if (cycle.Deleted == true && cycle.CycleId!=0)
+                        if (cycle.Deleted == true && cycle.CycleId != 0)
                         {
                             var res = await _hriCyclesRepository.DeleteHRICycle(cycle.CycleId);
                             if (res.Success == false)
@@ -445,7 +446,7 @@ namespace SupervisorMobility.API.DataAccess.Services.HRIRepository
                             continue;
                         }
                         //si el id es 0 creamos un nuevo ciclo relacionado al hri
-                        else if (cycle.CycleId == 0 && cycle.Deleted!=true)
+                        else if (cycle.CycleId == 0 && cycle.Deleted != true)
                         {
                             var cycleToCreate = _mapper.Map<CreateHRICyclesDto>(cycle);
                             cycleToCreate.HriId = hri.HriId;
@@ -466,7 +467,7 @@ namespace SupervisorMobility.API.DataAccess.Services.HRIRepository
                                 response.Data = false;
                                 return response;
                             }
-                            
+
                             continue;
                         }
                     }
@@ -531,7 +532,7 @@ namespace SupervisorMobility.API.DataAccess.Services.HRIRepository
                             else
                             {
                                 continue;
-                            }                           
+                            }
                         }
                         //si el id es 0 creamos un nuevo item relacionado al hri
                         else if (item.ItemId == 0)
@@ -547,7 +548,7 @@ namespace SupervisorMobility.API.DataAccess.Services.HRIRepository
                                 response.Data = false;
                                 return response;
                             }
-                            
+
                             continue;
                         }
 
@@ -600,7 +601,7 @@ namespace SupervisorMobility.API.DataAccess.Services.HRIRepository
                 var historyActions = await _context.HRIHistoryActions.AsNoTracking()
                     .Where(ha => ha.HRIid == hriId)
                     .Include(ha => ha.Responsible)
-                    .OrderByDescending(ha => ha.ActionDate) 
+                    .OrderByDescending(ha => ha.ActionDate)
                     .ToListAsync();
                 response.Data = historyActions.Select(ha => _mapper.Map<GetHRIHistoryActionDto>(ha)).ToList();
                 response.Success = true;
@@ -612,6 +613,252 @@ namespace SupervisorMobility.API.DataAccess.Services.HRIRepository
                 response.Message = $"Error retrieving HRI history: {ex.Message + (ex.InnerException != null ? " - " + ex.InnerException.Message : "")}";
             }
             return response;
+        }
+
+        // Endpoints para el Dashboard del HRI
+        public async Task<ServiceResponse<HriKpis>> GetHriKPIs()
+        {
+            var response = new ServiceResponse<HriKpis>();
+            try
+            {
+                HriKpis hriKpis = new HriKpis();
+                hriKpis.TotalHri = await _context.HRIs.CountAsync(h => h.IsActive);
+                hriKpis.TodayRevisions = await _context.DailyRevisions.CountAsync(ri => ri.IsActive.Value && ri.Day == DateTime.Now.Day && ri.Month == DateTime.Now.Month);
+
+                int cycle1NGCount = await _context.HRICycles.Where(hc => hc.Cycle == 1).SelectMany(hc => hc.DailyRevisions).CountAsync(dr => dr.Status == "NG");
+                int cycle2NGCount = await _context.HRICycles.Where(hc => hc.Cycle == 2).SelectMany(hc => hc.DailyRevisions).CountAsync(dr => dr.Status == "NG");
+                int cycle3NGCount = await _context.HRICycles.Where(hc => hc.Cycle == 3).SelectMany(hc => hc.DailyRevisions).CountAsync(dr => dr.Status == "NG");
+                hriKpis.CriticCycle = Math.Max(cycle1NGCount, Math.Max(cycle2NGCount, cycle3NGCount));
+
+                hriKpis.GlobalHealth =
+                    await _context.DailyRevisions.CountAsync(dr => dr.HourmeterRevisionId == null && dr.Status.ToUpper() == "OK") * 100.0 /
+                    await _context.DailyRevisions.CountAsync(dr => dr.HourmeterRevisionId == null);
+
+                response.Data = hriKpis;
+                response.Success = true;
+                response.Message = "HRI KPIs retrieved successfully.";
+            }
+            catch (Exception ex)
+            {
+                response.Success = false;
+                response.Message = $"Error retrieving HRI KPIs: {ex.Message + (ex.InnerException != null ? " - " + ex.InnerException.Message : "")}";
+            }
+            return response;
+        }
+
+        public async Task<ServiceResponse<LinesChartData>> GetLinesChartData(int areaId)
+        {
+            var response = new ServiceResponse<LinesChartData>();
+            try
+            {
+                // Traer todos los HRI con sus ciclos y revisiones
+                var hris = await _context.HRIs
+                    .Include(h => h.Line)
+                    .Include(h => h.Area)
+                    .Include(h => h.HriCycles)
+                        .ThenInclude(c => c.DailyRevisions)
+                    .Include(h => h.ItemsRevised)
+                        .ThenInclude(ir => ir.RevisionCycles)
+                            .ThenInclude(rc => rc.DailyRevisions)
+                    .Where(h => areaId == 0 || h.Area.AreaId == areaId)
+                    .ToListAsync();
+
+                // Labels: nombres de línea únicos
+                var _barChartLabels = hris
+                    .Select(h => h.Line?.LineName)
+                    .Distinct()
+                    .ToArray();
+
+                // Agrupamos por LineName y contamos por Status
+                var groupedData = hris
+                    .GroupBy(h => h.Line?.LineName ?? "Sin Línea")
+                    .Select(g => new
+                    {
+                        LineName = g.Key,
+                        StatusCounts = g.SelectMany(h =>
+                            // Ruta 1: Revisiones generales del ciclo HRI
+                            h.HriCycles.SelectMany(c => c.DailyRevisions)
+                            .Concat(
+                                // Ruta 2: Revisiones específicas de los ítems
+                                h.ItemsRevised.SelectMany(ir => ir.RevisionCycles.SelectMany(rc => rc.DailyRevisions))
+                            )
+                        )
+                        // Opcional: Filtrar por IsActive si quieres que coincida con tu KPI
+                        .Where(dr => dr.IsActive == true)
+                        .GroupBy(dr => dr.Status)
+                        .ToDictionary(x => x.Key ?? "Pendiente", x => x.Count())
+                    })
+                    .ToList();
+
+                // Construimos las series para cada Status esperado
+                var _barChartSeries = new List<ChartSeries>
+                {
+                    new ChartSeries
+                    {
+                        Name = "OK",
+                        Data = groupedData.Select(g => g.StatusCounts.ContainsKey("Ok") ? (double)g.StatusCounts["Ok"] : 0).ToArray()
+                    },
+                    new ChartSeries
+                    {
+                        Name = "NG",
+                        Data = groupedData.Select(g => g.StatusCounts.ContainsKey("NG") ? (double)g.StatusCounts["NG"] : 0).ToArray()
+                    },
+                    new ChartSeries
+                    {
+                        Name = "NA",
+                        Data = groupedData.Select(g => g.StatusCounts.ContainsKey("NA") ? (double)g.StatusCounts["NA"] : 0).ToArray()
+                    }
+                };
+
+                var linesChartData = new LinesChartData
+                {
+                    Labels = _barChartLabels,
+                    Series = _barChartSeries
+                };
+
+                response.Data = linesChartData;
+                response.Success = true;
+                response.Message = "Lines Chart Data retrieved successfully.";
+            }
+            catch (Exception ex)
+            {
+                response.Success = false;
+                response.Message = $"Error retrieving Data for the Lines Chart: {ex.Message + (ex.InnerException != null ? " - " + ex.InnerException.Message : "")}";
+            }
+            return response;
+        }
+
+        public async Task<ServiceResponse<GeneralStatusChartData>> GetGeneralStatusChartData(int areaId)
+        {
+            var response = new ServiceResponse<GeneralStatusChartData>();
+            try
+            {
+                // Traer todas las revisiones
+                var allRevisions = await _context.DailyRevisions
+                    .Where(dr => dr.HourmeterRevisionId == null)
+                    .Select(dr => new { dr.Status })
+                    .ToListAsync();
+
+                // Contar por Status
+                var statusCounts = allRevisions
+                    .GroupBy(r => r.Status?.ToUpper() ?? "PENDIENTE")
+                    .ToDictionary(g => g.Key, g => g.Count());
+
+                // Armar los datos para el donut
+                var _donutData = new double[]
+                {
+                    statusCounts.GetValueOrDefault("OK", 0),
+                    statusCounts.GetValueOrDefault("NG", 0),
+                    statusCounts.GetValueOrDefault("NA", 0)
+                };
+
+                var _donutLabels = new string[]
+                {
+                    "Correcto (OK)",
+                    "Incorrecto (NG)",
+                    "No Aplica (NA)"
+                };
+
+                var generalStatusChartData = new GeneralStatusChartData
+                {
+                    Data = _donutData,
+                    Labels = _donutLabels
+                };
+
+                response.Success = true;
+                response.Data = generalStatusChartData;
+                response.Message = "General Status Chart Data retrieved successfully.";
+            }
+            catch (Exception ex)
+            {
+                response.Success = false;
+                response.Message = $"Error retrieving Data for the General Status Chart: {ex.Message + (ex.InnerException != null ? " - " + ex.InnerException.Message : "")}";
+            }
+            return response;
+        }
+
+        public async Task<ServiceResponse<List<HriRecentRevisionsDto>>> GetRecentRevisions(int areaId, string? filter)
+        {
+            var response = new ServiceResponse<List<HriRecentRevisionsDto>>();
+            try
+            {
+                var hris = await _context.HRIs
+                    .Include(h => h.Line)
+                    .Include(h => h.Area)
+                    .Include(h => h.HriCycles)
+                        .ThenInclude(c => c.DailyRevisions)
+                    .Include(h => h.ItemsRevised)
+                        .ThenInclude(ir => ir.RevisionCycles)
+                            .ThenInclude(rc => rc.DailyRevisions)
+                    .Where(h => (areaId == 0 || h.Area.AreaId == areaId) &&
+                                (string.IsNullOrEmpty(filter) || h.Line.LineName.Contains(filter)))
+                    .AsNoTracking().ToListAsync();
+
+                var revisionsFromCycles = hris.SelectMany(h => h.HriCycles?
+                    .SelectMany(c => c.DailyRevisions?.Select(r => new HriRecentRevisionsDto
+                    {
+                        HriId = h.HriId,
+                        HRIName = h.ControlNumber,
+                        RevisionPointName = "N/A",
+                        Line = h.Line?.LineName ?? "N/A",
+                        Cycle = c.Cycle,
+                        Day = r.Day,
+                        Month = GetMonth(r.Month),
+                        Status = r.Status ?? string.Empty,
+                        RevisionId = r.RevisionId
+                    }) ?? new List<HriRecentRevisionsDto>()) ?? new List<HriRecentRevisionsDto>());
+
+                // RUTA 2: Revisiones desde los ítems (ItemsRevised -> RevisionCycles)
+                var revisionsFromItems = hris.SelectMany(h => h.ItemsRevised?
+                    .SelectMany(ir => ir.RevisionCycles?
+                        .SelectMany(rc => rc.DailyRevisions?.Select(r => new HriRecentRevisionsDto
+                        {
+                            HriId = h.HriId,
+                            HRIName = h.ControlNumber,
+                            RevisionPointName = ir.RevisionPoint,
+                            Line = h.Line?.LineName ?? "N/A",
+                            Cycle = rc.Cycle,
+                            Day = r.Day,
+                            Month = GetMonth(r.Month),
+                            Status = r.Status ?? string.Empty,
+                            RevisionId = r.RevisionId
+                        }) ?? new List<HriRecentRevisionsDto>()) ?? new List<HriRecentRevisionsDto>()) ?? new List<HriRecentRevisionsDto>());
+
+                // Unimos ambas listas, ordenamos y asignamos a la respuesta
+                response.Data = revisionsFromCycles
+                    .Concat(revisionsFromItems)
+                    .OrderByDescending(x => x.RevisionId)
+                    .Take(10).ToList();
+                response.Success = true;
+                response.Message = "History action sent successfully.";
+            }
+            catch (Exception ex)
+            {
+                Console.WriteLine($"Error sending history action: {ex.Message}");
+                response.Success = false;
+                response.Message = $"Error sending history action: {ex.Message + (ex.InnerException != null ? " - " + ex.InnerException.Message : "")}";
+            }
+            return response;
+        }
+
+        private string GetMonth(int monthNumber)
+        {
+            return monthNumber switch
+            {
+                1 => "Enero",
+                2 => "Febrero",
+                3 => "Marzo",
+                4 => "Abril",
+                5 => "Mayo",
+                6 => "Junio",
+                7 => "Julio",
+                8 => "Agosto",
+                9 => "Septiembre",
+                10 => "Octubre",
+                11 => "Noviembre",
+                12 => "Diciembre",
+                _ => "Mes desconocido"
+            };
         }
     }
 }

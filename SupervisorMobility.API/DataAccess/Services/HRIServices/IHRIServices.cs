@@ -1,4 +1,5 @@
 ﻿using SupervisorMobility.API.Models.HRIDtos;
+using SupervisorMobility.API.Models.HRIDtos.HRIMetrics;
 using SupervisorMobility.API.Models.HRIWeeklyRevisions;
 
 namespace SupervisorMobility.API.DataAccess.Services.HRIServices
@@ -14,6 +15,10 @@ namespace SupervisorMobility.API.DataAccess.Services.HRIServices
         Task<ServiceResponse<bool>>DeleteHRI(int id);
         Task<ServiceResponse<List<GetHRIHistoryActionDto>>> GetHRIHistory(int hriId);
 
-
+        // Endpoints para el Dashboard del HRI
+        Task<ServiceResponse<HriKpis>> GetHriKPIs();
+        Task<ServiceResponse<LinesChartData>> GetLinesChartData(int areaId);
+        Task<ServiceResponse<GeneralStatusChartData>> GetGeneralStatusChartData(int areaId);    
+        Task<ServiceResponse<List<HriRecentRevisionsDto>>> GetRecentRevisions(int areaId, string? filter);
     }
 }
