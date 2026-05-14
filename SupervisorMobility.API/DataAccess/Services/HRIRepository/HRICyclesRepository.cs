@@ -29,6 +29,7 @@ namespace SupervisorMobility.API.DataAccess.Services.HRIRepository
             try
             {
                 var newHRICycle = _mapper.Map<HRICycles>(createHRICycle);
+                newHRICycle.CreationDate = DateTime.UtcNow;
                 await _context.HRICycles.AddAsync(newHRICycle);
                 await _context.SaveChangesAsync();
 
@@ -64,6 +65,7 @@ namespace SupervisorMobility.API.DataAccess.Services.HRIRepository
                 foreach (var hriCycle in newHRICycles)
                 {
                     hriCycle.HriId = hriId;
+                    hriCycle.CreationDate = DateTime.UtcNow;
                     await _context.HRICycles.AddAsync(hriCycle);
                 }
                 await _context.SaveChangesAsync();
@@ -152,7 +154,6 @@ namespace SupervisorMobility.API.DataAccess.Services.HRIRepository
             return response;
 
         }
-
 
         public async Task<ServiceResponse<bool>> DeleteHRICycle(int id)
         {

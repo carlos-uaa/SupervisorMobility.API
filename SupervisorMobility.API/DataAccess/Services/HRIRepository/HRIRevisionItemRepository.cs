@@ -151,6 +151,7 @@ namespace SupervisorMobility.API.DataAccess.Services.HRIRepository
                 {
                     
                     item.HriId = hriId; // Asignamos el HRIId a cada item
+                    item.CreationDate = DateTime.Now;
                     await _context.HRIRevisionItems.AddAsync(item);
                     await _context.SaveChangesAsync();
                     // Crear los ciclos de revisión para cada item
