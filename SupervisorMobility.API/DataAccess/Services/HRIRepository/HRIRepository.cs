@@ -210,14 +210,6 @@ namespace SupervisorMobility.API.DataAccess.Services.HRIRepository
                     ActionType = "UPDATE"
                 };
                 await SendHistoryAction(historyItem);
-                    {
-                        HRIid = HRIId,
-                        Action = "Weekly Revisions Created",
-                        ActionDate = DateTime.UtcNow,
-                        ResponsibleUserId = weeklyRevisions.First().UserId,
-                        ActionType = "UPDATE"
-                    };
-                    await SendHistoryAction(historyItem);
 
                 // Create notification if needed
                 var weekly = weeklyRevisions.First();
