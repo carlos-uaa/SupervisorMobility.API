@@ -19,6 +19,7 @@ namespace SupervisorMobility.API.DataAccess.Entities.HRI_s_Entities
         public Frequency? Frequency { get; set; }
         public bool? IsActive { get; set; }
         public DateTime? CreationDate { get; set; }
+        public DateTime? DeletedDate { get; set; }  
         public List<RevisionCycles>? RevisionCycles { get; set; }
     }
 }
