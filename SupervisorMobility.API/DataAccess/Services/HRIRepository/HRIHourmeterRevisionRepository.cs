@@ -1,10 +1,12 @@
 ﻿using AutoMapper;
 using Microsoft.EntityFrameworkCore;
+using SupervisorMobility.API.Business;
 using SupervisorMobility.API.Context;
 using SupervisorMobility.API.DataAccess.Entities.HRI_s_Entities;
 using SupervisorMobility.API.Models.HRIDailyRevisionDtos;
 using SupervisorMobility.API.Models.HRIDtos;
 using SupervisorMobility.API.Models.HRIHourmeterRevisionDto;
+using SupervisorMobility.API.Models.NotificationDtos;
 
 namespace SupervisorMobility.API.DataAccess.Services.HRIRepository
 {
@@ -12,10 +14,16 @@ namespace SupervisorMobility.API.DataAccess.Services.HRIRepository
     {
         private readonly SupervisorMobilityContext _context;
         private readonly IMapper _mapper;
-        public HRIHourmeterRevisionRepository(SupervisorMobilityContext context, IMapper mapper)
+        private readonly INotificationService _notificationService;
+        public HRIHourmeterRevisionRepository(
+            SupervisorMobilityContext context,
+            IMapper mapper,
+            INotificationService notificationService
+        )
         {
             _context = context;
             _mapper = mapper;
+            _notificationService = notificationService;
         }
 
         public async Task<ServiceResponse<List<GetHourmeterRevisionDto>>> GetAllHourmeterRevisions()
@@ -106,6 +114,8 @@ namespace SupervisorMobility.API.DataAccess.Services.HRIRepository
                     HourmeterRevisionId = createDaily.EntityRelationId,
                     Day = createDaily.Day,
                     Month = createDaily.Month,
+                    Year = createDaily.Year,
+                    RevisionDate = new DateTime(createDaily.Year, createDaily.Month, createDaily.Day),
                     UserId = createDaily.UserId,
                     UserType = createDaily.UserType,
                     Status = createDaily.Status,
@@ -115,15 +125,41 @@ namespace SupervisorMobility.API.DataAccess.Services.HRIRepository
                 await _context.SaveChangesAsync();
 
                 //creamos un nuevo registro en HRIHistoryActions para el historial de acciones
+                var HRIId = (int)await _context.HourmeterRevisions.Where(h => h.Id == createDaily.EntityRelationId).Select(h => h.HriId).FirstOrDefaultAsync();
                 var historyItem = new HRIHistoryItemDto
                 {
                     Action = $"Created daily revision for Hourmeter, Day: {createDaily.Day}, Month: {createDaily.Month}, Status: {createDaily.Status}",
                     ActionDate = DateTime.Now,
                     ResponsibleUserId = createDaily.UserId,
-                    HRIid = (int)await _context.HourmeterRevisions.Where(h => h.Id == createDaily.EntityRelationId).Select(h => h.HriId).FirstOrDefaultAsync(),
+                    HRIid = HRIId,
                     ActionType = "UPDATE"
                 };
                 await SendHistoryAction(historyItem);
+
+
+                // Create notification if needed
+                if (createDaily.Notification == true)
+                {
+                    var dto = new NotificationToCreateDto
+                    {
+                        MadeBy = "System",
+                        NotificationType = createDaily.Title ?? "Revision of Hourmeter with NG",
+                        NotificationText = createDaily.Message ?? "A new daily revision has been created.",
+                        UserId = createDaily.To ?? 1,
+                        IsAccepted = true,
+                        IsActive = true,
+                        EntryDate = DateTime.Now,
+                        TargetRelation = HRIId
+                    };
+                    SpecialOptionsNotification options = new SpecialOptionsNotification
+                    {
+                        Email = createDaily.IsUrgent ? true : false,
+                        WhatsApp = createDaily.IsUrgent ? true : false,
+                        MicrosoftTeams = false,
+                        type = "RevisionWithNG"
+                    };
+                    var created = await _notificationService.CreateNotificationAsync(dto, options);
+                }
 
 
                 response.Data = true;

@@ -4,7 +4,7 @@
     {
         public string? MadeBy { get; set; }
 
-        //public int TargetRelation { get; set; }
+        public int? TargetRelation { get; set; }
         public string NotificationType { get; set; }
         public string? NotificationText { get; set; }
         public int UserId { get; set; }

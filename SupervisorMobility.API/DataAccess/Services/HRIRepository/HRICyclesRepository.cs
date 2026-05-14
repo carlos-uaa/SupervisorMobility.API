@@ -1,11 +1,13 @@
 ﻿using AutoMapper;
 using Microsoft.EntityFrameworkCore;
+using SupervisorMobility.API.Business;
 using SupervisorMobility.API.Context;
 using SupervisorMobility.API.DataAccess.Entities;
 using SupervisorMobility.API.DataAccess.Entities.HRI_s_Entities;
 using SupervisorMobility.API.Models.HRICyclesDtos;
 using SupervisorMobility.API.Models.HRIDailyRevisionDtos;
 using SupervisorMobility.API.Models.HRIDtos;
+using SupervisorMobility.API.Models.NotificationDtos;
 
 namespace SupervisorMobility.API.DataAccess.Services.HRIRepository
 {
@@ -13,10 +15,12 @@ namespace SupervisorMobility.API.DataAccess.Services.HRIRepository
     {
         private readonly SupervisorMobilityContext _context;
         private readonly IMapper _mapper;
-        public HRICyclesRepository(SupervisorMobilityContext context, IMapper mapper)
+        private readonly INotificationService _notificationService;
+        public HRICyclesRepository(SupervisorMobilityContext context, IMapper mapper, INotificationService notificationService)
         {
             _context = context;
             _mapper = mapper;
+            _notificationService = notificationService;
         }
 
         public async Task<ServiceResponse<GetHRICyclesDto>> CreateHRICycle(CreateHRICyclesDto createHRICycle)
@@ -25,6 +29,7 @@ namespace SupervisorMobility.API.DataAccess.Services.HRIRepository
             try
             {
                 var newHRICycle = _mapper.Map<HRICycles>(createHRICycle);
+                newHRICycle.CreationDate = DateTime.UtcNow;
                 await _context.HRICycles.AddAsync(newHRICycle);
                 await _context.SaveChangesAsync();
 
@@ -60,6 +65,7 @@ namespace SupervisorMobility.API.DataAccess.Services.HRIRepository
                 foreach (var hriCycle in newHRICycles)
                 {
                     hriCycle.HriId = hriId;
+                    hriCycle.CreationDate = DateTime.UtcNow;
                     await _context.HRICycles.AddAsync(hriCycle);
                 }
                 await _context.SaveChangesAsync();
@@ -85,6 +91,8 @@ namespace SupervisorMobility.API.DataAccess.Services.HRIRepository
                     CycleId = createDaily.EntityRelationId,
                     Day = createDaily.Day,
                     Month = createDaily.Month,
+                    Year = createDaily.Year,
+                    RevisionDate = new DateTime(createDaily.Year, createDaily.Month, createDaily.Day),  
                     Status = createDaily.Status,
                     UserId = createDaily.UserId,
                     UserType = createDaily.UserType,
@@ -96,16 +104,43 @@ namespace SupervisorMobility.API.DataAccess.Services.HRIRepository
 
                 //creamos un nuevo registro en la tabla de historial de acciones para esta revisión diaria
                 var cycleNumber = await _context.HRICycles.Where(c => c.CycleId == createDaily.EntityRelationId).Select(c => c.Cycle).FirstOrDefaultAsync();
+                var HRIId = await _context.HRICycles.Where(h => h.CycleId == createDaily.EntityRelationId).Select(h => h.HriId).FirstOrDefaultAsync();
                 var historyItem = new HRIHistoryItemDto
                 {
                     Action = $"Created daily revision for Shift: {cycleNumber}, Day: {createDaily.Day}, Month: {createDaily.Month}, Status: {createDaily.Status}",
                     ActionDate = DateTime.Now,
                     ResponsibleUserId = createDaily.UserId,
-                    HRIid = await _context.HRICycles.Where(h => h.CycleId == createDaily.EntityRelationId).Select(h => h.HriId).FirstOrDefaultAsync(),
+                    HRIid = HRIId,
                     ActionType="UPDATE"
 
                 };
                 await SendHistoryAction(historyItem);
+
+
+
+                // Create notification if needed
+                if (createDaily.Notification == true)
+                {
+                    var dto = new NotificationToCreateDto
+                    {
+                        MadeBy = "System",
+                        NotificationType = createDaily.Title ?? "Revision with NG",
+                        NotificationText = createDaily.Message ?? "A new daily revision has been created.",
+                        UserId = createDaily.To ?? 1,
+                        IsAccepted = true,
+                        IsActive = true,
+                        EntryDate = DateTime.Now,
+                        TargetRelation = HRIId
+                    };
+                    SpecialOptionsNotification options = new SpecialOptionsNotification
+                    {
+                        Email = createDaily.IsUrgent ? true : false,
+                        WhatsApp = createDaily.IsUrgent ? true : false,
+                        MicrosoftTeams = false,
+                        type = "RevisionWithNG"
+                    };
+                    var created = await _notificationService.CreateNotificationAsync(dto, options);
+                }
 
                 response.Data = true;
                 response.Success = true;
@@ -119,7 +154,6 @@ namespace SupervisorMobility.API.DataAccess.Services.HRIRepository
             return response;
 
         }
-
 
         public async Task<ServiceResponse<bool>> DeleteHRICycle(int id)
         {

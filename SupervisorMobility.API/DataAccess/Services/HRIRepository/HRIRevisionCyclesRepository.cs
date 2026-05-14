@@ -1,10 +1,12 @@
 ﻿using AutoMapper;
 using Microsoft.EntityFrameworkCore;
+using SupervisorMobility.API.Business;
 using SupervisorMobility.API.Context;
 using SupervisorMobility.API.DataAccess.Entities.HRI_s_Entities;
 using SupervisorMobility.API.Models.HRIDailyRevisionDtos;
 using SupervisorMobility.API.Models.HRIDtos;
 using SupervisorMobility.API.Models.HRIRevisionCycles;
+using SupervisorMobility.API.Models.NotificationDtos;
 
 
 namespace SupervisorMobility.API.DataAccess.Services.HRIRepository
@@ -13,10 +15,13 @@ namespace SupervisorMobility.API.DataAccess.Services.HRIRepository
     {
         private readonly SupervisorMobilityContext _context;
         private readonly IMapper _mapper;
-        public HRIRevisionCyclesRepository(SupervisorMobilityContext context, IMapper mapper)
+        private readonly INotificationService _notificationService;
+
+        public HRIRevisionCyclesRepository(SupervisorMobilityContext context, IMapper mapper, INotificationService notificationService)
         {
             _context = context;
             _mapper = mapper;
+            _notificationService = notificationService;
         }
         public async Task<ServiceResponse<List<GetRevisionCyclesDto>>> GetAllRevisionCycles()
         {
@@ -146,6 +151,8 @@ namespace SupervisorMobility.API.DataAccess.Services.HRIRepository
                     RevisionCycleId = createDaily.EntityRelationId,
                     Day = createDaily.Day,
                     Month = createDaily.Month,
+                    Year = createDaily.Year,
+                    RevisionDate = new DateTime(createDaily.Year, createDaily.Month, createDaily.Day),
                     UserId = createDaily.UserId,
                     UserType = createDaily.UserType,
                     Status = createDaily.Status,
@@ -156,15 +163,41 @@ namespace SupervisorMobility.API.DataAccess.Services.HRIRepository
 
                 //creamos un nuevo registro en la tabla de historial de acciones para esta revisión diaria
                 var revisionItem = await _context.RevisionCycles.AsNoTracking().Include(rc => rc.HRIRevisionItems).FirstOrDefaultAsync(rc => rc.RevisionCycleId == createDaily.EntityRelationId);
+                var HRIId = (int)revisionItem!.HRIRevisionItems!.HriId;
                 var historyItem = new HRIHistoryItemDto
                 {
                     Action = $"Created daily revision for Item {revisionItem!.HRIRevisionItems!.RevisionPoint}  On Revision Shift: {revisionItem.Cycle}, Day: {createDaily.Day}, Month: {createDaily.Month}, Status: {createDaily.Status}",
                     ActionDate = DateTime.Now,
                     ResponsibleUserId = createDaily.UserId,
-                    HRIid = (int)revisionItem!.HRIRevisionItems!.HriId,
+                    HRIid = HRIId,
                     ActionType = "UPDATE"
                 };
                 await SendHistoryAction(historyItem);
+
+
+                // Create notification if needed
+                if (createDaily.Notification == true)
+                {
+                    var dto = new NotificationToCreateDto
+                    {
+                        MadeBy = "System",
+                        NotificationType = createDaily.Title ?? "Revision with NG",
+                        NotificationText = createDaily.Message ?? "A new daily revision has been created.",
+                        UserId = createDaily.To ?? 1,
+                        IsAccepted = true,
+                        IsActive = true,
+                        EntryDate = DateTime.Now,
+                        TargetRelation = HRIId
+                    };
+                    SpecialOptionsNotification options = new SpecialOptionsNotification
+                    {
+                        Email = createDaily.IsUrgent ? true : false,
+                        WhatsApp = createDaily.IsUrgent ? true : false,
+                        MicrosoftTeams = false,
+                        type = "RevisionWithNG"
+                    };
+                    var created = await _notificationService.CreateNotificationAsync(dto, options);
+                }
 
                 response.Data = true;
                 response.Success = true;

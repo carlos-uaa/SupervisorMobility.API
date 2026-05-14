@@ -87,6 +87,17 @@ app.UseAuthorization();
 app.MapControllers();
 app.MapRazorPages();
 
+// Iniciar procesamiento en background al arrancar la aplicación
+try
+{
+    var emailBackground = app.Services.GetService<SupervisorMobility.API.Services.BackgroundServices.EmailQueueBackgroundService>();
+    emailBackground?.TriggerProcessing();
+}
+catch (Exception ex)
+{
+    Log.Logger.Error(ex, "Error al iniciar el servicio de procesamiento en background");
+}
+
 app.Run();
 
 public partial class Program { }

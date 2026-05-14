@@ -20,5 +20,7 @@ namespace SupervisorMobility.API.DataAccess.Services.HRIRepository
         Task<ServiceResponse<LinesChartData>> GetLinesChartData(int areaId);
         Task<ServiceResponse<GeneralStatusChartData>> GetGeneralStatusChartData(int areaId);
         Task<ServiceResponse<List<HriRecentRevisionsDto>>> GetRecentRevisions(int areaId, string? filter);
+        Task<ServiceResponse<byte[]>> CreateExcelHriFile(int hriId, int month, int year);
+        Task<ServiceResponse<GetHRIDto>> GetDailyByMonthAndYear(int hriId, int month, int year);
     }
 }

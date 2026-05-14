@@ -16,10 +16,10 @@ namespace SupervisorMobility.API.Models.Email
         public int? MadeByID { get; set; }
         public User? MadeBy { get; set; }
 
-        // Relación con PIR relacionado
-        // [ForeignKey(nameof(TargetRelation))]
-        // public int? TargetRelationID { get; set; }
-        // public PIR? TargetRelation { get; set; }
+        // Relación para buscarl información del correo a enviar
+        public int? TargetRelationID { get; set; }
+
+        public string? TargetRelationAux { get; set; }
 
         public string NotificationType { get; set; }
         

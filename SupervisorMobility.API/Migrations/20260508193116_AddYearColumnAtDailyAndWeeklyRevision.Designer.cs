@@ -3,6 +3,7 @@ using System;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Infrastructure;
 using Microsoft.EntityFrameworkCore.Metadata;
+using Microsoft.EntityFrameworkCore.Migrations;
 using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 using SupervisorMobility.API.Context;
 
@@ -11,9 +12,11 @@ using SupervisorMobility.API.Context;
 namespace SupervisorMobility.API.Migrations
 {
     [DbContext(typeof(SupervisorMobilityContext))]
-    partial class SupervisorMobilityContextModelSnapshot : ModelSnapshot
+    [Migration("20260508193116_AddYearColumnAtDailyAndWeeklyRevision")]
+    partial class AddYearColumnAtDailyAndWeeklyRevision
     {
-        protected override void BuildModel(ModelBuilder modelBuilder)
+        /// <inheritdoc />
+        protected override void BuildTargetModel(ModelBuilder modelBuilder)
         {
 #pragma warning disable 612, 618
             modelBuilder
@@ -971,9 +974,6 @@ namespace SupervisorMobility.API.Migrations
 
                     SqlServerPropertyBuilderExtensions.UseIdentityColumn(b.Property<int>("CycleId"));
 
-                    b.Property<DateTime?>("CreationDate")
-                        .HasColumnType("datetime2");
-
                     b.Property<int>("Cycle")
                         .HasColumnType("int");
 
@@ -1111,9 +1111,6 @@ namespace SupervisorMobility.API.Migrations
                         .HasColumnType("int");
 
                     SqlServerPropertyBuilderExtensions.UseIdentityColumn(b.Property<int>("ItemId"));
-
-                    b.Property<DateTime?>("CreationDate")
-                        .HasColumnType("datetime2");
 
                     b.Property<int?>("FrequencyId")
                         .HasColumnType("int");

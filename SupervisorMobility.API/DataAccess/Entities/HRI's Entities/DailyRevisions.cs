@@ -14,6 +14,8 @@ namespace SupervisorMobility.API.DataAccess.Entities.HRI_s_Entities
         public HourmeterRevision? HourmeterRevision { get; set; }
         public int Day { get; set; }
         public int Month { get; set; }
+        public int Year { get; set; }
+        public DateTime? RevisionDate { get; set; }
         public int? UserId { get; set; }
         public User? Responsible { get; set; }
         public string? UserType { get; set; }
