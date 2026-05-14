@@ -350,19 +350,38 @@ namespace SupervisorMobility.API.DataAccess.Services.HRIRepository
         public async Task<ServiceResponse<GetHRIDto>> GetHRIById(int id)
         {
             var response = new ServiceResponse<GetHRIDto>();
+            var today = DateTime.Now;
+            var dateQ = new DateTime(today.Year, today.Month, 1);
+            
             try
             {
                 var hri = await _context.HRIs.AsNoTracking().Include(h => h.Line)
                     .Include(h => h.NameOfItem)
                     .Include(h => h.Dock)
                     .Include(h => h.Images)
-                    .Include(h => h.ItemsRevised!.Where(ir => ir.IsActive == true && ir.CreationDate!.Value.Month == DateTime.Now.Month && ir.CreationDate.Value.Year == DateTime.Now.Year))
+                    .Include(h => h.ItemsRevised!.Where(ir =>
+                        ir.CreationDate.HasValue &&
+                        ir.CreationDate < dateQ.AddMonths(1) &&
+                        (!ir.DeletedDate.HasValue || ir.DeletedDate > dateQ)
+                    ))
                         .ThenInclude(ir => ir.Frequency)
-                    .Include(h => h.ItemsRevised!.Where(ir => ir.IsActive == true && ir.CreationDate!.Value.Month == DateTime.Now.Month && ir.CreationDate.Value.Year == DateTime.Now.Year))
+                    .Include(h => h.ItemsRevised!.Where(ir =>                        
+                        ir.CreationDate.HasValue &&
+                        ir.CreationDate < dateQ.AddMonths(1) &&
+                        (!ir.DeletedDate.HasValue || ir.DeletedDate > dateQ)
+                    ))
                         .ThenInclude(ir => ir.Veredict)
-                    .Include(h => h.ItemsRevised!.Where(ir => ir.IsActive == true && ir.CreationDate!.Value.Month == DateTime.Now.Month && ir.CreationDate.Value.Year == DateTime.Now.Year))
+                    .Include(h => h.ItemsRevised!.Where(ir =>                        
+                        ir.CreationDate.HasValue &&
+                        ir.CreationDate < dateQ.AddMonths(1) &&
+                        (!ir.DeletedDate.HasValue || ir.DeletedDate > dateQ)
+                    ))
                         .ThenInclude(ir => ir.RevisionMethod)
-                    .Include(h => h.ItemsRevised!.Where(ir => ir.IsActive == true && ir.CreationDate!.Value.Month == DateTime.Now.Month && ir.CreationDate.Value.Year == DateTime.Now.Year))
+                    .Include(h => h.ItemsRevised!.Where(ir =>
+                        ir.CreationDate.HasValue &&
+                        ir.CreationDate < dateQ.AddMonths(1) &&
+                        (!ir.DeletedDate.HasValue || ir.DeletedDate > dateQ)
+                    ))
                         .ThenInclude(ir => ir.RevisionCycles!.Where(rc => rc.IsActive == true))
                             .ThenInclude(rc => rc.DailyRevisions!.Where(dr=>dr.Month == DateTime.Now.Month && dr.Year == DateTime.Now.Year))
                                 .ThenInclude(dr => dr.Responsible)
@@ -405,16 +424,34 @@ namespace SupervisorMobility.API.DataAccess.Services.HRIRepository
         public async Task<ServiceResponse<GetHRIDto>> GetDailyByMonthAndYear(int hriId, int month, int year)
         {
             var response = new ServiceResponse<GetHRIDto>();
+            var dateQ = new DateTime(year, month, 1);
             try
             {
-                var hri = await _context.HRIs.AsNoTracking().Include(h => h.Line)
-                   .Include(h => h.ItemsRevised!.Where(ir => ir.IsActive == true && ir.CreationDate!.Value.Month == month && ir.CreationDate.Value.Year == year))
+                var hri = await _context.HRIs.AsNoTracking()
+                   .Include(h => h.Line)
+                   .Include(h => h.ItemsRevised!.Where(ir =>
+                                                    ir.CreationDate.HasValue &&
+                                                    ir.CreationDate < dateQ.AddMonths(1) &&
+                                                    (!ir.DeletedDate.HasValue || ir.DeletedDate > dateQ)
+                                                ))
                        .ThenInclude(ir => ir.Frequency)
-                   .Include(h => h.ItemsRevised!.Where(ir => ir.IsActive == true && ir.CreationDate!.Value.Month == month && ir.CreationDate.Value.Year == year))
+                   .Include(h => h.ItemsRevised!.Where(ir =>
+                                                    ir.CreationDate.HasValue &&
+                                                    ir.CreationDate < dateQ.AddMonths(1) &&
+                                                    (!ir.DeletedDate.HasValue || ir.DeletedDate > dateQ)
+                                                ))
                        .ThenInclude(ir => ir.Veredict)
-                   .Include(h => h.ItemsRevised!.Where(ir => ir.IsActive == true && ir.CreationDate!.Value.Month == month && ir.CreationDate.Value.Year == year))
+                   .Include(h => h.ItemsRevised!.Where(ir =>
+                                                    ir.CreationDate.HasValue &&
+                                                    ir.CreationDate < dateQ.AddMonths(1) &&
+                                                    (!ir.DeletedDate.HasValue || ir.DeletedDate > dateQ)
+                                                ))
                        .ThenInclude(ir => ir.RevisionMethod)
-                   .Include(h => h.ItemsRevised!.Where(ir => ir.IsActive == true && ir.CreationDate!.Value.Month == month && ir.CreationDate.Value.Year == year))
+                   .Include(h => h.ItemsRevised!.Where(ir =>
+                                                    ir.CreationDate.HasValue &&
+                                                    ir.CreationDate < dateQ.AddMonths(1) &&
+                                                    (!ir.DeletedDate.HasValue || ir.DeletedDate > dateQ)
+                                                ))
                        .ThenInclude(ir => ir.RevisionCycles!.Where(rc => rc.IsActive == true))
                            .ThenInclude(rc => rc.DailyRevisions!.Where(dr => dr.Month == month && dr.Year == year))
                                .ThenInclude(dr => dr.Responsible)
@@ -454,17 +491,34 @@ namespace SupervisorMobility.API.DataAccess.Services.HRIRepository
 
         public async Task<GetHRIDto>GetHRIByMonthAndYearFilter(int hriId,int month,int year)
         {
+            var dateQ = new DateTime(year, month, 1);
             var hri = await _context.HRIs.AsNoTracking().Include(h => h.Line)
                  .Include(h => h.NameOfItem)
                  .Include(h => h.Dock)
                  .Include(h => h.Images)
-                 .Include(h => h.ItemsRevised!)
+                 .Include(h => h.ItemsRevised!.Where(ir =>
+                                                    ir.CreationDate.HasValue &&
+                                                    ir.CreationDate < dateQ.AddMonths(1) &&
+                                                    (!ir.DeletedDate.HasValue || ir.DeletedDate > dateQ)
+                                                ))
                      .ThenInclude(ir => ir.Frequency)
-                 .Include(h => h.ItemsRevised!.Where(ir => ir.IsActive == true && ir.CreationDate!.Value.Month == month && ir.CreationDate.Value.Year == year))
+                 .Include(h => h.ItemsRevised!.Where(ir =>
+                                                    ir.CreationDate.HasValue &&
+                                                    ir.CreationDate < dateQ.AddMonths(1) &&
+                                                    (!ir.DeletedDate.HasValue || ir.DeletedDate > dateQ)
+                                                ))
                      .ThenInclude(ir => ir.Veredict)
-                 .Include(h => h.ItemsRevised!.Where(ir => ir.IsActive == true && ir.CreationDate!.Value.Month == month && ir.CreationDate.Value.Year == year))
+                 .Include(h => h.ItemsRevised!.Where(ir =>
+                                                    ir.CreationDate.HasValue &&
+                                                    ir.CreationDate < dateQ.AddMonths(1) &&
+                                                    (!ir.DeletedDate.HasValue || ir.DeletedDate > dateQ)
+                                                ))
                      .ThenInclude(ir => ir.RevisionMethod)
-                 .Include(h => h.ItemsRevised!.Where(ir => ir.IsActive == true && ir.CreationDate!.Value.Month == month && ir.CreationDate.Value.Year == year))
+                 .Include(h => h.ItemsRevised!.Where(ir =>
+                                                    ir.CreationDate.HasValue &&
+                                                    ir.CreationDate < dateQ.AddMonths(1) &&
+                                                    (!ir.DeletedDate.HasValue || ir.DeletedDate > dateQ)
+                                                ))
                      .ThenInclude(ir => ir.RevisionCycles!.Where(rc => rc.IsActive == true))
                          .ThenInclude(rc => rc.DailyRevisions!.Where(dr => dr.Month == month && dr.Year == year))
                              .ThenInclude(dr => dr.Responsible)
