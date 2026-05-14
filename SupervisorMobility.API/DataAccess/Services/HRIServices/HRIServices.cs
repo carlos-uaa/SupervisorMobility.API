@@ -1,6 +1,7 @@
 ﻿
-using SupervisorMobility.API.Models.HRIDtos;
 using SupervisorMobility.API.DataAccess.Services.HRIRepository;
+using SupervisorMobility.API.Models.HRIDtos;
+using SupervisorMobility.API.Models.HRIDtos.HRIMetrics;
 using SupervisorMobility.API.Models.HRIWeeklyRevisions;
 
 namespace SupervisorMobility.API.DataAccess.Services.HRIServices
@@ -59,6 +60,27 @@ namespace SupervisorMobility.API.DataAccess.Services.HRIServices
         public async Task<ServiceResponse<GetHRIDto>> GetDailyByMonthAndYear(int hriId, int month, int year)
         {
             return await _hriRepository.GetDailyByMonthAndYear(hriId, month, year);
+        }
+
+        // Endpoints para el Dashboard del HRI
+        public async Task<ServiceResponse<HriKpis>> GetHriKPIs()
+        {
+            return await _hriRepository.GetHriKPIs();
+        }
+
+        public async Task<ServiceResponse<LinesChartData>> GetLinesChartData(int areaId)
+        {
+            return await _hriRepository.GetLinesChartData(areaId);
+        }
+
+        public async Task<ServiceResponse<GeneralStatusChartData>> GetGeneralStatusChartData(int areaId)
+        {
+            return await _hriRepository.GetGeneralStatusChartData(areaId);
+        }
+
+        public async Task<ServiceResponse<List<HriRecentRevisionsDto>>> GetRecentRevisions(int areaId, string? filter)
+        {
+            return await _hriRepository.GetRecentRevisions(areaId, filter);
         }
     }
 }

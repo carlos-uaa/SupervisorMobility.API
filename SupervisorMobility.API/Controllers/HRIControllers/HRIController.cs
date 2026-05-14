@@ -1,6 +1,8 @@
 ﻿using Microsoft.AspNetCore.Mvc;
+using SupervisorMobility.API.DataAccess.Entities;
 using SupervisorMobility.API.DataAccess.Services.HRIServices;
 using SupervisorMobility.API.Models.HRIDtos;
+using SupervisorMobility.API.Models.HRIDtos.HRIMetrics;
 using SupervisorMobility.API.Models.HRIWeeklyRevisions;
 
 namespace SupervisorMobility.API.Controllers.HRIControllers
@@ -149,6 +151,63 @@ namespace SupervisorMobility.API.Controllers.HRIControllers
         {
             var response = await _HRIServices.DeleteHRI(id);
             if (!response.Data)
+            {
+                return NotFound(response);
+            }
+            return Ok(response);
+        }
+
+        // Endpoints para el Dashboard del HRI
+        [HttpGet("GetHriKPIs")]
+        [ProducesResponseType(StatusCodes.Status200OK)]
+        [ProducesResponseType(StatusCodes.Status404NotFound)]
+        [ProducesResponseType(StatusCodes.Status500InternalServerError)]
+        public async Task<ActionResult<ServiceResponse<HriKpis>>> GetHriKPIs()
+        {
+            var response = await _HRIServices.GetHriKPIs();
+            if (response.Data == null)
+            {
+                return NotFound(response);
+            }
+            return Ok(response);
+        }
+
+        [HttpGet("GetLinesChartData/{distributionId}")]
+        [ProducesResponseType(StatusCodes.Status200OK)]
+        [ProducesResponseType(StatusCodes.Status404NotFound)]
+        [ProducesResponseType(StatusCodes.Status500InternalServerError)]
+        public async Task<ActionResult<ServiceResponse<LinesChartData>>> GetLinesChartData(int areaId)
+        {
+            var response = await _HRIServices.GetLinesChartData(areaId);
+            if (response.Data == null)
+            {
+                return NotFound(response);
+            }
+            return Ok(response);
+        }
+
+        [HttpGet("GetGeneralStatusChartData/{distributionId}")]
+        [ProducesResponseType(StatusCodes.Status200OK)]
+        [ProducesResponseType(StatusCodes.Status404NotFound)]
+        [ProducesResponseType(StatusCodes.Status500InternalServerError)]
+        public async Task<ActionResult<ServiceResponse<GeneralStatusChartData>>> GetGeneralStatusChartData(int areaId)
+        {
+            var response = await _HRIServices.GetGeneralStatusChartData(areaId);
+            if (response.Data == null)
+            {
+                return NotFound(response);
+            }
+            return Ok(response);
+        }
+
+        [HttpGet("GetRecentRevisions/{distributionId}")]
+        [ProducesResponseType(StatusCodes.Status200OK)]
+        [ProducesResponseType(StatusCodes.Status404NotFound)]
+        [ProducesResponseType(StatusCodes.Status500InternalServerError)]
+        public async Task<ActionResult<ServiceResponse<List<HriRecentRevisionsDto>>>> GetRecentRevisions(int areaId, string? filter)
+        {
+            var response = await _HRIServices.GetRecentRevisions(areaId, filter);
+            if (response.Data == null)
             {
                 return NotFound(response);
             }
