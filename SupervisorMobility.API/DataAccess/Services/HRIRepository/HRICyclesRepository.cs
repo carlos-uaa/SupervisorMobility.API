@@ -168,11 +168,12 @@ namespace SupervisorMobility.API.DataAccess.Services.HRIRepository
                 }
                 // Remove associated daily revisions first
                 var dailyRevisions = _context.DailyRevisions.Where(d => d.CycleId == id);
-                foreach (var daily in dailyRevisions)
-                {
-                    daily.IsActive = false; // Soft delete
-                }
+                //foreach (var daily in dailyRevisions)
+                //{
+                //    daily.IsActive = false; // Soft delete
+                //}
                 hriCycle.IsActive = false; // Soft delete
+                hriCycle.DeletedDate = DateTime.Now;
                 await _context.SaveChangesAsync();
                 response.Data = true;
                 response.Success = true;

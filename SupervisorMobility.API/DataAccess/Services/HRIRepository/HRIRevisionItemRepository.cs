@@ -230,17 +230,18 @@ namespace SupervisorMobility.API.DataAccess.Services.HRIRepository
                 {
                     // soft delete
                     revisionItem.IsActive = false;
+                    revisionItem.DeletedDate = DateTime.Now;
                     await _context.SaveChangesAsync();
 
                     // Eliminar los ciclos de revisión asociados
-                    var revisionCycles = await _hriRevisionCyclesRepository.GetAllRevisionCyclesByRevisionItemId(revisionItem.ItemId);
-                    if (revisionCycles.Data != null)
-                    {
-                        foreach (var cycle in revisionCycles.Data)
-                        {
-                            await _hriRevisionCyclesRepository.DeleteRevisionCycle(cycle.RevisionCycleId);
-                        }
-                    }
+                    //var revisionCycles = await _hriRevisionCyclesRepository.GetAllRevisionCyclesByRevisionItemId(revisionItem.ItemId);
+                    //if (revisionCycles.Data != null)
+                    //{
+                    //    foreach (var cycle in revisionCycles.Data)
+                    //    {
+                    //        await _hriRevisionCyclesRepository.DeleteRevisionCycle(cycle.RevisionCycleId);
+                    //    }
+                    //}
                     response.Data = true;
                     response.Success = true;
                     response.Message = "HRI Revision Item deleted successfully.";
