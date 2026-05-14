@@ -390,12 +390,24 @@ namespace SupervisorMobility.API.DataAccess.Services.HRIRepository
                             .ThenInclude(rc => rc.DailyRevisions!.Where(dr=>dr.Month == DateTime.Now.Month && dr.Year == DateTime.Now.Year))
                                 .ThenInclude(dr => dr.Responsible)
                     .Include(h => h.WeeklyRevisions!.Where(wr => wr.IsActive == true && wr.Month == DateTime.Now.Month && wr.Year == DateTime.Now.Year))
-                    .Include(h => h.HriCycles!.Where(hc => hc.IsActive == true && hc.CreationDate!.Value.Month == DateTime.Now.Month && hc.CreationDate.Value.Year == DateTime.Now.Year))
+                    .Include(h => h.HriCycles!.Where(hc =>
+                                                    hc.CreationDate.HasValue &&
+                                                    hc.CreationDate < dateQ.AddMonths(1) &&
+                                                    (!hc.DeletedDate.HasValue || hc.DeletedDate > dateQ)
+                                               ))
                         .ThenInclude(c => c.DailyRevisions!.Where(dr=>dr.Month == DateTime.Now.Month && dr.Year == DateTime.Now.Year))
                             .ThenInclude(dr => dr.Responsible)
-                    .Include(h => h.HriCycles!.Where(hc => hc.IsActive == true && hc.CreationDate!.Value.Month == DateTime.Now.Month && hc.CreationDate.Value.Year == DateTime.Now.Year))
+                    .Include(h => h.HriCycles!.Where(hc =>
+                                                    hc.CreationDate.HasValue &&
+                                                    hc.CreationDate < dateQ.AddMonths(1) &&
+                                                    (!hc.DeletedDate.HasValue || hc.DeletedDate > dateQ)
+                                               ))
                         .ThenInclude(c => c.Operator)
-                    .Include(h => h.HriCycles!.Where(hc => hc.IsActive == true && hc.CreationDate!.Value.Month == DateTime.Now.Month && hc.CreationDate.Value.Year == DateTime.Now.Year))
+                    .Include(h => h.HriCycles!.Where(hc =>
+                                                    hc.CreationDate.HasValue &&
+                                                    hc.CreationDate < dateQ.AddMonths(1) &&
+                                                    (!hc.DeletedDate.HasValue || hc.DeletedDate > dateQ)
+                                               ))
                         .ThenInclude(c => c.Supervisor)
                     .Include(h => h.HourmeterRevision)
                         .ThenInclude(hr => hr.DailyRevisions!.Where(dr=>dr.Month == DateTime.Now.Month && dr.Year == DateTime.Now.Year))
@@ -460,12 +472,24 @@ namespace SupervisorMobility.API.DataAccess.Services.HRIRepository
                            .ThenInclude(rc => rc.DailyRevisions!.Where(dr => dr.Month == month && dr.Year == year))
                                .ThenInclude(dr => dr.Responsible)
                    .Include(h => h.WeeklyRevisions!.Where(wr => wr.IsActive == true && wr.Month == month && wr.Year == year))
-                   .Include(h => h.HriCycles!.Where(hc => hc.IsActive == true && hc.CreationDate!.Value.Month == month && hc.CreationDate.Value.Year == year))
+                   .Include(h => h.HriCycles!.Where(hc =>
+                                                    hc.CreationDate.HasValue &&
+                                                    hc.CreationDate < dateQ.AddMonths(1) &&
+                                                    (!hc.DeletedDate.HasValue || hc.DeletedDate > dateQ)
+                                                ))
                        .ThenInclude(c => c.DailyRevisions!.Where(dr => dr.Month == month && dr.Year == year))
                            .ThenInclude(dr => dr.Responsible)
-                   .Include(h => h.HriCycles!.Where(hc => hc.IsActive == true && hc.CreationDate!.Value.Month == month && hc.CreationDate.Value.Year == year))
+                   .Include(h => h.HriCycles!.Where(hc =>
+                                                    hc.CreationDate.HasValue &&
+                                                    hc.CreationDate < dateQ.AddMonths(1) &&
+                                                    (!hc.DeletedDate.HasValue || hc.DeletedDate > dateQ)
+                                                ))
                        .ThenInclude(c => c.Operator)
-                   .Include(h => h.HriCycles!.Where(hc => hc.IsActive == true && hc.CreationDate!.Value.Month == month && hc.CreationDate.Value.Year == year))
+                   .Include(h => h.HriCycles!.Where(hc =>
+                                                    hc.CreationDate.HasValue &&
+                                                    hc.CreationDate < dateQ.AddMonths(1) &&
+                                                    (!hc.DeletedDate.HasValue || hc.DeletedDate > dateQ)
+                                                ))
                        .ThenInclude(c => c.Supervisor)
                    .Include(h => h.HourmeterRevision)
                        .ThenInclude(hr => hr.DailyRevisions!.Where(dr => dr.Month == month && dr.Year == year))
@@ -527,12 +551,24 @@ namespace SupervisorMobility.API.DataAccess.Services.HRIRepository
                          .ThenInclude(rc => rc.DailyRevisions!.Where(dr => dr.Month == month && dr.Year == year))
                              .ThenInclude(dr => dr.Responsible)
                  .Include(h => h.WeeklyRevisions!.Where(wr => wr.IsActive == true && wr.Month == month && wr.Year == year))
-                 .Include(h => h.HriCycles!.Where(hc => hc.IsActive == true && hc.CreationDate!.Value.Month == month && hc.CreationDate.Value.Year == year))
+                 .Include(h => h.HriCycles!.Where(hc =>
+                                                hc.CreationDate.HasValue &&
+                                                hc.CreationDate < dateQ.AddMonths(1) &&
+                                                (!hc.DeletedDate.HasValue || hc.DeletedDate > dateQ)
+                                            ))
                      .ThenInclude(c => c.DailyRevisions!.Where(dr => dr.Month == month && dr.Year == year))
                          .ThenInclude(dr => dr.Responsible)
-                 .Include(h => h.HriCycles!.Where(hc => hc.IsActive == true && hc.CreationDate!.Value.Month == month && hc.CreationDate.Value.Year == year))
+                 .Include(h => h.HriCycles!.Where(hc =>
+                                                hc.CreationDate.HasValue &&
+                                                hc.CreationDate < dateQ.AddMonths(1) &&
+                                                (!hc.DeletedDate.HasValue || hc.DeletedDate > dateQ)
+                                            ))
                      .ThenInclude(c => c.Operator)
-                 .Include(h => h.HriCycles!.Where(hc => hc.IsActive == true && hc.CreationDate!.Value.Month == month && hc.CreationDate.Value.Year == year))
+                 .Include(h => h.HriCycles!.Where(hc =>
+                                                hc.CreationDate.HasValue &&
+                                                hc.CreationDate < dateQ.AddMonths(1) &&
+                                                (!hc.DeletedDate.HasValue || hc.DeletedDate > dateQ)
+                                            ))
                      .ThenInclude(c => c.Supervisor)
                  .Include(h => h.HourmeterRevision)
                      .ThenInclude(hr => hr.DailyRevisions!.Where(dr => dr.Month == month && dr.Year == year))
