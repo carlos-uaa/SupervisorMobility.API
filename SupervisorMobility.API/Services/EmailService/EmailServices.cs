@@ -194,12 +194,31 @@ namespace SupervisorMobility.API.Services.EmailService
                     if (this._appSettings.production)
                     {
                         emailMessage.To.Add(email);
+                        if (queued.CCPEmails!=null)
+                        {
+                            var ccpEmails = queued.CCPEmails.Split(',', StringSplitOptions.RemoveEmptyEntries);
+                            foreach (var ccpEmail in ccpEmails)
+                            {
+                                emailMessage.Cc.Add(new MailboxAddress("", ccpEmail.Trim()));
+                            }
+                        }
+                        
+
                     }
                     else
                     {
                         // In environment development, send to a test email
                         emailMessage.To.Add(new MailboxAddress("Desarrollo DigitalPIR", "gmartinez@gruposinco.com.mx"));
                         emailMessage.Cc.Add(new MailboxAddress("Daniel Mares", "dmares@gruposinco.com.mx"));
+
+                        if (queued.CCPEmails != null)
+                        {
+                            var ccpEmails = queued.CCPEmails.Split(',', StringSplitOptions.RemoveEmptyEntries);
+                            foreach (var ccpEmail in ccpEmails)
+                            {
+                                emailMessage.Cc.Add(new MailboxAddress("", ccpEmail.Trim()));
+                            }
+                        }
                     }
 
                     if (this._appSettings.production)
