@@ -591,7 +591,6 @@ namespace SupervisorMobility.API.DataAccess.Services.HRIRepository
                 var hris = await _context.HRIs.AsNoTracking().Include(h => h.Line)
                     .Include(h => h.NameOfItem)
                     .Include(h => h.ItemsRevised!.Where(ir => ir.IsActive == true))
-                    .Include(h=>h.ItemsRevised!.Where(ir => ir.IsActive == true && ir.CreationDate!.Value.Month == DateTime.Now.Month && ir.CreationDate.Value.Year == DateTime.Now.Year))
                     .Include(h => h.Images)
                     .Where(h => h.IsActive)
                     .ToListAsync();
