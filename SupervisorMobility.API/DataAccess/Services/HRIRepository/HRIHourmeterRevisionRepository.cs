@@ -158,7 +158,7 @@ namespace SupervisorMobility.API.DataAccess.Services.HRIRepository
                         MicrosoftTeams = false,
                         type = "RevisionWithNG"
                     };
-                    var created = await _notificationService.CreateNotificationAsync(dto, options);
+                    var created = await _notificationService.CreateNotificationAsync(dto, options, createDaily.CCPEmails);
                 }
 
 

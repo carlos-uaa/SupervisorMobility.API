@@ -7,7 +7,7 @@ namespace SupervisorMobility.API.Services.EmailService
 {
     public interface IEmailQueueService
     {
-        Task<EmailQueue> AddEmailQueueEntryAsync(Notification notification, string type, int? targetRelationId = null);
+        Task<EmailQueue> AddEmailQueueEntryAsync(Notification notification, string type, int? targetRelationId = null, string CCPEmails = null);
         Task<ServiceResponse<List<EmailQueue>>> GetPendingEmailQueuesAsync();
         Task<ServiceResponse<bool>> IncrementAttempt(int id);
         
@@ -37,7 +37,7 @@ namespace SupervisorMobility.API.Services.EmailService
         }
 
 
-        public async Task<EmailQueue> AddEmailQueueEntryAsync(Notification notification, string type, int? targetRelationId = null)
+        public async Task<EmailQueue> AddEmailQueueEntryAsync(Notification notification, string type, int? targetRelationId = null, string CCPEmails = null)
         {
             // Logic to add the notification to the email queue
             EmailQueue emailQueueEntry = new EmailQueue
@@ -49,7 +49,8 @@ namespace SupervisorMobility.API.Services.EmailService
                 IsSend = false,
                 Attempts = 0,
                 TargetRelationID = targetRelationId ?? 0,
-                TargetRelationAux = getTargetAux(type, notification)
+                TargetRelationAux = getTargetAux(type, notification),
+                CCPEmails = CCPEmails
             };
 
             return await _repository.AddEmailQueueEntryAsync(emailQueueEntry);
