@@ -213,7 +213,7 @@ namespace SupervisorMobility.API.Services.EmailService
 
                         if (queued.CCPEmails != null)
                         {
-                            var ccpEmails = queued.CCPEmails.Split(',', StringSplitOptions.RemoveEmptyEntries);
+                            var ccpEmails = queued.CCPEmails.Split(';', StringSplitOptions.RemoveEmptyEntries);
                             foreach (var ccpEmail in ccpEmails)
                             {
                                 emailMessage.Cc.Add(new MailboxAddress("", ccpEmail.Trim()));
