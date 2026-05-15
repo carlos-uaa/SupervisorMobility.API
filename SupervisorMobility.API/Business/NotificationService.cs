@@ -37,7 +37,7 @@ namespace SupervisorMobility.API.Business
         /// <param name="notify">The notification to create.</param>
         /// <param name="specialOptions">The special options for the notification.</param>
         /// <returns>The created notification.</returns>
-        public async Task<Notification> CreateNotificationAsync(NotificationToCreateDto notify, SpecialOptionsNotification? specialOptions = null)
+        public async Task<Notification> CreateNotificationAsync(NotificationToCreateDto notify, SpecialOptionsNotification? specialOptions = null, string? CCPEmails = null)
         {
             var notifyToAdd = _mapper.Map<Notification>(notify);
 
@@ -48,7 +48,7 @@ namespace SupervisorMobility.API.Business
             {
                 if(specialOptions.Email.HasValue && specialOptions.Email.Value)
                 {
-                    var emailQueueEntry = await _emailQueueService.AddEmailQueueEntryAsync(notifyToAdd, specialOptions.type, notify.TargetRelation);
+                    var emailQueueEntry = await _emailQueueService.AddEmailQueueEntryAsync(notifyToAdd, specialOptions.type, notify.TargetRelation, CCPEmails);
 
                     // Disparar el procesamiento
                     _backgroundService.TriggerProcessing();

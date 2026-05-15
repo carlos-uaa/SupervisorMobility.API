@@ -20,6 +20,7 @@ namespace SupervisorMobility.API.Entities
 
         public bool IsAccepted { get; set; } = false;
         public bool IsActive { get; set; } = false;
+        
         public DateTime EntryDate { get; set; } = DateTime.Now;
     }
 }
