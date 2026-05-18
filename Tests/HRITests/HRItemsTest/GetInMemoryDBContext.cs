@@ -13,9 +13,9 @@ namespace Tests.HRITests.HRItemsTest
             var options = new DbContextOptionsBuilder<SupervisorMobilityContext>()
                 .UseInMemoryDatabase(databaseName: Guid.NewGuid().ToString())
                 .Options;
-            var context = new SupervisorMobilityContext(options);
-            context.Database.EnsureCreated();
-            return context;
+             
+            
+            return new SupervisorMobilityContext(options); ;
         }
     }
 }
