@@ -248,6 +248,7 @@ namespace SupervisorMobility.API.DataAccess.Services.HRIRepository
             }
             return response;
         }
+        
         public async Task<ServiceResponse<bool>> DeleteHRI(int id)
         {
             var response = new ServiceResponse<bool>();
@@ -436,6 +437,7 @@ namespace SupervisorMobility.API.DataAccess.Services.HRIRepository
             }
             return response;
         }
+
 
         public async Task<ServiceResponse<GetHRIDto>> GetDailyByMonthAndYear(int hriId, int month, int year)
         {
@@ -820,7 +822,7 @@ namespace SupervisorMobility.API.DataAccess.Services.HRIRepository
                     }
                 }
 
-                // actualizamos las imagenes TODO
+                // actualizamos las imagenes
                 if (updatedHRI.Images != null && updatedHRI.Images.Count > 0)
                 {
                     updatedHRI.Images.ForEach(img => img.HriId = hri.HriId);
@@ -1152,6 +1154,7 @@ namespace SupervisorMobility.API.DataAccess.Services.HRIRepository
                 _ => "Mes desconocido"
             };
         }
+        
         public async Task<ServiceResponse<byte[]>> CreateExcelHriFile(int hriId, int month, int year)
         {
             var serviceResponse = new ServiceResponse<byte[]>();
@@ -1889,6 +1892,7 @@ namespace SupervisorMobility.API.DataAccess.Services.HRIRepository
             }
             return weeksOfMonth;
         }
+        
         private List<int> GetSaturdaysAndSundays(int mes, int anio)
         {
             var diasMes = DateTime.DaysInMonth(anio, mes);
@@ -1903,6 +1907,7 @@ namespace SupervisorMobility.API.DataAccess.Services.HRIRepository
             }
             return dias;
         }
+        
         private string GetSimbolRevision(string valor)
         {
             switch (valor)
