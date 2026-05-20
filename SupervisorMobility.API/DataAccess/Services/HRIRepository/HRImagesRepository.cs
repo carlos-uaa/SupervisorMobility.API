@@ -108,8 +108,6 @@ namespace SupervisorMobility.API.DataAccess.Services.HRIRepository
                     _context.HRImages.RemoveRange(existingImagesToDelete);
                     await _context.SaveChangesAsync();
                 }
-                // var existingImages = await _context.HRImages.Where(i => i.HriId == image.First().HriId).ToListAsync();
-                // _context.HRImages.RemoveRange(existingImages);
 
                 // Remove from image array the images marked for deletion
                 image = image.Where(i => !i.delete).ToList();
