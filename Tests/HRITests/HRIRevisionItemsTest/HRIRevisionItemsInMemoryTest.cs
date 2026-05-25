@@ -1,5 +1,6 @@
 ﻿using AutoMapper;
 using Moq;
+using SupervisorMobility.API.Business;
 using SupervisorMobility.API.DataAccess.Entities.HRI_s_Entities;
 using SupervisorMobility.API.DataAccess.Services.HRIRepository;
 using SupervisorMobility.API.Models.HRIHourmeterRevisionDto;
@@ -63,7 +64,7 @@ namespace Tests.HRITests.HRIRevisionItemsTest
         [Test]
         public async Task CreateFrecuency()
         {
-                       var context = new GetInMemoryDBContext().GetInMemoryDbContext();
+            var context = new GetInMemoryDBContext().GetInMemoryDbContext();
             var _mapper = new MockMapperCreation().GetMockMapper().Object;
             var _service = new Mock<IHRIRevisionCyclesRepository>().Object;
             var repository = new HRIRevisionItemRepository(context, _service, _mapper);
@@ -101,7 +102,7 @@ namespace Tests.HRITests.HRIRevisionItemsTest
             {
                 Code = "Frecuencia 1 actualizada",
                 Description = "Descripción de la frecuencia 1 actualizada",
-                
+
             });
             //assert
             Assert.IsNotNull(updatedFrequency);
@@ -351,7 +352,383 @@ namespace Tests.HRITests.HRIRevisionItemsTest
             Assert.That(deleteResult.Success, Is.True); // Verifica que la eliminación fue exitosa
 
         }
+        [Test]
+        public async Task GetAllHRIRevisionItems()
+        {
+            var context = new GetInMemoryDBContext().GetInMemoryDbContext();
+            var _mapper = new MockMapperCreation().GetMockMapper().Object;
+            var _service = new Mock<IHRIRevisionCyclesRepository>().Object;
+            var _notificationService = new Mock<INotificationService>().Object;
+            var cycleRepository = new HRIRevisionCyclesRepository(context, _mapper, _notificationService);
+            var repository = new HRIRevisionItemRepository(context, _service, _mapper);
+            //creamos el veredicto, la frecuencia y el método de revisión necesarios para crear un ítem de revisión
+            var createdVeredict = await repository.CreateVeredict(new CreateVeredictDto
+            {
+                Code = "Veredicto 1",
+                Description = "Descripción del veredicto 1",
+                IsActive = true
+            });
+            var createdFrequency = await repository.CreateFrequency(new CreateFrequencyDto
+            {
+                Code = "Frecuencia 1",
+                Description = "Descripción de la frecuencia 1",
+                IsActive = true
+            });
+            var createdRevisionMethod = await repository.CreateRevisionMethod(new CreateRevisionMethodDto
+            {
+                Code = "Método de revisión 1",
+                Description = "Descripción del método de revisión 1",
+                IsActive = true
+            });
+            // creamos el HRI necesario para crear un ítem de revisión
+            await context.HRIs.AddAsync(new HRI
+            {
+                HriId = 1,
+                HRILinesId = 1,
+                HRIItemId = 1,
+                ControlNumber = "Control 1",
+                HRIDockId = 1,
+                Department = "Department 1",
+                SupervisorUserId = 1,
+                SSVUserId = 12,
+                PlantId = 1,
+                AreaId = 1,
+                IsActive = true,
+                CreationDate = DateTime.UtcNow
+            });
+            await context.SaveChangesAsync();
+            //agregamos un ítem de revisión a la base de datos
+            await repository.CreateHRIRevisionItem(new CreateHRIRevisionItemDto
+            {
+                HriId = 1,
+                ItemNumber = 1,
+                RevisionPoint = "Punto de revisión 1",
+                RevisionMethodId = createdRevisionMethod.Data!.Id,
+                VeredictId = createdVeredict.Data!.Id,
+                FrequencyId = createdFrequency.Data!.Id,
+                IsActive = true
+            });
+            var allRevisionItems = await repository.GetAllHRIRevisionItems();
+            //assert
+            Assert.IsNotNull(allRevisionItems);
+            Assert.That(allRevisionItems.Data!.Count, Is.EqualTo(1)); // Verifica que solo hay un ítem de revisión en la base de datos
+        }
+        [Test]
+        public async Task GetHRIRevisionItemById()
+        {
+            var context = new GetInMemoryDBContext().GetInMemoryDbContext();
+            var _mapper = new MockMapperCreation().GetMockMapper().Object;
+            var _service = new Mock<IHRIRevisionCyclesRepository>().Object;
+            var _notificationService = new Mock<INotificationService>().Object;
+            var cycleRepository = new HRIRevisionCyclesRepository(context, _mapper, _notificationService);
+            var repository = new HRIRevisionItemRepository(context, _service, _mapper);
+            //creamos el veredicto, la frecuencia y el método de revisión necesarios para crear un ítem de revisión
+            var createdVeredict = await repository.CreateVeredict(new CreateVeredictDto
+            {
+                Code = "Veredicto 1",
+                Description = "Descripción del veredicto 1",
+                IsActive = true
+            });
+            var createdFrequency = await repository.CreateFrequency(new CreateFrequencyDto
+            {
+                Code = "Frecuencia 1",
+                Description = "Descripción de la frecuencia 1",
+                IsActive = true
+            });
+            var createdRevisionMethod = await repository.CreateRevisionMethod(new CreateRevisionMethodDto
+            {
+                Code = "Método de revisión 1",
+                Description = "Descripción del método de revisión 1",
+                IsActive = true
+            });
+            // creamos el HRI necesario para crear un ítem de revisión
+            await context.HRIs.AddAsync(new HRI
+            {
+                HriId = 1,
+                HRILinesId = 1,
+                HRIItemId = 1,
+                ControlNumber = "Control 1",
+                HRIDockId = 1,
+                Department = "Department 1",
+                SupervisorUserId = 1,
+                SSVUserId = 12,
+                PlantId = 1,
+                AreaId = 1,
+                IsActive = true,
+                CreationDate = DateTime.UtcNow
+            });
+            await context.SaveChangesAsync();
+            //agregamos un ítem de revisión a la base de datos
+            var createdRevisionItem = await repository.CreateHRIRevisionItem(new CreateHRIRevisionItemDto
+            {
+                HriId = 1,
+                ItemNumber = 1,
+                RevisionPoint = "Punto de revisión 1",
+                RevisionMethodId = createdRevisionMethod.Data!.Id,
+            });
 
-       
+            //obtenemos el ítem de revisión por su ID
+            var revisionItem = await repository.GetHRIRevisionItemById(createdRevisionItem.Data!.ItemId);
+            Assert.IsNotNull(revisionItem);
+            Assert.That(revisionItem.Data!.ItemId, Is.EqualTo(createdRevisionItem.Data!.ItemId));
+        }
+
+        [Test]
+        public async Task CreateHRIRevisionItem()
+        {
+            var context = new GetInMemoryDBContext().GetInMemoryDbContext();
+            var _mapper = new MockMapperCreation().GetMockMapper().Object;
+            var _service = new Mock<IHRIRevisionCyclesRepository>().Object;
+            var _notificationService = new Mock<INotificationService>().Object;
+            var cycleRepository = new HRIRevisionCyclesRepository(context, _mapper, _notificationService);
+            var repository = new HRIRevisionItemRepository(context, _service, _mapper);
+            //creamos el veredicto, la frecuencia y el método de revisión necesarios para crear un ítem de revisión
+            var createdVeredict = await repository.CreateVeredict(new CreateVeredictDto
+            {
+                Code = "Veredicto 1",
+                Description = "Descripción del veredicto 1",
+                IsActive = true
+            });
+            var createdFrequency = await repository.CreateFrequency(new CreateFrequencyDto
+            {
+                Code = "Frecuencia 1",
+                Description = "Descripción de la frecuencia 1",
+                IsActive = true
+            });
+            var createdRevisionMethod = await repository.CreateRevisionMethod(new CreateRevisionMethodDto
+            {
+                Code = "Método de revisión 1",
+                Description = "Descripción del método de revisión 1",
+                IsActive = true
+            });
+            // creamos el HRI necesario para crear un ítem de revisión
+            await context.HRIs.AddAsync(new HRI
+            {
+                HriId = 1,
+                HRILinesId = 1,
+                HRIItemId = 1,
+                ControlNumber = "Control 1",
+                HRIDockId = 1,
+                Department = "Department 1",
+                SupervisorUserId = 1,
+                SSVUserId = 12,
+                PlantId = 1,
+                AreaId = 1,
+                IsActive = true,
+                CreationDate = DateTime.UtcNow
+            });
+            await context.SaveChangesAsync();
+
+            //agregamos un ítem de revisión a la base de datos
+            var createdRevisionItem = await repository.CreateHRIRevisionItem(new CreateHRIRevisionItemDto
+            {
+                HriId = 1,
+                ItemNumber = 1,
+                RevisionPoint = "Punto de revisión 1",
+                RevisionMethodId = createdRevisionMethod.Data!.Id,
+                VeredictId = createdVeredict.Data!.Id,
+                FrequencyId = createdFrequency.Data!.Id,
+                IsActive = true
+            });
+            //assert
+            Assert.IsNotNull(createdRevisionItem);
+            Assert.That(createdRevisionItem.Data!.HriId, Is.EqualTo(1)); // Verifica que el HRI ID del ítem de revisión creado es correcto
+            Assert.That(createdRevisionItem.Data.ItemNumber, Is.EqualTo(1)); // Verifica que el número de ítem del ítem de revisión creado es correcto
+        }
+
+        [Test]
+        public async Task CreateHRIREvisionItemsByHRIId()
+        {
+            var context = new GetInMemoryDBContext().GetInMemoryDbContext();
+            var _mapper = new MockMapperCreation().GetMockMapper().Object;
+            var _service = new Mock<IHRIRevisionCyclesRepository>().Object;
+            var _notificationService = new Mock<INotificationService>().Object;
+            var cycleRepository = new HRIRevisionCyclesRepository(context, _mapper, _notificationService);
+            var repository = new HRIRevisionItemRepository(context, _service, _mapper);
+            //creamos el veredicto, la frecuencia y el método de revisión necesarios para crear un ítem de revisión
+            var createdVeredict = await repository.CreateVeredict(new CreateVeredictDto
+            {
+                Code = "Veredicto 1",
+                Description = "Descripción del veredicto 1",
+                IsActive = true
+            });
+            var createdFrequency = await repository.CreateFrequency(new CreateFrequencyDto
+            {
+                Code = "Frecuencia 1",
+                Description = "Descripción de la frecuencia 1",
+                IsActive = true
+            });
+            var createdRevisionMethod = await repository.CreateRevisionMethod(new CreateRevisionMethodDto
+            {
+                Code = "Método de revisión 1",
+                Description = "Descripción del método de revisión 1",
+                IsActive = true
+            });
+            // creamos el HRI necesario para crear un ítem de revisión
+            await context.HRIs.AddAsync(new HRI
+            {
+                HriId = 1,
+                HRILinesId = 1,
+                HRIItemId = 1,
+                ControlNumber = "Control 1",
+                HRIDockId = 1,
+                Department = "Department 1",
+                SupervisorUserId = 1,
+                SSVUserId = 12,
+                PlantId = 1,
+                AreaId = 1,
+                IsActive = true,
+                CreationDate = DateTime.UtcNow
+            });
+            await context.SaveChangesAsync();
+
+            //agregamos un item de revision con el metodo que crea multiples items de revision por HRIId
+            var createdRevisionItems = await repository.CreateHRIREvisionItemsByHRIId(1, new List<CreateHRIRevisionItemDto>
+            {
+                new CreateHRIRevisionItemDto
+                {
+                    ItemNumber = 1,
+                    RevisionPoint = "Punto de revisión 1",
+                    RevisionMethodId = createdRevisionMethod.Data!.Id,
+                    VeredictId = createdVeredict.Data!.Id,
+                    FrequencyId = createdFrequency.Data!.Id,
+                    IsActive = true
+                }
+
+            }, 1);
+
+            //assert
+            Assert.IsNotNull(createdRevisionItems);
+            Assert.That(createdRevisionItems.Data!, Is.EqualTo(true));
+        }
+
+        [Test]
+        public async Task GetAllHRIRevisionItemsByHRIId()
+        {
+            var context = new GetInMemoryDBContext().GetInMemoryDbContext();
+            var _mapper = new MockMapperCreation().GetMockMapper().Object;
+            var _service = new Mock<IHRIRevisionCyclesRepository>().Object;
+            var _notificationService = new Mock<INotificationService>().Object;
+            var cycleRepository = new HRIRevisionCyclesRepository(context, _mapper, _notificationService);
+            var repository = new HRIRevisionItemRepository(context, _service, _mapper);
+            //creamos el veredicto, la frecuencia y el método de revisión necesarios para crear un ítem de revisión
+            var createdVeredict = await repository.CreateVeredict(new CreateVeredictDto
+            {
+                Code = "Veredicto 1",
+                Description = "Descripción del veredicto 1",
+                IsActive = true
+            });
+            var createdFrequency = await repository.CreateFrequency(new CreateFrequencyDto
+            {
+                Code = "Frecuencia 1",
+                Description = "Descripción de la frecuencia 1",
+                IsActive = true
+            });
+            var createdRevisionMethod = await repository.CreateRevisionMethod(new CreateRevisionMethodDto
+            {
+                Code = "Método de revisión 1",
+                Description = "Descripción del método de revisión 1",
+                IsActive = true
+            });
+            // creamos el HRI necesario para crear un ítem de revisión
+            await context.HRIs.AddAsync(new HRI
+            {
+                HriId = 1,
+                HRILinesId = 1,
+                HRIItemId = 1,
+                ControlNumber = "Control 1",
+                HRIDockId = 1,
+                Department = "Department 1",
+                SupervisorUserId = 1,
+                SSVUserId = 12,
+                PlantId = 1,
+                AreaId = 1,
+                IsActive = true,
+                CreationDate = DateTime.UtcNow
+            });
+            await context.SaveChangesAsync();
+            //agregamos un ítem de revisión a la base de datos
+            await repository.CreateHRIRevisionItem(new CreateHRIRevisionItemDto
+            {
+                HriId = 1,
+                ItemNumber = 1,
+                RevisionPoint = "Punto de revisión 1",
+                RevisionMethodId = createdRevisionMethod.Data!.Id,
+                VeredictId = createdVeredict.Data!.Id,
+                FrequencyId = createdFrequency.Data!.Id,
+                IsActive = true
+            });
+            //obtenemos los ítems de revisión por el ID del HRI
+            var revisionItems = await repository.GetAllHRIRevisionItemsByHRIId(1);
+            //assert
+            Assert.IsNotNull(revisionItems);
+            Assert.That(revisionItems.Data!.Count, Is.EqualTo(1)); // Verifica que solo hay un ítem de revisión para el HRI con ID 1
+
+        }
+
+        [Test]
+        public async Task DeleteHRIRevisionItem()
+        {
+            var context = new GetInMemoryDBContext().GetInMemoryDbContext();
+            var _mapper = new MockMapperCreation().GetMockMapper().Object;
+            var _service = new Mock<IHRIRevisionCyclesRepository>().Object;
+            var _notificationService = new Mock<INotificationService>().Object;
+            var cycleRepository = new HRIRevisionCyclesRepository(context, _mapper, _notificationService);
+            var repository = new HRIRevisionItemRepository(context, _service, _mapper);
+            //creamos el veredicto, la frecuencia y el método de revisión necesarios para crear un ítem de revisión
+            var createdVeredict = await repository.CreateVeredict(new CreateVeredictDto
+            {
+                Code = "Veredicto 1",
+                Description = "Descripción del veredicto 1",
+                IsActive = true
+            });
+            var createdFrequency = await repository.CreateFrequency(new CreateFrequencyDto
+            {
+                Code = "Frecuencia 1",
+                Description = "Descripción de la frecuencia 1",
+                IsActive = true
+            });
+            var createdRevisionMethod = await repository.CreateRevisionMethod(new CreateRevisionMethodDto
+            {
+                Code = "Método de revisión 1",
+                Description = "Descripción del método de revisión 1",
+                IsActive = true
+            });
+            // creamos el HRI necesario para crear un ítem de revisión
+            await context.HRIs.AddAsync(new HRI
+            {
+                HriId = 1,
+                HRILinesId = 1,
+                HRIItemId = 1,
+                ControlNumber = "Control 1",
+                HRIDockId = 1,
+                Department = "Department 1",
+                SupervisorUserId = 1,
+                SSVUserId = 12,
+                PlantId = 1,
+                AreaId = 1,
+                IsActive = true,
+                CreationDate = DateTime.UtcNow
+            });
+            await context.SaveChangesAsync();
+            //agregamos un ítem de revisión a la base de datos
+            var createdRevisionItem = await repository.CreateHRIRevisionItem(new CreateHRIRevisionItemDto
+            {
+                HriId = 1,
+                ItemNumber = 1,
+                RevisionPoint = "Punto de revisión 1",
+                RevisionMethodId = createdRevisionMethod.Data!.Id,
+                VeredictId = createdVeredict.Data!.Id,
+                FrequencyId = createdFrequency.Data!.Id,
+                IsActive = true
+            });
+            var revisionItemId = createdRevisionItem.Data!.ItemId;
+            //eliminamos el ítem de revisión
+            var deleteResult = await repository.DeleteHRIRevisionItem(revisionItemId);
+            //assert
+            Assert.NotNull(deleteResult);
+            Assert.That(deleteResult.Success, Is.True); // Verifica que la eliminación fue exitosa
+        }
+
     }
 }

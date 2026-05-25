@@ -1,6 +1,8 @@
 ﻿using AutoMapper;
 using Moq;
+using SupervisorMobility.API.DataAccess.Entities.HRI_s_Entities;
 using SupervisorMobility.API.DataAccess.Entities.HRI_s_Entities.HRIRevisionsItem_Entities;
+using SupervisorMobility.API.Models.HRIRevisionCycles;
 using SupervisorMobility.API.Models.HRIRevisionItemsDtos;
 using System;
 using System.Collections.Generic;
@@ -124,6 +126,57 @@ namespace Tests.HRITests.HRIRevisionItemsTest
                     Description = dto.Description,
                     IsActive = true,
                 });
+
+            //configuracion del mapper de RevisionCycle a GetRevisionCycleDto
+            mockMapper.Setup(m => m.Map<GetRevisionCyclesDto>(It.IsAny<RevisionCycles>()))
+                .Returns<RevisionCycles>(entity => new GetRevisionCyclesDto
+                {
+                    RevisionCycleId = entity.RevisionCycleId,
+                    Cycle = entity.Cycle,
+                    IsActive = entity.IsActive,
+                    HRIRevisionItemsId = entity.HRIRevisionItemsId
+                });
+
+            //configuracion del mapper CreateRevisionCycleDto a RevisionCycle
+            mockMapper.Setup(m => m.Map<RevisionCycles>(It.IsAny<CreateRevisionCyclesDto>()))
+                .Returns<CreateRevisionCyclesDto>(dto => new RevisionCycles
+                {
+                    RevisionCycleId = 1, // Genera un ID aleatorio para simular la base de datos
+                    Cycle = dto.Cycle,
+                    IsActive = true
+                   
+                });
+
+            //configuracion del mapper HRIRevisionItems a GetHRIRevisionItemDto
+            mockMapper.Setup(m => m.Map<GetHRIRevisionItemDto>(It.IsAny<HRIRevisionItems>()))
+                .Returns<HRIRevisionItems>(entity => new GetHRIRevisionItemDto
+                {
+                    ItemId = entity.ItemId,
+                    HriId = entity.HriId,
+                    ItemNumber = entity.ItemNumber,
+                    RevisionPoint = entity.RevisionPoint,
+                    RevisionMethodId = entity.RevisionMethodId,
+                    VeredictId = entity.VeredictId,
+                    FrequencyId = entity.FrequencyId,
+                    IsActive = entity.IsActive,
+                });
+
+            //configuracion del mapper de CreateHRIRevisionItemDto a HRIRevisionItems
+            mockMapper.Setup(m => m.Map<HRIRevisionItems>(It.IsAny<CreateHRIRevisionItemDto>()))
+                .Returns<CreateHRIRevisionItemDto>(dto => new HRIRevisionItems
+                {
+                    ItemId = 1, // Genera un ID aleatorio para simular la base de datos
+                    HriId = dto.HriId,
+                    ItemNumber = dto.ItemNumber,
+                    RevisionPoint = dto.RevisionPoint,
+                    RevisionMethodId = dto.RevisionMethodId,
+                    VeredictId = dto.VeredictId,
+                    FrequencyId = dto.FrequencyId,
+                    IsActive = true,
+                    CreationDate = DateTime.UtcNow
+                });
+
+
             return mockMapper;
         }
     }
