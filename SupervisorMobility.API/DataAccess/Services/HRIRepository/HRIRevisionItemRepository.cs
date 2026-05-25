@@ -27,6 +27,7 @@ namespace SupervisorMobility.API.DataAccess.Services.HRIRepository
             var response = new ServiceResponse<List<GetHRIRevisionItemDto>>();
             try
             {
+                var revi = await _context.HRIRevisionItems.Where(ri => ri.IsActive == true).FirstOrDefaultAsync();
                 var revisionItems = await _context.HRIRevisionItems.Include(ri => ri.HRI)
                                                                    .Include(ri => ri.RevisionMethod)
                                                                    .Include(ri => ri.Veredict)
@@ -454,7 +455,8 @@ namespace SupervisorMobility.API.DataAccess.Services.HRIRepository
                 }
                 else
                 {
-                    _mapper.Map(updateFrequencyDto, frequency);
+                    frequency.Code = updateFrequencyDto.Code;
+                    frequency.Description = updateFrequencyDto.Description;
                     _context.Frequencies.Update(frequency);
                     await _context.SaveChangesAsync();
                     response.Data = _mapper.Map<GetFrequencyDto>(frequency);
@@ -583,7 +585,8 @@ namespace SupervisorMobility.API.DataAccess.Services.HRIRepository
                 }
                 else
                 {
-                    _mapper.Map(updateVeredictDto, veredict);
+                    veredict.Code = updateVeredictDto.Code;
+                    veredict.Description = updateVeredictDto.Description;
                     await _context.SaveChangesAsync();
                     response.Data = _mapper.Map<GetVeredictDto>(veredict);
                     response.Success = true;
@@ -715,7 +718,8 @@ namespace SupervisorMobility.API.DataAccess.Services.HRIRepository
                 }
                 else
                 {
-                    _mapper.Map(updateRevisionMethodDto, revisionMethod);
+                    revisionMethod.Code = updateRevisionMethodDto.Code;
+                    revisionMethod.Description = updateRevisionMethodDto.Description;
                     await _context.SaveChangesAsync();
                     response.Data = _mapper.Map<GetRevisionMethodDto>(revisionMethod);
                     response.Success = true;
