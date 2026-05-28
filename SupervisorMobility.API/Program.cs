@@ -1,16 +1,5 @@
-using DocumentFormat.OpenXml.Office2016.Drawing.ChartDrawing;
-using Microsoft.EntityFrameworkCore;
-using Microsoft.OpenApi.Models;
 using Serilog;
 using SupervisorMobility.API;
-using SupervisorMobility.API.Business;
-using SupervisorMobility.API.Context;
-using SupervisorMobility.API.DataAccess.Entities;
-using SupervisorMobility.API.DataAccess.Services;
-using SupervisorMobility.API.Models.NotificationDtos;
-using SupervisorMobility.API.Services;
-using System.Diagnostics;
-using System.Runtime.InteropServices;
 
 Log.Logger = new LoggerConfiguration()
     .MinimumLevel.Debug()
@@ -34,33 +23,13 @@ builder.Services.AddCors(policy =>
 
 
 var env = builder.Environment;
-// Verifica si el sistema operativo es Linux
-bool isLinux = RuntimeInformation.IsOSPlatform(OSPlatform.Linux);
 
-if (env.IsDevelopment())
-{
-    // Usa una ruta completa si es Linux
-    if (isLinux)
-    {
-        builder.Configuration.AddJsonFile("/home/Vanitas/Documents/GrupoSinco/Supervisor Mobility/SupervisorMobility.API/SupervisorMobility.API/appsettings.Development.json", optional: false, reloadOnChange: false);
-    }
-    else
-    {
-        builder.Configuration.AddJsonFile("appsettings.Development.json", optional: false, reloadOnChange: false);
-    }
-}
-else
-{
-    // Usa una ruta completa si es Linux
-    if (isLinux)
-    {
-        builder.Configuration.AddJsonFile("/home/Vanitas/Documents/GrupoSinco/Supervisor Mobility/SupervisorMobility.API/SupervisorMobility.API/appsettings.json", optional: false, reloadOnChange: true);
-    }
-    else
-    {
-        builder.Configuration.AddJsonFile("appsettings.json", optional: false, reloadOnChange: true);
-    }
-}
+builder.Configuration
+    .SetBasePath(Directory.GetCurrentDirectory())
+    .AddJsonFile("appsettings.json", optional: false, reloadOnChange: true)
+    .AddJsonFile($"appsettings.{env.EnvironmentName}.json", optional: true, reloadOnChange: true)
+    .AddEnvironmentVariables();
+
 
 builder.Host.UseSerilog();
 
@@ -81,6 +50,8 @@ builder.Services.AddSwaggerGen(options =>
 
 builder.Services.RegisterBusinessServices();
 builder.Services.RegisterDataServices(builder.Configuration, builder.WebHost);
+
+
 
 var app = builder.Build();
 
@@ -115,6 +86,17 @@ app.UseCors("Cors");
 app.UseAuthorization();
 app.MapControllers();
 app.MapRazorPages();
+
+// Iniciar procesamiento en background al arrancar la aplicación
+try
+{
+    var emailBackground = app.Services.GetService<SupervisorMobility.API.Services.BackgroundServices.EmailQueueBackgroundService>();
+    emailBackground?.TriggerProcessing();
+}
+catch (Exception ex)
+{
+    Log.Logger.Error(ex, "Error al iniciar el servicio de procesamiento en background");
+}
 
 app.Run();
 

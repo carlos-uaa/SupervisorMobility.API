@@ -10,6 +10,7 @@ namespace SupervisorMobility.API.MapperProfiles
             CreateMap<DataAccess.Entities.Area, Models.AreaDtos.AreaWithoutNavigationPropertiesDto>().ReverseMap();
             CreateMap<DataAccess.Entities.Area, Models.AreaDtos.AreaForCreationDto>().ReverseMap();
             CreateMap<DataAccess.Entities.Area, Models.AreaDtos.AreaForUpdateDto>().ReverseMap();
+            CreateMap<DataAccess.Entities.Area, Models.AreaDtos.GetAreaForHRIDto>().ReverseMap();
         }
     }
 }

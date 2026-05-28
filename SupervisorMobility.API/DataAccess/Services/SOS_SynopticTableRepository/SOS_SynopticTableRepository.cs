@@ -3,6 +3,7 @@ using SupervisorMobility.API.DataAccess.Entities.SOS.STRO.Dtos;
 using SupervisorMobility.API.DataAccess.Entities.SOS.STRO;
 using SupervisorMobility.API.DataAccess.Entities.SOS;
 using SupervisorMobility.API.DataAccess.Entities;
+using SupervisorMobility.API.Models.SOS.SOSSynopticTableofControlPointsDtos;
 using SupervisorMobility.API.Models.SOS.SOSSynopticTableofOperatingRequirementsLogbookDtos;
 using SupervisorMobility.API.Models.SOS.SOSSynopticTableofOperatingRequirementsOperationSequenceDtos;
 using System.Runtime.CompilerServices;
@@ -27,8 +28,17 @@ namespace SupervisorMobility.API.DataAccess.Services.SOS_SynopticTableRepository
         #region SOSSynopticTableofOperatingRequirements
         public async Task<int> CreateSOSSynopticTableofOperatingRequirements(SOSSynopticTableofOperatingRequirements SOS_SynopticTableofOperatingRequirementsToCreate)
         {
-
             _context.SOSSynopticTableofOperatingRequirements.Add(SOS_SynopticTableofOperatingRequirementsToCreate);
+            
+            // NOTE: Mark related SOSHubs as Unchanged - they already exist in DB
+            if (SOS_SynopticTableofOperatingRequirementsToCreate.SOSHubs != null)
+            {
+                foreach (var sosHub in SOS_SynopticTableofOperatingRequirementsToCreate.SOSHubs)
+                {
+                    _context.Entry(sosHub).State = EntityState.Unchanged;
+                }
+            }
+            
             return _context.SaveChanges();
         }
         public async Task<SOSSynopticTableofOperatingRequirements> GetSOSSynopticTableofOperatingRequirements(int SOSSynopticTableofOperatingRequirementsId, bool includeLogbooks = false, bool includeSOS = false, bool includeCollections = false)
@@ -391,7 +401,12 @@ namespace SupervisorMobility.API.DataAccess.Services.SOS_SynopticTableRepository
         }
         public async Task<int> RemoveSOSSynopticTableofOperatingRequirements(int SOS_SynopticTableofOperatingRequirements_id)
         {
-            throw new NotImplementedException();
+            var entity = await _context.SOSSynopticTableofOperatingRequirements
+                .FirstOrDefaultAsync(e => e.SOSSynopticTableofOperatingRequirementsId == SOS_SynopticTableofOperatingRequirements_id);
+            if (entity == null) return 0;
+            entity.IsActive = false;
+            _context.SOSSynopticTableofOperatingRequirements.Update(entity);
+            return await _context.SaveChangesAsync();
         }
         public async Task AddIlustrationToSOSSynopticTableofOperatingRequirements(int SOS_SynopticTableofOperatingRequirements_id, FileUpload evidence)
         {
@@ -500,6 +515,10 @@ namespace SupervisorMobility.API.DataAccess.Services.SOS_SynopticTableRepository
         #region SOSSynopticTableofControlPoints
         public async Task<int> CreateSOSSynopticTableofControlPoints(SOSSynopticTableofControlPoints SOS_SynopticTableofControlPointsToCreate)
         {
+            Console.WriteLine($"[CreateSOSSynopticTableofControlPoints] Creating CSPC with ProcessName='{SOS_SynopticTableofControlPointsToCreate.ProcessName}', SOSHubId={SOS_SynopticTableofControlPointsToCreate.SOSHubId}");
+            Console.WriteLine($"[CreateSOSSynopticTableofControlPoints] Analyses count: {SOS_SynopticTableofControlPointsToCreate.Analyses?.Count() ?? 0}");
+            Console.WriteLine($"[CreateSOSSynopticTableofControlPoints] Sequences count: {SOS_SynopticTableofControlPointsToCreate.Sequences?.Count() ?? 0}");
+            
             var analysesCopy = SOS_SynopticTableofControlPointsToCreate.Analyses.ToList();
 
             for (int j = 0; j < analysesCopy.Count; j++)
@@ -545,7 +564,29 @@ namespace SupervisorMobility.API.DataAccess.Services.SOS_SynopticTableRepository
             }
 
             _context.SOSSynopticTableofControlPoints.Add(SOS_SynopticTableofControlPointsToCreate);
-            return _context.SaveChanges();
+            
+            // CRITICAL FIX: Establecer la relación many-to-many con el Hub
+            // Cargar el Hub y agregarlo a la colección para que EF Core cree la entrada en la tabla intermedia
+            var hub = await _context.SOSHubs.FindAsync(SOS_SynopticTableofControlPointsToCreate.SOSHubId);
+            if (hub != null)
+            {
+                // Cargar la colección de CSPC del Hub si no está cargada
+                await _context.Entry(hub).Collection(h => h.SOSSynopticControlPoints).LoadAsync();
+                
+                // Agregar el CSPC a la colección del Hub (esto crea la relación many-to-many)
+                hub.SOSSynopticControlPoints.Add(SOS_SynopticTableofControlPointsToCreate);
+                
+                Console.WriteLine($"[CreateSOSSynopticTableofControlPoints] Added CSPC to Hub collection. Hub now has {hub.SOSSynopticControlPoints.Count} CSPC items");
+            }
+            else
+            {
+                Console.WriteLine($"[CreateSOSSynopticTableofControlPoints] ERROR: Hub {SOS_SynopticTableofControlPointsToCreate.SOSHubId} not found!");
+            }
+            
+            var savedCount = _context.SaveChanges();
+            Console.WriteLine($"[CreateSOSSynopticTableofControlPoints] SaveChanges returned: {savedCount}");
+            
+            return savedCount;
         }
 
         public async Task<SOSSynopticTableofControlPoints> GetSOSSynopticTableofControlPoints(int SOSSynopticTableofControlPointsId, bool includeLogbooks = false, bool includeSOS = false, bool includeCollections = false)
@@ -592,14 +633,14 @@ namespace SupervisorMobility.API.DataAccess.Services.SOS_SynopticTableRepository
 
 
                     sosSynopticControlPoints.Sequences = await _context.SOSSequences
-                        .Where(s => s.SOSSynopticOperatingRequirements.Any(d => d.SOSSynopticTableofOperatingRequirementsId == SOSSynopticTableofControlPointsId))
+                        .Where(s => s.SOSSynopticControlPoints.Any(d => d.SOSSynopticTableofControlPointsId == SOSSynopticTableofControlPointsId))
                         .Include(sh => sh.SOSHub)
                         .ThenInclude(shs => shs.Sections)
                         .ThenInclude(shsa => shsa.Analyses)
                         .ToListAsync();
 
                     sosSynopticControlPoints.Analyses = await _context.SOSAnalyses
-                        .Where(s => s.SOSSynopticOperatingRequirements.Any(d => d.SOSSynopticTableofOperatingRequirementsId == SOSSynopticTableofControlPointsId))
+                        .Where(s => s.SOSSynopticControlPoints.Any(d => d.SOSSynopticTableofControlPointsId == SOSSynopticTableofControlPointsId))
                         .Include(sh => sh.SOSHub)
                         .ThenInclude(shs => shs.Sections)
                         .ThenInclude(shsa => shsa.Analyses)
@@ -643,7 +684,37 @@ namespace SupervisorMobility.API.DataAccess.Services.SOS_SynopticTableRepository
             return sosSynopticControlPoints;
         }
 
+        public async Task<SOSSynopticTableofControlPoints> UpdateSOSSynopticTableofControlPoints(int sosSynopticTableofControlPoints_Id, SOSSynopticTableofControlPointsForUpdateDto STCPUpdate)
+        {
+            var entity = await _context.SOSSynopticTableofControlPoints
+                .FirstOrDefaultAsync(e => e.SOSSynopticTableofControlPointsId == sosSynopticTableofControlPoints_Id);
+
+            if (entity == null) throw new Exception("SOSSynopticTableofControlPoints not found");
+
+            entity.ProcessName = STCPUpdate.ProcessName ?? entity.ProcessName;
+            entity.InternalControlNumber = STCPUpdate.InternalControlNumber ?? entity.InternalControlNumber;
+            entity.CreatorId = STCPUpdate.CreatorId ?? entity.CreatorId;
+            entity.ReviewerId = STCPUpdate.ReviewerId ?? entity.ReviewerId;
+            entity.ApproverId = STCPUpdate.ApproverId ?? entity.ApproverId;
+            entity.SOSHubId = STCPUpdate.SOSHubId ?? entity.SOSHubId;
+
+            _context.SOSSynopticTableofControlPoints.Update(entity);
+            await _context.SaveChangesAsync();
+
+            return entity;
+        }
+
         #endregion
+
+        public async Task<int> RemoveSOSSynopticTableofControlPoints(int SOS_SynopticTableofControlPoints_id)
+        {
+            var entity = await _context.SOSSynopticTableofControlPoints
+                .FirstOrDefaultAsync(e => e.SOSSynopticTableofControlPointsId == SOS_SynopticTableofControlPoints_id);
+            if (entity == null) return 0;
+            entity.IsActive = false;
+            _context.SOSSynopticTableofControlPoints.Update(entity);
+            return await _context.SaveChangesAsync();
+        }
 
         #region Add To Sos SynopticTableofControlPoints
         public async Task<AsyncVoidMethodBuilder> AddSOSSynopticPointsLogbookToSOSSynopticTableofControlPoints(SOSSynopticTableofControlPoints Master, SOSSynopticPointsLogbook Slave)

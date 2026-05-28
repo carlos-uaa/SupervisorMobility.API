@@ -9,11 +9,13 @@ using SupervisorMobility.API.Models.PATDtos;
 using SupervisorMobility.API.Models.HCIDtos;
 using SupervisorMobility.API.Models.SOSReviewDtos;
 using SupervisorMobility.API.Models.Users;
+using SupervisorMobility.API.Models.Email;
 using System.Runtime.CompilerServices;
 using SupervisorMobility.API.Models.ILURegisterDtos;
 using SupervisorMobility.API.Models.JobPaginationDtos;
 using SupervisorMobility.API.Models.ProductiveCalendarDtos;
 using SupervisorMobility.API.Models.MetricsDtos;
+using SupervisorMobility.API.DataAccess.SPModels;
 
 
 namespace SupervisorMobility.API.Services
@@ -184,13 +186,16 @@ namespace SupervisorMobility.API.Services
         Task<AsyncVoidMethodBuilder> UserUpdateAllSubordinated(User Master);
         Task<AsyncVoidMethodBuilder> UserRemoveAllSubordinated(User Master);
         Task RemoveAllAreasFromUser(User user);
-        Task<AsyncVoidMethodBuilder> UserRemoveAllAreas(User Master);
+        Task<int> UserRemoveAllAreas(User Master);
         Task<AsyncVoidMethodBuilder> UserAddArea(User Master, Area Slave);
+        Task<AsyncVoidMethodBuilder> UserAddAreas(User Master, List<Area> Areas);
 
 
         Task UpdateUser(UsersForUpdateDto user, int userId);
+        Task<ServiceResponse<UpdateUsersAreasResult>> UpdateUserAreasForSuperior(List<UpdateAreasForSuperiorDto> userList);
 
         Task AddUserAsync(User user);
+        Task<ServiceResponse<WFMInfoSP>> GetPersonalInfoForUserByPersonalNumber(int personalNumber);
 
         void DeleteUserAsync(User user);
         #endregion
@@ -210,6 +215,19 @@ namespace SupervisorMobility.API.Services
         void AddNotificationAsync(Notification notify);
         void DeleteNotificationAsync(Notification notify);
         #endregion
+
+        #region EmailQueue
+        Task<EmailQueue> AddEmailQueueEntryAsync(EmailQueue emailQueue);
+        Task<List<EmailQueue>> GetPendingEmailQueuesAsync();
+        Task<EmailQueue?> GetEmailQueueByIdAsync(int id);
+        Task UpdateEmailQueueAsync(EmailQueue emailQueue);
+        #endregion
+
+        #region EmailDeliveryResult
+        Task<EmailDeliveryResult> AddEmailDeliveryResultAsync(EmailDeliveryResult emailDeliveryResult);
+        Task<EmailDeliveryResult?> GetEmailDeliveryResultByIdAsync(int id);
+        #endregion
+
         #region File
         void AddUploadFile(FileUpload fileUpload);
 

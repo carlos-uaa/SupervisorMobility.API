@@ -149,6 +149,30 @@ namespace SupervisorMobility.API.DataAccess.Services.SOS_SequenceRepository
 
             return sosSequences;
         }
+
+        // Get All SOS Sequences by Area
+        public async Task<IEnumerable<SOSSequence>> GetAllSOSSequenceByArea(int Area_Id, bool includeImages = false, bool includeNotes = false, bool includeLogbooks = false, bool includeSpecialCases = false, bool includeSOS = false)
+        {
+            try
+            {
+                var query = _context.SOSSequences.AsNoTracking()
+                  .Where(sequence => Area_Id == (int)sequence.SOSHub.AreaId && sequence.IsActive == true);
+
+                if (includeImages) query = query.Include(i => i.Illustrations);
+                if (includeNotes) query = query.Include(query => query.Notes);
+                if (includeLogbooks) query = query.Include(t => t.SequenceLogbooks);
+                if (includeSOS) query = query.Include(m => m.SOSHub).ThenInclude(ms => ms.Sections).ThenInclude(msa => msa.Analyses);
+
+                var sosSequences = await query.OrderBy(s => s.SOSHubId).ToListAsync();
+                return sosSequences;
+            }
+            catch (Exception ex)
+            {
+                Debug.WriteLine("An error occurred while retrieving SOS Analyses by Areas: " + ex.Message);
+                return new List<SOSSequence>();
+            }
+        }
+
         public async Task<IEnumerable<SOSSequence>> GetAllSOSSequenceByDistribution(int Distribution_Id, bool includeImages = false, bool includeNotes = false, bool includeLogbooks = false, bool includeSpecialCases = false, bool includeSOS = false)
         {
             var query = _context.SOSSequences.AsNoTracking()

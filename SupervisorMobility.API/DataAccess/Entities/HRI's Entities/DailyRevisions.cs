@@ -1,0 +1,25 @@
+﻿using System.ComponentModel.DataAnnotations;
+
+namespace SupervisorMobility.API.DataAccess.Entities.HRI_s_Entities
+{
+    public class DailyRevisions
+    {
+        [Key]
+        public int RevisionId { get; set; }
+        public int? RevisionCycleId { get; set; }
+        public RevisionCycles? RevisionCycle { get; set; }
+        public int? CycleId { get; set; }
+        public HRICycles? cycle { get; set; }
+        public int? HourmeterRevisionId { get; set; }
+        public HourmeterRevision? HourmeterRevision { get; set; }
+        public int Day { get; set; }
+        public int Month { get; set; }
+        public int Year { get; set; }
+        public DateTime? RevisionDate { get; set; }
+        public int? UserId { get; set; }
+        public User? Responsible { get; set; }
+        public string? UserType { get; set; }
+        public string? Status { get; set; }
+        public bool? IsActive { get; set; }
+    }
+}

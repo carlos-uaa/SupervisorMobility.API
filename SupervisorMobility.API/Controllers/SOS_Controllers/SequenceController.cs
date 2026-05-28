@@ -1,11 +1,13 @@
 ﻿using AutoMapper;
 using Microsoft.AspNetCore.Mvc;
+using SupervisorMobility.API.Business;
 using SupervisorMobility.API.DataAccess.Entities;
 using SupervisorMobility.API.DataAccess.Entities.SOS;
 using SupervisorMobility.API.DataAccess.Services;
 using SupervisorMobility.API.DataAccess.Services.SOS_SequenceRepository;
 using SupervisorMobility.API.Models.CommentaryDtos;
 using SupervisorMobility.API.Models.FileUploadDto;
+using SupervisorMobility.API.Models.NotificationDtos;
 using SupervisorMobility.API.Models.SOS.SOSSequenceDtos;
 using SupervisorMobility.API.Models.SOS.SOSSequenceLogbookDtos;
 using SupervisorMobility.API.Models.SOS.SOSTimeDtos;
@@ -21,13 +23,15 @@ namespace SupervisorMobility.API.Controllers.SOS_Controllers
         private readonly ISOS_SequenceRepository _SequenceRepository;
         private readonly IMapper _mapper;
         private readonly IWebHostEnvironment _env;
-        public SequenceController(IWebHostEnvironment env, IMapper mapper, ISOS_ProcessRepository repository, ISOS_SequenceRepository sequenceRepository)
+        private readonly INotificationService _notificationService;
+        public SequenceController(IWebHostEnvironment env, IMapper mapper, ISOS_ProcessRepository repository, ISOS_SequenceRepository sequenceRepository, INotificationService notificationService)
         {
             _ProcessRepository = repository;
             _mapper = mapper ??
                   throw new ArgumentNullException(nameof(mapper));
             _env = env ?? throw new ArgumentNullException(nameof(env));
             _SequenceRepository = sequenceRepository;
+            _notificationService = notificationService ?? throw new ArgumentNullException(nameof(notificationService));
         }
 
         [HttpPost]
@@ -48,8 +52,22 @@ namespace SupervisorMobility.API.Controllers.SOS_Controllers
                 SOSSequence SequenceToCreate = _mapper.Map<SOSSequence>(sOSSequenceToCreate);
 
                 var createdResult = await _SequenceRepository.CreateSOSSequence(SequenceToCreate);
-                if (createdResult != null)
+                if (createdResult > 0)
+                {
+                    int notifyUserId = SOSEntity?.CreatorId ?? 1;
+                    await _notificationService.CreateNotificationAsync(new NotificationToCreateDto
+                    {
+                        MadeBy = "SM Mobility",
+                        NotificationType = "SOS Sequence Created",
+                        NotificationText = $"SOS Sequence (ID: {SequenceToCreate.SOSSequenceId}) has been generated for SOS Hub (ID: {SOSHubCollection_Id}).",
+                        UserId = notifyUserId,
+                        IsActive = true,
+                        IsAccepted = true,
+                        EntryDate = DateTime.Now
+                    });
+
                     return Ok(SequenceToCreate);
+                }
                 else
                     return BadRequest();
             }
@@ -75,6 +93,18 @@ namespace SupervisorMobility.API.Controllers.SOS_Controllers
                 }
 
 
+
+                int reviewNotifyUserId = SOSEntity?.CreatorId ?? 1;
+                await _notificationService.CreateNotificationAsync(new NotificationToCreateDto
+                {
+                    MadeBy = "SM Mobility",
+                    NotificationType = "SOS Sequence Review Completed",
+                    NotificationText = $"SOS Sequence (ID: {_sosSequence.SOSSequenceId}) review has been completed.",
+                    UserId = reviewNotifyUserId,
+                    IsActive = true,
+                    IsAccepted = true,
+                    EntryDate = DateTime.Now
+                });
 
                 return Ok(_sosSequence);
             }
@@ -118,6 +148,16 @@ namespace SupervisorMobility.API.Controllers.SOS_Controllers
             {
                 return NotFound("Get All Sos Analisis not found!");
             }
+
+            return Ok(_mapper.Map<IEnumerable<SOSSequenceDto>>(CheckpointEntities));
+        }
+
+        [HttpGet("byArea")]
+        public async Task<ActionResult<IEnumerable<SOSSequenceDto>>> GetAllSOSSequenceByArea(int Area_Id, bool includeImages = false, bool includeNotes = false, bool includeLogbooks = false, bool includeSpecialCases = false, bool includeSOS = false)
+        {
+            var CheckpointEntities = await _SequenceRepository.GetAllSOSSequenceByArea(Area_Id, includeImages, includeNotes, includeLogbooks, includeSpecialCases, includeSOS);
+            if (CheckpointEntities == null)
+                return NotFound("Get All Sos Analisis not found!");
 
             return Ok(_mapper.Map<IEnumerable<SOSSequenceDto>>(CheckpointEntities));
         }

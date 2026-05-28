@@ -27,7 +27,10 @@ using SupervisorMobility.API.DataAccess.Services;
 // - Business / Service imports
 using SupervisorMobility.API.Business;
 using SupervisorMobility.API.Services;
+using SupervisorMobility.API.Services.BackgroundServices;
 using SupervisorMobility.API.Services.SOS;
+using SupervisorMobility.API.Services.WhatsAppService;
+using SupervisorMobility.API.Services.MicrosoftTeamsService;
 
 // - Interface imports
 using SupervisorMobility.API.Interfaces.SOS;
@@ -39,10 +42,6 @@ using SupervisorMobility.API.Services.SOSDistribution.SOSDistributionExcel;
 using SupervisorMobility.API.infrastructure.repositories.STRO.Collections.Skills;
 using SupervisorMobility.API.infrastructure.repositories.STRO;
 using SupervisorMobility.API.Models.NotificationDtos;
-using SupervisorMobility.API.infrastructure.repositories.STRO.Collections.Skills;
-using SupervisorMobility.API.infrastructure.repositories.STRO.Collections.Knowledges;
-using SupervisorMobility.API.Interfaces.SOSDistribution.SOSDistributionExcel;
-using SupervisorMobility.API.Services.SOSDistribution.SOSDistributionExcel;
 using SupervisorMobility.API.DataAccess.Services.SOS_AnalysisRepository;
 using SupervisorMobility.API.DataAccess.Services.SOS_Combination;
 using SupervisorMobility.API.DataAccess.Services.SOS_CombinationRepository;
@@ -50,6 +49,12 @@ using SupervisorMobility.API.DataAccess.Services.SOS_DistributionRepository;
 using SupervisorMobility.API.DataAccess.Services.SOS_FlowRepository;
 using SupervisorMobility.API.DataAccess.Services.SOS_SequenceRepository;
 using SupervisorMobility.API.DataAccess.Services.SOS_SynopticTableRepository;
+using SupervisorMobility.API.DataAccess.Services.UserCoursesServices;
+using SupervisorMobility.API.DataAccess.Services.LocalUserCourses.Service;
+using SupervisorMobility.API.DataAccess.Services.LocalUserCourses.Repository;
+using SupervisorMobility.API.Services.EmailService;
+using SupervisorMobility.API.DataAccess.Services.HRIServices;
+using SupervisorMobility.API.DataAccess.Services.HRIRepository;
 
 
 namespace SupervisorMobility.API
@@ -74,6 +79,9 @@ namespace SupervisorMobility.API
             services.AddScoped<ISOS_SynopticTableRepository, SOS_SynopticTableRepository>();
             services.AddScoped<ISOSDistributionExcelService, SOSDistributionExcelService>();
 
+            services.AddScoped<IUserCoursesServices, UserCoursesServices>();
+            services.AddScoped<IUserCoursesRepository, UserCoursesRepository>();
+
             services.AddScoped<IKnowledgeRepository, KnowledgeRepository>();
             services.AddScoped<ISkillRepository, SkillRepository>();
             services.AddScoped<ISTROSequencesRepository, STROSequencesRepository>();
@@ -86,14 +94,47 @@ namespace SupervisorMobility.API
 
             //Another
             services.AddScoped<IJobObservationService, JobObservationService>();
+            services.AddScoped<IEmailDeliveryResultService, EmailDeliveryResultService>();
+            services.AddScoped<IEmailQueueService, EmailQueueService>();
+            services.AddScoped<INotificationService, NotificationService>();
             services.AddScoped<IAssyChartService, AssyChartService>();
             services.AddScoped<IEmailService, EmailService>();
+            services.AddScoped<IEmailServices, EmailServices>();
+            services.AddScoped<IWhatsAppService, WhatsAppService>();
+            services.AddScoped<IMicrosoftTeamsService, MicrosoftTeamsService>();
             services.AddScoped<ITreeService, TreeService>();
             services.AddScoped<IOrderingService, OrderingService>();
             services.AddScoped<ISTOperatingRequirementsService, STOperatingRequirementsService>();
             services.AddScoped<ISTROSyncDistributionService, STROSyncDistributionService>();
+            services.AddScoped<ILocalUserCoursesService, LocalUserCoursesService>();
+            services.AddScoped<ILocalUserCoursesRepository, LocalUserCoursesRepository>();
 
 
+            // Register EmailQueueBackgroundService as singleton and hosted service
+            services.AddSingleton<EmailQueueBackgroundService>();
+            services.AddHostedService(provider => provider.GetRequiredService<EmailQueueBackgroundService>());
+
+            //HRI Services
+            services.AddScoped<IHRIServices, HRIServices>();
+            services.AddScoped<IHRIRepository, HRIRepository>();
+            services.AddScoped<IHRIItemsService, HRIItemsService>();
+            services.AddScoped<IHRImagesService, HRImagesService>();
+            services.AddScoped<IHRIDocksService, HRIDocksService>();
+            services.AddScoped<IHRILinesService, HRILinesService>();
+            services.AddScoped<IHRICyclesService, HRICyclesServices>();
+            services.AddScoped<IHRIRevisionItemService, HRIRevisionItemService>();
+            services.AddScoped<IHRIRevisionItemRepository, HRIRevisionItemRepository>();
+            services.AddScoped<IHRIRevisionCyclesService, HRIRevisionCyclesServices>();
+            services.AddScoped<IHRIRevisionCyclesRepository, HRIRevisionCyclesRepository>(); 
+            services.AddScoped<IHRIHourmeterRevisionService, HRIHourmeterRevisionService>();
+
+            //HRI Repositories
+            services.AddScoped<IHRIItemsRepository, HRIItemsRepository>();
+            services.AddScoped<IHRImagesRepository, HRImagesRepository>();
+            services.AddScoped<IHRIDocksRepository, HRIDocksRepository>();
+            services.AddScoped<IHRILinesRepository, HRILinesRepository>();
+            services.AddScoped<IHRICyclesRepository, HRICyclesRepository>();   
+            services.AddScoped<IHRIHourmeterRevisionRepository, HRIHourmeterRevisionRepository>();
 
             services.Configure<IISServerOptions>(options =>
             {
@@ -124,7 +165,14 @@ namespace SupervisorMobility.API
             if (RuntimeInformation.IsOSPlatform(OSPlatform.Windows))
             {
                 // Usa la cadena de conexión de Windows
-                services.AddDbContext<SupervisorMobilityContext>(options => options.UseSqlServer(configuration.GetConnectionString("SupervisorMobilityDBConnectionString"), options => { options.CommandTimeout(300); }), ServiceLifetime.Transient);
+                services.AddDbContext<SupervisorMobilityContext>(options =>
+                {
+                    options.UseSqlServer(configuration.GetConnectionString("SupervisorMobilityDBConnectionString"), sqlOptions =>
+                    {
+                        sqlOptions.CommandTimeout(300);
+                    });
+                    options.EnableSensitiveDataLogging(); // Moved inside the lambda to ensure 'options' is in scope
+                }, ServiceLifetime.Transient);
             }
             else
             {
@@ -149,9 +197,42 @@ namespace SupervisorMobility.API
 
             var emailConfig = configuration
                 .GetSection("EmailConfiguration")
-                .Get<EmailConfiguration>();
+                .Get<EmailConfiguration>() ?? new EmailConfiguration();
+
+            var whatsappConfig = configuration
+                .GetSection("WhatsAppConfiguration")
+                .Get<WhatsAppConfiguration>() ?? new WhatsAppConfiguration
+                {
+                    UserAccessToken = string.Empty,
+                    Version = "v25.0",
+                    PhoneNumberId = string.Empty
+                };
+                
+            var microsoftTeamsConfig = configuration
+                .GetSection("MicrosoftTeamsConfiguration")
+                .Get<MicrosoftTeamsConfiguration>() ?? new MicrosoftTeamsConfiguration
+                {
+                    ClientId = string.Empty,
+                    Username = string.Empty,
+                    Password = string.Empty,
+                    TenantId = string.Empty,
+                    ClientSecret = string.Empty,
+                    TeamId = string.Empty,
+                    ChannelId = string.Empty
+                };
+
+                var appSettingsConfig = configuration
+                .GetSection("AppSettings")
+                .Get<AppSettingsConfiguration>() ?? new AppSettingsConfiguration
+                {
+                    production = false
+                };
 
             services.AddSingleton(emailConfig);
+            services.AddSingleton(whatsappConfig);
+            services.AddSingleton(microsoftTeamsConfig);
+            services.AddSingleton(appSettingsConfig);
+            services.AddHttpClient();
 
             //Odmitir Referencias ciruclares
             services.AddControllers()

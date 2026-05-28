@@ -34,94 +34,89 @@ namespace SupervisorMobility.API.DataAccess.Services.SOS_CombinationRepository
 
         public async Task<SOSCombination> GetSOSCombination(int SOSCombinationId, bool includeImages = false, bool includeNotes = false, bool includeLogbooks = false, bool includeSOS = false, bool includeImagesSOS = false, bool includeProcess = false)
         {
-            // Consulta inicial para encontrar la combinación
-            var sosCombination = await _context.SOSCombinations.AsNoTracking()
-                .Where(c => c.SOSCombinationId == SOSCombinationId && c.IsActive == true)
-                .FirstOrDefaultAsync();
-
-
-            // Verificar si sosCombination es nulo antes de cargar relaciones
-            if (sosCombination != null)
+            try
             {
-                // Incluir imágenes relacionadas
-                if (includeImages)
-                {
-                    await _context.Entry(sosCombination).Collection(c => c.Illustrations).LoadAsync();
-                    sosCombination.Illustrations = sosCombination.Illustrations.Where(i => i.IsActive == true).ToList();
-                }
+                // Consulta inicial para encontrar la combinación
+                var sosCombination = await _context.SOSCombinations.AsNoTracking()
+                    .Where(c => c.SOSCombinationId == SOSCombinationId && c.IsActive == true)
+                    .FirstOrDefaultAsync();
 
-                // Incluir notas relacionadas (descomentado si es necesario en el futuro)
-                //if (includeNotes)
-                //{
-                //    await _context.Entry(sosCombination).Collection(c => c.Notes).LoadAsync();
-                //    sosCombination.Notes = sosCombination.Notes.Where(n => n.IsActive == true).ToList();
-                //}
-
-                // Incluir registros (logbooks) y sus referencias
-                if (includeLogbooks)
+                // Verificar si sosCombination es nulo antes de cargar relaciones
+                if (sosCombination != null)
                 {
-                    await _context.Entry(sosCombination).Collection(c => c.CombinationLogbooks).LoadAsync();
-                    foreach (var logbook in sosCombination.CombinationLogbooks)
+                    // Incluir imágenes relacionadas
+                    if (includeImages)
                     {
-                        await _context.Entry(logbook).Reference(l => l.Approver).LoadAsync();
-                        await _context.Entry(logbook).Reference(l => l.Reviewer).LoadAsync();
+                        await _context.Entry(sosCombination).Collection(c => c.Illustrations).LoadAsync();
+                        sosCombination.Illustrations = sosCombination.Illustrations.Where(i => i.IsActive == true).ToList();
                     }
 
-                    await _context.Entry(sosCombination).Reference(c => c.ReviewerHS).LoadAsync();
-                }
-
-                if (includeSOS)
-                {
-                    await _context.Entry(sosCombination).Reference(d => d.SOSHub).LoadAsync();
-
-                    if (sosCombination.SOSHub != null)
+                    // Incluir registros (logbooks) y sus referencias
+                    if (includeLogbooks)
                     {
-                        await _context.Entry(sosCombination.SOSHub).Collection(s => s.Sections).LoadAsync();
-
-                        foreach (var section in sosCombination.SOSHub.Sections)
+                        await _context.Entry(sosCombination).Collection(c => c.CombinationLogbooks).LoadAsync();
+                        foreach (var logbook in sosCombination.CombinationLogbooks)
                         {
-                            await _context.Entry(section).Collection(s => s.Analyses).LoadAsync();
+                            await _context.Entry(logbook).Reference(l => l.Approver).LoadAsync();
+                            await _context.Entry(logbook).Reference(l => l.Reviewer).LoadAsync();
                         }
 
-                        await _context.Entry(sosCombination.SOSHub).Collection(s => s.AppliedModels).LoadAsync();
-                        await _context.Entry(sosCombination.SOSHub).Collection(s => s.ToolsUsed).LoadAsync();
-                        foreach (var toolUsed in sosCombination.SOSHub.ToolsUsed)
-                        {
-                            await _context.Entry(toolUsed).Reference(t => t.Tool).LoadAsync();
-                        }
-
-                        await _context.Entry(sosCombination.SOSHub).Collection(s => s.MaterialsUsed).LoadAsync();
-                        foreach (var materialUsed in sosCombination.SOSHub.MaterialsUsed)
-                        {
-                            await _context.Entry(materialUsed).Reference(m => m.Material).LoadAsync();
-                        }
-
-                        await _context.Entry(sosCombination.SOSHub).Collection(s => s.SafetyEquipment).LoadAsync();
-                        await _context.Entry(sosCombination.SOSHub).Reference(s => s.Plant).LoadAsync();
-                        await _context.Entry(sosCombination.SOSHub).Reference(s => s.Department).LoadAsync();
-                        await _context.Entry(sosCombination.SOSHub).Collection(s => s.ApproverOwners).LoadAsync();
-                        await _context.Entry(sosCombination.SOSHub).Collection(s => s.ReviewerEditors).LoadAsync();
+                        await _context.Entry(sosCombination).Reference(c => c.ReviewerHS).LoadAsync();
                     }
-                }
 
-                // Incluir imágenes específicas del SOS
-                if (includeImagesSOS)
-                {
-                    var sosHub = sosCombination.SOSHub;
-                    if (sosHub != null)
+                    if (includeSOS)
                     {
-                        await _context.Entry(sosHub).Collection(s => s.Images).LoadAsync();
+                        await _context.Entry(sosCombination).Reference(d => d.SOSHub).LoadAsync();
+
+                        if (sosCombination.SOSHub != null)
+                        {
+                            await _context.Entry(sosCombination.SOSHub).Collection(s => s.Sections).LoadAsync();
+
+                            foreach (var section in sosCombination.SOSHub.Sections)
+                            {
+                                await _context.Entry(section).Collection(s => s.Analyses).LoadAsync();
+                            }
+
+                            await _context.Entry(sosCombination.SOSHub).Collection(s => s.AppliedModels).LoadAsync();
+                            await _context.Entry(sosCombination.SOSHub).Collection(s => s.ToolsUsed).LoadAsync();
+                            foreach (var toolUsed in sosCombination.SOSHub.ToolsUsed)
+                            {
+                                await _context.Entry(toolUsed).Reference(t => t.Tool).LoadAsync();
+                            }
+
+                            await _context.Entry(sosCombination.SOSHub).Collection(s => s.MaterialsUsed).LoadAsync();
+                            foreach (var materialUsed in sosCombination.SOSHub.MaterialsUsed)
+                            {
+                                await _context.Entry(materialUsed).Reference(m => m.Material).LoadAsync();
+                            }
+
+                            await _context.Entry(sosCombination.SOSHub).Collection(s => s.SafetyEquipment).LoadAsync();
+                            await _context.Entry(sosCombination.SOSHub).Reference(s => s.Plant).LoadAsync();
+                            await _context.Entry(sosCombination.SOSHub).Reference(s => s.Department).LoadAsync();
+                            await _context.Entry(sosCombination.SOSHub).Collection(s => s.ApproverOwners).LoadAsync();
+                            await _context.Entry(sosCombination.SOSHub).Collection(s => s.ReviewerEditors).LoadAsync();
+                        }
                     }
+
+                    // Incluir imágenes específicas del SOS
+                    if (includeImagesSOS)
+                    {
+                        var sosHub = sosCombination.SOSHub;
+                        if (sosHub != null)
+                            await _context.Entry(sosHub).Collection(s => s.Images).LoadAsync();
+                    }
+
+                    // Incluir procesos relacionados
+                    if (includeProcess)
+                        await _context.Entry(sosCombination).Collection(c => c.SOSCombinationOperationSequence).LoadAsync();
                 }
 
-                // Incluir procesos relacionados
-                if (includeProcess)
-                {
-                    await _context.Entry(sosCombination).Collection(c => c.SOSCombinationOperationSequence).LoadAsync();
-                }
+                return sosCombination;
             }
-
-            return sosCombination;
+            catch (Exception ex)
+            {
+                throw new Exception($"An error occurred while retrieving the SOS Combination with ID {SOSCombinationId}.", ex);
+            }
         }
 
         public async Task<IEnumerable<SOSCombination>> GetAllSOSCombination(bool includeImages = false, bool includeNotes = false, bool includeLogbooks = false, bool includeSOS = false)
@@ -129,54 +124,27 @@ namespace SupervisorMobility.API.DataAccess.Services.SOS_CombinationRepository
             var query = _context.SOSCombinations.AsNoTracking().Where(SOS => SOS.IsActive == true);
 
             if (includeImages)
-            {
                 query = query.Include(i => i.Illustrations);
-            }
-
-            //if (includeNotes)
-            //{
-            //    query = query.Include(query => query.Notes);
-            //}
 
             if (includeLogbooks)
-            {
                 query = query.Include(t => t.CombinationLogbooks);
-            }
-
-
 
             if (includeSOS)
-            {
                 query = query.Include(m => m.SOSHub);
-            }
 
             var sosCombinations = await query.OrderBy(s => s.SOSHubId).ToListAsync();
 
             if (includeImages)
-            {
                 foreach (var SOSCombination in sosCombinations)
                 {
                     SOSCombination.Illustrations = SOSCombination.Illustrations.Where(i => i.IsActive == true).ToList();
                 }
-            }
-
-            //if (includeNotes)
-            //{
-            //    foreach (var SOSCombination in sosCombinations)
-            //    {
-            //        SOSCombination.Notes = SOSCombination.Notes.Where(v => v.IsActive == true).ToList();
-            //    }
-            //}
 
             if (includeLogbooks)
-            {
                 foreach (var SOSCombination in sosCombinations)
                 {
                     SOSCombination.CombinationLogbooks = SOSCombination.CombinationLogbooks.Where(t => t.IsActive == true).ToList();
                 }
-            }
-
-
 
             return sosCombinations;
         }

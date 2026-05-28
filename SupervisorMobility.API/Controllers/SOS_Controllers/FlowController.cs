@@ -1,8 +1,10 @@
 ﻿using AutoMapper;
 using Microsoft.AspNetCore.Mvc;
+using SupervisorMobility.API.Business;
 using SupervisorMobility.API.DataAccess.Entities.SOS;
 using SupervisorMobility.API.DataAccess.Services;
 using SupervisorMobility.API.DataAccess.Services.SOS_FlowRepository;
+using SupervisorMobility.API.Models.NotificationDtos;
 using SupervisorMobility.API.Models.SOS.SOSCombinationDtos;
 using SupervisorMobility.API.Models.SOS.SOSCombinationLogbookDtos;
 using SupervisorMobility.API.Models.SOS.SOSFlowDtos;
@@ -20,13 +22,16 @@ namespace SupervisorMobility.API.Controllers.SOS_Controllers
         private readonly ISOS_ProcessRepository _ProcessRepository;
         private readonly ISOS_FlowRepository _FlowRepository;
         private readonly IWebHostEnvironment _env;
-        public FlowController(IWebHostEnvironment env, IMapper mapper, ISOS_ProcessRepository repository, ISOS_FlowRepository flowRepository)
+        private readonly INotificationService _notificationService;
+
+        public FlowController(IWebHostEnvironment env, IMapper mapper, ISOS_ProcessRepository repository, ISOS_FlowRepository flowRepository, INotificationService notificationService)
         {
             _ProcessRepository = repository;
             _mapper = mapper ??
                   throw new ArgumentNullException(nameof(mapper));
             _env = env ?? throw new ArgumentNullException(nameof(env));
             _FlowRepository = flowRepository;
+            _notificationService = notificationService ?? throw new ArgumentNullException(nameof(notificationService));
         }
 
         [HttpPost]
@@ -50,8 +55,22 @@ namespace SupervisorMobility.API.Controllers.SOS_Controllers
 
 
                 var createdResult = await _FlowRepository.CreateSOSFlow(FlowToCreate);
-                if (createdResult != null)
+                if (createdResult > 0)
+                {
+                    int notifyUserId = FlowToCreate.ReviewerHSId ?? SOSEntity?.CreatorId ?? 1;
+                    await _notificationService.CreateNotificationAsync(new NotificationToCreateDto
+                    {
+                        MadeBy = "SM Mobility",
+                        NotificationType = "SOS Flow Created",
+                        NotificationText = $"SOS Flow (ID: {FlowToCreate.SOSFlowId}) has been generated for SOS Hub (ID: {SOSHubCollection_Id}).",
+                        UserId = notifyUserId,
+                        IsActive = true,
+                        IsAccepted = true,
+                        EntryDate = DateTime.Now
+                    });
+
                     return Ok(FlowToCreate);
+                }
                 else
                     return BadRequest();
             }
@@ -88,6 +107,18 @@ namespace SupervisorMobility.API.Controllers.SOS_Controllers
                 }
 
 
+
+                int reviewNotifyUserId = SOSEntity?.CreatorId ?? _sosFlow.ReviewerHSId ?? 1;
+                await _notificationService.CreateNotificationAsync(new NotificationToCreateDto
+                {
+                    MadeBy = "SM Mobility",
+                    NotificationType = "SOS Flow Review Completed",
+                    NotificationText = $"SOS Flow (ID: {_sosFlow.SOSFlowId}) review has been completed.",
+                    UserId = reviewNotifyUserId,
+                    IsActive = true,
+                    IsAccepted = true,
+                    EntryDate = DateTime.Now
+                });
 
                 return Ok(_sosFlow);
             }

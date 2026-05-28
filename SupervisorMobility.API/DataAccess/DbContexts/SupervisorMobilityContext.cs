@@ -13,6 +13,10 @@ using SupervisorMobility.API.DataAccess.Entities.SOS.History;
 using SupervisorMobility.API.DataAccess.Entities.SOS_Review;
 using SupervisorMobility.API.Entities;
 using System.Globalization;
+using SupervisorMobility.API.DataAccess.SPModels;
+using SupervisorMobility.API.DataAccess.Entities.HRI_s_Entities;
+using SupervisorMobility.API.Models.Email;
+using SupervisorMobility.API.DataAccess.Entities.HRI_s_Entities.HRIRevisionsItem_Entities;
 
 namespace SupervisorMobility.API.Context
 {
@@ -70,7 +74,10 @@ namespace SupervisorMobility.API.Context
         public DbSet<Kaizen> Kaizens { get; set; }
         public DbSet<KaizenTransaction> KaizenTransactions { get; set; }
         public DbSet<Holiday> Holidays { get; set; }
-
+        public DbSet<UserCourse> UserCourses { get; set; }
+        public DbSet<LocalUserCourses> LocalUserCourses { get; set; }
+        public DbSet<EmailQueue> EmailQueues { get; set; }
+        public DbSet<EmailDeliveryResult> EmailDeliveryResults { get; set; }
         #endregion
 
         #region IS
@@ -148,6 +155,28 @@ namespace SupervisorMobility.API.Context
         public DbSet<InsuranceFeatures> InsuranceFeatures { get; set; }
         public DbSet<OperationMachine> OperationMachine { get; set; }
 
+        //modelos para Store Procedures
+        public DbSet<WFMInfoSP> WFMInfoSPs { get; set; }
+
+        #endregion
+
+        #region HRIs
+        public DbSet<HRI>  HRIs { get; set; }
+        public DbSet<HRILines> HRILines { get; set; }
+        public DbSet<HRIDock> HRIDocks { get; set; }
+        public DbSet<HRIItem> HRIItems { get; set; }
+        public DbSet<HRICycles> HRICycles { get; set; }
+        public DbSet<HRIRevisionItems> HRIRevisionItems { get; set; }
+        public DbSet<HRImages> HRImages { get; set; }
+        public DbSet<RevisionCycles> RevisionCycles { get; set; }
+        public DbSet<WeeklyRevisions> WeeklyRevisions { get; set; }
+        public DbSet<DailyRevisions> DailyRevisions { get; set; }
+        public DbSet<RevisionMethod> RevisionMethods { get; set; }  
+        public DbSet<Veredict> Veredicts { get; set; }
+        public DbSet<Frequency> Frequencies { get; set; }
+        public DbSet<HourmeterRevision> HourmeterRevisions { get; set; }
+        public DbSet<HRIHistoryActions> HRIHistoryActions { get; set; }
+
         #endregion
 
         public SupervisorMobilityContext(DbContextOptions<SupervisorMobilityContext> options)
@@ -157,6 +186,14 @@ namespace SupervisorMobility.API.Context
 
         protected override void OnModelCreating(ModelBuilder modelBuilder)
         {
+
+
+            // configuramos los modelos de los SPs como vistas para que nos haga la migracion
+            modelBuilder.Entity<WFMInfoSP>(f =>
+            {
+                f.HasNoKey();
+                f.ToView("Get_Personal_Info_By_Personal_Number");
+            });
             //Default values
             modelBuilder.Entity<JobCategoryStructure>()
                 .Property(p => p.IsActive)
@@ -192,7 +229,7 @@ namespace SupervisorMobility.API.Context
             modelBuilder.Entity<JobObservation>()
                .HasMany(s => s.Operations)
                .WithMany(u => u.JobObservations)
-               .UsingEntity(join => join.ToTable("JobOperations")); // Nombre de la tabla intermedia
+               .UsingEntity(join => join.ToTable("JobOperations"));
 
 
             modelBuilder.Entity<Plant>()
@@ -980,6 +1017,9 @@ namespace SupervisorMobility.API.Context
               );
 
 
+            var seedUsersCreatedDate = new DateTime(2026, 1, 1, 8, 0, 0, DateTimeKind.Utc);
+            var seedNotificationsEntryDate = new DateTime(2026, 1, 1, 9, 0, 0, DateTimeKind.Utc);
+
             modelBuilder.Entity<User>().HasData(
                 new User
                 {
@@ -987,6 +1027,7 @@ namespace SupervisorMobility.API.Context
                     ObjectId = "marco.aguayo@compasdcpcs.local",
                     Name = "Marco Aguayo",
                     Email = "maguayo@gruposinco.com.mx",
+                    CreatedDate = seedUsersCreatedDate,
                     IsActive = true,
                     UserType = 1
                 },
@@ -996,6 +1037,7 @@ namespace SupervisorMobility.API.Context
                     ObjectId = "maguayosinco@compasdcpcs.local",
                     Name = "M. Aguayo Sinco",
                     Email = "maguayo@gruposinco.com.mx",
+                    CreatedDate = seedUsersCreatedDate,
                     IsActive = true,
                     UserType = 1,
                 },
@@ -1005,6 +1047,7 @@ namespace SupervisorMobility.API.Context
                     ObjectId = "pmunozsinco@compasdcpcs.local",
                     Name = "Pedro",
                     Email = "pmunoz@gruposinco.com.mx",
+                    CreatedDate = seedUsersCreatedDate,
                     IsActive = true,
                     UserType = 1
                 }
@@ -1018,6 +1061,7 @@ namespace SupervisorMobility.API.Context
                     GroupId = 1,
                     Name = "SeniorSupervisor",
                     Payroll = 4,
+                    CreatedDate = seedUsersCreatedDate,
                     IsActive = true,
                     UserType = 2,
                 }, new User
@@ -1030,6 +1074,7 @@ namespace SupervisorMobility.API.Context
                     GroupId = 1,
                     Name = "Supervisor",
                     Payroll = 5,
+                    CreatedDate = seedUsersCreatedDate,
                     IsActive = true,
                     UserType = 3,
                     SuperiorId = 3,
@@ -1043,6 +1088,7 @@ namespace SupervisorMobility.API.Context
                     GroupId = 1,
                     Name = "Operador 1",
                     Payroll = 6,
+                    CreatedDate = seedUsersCreatedDate,
                     IsActive = true,
                     UserType = 4,
                     SuperiorId = 4,
@@ -1056,6 +1102,7 @@ namespace SupervisorMobility.API.Context
                     GroupId = 1,
                     Name = "Operador 2",
                     Payroll = 7,
+                    CreatedDate = seedUsersCreatedDate,
                     IsActive = true,
                     UserType = 4,
                     SuperiorId = 4,
@@ -1069,6 +1116,7 @@ namespace SupervisorMobility.API.Context
                     GroupId = 1,
                     Name = "Operador 3",
                     Payroll = 8,
+                    CreatedDate = seedUsersCreatedDate,
                     IsActive = true,
                     UserType = 4,
                     SuperiorId = 4,
@@ -1093,7 +1141,7 @@ namespace SupervisorMobility.API.Context
                     new Notification()
                     {
                         NotificationID = 2,
-                        EntryDate = DateTime.Now,
+                        EntryDate = seedNotificationsEntryDate,
                         IsAccepted = true,
                         IsActive = true,
                         MadeBy = "Marco Aguayo",
@@ -1104,7 +1152,7 @@ namespace SupervisorMobility.API.Context
                     new Notification()
                     {
                         NotificationID = 3,
-                        EntryDate = DateTime.Now,
+                        EntryDate = seedNotificationsEntryDate,
                         IsAccepted = false,
                         IsActive = true,
                         MadeBy = "Marco Aguayo",
@@ -1115,7 +1163,7 @@ namespace SupervisorMobility.API.Context
                     new Notification()
                     {
                         NotificationID = 4,
-                        EntryDate = DateTime.Now,
+                        EntryDate = seedNotificationsEntryDate,
                         IsAccepted = true,
                         IsActive = false,
                         MadeBy = "Marco Aguayo",
@@ -1126,7 +1174,7 @@ namespace SupervisorMobility.API.Context
                     new Notification()
                     {
                         NotificationID = 5,
-                        EntryDate = DateTime.Now,
+                        EntryDate = seedNotificationsEntryDate,
                         IsAccepted = false,
                         IsActive = false,
                         MadeBy = "Marco Aguayo",
@@ -1137,7 +1185,7 @@ namespace SupervisorMobility.API.Context
                     new Notification()
                     {
                         NotificationID = 6,
-                        EntryDate = DateTime.Now,
+                        EntryDate = seedNotificationsEntryDate,
                         IsAccepted = true,
                         IsActive = true,
                         MadeBy = "Marco Aguayo",
@@ -1148,7 +1196,7 @@ namespace SupervisorMobility.API.Context
                     new Notification()
                     {
                         NotificationID = 7,
-                        EntryDate = DateTime.Now,
+                        EntryDate = seedNotificationsEntryDate,
                         IsAccepted = false,
                         IsActive = true,
                         MadeBy = "Marco Aguayo",
@@ -1159,7 +1207,7 @@ namespace SupervisorMobility.API.Context
                     new Notification()
                     {
                         NotificationID = 8,
-                        EntryDate = DateTime.Now,
+                        EntryDate = seedNotificationsEntryDate,
                         IsAccepted = true,
                         IsActive = false,
                         MadeBy = "Marco Aguayo",
@@ -1170,7 +1218,7 @@ namespace SupervisorMobility.API.Context
                     new Notification()
                     {
                         NotificationID = 9,
-                        EntryDate = DateTime.Now,
+                        EntryDate = seedNotificationsEntryDate,
                         IsAccepted = false,
                         IsActive = false,
                         MadeBy = "Marco Aguayo",
@@ -1552,6 +1600,11 @@ namespace SupervisorMobility.API.Context
                 );
 
 
+            modelBuilder.Entity<UserCourse>(entity =>
+            {
+                entity.HasNoKey();
+                entity.ToView("dbo.sp_GetUserCourses");
+            });
 
             //modelBuilder.Entity<ChecklistAnswer>()
             //    .HasData(

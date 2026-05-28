@@ -165,7 +165,7 @@ namespace SupervisorMobility.API.DataAccess.Services
 
                 if (includeDocuments)
                 {
-                    await _context.Entry(sosHub).Collection(o => o.CommonDirection).LoadAsync();
+                    await _context.Entry(sosHub).Collection(o => o.CommonDirection).Query().Where(d => d.IsActive == true).LoadAsync();
                 }
 
                 if (includeModel)
@@ -191,26 +191,66 @@ namespace SupervisorMobility.API.DataAccess.Services
 
                 if (includeCollections)
                 {
+                    Console.WriteLine($"[API GetSOSHub] Loading collections for HubId: {HubId}");
+                    
                     await _context.Entry(sosHub).Reference(a => a.Hci).Query().Where(d => d.IsActive == true).LoadAsync();
-
 
                     await _context.Entry(sosHub).Collection(a => a.SOSAnalysis).Query().Where(d => d.IsActive == true).LoadAsync();
                     foreach (var analysis in sosHub.SOSAnalysis)
                     {
                         await _context.Entry(analysis).Collection(aa => aa.AnalysisLogbooks).LoadAsync();
+                        foreach (var logbook in analysis.AnalysisLogbooks)
+                        {
+                            await _context.Entry(logbook).Reference(al => al.Approver).LoadAsync();
+                            await _context.Entry(logbook).Reference(al => al.Reviewer).LoadAsync();
+                        }
                     }
 
                     await _context.Entry(sosHub).Collection(c => c.SOSCombination).Query().Where(d => d.IsActive == true).LoadAsync();
                     foreach (var combination in sosHub.SOSCombination)
                     {
                         await _context.Entry(combination).Collection(aa => aa.CombinationLogbooks).LoadAsync();
+                        foreach (var logbook in combination.CombinationLogbooks)
+                        {
+                            await _context.Entry(logbook).Reference(al => al.Approver).LoadAsync();
+                            await _context.Entry(logbook).Reference(al => al.Reviewer).LoadAsync();
+                        }
+
                         await _context.Entry(combination).Collection(aa => aa.Turns).LoadAsync();
+                        foreach (var turn in combination.Turns)
+                        {
+                            await _context.Entry(turn).Reference(t => t.Supervisor).LoadAsync();
+                            await _context.Entry(turn).Reference(t => t.Operator).LoadAsync();
+                        }
+                        await _context.Entry(combination).Reference(al => al.ReviewerHS).LoadAsync();
                     }
 
-                    await _context.Entry(sosHub).Collection(d => d.SOSDistribution).Query().Where(d => d.IsActive == true).LoadAsync(); foreach (var distribution in sosHub.SOSDistribution)
+                    await _context.Entry(sosHub).Collection(d => d.SOSDistribution).Query().Where(d => d.IsActive == true).LoadAsync(); 
+                    
+                    Console.WriteLine($"[API GetSOSHub] Loaded {sosHub.SOSDistribution?.Count ?? 0} distributions");
+                    if (sosHub.SOSDistribution != null && sosHub.SOSDistribution.Count > 0)
+                    {
+                        foreach (var dist in sosHub.SOSDistribution)
+                        {
+                            Console.WriteLine($"[API GetSOSHub] Distribution {dist.SOSDistributionId}, SOSHubId: {dist.SOSHubId}, IsActive: {dist.IsActive}");
+                        }
+                    }
+                    
+                    foreach (var distribution in sosHub.SOSDistribution)
                     {
                         await _context.Entry(distribution).Collection(aa => aa.DistributionLogbooks).LoadAsync();
+                        foreach (var logbook in distribution.DistributionLogbooks)
+                        {
+                            await _context.Entry(logbook).Reference(al => al.Approver).LoadAsync();
+                            await _context.Entry(logbook).Reference(al => al.Reviewer).LoadAsync();
+                        }
+                        
                         await _context.Entry(distribution).Collection(aa => aa.Turns).LoadAsync();
+                        foreach (var turn in distribution.Turns)
+                        {
+                            await _context.Entry(turn).Reference(t => t.Supervisor).LoadAsync();
+                            await _context.Entry(turn).Reference(t => t.Operator).LoadAsync();
+                        }
 
                         await _context.Entry(distribution).Collection(aa => aa.Analyses).LoadAsync();
                         await _context.Entry(distribution).Collection(aa => aa.Sequences).LoadAsync();
@@ -220,93 +260,69 @@ namespace SupervisorMobility.API.DataAccess.Services
                     foreach (var flow in sosHub.SOSFlow)
                     {
                         await _context.Entry(flow).Collection(aa => aa.FlowLogbooks).LoadAsync();
+                        foreach (var logbook in flow.FlowLogbooks)
+                        {
+                            await _context.Entry(logbook).Reference(al => al.Approver).LoadAsync();
+                            await _context.Entry(logbook).Reference(al => al.Reviewer).LoadAsync();
+                        }
+                        await _context.Entry(flow).Reference(al => al.ReviewerHS).LoadAsync();
                     }
 
                     await _context.Entry(sosHub).Collection(s => s.SOSSequence).Query().Where(d => d.IsActive == true).LoadAsync();
                     foreach (var sequence in sosHub.SOSSequence)
                     {
                         await _context.Entry(sequence).Collection(aa => aa.SequenceLogbooks).LoadAsync();
-                    }
-
-                    await _context.Entry(sosHub).Collection(d => d.SOSSynopticControlPoints).Query().Where(d => d.IsActive == true).LoadAsync(); foreach (var synoptic in sosHub.SOSSynopticControlPoints)
-                    {
-                        await _context.Entry(synoptic).Collection(aa => aa.SynopticPointsLogbooks).LoadAsync();
-
-                        await _context.Entry(synoptic).Collection(aa => aa.Analyses).LoadAsync();
-                        await _context.Entry(synoptic).Collection(aa => aa.Sequences).LoadAsync();
-                    }
-
-                    await _context.Entry(sosHub).Collection(d => d.SOSSynopticOperatingRequirements).Query().Where(d => d.IsActive == true).LoadAsync(); foreach (var synoptic in sosHub.SOSSynopticOperatingRequirements)
-                    {
-                        await _context.Entry(synoptic).Collection(aa => aa.SynopticRequirementsLogbooks).LoadAsync();
-
-                        await _context.Entry(synoptic).Collection(aa => aa.Analyses).LoadAsync();
-                        await _context.Entry(synoptic).Collection(aa => aa.Sequences).LoadAsync();
-                    }
-
-
-                    await _context.Entry(sosHub).Collection(a => a.SOSAnalysis).LoadAsync();
-                    foreach (var analysis in sosHub.SOSAnalysis)
-                    {
-                        // Cargar AnalysisLogbooks y sus relaciones
-                        await _context.Entry(analysis).Collection(aa => aa.AnalysisLogbooks).LoadAsync();
-                        foreach (var logbook in analysis.AnalysisLogbooks)
-                        {
-                            await _context.Entry(logbook).Reference(al => al.Approver).LoadAsync();
-                            await _context.Entry(logbook).Reference(al => al.Reviewer).LoadAsync();
-                        }
-                    }
-
-                    await _context.Entry(sosHub).Collection(c => c.SOSCombination).LoadAsync();
-                    foreach (var combination in sosHub.SOSCombination)
-                    {
-                        // Cargar CombinationLogbooks y sus relaciones
-                        await _context.Entry(combination).Collection(al => al.CombinationLogbooks).LoadAsync();
-                        foreach (var logbook in combination.CombinationLogbooks)
-                        {
-                            await _context.Entry(logbook).Reference(al => al.Approver).LoadAsync();
-                            await _context.Entry(logbook).Reference(al => al.Reviewer).LoadAsync();
-                        }
-
-                        await _context.Entry(combination).Reference(al => al.ReviewerHS).LoadAsync();
-                    }
-
-                    await _context.Entry(sosHub).Collection(d => d.SOSDistribution).LoadAsync();
-                    foreach (var distribution in sosHub.SOSDistribution)
-                    {
-                        // Cargar DistributionLogbooks y sus relaciones
-                        await _context.Entry(distribution).Collection(aa => aa.DistributionLogbooks).LoadAsync();
-                        foreach (var logbook in distribution.DistributionLogbooks)
-                        {
-                            await _context.Entry(logbook).Reference(al => al.Approver).LoadAsync();
-                            await _context.Entry(logbook).Reference(al => al.Reviewer).LoadAsync();
-                        }
-                    }
-
-                    await _context.Entry(sosHub).Collection(f => f.SOSFlow).LoadAsync();
-                    foreach (var flow in sosHub.SOSFlow)
-                    {
-                        // Cargar FlowLogbooks y sus relaciones
-                        await _context.Entry(flow).Collection(aa => aa.FlowLogbooks).LoadAsync();
-                        foreach (var logbook in flow.FlowLogbooks)
-                        {
-                            await _context.Entry(logbook).Reference(al => al.Approver).LoadAsync();
-                            await _context.Entry(logbook).Reference(al => al.Reviewer).LoadAsync();
-                        }
-
-                        await _context.Entry(flow).Reference(al => al.ReviewerHS).LoadAsync();
-                    }
-
-                    await _context.Entry(sosHub).Collection(s => s.SOSSequence).LoadAsync();
-                    foreach (var sequence in sosHub.SOSSequence)
-                    {
-                        // Cargar SequenceLogbooks y sus relaciones
-                        await _context.Entry(sequence).Collection(aa => aa.SequenceLogbooks).LoadAsync();
                         foreach (var logbook in sequence.SequenceLogbooks)
                         {
                             await _context.Entry(logbook).Reference(al => al.Approver).LoadAsync();
                             await _context.Entry(logbook).Reference(al => al.Reviewer).LoadAsync();
                         }
+                    }
+
+                    await _context.Entry(sosHub).Collection(d => d.SOSSynopticControlPoints).Query().Where(d => d.IsActive == true).LoadAsync(); 
+                    
+                    Console.WriteLine($"[API GetSOSHub] Loaded {sosHub.SOSSynopticControlPoints?.Count ?? 0} CSPC items");
+                    
+                    foreach (var synoptic in sosHub.SOSSynopticControlPoints)
+                    {
+                        Console.WriteLine($"[API GetSOSHub] CSPC ID={synoptic.SOSSynopticTableofControlPointsId}, ProcessName='{synoptic.ProcessName}'");
+                        
+                        await _context.Entry(synoptic).Collection(aa => aa.SynopticPointsLogbooks).LoadAsync();
+                        
+                        await _context.Entry(synoptic).Collection(aa => aa.Analyses).LoadAsync();
+                        Console.WriteLine($"[API GetSOSHub] CSPC {synoptic.SOSSynopticTableofControlPointsId} loaded {synoptic.Analyses?.Count() ?? 0} analyses");
+                        
+                        await _context.Entry(synoptic).Collection(aa => aa.Sequences).LoadAsync();
+                        Console.WriteLine($"[API GetSOSHub] CSPC {synoptic.SOSSynopticTableofControlPointsId} loaded {synoptic.Sequences?.Count() ?? 0} sequences");
+                    }
+
+                    // CSRO: First try loading via direct FK (SOSHubId), then also via many-to-many join table
+                    // The CSRO entity has both SOSHubId (direct FK to owner hub) and SOSHubs (many-to-many for selected hubs)
+                    var csrosByFK = await _context.SOSSynopticTableofOperatingRequirements
+                        .Where(s => s.SOSHubId == sosHub.SOSHubId && s.IsActive == true)
+                        .ToListAsync();
+                    
+                    // Also load via many-to-many navigation (in case some were linked that way)
+                    await _context.Entry(sosHub).Collection(d => d.SOSSynopticOperatingRequirements).Query().Where(d => d.IsActive == true).LoadAsync();
+                    
+                    // Merge: add any FK-based CSROs that aren't already in the many-to-many collection
+                    foreach (var csroByFK in csrosByFK)
+                    {
+                        if (!sosHub.SOSSynopticOperatingRequirements.Any(x => x.SOSSynopticTableofOperatingRequirementsId == csroByFK.SOSSynopticTableofOperatingRequirementsId))
+                        {
+                            sosHub.SOSSynopticOperatingRequirements.Add(csroByFK);
+                        }
+                    }
+                    
+                    Console.WriteLine($"[API GetSOSHub] Loaded {sosHub.SOSSynopticOperatingRequirements?.Count ?? 0} CSRO items (FK={csrosByFK.Count}, M2M={sosHub.SOSSynopticOperatingRequirements?.Count ?? 0})");
+                    foreach (var synoptic in sosHub.SOSSynopticOperatingRequirements)
+                    {
+                        Console.WriteLine($"[API GetSOSHub] CSRO ID={synoptic.SOSSynopticTableofOperatingRequirementsId}, ProcessName='{synoptic.ProcessName}', SOSHubId={synoptic.SOSHubId}");
+                        await _context.Entry(synoptic).Collection(aa => aa.SynopticRequirementsLogbooks).LoadAsync();
+                        await _context.Entry(synoptic).Collection(aa => aa.SOSHubs).LoadAsync();
+                        Console.WriteLine($"[API GetSOSHub] CSRO {synoptic.SOSSynopticTableofOperatingRequirementsId} loaded {synoptic.SOSHubs?.Count() ?? 0} SOSHubs");
+                        await _context.Entry(synoptic).Collection(aa => aa.Analyses).LoadAsync();
+                        await _context.Entry(synoptic).Collection(aa => aa.Sequences).LoadAsync();
                     }
                 }
             }
@@ -1267,52 +1283,42 @@ namespace SupervisorMobility.API.DataAccess.Services
         {
             try
             {
+                // Cargar explícitamente la colección desde la BD
+                // Esto asegura que AppliedModels refleja lo que realmente está en la tabla intermedia.
+                await _context.Entry(master)
+                             .Collection(m => m.AppliedModels)
+                             .LoadAsync();
+
                 // Verificar si el master ya está siendo rastreado en el contexto
                 var localMasterEntry = _context.SOSHubs.Local.FirstOrDefault(entry => entry.SOSHubId == master.SOSHubId);
                 if (localMasterEntry != null)
-                {
                     master = localMasterEntry;
-                }
                 else
-                {
                     if (_context.Entry(master).State == EntityState.Detached)
-                    {
                         _context.SOSHubs.Attach(master);
-                    }
-                }
 
-                // Verificar si el AppliedModel slave ya está siendo rastreado en el contexto
+                // Verificar si el slave ya está siendo rastreado en el contexto
                 var localSlaveEntry = _context.Products.Local.FirstOrDefault(entry => entry.ProductId == slave.ProductId);
                 if (localSlaveEntry != null)
-                {
                     slave = localSlaveEntry;
-                }
                 else
-                {
                     if (_context.Entry(slave).State == EntityState.Detached)
-                    {
                         _context.Products.Attach(slave);
-                    }
-                }
 
-                // Añadir el producto a la colección de AppliedModels del master
-                if (master.AppliedModels == null)
-                {
+                // Validar contra la colección cargada
+                if(master.AppliedModels == null)
                     master.AppliedModels = new List<Product>();
-                }
 
-                // Verificar si la Prodcut ya está en la colección
-                if (!master.AppliedModels.Any(t => t.ProductId == slave.ProductId))
+                if (!master.AppliedModels.Any(p => p.ProductId == slave.ProductId))
                 {
                     master.AppliedModels.Add(slave);
+                    await _context.SaveChangesAsync();
                 }
-
-                // Guardar los cambios
-                await _context.SaveChangesAsync();
+                else
+                    Debug.WriteLine($"La relación SOSHubId={master.SOSHubId} con ProductId={slave.ProductId} ya existe.");
             }
             catch (Exception ex)
             {
-                // Manejar el error apropiadamente, puedes loguearlo o lanzar una excepción personalizada
                 Debug.WriteLine("An error occurred while updating the SOSHub: " + ex.Message);
             }
             return new AsyncVoidMethodBuilder();
