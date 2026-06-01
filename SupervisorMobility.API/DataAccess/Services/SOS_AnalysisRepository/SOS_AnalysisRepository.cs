@@ -182,6 +182,29 @@ namespace SupervisorMobility.API.DataAccess.Services.SOS_AnalysisRepository
             return sosAnalyses;
         }
 
+        //Get SOS Analysis by Areas
+        public async Task<IEnumerable<SOSAnalysis>> GetAllSOSAnalysisByArea(int area, bool includeImages = false, bool includeNotes = false, bool includeLogbooks = false, bool includeSpecialCases = false, bool includeSOS = false)
+        {
+            try
+            {
+                var query = _context.SOSAnalyses.AsNoTracking()
+                  .Where(analysis => area == (int)analysis.SOSHub.AreaId && analysis.IsActive == true);
+
+                if (includeImages) query = query.Include(i => i.Illustrations);
+                if (includeNotes)  query = query.Include(query => query.Notes);
+                if (includeLogbooks) query = query.Include(t => t.AnalysisLogbooks);
+                if (includeSOS) query = query.Include(m => m.SOSHub).ThenInclude(ms => ms.Sections).ThenInclude(msa => msa.Analyses);
+
+                var sosAnalyses = await query.OrderBy(s => s.SOSHubId).ToListAsync();
+                return sosAnalyses;
+            }
+            catch (Exception ex)
+            {
+                Debug.WriteLine("An error occurred while retrieving SOS Analyses by Areas: " + ex.Message);
+                return new List<SOSAnalysis>();
+            }
+        }
+
         public async Task<int> UpdateSOSAnalysis(SOSAnalysisForUpdateDto AnalysisUpdate, SOSAnalysis AnalysisEntity)
         {
             try

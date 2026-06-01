@@ -5,6 +5,7 @@ using System.Collections.Generic;
 // - External imports
 using AutoMapper;
 using Microsoft.AspNetCore.Mvc;
+using SupervisorMobility.API.Business;
 
 // - Context imports
 using SupervisorMobility.API.DataAccess.Services;
@@ -29,6 +30,7 @@ using SupervisorMobility.API.Models.SOS.SOSTimeDtos;
 using SupervisorMobility.API.Models.CommentaryDtos;
 using SupervisorMobility.API.Models.SOS.SOSHubDtos;
 using SupervisorMobility.API.Models.FileUploadDto;
+using SupervisorMobility.API.Models.NotificationDtos;
 using SupervisorMobility.API.Models.SOS.TurnDtos;
 using SupervisorMobility.API.DataAccess.Services.SOS_DistributionRepository;
 using SupervisorMobility.API.DataAccess.Services.SOS_SequenceRepository;
@@ -49,6 +51,7 @@ namespace SupervisorMobility.API.Controllers.SOS_Controllers
         private readonly ISOS_SequenceRepository _SequenceRepository;
         private readonly ISOS_AnalysisRepository _AnalysisRepository;
         private readonly ISTROSyncDistributionService _STROSyncDistributionService;
+        private readonly INotificationService _notificationService;
 
         /// <summary>
         /// Initializes dependencies required by the DistributionController.
@@ -60,7 +63,7 @@ namespace SupervisorMobility.API.Controllers.SOS_Controllers
         /// <exception cref="ArgumentNullException">
         /// Thrown when <paramref name="mapper"/> or <paramref name="env"/> is null.
         /// </exception>
-        public DistributionController(IWebHostEnvironment env, IMapper mapper, ISOS_ProcessRepository repository, ISTROSyncDistributionService STROSyncDistributionService, ISOS_DistributionRepository distributionRepository, ISOS_AnalysisRepository analysisRepository, ISOS_SequenceRepository sequenceRepository)
+        public DistributionController(IWebHostEnvironment env, IMapper mapper, ISOS_ProcessRepository repository, ISTROSyncDistributionService STROSyncDistributionService, ISOS_DistributionRepository distributionRepository, ISOS_AnalysisRepository analysisRepository, ISOS_SequenceRepository sequenceRepository, INotificationService notificationService)
         {
             _ProcessRepository = repository;
             _mapper = mapper ??throw new ArgumentNullException(nameof(mapper));
@@ -69,6 +72,7 @@ namespace SupervisorMobility.API.Controllers.SOS_Controllers
             _DistributionRepository = distributionRepository;
             _SequenceRepository = sequenceRepository;
             _AnalysisRepository = analysisRepository;
+            _notificationService = notificationService ?? throw new ArgumentNullException(nameof(notificationService));
         }
 
         // +============ ROUTES / ENDPOINTS ============+\\
@@ -86,6 +90,7 @@ namespace SupervisorMobility.API.Controllers.SOS_Controllers
         [HttpPost]
         public async Task<ActionResult<SOSDistributionDto>> GenerateDistribution(SOSDistributionForCreateDto sOSDistributionToCreate, int SOSHubCollection_Id)
         {
+            SOSHub sosHubEntity = await _ProcessRepository.GetSOSHub(SOSHubCollection_Id, includeInformation: true);
 
             // ============ CREATE NEW DISTRIBUTION =============\\
             if (sOSDistributionToCreate.SOSDistributionId == 0)
@@ -99,6 +104,12 @@ namespace SupervisorMobility.API.Controllers.SOS_Controllers
                 sOSDistributionToCreate.IsActive = true;
 
                 sOSDistributionToCreate.SOSHubId = SOSHubCollection_Id;
+                
+                Console.WriteLine($"[API] Creating distribution for SOSHubId: {SOSHubCollection_Id}");
+                Console.WriteLine($"[API] Distribution.IsActive: {sOSDistributionToCreate.IsActive}");
+                Console.WriteLine($"[API] Analyses count: {sOSDistributionToCreate.Analyses?.Count ?? 0}");
+                Console.WriteLine($"[API] Sequences count: {sOSDistributionToCreate.Sequences?.Count ?? 0}");
+                
                 // NOTE: Replace with logic to add SOS hubs from selected analyses and sequences
 
                 // NOTE: Ensure additional time details are initialized if missing
@@ -118,11 +129,33 @@ namespace SupervisorMobility.API.Controllers.SOS_Controllers
 
                 // NOTE: Map DTO to entity before creation
                 SOSDistribution DistributionToCreate = _mapper.Map<SOSDistribution>(sOSDistributionToCreate);
+                
+                Console.WriteLine($"[API] Mapped entity SOSHubId: {DistributionToCreate.SOSHubId}");
+                Console.WriteLine($"[API] Mapped entity Analyses count: {DistributionToCreate.Analyses?.Count ?? 0}");
 
                 // NOTE: Create new distribution in repository
                 var createdResult = await _DistributionRepository.CreateSOSDistribution(DistributionToCreate);
-                if (createdResult != null)
+                
+                Console.WriteLine($"[API] CreateSOSDistribution returned: {createdResult}");
+                Console.WriteLine($"[API] DistributionToCreate.SOSDistributionId after save: {DistributionToCreate.SOSDistributionId}");
+                Console.WriteLine($"[API] DistributionToCreate.SOSHubId after save: {DistributionToCreate.SOSHubId}");
+                
+                if (createdResult > 0)
+                {
+                    int notifyUserId = sosHubEntity?.CreatorId ?? 1;
+                    await _notificationService.CreateNotificationAsync(new NotificationToCreateDto
+                    {
+                        MadeBy = "SM Mobility",
+                        NotificationType = "SOS Distribution Created",
+                        NotificationText = $"SOS Distribution (ID: {DistributionToCreate.SOSDistributionId}) has been generated for SOS Hub (ID: {SOSHubCollection_Id}).",
+                        UserId = notifyUserId,
+                        IsActive = true,
+                        IsAccepted = true,
+                        EntryDate = DateTime.Now
+                    });
+
                     return Ok(DistributionToCreate);
+                }
                 else
                     return BadRequest();
             }
@@ -147,6 +180,19 @@ namespace SupervisorMobility.API.Controllers.SOS_Controllers
                 {
                     return BadRequest();
                 }
+
+
+                int notifyUserId = sosHubEntity?.CreatorId ?? 1;
+                await _notificationService.CreateNotificationAsync(new NotificationToCreateDto
+                {
+                    MadeBy = "SM Mobility",
+                    NotificationType = "SOS Distribution Review Completed",
+                    NotificationText = $"SOS Distribution (ID: {_sosDistribution.SOSDistributionId}) review has been completed.",
+                    UserId = notifyUserId,
+                    IsActive = true,
+                    IsAccepted = true,
+                    EntryDate = DateTime.Now
+                });
 
 
 

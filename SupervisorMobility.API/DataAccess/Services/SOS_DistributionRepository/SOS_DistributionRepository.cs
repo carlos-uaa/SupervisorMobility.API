@@ -237,6 +237,27 @@ namespace SupervisorMobility.API.DataAccess.Services.SOS_DistributionRepository
 
             }
 
+            // ✅ CRITICAL FIX: Ensure parent Hub is in SOSHubs collection for junction table
+            if (SOS_DistributionToCreate.SOSHubId.HasValue && SOS_DistributionToCreate.SOSHubId.Value > 0)
+            {
+                // Check if parent hub is already in the collection
+                if (SOS_DistributionToCreate.SOSHubs == null)
+                    SOS_DistributionToCreate.SOSHubs = new List<SOSHub>();
+                    
+                bool parentHubExists = SOS_DistributionToCreate.SOSHubs.Any(h => h.SOSHubId == SOS_DistributionToCreate.SOSHubId.Value);
+                
+                if (!parentHubExists)
+                {
+                    // Load the parent hub and add it to the collection
+                    var parentHub = await _context.SOSHubs.FindAsync(SOS_DistributionToCreate.SOSHubId.Value);
+                    if (parentHub != null)
+                    {
+                        SOS_DistributionToCreate.SOSHubs.Add(parentHub);
+                        Console.WriteLine($"[CreateSOSDistribution] Added parent Hub {parentHub.SOSHubId} to distribution's SOSHubs collection");
+                    }
+                }
+            }
+
             _context.SOSDistributions.Add(SOS_DistributionToCreate);
             return await _context.SaveChangesAsync();
         }
@@ -600,10 +621,24 @@ namespace SupervisorMobility.API.DataAccess.Services.SOS_DistributionRepository
 
         public async Task<int> RemoveSOSDistribution(int SOS_Distribution_id)
         {
-            var SOS_DistributionEntity = await GetSOSDistribution(SOS_Distribution_id);
-            SOS_DistributionEntity.IsActive = false;
-            _context.SOSDistributions.Update(SOS_DistributionEntity);
-            return await _context.SaveChangesAsync();
+            try
+            {
+                var SOS_DistributionEntity = await _context.SOSDistributions
+                    .Where(d => d.SOSDistributionId == SOS_Distribution_id)
+                    .FirstOrDefaultAsync();
+                
+                if (SOS_DistributionEntity == null || SOS_DistributionEntity.IsActive == false)
+                    return 0;
+                    
+                SOS_DistributionEntity.IsActive = false;
+                _context.SOSDistributions.Update(SOS_DistributionEntity);
+                return await _context.SaveChangesAsync();
+            }
+            catch (Exception ex)
+            {
+                Debug.WriteLine($"An error occurred while removing SOS Distribution: {ex}");
+                return 0;
+            }
         }
 
         public async Task AddIlustrationToSOSDistribution(int SOS_Distribution_id, FileUpload evidence)

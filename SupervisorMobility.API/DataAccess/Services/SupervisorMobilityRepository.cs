@@ -36,6 +36,8 @@ using System.Diagnostics;
 using System.Linq;
 using System.Linq.Expressions;
 using System.Runtime.CompilerServices;
+using SupervisorMobility.API.Models.Email;
+using SupervisorMobility.API.Entities;
 
 namespace SupervisorMobility.API.Services
 {
@@ -901,7 +903,7 @@ namespace SupervisorMobility.API.Services
 
         public async Task<IEnumerable<User>> GetAllUserByTypeInPlantAreaAsync(int plantId, int areaId, int typeUser, bool includeCollections = false, bool includeSubordinates = false, bool includeLeadershipRecord = false)
         {
-            var query = _context.Users.AsNoTracking().Where(u => u.IsActive == true && u.UserType == typeUser && u.PlantId == plantId && u.Areas.Any(a=>a.AreaId == areaId));
+            var query = _context.Users.AsNoTracking().Where(u => u.IsActive == true && u.UserType == typeUser && u.PlantId == plantId && u.Areas.Any(a => a.AreaId == areaId));
 
             if (includeCollections)
             {
@@ -1048,7 +1050,7 @@ namespace SupervisorMobility.API.Services
 
         public async Task<User?> GetUserByPayrollAndMoreAsync(int payroll, int plantid, int areaid, int groupid)
         {
-            return await _context.Users.Where(p => p.Payroll == payroll && p.PlantId == plantid && p.Areas.Any(a=>a.AreaId == areaid) && p.GroupId == groupid).FirstOrDefaultAsync();
+            return await _context.Users.Where(p => p.Payroll == payroll && p.PlantId == plantid && p.Areas.Any(a => a.AreaId == areaid) && p.GroupId == groupid).FirstOrDefaultAsync();
         }
 
 
@@ -1357,11 +1359,17 @@ namespace SupervisorMobility.API.Services
         public async Task<AsyncVoidMethodBuilder> UserUpdateAllSubordinated(User Master)
         {
 
-            var UsersList = await _context.Users.Where(u => u.SuperiorId == Master.UserId)
+            var UsersList = await _context.Users.Include(u => u.Areas).Where(u => u.SuperiorId == Master.UserId)
                  .OrderBy(c => c.UserId).ToListAsync();
 
             if (UsersList?.Count > 0)
             {
+                // Cargar las áreas del Master si no están cargadas
+                if (Master.Areas == null)
+                {
+                    await _context.Entry(Master).Collection(m => m.Areas).LoadAsync();
+                }
+
                 foreach (User sub in UsersList)
                 {
                     switch (sub.UserType)
@@ -1377,8 +1385,25 @@ namespace SupervisorMobility.API.Services
                             break;
                         case 4:
                             sub.PlantId = Master.PlantId;
-                            sub.Areas.Add( Master.Areas.FirstOrDefault() );
                             sub.GroupId = Master.GroupId;
+                            
+                            // Limpiar áreas actuales del subordinado
+                            sub.Areas?.Clear();
+                            if (sub.Areas == null)
+                            {
+                                sub.Areas = new List<Area>();
+                            }
+                            
+                            // Copiar todas las áreas del Master al subordinado
+                            if (Master.Areas != null && Master.Areas.Any())
+                            {
+                                foreach (var area in Master.Areas)
+                                {
+                                    // Buscar el área en el contexto o adjuntarla
+                                    var trackedArea = _context.Areas.Local.FirstOrDefault(a => a.AreaId == area.AreaId) ?? area;
+                                    sub.Areas.Add(trackedArea);
+                                }
+                            }
                             break;
                     }
                 }
@@ -2620,6 +2645,60 @@ namespace SupervisorMobility.API.Services
             //_context.Notifications.Remove(notify);
         }
         #endregion
+
+        #region EmailQueue
+        public async Task<EmailQueue> AddEmailQueueEntryAsync(EmailQueue emailQueue)
+        {
+            await _context.EmailQueues.AddAsync(emailQueue);
+            await _context.SaveChangesAsync();
+            return emailQueue;
+        }
+
+        public async Task<List<EmailQueue>> GetPendingEmailQueuesAsync()
+        {
+            return await _context.EmailQueues
+                .Include(e => e.MadeBy)
+                // .Include(e => e.TargetRelation)
+                .Include(e => e.Staff)
+                .Where(e => !e.IsSend)
+                .OrderBy(c => c.EntryDate)
+                .Take(1)
+                .ToListAsync();
+        }
+        #endregion
+
+
+        #region EmailDeliveryResult
+        public async Task<EmailDeliveryResult> AddEmailDeliveryResultAsync(EmailDeliveryResult emailDeliveryResult)
+        {
+            _context.EmailDeliveryResults.Add(emailDeliveryResult);
+            await _context.SaveChangesAsync();
+            return emailDeliveryResult;
+        }
+        public async Task<EmailDeliveryResult?> GetEmailDeliveryResultByIdAsync(int id)
+        {
+            return await _context.EmailDeliveryResults
+                .Include(e => e.SentByUser)
+                .FirstOrDefaultAsync(e => e.EmailDeliveryResultID == id);
+        }
+
+        public async Task<EmailQueue?> GetEmailQueueByIdAsync(int id)
+        {
+            return await _context.EmailQueues
+                .Include(e => e.MadeBy)
+                // .Include(e => e.TargetRelation)
+                .Include(e => e.Staff)
+                .FirstOrDefaultAsync(e => e.EmailQueueID == id);
+        }
+
+        public async Task UpdateEmailQueueAsync(EmailQueue emailQueue)
+        {
+            _context.EmailQueues.Update(emailQueue);
+            await _context.SaveChangesAsync();
+        }
+        #endregion
+
+
         #region Attendance
         public async Task<Attendance> GetAttendanceById(int AttendanceId)
         {
@@ -3438,9 +3517,7 @@ namespace SupervisorMobility.API.Services
             var query = _context.HCIs.Where(k => k.IsActive == true && k.HCIId == HCIId);
 
             if (includeNavigation)
-            {
-                query = query.Include(p => p.CareerPaths).Include(p => p.Categories).Include(p => p.Commentaries).Include(p => p.Transactions);
-            }
+                query = query.Include(p => p.CareerPaths).Include(p => p.Categories).Include(p => p.Commentaries).Include(p => p.Transactions).Include(p => p.Courses);
 
             if (includePeople)
             {
@@ -3479,7 +3556,6 @@ namespace SupervisorMobility.API.Services
             return await _context.HCIs.Where(k => k.IsActive == true && k.UserId == userId).FirstOrDefaultAsync();
 
         }
-
         public async Task<bool> SearchExistHciForUserId(int userId)
         {
             return await _context.HCIs.AnyAsync(k => k.IsActive == true && k.UserId == userId);
@@ -3567,7 +3643,9 @@ namespace SupervisorMobility.API.Services
         }
         public async Task<int> AddHCI(HCI HCIForAdd)
         {
-            //HCIForAdd.User = _context.Users.FirstOrDefault(p=>p.UserId == HCIForAdd.UserId);
+            if (HCIForAdd.Courses == null)
+                HCIForAdd.Courses = new List<LocalUserCourses>();
+
             _context.HCIs.Add(HCIForAdd);
             return _context.SaveChanges();
         }
@@ -3594,25 +3672,20 @@ namespace SupervisorMobility.API.Services
 
             return await _context.SaveChangesAsync();
         }
-
         public async Task<int> RemoveHCI(HCI HCIForAdd)
         {
             HCIForAdd.IsActive = false;
             return _context.SaveChanges();
         }
-
-
         public async Task<IEnumerable<User>> GetUsersWithoutHci()
         {
             var usuariosSinHCI = _context.Users.Where(u => !_context.HCIs.Any(hci => hci.UserId == u.UserId));
             return await usuariosSinHCI.ToListAsync();
         }
-
         public async Task<IEnumerable<HCICategory>> GetHCICategories()
         {
             return _context.HCICategories.OrderBy(p => p.ChosenCategoryDepartmentId).ToList();
         }
-
         private void UpdateILURegisters(ICollection<ILURegister> existingILURegisters, ICollection<ILURegisterForUpdateDto> updatedILURegisters)
         {
             foreach (var updatedILURegister in updatedILURegisters)
@@ -3636,7 +3709,6 @@ namespace SupervisorMobility.API.Services
                 existingILURegisters.Remove(iluToRemove);
             }
         }
-
         #endregion
 
         //#region HCI ILU

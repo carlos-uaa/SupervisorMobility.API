@@ -17,7 +17,5 @@ namespace SupervisorMobility.API.DataAccess.Entities
 
         public string? OperationDescription { get; set; }
         public bool? IsActive { get; set; }
-
-
     }
 }

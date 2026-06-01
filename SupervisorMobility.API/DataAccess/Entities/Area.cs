@@ -1,4 +1,5 @@
-﻿using SupervisorMobility.API.Entities;
+﻿using SupervisorMobility.API.DataAccess.Entities.HRI_s_Entities;
+using SupervisorMobility.API.Entities;
 using System.ComponentModel.DataAnnotations;
 using System.ComponentModel.DataAnnotations.Schema;
 
@@ -24,6 +25,8 @@ namespace SupervisorMobility.API.DataAccess.Entities
             = new List<Distribution>();
         [NotMapped]
         public ICollection<User>? Users { get; set; }
+
+        public List<HRI> HRIs { get; set; } = new List<HRI>();
 
         public Area(string code, string description)
         {

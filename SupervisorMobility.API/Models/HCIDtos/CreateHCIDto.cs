@@ -20,6 +20,7 @@ namespace SupervisorMobility.API.Models.HCIDtos
 
         public ICollection<ILURegister>? ILUs { get; set; } = new List<ILURegister>();
         public ICollection<UserCareerPath>? CareerPaths { get; set; } = new List<UserCareerPath>();
+        public ICollection<LocalUserCourses>? Courses { get; set; } = new List<LocalUserCourses>();
         public ICollection<CreateCommentaryDto>? Commentaries { get; set; }
           = new List<CreateCommentaryDto>();
         public bool? IsActive { get; set; }

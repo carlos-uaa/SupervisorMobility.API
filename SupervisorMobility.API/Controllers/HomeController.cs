@@ -29,7 +29,7 @@ namespace SupervisorMobility.API.Controllers
             }
             catch (Exception ex)
             {
-                return StatusCode(500, $"Connection failed: {ex.Message}");
+                return StatusCode(500, $"Connection failed: {ex.Message} \n CADENA DE CONEXIÓN: {_configuration.GetConnectionString("SupervisorMobilityDBConnectionString").ToString()}");
             }
 
 

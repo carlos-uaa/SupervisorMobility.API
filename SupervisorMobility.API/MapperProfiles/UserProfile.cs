@@ -19,7 +19,8 @@ namespace SupervisorMobility.API.MapperProfiles
             CreateMap<UsersForUpdateDto, UsersWithPeopleWithoutNavigationDetails>().ReverseMap();
             CreateMap<UsersWithoutNavigationWithoutPeopleDetails, UsersForUpdateDto>().ReverseMap();
             CreateMap<UsersWithNavigationAndPeopleDetails, User>().ReverseMap();
-            CreateMap<UsersToReasignnDto,UsersForUpdateDto>().ReverseMap();
+            CreateMap<UsersWithoutNavigationWithoutPeopleDetails, UsersWithoutPeopleWithNavigation>().ReverseMap();
+            CreateMap<User, GetUserForHRIDailyRevsionDto>().ReverseMap();
         }
     }
 }

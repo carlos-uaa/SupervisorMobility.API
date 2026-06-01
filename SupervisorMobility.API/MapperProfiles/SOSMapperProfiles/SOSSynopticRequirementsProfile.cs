@@ -9,7 +9,14 @@ namespace SupervisorMobility.API.MapperProfiles.SOSMapperProfiles
         public SOSSynopticRequirementsProfile()
         {
             CreateMap<SOSSynopticTableofOperatingRequirements, SOSSynopticRequirementsDto>().ReverseMap();
-            CreateMap<SOSSynopticTableofOperatingRequirements, SOSSynopticTableofOperatingRequirementsForCreateDto>().ReverseMap();
+            
+            // NOTE: Map DTO to Entity but ignore SOSHubs (EF Core will handle relationship separately)
+            CreateMap<SOSSynopticTableofOperatingRequirementsForCreateDto, SOSSynopticTableofOperatingRequirements>()
+                .ForMember(dest => dest.SOSHubs, opt => opt.Ignore());
+            
+            // NOTE: Reverse map (Entity to DTO) includes SOSHubs
+            CreateMap<SOSSynopticTableofOperatingRequirements, SOSSynopticTableofOperatingRequirementsForCreateDto>();
+            
             CreateMap<SOSSynopticTableofOperatingRequirements, SOSSynopticRequirementsForUpdateDto>().ReverseMap();
         }
     }
