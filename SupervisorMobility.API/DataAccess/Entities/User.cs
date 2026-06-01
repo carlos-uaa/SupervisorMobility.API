@@ -130,14 +130,14 @@ namespace SupervisorMobility.API.DataAccess.Entities
                            Email == other.Email &&
                            SuperiorId == other.SuperiorId &&
                            PlantId == other.PlantId &&
-                           AreaId == other.AreaId &&
+                           AreaId == other.Areas.FirstOrDefault().AreaId &&
                            GroupId == other.GroupId;
                 case 4:
                     return Payroll == other.Payroll &&
                            Name == other.Name &&
                            SuperiorId == other.SuperiorId &&
                            PlantId == other.PlantId &&
-                           AreaId == other.AreaId &&
+                           AreaId == other.Areas.FirstOrDefault().AreaId &&
                            DistributionId == other.DistributionId &&
                            DepartmentId == other.DepartmentId &&
                            Management == other.Management &&

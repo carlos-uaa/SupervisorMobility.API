@@ -31,6 +31,7 @@ using SupervisorMobility.API.Models.ProductiveCalendarDtos;
 using SupervisorMobility.API.Models.SOS.SOSHubDtos.AnalysisDtos;
 using SupervisorMobility.API.Models.SOSReviewDtos;
 using SupervisorMobility.API.Models.Users;
+using System.Collections.Frozen;
 using System.Diagnostics;
 using System.Linq;
 using System.Linq.Expressions;
@@ -1695,7 +1696,7 @@ namespace SupervisorMobility.API.Services
             {
                 query = query.Where(j => j.AreaId == areaId);
                 dtquery = _context.Distributions.Where(p => p.AreaId == areaId && p.IsActive == true);
-                oquery = _context.Users.Where(u => u.IsActive == true && u.UserType == 4 && u.PlantId == plantId && u.AreaId == areaId);
+                oquery = _context.Users.Where(u => u.IsActive == true && u.UserType == 4 && u.PlantId == plantId && u.Areas.Any(a=>a.AreaId == areaId));
             }
 
             if (distributionId != default(int))

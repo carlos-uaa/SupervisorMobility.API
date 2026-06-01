@@ -347,12 +347,12 @@ namespace SupervisorMobility.API.DataAccess.Services
                 else
                 {
                     //buscamos si el usuario tiene solo una area asignada 
-                    var areaId = await _context.Users.AsNoTracking().Where(u => u.UserId == userId).Select(a => a.AreaId).FirstOrDefaultAsync();
+                    var areaId = await _context.Users.AsNoTracking().Where(u => u.UserId == userId).Select(u => u.Areas.Select(a => a.AreaId).FirstOrDefault()).FirstOrDefaultAsync();
 
                     //si solo tiene una sola area hacemos el filtrado sencillo
-                    if (areaId.HasValue && areaId.Value != 0)
+                    if (areaId != 0)
                     {
-                        query = _context.SOSHubs.AsNoTracking().Where(h => h.IsActive == true && h.AreaId == areaId.Value);
+                        query = _context.SOSHubs.AsNoTracking().Where(h => h.IsActive == true && h.AreaId == areaId);
                     }
                     else
                     {
